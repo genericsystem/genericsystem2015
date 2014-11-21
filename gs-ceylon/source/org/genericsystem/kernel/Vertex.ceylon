@@ -115,30 +115,44 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 	
 	shared {<Vertex|Projection> *} getDesignatings(Vertex origin) => InheritanceComputer(origin).getDesignatings(this);
 	
-	shared {Vertex?*}[] projections(Integer pos) {
+	shared Vertex?[][] projections(Integer pos) {
 		return [for (i->component in components.indexed) 
 		if(i!=pos)
-		component?.descendantsToProject() else {null}
+		component?.descendantsToProject() else [component]
 		];
 	}
 	
-	{Vertex?*} descendantsToProject()=> allInstances;
+	Vertex?[] descendantsToProject()=> allInstances.sequence();
 	
 	shared {Vertex?[]*} findCombinations(Integer pos) {
-		return [for (Vertex?[] combination in CartesianProduct(projections(pos))) 
+		return [for (Vertex?[] combination in computeCartesian(projections(pos))) 
 			if (isEligible(combination))
 			combination
 		];
 	}
 	
+	shared {Vertex?[]*} computeCartesian(Vertex?[][] combinations) {
+		Integer n = combinations.size;
+		variable Integer solutions = 1;
+		for (Vertex?[] vector in combinations) {
+			solutions *= vector.size;
+		}
+		ArrayList<Vertex?[]> allCombinations = ArrayList<Vertex?[]>(solutions);
+		for (i in 0..solutions) {
+			ArrayList<Vertex?> combination = ArrayList<Vertex?>(n);
+			variable Integer j = 1;
+			for (Vertex?[] vec in combinations) {
+				combination.add(vec[((i / j) % vec.size)]);
+				j *= vec.size;
+			}
+			allCombinations.set(i,combination.sequence());
+		}
+		return allCombinations;
+	}
+	
 	Boolean isEligible(Vertex?[] combination){
 		return true;
 		//this.unambigousFirst(getAllInheritingsSnapshotWithoutRoot().filter(next -> ((GenericImpl) next).inheritsFrom(((GenericImpl) next).filterToProjectVertex(components, pos)))) == null)
-	}
-	
-	class CartesianProduct({Vertex?*}[] projections) satisfies {Vertex?[]*}{	
-		shared actual Iterator<Vertex?[]> iterator() => CartesianIterator(projections);	
-	}
-	
+	}	
 }
 
