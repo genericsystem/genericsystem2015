@@ -46,17 +46,11 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 	
 	shared Integer level => 1+(meta?.level else -1);
 	
-	shared Vertex addInstance(Value? content,Vertex?[]  components=[]){
-		return addInheritingInstance([], content, components);
-	}
+	shared Vertex addInstance(Value? content,Vertex?[]  components=[])=> addInheritingInstance([], content, components);
 	
-	shared Vertex addInheriting(Vertex? meta, Value? content,Vertex?[]  components=[]){
-		return Vertex(meta,[this], content, components).plug();
-	}
+	shared Vertex addInheriting(Vertex? meta, Value? content,Vertex?[]  components=[])=> Vertex(meta,[this], content, components).plug();
 	
-	shared Vertex addInheritingInstance(Vertex[] supers,Value? content,Vertex?[]  components=[]){
-		return Vertex(this, supers, content, components).plug();
-	}
+	shared Vertex addInheritingInstance(Vertex[] supers,Value? content,Vertex?[]  components=[])=> Vertex(this, supers, content, components).plug();
 	
 	shared Boolean inheritsFrom(Vertex superVertex) {
 		if (this==superVertex) {
@@ -112,16 +106,44 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 		return false;
 	}
 	
-	shared {Vertex *} getInheritingComposites(Vertex origin) {
-		return InheritanceComputer(origin).getInheritings(this);
+	shared {Vertex*} allInheritings => {this}.chain(inheritings).flatMap((inheriting) => inheriting.allInheritings);
+	
+	shared {Vertex*} allInstances => allInheritings.flatMap((inheriting) => inheriting.instances);
+
+	
+	shared {Vertex *} getInheritingComposites(Vertex origin) => InheritanceComputer(origin).getInheritings(this);
+	
+	shared {<Vertex|Projection> *} getDesignatings(Vertex origin) => InheritanceComputer(origin).getDesignatings(this);
+	
+	shared {Vertex?*}[] projections(Integer pos) {
+		return [for (i->component in components.indexed) 
+		if(i!=pos)
+		component?.descendantsToProject() else {null}
+		];
 	}
 	
-	shared {<Vertex|Projection> *} getDesignatings(Vertex origin) {
-		return InheritanceComputer(origin).getDesignatings(this);
+	{Vertex?*} descendantsToProject()=> allInstances;
+	
+	shared {Vertex?[]*} findCombinations(Integer pos) {
+		return [for (Vertex?[] combination in CartesianProduct(projections(pos))) 
+			if (isEligible(combination))
+			combination
+		];
 	}
-
+	
+	Boolean isEligible(Vertex?[] combination){
+		return true;
+		//this.unambigousFirst(getAllInheritingsSnapshotWithoutRoot().filter(next -> ((GenericImpl) next).inheritsFrom(((GenericImpl) next).filterToProjectVertex(components, pos)))) == null)
+	}
+	
+	class CartesianProduct({Vertex?*}[] projections) satisfies {Vertex?[]*}{	
+		shared actual Iterator<Vertex?[]> iterator() => CartesianIterator(projections);	
+	}
+	
+	class CartesianIterator({Vertex?*}[] projections) satisfies Iterator<Vertex?[]>{
+		shared actual Vertex[]|Finished next() => finished;		
+	}
+	
+	
 }
-
-
-
 

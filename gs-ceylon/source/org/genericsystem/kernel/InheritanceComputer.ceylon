@@ -102,21 +102,4 @@ class InheritanceComputer(Vertex origin) extends HashMap<Vertex, {Vertex *}>(){
 		}
 		return projections;
 	}	
-	
-	//{[Vertex?]*} developComponents(Vertex localBase,Integer index,{Vertex?*} originals){
-	//	 ArrayList<[Vertex?]> newComponentsList = ArrayList<[Vertex?]>();
-	//	 for(i->Vertex? component in originals.indexed){
-	//	 	ArrayList<Vertex?|Projection> newComponents = ArrayList<Vertex?|Projection>();
-	//	 	newComponents.addAll(elements);
-	//	 	if(i==index){
-	//	 		
-	//	 	}
-	//	 	else {
-	//	 		
-	//	 	}
-	//	 }
-	//	 
-	//	 
-	//	 return newComponentsList;
-	//}
 }	
