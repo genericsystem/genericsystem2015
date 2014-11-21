@@ -140,10 +140,5 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 		shared actual Iterator<Vertex?[]> iterator() => CartesianIterator(projections);	
 	}
 	
-	class CartesianIterator({Vertex?*}[] projections) satisfies Iterator<Vertex?[]>{
-		shared actual Vertex[]|Finished next() => finished;		
-	}
-	
-	
 }
 
