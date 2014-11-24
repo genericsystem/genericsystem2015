@@ -109,7 +109,6 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 	shared {Vertex*} allInheritings => {this}.chain(inheritings).flatMap((inheriting) => inheriting.allInheritings);
 	
 	shared {Vertex*} allInstances => allInheritings.flatMap((inheriting) => inheriting.instances);
-
 	
 	shared {Vertex *} getInheritingComposites(Vertex origin) => InheritanceComputer(origin).getInheritings(this);
 	
@@ -131,23 +130,23 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 		];
 	}
 	
-	shared {Vertex?[]*} computeCartesian(Vertex?[][] combinations) {
-		Integer n = combinations.size;
+	shared {Vertex?[]*} computeCartesian(Vertex?[][] projections) {
+		Integer n = projections.size;
 		variable Integer solutions = 1;
-		for (Vertex?[] vector in combinations) {
-			solutions *= vector.size;
+		for (Vertex?[] candidates in projections) {
+			solutions *= candidates.size;
 		}
-		ArrayList<Vertex?[]> allCombinations = ArrayList<Vertex?[]>(solutions);
+		ArrayList<Vertex?[]> combinations = ArrayList<Vertex?[]>(solutions);
 		for (i in 0..solutions) {
 			ArrayList<Vertex?> combination = ArrayList<Vertex?>(n);
 			variable Integer j = 1;
-			for (Vertex?[] vec in combinations) {
-				combination.add(vec[((i / j) % vec.size)]);
-				j *= vec.size;
+			for (Vertex?[] candidates in projections) {
+				combination.add(candidates[((i / j) % candidates.size)]);
+				j *= candidates.size;
 			}
-			allCombinations.set(i,combination.sequence());
+			combinations.set(i,combination.sequence());
 		}
-		return allCombinations;
+		return combinations;
 	}
 	
 	Boolean isEligible(Vertex?[] combination){
