@@ -114,30 +114,28 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 	
 	shared {<Vertex|Projection> *} getDesignatings(Vertex origin) => InheritanceComputer(origin).getDesignatings(this);
 	
-	shared Vertex?[][] projections(Integer pos) {
-		return [for (i->component in components.indexed) 
-		if(i!=pos)
-		component?.descendantsToProject() else [component]
-		];
+	shared {Vertex?[]*} projections(Integer pos) {
+		return {for (i->component in components.indexed) 
+			if(i!=pos)
+		component?.descendantsToProject() else [component]};
 	}
 	
-	Vertex?[] descendantsToProject()=> allInstances.sequence();
+	Vertex?[] descendantsToProject()=> allInheritings.sequence();
 	
 	shared {Vertex?[]*} findCombinations(Integer pos) {
-		return [for (Vertex?[] combination in computeCartesian(projections(pos))) 
-			if (isEligible(combination))
-			combination
-		];
+		return {for (Vertex?[] combination in computeCartesian(projections(pos))) 
+			if (isEligible(combination,pos))
+		combination};
 	}
 	
-	shared {Vertex?[]*} computeCartesian(Vertex?[][] projections) {
+	shared {Vertex?[]*} computeCartesian({Vertex?[]*} projections) {
 		Integer n = projections.size;
 		variable Integer solutions = 1;
 		for (Vertex?[] candidates in projections) {
 			solutions *= candidates.size;
 		}
 		ArrayList<Vertex?[]> combinations = ArrayList<Vertex?[]>(solutions);
-		for (i in 0..solutions) {
+		for (i in 0..solutions-1) {
 			ArrayList<Vertex?> combination = ArrayList<Vertex?>(n);
 			variable Integer j = 1;
 			for (Vertex?[] candidates in projections) {
@@ -149,9 +147,18 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 		return combinations;
 	}
 	
-	Boolean isEligible(Vertex?[] combination){
-		return true;
-		//this.unambigousFirst(getAllInheritingsSnapshotWithoutRoot().filter(next -> ((GenericImpl) next).inheritsFrom(((GenericImpl) next).filterToProjectVertex(components, pos)))) == null)
+	Boolean componentsDepends(Vertex?[] components){
+		return true;//TODO
+	}
+	
+	Vertex?[] switchComponent(Vertex?[] combination,Vertex? newComponent,Integer pos) {
+		return [];//TODO
+	}
+	
+	Boolean isEligible(Vertex?[] combination,Integer pos){
+		return !allInheritings.filter((Vertex override) => override.componentsDepends(switchComponent(combination,override.components[pos],pos))).empty;
 	}	
+	
+	
 }
 
