@@ -109,8 +109,7 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 	shared {Vertex*} allInheritings => {this}.chain(inheritings).flatMap((inheriting) => inheriting.allInheritings);
 	
 	shared {Vertex*} allInstances => allInheritings.flatMap((inheriting) => inheriting.instances);
-
-	
+		
 	shared {Vertex *} getInheritingComposites(Vertex origin) => InheritanceComputer(origin).getInheritings(this);
 	
 	shared {<Vertex|Projection> *} getDesignatings(Vertex origin) => InheritanceComputer(origin).getDesignatings(this);
@@ -126,8 +125,8 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 	
 	shared {Vertex?[]*} findCombinations(Integer pos) {
 		return [for (Vertex?[] combination in computeCartesian(projections(pos))) 
-			if (isEligible(combination))
-			combination
+		if (isEligible(combination))
+		combination
 		];
 	}
 	
@@ -154,5 +153,8 @@ class Vertex(meta,supers,content,components) satisfies Signature {
 		return true;
 		//this.unambigousFirst(getAllInheritingsSnapshotWithoutRoot().filter(next -> ((GenericImpl) next).inheritsFrom(((GenericImpl) next).filterToProjectVertex(components, pos)))) == null)
 	}	
+	
+	
+	
 }
 

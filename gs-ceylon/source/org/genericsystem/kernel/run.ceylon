@@ -1,5 +1,7 @@
 "Run the module `gsmodule`."
+
 shared void run() {
+		
 	Vertex metaType = Vertex(null,[],"Engine",[]);
 	Vertex metaAttribute = metaType.addInheriting(null,metaType.content,[metaType]);
 	Vertex metaRelation = metaAttribute.addInheriting(null,metaType.content,[metaType,metaType]);
