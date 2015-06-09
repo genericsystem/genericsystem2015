@@ -74,7 +74,7 @@ Pour faire fonctionner Generic System, il est nécessaire :
     &lt;dependency&gt;
     	&lt;groupId&gt;org.genericsystem&lt;/groupId&gt;
     	&lt;artifactId&gt;gs-mutability&lt;/artifactId&gt;
-    	&lt;version&gt;3.0-SNAPSHOT&lt;/version&gt;
+    	&lt;version&gt;4.0-SNAPSHOT&lt;/version&gt;
     &lt;/dependency&gt;
 </pre>
 
