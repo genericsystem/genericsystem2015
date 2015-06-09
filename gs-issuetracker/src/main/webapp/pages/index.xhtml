@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:composites="http://java.sun.com/jsf/composite/composites">
+
+<h:head>
+	<title>Issue Tracker</title>
+</h:head>
+<h:body>
+	<h:messages id="message" />
+	<h:form id="form">
+		<h:panelGrid columns="2">
+			<h:commandButton id="save" value="Save" action="#{cacheBean.flush}">
+				<f:ajax execute="@this" render="@form message" />
+			</h:commandButton>
+			<h:commandButton id="cancel" value="Cancel"
+				action="#{cacheBean.clear}">
+				<f:ajax execute="@this" render="@form message" />
+			</h:commandButton>
+		</h:panelGrid>
+	
+		<h:selectOneMenu value="#{filterBean.searchedStatut}"
+			rendered="#{filterBean.statuts != null}">
+			<f:selectItem itemLabel="All statuts"  value="#{null}"></f:selectItem>
+			<f:selectItems value="#{filterBean.statuts}" var="object"
+				itemLabel="#{object}" itemValue="#{object}">
+			</f:selectItems>
+			<f:ajax event="change" execute="@this" render="@form message" />
+		</h:selectOneMenu>
+
+		<composites:datatableGeneric backBean="#{editIssuesBean}"
+			title="Issue" />
+
+		<h:outputLabel value="Selected issue is : " />
+		<h:outputLabel value="#{issueSelectedBean.selectedIssue.getValue()}" />
+
+		<h:panelGroup layout="block"
+			rendered="#{issueSelectedBean.selectedIssue != null}">
+			<h:inputText size="10"
+				value="#{issueSelectedBean.updateDescription(issueSelectedBean.selectedIssue).value}">
+				<f:ajax event="blur" execute="@this" render="@form message" />
+			</h:inputText>
+
+			<h:selectOneMenu
+				value="#{issueSelectedBean.updatePriority(issueSelectedBean.selectedIssue).value}">
+				<f:selectItems value="#{issueSelectedBean.priorities}" var="object"
+					itemLabel="#{object}" itemValue="#{object}">
+				</f:selectItems>
+				<f:ajax event="change" execute="@this" render="@form message" />
+			</h:selectOneMenu>
+
+			<h:selectOneMenu
+				value="#{issueSelectedBean.updateStatut(issueSelectedBean.selectedIssue).value}">
+				<f:selectItems value="#{issueSelectedBean.statuts}" var="object"
+					itemLabel="#{object}" itemValue="#{object}">
+				</f:selectItems>
+				<f:ajax event="change" execute="@this" render="@form message" />
+			</h:selectOneMenu>
+
+			<h:selectManyCheckbox
+				value="#{issueSelectedBean.updateVersions(issueSelectedBean.selectedIssue).values}">
+				<f:selectItems value="#{issueSelectedBean.versions}" />
+				<f:ajax event="click" execute="@this" render="@form message" />
+			</h:selectManyCheckbox>
+		</h:panelGroup>
+
+		<composites:datatableGeneric backBean="#{editCommentsBean}"
+			title="Comment" />
+
+		<h:inputTextarea
+			value="#{editCommentsBean.getComment(editCommentsBean.selectedIssue).value}"
+			rendered="#{editCommentsBean.selectedIssue != null}">
+			<f:ajax event="blur" execute="@this" render="@form message" />
+		</h:inputTextarea>
+		
+
+		<h:outputLabel value="Selected comment is : " />
+		<h:outputLabel value="#{commentSelectedBean.selectedComment}"
+			rendered="#{commentSelectedBean.selected != null}" />
+		<h:outputLabel value="---"
+			rendered="#{commentSelectedBean.selected == null}" />
+
+		<h:panelGroup layout="block"
+			rendered="#{commentSelectedBean.selected != null}">
+			<h:inputText size="10"
+				value="#{commentSelectedBean.getComment(commentSelectedBean.selectedIssue).value}">
+				<f:ajax event="blur" execute="@this" render="@form message" />
+			</h:inputText>
+		</h:panelGroup>
+		
+		<!-- 		<h:selectOneMenu> -->
+		<!-- 			<f:selectItems value="#{editCommentsBean.allComments}" var="object" -->
+		<!-- 				itemLabel="#{object}" itemValue="#{object}"> -->
+		<!-- 			</f:selectItems> -->
+		<!-- 			<f:ajax event="blur" execute="@this" render="@form message" /> -->
+		<!-- 		</h:selectOneMenu> -->
+
+	</h:form>
+</h:body>
+
+</html>

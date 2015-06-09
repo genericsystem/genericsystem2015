@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<h:head />
+
+<h:body>
+	<h:messages id="message" />
+	<h:form>
+		<h:dataTable value="#{carBean.cars}" var="car">
+			<h:column>
+				<h:commandButton value="x" action="#{carBean.deleteCar(car)}">
+					<f:ajax execute="@this" render="@form" />
+				</h:commandButton>
+			</h:column>
+			<h:column>
+				<f:facet name="header">Car</f:facet>
+				<h:outputText value="#{car.getValue()}" />
+			</h:column>
+			<h:column>
+				<f:facet name="header">Power</f:facet>
+				<h:inputText size="10" value="#{carBean.getPower(car).value}">
+					<f:convertNumber integerOnly="true" />
+					<f:ajax event="blur" execute="@this" render="@this message" />
+				</h:inputText>
+			</h:column>
+			<h:column>
+				<f:facet name="header">Color</f:facet>
+				<h:selectOneMenu value="#{carBean.getColor(car).value}">
+					<f:selectItems value="#{colorBean.colors}" var="color"
+						itemLabel="#{color}" itemValue="#{color}">
+					</f:selectItems>
+					<f:ajax event="blur" execute="@this" render="@form message"/>
+				</h:selectOneMenu>
+			</h:column>
+			<f:facet name="footer">
+				<h:panelGroup id="addCar" layout="block">
+					<h:inputText size="10" value="#{carBean.newCarName}" />
+					<h:inputText size="10" value="#{carBean.newCarPower}">
+						<f:convertNumber integerOnly="true" />
+					</h:inputText>
+					<h:commandButton value="Add" action="#{carBean.addCar}">
+						<f:ajax execute="addCar" render="@form message" />
+					</h:commandButton>
+				</h:panelGroup>
+			</f:facet>
+		</h:dataTable>
+		<h:commandButton value="Save" action="#{carBean.flush}">
+			<f:ajax execute="@this" render="@form" />
+		</h:commandButton>
+		<h:commandButton value="Cancel" action="#{carBean.clear}">
+			<f:ajax execute="@this" render="@form" />
+		</h:commandButton>
+	</h:form>
+</h:body>
+</html>
