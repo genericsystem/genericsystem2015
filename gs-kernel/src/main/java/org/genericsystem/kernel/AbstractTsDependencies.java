@@ -115,6 +115,7 @@ public abstract class AbstractTsDependencies implements TsDependencies<Generic> 
 				Generic content = next.content;
 				if (content != null && content.getLifeManager().isAlive(ts))
 					break;
+
 			}
 		}
 

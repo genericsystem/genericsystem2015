@@ -49,6 +49,12 @@ public class Transaction extends AbstractContext<Generic> {
 
 	}
 
+	private void kill(Generic generic) {
+		getChecker().checkAfterBuild(false, false, generic);
+		generic.getLifeManager().kill(getTs());
+		getRoot().getGarbageCollector().add(generic);
+	}
+
 	@Override
 	protected void unplug(Generic generic) {
 		getChecker().checkAfterBuild(false, false, generic);
@@ -111,7 +117,7 @@ public class Transaction extends AbstractContext<Generic> {
 			try {
 				writeLockAllAndCheckMvcc(adds, removes);
 				for (Generic generic : removes)
-					unplug(generic);
+					kill(generic);
 				for (Generic generic : adds)
 					plug(generic);
 			} finally {

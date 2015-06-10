@@ -125,4 +125,19 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 	public String toString() {
 		return defaultToString();
 	}
+
+	@Override
+	public Generic[] newTArray(int i) {
+		return new Generic[i];
+	}
+
+	@Override
+	public long getBirthTs(Generic generic) {
+		return getCurrentCache().unwrap(generic).getBirthTs();
+	}
+
+	@Override
+	public long getDeathTs(Generic generic) {
+		return getCurrentCache().unwrap(generic).getDeathTs();
+	}
 }

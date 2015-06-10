@@ -45,9 +45,12 @@ public class Transaction implements IDifferential {
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		serverTransaction.applyFromExternal(() -> removes.stream().map(remove -> remove.getTs()), () -> adds.stream().map(add -> getRoot().getVertex(add.getTs())));
+		// dependenciesMap = new HashMap<>();
+		removes.stream().forEach(remove -> dependenciesMap.remove(remove));
+		adds.stream().forEach(add -> dependenciesMap.remove(add));
 	}
 
-	private final Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
+	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic ancestor) {

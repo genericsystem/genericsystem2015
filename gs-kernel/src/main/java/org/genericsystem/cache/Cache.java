@@ -171,11 +171,6 @@ public class Cache extends AbstractContext<Generic> {
 			transaction.apply(removes, adds);
 		}
 
-		// @Override
-		// public boolean isAlive(Generic generic) {
-		// return transaction.isAlive(generic);
-		// }
-
 		@Override
 		public Snapshot<Generic> getDependencies(Generic vertex) {
 			return transaction.getDependencies(vertex);
