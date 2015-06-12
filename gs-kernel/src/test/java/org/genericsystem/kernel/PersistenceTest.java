@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Random;
 
 import org.genericsystem.api.core.annotations.SystemGeneric;
+import org.genericsystem.common.LifeManager;
 import org.testng.annotations.Test;
 
 @Test

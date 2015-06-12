@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,8 +7,8 @@ import java.util.NavigableSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.GenericHandler.AtomicHandler;
 import org.genericsystem.defaults.DefaultVertex;
-import org.genericsystem.kernel.GenericHandler.AtomicHandler;
 
 public class Restructurator<T extends DefaultVertex<T>> {
 

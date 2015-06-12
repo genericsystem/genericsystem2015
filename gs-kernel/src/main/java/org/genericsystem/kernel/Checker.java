@@ -18,6 +18,7 @@ import org.genericsystem.api.core.exceptions.NotAliveConstraintViolationExceptio
 import org.genericsystem.api.core.exceptions.NotAllowedSerializableTypeException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.AbstractContext;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;

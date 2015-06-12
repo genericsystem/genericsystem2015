@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -22,7 +22,7 @@ public class LifeManager {
 	private long deathTs;
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-	LifeManager(long[] otherTs) {
+	public LifeManager(long[] otherTs) {
 		this.birthTs = otherTs[0];
 		this.lastReadTs = new AtomicLong(otherTs[1]);
 		this.deathTs = otherTs[2];

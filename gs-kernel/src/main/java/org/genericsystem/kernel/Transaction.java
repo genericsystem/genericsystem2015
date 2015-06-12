@@ -1,14 +1,18 @@
 package org.genericsystem.kernel;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.IDependencies;
+import org.genericsystem.common.LifeManager;
+import org.genericsystem.common.Vertex;
 
 public class Transaction extends AbstractContext<Generic> {
 
@@ -68,8 +72,8 @@ public class Transaction extends AbstractContext<Generic> {
 		getRoot().getGarbageCollector().add(generic);
 	}
 
-	public Generic getGenericFromTs(long ts) {
-		Generic generic = getRoot().getGenericFromTs(ts);
+	public Generic getGenericByTs(long ts) {
+		Generic generic = getRoot().getGenericByTs(ts);
 		if (generic != null)
 			getChecker().checkIsAlive(generic);
 		return generic;
@@ -102,11 +106,21 @@ public class Transaction extends AbstractContext<Generic> {
 		};
 	}
 
-	public void applyFromExternal(Snapshot<Long> removeIds, Snapshot<Vertex> addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericFromTs(removeId)).collect(Collectors.toList());
-		List<Generic> adds = addVertices.stream().map(addVertex -> getRoot().init((Class) null, addVertex.getTs(), addVertex.getMeta(), addVertex.getSupers(), addVertex.getValue(), addVertex.getComponents(), addVertex.getLifeManager()))
-				.collect(Collectors.toList());
+	public void applyFromExternal(List<Long> removeIds, List<Vertex> addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericByTs(removeId)).collect(Collectors.toList());
+		List<Generic> adds = addVertices.stream().map(addVertex -> getRoot().init(addVertex)).collect(Collectors.toList());
 		new LockedLifeManager().apply(removes, adds);
+	}
+
+	// archiver acces
+	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, LifeManager lifeManager) {
+		return plug(build(ts, clazz, meta, supers, value, components, lifeManager));
+
+	}
+
+	@Override
+	protected Generic setMeta(int dim) {
+		return super.setMeta(dim);
 	}
 
 	private class LockedLifeManager {

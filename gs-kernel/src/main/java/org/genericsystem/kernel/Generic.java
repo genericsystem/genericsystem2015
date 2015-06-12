@@ -1,5 +1,7 @@
 package org.genericsystem.kernel;
 
+import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.LifeManager;
 import org.genericsystem.defaults.DefaultVertex;
 
 public interface Generic extends DefaultVertex<Generic>, Comparable<Generic> {

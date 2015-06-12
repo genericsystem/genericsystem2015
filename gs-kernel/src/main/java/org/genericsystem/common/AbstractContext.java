@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -6,12 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.common.GenericHandler.AddHandler;
+import org.genericsystem.common.GenericHandler.MergeHandler;
+import org.genericsystem.common.GenericHandler.SetHandler;
+import org.genericsystem.common.GenericHandler.UpdateHandler;
 import org.genericsystem.defaults.DefaultContext;
 import org.genericsystem.defaults.DefaultVertex;
-import org.genericsystem.kernel.GenericHandler.AddHandler;
-import org.genericsystem.kernel.GenericHandler.MergeHandler;
-import org.genericsystem.kernel.GenericHandler.SetHandler;
-import org.genericsystem.kernel.GenericHandler.UpdateHandler;
+import org.genericsystem.kernel.Checker;
 
 public abstract class AbstractContext<T extends DefaultVertex<T>> implements DefaultContext<T> {
 
@@ -49,29 +50,18 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 		return root;
 	}
 
-	T[] rootComponents(int dim) {
-		T[] components = getRoot().newTArray(dim);
-		Arrays.fill(components, root);
-		return components;
-	}
-
-	protected T getMeta(int dim) {
-		T adjustedMeta = (root).adjustMeta(rootComponents(dim));
-		return adjustedMeta != null && adjustedMeta.getComponents().size() == dim ? adjustedMeta : null;
-	}
-
-	T setMeta(int dim) {
+	protected T setMeta(int dim) {
 		return new SetHandler<>(this, null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim))).resolve();
-	}
-
-	@Override
-	public T addInstance(T meta, List<T> overrides, Serializable value, List<T> components) {
-		return new AddHandler<>(this, meta, overrides, value, components).resolve();
 	}
 
 	@Override
 	public T setInstance(T meta, List<T> overrides, Serializable value, List<T> components) {
 		return new SetHandler<>(this, meta, overrides, value, components).resolve();
+	}
+
+	@Override
+	public T addInstance(T meta, List<T> overrides, Serializable value, List<T> components) {
+		return new AddHandler<>(this, meta, overrides, value, components).resolve();
 	}
 
 	@Override
@@ -110,15 +100,10 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 	public abstract Snapshot<T> getDependencies(T ancestor);
 
 	T buildAndPlug(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components) {
-		return buildAndPlug(null, clazz, meta, supers, value, components, new LifeManager(getRoot().isInitialized() ? LifeManager.USER_TS : LifeManager.SYSTEM_TS));
+		return plug(build(null, clazz, meta, supers, value, components, new LifeManager(getRoot().isInitialized() ? LifeManager.USER_TS : LifeManager.SYSTEM_TS)));
 	}
 
-	// archiver acces
-	T buildAndPlug(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, LifeManager lifeManager) {
-		return plug(build(ts, clazz, meta, supers, value, components, lifeManager));
-	}
-
-	private T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, LifeManager lifeManager) {
+	protected T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, LifeManager lifeManager) {
 		return getRoot().init(ts, clazz, meta, supers, value, components, lifeManager);
 	}
 

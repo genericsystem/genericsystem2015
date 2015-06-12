@@ -1,12 +1,15 @@
 package org.genericsystem.cache;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.Vertex;
 
 public class Transaction implements IDifferential {
 
@@ -44,7 +47,9 @@ public class Transaction implements IDifferential {
 
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		serverTransaction.applyFromExternal(() -> removes.stream().map(remove -> remove.getTs()), () -> adds.stream().map(add -> getRoot().getVertex(add.getTs())));
+		List<Long> removesIds = removes.stream().map(remove -> remove.getTs()).collect(Collectors.toList());
+		List<Vertex> addVertices = adds.stream().map(add -> getRoot().getVertex(add.getTs())).collect(Collectors.toList());
+		serverTransaction.applyFromExternal(removesIds, addVertices);
 		// dependenciesMap = new HashMap<>();
 		removes.stream().forEach(remove -> dependenciesMap.remove(remove));
 		adds.stream().forEach(add -> dependenciesMap.remove(add));
@@ -56,9 +61,9 @@ public class Transaction implements IDifferential {
 	public Snapshot<Generic> getDependencies(Generic ancestor) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(ancestor);
 		if (dependencies == null) {
-			org.genericsystem.kernel.Generic serverGeneric = serverTransaction.getGenericFromTs(ancestor.getTs());
+			org.genericsystem.kernel.Generic serverGeneric = serverTransaction.getGenericByTs(ancestor.getTs());
 			if (serverGeneric != null)
-				dependencies = () -> serverTransaction.getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs()).map(ts -> getRoot().getGenericFromTs(ts));
+				dependencies = () -> serverTransaction.getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs()).map(ts -> getRoot().getGenericByTs(ts));
 			else
 				dependencies = () -> Stream.empty();
 			Snapshot<Generic> result = dependenciesMap.put(ancestor, dependencies);

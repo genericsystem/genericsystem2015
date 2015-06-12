@@ -5,7 +5,8 @@ import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.kernel.AbstractContext;
+import org.genericsystem.cache.IDifferential.Differential;
+import org.genericsystem.common.AbstractContext;
 import org.genericsystem.kernel.Statics;
 
 public class Cache extends AbstractContext<Generic> {

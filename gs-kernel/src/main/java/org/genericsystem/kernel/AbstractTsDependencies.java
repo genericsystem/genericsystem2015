@@ -5,9 +5,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.genericsystem.kernel.iterator.AbstractGeneralAwareIterator;
+import org.genericsystem.common.AbstractGeneralAwareIterator;
+import org.genericsystem.common.LifeManager;
 
-public abstract class AbstractTsDependencies implements TsDependencies<Generic> {
+abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 
 	private Node head = null;
 	private Node tail = null;

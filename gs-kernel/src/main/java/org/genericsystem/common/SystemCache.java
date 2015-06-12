@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,9 +29,10 @@ import org.genericsystem.api.core.annotations.value.LongValue;
 import org.genericsystem.api.core.annotations.value.ShortValue;
 import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
+import org.genericsystem.common.GenericHandler.SetSystemHandler;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
-import org.genericsystem.kernel.GenericHandler.SetSystemHandler;
+import org.genericsystem.kernel.Root;
 
 public class SystemCache<T extends DefaultVertex<T>> {
 

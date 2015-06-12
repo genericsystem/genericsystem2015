@@ -3,11 +3,11 @@ package org.genericsystem.cache;
 import java.io.Serializable;
 
 import org.genericsystem.cache.Cache.ContextEventListener;
-import org.genericsystem.kernel.AbstractContext;
-import org.genericsystem.kernel.AbstractRoot;
+import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.kernel.Vertex;
 
 public class Engine extends AbstractRoot<Generic> implements Generic {
 
@@ -77,14 +77,14 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	public Generic getGenericFromTs(long ts) {
+	public Generic getGenericByTs(long ts) {
 		Generic generic = idsMap.get(ts);
 		if (generic == null) {
 			Vertex vertex = server.getVertex(ts);
 			if (vertex == null)
 				return null;
-			Class<?> clazz = server.getAnnotedClass(server.getGenericFromTs(ts));
-			generic = init(newT(clazz, ts == vertex.getMeta() ? null : getGenericFromTs(vertex.getMeta())), ts, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
+			Class<?> clazz = server.getAnnotedClass(server.getGenericByTs(ts));
+			generic = init(newT(clazz, ts == vertex.getMeta() ? null : getGenericByTs(vertex.getMeta())), ts, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
 			idsMap.put(ts, generic);
 		}
 		return generic;

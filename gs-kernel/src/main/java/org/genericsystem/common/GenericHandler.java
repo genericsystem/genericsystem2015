@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
@@ -9,14 +9,14 @@ import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.defaults.DefaultVertex;
 
 public abstract class GenericHandler<T extends DefaultVertex<T>> {
-	final AbstractContext<T> context;
+	protected final AbstractContext<T> context;
 	final T meta;
-	T adjustedMeta;
+	protected T adjustedMeta;
 	final List<T> overrides;
-	List<T> supers;
-	final Serializable value;
-	final List<T> components;
-	T gettable;
+	protected List<T> supers;
+	protected final Serializable value;
+	protected final List<T> components;
+	protected T gettable;
 
 	GenericHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 		assert overrides != null;
@@ -45,7 +45,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		context.getChecker().checkBeforeBuild(meta, overrides, value, components);
 	}
 
-	boolean isMeta() {
+	protected boolean isMeta() {
 		return Objects.equals(context.getRoot().getValue(), value) && components.stream().allMatch(context.getRoot()::equals);
 	}
 
@@ -72,7 +72,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		return instance == null ? build() : instance;
 	}
 
-	T build() {
+	protected T build() {
 		return gettable = context.buildAndPlug(null, isMeta() ? null : adjustedMeta, supers, value, components);
 	}
 
@@ -175,18 +175,18 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class AtomicHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
+	public static class AtomicHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
 
-		AtomicHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		protected AtomicHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 		}
 
-		final T resolve() {
+		public final T resolve() {
 			return getOrBuild();
 		}
 	}
 
-	static class SetSystemHandler<T extends DefaultVertex<T>> extends AtomicHandler<T> {
+	protected static class SetSystemHandler<T extends DefaultVertex<T>> extends AtomicHandler<T> {
 
 		private final Class<?> clazz;
 
@@ -201,25 +201,9 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		}
 
 		@Override
-		T build() {
+		protected T build() {
 			return gettable = context.buildAndPlug(clazz, isMeta() ? null : adjustedMeta, supers, value, components);
 		}
 	}
 
-	static class SetArchiverHandler extends AtomicHandler<Generic> {
-
-		private final long ts;
-		private final LifeManager lifeManager;
-
-		SetArchiverHandler(long ts, AbstractContext<Generic> context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, LifeManager lifeManager) {
-			super(context, meta, overrides, value, components);
-			this.ts = ts;
-			this.lifeManager = lifeManager;
-		}
-
-		@Override
-		Generic build() {
-			return gettable = context.buildAndPlug(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, lifeManager);
-		}
-	}
 }

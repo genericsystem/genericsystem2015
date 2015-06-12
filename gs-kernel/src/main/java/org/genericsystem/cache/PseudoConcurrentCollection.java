@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.genericsystem.api.core.IteratorSnapshot;
-import org.genericsystem.kernel.iterator.AbstractGeneralAwareIterator;
+import org.genericsystem.common.AbstractGeneralAwareIterator;
 
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 

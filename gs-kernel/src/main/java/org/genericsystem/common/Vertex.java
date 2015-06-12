@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -56,17 +56,4 @@ public class Vertex {
 	public LifeManager getLifeManager() {
 		return lifeManager;
 	}
-
-	// AbstractTsDependencies getDependencies() {
-	// return dependencies;
-	// }
-
-	// Long getNextDependency(Long ancestor) {
-	// return nextDependencies.get(ancestor);
-	// }
-	//
-	// void setNextDependency(Long ancestor, Long nextDependency) {
-	// nextDependencies.put(ancestor, nextDependency);
-	// }
-
 }

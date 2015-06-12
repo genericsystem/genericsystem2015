@@ -1,7 +1,12 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.LifeManager;
+import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultRoot;
 
 public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<Generic> {
@@ -9,6 +14,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 	private final Archiver archiver;
 	private boolean initialized = false;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
+	protected Map<Generic, TsDependencies<Generic>> dependenciesMap;
 
 	@Override
 	public Root getRoot() {
@@ -30,8 +36,18 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 	}
 
 	@Override
+	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
+		dependenciesMap = new ConcurrentHashMap<>();
+	};
+
+	@Override
 	public Transaction newCache() {
 		return new Transaction(this, pickNewTs());
+	}
+
+	@Override
+	public Transaction getCurrentCache() {
+		return (Transaction) super.getCurrentCache();
 	}
 
 	@Override
@@ -73,6 +89,10 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 	@Override
 	protected Class<Generic> getTClass() {
 		return Generic.class;
+	}
+
+	Generic init(Vertex vertex) {
+		return init(newT(null, getGenericByTs(vertex.getMeta())), vertex.getTs(), vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
 	}
 
 }

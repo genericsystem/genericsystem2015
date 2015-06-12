@@ -2,6 +2,7 @@ package org.genericsystem.defaults;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
@@ -138,4 +139,16 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 	}
 
 	Snapshot<T> getDependencies(T vertex);
+
+	default T getMeta(int dim) {
+		T adjustedMeta = getRoot().adjustMeta(rootComponents(dim));
+		return adjustedMeta != null && adjustedMeta.getComponents().size() == dim ? adjustedMeta : null;
+	}
+
+	default T[] rootComponents(int dim) {
+		T[] components = getRoot().newTArray(dim);
+		Arrays.fill(components, getRoot());
+		return components;
+	}
+
 }

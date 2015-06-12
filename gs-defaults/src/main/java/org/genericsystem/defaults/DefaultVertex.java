@@ -343,4 +343,5 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 	default DefaultRoot<T> getRoot() {
 		throw new IllegalStateException();
 	}
+
 }

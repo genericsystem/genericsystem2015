@@ -30,7 +30,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.genericsystem.kernel.GenericHandler.SetArchiverHandler;
+import org.genericsystem.common.GenericHandler.AtomicHandler;
+import org.genericsystem.common.LifeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,7 +215,7 @@ public class Archiver {
 		}
 
 		private void saveSnapshot() throws IOException {
-			writeDependencies(transaction.computeDependencies((Generic) root), new HashSet<>());
+			writeDependencies(transaction.computeDependencies(root), new HashSet<>());
 			objectOutputStream.flush();
 			objectOutputStream.close();
 		}
@@ -342,6 +343,23 @@ public class Archiver {
 
 		protected FileInputStream getFileInputStream(String fileName) throws IOException {
 			return new FileInputStream(new File(fileName));
+		}
+	}
+
+	private static class SetArchiverHandler extends AtomicHandler<Generic> {
+
+		private final long ts;
+		private final LifeManager lifeManager;
+
+		SetArchiverHandler(long ts, Transaction context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, LifeManager lifeManager) {
+			super(context, meta, overrides, value, components);
+			this.ts = ts;
+			this.lifeManager = lifeManager;
+		}
+
+		@Override
+		protected Generic build() {
+			return gettable = ((Transaction) context).buildAndPlug(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, lifeManager);
 		}
 	}
 

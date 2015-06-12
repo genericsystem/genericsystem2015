@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -22,13 +22,13 @@ import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractRoot<T extends DefaultVertex<T>> implements DefaultRoot<T>, MethodHandler {
 
 	private final TsGenerator generator = new TsGenerator();
 	protected Wrapper<T> contextWrapper = buildContextWrapper();
 	private final SystemCache<T> systemCache;
-	protected final Map<Generic, TsDependencies<Generic>> dependenciesMap = new ConcurrentHashMap<>();
 
 	public AbstractRoot(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -134,19 +134,18 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	}
 
 	protected final Map<Long, T> idsMap = new ConcurrentHashMap<>();
+	private final Map<T, Vertex> vertexMap = new ConcurrentHashMap<>();
 
-	public T getGenericFromTs(long ts) {
+	public T getGenericByTs(long ts) {
 		return idsMap.get(ts);
 	}
-
-	private final Map<T, Vertex> vertexMap = new ConcurrentHashMap<>();
 
 	protected Vertex getVertex(T generic) {
 		return vertexMap.get(generic);
 	}
 
 	public Vertex getVertex(long ts) {
-		return vertexMap.get(getGenericFromTs(ts));
+		return vertexMap.get(getGenericByTs(ts));
 	}
 
 	public LifeManager getLifeManager(T generic) {
@@ -170,12 +169,12 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	@Override
 	public T getMeta(T generic) {
-		return getGenericFromTs(getVertex(generic).getMeta());
+		return getGenericByTs(getVertex(generic).getMeta());
 	}
 
 	@Override
 	public List<T> getSupers(T generic) {
-		return getVertex(generic).getSupers().stream().map(id -> getGenericFromTs(id)).collect(Collectors.toList());
+		return getVertex(generic).getSupers().stream().map(id -> getGenericByTs(id)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -185,7 +184,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	@Override
 	public List<T> getComponents(T generic) {
-		return getVertex(generic).getComponents().stream().map(id -> getGenericFromTs(id)).collect(Collectors.toList());
+		return getVertex(generic).getComponents().stream().map(id -> getGenericByTs(id)).collect(Collectors.toList());
 	}
 
 	T init(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, LifeManager lifeMAnager) {
@@ -194,10 +193,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	protected T init(T generic, long ts, T meta, List<T> supers, Serializable value, List<T> components, LifeManager lifeMAnager) {
 		return init(generic, ts, meta == null ? ts : meta.getTs(), supers.stream().map(g -> g.getTs()).collect(Collectors.toList()), value, components.stream().map(g -> g.getTs()).collect(Collectors.toList()), lifeMAnager);
-	}
-
-	T init(Class<?> clazz, long ts, long meta, List<Long> supers, Serializable value, List<Long> components, LifeManager lifeMAnager) {
-		return init(newT(clazz, getGenericFromTs(meta)), ts, meta, supers, value, components, lifeMAnager);
 	}
 
 	protected T init(T generic, long ts, long meta, List<Long> supers, Serializable value, List<Long> components, LifeManager lifeMAnager) {
@@ -270,9 +265,12 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	@Override
 	public Object invoke(Object self, Method m, Method proceed, Object[] args) throws Throwable {
-		if (m.getName().equals("getRoot"))
+		switch (m.getName()) {
+		case ("getRoot"):
 			return this;
-		return ((DefaultVertex<T>) self).defaultToString();
+		default:
+			return ((DefaultVertex<T>) self).defaultToString();
+		}
 	}
 
 	@Override
