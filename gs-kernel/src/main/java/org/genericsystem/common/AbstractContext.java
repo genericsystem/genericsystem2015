@@ -5,14 +5,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.GenericHandler.AddHandler;
-import org.genericsystem.common.GenericHandler.MergeHandler;
-import org.genericsystem.common.GenericHandler.SetHandler;
-import org.genericsystem.common.GenericHandler.UpdateHandler;
+import org.genericsystem.common.THandler.AddHandler;
+import org.genericsystem.common.THandler.MergeHandler;
+import org.genericsystem.common.THandler.SetHandler;
+import org.genericsystem.common.THandler.UpdateHandler;
 import org.genericsystem.defaults.DefaultContext;
 import org.genericsystem.defaults.DefaultVertex;
-import org.genericsystem.kernel.Checker;
 
 public abstract class AbstractContext<T extends DefaultVertex<T>> implements DefaultContext<T> {
 
@@ -100,11 +100,11 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 	public abstract Snapshot<T> getDependencies(T ancestor);
 
 	T buildAndPlug(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components) {
-		return plug(build(null, clazz, meta, supers, value, components, new LifeManager(getRoot().isInitialized() ? LifeManager.USER_TS : LifeManager.SYSTEM_TS)));
+		return plug(build(null, clazz, meta, supers, value, components, getRoot().isInitialized() ? ApiStatics.USER_TS : ApiStatics.SYSTEM_TS));
 	}
 
-	protected T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, LifeManager lifeManager) {
-		return getRoot().init(ts, clazz, meta, supers, value, components, lifeManager);
+	protected T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
+		return getRoot().init(ts, clazz, meta, supers, value, components, otherTs);
 	}
 
 }

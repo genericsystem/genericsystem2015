@@ -1,21 +1,36 @@
 package org.genericsystem.kernel;
 
-import org.genericsystem.common.AbstractContext;
-import org.genericsystem.common.LifeManager;
-import org.genericsystem.defaults.DefaultVertex;
+import java.nio.channels.IllegalSelectorException;
 
-public interface Generic extends DefaultVertex<Generic>, Comparable<Generic> {
+import javassist.util.proxy.ProxyObject;
+
+import org.genericsystem.common.TProxy;
+import org.genericsystem.common.TsDependencies;
+import org.genericsystem.kernel.Root.RootWrapper;
+
+public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 
 	@Override
-	Root getRoot();
+	default Root getRoot() {
+		throw new IllegalSelectorException();
+	}
 
 	@Override
-	default AbstractContext<Generic> getCurrentCache() {
-		return (AbstractContext<Generic>) DefaultVertex.super.getCurrentCache();
+	default long getBirthTs() {
+		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager().getBirthTs();
+	}
+
+	@Override
+	default long getDeathTs() {
+		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager().getDeathTs();
 	}
 
 	default LifeManager getLifeManager() {
-		return getRoot().getLifeManager(this);
+		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager();
+	}
+
+	default TsDependencies<Generic> getDependencies() {
+		return ((RootWrapper) ((ProxyObject) this).getHandler()).getDependencies();
 	}
 
 }

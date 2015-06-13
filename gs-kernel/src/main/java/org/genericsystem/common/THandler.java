@@ -8,7 +8,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.defaults.DefaultVertex;
 
-public abstract class GenericHandler<T extends DefaultVertex<T>> {
+public abstract class THandler<T extends DefaultVertex<T>> {
 	protected final AbstractContext<T> context;
 	final T meta;
 	protected T adjustedMeta;
@@ -18,7 +18,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 	protected final List<T> components;
 	protected T gettable;
 
-	GenericHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+	THandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 		assert overrides != null;
 		this.context = context;
 		this.meta = meta != null ? meta : (T) context.getRoot();
@@ -114,7 +114,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 	// }
 	// }
 
-	public static class AddHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
+	public static class AddHandler<T extends DefaultVertex<T>> extends THandler<T> {
 
 		AddHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
@@ -128,7 +128,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class SetHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
+	static class SetHandler<T extends DefaultVertex<T>> extends THandler<T> {
 
 		SetHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
@@ -143,7 +143,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class UpdateHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
+	static class UpdateHandler<T extends DefaultVertex<T>> extends THandler<T> {
 
 		private final T update;
 
@@ -161,7 +161,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class MergeHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
+	static class MergeHandler<T extends DefaultVertex<T>> extends THandler<T> {
 
 		private final T update;
 
@@ -175,7 +175,7 @@ public abstract class GenericHandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	public static class AtomicHandler<T extends DefaultVertex<T>> extends GenericHandler<T> {
+	public static class AtomicHandler<T extends DefaultVertex<T>> extends THandler<T> {
 
 		protected AtomicHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);

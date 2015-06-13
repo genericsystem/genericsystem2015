@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -18,7 +18,6 @@ import org.genericsystem.api.core.exceptions.NotAliveConstraintViolationExceptio
 import org.genericsystem.api.core.exceptions.NotAllowedSerializableTypeException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.common.AbstractContext;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
@@ -136,7 +135,7 @@ public class Checker<T extends DefaultVertex<T>> {
 			getContext().discardWithException(new IllegalAccessException("System node can't be removed " + vertex.info()));
 	}
 
-	void checkIsAlive(T vertex) {
+	public void checkIsAlive(T vertex) {
 		if (!context.isAlive(vertex))
 			context.discardWithException(new AliveConstraintViolationException(vertex.info()));
 	}

@@ -12,9 +12,9 @@ public class Vertex {
 	private final List<Long> supers;
 	private final Serializable value;
 	private final List<Long> components;
-	private final LifeManager lifeManager;
+	private final long[] otherTs;
 
-	protected Vertex(long ts, long meta, List<Long> supers, Serializable value, List<Long> components, LifeManager lifeManager) {
+	protected Vertex(long ts, long meta, List<Long> supers, Serializable value, List<Long> components, long[] otherTs) {
 		this.ts = ts;
 		this.meta = meta;
 		this.value = value;
@@ -22,19 +22,11 @@ public class Vertex {
 			assert component != null && !equals(component);
 		this.components = Collections.unmodifiableList(new ArrayList<>(components));
 		this.supers = Collections.unmodifiableList(new ArrayList<>(supers));
-		this.lifeManager = lifeManager;
+		this.otherTs = otherTs;
 	}
 
 	public long getTs() {
 		return ts;
-	}
-
-	public long getBirthTs() {
-		return lifeManager.getBirthTs();
-	}
-
-	public long getDeathTs() {
-		return lifeManager.getDeathTs();
 	}
 
 	public long getMeta() {
@@ -53,7 +45,7 @@ public class Vertex {
 		return components;
 	}
 
-	public LifeManager getLifeManager() {
-		return lifeManager;
+	public long[] getOtherTs() {
+		return otherTs;
 	}
 }

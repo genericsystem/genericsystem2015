@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.genericsystem.common.AbstractGeneralAwareIterator;
-import org.genericsystem.common.LifeManager;
+import org.genericsystem.common.TsDependencies;
 
 abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 
@@ -127,8 +127,8 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 	}
 
 	private static class Node {
-		public Generic content;
-		public Node next;
+		Generic content;
+		Node next;
 
 		private Node(Generic content) {
 			this.content = content;

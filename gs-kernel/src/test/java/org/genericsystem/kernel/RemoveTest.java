@@ -226,17 +226,14 @@ public class RemoveTest extends AbstractTest {
 
 	public void test014() {
 		Root root = new Root();
-
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
-
 		// Disable default referential integrity for vehicle in vehicleColor for the first target : color
 		root.getMetaRelation().disableReferentialIntegrity(ApiStatics.TARGET_POSITION);
 
 		// Enable cascade remove for Color in vehicleColor
 		root.getMetaRelation().enableCascadeRemove(ApiStatics.TARGET_POSITION);
-
 		// Remove the type vehicle
 		car.remove();
 		assert !car.isAlive();

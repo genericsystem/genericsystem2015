@@ -6,9 +6,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.AbstractRoot.AbstractRootWrapper;
 import org.genericsystem.common.Vertex;
 
 public class Transaction implements IDifferential {
@@ -45,10 +48,11 @@ public class Transaction implements IDifferential {
 	// };
 	// }
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		List<Long> removesIds = removes.stream().map(remove -> remove.getTs()).collect(Collectors.toList());
-		List<Vertex> addVertices = adds.stream().map(add -> getRoot().getVertex(add.getTs())).collect(Collectors.toList());
+		List<Vertex> addVertices = adds.stream().map(add -> ((AbstractRootWrapper) ((ProxyObject) add).getHandler()).getVertex()).collect(Collectors.toList());
 		serverTransaction.applyFromExternal(removesIds, addVertices);
 		// dependenciesMap = new HashMap<>();
 		removes.stream().forEach(remove -> dependenciesMap.remove(remove));

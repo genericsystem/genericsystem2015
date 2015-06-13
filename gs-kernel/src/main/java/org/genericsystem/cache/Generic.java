@@ -1,7 +1,23 @@
 package org.genericsystem.cache;
 
-import org.genericsystem.defaults.DefaultVertex;
+import java.nio.channels.IllegalSelectorException;
 
-public interface Generic extends DefaultVertex<Generic> {
+import org.genericsystem.common.TProxy;
 
+public interface Generic extends TProxy<Generic> {
+
+	@Override
+	default Engine getRoot() {
+		throw new IllegalSelectorException();
+	}
+
+	@Override
+	default long getBirthTs() {
+		return getVertex().getOtherTs()[0];
+	}
+
+	@Override
+	default long getDeathTs() {
+		return getVertex().getOtherTs()[2];
+	}
 }

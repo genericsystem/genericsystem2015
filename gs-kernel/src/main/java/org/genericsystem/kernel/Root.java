@@ -1,20 +1,20 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import javassist.util.proxy.MethodHandler;
 
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.LifeManager;
+import org.genericsystem.common.TsDependencies;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultRoot;
 
 public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<Generic> {
 
 	private final Archiver archiver;
-	private boolean initialized = false;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
-	protected Map<Generic, TsDependencies<Generic>> dependenciesMap;
+	private TsDependencies<Generic> dependencies;
+	private LifeManager lifeManager;
 
 	@Override
 	public Root getRoot() {
@@ -32,12 +32,17 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 	public Root(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(value, persistentDirectoryPath, userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
-		initialized = true;
 	}
 
 	@Override
 	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
-		dependenciesMap = new ConcurrentHashMap<>();
+		lifeManager = new LifeManager(vertex.getOtherTs());
+		dependencies = new AbstractTsDependencies() {
+			@Override
+			public LifeManager getLifeManager() {
+				return lifeManager;
+			}
+		};
 	};
 
 	@Override
@@ -48,11 +53,6 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 	@Override
 	public Transaction getCurrentCache() {
 		return (Transaction) super.getCurrentCache();
-	}
-
-	@Override
-	protected boolean isInitialized() {
-		return initialized;
 	}
 
 	@Override
@@ -70,29 +70,57 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 		return garbageCollector;
 	}
 
-	TsDependencies<Generic> getDependencies(Generic generic) {
-		TsDependencies<Generic> dependencies = dependenciesMap.get(generic);
-		if (dependencies == null) {
-			Vertex vertex = getVertex(generic);
-			TsDependencies<Generic> already = dependenciesMap.putIfAbsent(generic, dependencies = new AbstractTsDependencies() {
-				@Override
-				public LifeManager getLifeManager() {
-					return vertex.getLifeManager();
-				}
-			});
-			if (already != null)
-				dependencies = already;
-		}
-		return dependencies;
-	}
-
 	@Override
 	protected Class<Generic> getTClass() {
 		return Generic.class;
 	}
 
-	Generic init(Vertex vertex) {
-		return init(newT(null, getGenericByTs(vertex.getMeta())), vertex.getTs(), vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
+	protected Generic init(Vertex vertex) {
+		return super.init(null, vertex);
 	}
 
+	@Override
+	protected MethodHandler buildHandler(Vertex vertex) {
+		return new RootWrapper(vertex);
+	}
+
+	class RootWrapper extends AbstractRootWrapper {
+
+		private final LifeManager lifeManager;
+		private final AbstractTsDependencies dependencies;
+
+		private RootWrapper(Vertex vertex) {
+			super(vertex);
+			this.lifeManager = new LifeManager(vertex.getOtherTs());
+			this.dependencies = new AbstractTsDependencies() {
+				@Override
+				public LifeManager getLifeManager() {
+					return lifeManager;
+				}
+			};
+		}
+
+		LifeManager getLifeManager() {
+			return lifeManager;
+		}
+
+		AbstractTsDependencies getDependencies() {
+			return dependencies;
+		}
+
+		@Override
+		protected Root getRoot() {
+			return Root.this;
+		}
+	}
+
+	@Override
+	public LifeManager getLifeManager() {
+		return lifeManager;
+	}
+
+	@Override
+	public TsDependencies<Generic> getDependencies() {
+		return dependencies;
+	}
 }

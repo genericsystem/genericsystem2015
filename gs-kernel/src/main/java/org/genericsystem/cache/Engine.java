@@ -2,6 +2,9 @@ package org.genericsystem.cache;
 
 import java.io.Serializable;
 
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.cache.Cache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
@@ -12,7 +15,6 @@ import org.genericsystem.kernel.Statics;
 public class Engine extends AbstractRoot<Generic> implements Generic {
 
 	private Root server;
-	private boolean isInitialized = false;
 
 	public Engine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -24,7 +26,11 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 
 	public Engine(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(engineValue, persistentDirectoryPath, userClasses);
-		isInitialized = true;
+	}
+
+	@Override
+	public Engine getRoot() {
+		return this;
 	}
 
 	@Override
@@ -80,11 +86,12 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	public Generic getGenericByTs(long ts) {
 		Generic generic = idsMap.get(ts);
 		if (generic == null) {
-			Vertex vertex = server.getVertex(ts);
+			@SuppressWarnings("unchecked")
+			Vertex vertex = (((AbstractRootWrapper) ((ProxyObject) server.getGenericByTs(ts)).getHandler()).getVertex());
 			if (vertex == null)
 				return null;
 			Class<?> clazz = server.getAnnotedClass(server.getGenericByTs(ts));
-			generic = init(newT(clazz, ts == vertex.getMeta() ? null : getGenericByTs(vertex.getMeta())), ts, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
+			generic = init(clazz, vertex);// , ts == vertex.getMeta() ? null : getGenericByTs(vertex.getMeta()), ts, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
 			idsMap.put(ts, generic);
 		}
 		return generic;
@@ -105,13 +112,24 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 		return Generic.class;
 	}
 
-	@Override
-	protected boolean isInitialized() {
-		return isInitialized;
-	}
-
 	public Root getServer() {
 		return server;
 	}
 
+	@Override
+	protected MethodHandler buildHandler(Vertex vertex) {
+		return new EngineWrapper(vertex);
+	}
+
+	class EngineWrapper extends AbstractRootWrapper {
+
+		private EngineWrapper(Vertex vertex) {
+			super(vertex);
+		}
+
+		@Override
+		protected Engine getRoot() {
+			return Engine.this;
+		}
+	}
 }

@@ -30,8 +30,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.genericsystem.common.GenericHandler.AtomicHandler;
-import org.genericsystem.common.LifeManager;
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.THandler.AtomicHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -287,13 +287,13 @@ public class Archiver {
 		protected void loadDependency(Map<Long, Generic> vertexMap) throws IOException, ClassNotFoundException {
 			long ts = loadTs();
 			long[] otherTs = loadOtherTs();
-			if (otherTs[0] == LifeManager.TS_SYSTEM)
-				otherTs[0] = LifeManager.TS_OLD_SYSTEM;
+			if (otherTs[0] == ApiStatics.TS_SYSTEM)
+				otherTs[0] = ApiStatics.TS_OLD_SYSTEM;
 			Serializable value = (Serializable) objectInputStream.readObject();
 			Generic meta = loadAncestor(ts, vertexMap);
 			List<Generic> supers = loadAncestors(ts, vertexMap);
 			List<Generic> components = loadAncestors(ts, vertexMap);
-			vertexMap.put(ts, new SetArchiverHandler(ts, transaction, meta, supers, value, components, new LifeManager(otherTs)).resolve());
+			vertexMap.put(ts, new SetArchiverHandler(ts, transaction, meta, supers, value, components, otherTs).resolve());
 			// log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " + vertexMap.get(ts).getLifeManager().getBirthTs());
 			assert getTransaction().isAlive(vertexMap.get(ts)) : vertexMap.get(ts).info();
 		}
@@ -349,17 +349,17 @@ public class Archiver {
 	private static class SetArchiverHandler extends AtomicHandler<Generic> {
 
 		private final long ts;
-		private final LifeManager lifeManager;
+		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, Transaction context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, LifeManager lifeManager) {
+		SetArchiverHandler(long ts, Transaction context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] lifeManager) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
-			this.lifeManager = lifeManager;
+			this.otherTs = lifeManager;
 		}
 
 		@Override
 		protected Generic build() {
-			return gettable = ((Transaction) context).buildAndPlug(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, lifeManager);
+			return gettable = ((Transaction) context).buildAndPlug(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs);
 		}
 	}
 

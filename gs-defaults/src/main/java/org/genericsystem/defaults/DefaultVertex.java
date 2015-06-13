@@ -272,67 +272,11 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	default long getTs() {
-		return getRoot().getTs((T) this);
-	}
+	long getTs();
 
-	@SuppressWarnings("unchecked")
-	@Override
-	default T getMeta() {
-		return getRoot().getMeta((T) this);
-	}
+	long getBirthTs();
 
-	@SuppressWarnings("unchecked")
-	@Override
-	default List<T> getSupers() {
-		return getRoot().getSupers((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	default Serializable getValue() {
-		return getRoot().getValue((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	default List<T> getComponents() {
-		return getRoot().getComponents((T) this);
-	}
-
-	@Override
-	default T enablePropertyConstraint() {
-		return DefaultSystemProperties.super.enablePropertyConstraint();
-	}
-
-	@Override
-	default T setInstanceValueClassConstraint(Class<? extends Serializable> constraintClass) {
-		return DefaultSystemProperties.super.setInstanceValueClassConstraint(constraintClass);
-	}
-
-	@Override
-	default T enableSingularConstraint(int pos) {
-		return DefaultSystemProperties.super.enableSingularConstraint(pos);
-
-	}
-
-	@Override
-	default int compareTo(T generic) {
-		long birthTs = getBirthTs();
-		long compareBirthTs = generic.getBirthTs();
-		return birthTs == compareBirthTs ? Long.compare(getTs(), generic.getTs()) : Long.compare(birthTs, compareBirthTs);
-	}
-
-	@SuppressWarnings("unchecked")
-	default long getBirthTs() {
-		return getRoot().getBirthTs((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
-	default long getDeathTs() {
-		return getRoot().getDeathTs((T) this);
-	}
+	long getDeathTs();
 
 	@Override
 	default boolean isSystem() {
@@ -342,6 +286,13 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 	@Override
 	default DefaultRoot<T> getRoot() {
 		throw new IllegalStateException();
+	}
+
+	@Override
+	default int compareTo(T generic) {
+		long birthTs = getBirthTs();
+		long compareBirthTs = generic.getBirthTs();
+		return birthTs == compareBirthTs ? Long.compare(getTs(), generic.getTs()) : Long.compare(birthTs, compareBirthTs);
 	}
 
 }

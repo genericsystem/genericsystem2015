@@ -11,7 +11,6 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.IDependencies;
-import org.genericsystem.common.LifeManager;
 import org.genericsystem.common.Vertex;
 
 public class Transaction extends AbstractContext<Generic> {
@@ -86,22 +85,22 @@ public class Transaction extends AbstractContext<Generic> {
 
 			@Override
 			public Stream<Generic> stream() {
-				return getRoot().getDependencies(ancestor).stream(getTs());
+				return ancestor.getDependencies().stream(getTs());
 			}
 
 			@Override
 			public Generic get(Object o) {
-				return getRoot().getDependencies(ancestor).get((Generic) o, getTs());
+				return ancestor.getDependencies().get((Generic) o, getTs());
 			}
 
 			@Override
 			public void add(Generic add) {
-				getRoot().getDependencies(ancestor).add(add);
+				ancestor.getDependencies().add(add);
 			}
 
 			@Override
 			public boolean remove(Generic remove) {
-				return getRoot().getDependencies(ancestor).remove(remove);
+				return ancestor.getDependencies().remove(remove);
 			}
 		};
 	}
@@ -113,8 +112,8 @@ public class Transaction extends AbstractContext<Generic> {
 	}
 
 	// archiver acces
-	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, LifeManager lifeManager) {
-		return plug(build(ts, clazz, meta, supers, value, components, lifeManager));
+	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
+		return plug(build(ts, clazz, meta, supers, value, components, otherTs));
 
 	}
 
