@@ -26,6 +26,7 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 
 	public Engine(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(engineValue, persistentDirectoryPath, userClasses);
+		isInitialized = true;
 	}
 
 	@Override
@@ -83,14 +84,14 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	public Generic getGenericByTs(long ts) {
+	public Generic getGenericById(long ts) {
 		Generic generic = idsMap.get(ts);
 		if (generic == null) {
 			@SuppressWarnings("unchecked")
-			Vertex vertex = (((AbstractRootWrapper) ((ProxyObject) server.getGenericByTs(ts)).getHandler()).getVertex());
+			Vertex vertex = (((AbstractRootWrapper) ((ProxyObject) server.getGenericById(ts)).getHandler()).getVertex());
 			if (vertex == null)
 				return null;
-			Class<?> clazz = server.getAnnotedClass(server.getGenericByTs(ts));
+			Class<?> clazz = server.getAnnotedClass(server.getGenericById(ts));
 			generic = init(clazz, vertex);// , ts == vertex.getMeta() ? null : getGenericByTs(vertex.getMeta()), ts, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
 			idsMap.put(ts, generic);
 		}

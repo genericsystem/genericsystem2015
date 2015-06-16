@@ -96,27 +96,22 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 		cacheEngine.close();
 	}
 
-	@Override
 	public long getTs(Generic generic) {
 		return getCurrentCache().unwrap(generic).getTs();
 	}
 
-	@Override
 	public Generic getMeta(Generic generic) {
 		return getCurrentCache().wrap(getCurrentCache().unwrap(generic).getMeta());
 	}
 
-	@Override
 	public List<Generic> getSupers(Generic generic) {
 		return getCurrentCache().wrap(getCurrentCache().unwrap(generic).getSupers());
 	}
 
-	@Override
 	public Serializable getValue(Generic generic) {
 		return getCurrentCache().unwrap(generic).getValue();
 	}
 
-	@Override
 	public List<Generic> getComponents(Generic generic) {
 		return getCurrentCache().wrap(getCurrentCache().unwrap(generic).getComponents());
 	}
@@ -131,13 +126,7 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 		return new Generic[i];
 	}
 
-	@Override
 	public long getBirthTs(Generic generic) {
 		return getCurrentCache().unwrap(generic).getBirthTs();
-	}
-
-	@Override
-	public long getDeathTs(Generic generic) {
-		return getCurrentCache().unwrap(generic).getDeathTs();
 	}
 }

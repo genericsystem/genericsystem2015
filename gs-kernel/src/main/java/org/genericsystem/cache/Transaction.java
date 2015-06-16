@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javassist.util.proxy.ProxyObject;
 
@@ -34,7 +33,7 @@ public class Transaction implements IDifferential {
 		return engine;
 	}
 
-	public long getTs() {
+	long getTs() {
 		return ts;
 	}
 
@@ -53,26 +52,31 @@ public class Transaction implements IDifferential {
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		List<Long> removesIds = removes.stream().map(remove -> remove.getTs()).collect(Collectors.toList());
 		List<Vertex> addVertices = adds.stream().map(add -> ((AbstractRootWrapper) ((ProxyObject) add).getHandler()).getVertex()).collect(Collectors.toList());
+		assert addVertices.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
 		serverTransaction.applyFromExternal(removesIds, addVertices);
 		// dependenciesMap = new HashMap<>();
 		removes.stream().forEach(remove -> dependenciesMap.remove(remove));
+		// removes.stream().forEach(remove -> remove.getVertex().getOtherTs()[2] = getTs());
 		adds.stream().forEach(add -> dependenciesMap.remove(add));
+		adds.stream().forEach(add -> add.getVertex().getOtherTs()[0] = getTs());
+		// adds.stream().forEach(add -> add.getVertex().getOtherTs()[0] = getTs());
 	}
 
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
 
 	@Override
-	public Snapshot<Generic> getDependencies(Generic ancestor) {
-		Snapshot<Generic> dependencies = dependenciesMap.get(ancestor);
+	public Snapshot<Generic> getDependencies(Generic generic) {
+		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			org.genericsystem.kernel.Generic serverGeneric = serverTransaction.getGenericByTs(ancestor.getTs());
-			if (serverGeneric != null)
-				dependencies = () -> serverTransaction.getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs()).map(ts -> getRoot().getGenericByTs(ts));
-			else
-				dependencies = () -> Stream.empty();
-			Snapshot<Generic> result = dependenciesMap.put(ancestor, dependencies);
+			dependencies = () -> serverTransaction.getDependenciesFromExternal(generic.getTs()).stream().map(ts -> getRoot().getGenericById(ts));
+			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}
 		return dependencies;
 	}
+
+	// @Override
+	// public long getBirthTs(Generic generic) {
+	// return generic.getVertex().getOtherTs()[0];
+	// }
 }

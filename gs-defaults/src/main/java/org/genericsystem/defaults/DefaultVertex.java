@@ -276,7 +276,7 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 
 	long getBirthTs();
 
-	long getDeathTs();
+	// long getDeathTs();
 
 	@Override
 	default boolean isSystem() {

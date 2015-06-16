@@ -30,7 +30,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	private final TsGenerator generator = new TsGenerator();
 	protected Wrapper<T> contextWrapper = buildContextWrapper();
 	private final SystemCache<T> systemCache;
-	private boolean isInitialized = false;
+	protected boolean isInitialized = false;
 
 	public AbstractRoot(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -57,7 +57,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		systemCache.mount(Arrays.asList(MetaAttribute.class, MetaRelation.class, SystemMap.class, Sequence.class), userClasses);
 		flushContext();
 		// shiftContext();
-		isInitialized = true;
 	}
 
 	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
@@ -141,17 +140,17 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	protected final Map<Long, T> idsMap = new ConcurrentHashMap<>();
 
-	public T getGenericByTs(long ts) {
+	public T getGenericById(long ts) {
 		return idsMap.get(ts);
 	}
 
 	protected T init(Class<?> clazz, Vertex vertex) {
-		return init(newT(clazz, vertex.getTs() == vertex.getMeta() ? null : getGenericByTs(vertex.getMeta())), vertex.getTs(), vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getOtherTs());
+		return init(newT(clazz, vertex.getTs() == vertex.getMeta() ? null : getGenericById(vertex.getMeta())), vertex.getTs(), vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getOtherTs());
 	}
 
 	T init(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
 		long newTs = ts == null ? pickNewTs() : ts;
-		return init(newT(clazz, meta), newTs, meta == null ? newTs : meta.getTs(), supers.stream().map(g -> g.getTs()).collect(Collectors.toList()), value, components.stream().map(g -> g.getTs()).collect(Collectors.toList()), otherTs);
+		return init(newT(clazz, meta), newTs, meta == null ? newTs : meta.getTs(), supers.stream().map(g -> g.getTs()).collect(Collectors.toList()), value, components.stream().map(g -> g.getTs()).collect(Collectors.toList()), otherTs.clone());
 	}
 
 	private T init(T generic, long ts, long meta, List<Long> supers, Serializable value, List<Long> components, long[] otherTs) {
@@ -252,16 +251,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	}
 
 	protected final Vertex vertex;
-
-	@Override
-	public long getBirthTs() {
-		return vertex.getOtherTs()[0];
-	}
-
-	@Override
-	public long getDeathTs() {
-		return vertex.getOtherTs()[2];
-	}
 
 	@Override
 	public Vertex getVertex() {

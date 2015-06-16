@@ -14,9 +14,11 @@ import org.genericsystem.common.Checker;
  */
 public interface IDifferential {
 
-	abstract Snapshot<Generic> getDependencies(Generic vertex);
+	Snapshot<Generic> getDependencies(Generic vertex);
 
-	abstract void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
+	void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
+
+	// long getTs();
 
 	public static class Differential implements IDifferential {
 
@@ -80,5 +82,16 @@ public interface IDifferential {
 			for (Generic generic : adds)
 				plug(generic);
 		}
+
+		// @Override
+		// public long getTs() {
+		// return getSubCache().getTs();
+		// }
+		//
+		// @Override
+		// public long getBirthTs(Generic generic) {
+		// return adds.contains(generic) ? getTs() : getSubCache().getBirthTs(generic);
+		// }
 	}
+
 }

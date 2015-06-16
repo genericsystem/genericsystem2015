@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
@@ -49,7 +50,6 @@ public class Transaction extends AbstractContext<Generic> {
 		set.stream().forEach(ancestor -> getDependencies(ancestor).add(generic));
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
-
 	}
 
 	private void kill(Generic generic) {
@@ -71,11 +71,13 @@ public class Transaction extends AbstractContext<Generic> {
 		getRoot().getGarbageCollector().add(generic);
 	}
 
-	public Generic getGenericByTs(long ts) {
-		Generic generic = getRoot().getGenericByTs(ts);
-		if (generic != null)
-			getChecker().checkIsAlive(generic);
-		return generic;
+	public Snapshot<Long> getDependenciesFromExternal(long ts) {
+		org.genericsystem.kernel.Generic serverGeneric = getRoot().getGenericById(ts);
+		// What to do if serverGeneric not alive ???
+		if (serverGeneric != null)
+			return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
+		else
+			return () -> Stream.empty();
 	}
 
 	@Override
@@ -106,7 +108,7 @@ public class Transaction extends AbstractContext<Generic> {
 	}
 
 	public void applyFromExternal(List<Long> removeIds, List<Vertex> addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericByTs(removeId)).collect(Collectors.toList());
+		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericById(removeId)).collect(Collectors.toList());
 		List<Generic> adds = addVertices.stream().map(addVertex -> getRoot().init(addVertex)).collect(Collectors.toList());
 		new LockedLifeManager().apply(removes, adds);
 	}
@@ -129,10 +131,12 @@ public class Transaction extends AbstractContext<Generic> {
 		private void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			try {
 				writeLockAllAndCheckMvcc(adds, removes);
-				for (Generic generic : removes)
-					kill(generic);
-				for (Generic generic : adds)
-					plug(generic);
+				for (Generic remove : removes)
+					kill(remove);
+				for (Generic add : adds) {
+					plug(add);
+				}
+
 			} finally {
 				writeUnlockAll();
 			}

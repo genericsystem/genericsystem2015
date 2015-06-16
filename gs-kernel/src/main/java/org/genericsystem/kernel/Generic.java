@@ -15,15 +15,16 @@ public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 		throw new IllegalSelectorException();
 	}
 
+	// @Override
 	@Override
 	default long getBirthTs() {
-		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager().getBirthTs();
+		return getLifeManager().getBirthTs();
 	}
 
-	@Override
-	default long getDeathTs() {
-		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager().getDeathTs();
-	}
+	// @Override
+	// default long getDeathTs() {
+	// return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager().getDeathTs();
+	// }
 
 	default LifeManager getLifeManager() {
 		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager();

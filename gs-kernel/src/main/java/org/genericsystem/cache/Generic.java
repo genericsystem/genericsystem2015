@@ -12,12 +12,12 @@ public interface Generic extends TProxy<Generic> {
 	}
 
 	@Override
-	default long getBirthTs() {
-		return getVertex().getOtherTs()[0];
+	default public Cache getCurrentCache() {
+		return (Cache) TProxy.super.getCurrentCache();
 	}
 
 	@Override
-	default long getDeathTs() {
-		return getVertex().getOtherTs()[2];
+	default long getBirthTs() {
+		return getVertex().getOtherTs()[0];
 	}
 }

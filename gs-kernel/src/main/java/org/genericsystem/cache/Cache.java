@@ -41,6 +41,10 @@ public class Cache extends AbstractContext<Generic> {
 		return differential.getDependencies(vertex);
 	}
 
+	// long getBirthTs(Generic generic) {
+	// return differential.getBirthTs(generic);
+	// }
+
 	protected void initialize() {
 		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
 	}
@@ -140,6 +144,7 @@ public class Cache extends AbstractContext<Generic> {
 
 	@Override
 	protected Generic plug(Generic generic) {
+		assert generic.getBirthTs() == Long.MAX_VALUE : generic.info() + generic.getBirthTs();
 		differential.plug(generic);
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;

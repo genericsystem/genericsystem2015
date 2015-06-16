@@ -7,9 +7,8 @@ import javassist.util.proxy.MethodHandler;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.TsDependencies;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.defaults.DefaultRoot;
 
-public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<Generic> {
+public class Root extends AbstractRoot<Generic> implements Generic {
 
 	private final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
@@ -32,6 +31,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, DefaultRoot<
 	public Root(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(value, persistentDirectoryPath, userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
+		isInitialized = true;
 	}
 
 	@Override

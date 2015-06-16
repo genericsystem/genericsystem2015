@@ -30,12 +30,12 @@ public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
 
 	@Override
 	default T getMeta() {
-		return getRoot().getGenericByTs(getVertex().getMeta());
+		return getRoot().getGenericById(getVertex().getMeta());
 	}
 
 	@Override
 	default List<T> getSupers() {
-		return getVertex().getSupers().stream().map(getRoot()::getGenericByTs).collect(Collectors.toList());
+		return getVertex().getSupers().stream().map(getRoot()::getGenericById).collect(Collectors.toList());
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
 
 	@Override
 	default List<T> getComponents() {
-		return getVertex().getComponents().stream().map(getRoot()::getGenericByTs).collect(Collectors.toList());
+		return getVertex().getComponents().stream().map(getRoot()::getGenericById).collect(Collectors.toList());
 	}
 
 }

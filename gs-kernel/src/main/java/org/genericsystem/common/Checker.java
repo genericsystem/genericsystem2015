@@ -137,7 +137,7 @@ public class Checker<T extends DefaultVertex<T>> {
 
 	public void checkIsAlive(T vertex) {
 		if (!context.isAlive(vertex))
-			context.discardWithException(new AliveConstraintViolationException(vertex.info()));
+			context.discardWithException(new AliveConstraintViolationException("" + vertex.getBirthTs()));
 	}
 
 	private void checkIsNotAlive(T vertex) {
