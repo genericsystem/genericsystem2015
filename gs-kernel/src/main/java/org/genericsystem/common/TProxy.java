@@ -2,50 +2,58 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javassist.util.proxy.ProxyObject;
 
-import org.genericsystem.common.AbstractRoot.AbstractRootWrapper;
 import org.genericsystem.defaults.DefaultVertex;
 
 public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
 	@Override
-	AbstractRoot<T> getRoot();
+	default AbstractRoot<T> getRoot() {
+		return getRootWrapper().getRoot();
+	}
 
 	@Override
 	default AbstractContext<T> getCurrentCache() {
 		return (AbstractContext<T>) DefaultVertex.super.getCurrentCache();
 	}
 
-	@SuppressWarnings("rawtypes")
-	default Vertex getVertex() {
-		return ((AbstractRootWrapper) ((ProxyObject) this).getHandler()).getVertex();
+	@SuppressWarnings("unchecked")
+	default AbstractRoot<T>.AbstractRootWrapper getRootWrapper() {
+		return ((AbstractRoot<T>.AbstractRootWrapper) ((ProxyObject) this).getHandler());
 	}
 
 	@Override
 	default long getTs() {
-		return getVertex().getTs();
+		return getRootWrapper().getTs();
 	}
 
 	@Override
 	default T getMeta() {
-		return getRoot().getGenericById(getVertex().getMeta());
+		return getRootWrapper().getMeta();
 	}
 
 	@Override
 	default List<T> getSupers() {
-		return getVertex().getSupers().stream().map(getRoot()::getGenericById).collect(Collectors.toList());
+		return getRootWrapper().getSupers();
 	}
 
 	@Override
 	default Serializable getValue() {
-		return getVertex().getValue();
+		return getRootWrapper().getValue();
 	}
 
 	@Override
 	default List<T> getComponents() {
-		return getVertex().getComponents().stream().map(getRoot()::getGenericById).collect(Collectors.toList());
+		return getRootWrapper().getComponents();
 	}
 
+	@Override
+	default long[] getOtherTs() {
+		return getRootWrapper().getOtherTs();
+	}
+
+	default Vertex getVertex() {
+		return getRootWrapper().getVertex();
+	}
 }

@@ -1,14 +1,12 @@
 package org.genericsystem.cache;
 
-import java.nio.channels.IllegalSelectorException;
-
 import org.genericsystem.common.TProxy;
 
 public interface Generic extends TProxy<Generic> {
 
 	@Override
 	default Engine getRoot() {
-		throw new IllegalSelectorException();
+		return (Engine) TProxy.super.getRoot();
 	}
 
 	@Override
@@ -18,6 +16,7 @@ public interface Generic extends TProxy<Generic> {
 
 	@Override
 	default long getBirthTs() {
-		return getVertex().getOtherTs()[0];
+		return getOtherTs()[0];
 	}
+
 }

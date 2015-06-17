@@ -70,4 +70,8 @@ public interface ISignature<T extends ISignature<T>> {
 		builder.add("Components", arrayBuilder);
 		return builder.build();
 	}
+
+	long getTs();
+
+	long[] getOtherTs();
 }

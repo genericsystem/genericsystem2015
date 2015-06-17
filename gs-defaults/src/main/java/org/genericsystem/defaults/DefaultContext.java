@@ -21,6 +21,7 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 	DefaultRoot<T> getRoot();
 
 	default boolean isAlive(T vertex) {
+		assert vertex != null;
 		class AliveFinder {
 			T find(T vertex) {
 				if (vertex.isRoot())

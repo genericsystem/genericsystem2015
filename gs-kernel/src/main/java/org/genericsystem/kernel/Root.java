@@ -1,19 +1,15 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
-
-import javassist.util.proxy.MethodHandler;
+import java.util.List;
 
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.TsDependencies;
 import org.genericsystem.common.Vertex;
 
 public class Root extends AbstractRoot<Generic> implements Generic {
 
 	private final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
-	private TsDependencies<Generic> dependencies;
-	private LifeManager lifeManager;
 
 	@Override
 	public Root getRoot() {
@@ -33,17 +29,6 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 		archiver = new Archiver(this, persistentDirectoryPath);
 		isInitialized = true;
 	}
-
-	@Override
-	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
-		lifeManager = new LifeManager(vertex.getOtherTs());
-		dependencies = new AbstractTsDependencies() {
-			@Override
-			public LifeManager getLifeManager() {
-				return lifeManager;
-			}
-		};
-	};
 
 	@Override
 	public Transaction newCache() {
@@ -80,8 +65,13 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	protected MethodHandler buildHandler(Vertex vertex) {
+	protected RootWrapper buildHandler(Vertex vertex) {
 		return new RootWrapper(vertex);
+	}
+
+	@Override
+	protected RootWrapper buildHandler(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		return new RootWrapper(meta, supers, value, components, ts, otherTs);
 	}
 
 	class RootWrapper extends AbstractRootWrapper {
@@ -92,6 +82,17 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 		private RootWrapper(Vertex vertex) {
 			super(vertex);
 			this.lifeManager = new LifeManager(vertex.getOtherTs());
+			this.dependencies = new AbstractTsDependencies() {
+				@Override
+				public LifeManager getLifeManager() {
+					return lifeManager;
+				}
+			};
+		}
+
+		private RootWrapper(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+			super(meta, supers, value, components, ts, otherTs);
+			this.lifeManager = new LifeManager(getOtherTs());
 			this.dependencies = new AbstractTsDependencies() {
 				@Override
 				public LifeManager getLifeManager() {
@@ -112,15 +113,5 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 		protected Root getRoot() {
 			return Root.this;
 		}
-	}
-
-	@Override
-	public LifeManager getLifeManager() {
-		return lifeManager;
-	}
-
-	@Override
-	public TsDependencies<Generic> getDependencies() {
-		return dependencies;
 	}
 }

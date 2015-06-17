@@ -42,6 +42,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 
 	protected final AbstractRoot<T> root;
 
+	@SuppressWarnings("unchecked")
 	public SystemCache(AbstractRoot<T> root, Class<?> rootClass) {
 		this.root = root;
 		put(DefaultRoot.class, (T) root);
@@ -80,6 +81,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 		reverseSystemCache.put(vertex, clazz);
 	}
 
+	@SuppressWarnings("unchecked")
 	public T find(Class<?> clazz) {
 		if (IRoot.class.isAssignableFrom(clazz))
 			return (T) root;
@@ -135,6 +137,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 				bind(dependencyClass);
 	}
 
+	@SuppressWarnings("unchecked")
 	private T setMeta(Class<?> clazz) {
 		Meta meta = clazz.getAnnotation(Meta.class);
 		if (meta == null)

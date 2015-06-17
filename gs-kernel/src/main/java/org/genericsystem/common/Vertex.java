@@ -22,7 +22,7 @@ public class Vertex {
 			assert component != null && !equals(component);
 		this.components = Collections.unmodifiableList(new ArrayList<>(components));
 		this.supers = Collections.unmodifiableList(new ArrayList<>(supers));
-		this.otherTs = otherTs;
+		this.otherTs = otherTs.clone();
 	}
 
 	public long getTs() {

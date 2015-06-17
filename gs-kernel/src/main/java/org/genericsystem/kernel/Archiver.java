@@ -269,7 +269,13 @@ public class Archiver {
 
 		private void loadSnapshot() throws ClassNotFoundException, IOException {
 			try {
-				Map<Long, Generic> vertexMap = new HashMap<>();
+				Map<Long, Generic> vertexMap = new HashMap<Long, Generic>();
+				// {
+				// @Override
+				// public Generic get(Object key) {
+				// return Archiver.this.root.getGenericById((Long) key);
+				// }
+				// };
 				for (;;)
 					loadDependency(vertexMap);
 			} catch (EOFException ignore) {
@@ -351,10 +357,10 @@ public class Archiver {
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, Transaction context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] lifeManager) {
+		SetArchiverHandler(long ts, Transaction context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
-			this.otherTs = lifeManager;
+			this.otherTs = otherTs;
 		}
 
 		@Override

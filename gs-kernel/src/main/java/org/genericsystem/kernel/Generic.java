@@ -1,9 +1,5 @@
 package org.genericsystem.kernel;
 
-import java.nio.channels.IllegalSelectorException;
-
-import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.common.TProxy;
 import org.genericsystem.common.TsDependencies;
 import org.genericsystem.kernel.Root.RootWrapper;
@@ -12,7 +8,7 @@ public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 
 	@Override
 	default Root getRoot() {
-		throw new IllegalSelectorException();
+		return (Root) TProxy.super.getRoot();
 	}
 
 	// @Override
@@ -26,12 +22,17 @@ public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 	// return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager().getDeathTs();
 	// }
 
+	@Override
+	default public RootWrapper getRootWrapper() {
+		return (RootWrapper) TProxy.super.getRootWrapper();
+	}
+
 	default LifeManager getLifeManager() {
-		return ((RootWrapper) ((ProxyObject) this).getHandler()).getLifeManager();
+		return getRootWrapper().getLifeManager();
 	}
 
 	default TsDependencies<Generic> getDependencies() {
-		return ((RootWrapper) ((ProxyObject) this).getHandler()).getDependencies();
+		return getRootWrapper().getDependencies();
 	}
 
 }

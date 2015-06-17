@@ -1,9 +1,7 @@
 package org.genericsystem.cache;
 
 import java.io.Serializable;
-
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyObject;
+import java.util.List;
 
 import org.genericsystem.cache.Cache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
@@ -85,15 +83,11 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 
 	@Override
 	public Generic getGenericById(long ts) {
-		Generic generic = idsMap.get(ts);
+		Generic generic = super.getGenericById(ts);
 		if (generic == null) {
-			@SuppressWarnings("unchecked")
-			Vertex vertex = (((AbstractRootWrapper) ((ProxyObject) server.getGenericById(ts)).getHandler()).getVertex());
-			if (vertex == null)
-				return null;
-			Class<?> clazz = server.getAnnotedClass(server.getGenericById(ts));
-			generic = init(clazz, vertex);// , ts == vertex.getMeta() ? null : getGenericByTs(vertex.getMeta()), ts, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents(), vertex.getLifeManager());
-			idsMap.put(ts, generic);
+			org.genericsystem.kernel.Generic serverGeneric = server.getGenericById(ts);
+			Class<?> clazz = server.getAnnotedClass(serverGeneric);
+			generic = init(clazz, serverGeneric.getVertex());
 		}
 		return generic;
 	}
@@ -118,14 +112,23 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	protected MethodHandler buildHandler(Vertex vertex) {
+	protected EngineWrapper buildHandler(Vertex vertex) {
 		return new EngineWrapper(vertex);
+	}
+
+	@Override
+	protected EngineWrapper buildHandler(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		return new EngineWrapper(meta, supers, value, components, ts, otherTs);
 	}
 
 	class EngineWrapper extends AbstractRootWrapper {
 
 		private EngineWrapper(Vertex vertex) {
 			super(vertex);
+		}
+
+		public EngineWrapper(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+			super(meta, supers, value, components, ts, otherTs);
 		}
 
 		@Override
