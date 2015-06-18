@@ -52,7 +52,7 @@ public class Transaction implements IDifferential {
 		serverTransaction.applyFromExternal(removesIds, addVertices);
 		removes.stream().forEach(remove -> dependenciesMap.remove(remove));
 		adds.stream().forEach(add -> dependenciesMap.remove(add));
-		adds.stream().forEach(add -> add.getVertex().getOtherTs()[0] = getTs());
+		adds.stream().forEach(add -> add.getOtherTs()[0] = getTs());
 	}
 
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();

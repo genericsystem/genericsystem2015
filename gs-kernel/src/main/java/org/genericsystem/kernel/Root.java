@@ -65,8 +65,8 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	protected RootWrapper buildHandler(Vertex vertex) {
-		return new RootWrapper(vertex);
+	protected RootWrapper buildHandler(Generic generic, Vertex vertex) {
+		return new RootWrapper(generic, vertex);
 	}
 
 	@Override
@@ -79,8 +79,8 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 		private final LifeManager lifeManager;
 		private final AbstractTsDependencies dependencies;
 
-		private RootWrapper(Vertex vertex) {
-			super(vertex);
+		private RootWrapper(Generic generic, Vertex vertex) {
+			super(generic, vertex);
 			this.lifeManager = new LifeManager(vertex.getOtherTs());
 			this.dependencies = new AbstractTsDependencies() {
 				@Override

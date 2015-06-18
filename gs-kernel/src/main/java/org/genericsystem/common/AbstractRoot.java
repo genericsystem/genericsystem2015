@@ -154,7 +154,8 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	}
 
 	protected T init(Class<?> clazz, Vertex vertex) {
-		return init(newT(clazz, tMap.get(vertex.getMeta())), buildHandler(vertex));
+		T generic = newT(clazz, tMap.get(vertex.getMeta()));
+		return init(generic, buildHandler(generic, vertex));
 	}
 
 	T init(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
@@ -170,7 +171,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return generic;
 	}
 
-	protected abstract AbstractRootWrapper buildHandler(Vertex vertex);
+	protected abstract AbstractRootWrapper buildHandler(T generic, Vertex vertex);
 
 	protected abstract AbstractRootWrapper buildHandler(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
 
@@ -222,85 +223,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	public abstract class AbstractRootWrapper implements MethodHandler, ISignature<T> {
 
-		private Vertex vertex;
-		private ISignature<T> subSignature;
-
-		protected AbstractRootWrapper(Vertex vertex) {
-			this.vertex = vertex;
-			assert vertex != null;
-		}
-
-		protected AbstractRootWrapper(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
-			this.subSignature = new SignatureImpl(meta, supers, value, components, ts, otherTs);
-			assert subSignature != null;
-		}
-
-		@Override
-		public Object invoke(Object self, Method m, Method proceed, Object[] args) throws Throwable {
-			return ((DefaultVertex<?>) self).defaultToString();
-			// switch (m.getName()) {
-			// case ("getRoot"):
-			// return AbstractRoot.this;
-			// default:
-			// return ((DefaultVertex<?>) self).defaultToString();
-			// }
-		}
-
-		abstract protected AbstractRoot<T> getRoot();
-
-		public Vertex getVertex() {
-			initVertex();
-			return vertex;
-		}
-
-		private void initVertex() {
-			if (vertex == null)
-				vertex = new Vertex(subSignature.getTs(), (subSignature.getMeta() == null ? subSignature : subSignature.getMeta()).getTs(), subSignature.getSupers().stream().map(T::getTs).collect(Collectors.toList()), subSignature.getValue(), subSignature
-						.getComponents().stream().map(T::getTs).collect(Collectors.toList()), subSignature.getOtherTs());
-		}
-
-		private void initSignature() {
-			if (subSignature == null) {
-				subSignature = new SignatureImpl(vertex);
-			}
-		}
-
-		@Override
-		public T getMeta() {
-			initSignature();
-			return subSignature.getMeta();
-		}
-
-		@Override
-		public List<T> getSupers() {
-			initSignature();
-			return subSignature.getSupers();
-		}
-
-		@Override
-		public Serializable getValue() {
-			return subSignature != null ? subSignature.getValue() : vertex.getValue();
-		}
-
-		@Override
-		public List<T> getComponents() {
-			initSignature();
-			return subSignature.getComponents();
-		}
-
-		@Override
-		public long getTs() {
-			return subSignature != null ? subSignature.getTs() : vertex.getTs();
-		}
-
-		@Override
-		public long[] getOtherTs() {
-			return subSignature != null ? subSignature.getOtherTs() : vertex.getOtherTs();
-		}
-
-	}
-
-	class SignatureImpl implements ISignature<T> {
 		private final T meta;
 		private final List<T> supers;
 		private final Serializable value;
@@ -308,7 +230,13 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		private final long ts;
 		private final long[] otherTs;
 
-		private SignatureImpl(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
+		protected AbstractRootWrapper(T generic, Vertex vertex) {
+			this(vertex.getMeta() == vertex.getTs() ? generic : AbstractRoot.this.getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(AbstractRoot.this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents()
+					.stream().map(AbstractRoot.this::getGenericById).collect(Collectors.toList()), vertex.getTs(), vertex.getOtherTs());
+
+		}
+
+		protected AbstractRootWrapper(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
 			assert meta != null;
 			this.meta = meta;
 			this.supers = supers;
@@ -318,9 +246,15 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 			this.otherTs = otherTs.clone();
 		}
 
-		public SignatureImpl(Vertex vertex) {
-			this(AbstractRoot.this.getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(AbstractRoot.this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents().stream().map(AbstractRoot.this::getGenericById)
-					.collect(Collectors.toList()), vertex.getTs(), vertex.getOtherTs());
+		@Override
+		public Object invoke(Object self, Method m, Method proceed, Object[] args) throws Throwable {
+			return ((DefaultVertex<?>) self).defaultToString();
+		}
+
+		abstract protected AbstractRoot<T> getRoot();
+
+		public Vertex getVertex() {
+			return new Vertex(getTs(), getMeta().getTs(), getSupers().stream().map(T::getTs).collect(Collectors.toList()), getValue(), getComponents().stream().map(T::getTs).collect(Collectors.toList()), getOtherTs());
 		}
 
 		@Override

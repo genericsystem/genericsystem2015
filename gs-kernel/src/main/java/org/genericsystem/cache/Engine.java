@@ -112,8 +112,8 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	protected EngineWrapper buildHandler(Vertex vertex) {
-		return new EngineWrapper(vertex);
+	protected EngineWrapper buildHandler(Generic generic, Vertex vertex) {
+		return new EngineWrapper(generic, vertex);
 	}
 
 	@Override
@@ -123,8 +123,8 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 
 	class EngineWrapper extends AbstractRootWrapper {
 
-		private EngineWrapper(Vertex vertex) {
-			super(vertex);
+		private EngineWrapper(Generic generic, Vertex vertex) {
+			super(generic, vertex);
 		}
 
 		public EngineWrapper(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
