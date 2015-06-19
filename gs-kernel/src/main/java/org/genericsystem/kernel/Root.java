@@ -65,32 +65,16 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	protected RootWrapper buildHandler(Generic generic, Vertex vertex) {
-		return new RootWrapper(generic, vertex);
+	protected RootWrapped buildHandler(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		return new RootWrapped(meta, supers, value, components, ts, otherTs);
 	}
 
-	@Override
-	protected RootWrapper buildHandler(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
-		return new RootWrapper(meta, supers, value, components, ts, otherTs);
-	}
-
-	class RootWrapper extends AbstractRootWrapper {
+	class RootWrapped extends Wrapped {
 
 		private final LifeManager lifeManager;
 		private final AbstractTsDependencies dependencies;
 
-		private RootWrapper(Generic generic, Vertex vertex) {
-			super(generic, vertex);
-			this.lifeManager = new LifeManager(vertex.getOtherTs());
-			this.dependencies = new AbstractTsDependencies() {
-				@Override
-				public LifeManager getLifeManager() {
-					return lifeManager;
-				}
-			};
-		}
-
-		private RootWrapper(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		private RootWrapped(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
 			super(meta, supers, value, components, ts, otherTs);
 			this.lifeManager = new LifeManager(getOtherTs());
 			this.dependencies = new AbstractTsDependencies() {

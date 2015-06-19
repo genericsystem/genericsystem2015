@@ -155,7 +155,9 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	protected T init(Class<?> clazz, Vertex vertex) {
 		T generic = newT(clazz, tMap.get(vertex.getMeta()));
-		return init(generic, buildHandler(generic, vertex));
+		Wrapped handler = buildHandler(vertex.getMeta() == vertex.getTs() ? generic : getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents().stream()
+				.map(this::getGenericById).collect(Collectors.toList()), vertex.getTs(), vertex.getOtherTs());
+		return init(generic, handler);
 	}
 
 	T init(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
@@ -163,17 +165,15 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return init(generic, buildHandler(meta != null ? meta : generic, supers, value, components, ts == null ? pickNewTs() : ts, otherTs));
 	}
 
-	private T init(T generic, AbstractRootWrapper handler) {
+	private T init(T generic, Wrapped handler) {
 		((ProxyObject) generic).setHandler(handler);
-		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.AbstractRootWrapper;
+		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.Wrapped;
 		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
 		assert gresult == null;
 		return generic;
 	}
 
-	protected abstract AbstractRootWrapper buildHandler(T generic, Vertex vertex);
-
-	protected abstract AbstractRootWrapper buildHandler(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
+	protected abstract Wrapped buildHandler(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
 
 	protected abstract Class<T> getTClass();
 
@@ -221,7 +221,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return isInitialized;
 	}
 
-	public abstract class AbstractRootWrapper implements MethodHandler, ISignature<T> {
+	public abstract class Wrapped implements MethodHandler, ISignature<T> {
 
 		private final T meta;
 		private final List<T> supers;
@@ -230,13 +230,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		private final long ts;
 		private final long[] otherTs;
 
-		protected AbstractRootWrapper(T generic, Vertex vertex) {
-			this(vertex.getMeta() == vertex.getTs() ? generic : AbstractRoot.this.getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(AbstractRoot.this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents()
-					.stream().map(AbstractRoot.this::getGenericById).collect(Collectors.toList()), vertex.getTs(), vertex.getOtherTs());
-
-		}
-
-		protected AbstractRootWrapper(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
+		protected Wrapped(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
 			assert meta != null;
 			this.meta = meta;
 			this.supers = supers;

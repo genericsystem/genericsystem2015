@@ -2,7 +2,7 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.common.TProxy;
 import org.genericsystem.common.TsDependencies;
-import org.genericsystem.kernel.Root.RootWrapper;
+import org.genericsystem.kernel.Root.RootWrapped;
 
 public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 
@@ -23,8 +23,8 @@ public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 	// }
 
 	@Override
-	default public RootWrapper getRootWrapper() {
-		return (RootWrapper) TProxy.super.getRootWrapper();
+	default public RootWrapped getRootWrapper() {
+		return (RootWrapped) TProxy.super.getRootWrapper();
 	}
 
 	default LifeManager getLifeManager() {

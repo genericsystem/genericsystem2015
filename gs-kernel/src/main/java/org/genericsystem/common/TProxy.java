@@ -19,8 +19,8 @@ public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	default AbstractRoot<T>.AbstractRootWrapper getRootWrapper() {
-		return ((AbstractRoot<T>.AbstractRootWrapper) ((ProxyObject) this).getHandler());
+	default AbstractRoot<T>.Wrapped getRootWrapper() {
+		return ((AbstractRoot<T>.Wrapped) ((ProxyObject) this).getHandler());
 	}
 
 	@Override

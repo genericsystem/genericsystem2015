@@ -6,7 +6,6 @@ import java.util.List;
 import org.genericsystem.cache.Cache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -112,22 +111,13 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	protected EngineWrapper buildHandler(Generic generic, Vertex vertex) {
-		return new EngineWrapper(generic, vertex);
+	protected EngineWrapped buildHandler(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		return new EngineWrapped(meta, supers, value, components, ts, otherTs);
 	}
 
-	@Override
-	protected EngineWrapper buildHandler(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
-		return new EngineWrapper(meta, supers, value, components, ts, otherTs);
-	}
+	class EngineWrapped extends Wrapped {
 
-	class EngineWrapper extends AbstractRootWrapper {
-
-		private EngineWrapper(Generic generic, Vertex vertex) {
-			super(generic, vertex);
-		}
-
-		public EngineWrapper(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		public EngineWrapped(Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
 			super(meta, supers, value, components, ts, otherTs);
 		}
 
