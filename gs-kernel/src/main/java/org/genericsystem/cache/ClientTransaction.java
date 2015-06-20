@@ -1,36 +1,39 @@
 package org.genericsystem.cache;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.ITransaction;
 import org.genericsystem.common.Vertex;
 
-public class Transaction implements IDifferential {
+public class ClientTransaction implements ITransaction<Generic> {
 
 	private final Engine engine;
 	private final long ts;
 	private final org.genericsystem.kernel.Transaction serverTransaction;
 
-	protected Transaction(Engine engine, long ts) {
+	protected ClientTransaction(Engine engine, long ts) {
 		this.engine = engine;
 		this.ts = ts;
 		this.serverTransaction = new org.genericsystem.kernel.Transaction(engine.getServer(), ts);
 	}
 
-	protected Transaction(Engine engine) {
+	protected ClientTransaction(Engine engine) {
 		this(engine, engine.pickNewTs());
 	}
 
-	Engine getRoot() {
+	@Override
+	public Engine getRoot() {
 		return engine;
 	}
 
-	long getTs() {
+	@Override
+	public long getTs() {
 		return ts;
 	}
 
@@ -45,14 +48,16 @@ public class Transaction implements IDifferential {
 	// }
 
 	@Override
-	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		List<Long> removesIds = removes.stream().map(remove -> remove.getTs()).collect(Collectors.toList());
-		List<Vertex> addVertices = adds.stream().map(add -> add.getVertex()).collect(Collectors.toList());
+	public void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		List<Long> removesIds = new ArrayList<>();
+		removes.forEach(remove -> removesIds.add(remove.getTs()));
+		List<Vertex> addVertices = new ArrayList<>();
+		adds.forEach(add -> addVertices.add(add.getVertex()));
 		assert addVertices.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
-		serverTransaction.applyFromExternal(removesIds, addVertices);
-		removes.stream().forEach(remove -> dependenciesMap.remove(remove));
-		adds.stream().forEach(add -> dependenciesMap.remove(add));
-		adds.stream().forEach(add -> add.getOtherTs()[0] = getTs());
+		serverTransaction.remoteApply(removesIds, addVertices);
+		removes.forEach(remove -> dependenciesMap.remove(remove));
+		adds.forEach(add -> dependenciesMap.remove(add));
+		adds.forEach(add -> add.getOtherTs()[0] = getTs());
 	}
 
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
@@ -61,15 +66,10 @@ public class Transaction implements IDifferential {
 	public Snapshot<Generic> getDependencies(Generic generic) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			dependencies = () -> serverTransaction.getDependenciesFromExternal(generic.getTs()).stream().map(ts -> getRoot().getGenericById(ts));
+			dependencies = () -> serverTransaction.getRemoteDependencies(generic.getTs()).stream().map(ts -> getRoot().getGenericById(ts));
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}
 		return dependencies;
 	}
-
-	// @Override
-	// public long getBirthTs(Generic generic) {
-	// return generic.getVertex().getOtherTs()[0];
-	// }
 }

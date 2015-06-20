@@ -1,33 +1,35 @@
-package org.genericsystem.cache;
+package org.genericsystem.common;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.cache.IDifferential.Differential;
-import org.genericsystem.common.AbstractContext;
+import org.genericsystem.defaults.DefaultVertex;
 import org.genericsystem.kernel.Statics;
 
-public class Cache extends AbstractContext<Generic> {
+public abstract class AbstractCache<T extends DefaultVertex<T>> extends AbstractContext<T> {
 
-	protected Transaction transaction;
-	protected Differential differential;
-	private final ContextEventListener<Generic> listener;
+	protected ITransaction<T> transaction;
+	protected Differential<T> differential;
+	private final ContextEventListener<T> listener;
 
-	protected Cache(Engine engine) {
-		this(new Transaction(engine));
+	public void shiftTs() throws RollbackException {
+		transaction = buildTransaction(getRoot());
+		listener.triggersRefreshEvent();
 	}
 
-	protected Cache(Transaction subContext) {
-		this(subContext, new ContextEventListener<Generic>() {
+	protected abstract ITransaction<T> buildTransaction(AbstractRoot<T> root);
+
+	protected AbstractCache(AbstractRoot<T> root) {
+		this(root, new ContextEventListener<T>() {
 		});
 	}
 
-	protected Cache(Transaction subContext, ContextEventListener<Generic> listener) {
-		super(subContext.getRoot());
+	protected AbstractCache(AbstractRoot<T> root, ContextEventListener<T> listener) {
+		super(root);
 		this.listener = listener;
-		this.transaction = subContext;
+		this.transaction = buildTransaction(root);
 		initialize();
 	}
 
@@ -37,21 +39,16 @@ public class Cache extends AbstractContext<Generic> {
 	}
 
 	@Override
-	public Snapshot<Generic> getDependencies(Generic vertex) {
+	public Snapshot<T> getDependencies(T vertex) {
 		return differential.getDependencies(vertex);
 	}
 
-	// long getBirthTs(Generic generic) {
+	// long getBirthTs(T generic) {
 	// return differential.getBirthTs(generic);
 	// }
 
 	protected void initialize() {
-		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
-	}
-
-	public void shiftTs() throws RollbackException {
-		transaction = new Transaction(getRoot(), getRoot().pickNewTs());
-		listener.triggersRefreshEvent();
+		differential = new Differential<>(differential == null ? new TransactionDifferential() : differential.getSubCache());
 	}
 
 	public void tryFlush() throws ConcurrencyControlException {
@@ -67,6 +64,7 @@ public class Cache extends AbstractContext<Generic> {
 		}
 	}
 
+	@Override
 	public void flush() {
 		Throwable cause = null;
 		for (int attempt = 0; attempt < Statics.ATTEMPTS; attempt++) {
@@ -90,9 +88,9 @@ public class Cache extends AbstractContext<Generic> {
 	}
 
 	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		Differential originalCacheElement = this.differential;
+		Differential<T> originalCacheElement = this.differential;
 		if (this.differential.getSubCache() instanceof Differential)
-			this.differential = (Differential) this.differential.getSubCache();
+			this.differential = (Differential<T>) this.differential.getSubCache();
 		try {
 			synchronizedApply(originalCacheElement);
 		} finally {
@@ -100,7 +98,7 @@ public class Cache extends AbstractContext<Generic> {
 		}
 	}
 
-	private void synchronizedApply(Differential cacheElement) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	private void synchronizedApply(Differential<T> cacheElement) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		synchronized (getRoot()) {
 			cacheElement.apply();
 		}
@@ -113,45 +111,32 @@ public class Cache extends AbstractContext<Generic> {
 	}
 
 	public void mount() {
-		differential = new Differential(differential);
+		differential = new Differential<>(differential);
 	}
 
 	public void unmount() {
-		IDifferential subCache = differential.getSubCache();
-		differential = subCache instanceof Differential ? (Differential) subCache : new Differential(subCache);
+		IDifferential<T> subCache = differential.getSubCache();
+		differential = subCache instanceof Differential ? (Differential<T>) subCache : new Differential<>(subCache);
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
 	}
 
 	@Override
-	public Engine getRoot() {
-		return (Engine) super.getRoot();
-	}
-
-	public Cache start() {
-		return getRoot().start(this);
-	}
-
-	public void stop() {
-		getRoot().stop(this);
-	}
-
-	@Override
-	protected void triggersMutation(Generic oldDependency, Generic newDependency) {
+	protected void triggersMutation(T oldDependency, T newDependency) {
 		if (listener != null)
 			listener.triggersMutationEvent(oldDependency, newDependency);
 	}
 
 	@Override
-	protected Generic plug(Generic generic) {
-		assert generic.getBirthTs() == Long.MAX_VALUE : generic.info() + generic.getBirthTs();
+	protected T plug(T generic) {
+		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info() + generic.getBirthTs();
 		differential.plug(generic);
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
 	}
 
 	@Override
-	protected void unplug(Generic generic) {
+	protected void unplug(T generic) {
 		getChecker().checkAfterBuild(false, false, generic);
 		differential.unplug(generic);
 	}
@@ -170,15 +155,15 @@ public class Cache extends AbstractContext<Generic> {
 		return differential.getCacheLevel();
 	}
 
-	private class TransactionDifferential implements IDifferential {
+	private class TransactionDifferential implements IDifferential<T> {
 
 		@Override
-		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		public void apply(Iterable<T> removes, Iterable<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			transaction.apply(removes, adds);
 		}
 
 		@Override
-		public Snapshot<Generic> getDependencies(Generic vertex) {
+		public Snapshot<T> getDependencies(T vertex) {
 			return transaction.getDependencies(vertex);
 		}
 	}

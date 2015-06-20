@@ -3,9 +3,9 @@ package org.genericsystem.cache;
 import java.io.Serializable;
 import java.util.List;
 
-import org.genericsystem.cache.Cache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -37,41 +37,23 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	};
 
 	@Override
-	public Cache newCache() {
-		return new Cache(this);
+	public ClientCache newCache() {
+		return new ClientCache(this);
+	}
+
+	public ClientCache newCache(ContextEventListener<Generic> listener) {
+		return new ClientCache(this, listener);
 	}
 
 	@Override
-	protected void flushContext() {
-		getCurrentCache().flush();
+	public ClientCache getCurrentCache() {
+		return (ClientCache) super.getCurrentCache();
 	}
 
-	public Cache newCache(ContextEventListener<Generic> listener) {
-		return new Cache(new Transaction(this), listener);
-	}
-
-	protected Cache start(Cache cache) {
-		contextWrapper.set(cache);
-		return cache;
-	}
-
-	protected void stop(Cache cache) {
-		assert contextWrapper.get() == cache;
-		contextWrapper.set(null);
-	}
-
-	@Override
-	public Cache getCurrentCache() {
-		Cache currentCache = (Cache) contextWrapper.get();
-		if (currentCache == null)
-			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
-		return currentCache;
-	}
-
-	public static class LocalContextWrapper extends InheritableThreadLocal<Cache> implements Wrapper<Generic> {
+	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<Generic> {
 		@Override
 		public void set(AbstractContext<Generic> context) {
-			super.set((Cache) context);
+			super.set((ClientCache) context);
 		}
 	}
 

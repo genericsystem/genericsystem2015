@@ -51,10 +51,10 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	public AbstractRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
 		init((T) this, buildHandler((T) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		initSubRoot(value, persistentDirectoryPath, userClasses);
-		contextWrapper.set(newCache());
+		newCache().start();
 		systemCache = new SystemCache<>(this, getClass());
 		systemCache.mount(Arrays.asList(MetaAttribute.class, MetaRelation.class, SystemMap.class, Sequence.class), userClasses);
-		flushContext();
+		getCurrentCache().flush();
 		// shiftContext();
 	}
 
@@ -102,17 +102,16 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return new ContextWrapper();
 	}
 
-	protected void flushContext() {
-		// //Autoflush
-	}
-
 	public long pickNewTs() {
 		return generator.pickNewTs();
 	}
 
 	@Override
 	public AbstractContext<T> getCurrentCache() {
-		return contextWrapper.get();
+		AbstractContext<T> context = contextWrapper.get();
+		if (context == null)
+			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
+		return context;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -281,4 +280,20 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 			return otherTs;
 		}
 	};
+
+	protected AbstractContext<T> start(AbstractContext<T> context) {
+		contextWrapper.set(context);
+		return context;
+	}
+
+	protected void stop(AbstractContext<T> context) {
+		assert contextWrapper.get() == context;
+		contextWrapper.set(null);
+	}
+
+	@Override
+	public String toString() {
+		return defaultToString();
+	}
+
 }

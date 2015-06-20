@@ -260,7 +260,7 @@ public class Archiver {
 
 		protected Loader(ObjectInputStream objectInputStream) {
 			this.objectInputStream = objectInputStream;
-			this.transaction = root.newCache();
+			this.transaction = (Transaction) root.newCache();
 		}
 
 		public Transaction getTransaction() {

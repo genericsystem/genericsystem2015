@@ -10,8 +10,8 @@ public interface Generic extends TProxy<Generic> {
 	}
 
 	@Override
-	default public Cache getCurrentCache() {
-		return (Cache) TProxy.super.getCurrentCache();
+	default public ClientCache getCurrentCache() {
+		return (ClientCache) TProxy.super.getCurrentCache();
 	}
 
 	@Override

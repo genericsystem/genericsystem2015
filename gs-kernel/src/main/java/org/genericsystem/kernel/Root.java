@@ -3,6 +3,7 @@ package org.genericsystem.kernel;
 import java.io.Serializable;
 import java.util.List;
 
+import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
 
@@ -31,13 +32,8 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	public Transaction newCache() {
+	public AbstractContext<Generic> newCache() {
 		return new Transaction(this, pickNewTs());
-	}
-
-	@Override
-	public Transaction getCurrentCache() {
-		return (Transaction) super.getCurrentCache();
 	}
 
 	@Override

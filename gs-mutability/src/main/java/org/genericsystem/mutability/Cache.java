@@ -21,12 +21,12 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.cache.Cache.ContextEventListener;
+import org.genericsystem.cache.ClientCache.ContextEventListener;
 import org.genericsystem.defaults.DefaultContext;
 
 public class Cache implements DefaultContext<Generic>, ContextEventListener<org.genericsystem.cache.Generic> {
 	private final Engine engine;
-	final org.genericsystem.cache.Cache cache;
+	final org.genericsystem.cache.ClientCache cache;
 	final Map<Generic, org.genericsystem.cache.Generic> mutabilityMap = new IdentityHashMap<>();
 	private final Map<org.genericsystem.cache.Generic, Set<Generic>> reverseMultiMap = new IdentityHashMap<>();
 

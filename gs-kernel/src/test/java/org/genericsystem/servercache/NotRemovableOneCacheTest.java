@@ -1,15 +1,18 @@
-package org.genericsystem.cache;
+package org.genericsystem.servercache;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
+import org.genericsystem.kernel.Generic;
+import org.genericsystem.kernel.ServerCache;
+import org.genericsystem.kernel.ServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableOneCacheTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		Engine engine = new Engine();
-		ClientCache cache = engine.getCurrentCache();
+		ServerEngine engine = new ServerEngine();
+		ServerCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -19,8 +22,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_aliveEx() {
-		Engine engine = new Engine();
-		ClientCache cache = engine.getCurrentCache();
+		ServerEngine engine = new ServerEngine();
+		ServerCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		assert car.isAlive();
 		Generic color = car.addAttribute("Color");
@@ -34,8 +37,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		Engine engine = new Engine();
-		ClientCache cache = engine.getCurrentCache();
+		ServerEngine engine = new ServerEngine();
+		ServerCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
 		Generic color = car.addAttribute("Color");
@@ -44,8 +47,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		Engine engine = new Engine();
-		ClientCache cache = engine.getCurrentCache();
+		ServerEngine engine = new ServerEngine();
+		ServerCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

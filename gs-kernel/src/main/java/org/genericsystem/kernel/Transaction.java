@@ -12,9 +12,10 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.IDependencies;
+import org.genericsystem.common.ITransaction;
 import org.genericsystem.common.Vertex;
 
-public class Transaction extends AbstractContext<Generic> {
+public class Transaction extends AbstractContext<Generic> implements ITransaction<Generic> {
 
 	private final long ts;
 
@@ -23,7 +24,7 @@ public class Transaction extends AbstractContext<Generic> {
 		this.ts = ts;
 	}
 
-	protected Transaction(Root root) {
+	public Transaction(Root root) {
 		this(root, root.pickNewTs());
 	}
 
@@ -33,12 +34,12 @@ public class Transaction extends AbstractContext<Generic> {
 	}
 
 	@Override
-	public final long getTs() {
+	public long getTs() {
 		return ts;
 	}
 
 	@Override
-	protected final Generic plug(Generic generic) {
+	protected Generic plug(Generic generic) {
 		if (getRoot().isInitialized())
 			generic.getLifeManager().beginLife(getTs());
 
@@ -47,7 +48,7 @@ public class Transaction extends AbstractContext<Generic> {
 			set.add(generic.getMeta());
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
-		set.stream().forEach(ancestor -> getDependencies(ancestor).add(generic));
+		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).add(generic));
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
 	}
@@ -66,22 +67,13 @@ public class Transaction extends AbstractContext<Generic> {
 			set.add(generic.getMeta());
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
-		set.stream().forEach(ancestor -> getDependencies(ancestor).remove(generic));
+		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).remove(generic));
 		generic.getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
 
-	public Snapshot<Long> getDependenciesFromExternal(long ts) {
-		org.genericsystem.kernel.Generic serverGeneric = getRoot().getGenericById(ts);
-		// What to do if serverGeneric not alive ???
-		if (serverGeneric != null)
-			return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
-		else
-			return () -> Stream.empty();
-	}
-
 	@Override
-	public IDependencies<Generic> getDependencies(Generic ancestor) {
+	public Snapshot<Generic> getDependencies(Generic ancestor) {
 		assert ancestor != null;
 		return new IDependencies<Generic>() {
 
@@ -107,9 +99,8 @@ public class Transaction extends AbstractContext<Generic> {
 		};
 	}
 
-	public void applyFromExternal(List<Long> removeIds, List<Vertex> addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericById(removeId)).collect(Collectors.toList());
-		List<Generic> adds = addVertices.stream().map(addVertex -> getRoot().init(addVertex)).collect(Collectors.toList());
+	@Override
+	public void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		new LockedLifeManager().apply(removes, adds);
 	}
 
@@ -174,5 +165,20 @@ public class Transaction extends AbstractContext<Generic> {
 				lifeManager.writeUnlock();
 			lockedLifeManagers = new HashSet<>();
 		}
+	}
+
+	public Snapshot<Long> getRemoteDependencies(long ts) {
+		org.genericsystem.kernel.Generic serverGeneric = getRoot().getGenericById(ts);
+		// What to do if serverGeneric not alive ???
+		if (serverGeneric != null)
+			return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
+		else
+			return () -> Stream.empty();
+	}
+
+	public void remoteApply(List<Long> removeIds, List<Vertex> addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericById(removeId)).collect(Collectors.toList());
+		List<Generic> adds = addVertices.stream().map(addVertex -> getRoot().init(addVertex)).collect(Collectors.toList());
+		apply(removes, adds);
 	}
 }

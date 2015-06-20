@@ -1,4 +1,4 @@
-package org.genericsystem.cache;
+package org.genericsystem.common;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.genericsystem.api.core.IteratorSnapshot;
-import org.genericsystem.common.AbstractGeneralAwareIterator;
 
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 

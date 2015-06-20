@@ -25,12 +25,12 @@ public class MetasTests extends AbstractTest {
 		Root root = new Root();
 		assert root.getCurrentCache().getMeta(1).equals(root.getMetaAttribute());
 		assert root.getCurrentCache().getMeta(5) == null;
-		Generic pentaMeta = root.getCurrentCache().setMeta(5);
+		Generic pentaMeta = ((Transaction) root.getCurrentCache()).setMeta(5);
 		assert root.getCurrentCache().getMeta(5) == pentaMeta;
-		assert pentaMeta == root.getCurrentCache().setMeta(5);
+		assert pentaMeta == ((Transaction) root.getCurrentCache()).setMeta(5);
 		assert pentaMeta.equals(root.getCurrentCache().getMeta(5));
 		assert root.getCurrentCache().getMeta(3) == null;
-		Generic ternaryMeta = root.getCurrentCache().setMeta(3);
+		Generic ternaryMeta = ((Transaction) root.getCurrentCache()).setMeta(3);
 		assert !pentaMeta.isAlive();
 		assert root.getCurrentCache().getMeta(5).inheritsFrom(ternaryMeta);
 	}

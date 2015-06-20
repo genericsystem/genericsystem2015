@@ -107,4 +107,17 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 		return getRoot().init(ts, clazz, meta, supers, value, components, otherTs);
 	}
 
+	@SuppressWarnings("unchecked")
+	public final <U extends AbstractContext<T>> U start() {
+		return (U) getRoot().start(this);
+	}
+
+	public final void stop() {
+		getRoot().stop(this);
+	}
+
+	public void flush() {
+
+	}
+
 }
