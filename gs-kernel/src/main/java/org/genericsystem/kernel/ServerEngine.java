@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 
-public class ServerEngine extends Root implements Generic {
+public class ServerEngine extends Root {
 
 	public ServerEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);

@@ -1,5 +1,8 @@
 package org.genericsystem.common;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.eventbus.EventBus;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -26,7 +29,7 @@ import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractRoot<T extends DefaultVertex<T>> implements DefaultRoot<T>, TProxy<T>, ProxyObject {
+public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractVerticle implements DefaultRoot<T>, TProxy<T>, ProxyObject {
 
 	protected final Map<Long, T> tMap = new ConcurrentHashMap<>();
 	private final TsGenerator generator = new TsGenerator();
@@ -294,6 +297,17 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	@Override
 	public String toString() {
 		return defaultToString();
+	}
+
+	@Override
+	public void start() throws Exception {
+		EventBus eb = vertx.eventBus();
+		eb.consumer("ping-address", message -> {
+			System.out.println("Received message: " + message.body());
+			// Now send back reply
+				message.reply("pong!");
+			});
+		System.out.println("Receiver ready!");
 	}
 
 }

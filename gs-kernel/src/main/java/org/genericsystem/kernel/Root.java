@@ -1,5 +1,7 @@
 package org.genericsystem.kernel;
 
+import io.vertx.example.util.ExampleRunner;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,6 +17,10 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 	@Override
 	public Root getRoot() {
 		return this;
+	}
+
+	public Root() {
+		this(new Class[] {});
 	}
 
 	public Root(Class<?>... userClasses) {
@@ -94,4 +100,13 @@ public class Root extends AbstractRoot<Generic> implements Generic {
 			return Root.this;
 		}
 	}
+
+	private static final String CORE_EXAMPLES_DIR = "gs-kernel";
+	private static final String CORE_EXAMPLES_JAVA_DIR = CORE_EXAMPLES_DIR + "/src/main/java/";
+
+	// Convenience method so you can run it in your IDE
+	public static void main(String[] args) {
+		ExampleRunner.runJavaExample(CORE_EXAMPLES_JAVA_DIR, Root.class, true);
+	}
+
 }
