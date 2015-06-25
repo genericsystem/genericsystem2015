@@ -1,12 +1,11 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -79,28 +78,28 @@ public class Transaction extends AbstractContext<Generic> implements ITransactio
 
 			@Override
 			public Stream<Generic> stream() {
-				return ancestor.getDependencies().stream(getTs());
+				return ancestor.getProxyHandler().getDependencies().stream(getTs());
 			}
 
 			@Override
 			public Generic get(Object o) {
-				return ancestor.getDependencies().get((Generic) o, getTs());
+				return ancestor.getProxyHandler().getDependencies().get((Generic) o, getTs());
 			}
 
 			@Override
 			public void add(Generic add) {
-				ancestor.getDependencies().add(add);
+				ancestor.getProxyHandler().getDependencies().add(add);
 			}
 
 			@Override
 			public boolean remove(Generic remove) {
-				return ancestor.getDependencies().remove(remove);
+				return ancestor.getProxyHandler().getDependencies().remove(remove);
 			}
 		};
 	}
 
 	@Override
-	public void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		new LockedLifeManager().apply(removes, adds);
 	}
 
@@ -172,13 +171,11 @@ public class Transaction extends AbstractContext<Generic> implements ITransactio
 		// What to do if serverGeneric not alive ???
 		if (serverGeneric != null)
 			return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
-		else
-			return () -> Stream.empty();
+			else
+				return () -> Stream.empty();
 	}
 
-	public void remoteApply(List<Long> removeIds, List<Vertex> addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		List<Generic> removes = removeIds.stream().map(removeId -> getRoot().getGenericById(removeId)).collect(Collectors.toList());
-		List<Generic> adds = addVertices.stream().map(addVertex -> getRoot().init(addVertex)).collect(Collectors.toList());
-		apply(removes, adds);
+	public void remoteApply(long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().init(addVertex)));
 	}
 }

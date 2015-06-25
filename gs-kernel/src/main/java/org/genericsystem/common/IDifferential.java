@@ -13,6 +13,6 @@ public interface IDifferential<T extends DefaultVertex<T>> {
 
 	Snapshot<T> getDependencies(T generic);
 
-	void apply(Iterable<T> removes, Iterable<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
+	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
 }

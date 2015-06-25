@@ -22,8 +22,7 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 	protected abstract ITransaction<T> buildTransaction(AbstractRoot<T> root);
 
 	protected AbstractCache(AbstractRoot<T> root) {
-		this(root, new ContextEventListener<T>() {
-		});
+		this(root, new ContextEventListener<T>() {});
 	}
 
 	protected AbstractCache(AbstractRoot<T> root, ContextEventListener<T> listener) {
@@ -158,7 +157,7 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 	private class TransactionDifferential implements IDifferential<T> {
 
 		@Override
-		public void apply(Iterable<T> removes, Iterable<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		public void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			transaction.apply(removes, adds);
 		}
 
@@ -170,17 +169,13 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.genericsystem.common;
 
 import java.util.stream.Stream;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -64,7 +63,7 @@ public class Differential<T extends DefaultVertex<T>> implements IDifferential<T
 	}
 
 	@Override
-	public void apply(Iterable<T> removes, Iterable<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		for (T generic : removes)
 			unplug(generic);
 		for (T generic : adds)

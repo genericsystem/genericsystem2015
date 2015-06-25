@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -12,12 +11,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -73,8 +70,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		return handler;
 	}
 
-	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
-	};
+	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {};
 
 	@Override
 	public abstract AbstractContext<T> newCache();
@@ -305,8 +301,8 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		eb.consumer("ping-address", message -> {
 			System.out.println("Received message: " + message.body());
 			// Now send back reply
-				message.reply("pong!");
-			});
+			message.reply("pong!");
+		});
 		System.out.println("Receiver ready!");
 	}
 

@@ -1,10 +1,7 @@
 package org.genericsystem.cache;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -48,13 +45,9 @@ public class ClientTransaction implements ITransaction<Generic> {
 	// }
 
 	@Override
-	public void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		List<Long> removesIds = new ArrayList<>();
-		removes.forEach(remove -> removesIds.add(remove.getTs()));
-		List<Vertex> addVertices = new ArrayList<>();
-		adds.forEach(add -> addVertices.add(add.getVertex()));
-		assert addVertices.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
-		serverTransaction.remoteApply(removesIds, addVertices);
+	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		assert adds.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
+		serverTransaction.remoteApply(removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
 		removes.forEach(remove -> dependenciesMap.remove(remove));
 		adds.forEach(add -> dependenciesMap.remove(add));
 		adds.forEach(add -> add.getOtherTs()[0] = getTs());
