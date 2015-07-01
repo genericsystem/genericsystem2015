@@ -7,8 +7,7 @@ import org.genericsystem.common.ITransaction;
 public class ServerCache extends AbstractCache<Generic> {
 
 	protected ServerCache(ServerEngine engine) {
-		this(engine, new ContextEventListener<Generic>() {
-		});
+		this(engine, new ContextEventListener<Generic>() {});
 	}
 
 	protected ServerCache(ServerEngine engine, ContextEventListener<Generic> listener) {
@@ -18,6 +17,10 @@ public class ServerCache extends AbstractCache<Generic> {
 	@Override
 	protected ITransaction<Generic> buildTransaction(AbstractRoot<Generic> root) {
 		return new Transaction((Root) root);
+	}
+
+	public ITransaction<Generic> getTransaction() {
+		return transaction;
 	}
 
 }

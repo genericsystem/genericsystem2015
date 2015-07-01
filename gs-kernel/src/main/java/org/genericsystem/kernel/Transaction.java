@@ -171,11 +171,15 @@ public class Transaction extends AbstractContext<Generic> implements ITransactio
 		// What to do if serverGeneric not alive ???
 		if (serverGeneric != null)
 			return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
-			else
-				return () -> Stream.empty();
+		else
+			return () -> Stream.empty();
 	}
 
 	public void remoteApply(long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().init(addVertex)));
+		// Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)).allMatch(g -> true);
+		// assert Arrays.stream(addVertices).map(add -> add.getTs()).distinct().count() == addVertices.length;
+		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
+		Arrays.stream(addVertices).forEach(addVertex -> getRoot().init(addVertex));
+		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
 	}
 }

@@ -28,7 +28,7 @@ import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractVerticle implements DefaultRoot<T>, TProxy<T>, ProxyObject {
 
-	protected final Map<Long, T> tMap = new ConcurrentHashMap<>();
+	private final Map<Long, T> tMap = new ConcurrentHashMap<>();
 	private final TsGenerator generator = new TsGenerator();
 	protected Wrapper<T> contextWrapper = buildContextWrapper();
 	private final SystemCache<T> systemCache;
@@ -167,7 +167,9 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		((ProxyObject) generic).setHandler(handler);
 		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.Wrapped;
 		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
-		assert gresult == null;
+		// assert (!(this instanceof Root)) || !Objects.toString(generic.getValue()).contains("Vehicle") : gresult;
+		// System.out.println("generic : " + generic.info() + handler.getTs());
+		assert gresult == null : gresult.info();
 		return generic;
 	}
 

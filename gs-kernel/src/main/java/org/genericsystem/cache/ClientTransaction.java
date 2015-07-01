@@ -1,5 +1,6 @@
 package org.genericsystem.cache;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.genericsystem.api.core.Snapshot;
@@ -12,12 +13,13 @@ public class ClientTransaction implements ITransaction<Generic> {
 
 	private final Engine engine;
 	private final long ts;
-	private final org.genericsystem.kernel.Transaction serverTransaction;
+
+	// private final org.genericsystem.kernel.Transaction serverTransaction;
 
 	protected ClientTransaction(Engine engine, long ts) {
 		this.engine = engine;
 		this.ts = ts;
-		this.serverTransaction = new org.genericsystem.kernel.Transaction(engine.getServer(), ts);
+		// this.serverTransaction = new org.genericsystem.kernel.Transaction(engine.getServer(), ts);
 	}
 
 	protected ClientTransaction(Engine engine) {
@@ -47,7 +49,7 @@ public class ClientTransaction implements ITransaction<Generic> {
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		assert adds.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
-		serverTransaction.remoteApply(removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
+		engine.getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
 		removes.forEach(remove -> dependenciesMap.remove(remove));
 		adds.forEach(add -> dependenciesMap.remove(add));
 		adds.forEach(add -> add.getOtherTs()[0] = getTs());
@@ -59,7 +61,7 @@ public class ClientTransaction implements ITransaction<Generic> {
 	public Snapshot<Generic> getDependencies(Generic generic) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			dependencies = () -> serverTransaction.getRemoteDependencies(generic.getTs()).stream().map(ts -> getRoot().getGenericById(ts));
+			dependencies = () -> Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts));
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}

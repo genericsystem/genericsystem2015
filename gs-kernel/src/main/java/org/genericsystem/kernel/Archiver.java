@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.THandler.AtomicHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -260,7 +260,8 @@ public class Archiver {
 
 		protected Loader(ObjectInputStream objectInputStream) {
 			this.objectInputStream = objectInputStream;
-			this.transaction = (Transaction) root.newCache();
+			AbstractContext<Generic> context = root.newCache();
+			transaction = (context instanceof ServerCache) ? (Transaction) ((ServerCache) context).getTransaction() : (Transaction) context;
 		}
 
 		public Transaction getTransaction() {
@@ -278,8 +279,7 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {
-			}
+			} catch (EOFException ignore) {}
 		}
 
 		protected long loadTs() throws IOException {

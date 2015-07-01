@@ -7,7 +7,7 @@ import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
 
-public class Root extends AbstractRoot<Generic> implements Generic {
+public class Root extends AbstractRoot<Generic> implements Generic, Server {
 
 	private final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
