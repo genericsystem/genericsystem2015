@@ -2,7 +2,10 @@ package org.genericsystem.cache;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -61,7 +64,22 @@ public class ClientTransaction implements ITransaction<Generic> {
 	public Snapshot<Generic> getDependencies(Generic generic) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
+			final Map<Generic, Generic> container = Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts)).collect(Collectors.toMap(g -> g, g -> g, (u, v) -> {
+				throw new IllegalStateException(String.format("Duplicate key %s", u));
+			}, LinkedHashMap::new));
 			dependencies = () -> Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts));
+
+			// dependencies = new IteratorSnapshot<Generic>() {
+			// @Override
+			// public Iterator<Generic> iterator() {
+			// return container.keySet().iterator();
+			// }
+			//
+			// @Override
+			// public Generic get(Object o) {
+			// return container.get(o);
+			// }
+			// };
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}

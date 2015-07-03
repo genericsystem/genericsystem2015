@@ -17,7 +17,6 @@ public class RemoveOneCacheTest extends AbstractTest {
 		cache.flush();
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;
-
 		myBmwRed.remove();
 		cache.clear();
 

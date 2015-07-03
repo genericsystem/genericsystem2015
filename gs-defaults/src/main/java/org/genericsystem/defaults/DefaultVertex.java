@@ -272,8 +272,6 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return result;
 	}
 
-	
-
 	long getBirthTs();
 
 	// long getDeathTs();
