@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -68,7 +67,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 		T meta = setMeta(clazz);
 		List<T> overrides = setOverrides(clazz);
 		List<T> components = setComponents(clazz);
-		systemProperty = new SetSystemHandler<T>(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
+		systemProperty = new SetSystemHandler<>(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
 		put(clazz, systemProperty);
 		mountConstraints(clazz, systemProperty);
 		triggersDependencies(clazz);

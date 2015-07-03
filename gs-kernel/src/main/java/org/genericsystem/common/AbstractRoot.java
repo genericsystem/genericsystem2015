@@ -126,8 +126,8 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 	}
 
 	@Override
-	public Class<?> findAnnotedClass(T vertex) {
-		return systemCache.getClassByVertex(vertex);
+	public Class<?> findAnnotedClass(T generic) {
+		return systemCache.getClassByVertex(generic);
 	}
 
 	public static class TsGenerator {
@@ -165,7 +165,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 
 	private T init(T generic, Wrapped handler) {
 		((ProxyObject) generic).setHandler(handler);
-		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.Wrapped;
+		 assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.Wrapped;
 		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
 		// assert (!(this instanceof Root)) || !Objects.toString(generic.getValue()).contains("Vehicle") : gresult;
 		// System.out.println("generic : " + generic.info() + handler.getTs());
@@ -208,13 +208,15 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		}
 	}
 
-	public Class<?> getAnnotedClass(T vertex) {
-		if (vertex.isSystem()) {
-			Class<?> annotedClass = findAnnotedClass(vertex);
+	public Class<?> getAnnotedClass(T generic) {
+		if (generic.isSystem()) {
+			Class<?> annotedClass = findAnnotedClass(generic);
 			if (annotedClass != null)
 				return annotedClass;
 		}
-		return vertex.getClass();
+		// if (!generic.isRoot() && generic instanceof ProxyObject)
+		// return generic.getClass().getSuperclass();
+		return generic.getClass();
 	}
 
 	public boolean isInitialized() {
@@ -303,8 +305,8 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		eb.consumer("ping-address", message -> {
 			System.out.println("Received message: " + message.body());
 			// Now send back reply
-			message.reply("pong!");
-		});
+				message.reply("pong!");
+			});
 		System.out.println("Receiver ready!");
 	}
 

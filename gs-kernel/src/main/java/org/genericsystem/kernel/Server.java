@@ -3,9 +3,8 @@ package org.genericsystem.kernel;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.defaults.DefaultRoot;
 
-public interface Server extends DefaultRoot<Generic> {
+public interface Server {
 
 	final static long[] EMPTY = new long[] {};
 

@@ -2,11 +2,12 @@ package org.genericsystem.cache;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
 public class Engine extends AbstractRoot<Generic> implements Generic {
@@ -66,9 +67,8 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 	public Generic getGenericById(long ts) {
 		Generic generic = super.getGenericById(ts);
 		if (generic == null) {
-			org.genericsystem.kernel.Generic serverGeneric = server.getGenericById(ts);
-			Class<?> clazz = server.getAnnotedClass(serverGeneric);
-			generic = init(clazz, serverGeneric.getVertex());
+			Vertex vertex = server.getVertex(ts);
+			generic = init(server.getAnnotedClass(server.getGenericById(ts)), vertex);
 		}
 		return generic;
 	}
@@ -80,7 +80,7 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 
 	@Override
 	public void close() {
-		server.close();
+		// server.close();
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class Engine extends AbstractRoot<Generic> implements Generic {
 		return Generic.class;
 	}
 
-	public Root getServer() {
+	public Server getServer() {
 		return server;
 	}
 
