@@ -129,8 +129,8 @@ public interface Snapshot<T> extends Iterable<T> {
 			}
 		};
 	}
-	
-	default List<T> toList(){
+
+	default List<T> toList() {
 		return stream().collect(Collectors.toList());
 	}
 }
