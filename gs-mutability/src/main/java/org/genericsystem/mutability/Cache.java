@@ -21,7 +21,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.cache.ClientCache.ContextEventListener;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.defaults.DefaultContext;
 
 public class Cache implements DefaultContext<Generic>, ContextEventListener<org.genericsystem.cache.Generic> {
