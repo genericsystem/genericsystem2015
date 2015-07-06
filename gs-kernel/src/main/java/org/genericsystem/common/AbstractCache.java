@@ -10,7 +10,7 @@ import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractCache<T extends DefaultVertex<T>> extends AbstractContext<T> {
 
-	protected ITransaction<T> transaction;
+	protected IDifferential<T> transaction;
 	protected Differential<T> differential;
 	private final ContextEventListener<T> listener;
 
@@ -19,10 +19,11 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 		listener.triggersRefreshEvent();
 	}
 
-	protected abstract ITransaction<T> buildTransaction(AbstractRoot<T> root);
+	protected abstract IDifferential<T> buildTransaction(AbstractRoot<T> root);
 
 	protected AbstractCache(AbstractRoot<T> root) {
-		this(root, new ContextEventListener<T>() {});
+		this(root, new ContextEventListener<T>() {
+		});
 	}
 
 	protected AbstractCache(AbstractRoot<T> root, ContextEventListener<T> listener) {
@@ -165,17 +166,26 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 		public Snapshot<T> getDependencies(T vertex) {
 			return transaction.getDependencies(vertex);
 		}
+
+		@Override
+		public long getTs() {
+			return transaction.getTs();
+		}
 	}
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {
+		}
 
-		default void triggersRefreshEvent() {}
+		default void triggersRefreshEvent() {
+		}
 
-		default void triggersClearEvent() {}
+		default void triggersClearEvent() {
+		}
 
-		default void triggersFlushEvent() {}
+		default void triggersFlushEvent() {
+		}
 	}
 
 }

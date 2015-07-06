@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -68,5 +69,10 @@ public class Differential<T extends DefaultVertex<T>> implements IDifferential<T
 			unplug(generic);
 		for (T generic : adds)
 			plug(generic);
+	}
+
+	@Override
+	public long getTs() {
+		return getSubCache().getTs();
 	}
 }

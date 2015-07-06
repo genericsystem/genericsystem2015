@@ -8,10 +8,10 @@ public class BindingServiceTest extends AbstractTest {
 
 	public void test001_addInstance() {
 		// given
-		Generic engine = new Engine();
+		ClientGeneric engine = new ClientEngine();
 
 		// when
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 
 		// then
 		assert "Vehicle".equals(vehicle.getValue());
@@ -20,7 +20,7 @@ public class BindingServiceTest extends AbstractTest {
 
 	public void test002_addSameValueKO() {
 		// given
-		Generic engine = new Engine();
+		ClientGeneric engine = new ClientEngine();
 		engine.addInstance("Vehicle");
 
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);

@@ -8,13 +8,13 @@ import org.testng.annotations.Test;
 public class AncestorsServiceTest extends AbstractTest {
 
 	public void isAncestorOfByInheritence() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic device = engine.addInstance("Device");
-		Generic robot = engine.addInstance(device, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
-		Generic transformer2 = engine.addInstance(transformer, "Transformer2");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric device = engine.addInstance("Device");
+		ClientGeneric robot = engine.addInstance(device, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
+		ClientGeneric transformer2 = engine.addInstance(transformer, "Transformer2");
 
 		assert transformer.isAncestorOf(transformer2);
 		assert robot.isAncestorOf(transformer);
@@ -61,10 +61,10 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void isAncestorOfByInheritenceSimpleConfiguration() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic microcar = engine.addInstance(car, "Microcar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
 
 		assert vehicle.isAncestorOf(car);
 		assert vehicle.isAncestorOf(microcar);
@@ -77,13 +77,13 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void isAncestorOfViaComposite() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic airConditioner = engine.addInstance("AirConditioner", car);
-		Generic microcar = engine.addInstance(car, "microcar");
-		Generic radio = engine.addInstance("Radio", microcar);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric airConditioner = engine.addInstance("AirConditioner", car);
+		ClientGeneric microcar = engine.addInstance(car, "microcar");
+		ClientGeneric radio = engine.addInstance("Radio", microcar);
 
 		assert vehicle.isAncestorOf(radio);
 		assert vehicle.isAncestorOf(airConditioner);
@@ -102,14 +102,14 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void isAncestorOfViaComponent() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic airConditioner = engine.addInstance("AirConditioner", car);
-		Generic button = engine.addInstance("button", airConditioner);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric airConditioner = engine.addInstance("AirConditioner", car);
+		ClientGeneric button = engine.addInstance("button", airConditioner);
 
-		Generic microcar = engine.addInstance(car, "microcar");
+		ClientGeneric microcar = engine.addInstance(car, "microcar");
 		engine.addInstance("Radio", microcar);
 
 		assert vehicle.isAncestorOf(button);

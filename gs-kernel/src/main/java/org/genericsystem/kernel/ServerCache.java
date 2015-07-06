@@ -2,12 +2,13 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.ITransaction;
+import org.genericsystem.common.IDifferential;
 
 public class ServerCache extends AbstractCache<Generic> {
 
 	protected ServerCache(ServerEngine engine) {
-		this(engine, new ContextEventListener<Generic>() {});
+		this(engine, new ContextEventListener<Generic>() {
+		});
 	}
 
 	protected ServerCache(ServerEngine engine, ContextEventListener<Generic> listener) {
@@ -15,11 +16,11 @@ public class ServerCache extends AbstractCache<Generic> {
 	}
 
 	@Override
-	protected ITransaction<Generic> buildTransaction(AbstractRoot<Generic> root) {
+	protected IDifferential<Generic> buildTransaction(AbstractRoot<Generic> root) {
 		return new Transaction((Root) root);
 	}
 
-	public ITransaction<Generic> getTransaction() {
+	public IDifferential<Generic> getTransaction() {
 		return transaction;
 	}
 

@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 public class InstanciationTest extends AbstractTest {
 
 	public void testEngineInstanciation() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		assert engine.getMeta().equals(engine);
 		assert engine.getSupers().isEmpty();
 		assert engine.getComponents().isEmpty();
@@ -22,8 +22,8 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTypeInstanciation() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
 
 		assert car.getMeta().equals(engine);
 		assert car.getSupers().isEmpty();
@@ -36,9 +36,9 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTwoTypeInstanciationDifferentNames() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic robot = engine.addInstance("Robot");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric robot = engine.addInstance("Robot");
 
 		assert car.getMeta().equals(engine);
 		assert car.getSupers().isEmpty();
@@ -60,15 +60,15 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTwoTypeInstanciationSameNamesAddInstance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		engine.addInstance("Car");
 		catchAndCheckCause(() -> engine.addInstance("Car"), ExistsException.class);
 	}
 
 	public void testTwoTypeInstanciationSameNamesSetInstance() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic car2 = engine.setInstance("Car");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric car2 = engine.setInstance("Car");
 
 		// log.info(engine.info());
 		// log.info(car.info());
@@ -87,9 +87,9 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTwoTypeInstanciationWithInheritance() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		// log.info(engine.info());
 		// log.info(vehicle.info());
 		// log.info(car.info());
@@ -116,16 +116,16 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTypeInstanciationWithSelfInheritance() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		assert !engine.addInstance(Arrays.asList(vehicle), "Vehicle").equals(vehicle);
 	}
 
 	public void test3TypeInstanciationWithMultipleInheritence() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic robot = engine.addInstance("Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric robot = engine.addInstance("Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
 
 		// log.info(car.info());
 		// log.info(robot.info());
@@ -155,12 +155,12 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test5TypeInstanciationWithMultipleInheritence() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		Generic device = engine.addInstance("Device");
-		Generic robot = engine.addInstance(Arrays.asList(device), "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		ClientGeneric device = engine.addInstance("Device");
+		ClientGeneric robot = engine.addInstance(Arrays.asList(device), "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
 
 		// log.info(vehicle.info());
 		// log.info(car.info());
@@ -187,7 +187,7 @@ public class InstanciationTest extends AbstractTest {
 		assert car.getSupers().stream().anyMatch(vehicle::equals);
 		assert robot.getSupers().stream().anyMatch(device::equals);
 
-		final Predicate<Generic> condition = x -> transformer.getSupers().stream().flatMap(superGeneric -> Stream.concat(Stream.of(superGeneric), superGeneric.getSupers().stream())).anyMatch(x::equals);
+		final Predicate<ClientGeneric> condition = x -> transformer.getSupers().stream().flatMap(superGeneric -> Stream.concat(Stream.of(superGeneric), superGeneric.getSupers().stream())).anyMatch(x::equals);
 
 		assert condition.test(vehicle);
 		assert condition.test(car);
@@ -203,13 +203,13 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test6TypeInstanciationWithMultipleInheritence() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		Generic device = engine.addInstance("Device");
-		Generic robot = engine.addInstance(Arrays.asList(device), "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
-		Generic transformer2 = engine.addInstance(Arrays.asList(transformer), "Transformer2");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		ClientGeneric device = engine.addInstance("Device");
+		ClientGeneric robot = engine.addInstance(Arrays.asList(device), "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
+		ClientGeneric transformer2 = engine.addInstance(Arrays.asList(transformer), "Transformer2");
 
 		// log.info(vehicle.info());
 		// log.info(car.info());
@@ -237,7 +237,7 @@ public class InstanciationTest extends AbstractTest {
 		assert car.getSupers().stream().anyMatch(vehicle::equals);
 		assert robot.getSupers().stream().anyMatch(device::equals);
 
-		final Predicate<Generic> condition = x -> transformer.getSupers().stream().flatMap(superGeneric -> Stream.concat(Stream.of(superGeneric), superGeneric.getSupers().stream())).anyMatch(x::equals);
+		final Predicate<ClientGeneric> condition = x -> transformer.getSupers().stream().flatMap(superGeneric -> Stream.concat(Stream.of(superGeneric), superGeneric.getSupers().stream())).anyMatch(x::equals);
 
 		assert condition.test(vehicle);
 		assert condition.test(car);

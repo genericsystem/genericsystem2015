@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Vertex {
 
+	private final Class<?> clazz;
 	private final long ts;
 	private final long meta;
 	private final List<Long> supers;
@@ -14,7 +15,9 @@ public class Vertex {
 	private final List<Long> components;
 	private final long[] otherTs;
 
-	protected Vertex(long ts, long meta, List<Long> supers, Serializable value, List<Long> components, long[] otherTs) {
+	protected Vertex(Class<?> clazz, long ts, long meta, List<Long> supers, Serializable value, List<Long> components, long[] otherTs) {
+		assert !Object.class.equals(clazz);
+		this.clazz = clazz;
 		this.ts = ts;
 		this.meta = meta;
 		this.value = value;
@@ -23,6 +26,10 @@ public class Vertex {
 		this.components = Collections.unmodifiableList(new ArrayList<>(components));
 		this.supers = Collections.unmodifiableList(new ArrayList<>(supers));
 		this.otherTs = otherTs.clone();
+	}
+
+	public Class<?> getClazz() {
+		return clazz;
 	}
 
 	public long getTs() {

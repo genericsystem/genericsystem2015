@@ -10,55 +10,55 @@ import org.testng.annotations.Test;
 public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache.start();
 		catchAndCheckCause(() -> myBmwRed.remove(), AliveConstraintViolationException.class);
 
 	}
 
 	public void test003_aliveEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache.start();
-		Generic car2 = engine.addInstance("Car2");
-		Generic myBmw2 = car2.addInstance("myBmw2");
+		ClientGeneric car2 = engine.addInstance("Car2");
+		ClientGeneric myBmw2 = car2.addInstance("myBmw2");
 		catchAndCheckCause(() -> myBmw2.addHolder(color, "red2"), MetaRuleConstraintViolationException.class);
 	}
 
 	public void test001_referenceEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
+		ClientGeneric car = engine.addInstance("Car");
 		cache.flush();
 		ClientCache cache2 = engine.newCache().start();
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
 		catchAndCheckCause(() -> car.remove(), ReferentialIntegrityConstraintViolationException.class);
 	}
 
 	public void test002_referenceEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
 		ClientCache cache3 = engine.newCache().start();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
 		cache3.flush();
 		cache2.start();
 		cache2.shiftTs();
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache2.flush();
 		cache.start();
 		cache.shiftTs();
@@ -66,9 +66,9 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic myCar1 = car.addInstance("myCar1");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric myCar1 = car.addInstance("myCar1");
 		ClientCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
@@ -79,9 +79,9 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic myCar = car.addInstance("myCar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric myCar = car.addInstance("myCar");
 		ClientCache cache = engine.getCurrentCache();
 		cache.flush();
 

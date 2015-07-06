@@ -13,7 +13,7 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 
 	protected final InheritableThreadLocal<Cache> cacheLocal = new InheritableThreadLocal<>();
 
-	private final org.genericsystem.cache.Engine cacheEngine;
+	private final org.genericsystem.cache.ClientEngine cacheEngine;
 
 	public Engine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -24,7 +24,7 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 	}
 
 	public Engine(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		this.cacheEngine = new org.genericsystem.cache.Engine(engineValue, persistentDirectoryPath, userClasses);
+		this.cacheEngine = new org.genericsystem.cache.ClientEngine(engineValue, persistentDirectoryPath, userClasses);
 		newCache().start();
 	}
 
@@ -87,7 +87,7 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 		return currentCache;
 	}
 
-	public org.genericsystem.cache.Engine getConcurrencyEngine() {
+	public org.genericsystem.cache.ClientEngine getConcurrencyEngine() {
 		return cacheEngine;
 	}
 

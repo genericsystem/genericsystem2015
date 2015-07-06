@@ -8,16 +8,13 @@ public interface Server {
 
 	final static long[] EMPTY = new long[] {};
 
-	default Vertex getVertex(long id) {
-		return ((Root) this).getGenericById(id).getVertex();
-	}
+	Vertex getVertex(long id);
 
-	default long[] getDependencies(long ts, long id) {
-		Generic genericById = ((Root) this).getGenericById(id);
-		return genericById != null ? genericById.getProxyHandler().getDependencies().stream(ts).mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
-	}
+	long[] getDependencies(long ts, long id);
 
-	default void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		new Transaction((Root) this, ts).remoteApply(removes, adds);
-	}
+	void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
+
+	long pickNewTs();
+
+	void close();
 }

@@ -2,6 +2,7 @@ package org.genericsystem.common;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -11,10 +12,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -29,7 +32,6 @@ import org.genericsystem.kernel.Statics;
 public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractVerticle implements DefaultRoot<T>, TProxy<T>, ProxyObject {
 
 	private final Map<Long, T> tMap = new ConcurrentHashMap<>();
-	private final TsGenerator generator = new TsGenerator();
 	protected Wrapper<T> contextWrapper = buildContextWrapper();
 	private final SystemCache<T> systemCache;
 	protected boolean isInitialized = false;
@@ -49,8 +51,9 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 
 	@SuppressWarnings("unchecked")
 	public AbstractRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {
-		init((T) this, buildHandler((T) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
+		init((T) this, buildHandler(getClass(), (T) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		initSubRoot(value, persistentDirectoryPath, userClasses);
+
 		newCache().start();
 		systemCache = new SystemCache<>(this, getClass());
 		systemCache.mount(Arrays.asList(MetaAttribute.class, MetaRelation.class, SystemMap.class, Sequence.class), userClasses);
@@ -70,7 +73,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		return handler;
 	}
 
-	protected void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses) {};
+	protected abstract void initSubRoot(Serializable value, String persistentDirectoryPath, Class<?>... userClasses);
 
 	@Override
 	public abstract AbstractContext<T> newCache();
@@ -99,10 +102,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 
 	protected Wrapper<T> buildContextWrapper() {
 		return new ContextWrapper();
-	}
-
-	public long pickNewTs() {
-		return generator.pickNewTs();
 	}
 
 	@Override
@@ -151,48 +150,51 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		return tMap.get(ts);
 	}
 
-	protected T init(Class<?> clazz, Vertex vertex) {
-		T generic = newT(clazz, tMap.get(vertex.getMeta()));
-		Wrapped handler = buildHandler(vertex.getMeta() == vertex.getTs() ? generic : getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents().stream()
-				.map(this::getGenericById).collect(Collectors.toList()), vertex.getTs(), vertex.getOtherTs());
-		return init(generic, handler);
-	}
-
-	T init(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
-		T generic = newT(clazz, meta);
-		return init(generic, buildHandler(meta != null ? meta : generic, supers, value, components, ts == null ? pickNewTs() : ts, otherTs));
-	}
-
-	private T init(T generic, Wrapped handler) {
-		((ProxyObject) generic).setHandler(handler);
-		 assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.Wrapped;
-		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
-		// assert (!(this instanceof Root)) || !Objects.toString(generic.getValue()).contains("Vehicle") : gresult;
-		// System.out.println("generic : " + generic.info() + handler.getTs());
-		assert gresult == null : gresult.info();
-		return generic;
-	}
-
-	protected abstract Wrapped buildHandler(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
-
-	protected abstract Class<T> getTClass();
-
-	protected T newT(Class<?> clazz, T meta) {
-		InstanceClass metaAnnotation = meta == null ? null : getAnnotedClass(meta).getAnnotation(InstanceClass.class);
-		if (metaAnnotation != null)
-			if (clazz == null || clazz.isAssignableFrom(metaAnnotation.value()))
-				clazz = metaAnnotation.value();
-			else if (!metaAnnotation.value().isAssignableFrom(clazz))
-				getCurrentCache().discardWithException(new InstantiationException(clazz + " must extends " + metaAnnotation.value()));
+	private T newT(Class<?> clazz) {
 		try {
-			if (clazz == null || !getTClass().isAssignableFrom(clazz))
-				return newInstance(getTClass());
 			return newInstance(clazz);
 		} catch (IllegalArgumentException e) {
 			getCurrentCache().discardWithException(e);
 		}
 		return null; // Not reached
 	}
+
+	protected T build(Vertex vertex) {
+		return build(vertex.getTs(), vertex.getClazz(), vertex.getMeta() == vertex.getTs() ? null : getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex
+				.getComponents().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getOtherTs());
+	}
+
+	Class<?> compute(Class<?> clazz, T meta) {
+		InstanceClass metaAnnotation = meta == null ? null : getAnnotedClass(meta).getAnnotation(InstanceClass.class);
+		if (metaAnnotation != null)
+			if (clazz == null || clazz.isAssignableFrom(metaAnnotation.value()))
+				clazz = metaAnnotation.value();
+			else if (!metaAnnotation.value().isAssignableFrom(clazz))
+				getCurrentCache().discardWithException(new InstantiationException(clazz + " must extends " + metaAnnotation.value()));
+		if (clazz == null || !getTClass().isAssignableFrom(clazz))
+			clazz = getTClass();
+		return clazz;
+	}
+
+	public abstract long pickNewTs();
+
+	T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
+		Wrapped handler = buildHandler(clazz, meta, supers, value, components, ts == null ? pickNewTs() : ts, otherTs);
+		T generic = newT(compute(handler.getClazz(), meta));
+		return init(generic, handler);
+	}
+
+	private T init(T generic, Wrapped handler) {
+		((ProxyObject) generic).setHandler(handler);
+		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.Wrapped;
+		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
+		assert gresult == null : gresult.info();
+		return generic;
+	}
+
+	protected abstract Wrapped buildHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
+
+	protected abstract Class<T> getTClass();
 
 	private final static ProxyFactory PROXY_FACTORY = new ProxyFactory();
 	private final static MethodFilter METHOD_FILTER = method -> method.getName().equals("toString");
@@ -214,8 +216,8 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 			if (annotedClass != null)
 				return annotedClass;
 		}
-		// if (!generic.isRoot() && generic instanceof ProxyObject)
-		// return generic.getClass().getSuperclass();
+		if (!generic.isRoot() && generic instanceof ProxyObject)
+			return generic.getClass().getSuperclass();
 		return generic.getClass();
 	}
 
@@ -225,6 +227,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 
 	public abstract class Wrapped implements MethodHandler, ISignature<T> {
 
+		private final Class<?> clazz;
 		private final T meta;
 		private final List<T> supers;
 		private final Serializable value;
@@ -232,8 +235,8 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		private final long ts;
 		private final long[] otherTs;
 
-		protected Wrapped(T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
-			assert meta != null;
+		protected Wrapped(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
+			this.clazz = clazz;
 			this.meta = meta;
 			this.supers = supers;
 			this.value = value;
@@ -250,7 +253,12 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 		abstract protected AbstractRoot<T> getRoot();
 
 		public Vertex getVertex() {
-			return new Vertex(getTs(), getMeta().getTs(), getSupers().stream().map(T::getTs).collect(Collectors.toList()), getValue(), getComponents().stream().map(T::getTs).collect(Collectors.toList()), getOtherTs());
+			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(T::getTs).collect(Collectors.toList()), getValue(), getComponents().stream().map(T::getTs).collect(Collectors.toList()),
+					getOtherTs());
+		}
+
+		public Class<?> getClazz() {
+			return clazz;
 		}
 
 		@Override

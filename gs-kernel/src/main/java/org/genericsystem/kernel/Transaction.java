@@ -6,15 +6,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.IDependencies;
-import org.genericsystem.common.ITransaction;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 
-public class Transaction extends AbstractContext<Generic> implements ITransaction<Generic> {
+public class Transaction extends AbstractContext<Generic> implements IDifferential<Generic> {
 
 	private final long ts;
 
@@ -179,7 +180,7 @@ public class Transaction extends AbstractContext<Generic> implements ITransactio
 		// Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)).allMatch(g -> true);
 		// assert Arrays.stream(addVertices).map(add -> add.getTs()).distinct().count() == addVertices.length;
 		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
-		Arrays.stream(addVertices).forEach(addVertex -> getRoot().init(addVertex));
+		Arrays.stream(addVertices).forEach(addVertex -> getRoot().build(addVertex));
 		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
 	}
 }

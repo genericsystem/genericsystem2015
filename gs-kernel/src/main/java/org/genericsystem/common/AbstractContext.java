@@ -104,7 +104,7 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 	}
 
 	protected T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
-		return getRoot().init(ts, clazz, meta, supers, value, components, otherTs);
+		return getRoot().build(ts, clazz, meta, supers, value, components, otherTs);
 	}
 
 	@SuppressWarnings("unchecked")

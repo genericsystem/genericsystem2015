@@ -8,20 +8,20 @@ import org.testng.annotations.Test;
 public class AttributesTest extends AbstractTest {
 
 	public void test1Attribut() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		assert vehicle.getLevel() == 1 : vehicle.getLevel();
-		Generic power = engine.addInstance("Power", vehicle);
+		ClientGeneric power = engine.addInstance("Power", vehicle);
 		assert power.getComponents().size() == 1;
 		assert vehicle.equals(power.getComponents().get(0));
 		assert power.isAlive();
 	}
 
 	public void test1AttributWith2LevelsInheritance1AttributOnParent() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
 		// assert vehicle.getAttributes(engine).size() == 1 : vehicle.getAttributes(engine);
 		assert vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 1;
@@ -29,10 +29,10 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance1AttributOnFistChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = engine.addInstance("Power", car);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = engine.addInstance("Power", car);
 
 		assert engine.getLevel() == 0;
 		assert vehicle.getLevel() == 1;
@@ -46,11 +46,11 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnParent() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic microcar = engine.addInstance(car, "Microcar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
 		// assert vehicle.getAttributes(engine).size() == 1;
 		assert vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 1;
@@ -60,11 +60,11 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnFirstChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = engine.addInstance("Power", car);
-		Generic microcar = engine.addInstance(car, "Microcar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = engine.addInstance("Power", car);
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 1;
@@ -74,11 +74,11 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnSecondChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic microcar = engine.addInstance(car, "Microcar");
-		Generic power = engine.addInstance("Power", microcar);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
+		ClientGeneric power = engine.addInstance("Power", microcar);
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 0;
@@ -93,10 +93,10 @@ public class AttributesTest extends AbstractTest {
 	 */
 	public void test2Attributs() {
 
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", vehicle);
 		// assert vehicle.getAttributes(engine).size() == 2;
 		assert vehicle.getAttributes(engine).contains(power);
 		assert vehicle.getAttributes(engine).contains(airconditioner);
@@ -106,11 +106,11 @@ public class AttributesTest extends AbstractTest {
 
 	public void test2AttributsWith2LevelsInheritance2AttributsOnParent() {
 
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
 		// assert vehicle.getAttributes(engine).size() == 2;
 		assert vehicle.getAttributes(engine).contains(power);
 		assert vehicle.getAttributes(engine).contains(airconditioner);
@@ -121,11 +121,11 @@ public class AttributesTest extends AbstractTest {
 
 	public void test2AttributsWith2LevelsInheritance2AttributsOnFistChild() {
 
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = engine.addInstance("Power", car);
-		Generic airconditioner = engine.addInstance("AirConditioner", car);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = engine.addInstance("Power", car);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", car);
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -136,11 +136,11 @@ public class AttributesTest extends AbstractTest {
 
 	public void test2AttributsWith2LevelsInheritance1AttributOnParentAnd1AttributOnFistChild() {
 
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic airconditioner = engine.addInstance("AirConditioner", car);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", car);
 		// assert vehicle.getAttributes(engine).size() == 1;
 		assert vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -150,12 +150,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2AttributOnParent() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic microcar = engine.addInstance(car, "Microcar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
 		// assert vehicle.getAttributes(engine).size() == 2;
 		assert vehicle.getAttributes(engine).contains(power);
 		assert vehicle.getAttributes(engine).contains(airconditioner);
@@ -168,12 +168,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2AttributFirstChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = engine.addInstance("Power", car);
-		Generic airconditioner = engine.addInstance("AirConditioner", car);
-		Generic microcar = engine.addInstance(car, "Microcar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = engine.addInstance("Power", car);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", car);
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -186,12 +186,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2AttributOnSecondChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic microcar = engine.addInstance(car, "Microcar");
-		Generic power = engine.addInstance("Power", microcar);
-		Generic airconditioner = engine.addInstance("AirConditioner", microcar);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
+		ClientGeneric power = engine.addInstance("Power", microcar);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", microcar);
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -204,12 +204,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnParent1AttributOnFirstChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic airconditioner = engine.addInstance("AirConditioner", car);
-		Generic microcar = engine.addInstance(car, "Microcar");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", car);
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
 		// assert vehicle.getAttributes(engine).size() == 1;
 		assert vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -222,12 +222,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnParent1AttributOnSecondChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic microcar = engine.addInstance(car, "Microcar");
-		Generic airconditioner = engine.addInstance("AirConditioner", microcar);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", microcar);
 		// assert vehicle.getAttributes(engine).size() == 1;
 		assert vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -239,12 +239,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributFirstChild1AttributOnSecondChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = engine.addInstance("Power", car);
-		Generic microcar = engine.addInstance(car, "Microcar");
-		Generic airconditioner = engine.addInstance("AirConditioner", microcar);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = engine.addInstance("Power", car);
+		ClientGeneric microcar = engine.addInstance(car, "Microcar");
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", microcar);
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		assert !vehicle.getAttributes(engine).contains(airconditioner);
@@ -257,11 +257,11 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance2ChildrenAt2ndLevel1AttributOnParent() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic caravan = engine.addInstance(vehicle, "Caravan");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric caravan = engine.addInstance(vehicle, "Caravan");
 		// assert vehicle.getAttributes(engine).size() == 1;
 		assert vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 1;
@@ -271,11 +271,11 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance2ChildrenAt2ndLevel1AttributOnLevel1FirstChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = engine.addInstance("Power", car);
-		Generic caravan = engine.addInstance(vehicle, "Caravan");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = engine.addInstance("Power", car);
+		ClientGeneric caravan = engine.addInstance(vehicle, "Caravan");
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 1;
@@ -285,11 +285,11 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance2ChildrenAt2ndLevel1AttributOnLevel1SecondChild() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic caravan = engine.addInstance(vehicle, "Caravan");
-		Generic power = engine.addInstance("Power", caravan);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric caravan = engine.addInstance(vehicle, "Caravan");
+		ClientGeneric power = engine.addInstance("Power", caravan);
 		// assert vehicle.getAttributes(engine).size() == 0;
 		assert !vehicle.getAttributes(engine).contains(power);
 		// assert car.getAttributes(engine).size() == 0;
@@ -299,12 +299,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributOnParent() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic power = engine.addInstance("Power", object);
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric power = engine.addInstance("Power", object);
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 
 		// assert object.getAttributes(engine).size() == 1;
 		assert object.getAttributes(engine).contains(power);
@@ -317,12 +317,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributLevel1FistChild() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 
 		// assert object.getAttributes(engine).size() == 0;
 		assert !object.getAttributes(engine).contains(power);
@@ -335,12 +335,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributLevel1SecondChild() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 
 		// assert object.getAttributes(engine).size() == 0;
 		assert !object.getAttributes(engine).contains(power);
@@ -353,12 +353,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributLevel2Child1() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
-		Generic power = engine.addInstance("Power", transformer);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientGeneric power = engine.addInstance("Power", transformer);
 		// assert object.getAttributes(engine).size() == 0;
 		assert !object.getAttributes(engine).contains(power);
 		// assert vehicle.getAttributes(engine).size() == 0;
@@ -370,14 +370,14 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsOnParent() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic power = engine.addInstance("Power", object);
-		Generic airconditioner = engine.addInstance("AirConditioner", object);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric power = engine.addInstance("Power", object);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", object);
 
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 
 		// assert object.getAttributes(engine).size() == 2 : object.getAttributes(engine);
 		assert object.getAttributes(engine).contains(power);
@@ -394,13 +394,13 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsLevel1FirstChild() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic power = engine.addInstance("Power", vehicle);
-		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric power = engine.addInstance("Power", vehicle);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", vehicle);
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 
 		// assert object.getAttributes(engine).size() == 0;
 		assert !object.getAttributes(engine).contains(power);
@@ -417,13 +417,13 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsLevel1SecondChild() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic power = engine.addInstance("Power", robot);
-		Generic airconditioner = engine.addInstance("AirConditioner", robot);
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric power = engine.addInstance("Power", robot);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", robot);
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 
 		// assert object.getAttributes(engine).size() == 0;
 		assert !object.getAttributes(engine).contains(power);
@@ -440,13 +440,13 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsLevel2() {
-		Engine engine = new Engine();
-		Generic object = engine.addInstance("Object");
-		Generic vehicle = engine.addInstance(object, "Vehicle");
-		Generic robot = engine.addInstance(object, "Robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
-		Generic power = engine.addInstance("Power", transformer);
-		Generic airconditioner = engine.addInstance("AirConditioner", transformer);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric object = engine.addInstance("Object");
+		ClientGeneric vehicle = engine.addInstance(object, "Vehicle");
+		ClientGeneric robot = engine.addInstance(object, "Robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientGeneric power = engine.addInstance("Power", transformer);
+		ClientGeneric airconditioner = engine.addInstance("AirConditioner", transformer);
 		// assert object.getAttributes(engine).size() == 0;
 		assert !object.getAttributes(engine).contains(power);
 		assert !object.getAttributes(engine).contains(airconditioner);

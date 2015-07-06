@@ -16,12 +16,12 @@ import org.slf4j.LoggerFactory;
 @InstanceValueClassConstraint(String.class)
 @Dependencies(FileType.class)
 @InstanceClass(Directory.class)
-public class FileSystem implements Generic {
+public class FileSystem implements ClientGeneric {
 	protected static Logger log = LoggerFactory.getLogger(FileSystem.class);
 	private static final String SEPARATOR = "/";
 	private static final byte[] EMPTY = "<html/>".getBytes();
 
-	public static class Directory implements Generic {
+	public static class Directory implements ClientGeneric {
 		public Snapshot<File> getFiles() {
 			return (Snapshot) getHolders(getRoot().find(FileType.class));
 		}
@@ -73,11 +73,11 @@ public class FileSystem implements Generic {
 	@InstanceValueClassConstraint(String.class)
 	@InstanceClass(File.class)
 	@Dependencies(FileContent.class)
-	public static class FileType implements Generic {
+	public static class FileType implements ClientGeneric {
 
 	}
 
-	public static class File implements Generic {
+	public static class File implements ClientGeneric {
 		public byte[] getContent() {
 			return (byte[]) getHolders(getRoot().find(FileContent.class)).first().getValue();
 		}
@@ -96,10 +96,10 @@ public class FileSystem implements Generic {
 	@SingularConstraint
 	@Components(FileType.class)
 	@InstanceValueClassConstraint(byte[].class)
-	public static class FileContent implements Generic {
+	public static class FileContent implements ClientGeneric {
 	}
 
-	public Snapshot<Generic> getRootDirectories() {
+	public Snapshot<ClientGeneric> getRootDirectories() {
 		return getInstances();
 	}
 
@@ -135,11 +135,11 @@ public class FileSystem implements Generic {
 		return file.getContent();
 	}
 
-	public Generic setFile(String resource) {
+	public ClientGeneric setFile(String resource) {
 		return setFile(resource, EMPTY);
 	}
 
-	public Generic setFile(String resource, byte[] content) {
+	public ClientGeneric setFile(String resource, byte[] content) {
 		if (resource.startsWith(SEPARATOR))
 			resource = resource.substring(1);
 		String[] pathToResource = resource.split(SEPARATOR);

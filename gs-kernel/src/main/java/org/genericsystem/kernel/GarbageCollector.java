@@ -6,15 +6,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.genericsystem.common.AbstractRoot;
-
 public class GarbageCollector extends LinkedHashSet<Generic> {
 
 	private static final long serialVersionUID = -2021341943811568201L;
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-	private final AbstractRoot<Generic> root;
+	private final Root root;
 
-	public GarbageCollector(AbstractRoot<Generic> root) {
+	public GarbageCollector(Root root) {
 		this.root = root;
 	}
 

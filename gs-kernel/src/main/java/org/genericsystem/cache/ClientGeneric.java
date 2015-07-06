@@ -2,11 +2,11 @@ package org.genericsystem.cache;
 
 import org.genericsystem.common.TProxy;
 
-public interface Generic extends TProxy<Generic> {
+public interface ClientGeneric extends TProxy<ClientGeneric> {
 
 	@Override
-	default Engine getRoot() {
-		return (Engine) TProxy.super.getRoot();
+	default ClientEngine getRoot() {
+		return (ClientEngine) TProxy.super.getRoot();
 	}
 
 	@Override

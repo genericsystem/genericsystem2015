@@ -8,12 +8,12 @@ import org.testng.annotations.Test;
 public class RemoveOneCacheTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache.flush();
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;
@@ -26,12 +26,12 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache.flush();
 		cache.clear();
 		cache.flush();
@@ -46,20 +46,20 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 
 		myBmwRed.remove();
 		cache.flush();
-		Generic myBmwBlue = myBmw.addHolder(color, "blue");
+		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
 		cache.clear();
 		assert myBmw.getHolders(color).size() == 0;
 
-		Generic myBmwGreen = myBmw.addHolder(color, "green");
+		ClientGeneric myBmwGreen = myBmw.addHolder(color, "green");
 
 		catchAndCheckCause(() -> myBmwBlue.remove(), AliveConstraintViolationException.class);
 
@@ -67,20 +67,20 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_multipleHolders() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 
 		myBmwRed.remove();
 		cache.flush();
-		Generic myBmwBlue = myBmw.addHolder(color, "blue");
+		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
 		cache.clear();
 		assert myBmw.getHolders(color).size() == 0;
 
-		Generic myBmwGreen = myBmw.addHolder(color, "green");
+		ClientGeneric myBmwGreen = myBmw.addHolder(color, "green");
 		cache.flush();
 		catchAndCheckCause(() -> myBmwBlue.remove(), AliveConstraintViolationException.class);
 		assert myBmw.getHolders(color).contains(myBmwGreen);
@@ -88,17 +88,17 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
-		Generic myBmwBlue = myBmw.addHolder(color, "blue");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
 		myBmwRed.remove();
 		cache.flush();
 		cache.clear();
-		Generic myBmwRed2 = myBmw.addHolder(color, "red");
+		ClientGeneric myBmwRed2 = myBmw.addHolder(color, "red");
 		cache.clear();
 		assert !myBmwRed2.equals(myBmwRed);
 		assert !myBmwRed2.isAlive();
@@ -108,16 +108,16 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
-		Generic myBmwBlue = myBmw.addHolder(color, "blue");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
 		cache.flush();
 		myBmwRed.remove();
-		Generic myBmwRed2 = myBmw.addHolder(color, "red");
+		ClientGeneric myBmwRed2 = myBmw.addHolder(color, "red");
 		cache.clear();
 		assert myBmwRed.isAlive();
 		myBmwRed.remove();
@@ -128,18 +128,18 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeAndAddAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache.flush();
 		cache.clear();
-		Generic myBmwBlue = myBmw.addHolder(color, "blue");
+		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
 		cache.clear();
 		myBmwRed.remove();
-		Generic myBmwRed2 = myBmw.addHolder(color, "red");
+		ClientGeneric myBmwRed2 = myBmw.addHolder(color, "red");
 		cache.clear();
 		assert myBmwRed.isAlive();
 		assert !myBmwRed2.isAlive();
@@ -148,12 +148,12 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 
 		assert color.getInstances().contains(myBmwRed);
 		assert color.getInstances().size() == 1;
@@ -165,12 +165,12 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic car = engine.addInstance("Car");
-		Generic color = car.addAttribute("Color");
-		Generic myBmw = car.addInstance("myBmw");
-		Generic myBmwRed = myBmw.addHolder(color, "red");
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric color = car.addAttribute("Color");
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
 		cache.flush();
 		myBmw.remove();
 		cache.clear();

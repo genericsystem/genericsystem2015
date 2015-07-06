@@ -9,48 +9,48 @@ import org.testng.annotations.Test;
 public class VertexTest extends AbstractTest {
 
 	public void test001_getInheritings() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
 
 		assert vehicle.getInheritings().stream().anyMatch(car::equals);
 	}
 
 	public void test001_getInstances() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		assert engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test001_getMetaComponents() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic powerVehicle = engine.addInstance("power", vehicle);
-		Generic myVehicle = vehicle.addInstance("myVehicle");
-		Generic myVehicle123 = powerVehicle.addInstance("123", myVehicle);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric powerVehicle = engine.addInstance("power", vehicle);
+		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
+		ClientGeneric myVehicle123 = powerVehicle.addInstance("123", myVehicle);
 
 		assert myVehicle.getComposites().stream().anyMatch(g -> g.equals(myVehicle123));
 	}
 
 	public void test001_getSuperComponents() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic powerVehicle = engine.addInstance("power", vehicle);
-		Generic myVehicle = vehicle.addInstance("myVehicle");
-		Generic vehicle256 = powerVehicle.addInstance("256", vehicle);
-		Generic myVehicle123 = powerVehicle.addInstance(vehicle256, "123", myVehicle);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric powerVehicle = engine.addInstance("power", vehicle);
+		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
+		ClientGeneric vehicle256 = powerVehicle.addInstance("256", vehicle);
+		ClientGeneric myVehicle123 = powerVehicle.addInstance(vehicle256, "123", myVehicle);
 
 		assert myVehicle.getComposites().contains(myVehicle123);
 	}
 
 	public void test002_getSuperComponents() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic powerVehicle = engine.addInstance("power", vehicle);
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric powerVehicle = engine.addInstance("power", vehicle);
 		powerVehicle.enablePropertyConstraint();
-		Generic myVehicle = vehicle.addInstance("myVehicle");
-		Generic vehicle256 = powerVehicle.addInstance("256", vehicle);
-		Generic myVehicle123 = powerVehicle.addInstance("123", myVehicle);
+		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
+		ClientGeneric vehicle256 = powerVehicle.addInstance("256", vehicle);
+		ClientGeneric myVehicle123 = powerVehicle.addInstance("123", myVehicle);
 
 		assert myVehicle.getComposites().contains(myVehicle123);
 	}
@@ -133,101 +133,101 @@ public class VertexTest extends AbstractTest {
 
 	@Test(enabled = false)
 	public void test2() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic vehicle2 = engine.addInstance("Vehicle2");
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric vehicle2 = engine.addInstance("Vehicle2");
 		assert vehicle == engine.setInstance("Vehicle");
 		// assert vehicle != engine.setInstance(vehicle2, "Vehicle");
 	}
 
 	public void test3() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
-		Generic carPower = engine.addInstance("CarPower", car);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric vehiclePower = engine.addInstance("VehiclePower", vehicle);
+		ClientGeneric carPower = engine.addInstance("CarPower", car);
 		assert car.getAttributes(engine).containsAll(Arrays.asList(vehiclePower, carPower)) : car.getAttributes(engine);
 		// assert car.getAttributes(engine).size() == 2;
 	}
 
 	public void test4() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic vehiclePower = engine.addInstance("Power", vehicle);
-		Generic carPower = engine.addInstance("Power", car);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric vehiclePower = engine.addInstance("Power", vehicle);
+		ClientGeneric carPower = engine.addInstance("Power", car);
 		assert car.getAttributes(engine).contains(carPower);
 		// assert car.getAttributes(engine).size() == 1 : car.getAttributes(engine);
 	}
 
 	public void test5() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
-		Generic carPower = engine.addInstance(vehiclePower, "CarPower", car);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric vehiclePower = engine.addInstance("VehiclePower", vehicle);
+		ClientGeneric carPower = engine.addInstance(vehiclePower, "CarPower", car);
 		assert car.getAttributes(engine).contains(carPower);
 		// assert car.getAttributes(engine).size() == 1 : car.getAttributes(engine);
 	}
 
 	public void test6() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic sportCar = engine.addInstance(car, "SportCar");
-		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
-		Generic carPower = engine.addInstance(vehiclePower, "CarPower", car);
-		Generic sportCarPower = engine.addInstance(vehiclePower, "SportCarPower", sportCar);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric sportCar = engine.addInstance(car, "SportCar");
+		ClientGeneric vehiclePower = engine.addInstance("VehiclePower", vehicle);
+		ClientGeneric carPower = engine.addInstance(vehiclePower, "CarPower", car);
+		ClientGeneric sportCarPower = engine.addInstance(vehiclePower, "SportCarPower", sportCar);
 		assert sportCar.getAttributes(engine).containsAll(Arrays.asList(carPower, sportCarPower)) : car.getAttributes(engine) + " " + sportCarPower.info();
 		// assert sportCar.getAttributes(engine).size() == 2;
 	}
 
 	public void test7() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic robot = engine.addInstance("robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
-		Generic vehiclePower = engine.addInstance("Power", vehicle);
-		Generic robotPower = engine.addInstance("Power", robot);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric robot = engine.addInstance("robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientGeneric vehiclePower = engine.addInstance("Power", vehicle);
+		ClientGeneric robotPower = engine.addInstance("Power", robot);
 		assert transformer.getAttributes(engine).containsAll(Arrays.asList(robotPower, vehiclePower)) : transformer.getAttributes(engine);
 		// assert transformer.getAttributes(engine).size() == 2;
 	}
 
 	public void test8() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic robot = engine.addInstance("robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
-		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
-		Generic robotPower = engine.addInstance("RobotPower", robot);
-		Generic transformerPower = engine.addInstance(Arrays.asList(vehiclePower, robotPower), "TransformerPower", transformer);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric robot = engine.addInstance("robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientGeneric vehiclePower = engine.addInstance("VehiclePower", vehicle);
+		ClientGeneric robotPower = engine.addInstance("RobotPower", robot);
+		ClientGeneric transformerPower = engine.addInstance(Arrays.asList(vehiclePower, robotPower), "TransformerPower", transformer);
 		assert transformer.getAttributes(engine).contains(transformerPower) : transformer.getAttributes(engine);
 		// assert transformer.getAttributes(engine).size() == 1;
 	}
 
 	public void test9() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic robot = engine.addInstance("robot");
-		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
-		Generic vehiclePower = engine.addInstance("Power", vehicle);
-		Generic robotPower = engine.addInstance("Power", robot);
-		Generic transformerPower = engine.addInstance("Power", transformer);
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric robot = engine.addInstance("robot");
+		ClientGeneric transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+		ClientGeneric vehiclePower = engine.addInstance("Power", vehicle);
+		ClientGeneric robotPower = engine.addInstance("Power", robot);
+		ClientGeneric transformerPower = engine.addInstance("Power", transformer);
 		assert transformer.getAttributes(engine).contains(transformerPower) : transformer.getAttributes(engine);
 		// assert transformer.getAttributes(engine).size() == 1;
 		// assert transformer.getAttributes(robot).size() == 0 : transformer.getAttributes(robot);
 	}
 
 	public void test10() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> engine.addInstance(vehicle, "Car"), AliveConstraintViolationException.class);
 	}
 
 	public void test11() {
-		Generic engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
+		ClientGeneric engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> vehicle.addInstance("myVehicle"), AliveConstraintViolationException.class);
 	}

@@ -18,36 +18,36 @@ import org.testng.annotations.Test;
 public class AnnotationTest extends AbstractTest {
 
 	public void test001_Generic() {
-		Engine engine = new Engine(Vehicle.class, Human.class, Myck.class);
-		Generic vehicle = engine.find(Vehicle.class);
-		Generic human = engine.find(Human.class);
-		Generic myck = engine.find(Myck.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Human.class, Myck.class);
+		ClientGeneric vehicle = engine.find(Vehicle.class);
+		ClientGeneric human = engine.find(Human.class);
+		ClientGeneric myck = engine.find(Myck.class);
 		assert vehicle.isStructural();
 		assert human.isStructural();
 		assert myck.isConcrete();
 	}
 
 	public void test001_remove() {
-		Engine engine = new Engine(Vehicle.class);
-		Generic vehicle = engine.find(Vehicle.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class);
+		ClientGeneric vehicle = engine.find(Vehicle.class);
 		catchAndCheckCause(() -> vehicle.remove(), IllegalAccessException.class);
 	}
 
 	public void test002_remove() {
-		Engine engine = new Engine(OtherVehicle.class);
-		Generic vehicle = engine.find(OtherVehicle.class);
+		ClientEngine engine = new ClientEngine(OtherVehicle.class);
+		ClientGeneric vehicle = engine.find(OtherVehicle.class);
 		catchAndCheckCause(() -> vehicle.remove(), IllegalAccessException.class);
 	}
 
 	public void test001_instanceof() {
-		Engine engine = new Engine(Vehicle.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class);
 		assert engine.find(Vehicle.class) instanceof Vehicle : Vehicle.class.isInterface() + " " + engine.find(Vehicle.class).getClass();
 		assert engine.getInstance(Vehicle.class) instanceof Vehicle : engine.find(Vehicle.class).info() + "   " + engine.getInstance(Vehicle.class).info();
 		assert engine.getInstances().stream().anyMatch(x -> x instanceof Vehicle);
 	}
 
 	public void test002_instanceof() {
-		Engine engine = new Engine(VehicleType.class);
+		ClientEngine engine = new ClientEngine(VehicleType.class);
 		assert engine.find(VehicleType.class) instanceof VehicleType;
 		VehicleType vehicle = engine.find(VehicleType.class);
 		assert vehicle.addInstance("myBmw") instanceof VehicleInstance;
@@ -56,33 +56,33 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test0022_instanceof() {
-		Engine engine = new Engine(OtherVehicleType.class);
-		Generic vehicle = engine.find(OtherVehicleType.class);
+		ClientEngine engine = new ClientEngine(OtherVehicleType.class);
+		ClientGeneric vehicle = engine.find(OtherVehicleType.class);
 		assert vehicle.addInstance("myBmw") instanceof VehicleInstance;
 		assert vehicle.setInstance("myBmw") instanceof VehicleInstance;
 		VehicleInstance vi = (VehicleInstance) vehicle.setInstance("myBmw");
 	}
 
 	public void test002_instanceof_getInstances() {
-		Engine engine = new Engine(VehicleType.class);
+		ClientEngine engine = new ClientEngine(VehicleType.class);
 		VehicleType vehicle = engine.find(VehicleType.class);
 		assert vehicle.addInstance("myBmw") instanceof VehicleInstance;
 		assert vehicle.getInstances().stream().allMatch(x -> x instanceof VehicleInstance);
 	}
 
 	public void test003_instanceof() {
-		Engine engine = new Engine(MyAudi.class);
+		ClientEngine engine = new ClientEngine(MyAudi.class);
 		assert engine.find(MyAudi.class) instanceof VehicleInstance : engine.find(MyAudi.class).getClass();
 		assert engine.find(MyAudi.class) instanceof MyAudi : engine.find(MyAudi.class).getClass();
 	}
 
 	public void test004_instanceof() {
 
-		catchAndCheckCause(() -> new Engine(MyBmw.class), InstantiationException.class);
-		catchAndCheckCause(() -> new Engine(MyMercedes.class), InstantiationException.class);
+		catchAndCheckCause(() -> new ClientEngine(MyBmw.class), InstantiationException.class);
+		catchAndCheckCause(() -> new ClientEngine(MyMercedes.class), InstantiationException.class);
 	}
 
-	public static class VehicleInstance implements Generic {
+	public static class VehicleInstance implements ClientGeneric {
 
 	}
 
@@ -93,7 +93,7 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static class MyBmw implements Generic {
+	public static class MyBmw implements ClientGeneric {
 	}
 
 	@SystemGeneric
@@ -103,7 +103,7 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@InstanceClass(VehicleInstance.class)
-	public static class VehicleType implements Generic {
+	public static class VehicleType implements ClientGeneric {
 
 	}
 
@@ -114,10 +114,10 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test002_SuperGeneric() {
-		Engine engine = new Engine(Vehicle.class, Car.class, myCar.class);
-		Generic vehicle = engine.find(Vehicle.class);
-		Generic car = engine.find(Car.class);
-		Generic myCar = engine.find(myCar.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Car.class, myCar.class);
+		ClientGeneric vehicle = engine.find(Vehicle.class);
+		ClientGeneric car = engine.find(Car.class);
+		ClientGeneric myCar = engine.find(myCar.class);
 
 		assert vehicle.isStructural();
 		assert car.isStructural();
@@ -129,83 +129,83 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test003_Attribute() {
-		Engine engine = new Engine(Vehicle.class, Power.class);
-		Generic vehicle = engine.find(Vehicle.class);
-		Generic power = engine.find(Power.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Power.class);
+		ClientGeneric vehicle = engine.find(Vehicle.class);
+		ClientGeneric power = engine.find(Power.class);
 		assert power.isStructural();
 		assert vehicle.getAttributes(engine).contains(power) : vehicle.getAttributes(engine);
 	}
 
 	public void test004_AttributeValue() {
-		Engine engine = new Engine(V123.class);
-		Generic myVehicle = engine.find(MyVehicle.class);
+		ClientEngine engine = new ClientEngine(V123.class);
+		ClientGeneric myVehicle = engine.find(MyVehicle.class);
 		engine.find(V123.class);
 		assert myVehicle.getValues(engine.find(Power.class)).size() == 1;
 		assert myVehicle.getValues(engine.find(Power.class)).contains(new Integer(123)) : myVehicle.getValues(engine.find(Power.class));
 	}
 
 	public void test005_SuperAttribute() {
-		Engine engine = new Engine(Car.class, ElectrikPower.class);
-		Generic car = engine.find(Car.class);
-		Generic electrikPowerCar = engine.find(ElectrikPower.class);
+		ClientEngine engine = new ClientEngine(Car.class, ElectrikPower.class);
+		ClientGeneric car = engine.find(Car.class);
+		ClientGeneric electrikPowerCar = engine.find(ElectrikPower.class);
 		assert car.getAttributes(engine).contains(electrikPowerCar) : car.getAttributes(engine);
 	}
 
 	public void test006_AttributeOnAttribute() {
-		Engine engine = new Engine(ElectrikPower.class, Unit.class);
-		Generic electrikPowerCar = engine.find(ElectrikPower.class);
-		Generic unit = engine.find(Unit.class);
+		ClientEngine engine = new ClientEngine(ElectrikPower.class, Unit.class);
+		ClientGeneric electrikPowerCar = engine.find(ElectrikPower.class);
+		ClientGeneric unit = engine.find(Unit.class);
 		assert unit.isCompositeOf(electrikPowerCar);
 		assert unit.isStructural();
 		assert electrikPowerCar.getAttributes(engine).contains(unit);
 	}
 
 	public void test007_Relation() {
-		Engine engine = new Engine(Vehicle.class, Human.class, HumanPossessVehicle.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Human.class, HumanPossessVehicle.class);
 		engine.find(Vehicle.class);
-		Generic human = engine.find(Human.class);
-		Generic possess = engine.find(HumanPossessVehicle.class);
+		ClientGeneric human = engine.find(Human.class);
+		ClientGeneric possess = engine.find(HumanPossessVehicle.class);
 		assert human.getAttributes().contains(possess);
 	}
 
 	public void test008_SubRelation() {
-		Engine engine = new Engine(Car.class, Human.class, HumanPossessVehicle.class, HumanPossessCar.class);
+		ClientEngine engine = new ClientEngine(Car.class, Human.class, HumanPossessVehicle.class, HumanPossessCar.class);
 		engine.find(Car.class);
-		Generic human = engine.find(Human.class);
-		Generic possessVehicle = engine.find(HumanPossessVehicle.class);
-		Generic possessCar = engine.find(HumanPossessCar.class);
+		ClientGeneric human = engine.find(Human.class);
+		ClientGeneric possessVehicle = engine.find(HumanPossessVehicle.class);
+		ClientGeneric possessCar = engine.find(HumanPossessCar.class);
 		assert possessCar.inheritsFrom(possessVehicle);
 		assert human.getAttributes().contains(possessCar) : human.getAttributes();
 
 	}
 
 	public void test009_SymetricSuperRelation() {
-		Engine engine = new Engine(Car.class, Human.class, Man.class, HumanPossessVehicle.class, ManPossessCar.class);
+		ClientEngine engine = new ClientEngine(Car.class, Human.class, Man.class, HumanPossessVehicle.class, ManPossessCar.class);
 		engine.find(Car.class);
-		Generic human = engine.find(Human.class);
-		Generic man = engine.find(Man.class);
-		Generic humanPossessVehicle = engine.find(HumanPossessVehicle.class);
-		Generic manPossessCar = engine.find(ManPossessCar.class);
+		ClientGeneric human = engine.find(Human.class);
+		ClientGeneric man = engine.find(Man.class);
+		ClientGeneric humanPossessVehicle = engine.find(HumanPossessVehicle.class);
+		ClientGeneric manPossessCar = engine.find(ManPossessCar.class);
 		assert human.getAttributes().contains(humanPossessVehicle);
 		assert man.getAttributes().contains(manPossessCar) : man.getAttributes();
 		assert manPossessCar.inheritsFrom(humanPossessVehicle);
 	}
 
 	public void test010_TernaryRelation() {
-		Engine engine = new Engine(Vehicle.class, Human.class, Time.class, HumanPossessVehicleTime.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Human.class, Time.class, HumanPossessVehicleTime.class);
 		engine.find(Vehicle.class);
-		Generic human = engine.find(Human.class);
+		ClientGeneric human = engine.find(Human.class);
 		engine.find(Time.class);
-		Generic possess = engine.find(HumanPossessVehicleTime.class);
+		ClientGeneric possess = engine.find(HumanPossessVehicleTime.class);
 		assert human.getAttributes().contains(possess);
 	}
 
 	public void test011_getDirectSubGenericsWithDiamondProblem() {
-		Engine engine = new Engine(GraphicComposite.class, Window.class, Selectable.class, SelectableWindow.class);
-		Generic graphicComposite = engine.find(GraphicComposite.class);
-		Generic window = engine.find(Window.class);
-		Generic selectable = engine.find(Selectable.class);
-		Generic selectableWindow = engine.find(SelectableWindow.class);
+		ClientEngine engine = new ClientEngine(GraphicComposite.class, Window.class, Selectable.class, SelectableWindow.class);
+		ClientGeneric graphicComposite = engine.find(GraphicComposite.class);
+		ClientGeneric window = engine.find(Window.class);
+		ClientGeneric selectable = engine.find(Selectable.class);
+		ClientGeneric selectableWindow = engine.find(SelectableWindow.class);
 
 		assert selectableWindow.getSupers().size() == 2 : selectableWindow.getSupers();
 		assert selectableWindow.getSupers().contains(selectable) : selectableWindow.getSupers();
@@ -227,16 +227,16 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test012_Value() {
-		Engine engine = new Engine(SelectableWindow.class, Size.class, Selected.class, MySelectableWindow.class);
-		Generic selectableWindow = engine.find(SelectableWindow.class);
-		Generic size = engine.find(Size.class);
-		Generic selectedSelectable = engine.find(Selected.class);
-		Generic mySelectableWindow = engine.find(MySelectableWindow.class);
+		ClientEngine engine = new ClientEngine(SelectableWindow.class, Size.class, Selected.class, MySelectableWindow.class);
+		ClientGeneric selectableWindow = engine.find(SelectableWindow.class);
+		ClientGeneric size = engine.find(Size.class);
+		ClientGeneric selectedSelectable = engine.find(Selected.class);
+		ClientGeneric mySelectableWindow = engine.find(MySelectableWindow.class);
 		assert mySelectableWindow.isInstanceOf(selectableWindow) : mySelectableWindow.info() + selectableWindow.info();
 
 		assert engine.find(Selectable.class).isAncestorOf(mySelectableWindow);
-		Generic vTrue = selectedSelectable.addInstance(true, selectedSelectable.getComponents().toArray(new Generic[1]));
-		Generic v12 = size.addInstance(12, size.getComponents().toArray(new Generic[1]));
+		ClientGeneric vTrue = selectedSelectable.addInstance(true, selectedSelectable.getComponents().toArray(new ClientGeneric[1]));
+		ClientGeneric v12 = size.addInstance(12, size.getComponents().toArray(new ClientGeneric[1]));
 
 		assert selectableWindow.getInstances().size() == 1 : selectableWindow.getInstances();
 		assert selectableWindow.getInstances().contains(mySelectableWindow);
@@ -247,14 +247,14 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test013_MultiInheritanceComplexStructural() {
-		Engine engine = new Engine(Games.class, Children.class, Vehicle.class, Human.class, ChildrenGames.class, Transformer.class, TransformerChildrenGames.class);
-		Generic games = engine.find(Games.class);
-		Generic children = engine.find(Children.class);
-		Generic vehicle = engine.find(Vehicle.class);
-		Generic human = engine.find(Human.class);
-		Generic childrenGames = engine.find(ChildrenGames.class);
-		Generic transformer = engine.find(Transformer.class);
-		Generic transformerChildrenGames = engine.find(TransformerChildrenGames.class);
+		ClientEngine engine = new ClientEngine(Games.class, Children.class, Vehicle.class, Human.class, ChildrenGames.class, Transformer.class, TransformerChildrenGames.class);
+		ClientGeneric games = engine.find(Games.class);
+		ClientGeneric children = engine.find(Children.class);
+		ClientGeneric vehicle = engine.find(Vehicle.class);
+		ClientGeneric human = engine.find(Human.class);
+		ClientGeneric childrenGames = engine.find(ChildrenGames.class);
+		ClientGeneric transformer = engine.find(Transformer.class);
+		ClientGeneric transformerChildrenGames = engine.find(TransformerChildrenGames.class);
 
 		assert transformerChildrenGames.inheritsFrom(games);
 		assert transformerChildrenGames.inheritsFrom(children);
@@ -279,17 +279,17 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test014_MultiInheritanceComplexValue() {
-		Engine engine = new Engine(MyGames.class, MyChildren.class, MyVehicle.class, Myck.class, MyChildrenGames.class, ChildrenGames.class, MyTransformer.class, Transformer.class, TransformerChildrenGames.class, MyTransformerChildrenGames.class);
-		Generic myGames = engine.find(MyGames.class);
-		Generic myChildren = engine.find(MyChildren.class);
-		Generic myVehicle = engine.find(MyVehicle.class);
-		Generic myck = engine.find(Myck.class);
-		Generic myChildrenGames = engine.find(MyChildrenGames.class);
-		Generic childrenGames = engine.find(ChildrenGames.class);
-		Generic myTransformer = engine.find(MyTransformer.class);
-		Generic transformer = engine.find(Transformer.class);
-		Generic transformerChildrenGames = engine.find(TransformerChildrenGames.class);
-		Generic myTransformerChildrenGames = engine.find(MyTransformerChildrenGames.class);
+		ClientEngine engine = new ClientEngine(MyGames.class, MyChildren.class, MyVehicle.class, Myck.class, MyChildrenGames.class, ChildrenGames.class, MyTransformer.class, Transformer.class, TransformerChildrenGames.class, MyTransformerChildrenGames.class);
+		ClientGeneric myGames = engine.find(MyGames.class);
+		ClientGeneric myChildren = engine.find(MyChildren.class);
+		ClientGeneric myVehicle = engine.find(MyVehicle.class);
+		ClientGeneric myck = engine.find(Myck.class);
+		ClientGeneric myChildrenGames = engine.find(MyChildrenGames.class);
+		ClientGeneric childrenGames = engine.find(ChildrenGames.class);
+		ClientGeneric myTransformer = engine.find(MyTransformer.class);
+		ClientGeneric transformer = engine.find(Transformer.class);
+		ClientGeneric transformerChildrenGames = engine.find(TransformerChildrenGames.class);
+		ClientGeneric myTransformerChildrenGames = engine.find(MyTransformerChildrenGames.class);
 
 		assert myTransformerChildrenGames.isInstanceOf(transformerChildrenGames) : myTransformerChildrenGames.info() + transformerChildrenGames.info();
 
@@ -338,9 +338,9 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test015_propertyConstraint() {
-		Engine engine = new Engine(Vehicle.class, Puissance.class);
-		Generic voiture = engine.find(Vehicle.class);
-		Generic puissance = engine.find(Puissance.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Puissance.class);
+		ClientGeneric voiture = engine.find(Vehicle.class);
+		ClientGeneric puissance = engine.find(Puissance.class);
 
 		assert puissance.isPropertyConstraintEnabled();
 	}
@@ -354,98 +354,98 @@ public class AnnotationTest extends AbstractTest {
 	// }
 
 	public void test017_singularConstraint() {
-		Engine engine = new Engine(Vehicle.class, Puissance.class);
-		Generic voiture = engine.find(Vehicle.class);
-		Generic puissance = engine.find(Puissance.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Puissance.class);
+		ClientGeneric voiture = engine.find(Vehicle.class);
+		ClientGeneric puissance = engine.find(Puissance.class);
 
 		assert puissance.isSingularConstraintEnabled(0);
 	}
 
 	public void test018_uniqueValueConstraint() {
-		Engine engine = new Engine(Vehicle.class, Puissance.class);
-		Generic voiture = engine.find(Vehicle.class);
-		Generic puissance = engine.find(Puissance.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Puissance.class);
+		ClientGeneric voiture = engine.find(Vehicle.class);
+		ClientGeneric puissance = engine.find(Puissance.class);
 
 		assert puissance.isUniqueValueEnabled();
 	}
 
 	public void test019_uniqueClassConstraint() {
-		Engine engine = new Engine(Vehicle.class, Puissance.class);
-		Generic voiture = engine.find(Vehicle.class);
-		Generic puissance = engine.find(Puissance.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Puissance.class);
+		ClientGeneric voiture = engine.find(Vehicle.class);
+		ClientGeneric puissance = engine.find(Puissance.class);
 
 		assert puissance.getInstanceValueClassConstraint().equals(Integer.class);
 	}
 
 	public void test020_dependencies() {
-		Engine engine = new Engine(Voiture.class);
-		Generic puissance = engine.find(Puissance.class);
-		Generic couleur = engine.find(Couleur.class);
+		ClientEngine engine = new ClientEngine(Voiture.class);
+		ClientGeneric puissance = engine.find(Puissance.class);
+		ClientGeneric couleur = engine.find(Couleur.class);
 		assert puissance instanceof Puissance;
 		assert couleur instanceof Couleur;
 	}
 
 	@SystemGeneric
-	public static class Games implements Generic {
+	public static class Games implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Meta(Games.class)
-	public static class MyGames implements Generic {
+	public static class MyGames implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Meta(Games.class)
-	public static class MyGames2 implements Generic {
+	public static class MyGames2 implements ClientGeneric {
 	}
 
 	@SystemGeneric
-	public static class Children implements Generic {
+	public static class Children implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Meta(Children.class)
-	public static class MyChildren implements Generic {
+	public static class MyChildren implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Supers({ Games.class, Children.class })
-	public static class ChildrenGames implements Generic {
+	public static class ChildrenGames implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Meta(ChildrenGames.class)
-	public static class MyChildrenGames implements Generic {
+	public static class MyChildrenGames implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Supers({ Human.class, Vehicle.class })
-	public static class Transformer implements Generic {
+	public static class Transformer implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Meta(Transformer.class)
-	public static class MyTransformer implements Generic {
+	public static class MyTransformer implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Supers({ Transformer.class, ChildrenGames.class })
-	public static class TransformerChildrenGames implements Generic {
+	public static class TransformerChildrenGames implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Meta(TransformerChildrenGames.class)
-	public static class MyTransformerChildrenGames implements Generic {
+	public static class MyTransformerChildrenGames implements ClientGeneric {
 	}
 
 	@SystemGeneric
-	public static class GraphicComposite implements Generic {
+	public static class GraphicComposite implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Components(GraphicComposite.class)
-	public static class Size implements Generic {
+	public static class Size implements ClientGeneric {
 
 	}
 
@@ -457,30 +457,30 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Supers(GraphicComposite.class)
-	public static class Selectable implements Generic {
+	public static class Selectable implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Components(Selectable.class)
-	public static class Selected implements Generic {
+	public static class Selected implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Supers({ Selectable.class, Window.class })
-	public static class SelectableWindow implements Generic {
+	public static class SelectableWindow implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Meta(SelectableWindow.class)
-	public static class MySelectableWindow implements Generic {
+	public static class MySelectableWindow implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
-	public static class Vehicle implements Generic {
+	public static class Vehicle implements ClientGeneric {
 
 	}
 
@@ -491,12 +491,12 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(Vehicle.class)
-	public static class MyVehicle implements Generic {
+	public static class MyVehicle implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Components(Vehicle.class)
-	public static class Power implements Generic {
+	public static class Power implements ClientGeneric {
 
 	}
 
@@ -508,16 +508,16 @@ public class AnnotationTest extends AbstractTest {
 	@UniqueValueConstraint
 	@InstanceValueClassConstraint(Integer.class)
 	@Dependencies(Couleur.class)
-	public static class Puissance implements Generic {
+	public static class Puissance implements ClientGeneric {
 
 	}
 
-	public static class Couleur implements Generic {
+	public static class Couleur implements ClientGeneric {
 
 	}
 
 	@Dependencies(Puissance.class)
-	public static class Voiture implements Generic {
+	public static class Voiture implements ClientGeneric {
 
 	}
 
@@ -525,36 +525,36 @@ public class AnnotationTest extends AbstractTest {
 	@Meta(Power.class)
 	@Components(MyVehicle.class)
 	@IntValue(123)
-	public static class V123 implements Generic {
+	public static class V123 implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Supers(Vehicle.class)
-	public static class Car implements Generic {
+	public static class Car implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Meta(Car.class)
-	public static class myCar implements Generic {
+	public static class myCar implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Components(Car.class)
 	@Supers(Power.class)
-	public static class ElectrikPower implements Generic {
+	public static class ElectrikPower implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
 	@Components(ElectrikPower.class)
-	public static class Unit implements Generic {
+	public static class Unit implements ClientGeneric {
 
 	}
 
 	@SystemGeneric
-	public static class Human implements Generic {
+	public static class Human implements ClientGeneric {
 	}
 
 	@SystemGeneric
@@ -563,16 +563,16 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(Human.class)
-	public static class Myck implements Generic {
+	public static class Myck implements ClientGeneric {
 	}
 
 	@SystemGeneric
-	public static class Time implements Generic {
+	public static class Time implements ClientGeneric {
 	}
 
 	@SystemGeneric
 	@Components({ Human.class, Vehicle.class })
-	public static class HumanPossessVehicle implements Generic {
+	public static class HumanPossessVehicle implements ClientGeneric {
 	}
 
 	@SystemGeneric
@@ -589,7 +589,7 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Components({ Human.class, Vehicle.class, Time.class })
-	public static class HumanPossessVehicleTime implements Generic {
+	public static class HumanPossessVehicleTime implements ClientGeneric {
 	}
 
 }

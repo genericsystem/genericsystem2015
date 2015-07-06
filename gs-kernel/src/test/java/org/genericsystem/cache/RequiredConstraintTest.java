@@ -11,22 +11,22 @@ import org.testng.annotations.Test;
 public class RequiredConstraintTest extends AbstractTest {
 
 	public void test00_Inheritance() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic power = engine.addAttribute("Power");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric power = engine.addAttribute("Power");
 
-		Generic v235 = car.addHolder(power, 235);
+		ClientGeneric v235 = car.addHolder(power, 235);
 
 		assert car.getHolders(power).contains(v235);
 	}
 
 	public void test01_Inheritance() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic power = engine.addAttribute("Power", engine);
-		Generic unit = engine.addInstance("Unit");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric power = engine.addAttribute("Power", engine);
+		ClientGeneric unit = engine.addInstance("Unit");
 
-		Generic v235 = car.addHolder(power, 235, unit);
+		ClientGeneric v235 = car.addHolder(power, 235, unit);
 
 		assert car.getHolders(power).contains(v235);
 		assert unit.getHolders(power).contains(v235);
@@ -34,28 +34,28 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test000_Inheritance() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic power = car.addAttribute("Power");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric power = car.addAttribute("Power");
 
-		Generic myBmw = car.addInstance("myBmw");
+		ClientGeneric myBmw = car.addInstance("myBmw");
 
-		Generic v235 = myBmw.addHolder(power, 235);
+		ClientGeneric v235 = myBmw.addHolder(power, 235);
 
 		assert myBmw.getHolders(power).contains(v235);
 
 	}
 
 	public void test001_Inheritance() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic unit = engine.addInstance("Unit");
-		Generic power = car.addAttribute("Power", unit);
-		Generic myBmw = car.addInstance("myBmw");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric unit = engine.addInstance("Unit");
+		ClientGeneric power = car.addAttribute("Power", unit);
+		ClientGeneric myBmw = car.addInstance("myBmw");
 
-		Generic kw = unit.addInstance("kw");
+		ClientGeneric kw = unit.addInstance("kw");
 
-		Generic v235 = myBmw.addHolder(power, 235, kw);
+		ClientGeneric v235 = myBmw.addHolder(power, 235, kw);
 
 		assert myBmw.getHolders(power).contains(v235);
 		assert kw.getHolders(power).contains(v235);
@@ -63,27 +63,27 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test001_enableRequired() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic power = car.addAttribute("Power");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric power = car.addAttribute("Power");
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
 
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 		assert !car.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 		power.disableRequiredConstraint(ApiStatics.BASE_POSITION);
 		assert !car.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-		List<Generic> list = power.getHolders(engine).stream().collect(Collectors.toList());
+		List<ClientGeneric> list = power.getHolders(engine).stream().collect(Collectors.toList());
 
 		assert !power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) : power.getHolders(engine).stream().map(x -> x.info()).collect(Collectors.toList()).toString();
 	}
 
 	public void test002_removeAttribute() {
-		Engine engine = new Engine();
-		Generic car = engine.addInstance("Car");
-		Generic power = car.addAttribute("Power");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric car = engine.addInstance("Car");
+		ClientGeneric power = car.addAttribute("Power");
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
-		Generic myBmw = car.addInstance("myBmw");
-		Generic v236 = myBmw.addHolder(power, 236);
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric v236 = myBmw.addHolder(power, 236);
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 		ClientCache cache = engine.getCurrentCache();
 		assert myBmw.getHolders(power).contains(v236);
@@ -94,14 +94,14 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test003_removeAttribute_inherintings() {
-		Engine engine = new Engine();
-		Generic vehicle = engine.addInstance("Vehicle");
-		Generic car = engine.addInstance(vehicle, "Car");
-		Generic power = vehicle.addAttribute("Power");
+		ClientEngine engine = new ClientEngine();
+		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		ClientGeneric power = vehicle.addAttribute("Power");
 
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
-		Generic myBmw = car.addInstance("myBmw");
-		Generic v236 = myBmw.addHolder(power, 236);
+		ClientGeneric myBmw = car.addInstance("myBmw");
+		ClientGeneric v236 = myBmw.addHolder(power, 236);
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 		ClientCache cache = engine.getCurrentCache();
 		// power.getComponents().stream().forEach(x -> System.out.println(x.detailedInfo()));

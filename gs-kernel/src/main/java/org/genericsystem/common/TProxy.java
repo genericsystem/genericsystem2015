@@ -2,7 +2,9 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
+
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.defaults.DefaultVertex;
 
 public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
@@ -26,9 +28,11 @@ public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
 		return getProxyHandler().getTs();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getMeta() {
-		return getProxyHandler().getMeta();
+		T result = getProxyHandler().getMeta();
+		return result != null ? result : (T) this;
 	}
 
 	@Override

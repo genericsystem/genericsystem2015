@@ -10,6 +10,7 @@ import org.genericsystem.defaults.DefaultVertex;
  *
  */
 public interface IDifferential<T extends DefaultVertex<T>> {
+	long getTs();
 
 	Snapshot<T> getDependencies(T generic);
 

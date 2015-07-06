@@ -3,24 +3,24 @@ package org.genericsystem.cache;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 
-public class ClientCache extends AbstractCache<Generic> {
+public class ClientCache extends AbstractCache<ClientGeneric> {
 
 	@Override
-	public Engine getRoot() {
-		return (Engine) super.getRoot();
+	public ClientEngine getRoot() {
+		return (ClientEngine) super.getRoot();
 	};
 
-	protected ClientCache(Engine root) {
-		this(root, new ContextEventListener<Generic>() {
+	protected ClientCache(ClientEngine root) {
+		this(root, new ContextEventListener<ClientGeneric>() {
 		});
 	}
 
-	protected ClientCache(Engine root, ContextEventListener<Generic> listener) {
+	protected ClientCache(ClientEngine root, ContextEventListener<ClientGeneric> listener) {
 		super(root, listener);
 	}
 
 	@Override
-	protected ClientTransaction buildTransaction(AbstractRoot<Generic> root) {
-		return new ClientTransaction(((Engine) root), root.pickNewTs());
+	protected ClientTransaction buildTransaction(AbstractRoot<ClientGeneric> root) {
+		return new ClientTransaction(((ClientEngine) root), root.pickNewTs());
 	}
 }
