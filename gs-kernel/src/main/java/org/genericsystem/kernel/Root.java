@@ -1,10 +1,7 @@
 package org.genericsystem.kernel;
 
-import io.vertx.example.util.ExampleRunner;
-
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
@@ -129,10 +126,6 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	@Override
 	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		new Transaction(this, ts).remoteApply(removes, adds);
-	}
-
-	public static void main(String[] args) {
-		ExampleRunner.runJavaExample("gs-kernel/src/main/java/", Root.class, true);
 	}
 
 }

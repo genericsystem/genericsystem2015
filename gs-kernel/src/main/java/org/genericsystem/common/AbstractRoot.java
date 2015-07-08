@@ -1,8 +1,5 @@
 package org.genericsystem.common;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.eventbus.EventBus;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -12,12 +9,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -29,7 +24,7 @@ import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractVerticle implements DefaultRoot<T>, TProxy<T>, ProxyObject {
+public abstract class AbstractRoot<T extends DefaultVertex<T>> implements DefaultRoot<T>, TProxy<T>, ProxyObject {
 
 	private final Map<Long, T> tMap = new ConcurrentHashMap<>();
 	protected Wrapper<T> contextWrapper = buildContextWrapper();
@@ -305,17 +300,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> extends AbstractV
 	@Override
 	public String toString() {
 		return defaultToString();
-	}
-
-	@Override
-	public void start() throws Exception {
-		EventBus eb = vertx.eventBus();
-		eb.consumer("ping-address", message -> {
-			System.out.println("Received message: " + message.body());
-			// Now send back reply
-				message.reply("pong!");
-			});
-		System.out.println("Receiver ready!");
 	}
 
 }

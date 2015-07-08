@@ -1,19 +1,18 @@
 package org.genericsystem.cache;
 
+import io.vertx.example.util.ExampleRunner;
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
+public abstract class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
 
-	private Server server;
+	protected Server server;
 
 	public ClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -34,10 +33,7 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	protected void initSubRoot(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		server = new ClientServer(new Root(engineValue, persistentDirectoryPath, userClasses));
-		// server = new VertxClientServer(this, vertx);
-	};
+	protected abstract void initSubRoot(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses);
 
 	@Override
 	public ClientCache newCache() {
@@ -114,5 +110,9 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	@Override
 	public long pickNewTs() {
 		return server.pickNewTs();
+	}
+
+	public static void main(String[] args) {
+		ExampleRunner.runJavaExample("gs-kernel/src/main/java/", ClientEngine.class, true);
 	}
 }
