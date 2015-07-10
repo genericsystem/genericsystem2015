@@ -2,7 +2,10 @@ package org.genericsystem.cache;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.example.util.ExampleRunner;
+import java.util.Arrays;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
@@ -22,7 +25,10 @@ public class VertxServerClient extends AbstractVerticle implements Server {
 	}
 
 	@Override
-	public long[] getDependencies(long ts, long id) {
+	public Long[] getDependencies(long ts, long id) {
+		System.out.println("getDependencies : " + ts + " " + id);
+		System.out.println("getDependencies : " + Arrays.asList(root.getDependencies(ts, id)));
+		System.out.println("Vertex found " + getVertex(root.getDependencies(ts, id)[0]).getTs());
 		return root.getDependencies(ts, id);
 	}
 
@@ -45,48 +51,24 @@ public class VertxServerClient extends AbstractVerticle implements Server {
 	@Override
 	public void start() {
 		EventBus eb = vertx.eventBus();
-		System.out.println("aaa");
-
-		// eb.consumer("getVertex", message -> {
-		// System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-		//
-		// long id = (Long) message.body();
-		// message.reply(getVertex(id));
-		// });
-		// System.out.println("bbb");
-		//
-		// eb.consumer("getDependencies", message -> {
-		// System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-		//
-		// JsonObject temporal = (JsonObject) message.body();
-		// System.out.println("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
-		// message.reply(getDependencies(temporal.getLong("ts"), temporal.getLong("id")));
-		// System.out.println("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-		// });
-		eb.consumer("picknewts", message -> {
+		eb.consumer("pickNewTs", message -> {
 			System.out.println("Receive picknewts");
-
 			message.reply(pickNewTs());
 		});
-		eb.consumer("ping-address", message -> {
+		eb.consumer("getDependencies", message -> {
+			System.out.println("Receive getDependencies");
+			JsonObject json = (JsonObject) message.body();
+			message.reply(new JsonArray(Arrays.asList(getDependencies(json.getLong("ts"), json.getLong("id")))));
+		});
+		eb.consumer("getVertex", message -> {
+			System.out.println("Receive getVertex");
+			long id = (Long) message.body();
+			System.out.println("id : " + id);
+			Vertex vertex = getVertex(id);
+			JsonObject json = vertex.getJsonObject();
+			message.reply(json);
+		});
 
-			System.out.println("Received message: " + message.body());
-			// Now send back reply
-				message.reply("pong!");
-			});
-		// eb.consumer("close", message -> {
-		// close();
-		// message.reply(null);
-		// });
-		// eb.consumer("apply", message -> {
-		// Apply apply = (Apply) message.body();
-		// try {
-		// apply(apply.ts, apply.removes, apply.adds);
-		// } catch (Exception e) {
-		// message.fail(500, e.getCause().getMessage());
-		// }
-		// message.reply(null);
-		// });
 		System.out.println("Receiver ready!");
 	}
 }

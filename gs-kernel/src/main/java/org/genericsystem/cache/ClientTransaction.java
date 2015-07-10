@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -69,7 +68,7 @@ public class ClientTransaction implements IDifferential<ClientGeneric> {
 	public Snapshot<ClientGeneric> getDependencies(ClientGeneric generic) {
 		Snapshot<ClientGeneric> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			final Map<ClientGeneric, ClientGeneric> container = Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts)).collect(Collectors.toMap(g -> g, g -> g, (u, v) -> {
+			final Map<ClientGeneric, ClientGeneric> container = Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).map(ts -> getRoot().getGenericById(ts)).collect(Collectors.toMap(g -> g, g -> g, (u, v) -> {
 				throw new IllegalStateException(String.format("Duplicate key %s", u));
 			}, LinkedHashMap::new));
 			dependencies = new IteratorSnapshot<ClientGeneric>() {

@@ -6,11 +6,11 @@ import org.genericsystem.common.Vertex;
 
 public interface Server {
 
-	final static long[] EMPTY = new long[] {};
+	final static Long[] EMPTY = new Long[] {};
 
 	Vertex getVertex(long id);
 
-	long[] getDependencies(long ts, long id);
+	Long[] getDependencies(long ts, long id);
 
 	void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 

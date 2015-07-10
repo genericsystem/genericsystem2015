@@ -118,9 +118,9 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	}
 
 	@Override
-	public long[] getDependencies(long ts, long id) {
+	public Long[] getDependencies(long ts, long id) {
 		Generic genericById = this.getGenericById(id);
-		return genericById != null ? genericById.getProxyHandler().getDependencies().stream(ts).mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
+		return genericById != null ? genericById.getProxyHandler().getDependencies().stream(ts).map(generic -> generic.getTs()).toArray(Long[]::new) : EMPTY;
 	}
 
 	@Override
