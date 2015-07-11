@@ -10,7 +10,7 @@ import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public abstract class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
+public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
 
 	protected Server server;
 
@@ -33,7 +33,9 @@ public abstract class ClientEngine extends AbstractRoot<ClientGeneric> implement
 	}
 
 	@Override
-	protected abstract void initSubRoot(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses);
+	protected void initSubRoot(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
+		server = new VertxClientServer(this);
+	}
 
 	@Override
 	public ClientCache newCache() {
