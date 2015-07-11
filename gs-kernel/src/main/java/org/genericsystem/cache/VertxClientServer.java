@@ -1,131 +1,86 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.example.util.ExampleRunner;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Server;
 
-public class VertxClientServer extends AbstractVerticle implements Server {
-	private ClientEngine engine;
+public class VertxClientServer implements Server {
+	private final ClientEngine engine;
+	private final EventBus bus;
 
-	@Override
-	public void start() throws Exception {
-		// vertx.setPeriodic(1000, v -> {
-		//
-		// vertx.eventBus().send("ping-address", "ping!", reply -> {
-		// if (reply.succeeded()) {
-		// System.out.println("Received reply " + reply.result().body());
-		// } else {
-		// System.out.println("No reply");
-		// }
-		// });
-		//
-		// });
-		// vertx.setTimer(5000, future -> {
-		// vertx.eventBus().send("picknewts", null, reply -> {
-		// if (reply.succeeded()) {
-		// System.out.println("Received reply " + reply.result().body());
-		// } else {
-		// System.out.println("No reply");
-		// }
-		// });
-		// });
-		long[] resultHandler = new long[1];
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		vertx.executeBlocking(future -> {
-			vertx.eventBus().send("picknewts", null, reply -> {
-				if (reply.succeeded()) {
-					resultHandler[0] = (long) reply.result().body();
-					countDownLatch.countDown();
-					System.out.println("all is ok picknewts");
-				} else {
-					System.out.println("ko  picknewts");
-					engine.getCurrentCache().discardWithException(reply.cause());
-				}
-			});
-			try {
-				countDownLatch.await();
-			} catch (InterruptedException e) {
-				engine.getCurrentCache().discardWithException(e);
-			}
-			future.complete(resultHandler[0]);
-		}, result -> {
-			if (result.succeeded())
-				System.out.println("successsssssssssssss");
-			else
-				System.out.println("faillllllllllllllllll");
-
-		});
-		try {
-			countDownLatch.await();
-		} catch (InterruptedException e) {
-			engine.getCurrentCache().discardWithException(e);
-		}
-		System.out.println("pickNewTs ok : " + resultHandler[0]);
-		// this.engine = new ClientEngine() {
-		// @Override
-		// protected void initSubRoot(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		// server = VertxClientServer.this;
-		// }
-		// };
+	VertxClientServer(ClientEngine engine) {
+		this.engine = engine;
+		this.bus = initVertx().eventBus();
 	}
 
-	public static void main(String[] args) {
-		ExampleRunner.runJavaExample("gs-kernel/src/main/java/", VertxClientServer.class, true);
+	private Vertx initVertx() {
+		System.setProperty("vertx.cwd", "/src/main/java/" + VertxServerClient.class.getPackage().getName().replace(".", "/"));
+		CountDownLatch latch = new CountDownLatch(1);
+		Vertx[] vertxArray = new Vertx[1];
+		Vertx.clusteredVertx(new VertxOptions().setClustered(true), res -> {
+			if (res.succeeded()) {
+				vertxArray[0] = res.result();
+				try {
+					vertxArray[0].deployVerticle(VertxServerClient.class.getName());
+					latch.countDown();
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+			} else {
+				res.cause().printStackTrace();
+			}
+		});
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			throw new IllegalStateException(e);
+		}
+		return vertxArray[0];
 	}
 
 	@Override
 	public Vertex getVertex(long id) {
-		System.out.println("getVertex");
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		Vertex[] resultHandler = new Vertex[1];
-		vertx.eventBus().send("getVertex", id, reply -> {
-			if (reply.succeeded()) {
-				resultHandler[0] = (Vertex) reply.result().body();
-				countDownLatch.countDown();
-			} else {
-				engine.getCurrentCache().discardWithException(reply.cause());
-			}
-		});
 		try {
-			countDownLatch.await();
-		} catch (InterruptedException e) {
-			engine.getCurrentCache().discardWithException(e);
+			System.out.println("Call getVertex with id = " + id);
+			return new Vertex((JsonObject) synchronize("getVertex", id));
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(e);
 		}
-		return resultHandler[0];
 	}
 
 	@Override
-	public long[] getDependencies(long ts, long id) {
+	public Long[] getDependencies(long ts, long id) {
+		JsonArray json = synchronize("getDependencies", new JsonObject().put("id", id).put("ts", ts));
+		return (Long[]) json.getList().toArray(new Long[json.getList().size()]);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T synchronize(String methodName, Object parameters) {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		long[][] resultHandler = new long[1][];
-		JsonObject json = new JsonObject();
-		json.put("id", id);
-		json.put("ts", ts);
-		System.out.println("fffffffffffffffffffffffffff");
-		vertx.eventBus().send("getDependencies", json, reply -> {
-			System.out.println("rrrrrrrrrrrrrrrrrrrrrr");
-			if (reply.succeeded()) {
-				System.out.println("sssssssssssssssssssssssssssss");
-				resultHandler[0] = (long[]) reply.result().body();
-				countDownLatch.countDown();
-			} else {
-				System.out.println("tttttttttttttttttttttttttttt");
-				engine.getCurrentCache().discardWithException(reply.cause());
-				throw new IllegalStateException(reply.cause());
-			}
+		AsyncResult<?>[] replyArray = new AsyncResult<?>[1];
+		bus.send(methodName, parameters, reply -> {
+			replyArray[0] = reply;
+			countDownLatch.countDown();
 		});
 		try {
-			System.out.println("uuuuuuuuuuuuuuuuuuuuuuu");
-			countDownLatch.await();
+			countDownLatch.await(2000, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
-			engine.getCurrentCache().discardWithException(e);
+			engine.getCurrentCache().discardWithException(e);;
 		}
-		return resultHandler[0];
+		if (replyArray[0].succeeded())
+			return (T) ((Message<Object>) replyArray[0].result()).body();
+		engine.getCurrentCache().discardWithException(replyArray[0].cause());
+		return null;// Unreachable
 	}
 
 	public static class Apply {
@@ -143,7 +98,7 @@ public class VertxClientServer extends AbstractVerticle implements Server {
 	@Override
 	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		vertx.eventBus().send("apply", new Apply(ts, removes, adds), reply -> {
+		bus.send("apply", new Apply(ts, removes, adds), reply -> {
 			if (reply.succeeded()) {
 				countDownLatch.countDown();
 			} else {
@@ -159,32 +114,13 @@ public class VertxClientServer extends AbstractVerticle implements Server {
 
 	@Override
 	public long pickNewTs() {
-		System.out.println("pickNewTs");
-		long[] resultHandler = new long[1];
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		vertx.eventBus().send("picknewts", null, reply -> {
-			if (reply.succeeded()) {
-				resultHandler[0] = (long) reply.result().body();
-				countDownLatch.countDown();
-				System.out.println("all is ok picknewts");
-			} else {
-				System.out.println("ko  picknewts");
-				engine.getCurrentCache().discardWithException(reply.cause());
-			}
-		});
-		try {
-			countDownLatch.await();
-		} catch (InterruptedException e) {
-			engine.getCurrentCache().discardWithException(e);
-		}
-		System.out.println("pickNewTs ok : " + resultHandler[0]);
-		return resultHandler[0];
+		return (Long) synchronize("pickNewTs", null);
 	}
 
 	@Override
 	public void close() {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		vertx.eventBus().send("close", null, reply -> {
+		bus.send("close", null, reply -> {
 			if (reply.succeeded()) {
 				countDownLatch.countDown();
 			} else {
