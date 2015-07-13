@@ -8,7 +8,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.defaults.DefaultVertex;
 
-public abstract class THandler<T extends DefaultVertex<T>> {
+public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 	protected final AbstractContext<T> context;
 	final T meta;
 	protected T adjustedMeta;
@@ -18,7 +18,7 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 	protected final List<T> components;
 	protected T gettable;
 
-	THandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+	GenericBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 		assert overrides != null;
 		this.context = context;
 		this.meta = meta != null ? meta : (T) context.getRoot();
@@ -114,9 +114,9 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 	// }
 	// }
 
-	public static class AddHandler<T extends DefaultVertex<T>> extends THandler<T> {
+	public static class AddBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
 
-		AddHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		AddBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -128,9 +128,9 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class SetHandler<T extends DefaultVertex<T>> extends THandler<T> {
+	static class SetBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
 
-		SetHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		SetBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -143,11 +143,11 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class UpdateHandler<T extends DefaultVertex<T>> extends THandler<T> {
+	static class UpdateBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
 
 		private final T update;
 
-		UpdateHandler(AbstractContext<T> context, T update, T meta, List<T> overrides, Serializable value, List<T> components) {
+		UpdateBuilder(AbstractContext<T> context, T update, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -161,11 +161,11 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class MergeHandler<T extends DefaultVertex<T>> extends THandler<T> {
+	static class MergeBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
 
 		private final T update;
 
-		MergeHandler(AbstractContext<T> context, T update, T meta, List<T> overrides, Serializable value, List<T> components) {
+		MergeBuilder(AbstractContext<T> context, T update, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -175,9 +175,9 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	public static class AtomicHandler<T extends DefaultVertex<T>> extends THandler<T> {
+	public static class AtomicBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
 
-		protected AtomicHandler(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		protected AtomicBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -186,11 +186,11 @@ public abstract class THandler<T extends DefaultVertex<T>> {
 		}
 	}
 
-	protected static class SetSystemHandler<T extends DefaultVertex<T>> extends AtomicHandler<T> {
+	protected static class SetSystemBuilder<T extends DefaultVertex<T>> extends AtomicBuilder<T> {
 
 		private final Class<?> clazz;
 
-		SetSystemHandler(AbstractContext<T> context, Class<?> clazz, T meta, List<T> overrides, Serializable value, List<T> components) {
+		SetSystemBuilder(AbstractContext<T> context, Class<?> clazz, T meta, List<T> overrides, Serializable value, List<T> components) {
 			super(context, meta, overrides, value, components);
 			this.clazz = clazz;
 		}

@@ -1,17 +1,17 @@
 package org.genericsystem.cache;
 
-import org.genericsystem.common.TProxy;
+import org.genericsystem.common.GenericProxy;
 
-public interface ClientGeneric extends TProxy<ClientGeneric> {
+public interface ClientGeneric extends GenericProxy<ClientGeneric> {
 
 	@Override
 	default ClientEngine getRoot() {
-		return (ClientEngine) TProxy.super.getRoot();
+		return (ClientEngine) GenericProxy.super.getRoot();
 	}
 
 	@Override
 	default public ClientCache getCurrentCache() {
-		return (ClientCache) TProxy.super.getCurrentCache();
+		return (ClientCache) GenericProxy.super.getCurrentCache();
 	}
 
 	@Override

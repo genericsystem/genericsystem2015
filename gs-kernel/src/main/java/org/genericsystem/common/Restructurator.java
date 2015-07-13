@@ -7,7 +7,7 @@ import java.util.NavigableSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.THandler.AtomicHandler;
+import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.genericsystem.defaults.DefaultVertex;
 
 public class Restructurator<T extends DefaultVertex<T>> {
@@ -48,7 +48,7 @@ public class Restructurator<T extends DefaultVertex<T>> {
 					List<T> overrides = reasignSupers(oldDependency, new ArrayList<>());
 					List<T> components = reasignComponents(oldDependency);
 					T meta = reasignMeta(components, convert(oldDependency.getMeta()));
-					newDependency = new AtomicHandler<>(context, meta, overrides, oldDependency.getValue(), components).resolve();
+					newDependency = new AtomicBuilder<>(context, meta, overrides, oldDependency.getValue(), components).resolve();
 				}
 				put(oldDependency, newDependency);// triggers mutation
 			}

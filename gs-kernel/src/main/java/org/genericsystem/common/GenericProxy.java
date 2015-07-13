@@ -7,7 +7,7 @@ import javassist.util.proxy.ProxyObject;
 
 import org.genericsystem.defaults.DefaultVertex;
 
-public interface TProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
+public interface GenericProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
 	@Override
 	default AbstractRoot<T> getRoot() {
 		return getProxyHandler().getRoot();

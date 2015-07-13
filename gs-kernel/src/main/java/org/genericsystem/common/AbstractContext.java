@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.common.THandler.AddHandler;
-import org.genericsystem.common.THandler.MergeHandler;
-import org.genericsystem.common.THandler.SetHandler;
-import org.genericsystem.common.THandler.UpdateHandler;
+import org.genericsystem.common.GenericBuilder.AddBuilder;
+import org.genericsystem.common.GenericBuilder.MergeBuilder;
+import org.genericsystem.common.GenericBuilder.SetBuilder;
+import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultContext;
 import org.genericsystem.defaults.DefaultVertex;
 
@@ -51,27 +51,27 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 	}
 
 	protected T setMeta(int dim) {
-		return new SetHandler<>(this, null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim))).resolve();
+		return new SetBuilder<>(this, null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim))).resolve();
 	}
 
 	@Override
 	public T setInstance(T meta, List<T> overrides, Serializable value, List<T> components) {
-		return new SetHandler<>(this, meta, overrides, value, components).resolve();
+		return new SetBuilder<>(this, meta, overrides, value, components).resolve();
 	}
 
 	@Override
 	public T addInstance(T meta, List<T> overrides, Serializable value, List<T> components) {
-		return new AddHandler<>(this, meta, overrides, value, components).resolve();
+		return new AddBuilder<>(this, meta, overrides, value, components).resolve();
 	}
 
 	@Override
 	public T update(T update, List<T> overrides, Serializable newValue, List<T> newComponents) {
-		return new UpdateHandler<>(this, update, update.getMeta(), overrides, newValue, newComponents).resolve();
+		return new UpdateBuilder<>(this, update, update.getMeta(), overrides, newValue, newComponents).resolve();
 	}
 
 	@Override
 	public T merge(T update, List<T> overrides, Serializable newValue, List<T> newComponents) {
-		return new MergeHandler<>(this, update, update.getMeta(), overrides, newValue, newComponents).resolve();
+		return new MergeBuilder<>(this, update, update.getMeta(), overrides, newValue, newComponents).resolve();
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractContext;
-import org.genericsystem.common.THandler.AtomicHandler;
+import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -352,7 +352,7 @@ public class Archiver {
 		}
 	}
 
-	private static class SetArchiverHandler extends AtomicHandler<Generic> {
+	private static class SetArchiverHandler extends AtomicBuilder<Generic> {
 
 		private final long ts;
 		private final long[] otherTs;

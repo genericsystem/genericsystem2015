@@ -28,7 +28,7 @@ import org.genericsystem.api.core.annotations.value.LongValue;
 import org.genericsystem.api.core.annotations.value.ShortValue;
 import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
-import org.genericsystem.common.THandler.SetSystemHandler;
+import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 import org.genericsystem.kernel.Root;
@@ -67,7 +67,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 		T meta = setMeta(clazz);
 		List<T> overrides = setOverrides(clazz);
 		List<T> components = setComponents(clazz);
-		systemProperty = new SetSystemHandler<>(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
+		systemProperty = new SetSystemBuilder<>(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
 		put(clazz, systemProperty);
 		mountConstraints(clazz, systemProperty);
 		triggersDependencies(clazz);

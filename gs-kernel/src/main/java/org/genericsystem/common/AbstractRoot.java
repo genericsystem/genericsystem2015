@@ -24,7 +24,7 @@ import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractRoot<T extends DefaultVertex<T>> implements DefaultRoot<T>, TProxy<T>, ProxyObject {
+public abstract class AbstractRoot<T extends DefaultVertex<T>> implements DefaultRoot<T>, GenericProxy<T>, ProxyObject {
 
 	private final Map<Long, T> tMap = new ConcurrentHashMap<>();
 	protected Wrapper<T> contextWrapper = buildContextWrapper();

@@ -1,13 +1,13 @@
 package org.genericsystem.kernel;
 
-import org.genericsystem.common.TProxy;
+import org.genericsystem.common.GenericProxy;
 import org.genericsystem.kernel.Root.RootWrapped;
 
-public interface Generic extends TProxy<Generic>, Comparable<Generic> {
+public interface Generic extends GenericProxy<Generic>, Comparable<Generic> {
 
 	@Override
 	default Root getRoot() {
-		return (Root) TProxy.super.getRoot();
+		return (Root) GenericProxy.super.getRoot();
 	}
 
 	// @Override
@@ -18,7 +18,7 @@ public interface Generic extends TProxy<Generic>, Comparable<Generic> {
 
 	@Override
 	default public RootWrapped getProxyHandler() {
-		return (RootWrapped) TProxy.super.getProxyHandler();
+		return (RootWrapped) GenericProxy.super.getProxyHandler();
 	}
 
 	default LifeManager getLifeManager() {

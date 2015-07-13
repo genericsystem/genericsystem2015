@@ -8,5 +8,6 @@ public class VertxTest extends AbstractTest {
 	public void test001() {
 
 		ClientEngine engine = new ClientEngine();
+		// ClientEngine engine2 = new ClientEngine();
 	}
 }

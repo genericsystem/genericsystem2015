@@ -1,16 +1,13 @@
 package org.genericsystem.common;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
-public class Vertex {
+public class Vertex implements Serializable {
 
+	private static final long serialVersionUID = 8227404973479376042L;
 	private final Class<?> clazz;
 	private final long ts;
 	private final long meta;
@@ -32,10 +29,10 @@ public class Vertex {
 		this.otherTs = otherTs.clone();
 	}
 
-	public Vertex(JsonObject json) throws ClassNotFoundException {
-		this((Class) Class.forName(json.getString("class")), (long) json.getLong("ts"), (long) json.getLong("meta"), (List<Long>) json.getJsonArray("supers").getList(), (Serializable) json.getValue("value"), (List<Long>) json.getJsonArray("components")
-				.getList(), json.getJsonArray("otherTs").getList().stream().mapToLong(l -> (Long) l).toArray());
-	}
+	// public Vertex(JsonObject json) throws ClassNotFoundException {
+	// this((Class) Class.forName(json.getString("class")), (long) json.getLong("ts"), (long) json.getLong("meta"), (List<Long>) json.getJsonArray("supers").getList(), (Serializable) json.getValue("value"), (List<Long>) json.getJsonArray("components")
+	// .getList(), json.getJsonArray("otherTs").getList().stream().mapToLong(l -> (Long) l).toArray());
+	// }
 
 	public Class<?> getClazz() {
 		return clazz;
@@ -65,15 +62,17 @@ public class Vertex {
 		return otherTs;
 	}
 
-	public JsonObject getJsonObject() {
-		JsonObject json = new JsonObject();
-		json.put("class", clazz.getName());
-		json.put("ts", ts);
-		json.put("meta", meta);
-		json.put("value", value);
-		json.put("components", new JsonArray(components));
-		json.put("supers", new JsonArray(supers));
-		json.put("otherTs", new JsonArray(LongStream.of(otherTs).mapToObj(lo -> Long.valueOf(lo)).collect(Collectors.toList())));
-		return json;
-	}
+	// public JsonObject getJsonObject() {
+	// JsonObject json = new JsonObject();
+	// json.put("class", clazz.getName());
+	// json.put("ts", ts);
+	// json.put("meta", meta);
+	// AssertionError f;
+	// assert !(value instanceof Class) : value + "   " + clazz.getName();
+	// json.put("value", value);
+	// json.put("components", new JsonArray(components));
+	// json.put("supers", new JsonArray(supers));
+	// json.put("otherTs", new JsonArray(LongStream.of(otherTs).mapToObj(lo -> Long.valueOf(lo)).collect(Collectors.toList())));
+	// return json;
+	// }
 }
