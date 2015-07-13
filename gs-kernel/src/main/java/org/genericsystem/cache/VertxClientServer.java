@@ -6,11 +6,9 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-
 import java.io.Serializable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
@@ -20,6 +18,7 @@ public class VertxClientServer implements Server {
 
 	private final ClientEngine engine;
 	private final EventBus bus;
+
 	private static boolean init = false;
 
 	VertxClientServer(ClientEngine engine) {

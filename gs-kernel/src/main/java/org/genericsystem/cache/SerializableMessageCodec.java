@@ -2,7 +2,6 @@ package org.genericsystem.cache;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,13 +30,22 @@ public class SerializableMessageCodec<T extends Serializable> implements Message
 		}
 		buffer.appendBytes(arrayStream.toByteArray());
 
+		try {
+			T result = (T) new ObjectInputStream(new ByteArrayInputStream(arrayStream.toByteArray())).readObject();
+			System.out.println("coucou" + result.getClass());
+
+		} catch (ClassNotFoundException | IOException e) {
+			throw new IllegalStateException(name() + " : " + e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public T decodeFromWire(int pos, Buffer buffer) {
+		// throw new IllegalStateException(name());
 		try {
-			return (T) new ObjectInputStream(new ByteArrayInputStream(buffer.getBytes(/* pos, buffer.length() */))).readObject();
+			System.out.println("coucou pos : " + pos);
+			return (T) new ObjectInputStream(new ByteArrayInputStream(buffer.getBytes(pos, buffer.length()))).readObject();
 		} catch (ClassNotFoundException | IOException e) {
 			throw new IllegalStateException(name() + " : " + e);
 		}

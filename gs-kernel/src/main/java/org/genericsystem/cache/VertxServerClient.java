@@ -3,7 +3,6 @@ package org.genericsystem.cache;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.cache.VertxClientServer.Apply;
@@ -47,6 +46,7 @@ public class VertxServerClient extends AbstractVerticle implements Server {
 				// System.out.println("Receive picknewts");
 				message.reply(pickNewTs());
 			} catch (Throwable e) {
+				e.printStackTrace();
 				message.fail(400, e.getMessage());
 			}
 		});
@@ -67,6 +67,7 @@ public class VertxServerClient extends AbstractVerticle implements Server {
 				long id = (Long) message.body();
 				message.reply(getVertex(id));
 			} catch (Throwable e) {
+				e.printStackTrace();
 				message.fail(400, e.getMessage());
 			}
 		});
@@ -77,6 +78,7 @@ public class VertxServerClient extends AbstractVerticle implements Server {
 				apply(apply.ts, apply.removes, apply.adds);
 				message.reply(null);
 			} catch (Throwable e) {
+				e.printStackTrace();
 				message.fail(400, e.getMessage());
 			}
 		});
