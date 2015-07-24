@@ -73,7 +73,13 @@ public class VertxServerClient extends AbstractVerticle implements Server {
 					break;
 				}
 				case VertxClientServer.APPLY: {
+					try {
+						apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(),
+								gsBuffer.getGSVertexArray());
+					} catch (Exception e) {
+						throw new IllegalStateException("");
 
+					}
 				}
 				default:
 					throw new IllegalStateException("unable to find method:"
