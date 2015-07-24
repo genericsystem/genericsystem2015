@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -20,31 +21,31 @@ import org.genericsystem.kernel.Server;
 public class VertxClientServer implements Server {
 
 	private final ClientEngine engine;
-	// private final EventBus bus;
-	// private final HttpClient httpClient;
 	private final WebSocket webSocket;
 	private final AtomicInteger requestId = new AtomicInteger(0);
-	// private static boolean init = false;
 	private final Map<Integer, CountDownLatch> countDownLatchs = new ConcurrentHashMap<>();
 	private final Map<Integer, Object> results = new ConcurrentHashMap<>();
 	public static final int PICK_NEW_TS = 0;
 	public static final int GET_DEPENDENCIES = 1;
 	public static final int GET_VERTEX = 2;
 	public static final int APPLY = 3;
-	private int index = 0;
+	public static final int RECEIVE_BUFFER_SIZE = 32 * 1024;
 
 	VertxClientServer(ClientEngine engine) {
 
 		CountDownLatch cdl = new CountDownLatch(1);
 		WebSocket[] socketArray = new WebSocket[1];
 		this.engine = engine;
-		// this.bus = initVertx().eventBus();
-		// this.httpClient = Vertx.vertx().createHttpClient();
 
 		Vertx.vertx()
-				.createHttpClient(new HttpClientOptions().setDefaultPort(8081))
+				.createHttpClient(
+						new HttpClientOptions()
+								.setDefaultPort(8081)
+								.setMaxWebsocketFrameSize(1000000)
+								.setReceiveBufferSize(RECEIVE_BUFFER_SIZE)
+								.setSendBufferSize(
+										VertxServerClient.SEND_BUFFER_SIZE))
 				.websocket("/gs", socket -> {
-					System.out.println("coucou");
 					socketArray[0] = socket;
 					cdl.countDown();
 				});
@@ -56,7 +57,6 @@ public class VertxClientServer implements Server {
 		}
 		webSocket = socketArray[0];
 		webSocket.handler(buffer -> {
-			System.out.println("receive response on client websocket ");
 			GSBuffer buff = new GSBuffer(buffer);
 			int id = buff.getInt();
 			int methodId = buff.getInt();
@@ -80,9 +80,11 @@ public class VertxClientServer implements Server {
 			}
 			case APPLY: {
 
+				break;
 			}
+			default:
+				throw new IllegalStateException("no method called");
 			}
-
 			countDownLatchs.get(id).countDown();
 		});
 	}
@@ -90,7 +92,10 @@ public class VertxClientServer implements Server {
 	@Override
 	public Vertex getVertex(long id) {
 		Buffer buff = Buffer.buffer().appendLong(id);
-		return (Vertex) synchronize(GET_VERTEX, buff);
+		Vertex result = (Vertex) synchronize(GET_VERTEX, buff);
+		if (result == null)
+			throw new IllegalStateException("Vertex id: " + id);
+		return result;
 	}
 
 	@Override
@@ -119,7 +124,6 @@ public class VertxClientServer implements Server {
 		countDownLatchs.remove(id);
 		results.remove(id);
 		return result;
-
 	}
 
 	public static class Apply implements Serializable {
@@ -140,32 +144,25 @@ public class VertxClientServer implements Server {
 	public void apply(long ts, long[] removes, Vertex[] adds)
 			throws ConcurrencyControlException,
 			OptimisticLockConstraintViolationException {
-		Buffer buff = Buffer.buffer().appendLong(ts);
-		GSBuffer gsBuffer = new GSBuffer(buff);
+		GSBuffer gsBuffer = new GSBuffer(Buffer.buffer());
+		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
+		assert Arrays.stream(adds).allMatch(
+				add -> add.getOtherTs()[0] == Long.MAX_VALUE);
+		if (Arrays.stream(adds).anyMatch(
+				v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
+			throw new IllegalStateException("");
 		synchronize(APPLY, gsBuffer);
 	}
 
 	@Override
 	public long pickNewTs() {
-		return (Long) synchronize(PICK_NEW_TS, null);
+		return (Long) synchronize(PICK_NEW_TS, Buffer.buffer());
 	}
 
 	@Override
 	public void close() {
-		// final CountDownLatch countDownLatch = new CountDownLatch(1);
-		// bus.send("close", null, reply -> {
-		// if (reply.succeeded()) {
-		// countDownLatch.countDown();
-		// } else {
-		// engine.getCurrentCache().discardWithException(reply.cause());
-		// }
-		// });
-		// try {
-		// countDownLatch.await();
-		// } catch (InterruptedException e) {
-		// engine.getCurrentCache().discardWithException(e);
-		// }
+
 	}
 }

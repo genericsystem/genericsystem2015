@@ -8,7 +8,8 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.DefaultVertex;
 
-public class Differential<T extends DefaultVertex<T>> implements IDifferential<T> {
+public class Differential<T extends DefaultVertex<T>> implements
+		IDifferential<T> {
 
 	private final IDifferential<T> differential;
 	private final PseudoConcurrentCollection<T> adds = new PseudoConcurrentCollection<>();
@@ -23,7 +24,8 @@ public class Differential<T extends DefaultVertex<T>> implements IDifferential<T
 	}
 
 	public int getCacheLevel() {
-		return differential instanceof Differential ? ((Differential<T>) differential).getCacheLevel() + 1 : 0;
+		return differential instanceof Differential ? ((Differential<T>) differential)
+				.getCacheLevel() + 1 : 0;
 	}
 
 	void checkConstraints(Checker<T> checker) throws RollbackException {
@@ -32,6 +34,7 @@ public class Differential<T extends DefaultVertex<T>> implements IDifferential<T
 	}
 
 	protected T plug(T generic) {
+		assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
 		return generic;
 	}
@@ -49,22 +52,29 @@ public class Differential<T extends DefaultVertex<T>> implements IDifferential<T
 				T result = adds.get(o);
 				if (result != null)
 					return generic.isDirectAncestorOf(result) ? result : null;
-				return !removes.contains(o) ? differential.getDependencies(generic).get(o) : null;
+				return !removes.contains(o) ? differential.getDependencies(
+						generic).get(o) : null;
 			}
 
 			@Override
 			public Stream<T> stream() {
-				return Stream.concat(adds.contains(generic) ? Stream.empty() : differential.getDependencies(generic).stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
+				return Stream.concat(adds.contains(generic) ? Stream.empty()
+						: differential.getDependencies(generic).stream()
+								.filter(x -> !removes.contains(x)), adds
+						.stream().filter(x -> generic.isDirectAncestorOf(x)));
 			}
 		};
 	}
 
-	void apply() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	void apply() throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
 		getSubCache().apply(removes, adds);
 	}
 
 	@Override
-	public void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(Snapshot<T> removes, Snapshot<T> adds)
+			throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
 		for (T generic : removes)
 			unplug(generic);
 		for (T generic : adds)
