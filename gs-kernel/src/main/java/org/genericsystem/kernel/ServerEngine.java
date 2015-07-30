@@ -1,7 +1,5 @@
 package org.genericsystem.kernel;
 
-import java.io.Serializable;
-
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 
 public class ServerEngine extends Root {
@@ -10,11 +8,12 @@ public class ServerEngine extends Root {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public ServerEngine(Serializable engineValue, Class<?>... userClasses) {
+	public ServerEngine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, userClasses);
 	}
 
-	public ServerEngine(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
+	public ServerEngine(String engineValue, String persistentDirectoryPath,
+			Class<?>... userClasses) {
 		super(engineValue, persistentDirectoryPath, userClasses);
 		isInitialized = true;
 	}

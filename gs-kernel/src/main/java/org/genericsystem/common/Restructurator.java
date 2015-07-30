@@ -18,7 +18,8 @@ public class Restructurator<T extends DefaultVertex<T>> {
 		this.context = context;
 	}
 
-	T rebuildAll(T toRebuild, Supplier<T> rebuilder, NavigableSet<T> dependenciesToRebuild) {
+	T rebuildAll(T toRebuild, Supplier<T> rebuilder,
+			NavigableSet<T> dependenciesToRebuild) {
 		dependenciesToRebuild.descendingSet().forEach(context::unplug);
 		if (rebuilder != null) {
 			ConvertMap convertMap = new ConvertMap();
@@ -43,12 +44,17 @@ public class Restructurator<T extends DefaultVertex<T>> {
 			if (newDependency == null) {
 				if (oldDependency.isMeta()) {
 					assert oldDependency.getSupers().size() == 1;
-					newDependency = context.setMeta(oldDependency.getComponents().size());
+					newDependency = context.setMeta(oldDependency
+							.getComponents().size());
 				} else {
-					List<T> overrides = reasignSupers(oldDependency, new ArrayList<>());
+					List<T> overrides = reasignSupers(oldDependency,
+							new ArrayList<>());
 					List<T> components = reasignComponents(oldDependency);
-					T meta = reasignMeta(components, convert(oldDependency.getMeta()));
-					newDependency = new AtomicBuilder<>(context, meta, overrides, oldDependency.getValue(), components).resolve();
+					T meta = reasignMeta(components,
+							convert(oldDependency.getMeta()));
+					newDependency = new AtomicBuilder<>(context, meta,
+							overrides, oldDependency.getValue(), components)
+							.resolve();
 				}
 				put(oldDependency, newDependency);// triggers mutation
 			}
@@ -56,7 +62,8 @@ public class Restructurator<T extends DefaultVertex<T>> {
 		}
 
 		private List<T> reasignSupers(T oldDependency, List<T> supersReasign) {
-			for (T ancestor : oldDependency.getSupers().stream().map(x -> convert(x)).collect(Collectors.toList()))
+			for (T ancestor : oldDependency.getSupers().stream()
+					.map(x -> convert(x)).collect(Collectors.toList()))
 				if (!ancestor.isAlive())
 					reasignSupers(ancestor, supersReasign);
 				else
@@ -65,7 +72,8 @@ public class Restructurator<T extends DefaultVertex<T>> {
 		}
 
 		private List<T> reasignComponents(T oldDependency) {
-			return oldDependency.getComponents().stream().map(x -> convert(x)).filter(x -> x.isAlive()).collect(Collectors.toList());
+			return oldDependency.getComponents().stream().map(x -> convert(x))
+					.filter(x -> x.isAlive()).collect(Collectors.toList());
 		}
 
 		private T reasignMeta(List<T> components, T meta) {

@@ -83,13 +83,15 @@ public class Checker<T extends DefaultVertex<T>> {
 	}
 
 	private void checkSerializableType(Serializable value) {
-
+		if (value == null)
+			return;
 		for (Class clazz : ApiStatics.SUPPORTED_VALUE_CLASSES.values()) {
 			if (clazz.isInstance(value))
 				return;
 		}
 		context.discardWithException(new NotAllowedSerializableTypeException(
-				"Not allowed type for your serializable. Only primitive and Byte[] allowed."));
+				"Not allowed type for your serializable. Only primitive and Byte[] allowed : "
+						+ value.getClass()));
 	}
 
 	private void checkWellFormedMeta(T meta, Serializable value,

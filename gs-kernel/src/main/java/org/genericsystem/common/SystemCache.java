@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -58,7 +59,8 @@ public class SystemCache<T extends DefaultVertex<T>> {
 
 	private T set(Class<?> clazz) {
 		if (root.isInitialized())
-			throw new IllegalStateException("Class : " + clazz + " has not been built at startup");
+			throw new IllegalStateException("Class : " + clazz
+					+ " has not been built at startup");
 		T systemProperty = systemCache.get(clazz);
 		if (systemProperty != null) {
 			assert systemProperty.isAlive();
@@ -67,7 +69,9 @@ public class SystemCache<T extends DefaultVertex<T>> {
 		T meta = setMeta(clazz);
 		List<T> overrides = setOverrides(clazz);
 		List<T> components = setComponents(clazz);
-		systemProperty = new SetSystemBuilder<>(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
+		systemProperty = new SetSystemBuilder<>(root.getCurrentCache(), clazz,
+				meta, overrides,  findValue(clazz), components)
+				.resolve();
 		put(clazz, systemProperty);
 		mountConstraints(clazz, systemProperty);
 		triggersDependencies(clazz);
@@ -106,31 +110,38 @@ public class SystemCache<T extends DefaultVertex<T>> {
 			result.enableUniqueValueConstraint();
 
 		if (clazz.getAnnotation(InstanceValueClassConstraint.class) != null)
-			result.setInstanceValueClassConstraint(clazz.getAnnotation(InstanceValueClassConstraint.class).value());
+			result.setInstanceValueClassConstraint(clazz.getAnnotation(
+					InstanceValueClassConstraint.class).value());
 
 		if (clazz.getAnnotation(InstanceValueGenerator.class) != null)
-			result.setInstanceValueGenerator(clazz.getAnnotation(InstanceValueGenerator.class).value());
+			result.setInstanceValueGenerator(clazz.getAnnotation(
+					InstanceValueGenerator.class).value());
 
-		RequiredConstraint requiredConstraint = clazz.getAnnotation(RequiredConstraint.class);
+		RequiredConstraint requiredConstraint = clazz
+				.getAnnotation(RequiredConstraint.class);
 		if (requiredConstraint != null)
 			for (int axe : requiredConstraint.value()) {
 				result.enableRequiredConstraint(axe);
-				// assert result.isRequiredConstraintEnabled(axe) : result.getComposites().first().info();
+				// assert result.isRequiredConstraintEnabled(axe) :
+				// result.getComposites().first().info();
 			}
 
-		NoReferentialIntegrityProperty referentialIntegrity = clazz.getAnnotation(NoReferentialIntegrityProperty.class);
+		NoReferentialIntegrityProperty referentialIntegrity = clazz
+				.getAnnotation(NoReferentialIntegrityProperty.class);
 		if (referentialIntegrity != null)
 			for (int axe : referentialIntegrity.value())
 				result.disableReferentialIntegrity(axe);
 
-		SingularConstraint singularTarget = clazz.getAnnotation(SingularConstraint.class);
+		SingularConstraint singularTarget = clazz
+				.getAnnotation(SingularConstraint.class);
 		if (singularTarget != null)
 			for (int axe : singularTarget.value())
 				result.enableSingularConstraint(axe);
 	}
 
 	private void triggersDependencies(Class<?> clazz) {
-		Dependencies dependenciesClass = clazz.getAnnotation(Dependencies.class);
+		Dependencies dependenciesClass = clazz
+				.getAnnotation(Dependencies.class);
 		if (dependenciesClass != null)
 			for (Class<?> dependencyClass : dependenciesClass.value())
 				bind(dependencyClass);
@@ -148,7 +159,8 @@ public class SystemCache<T extends DefaultVertex<T>> {
 
 	private List<T> setOverrides(Class<?> clazz) {
 		List<T> overridesVertices = new ArrayList<>();
-		org.genericsystem.api.core.annotations.Supers supersAnnotation = clazz.getAnnotation(org.genericsystem.api.core.annotations.Supers.class);
+		org.genericsystem.api.core.annotations.Supers supersAnnotation = clazz
+				.getAnnotation(org.genericsystem.api.core.annotations.Supers.class);
 		if (supersAnnotation != null)
 			for (Class<?> overrideClass : supersAnnotation.value())
 				overridesVertices.add(bind(overrideClass));
@@ -156,15 +168,18 @@ public class SystemCache<T extends DefaultVertex<T>> {
 	}
 
 	private Serializable findValue(Class<?> clazz) {
-		AxedPropertyClassValue axedPropertyClass = clazz.getAnnotation(AxedPropertyClassValue.class);
+		AxedPropertyClassValue axedPropertyClass = clazz
+				.getAnnotation(AxedPropertyClassValue.class);
 		if (axedPropertyClass != null)
-			return new org.genericsystem.api.core.AxedPropertyClass(axedPropertyClass.propertyClass(), axedPropertyClass.pos());
+			return new org.genericsystem.api.core.AxedPropertyClass(
+					axedPropertyClass.propertyClass(), axedPropertyClass.pos());
 
 		BooleanValue booleanValue = clazz.getAnnotation(BooleanValue.class);
 		if (booleanValue != null)
 			return booleanValue.value();
 
-		ByteArrayValue byteArrayValue = clazz.getAnnotation(ByteArrayValue.class);
+		ByteArrayValue byteArrayValue = clazz
+				.getAnnotation(ByteArrayValue.class);
 		if (byteArrayValue != null)
 			return byteArrayValue.value();
 
@@ -205,7 +220,9 @@ public class SystemCache<T extends DefaultVertex<T>> {
 		if (componentsAnnotation != null)
 			for (Class<?> compositeClass : componentsAnnotation.value())
 				if (compositeClass.equals(clazz))
-					root.getCurrentCache().discardWithException(new CyclicException("The annoted class " + clazz + " has a component with same name"));
+					root.getCurrentCache().discardWithException(
+							new CyclicException("The annoted class " + clazz
+									+ " has a component with same name"));
 				else
 					components.add(set(compositeClass));
 		return components;

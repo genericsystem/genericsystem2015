@@ -28,22 +28,23 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public Root(Serializable value, Class<?>... userClasses) {
+	public Root(String value, Class<?>... userClasses) {
 		this(value, null, userClasses);
 	}
 
+	public Root(String value, String persistentDirectoryPath,
+			Class<?>... userClasses) {
+		super(value, null, persistentDirectoryPath, userClasses);
+		archiver = new Archiver(this, persistentDirectoryPath);
+		if (Root.class.equals(getClass()))
+			isInitialized = true;
+	}
+
 	@Override
-	protected void initSubRoot(Serializable value,
+	protected void initSubRoot(String value, String host,
 			String persistentDirectoryPath, java.lang.Class<?>... userClasses) {
 		generator = new TsGenerator();
 	};
-
-	public Root(Serializable value, String persistentDirectoryPath,
-			Class<?>... userClasses) {
-		super(value, persistentDirectoryPath, userClasses);
-		archiver = new Archiver(this, persistentDirectoryPath);
-		isInitialized = true;
-	}
 
 	@Override
 	public AbstractContext<Generic> newCache() {
