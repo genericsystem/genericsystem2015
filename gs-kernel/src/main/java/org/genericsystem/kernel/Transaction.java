@@ -15,7 +15,8 @@ import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 
-public class Transaction extends AbstractContext<Generic> implements IDifferential<Generic> {
+public class Transaction extends AbstractContext<Generic> implements
+		IDifferential<Generic> {
 
 	private final long ts;
 
@@ -48,7 +49,10 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 			set.add(generic.getMeta());
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
-		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).add(generic));
+		set.stream()
+				.forEach(
+						ancestor -> ((IDependencies<Generic>) getDependencies(ancestor))
+								.add(generic));
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
 	}
@@ -67,7 +71,10 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 			set.add(generic.getMeta());
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
-		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).remove(generic));
+		set.stream()
+				.forEach(
+						ancestor -> ((IDependencies<Generic>) getDependencies(ancestor))
+								.remove(generic));
 		generic.getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
@@ -79,12 +86,14 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 			@Override
 			public Stream<Generic> stream() {
-				return ancestor.getProxyHandler().getDependencies().stream(getTs());
+				return ancestor.getProxyHandler().getDependencies()
+						.stream(getTs());
 			}
 
 			@Override
 			public Generic get(Object o) {
-				return ancestor.getProxyHandler().getDependencies().get((Generic) o, getTs());
+				return ancestor.getProxyHandler().getDependencies()
+						.get((Generic) o, getTs());
 			}
 
 			@Override
@@ -94,18 +103,23 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 			@Override
 			public boolean remove(Generic remove) {
-				return ancestor.getProxyHandler().getDependencies().remove(remove);
+				return ancestor.getProxyHandler().getDependencies()
+						.remove(remove);
 			}
 		};
 	}
 
 	@Override
-	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds)
+			throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
 		new LockedLifeManager().apply(removes, adds);
 	}
 
 	// archiver acces
-	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
+	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta,
+			List<Generic> supers, Serializable value, List<Generic> components,
+			long[] otherTs) {
 		return plug(build(ts, clazz, meta, supers, value, components, otherTs));
 
 	}
@@ -119,7 +133,9 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 		private Set<LifeManager> lockedLifeManagers = new HashSet<>();
 
-		private void apply(Iterable<Generic> removes, Iterable<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		private void apply(Iterable<Generic> removes, Iterable<Generic> adds)
+				throws ConcurrencyControlException,
+				OptimisticLockConstraintViolationException {
 			try {
 				writeLockAllAndCheckMvcc(adds, removes);
 				for (Generic remove : removes)
@@ -133,14 +149,18 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 			}
 		}
 
-		private void writeLockAllAndCheckMvcc(Iterable<Generic> adds, Iterable<Generic> removes) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		private void writeLockAllAndCheckMvcc(Iterable<Generic> adds,
+				Iterable<Generic> removes) throws ConcurrencyControlException,
+				OptimisticLockConstraintViolationException {
 			for (Generic remove : removes)
 				writeLockAndCheckMvcc(remove);
 			for (Generic add : adds)
 				writeLockAndCheckMvccForAdd(add);
 		}
 
-		private void writeLockAndCheckMvccForAdd(Generic add) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		private void writeLockAndCheckMvccForAdd(Generic add)
+				throws ConcurrencyControlException,
+				OptimisticLockConstraintViolationException {
 			writeLockAndCheckMvcc(add.getMeta());
 			for (Generic superT : add.getSupers())
 				writeLockAndCheckMvcc(superT);
@@ -149,7 +169,9 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 			writeLockAndCheckMvcc(add);
 		}
 
-		private void writeLockAndCheckMvcc(Generic generic) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		private void writeLockAndCheckMvcc(Generic generic)
+				throws ConcurrencyControlException,
+				OptimisticLockConstraintViolationException {
 			if (generic != null) {
 				LifeManager manager = generic.getLifeManager();
 				if (!lockedLifeManagers.contains(manager)) {
@@ -168,19 +190,33 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 	}
 
 	public Snapshot<Long> getRemoteDependencies(long ts) {
-		org.genericsystem.kernel.Generic serverGeneric = getRoot().getGenericById(ts);
+		org.genericsystem.kernel.Generic serverGeneric = getRoot()
+				.getGenericById(ts);
 		// What to do if serverGeneric not alive ???
 		if (serverGeneric != null)
-			return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
+			return () -> getDependencies(serverGeneric).stream().map(
+					serverDependency -> serverDependency.getTs());
 		else
 			return () -> Stream.empty();
 	}
 
-	public void remoteApply(long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		// Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)).allMatch(g -> true);
-		// assert Arrays.stream(addVertices).map(add -> add.getTs()).distinct().count() == addVertices.length;
-		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
-		Arrays.stream(addVertices).forEach(addVertex -> getRoot().build(addVertex));
-		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
+	public void remoteApply(long[] removeIds, Vertex[] addVertices)
+			throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
+		// Arrays.stream(removeIds).mapToObj(removeId ->
+		// getRoot().getGenericById(removeId)).allMatch(g -> true);
+		// assert Arrays.stream(addVertices).map(add ->
+		// add.getTs()).distinct().count() == addVertices.length;
+		assert Arrays.stream(addVertices)
+				.allMatch(
+						addVertex -> getRoot()
+								.getGenericById(addVertex.getTs()) == null);
+		Arrays.stream(addVertices).forEach(
+				addVertex -> getRoot().build(addVertex));
+		apply(() -> Arrays.stream(removeIds).mapToObj(
+				removeId -> getRoot().getGenericById(removeId)),
+				() -> Arrays.stream(addVertices).map(
+						addVertex -> getRoot()
+								.getGenericById(addVertex.getTs())));
 	}
 }

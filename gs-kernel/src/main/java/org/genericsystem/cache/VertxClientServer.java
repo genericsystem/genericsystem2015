@@ -31,8 +31,7 @@ public class VertxClientServer implements Server {
 	public static final int APPLY = 3;
 	public static final int RECEIVE_BUFFER_SIZE = 32 * 1024;
 
-	VertxClientServer(ClientEngine engine) {
-
+	VertxClientServer(ClientEngine engine, String host, int port, String path) {
 		CountDownLatch cdl = new CountDownLatch(1);
 		WebSocket[] socketArray = new WebSocket[1];
 		this.engine = engine;
@@ -40,12 +39,13 @@ public class VertxClientServer implements Server {
 		Vertx.vertx()
 				.createHttpClient(
 						new HttpClientOptions()
-								.setDefaultPort(8081)
-								.setMaxWebsocketFrameSize(1000000)
-								.setReceiveBufferSize(RECEIVE_BUFFER_SIZE)
-								.setSendBufferSize(
-										VertxServerClient.SEND_BUFFER_SIZE))
-				.websocket("/gs", socket -> {
+								.setDefaultPort(port)
+								.setDefaultHost(
+										host != null ? host
+												: HttpClientOptions.DEFAULT_DEFAULT_HOST)
+								.setMaxWebsocketFrameSize(1000000))
+
+				.websocket(path, socket -> {
 					socketArray[0] = socket;
 					cdl.countDown();
 				});
@@ -56,6 +56,9 @@ public class VertxClientServer implements Server {
 			e.printStackTrace();
 		}
 		webSocket = socketArray[0];
+		webSocket.exceptionHandler(e -> {
+			e.printStackTrace();
+		});
 		webSocket.handler(buffer -> {
 			GSBuffer buff = new GSBuffer(buffer);
 			int id = buff.getInt();
@@ -66,6 +69,8 @@ public class VertxClientServer implements Server {
 				break;
 			}
 			case GET_DEPENDENCIES: {
+				System.out.println(">>>Client side getdependencies response"
+						+ id);
 				int size = buff.getInt();
 				long[] result = new long[size];
 				for (int i = 0; i < size; i++) {
@@ -85,7 +90,12 @@ public class VertxClientServer implements Server {
 			default:
 				throw new IllegalStateException("no method called");
 			}
-			countDownLatchs.get(id).countDown();
+			System.out.println("countDown " + id + " " + results.get(id));
+			CountDownLatch countDownLatch = countDownLatchs.get(id);
+			System.out.println(">>> countDown on latch : " + id + " "
+					+ System.identityHashCode(countDownLatch));
+			countDownLatch.countDown();
+
 		});
 	}
 
@@ -110,20 +120,42 @@ public class VertxClientServer implements Server {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 		CountDownLatch oldCountDownLatch = countDownLatchs.put(id,
 				countDownLatch);
+
 		assert oldCountDownLatch == null;
 		Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId)
 				.appendBuffer(parameters);
 
-		webSocket.writeBinaryMessage(buffer);
+		webSocket.writeFinalBinaryFrame(buffer);
+
+		boolean latchResult = false;
 		try {
-			countDownLatch.await(5000, TimeUnit.MILLISECONDS);
+			System.out.println(">>> waiting for : " + id + " "
+					+ System.identityHashCode(countDownLatch));
+			latchResult = countDownLatch.await(5000, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			engine.getCurrentCache().discardWithException(e);
+		}
+		if (!latchResult) {
+			webSocket.writeFinalBinaryFrame(buffer);
+
+			try {
+				System.out.println(">>> waiting for : " + id + " "
+						+ System.identityHashCode(countDownLatch));
+				latchResult = countDownLatch.await(5000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				engine.getCurrentCache().discardWithException(e);
+			}
+			if (!latchResult) {
+				engine.getCurrentCache().discardWithException(
+						new IllegalStateException(
+								"no response received during waiting time"));
+			}
 		}
 		T result = (T) results.get(id);
 		countDownLatchs.remove(id);
 		results.remove(id);
 		return result;
+
 	}
 
 	public static class Apply implements Serializable {

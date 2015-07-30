@@ -1,8 +1,8 @@
 package org.genericsystem.cache;
 
-import io.vertx.example.util.ExampleRunner;
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
@@ -10,20 +10,27 @@ import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
+public class ClientEngine extends AbstractRoot<ClientGeneric> implements
+		ClientGeneric {
 
 	protected Server server;
 
 	public ClientEngine(Class<?>... userClasses) {
-		this(Statics.ENGINE_VALUE, userClasses);
+		this(Statics.ENGINE_VALUE, null, userClasses);
 	}
 
-	public ClientEngine(Serializable engineValue, Class<?>... userClasses) {
+	public ClientEngine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, userClasses);
 	}
 
-	public ClientEngine(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(engineValue, persistentDirectoryPath, userClasses);
+	public ClientEngine(String engineValue, String host,
+			Class<?>... userClasses) {
+		this(engineValue, host, null, userClasses);
+	}
+
+	public ClientEngine(String engineValue, String host,
+			String persistentDirectoryPath, Class<?>... userClasses) {
+		super(engineValue, host, persistentDirectoryPath, userClasses);
 		isInitialized = true;
 	}
 
@@ -33,8 +40,10 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	protected void initSubRoot(Serializable engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		server = new VertxClientServer(this);
+	protected void initSubRoot(String engineValue, String host,
+			String persistentDirectoryPath, Class<?>... userClasses) {
+		server = new VertxClientServer(this, host, Statics.DEFAULT_PORT, "/"
+				+ engineValue);
 	}
 
 	@Override
@@ -51,7 +60,9 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 		return (ClientCache) super.getCurrentCache();
 	}
 
-	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<ClientGeneric> {
+	public static class LocalContextWrapper extends
+			InheritableThreadLocal<ClientCache> implements
+			Wrapper<ClientGeneric> {
 		@Override
 		public void set(AbstractContext<ClientGeneric> context) {
 			super.set((ClientCache) context);
@@ -93,13 +104,18 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	protected EngineWrapped buildHandler(Class<?> clazz, ClientGeneric meta, List<ClientGeneric> supers, Serializable value, List<ClientGeneric> components, long ts, long[] otherTs) {
-		return new EngineWrapped(clazz, meta, supers, value, components, ts, otherTs);
+	protected EngineWrapped buildHandler(Class<?> clazz, ClientGeneric meta,
+			List<ClientGeneric> supers, Serializable value,
+			List<ClientGeneric> components, long ts, long[] otherTs) {
+		return new EngineWrapped(clazz, meta, supers, value, components, ts,
+				otherTs);
 	}
 
 	class EngineWrapped extends Wrapped {
 
-		public EngineWrapped(Class<?> clazz, ClientGeneric meta, List<ClientGeneric> supers, Serializable value, List<ClientGeneric> components, long ts, long[] otherTs) {
+		public EngineWrapped(Class<?> clazz, ClientGeneric meta,
+				List<ClientGeneric> supers, Serializable value,
+				List<ClientGeneric> components, long ts, long[] otherTs) {
 			super(clazz, meta, supers, value, components, ts, otherTs);
 		}
 
@@ -114,7 +130,8 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 		return server.pickNewTs();
 	}
 
-	public static void main(String[] args) {
-		ExampleRunner.runJavaExample("gs-kernel/src/main/java/", ClientEngine.class, true);
-	}
+	// public static void main(String[] args) {
+	// ExampleRunner.runJavaExample("gs-kernel/src/main/java/",
+	// ClientEngine.class, true);
+	// }
 }

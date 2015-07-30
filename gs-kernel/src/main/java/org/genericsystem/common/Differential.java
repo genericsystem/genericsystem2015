@@ -34,7 +34,7 @@ public class Differential<T extends DefaultVertex<T>> implements
 	}
 
 	protected T plug(T generic) {
-		assert generic.getOtherTs()[0] == Long.MAX_VALUE;
+		// assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
 		return generic;
 	}
