@@ -1,6 +1,7 @@
 package org.genericsystem.cache;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
 
 import java.io.Serializable;
@@ -127,24 +128,18 @@ public class GSBuffer implements Buffer {
 	}
 
 	public Buffer appendGSString(String string) {
-		appendInt(getInt());
-		appendString(string);
-		return this;
+		return appendGSBytes(string.getBytes(CharsetUtil.UTF_8));
+
 	}
 
 	public Buffer appendGSVertex(Vertex vertex) {
+		appendGSClazz(vertex.getClazz());
 		appendLong(vertex.getTs());
 		appendLong(vertex.getMeta());
-		appendInt(vertex.getSupers().size());
-		for (long s : vertex.getSupers())
-			appendLong(s);
+		appendGSLongList(vertex.getSupers());
 		appendGSValue(vertex.getValue());
-		appendInt(vertex.getComponents().size());
-		for (long c : vertex.getComponents())
-			appendLong(c);
-		appendInt(vertex.getOtherTs().length);
-		for (long o : vertex.getOtherTs())
-			appendLong(o);
+		appendGSLongList(vertex.getComponents());
+		appendGSLongArray(vertex.getOtherTs());
 		return this;
 
 	}
@@ -153,6 +148,13 @@ public class GSBuffer implements Buffer {
 		appendInt(vertexArray.length);
 		for (Vertex v : vertexArray)
 			appendGSVertex(v);
+		return this;
+	}
+
+	public Buffer appendGSLongList(List<Long> array) {
+		appendInt(array.size());
+		for (long l : array)
+			appendLong(l);
 		return this;
 	}
 
@@ -168,14 +170,15 @@ public class GSBuffer implements Buffer {
 				.entrySet()) {
 			if (entry.getValue().isInstance(value)) {
 				appendInt(entry.getKey());
+
 				switch (entry.getKey()) {
 				case 0: {
-					appendClazz(((AxedPropertyClass) value).getClass());
+					appendGSClazz(((AxedPropertyClass) value).getClazz());
 					appendInt(((AxedPropertyClass) value).getAxe());
 					return this;
 				}
 				case 1: {
-					appendByte((byte) value);
+					appendInt(((Boolean) value).booleanValue() ? 1 : 0);
 					return this;
 				}
 				case 2: {
@@ -202,12 +205,18 @@ public class GSBuffer implements Buffer {
 					appendShort((Short) value);
 					return this;
 				}
+				case 8: {
+					appendGSString((String) value);
+					return this;
+				}
 				case 9: {
-					appendClazz((Class<?>) value);
+					appendGSClazz((Class<?>) value);
 					return this;
 				}
 				default:
-					throw new IllegalStateException("unknowned class code");
+					throw new IllegalStateException(
+							"unknowned class code in appendGSValue"
+									+ entry.getKey());
 				}
 			}
 		}
@@ -220,34 +229,45 @@ public class GSBuffer implements Buffer {
 		return this;
 	}
 
-	public Buffer appendClazz(Class<?> clazz) {
-		appendGSString(clazz.getName());
+	public Buffer appendGSClazz(Class<?> clazz) {
+		appendGSString(clazz != null ? clazz.getName() : "");
 		return this;
 	}
 
 	public int getInt() {
-		return getInt(index = +4);
+		int result = getInt(index);
+		index += 4;
+		return result;
 	}
 
 	public long getLong() {
-		return getLong(index = +8);
+		long result = getLong(index);
+		index += 8;
+		return result;
 	}
 
 	public double getDouble() {
-		return getDouble(index = +16);
+		double result = getDouble(index);
+		index += 16;
+		return result;
 	}
 
 	public float getFloat() {
-		return getFloat(index = +8);
+		float result = getFloat(index);
+		index += 8;
+		return result;
 	}
 
 	public short getShort() {
-		return getShort(index = +2);
+		short result = getShort(index);
+		index += 2;
+		return result;
 	}
 
 	public String getGSString() {
-		int length = getInt();
-		return getString(index, index += length);
+		byte[] result = getGSBytes();
+		return new String(result);
+
 	}
 
 	public Vertex getGSVertex() {
@@ -283,7 +303,7 @@ public class GSBuffer implements Buffer {
 		case 0:
 			return new AxedPropertyClass((Class) getGSClazz(), getInt());
 		case 1:
-			return getByte() == 1;
+			return (boolean) (getInt() == 1);
 		case 2:
 			return getGSBytes();
 		case 3:
@@ -306,8 +326,10 @@ public class GSBuffer implements Buffer {
 	}
 
 	public Class<?> getGSClazz() {
+		String string = getGSString();
 		try {
-			return Class.forName(getGSString());
+
+			return string.isEmpty() ? null : Class.forName(string);
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(e);
 		}
@@ -315,11 +337,17 @@ public class GSBuffer implements Buffer {
 
 	public byte[] getGSBytes() {
 		int length = getInt();
-		return getBytes(index, index += length);
+		byte[] result = getBytes(index, index + length);
+		if (result.length != length)
+			throw new IllegalStateException(result.length + " " + length);
+		index += length;
+		return result;
 	}
 
 	public byte getByte() {
-		return getByte(index++);
+		byte result = getByte(index);
+		index++;
+		return result;
 	}
 
 	public Buffer setByte(int pos, byte b) {
