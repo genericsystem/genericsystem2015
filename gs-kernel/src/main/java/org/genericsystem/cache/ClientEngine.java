@@ -42,7 +42,7 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	@Override
 	protected void initSubRoot(String engineValue, String host,
 			String persistentDirectoryPath, Class<?>... userClasses) {
-		server = new VertxClientServer(this, host, Statics.DEFAULT_PORT, "/"
+		server = new HttpGSClient(this, host, Statics.DEFAULT_PORT, "/"
 				+ engineValue);
 	}
 
