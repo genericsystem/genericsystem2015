@@ -4,16 +4,13 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.genericsystem.kernel.Root;
 
 public class HttpGSServer extends AbstractVerticle {
-
-	// public static void main(String[] args) {
-	// ExampleRunner.runJavaExample("src/main/java/", HttpGSClient.class,
-	// false);
-	// }
 
 	private final Map<String, Root> roots = new ConcurrentHashMap<>();
 
@@ -40,46 +37,41 @@ public class HttpGSServer extends AbstractVerticle {
 			webSocket.handler(buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				int id = gsBuffer.getInt();
-				System.out.println("RECEIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIVE" + id);
 				int methodId = gsBuffer.getInt();
 				GSBuffer buff = new GSBuffer(Buffer.buffer());
 				buff.appendInt(id).appendInt(methodId);
-				System.out.println(">>>: before server switch" + id);
-				switch (methodId) {
-				case HttpGSClient.PICK_NEW_TS: {
-
-					buff.appendLong(root.pickNewTs());
-					break;
-				}
-				case HttpGSClient.GET_DEPENDENCIES: {
-
-					buff.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
-
-					break;
-				}
-				case HttpGSClient.GET_VERTEX: {
-					buff.appendGSVertex(root.getVertex(gsBuffer.getLong()));
-					break;
-				}
-				case HttpGSClient.APPLY: {
-					try {
-						root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
-					} catch (Exception e) {
-						throw new IllegalStateException(e);
+				// System.out.println(">>>: before server switch" + id);
+					switch (methodId) {
+					case HttpGSClient.PICK_NEW_TS: {
+						buff.appendLong(root.pickNewTs());
+						break;
 					}
-					buff.appendInt(0);
-					break;
-				}
-				default:
-					throw new IllegalStateException("unable to find method:" + methodId + " " + "id :" + id);
-				}
-				System.out.println(">>>>>>: after server switch" + id);
-				assert !webSocket.writeQueueFull();
-				webSocket.writeBinaryMessage(buff);
-			});
+					case HttpGSClient.GET_DEPENDENCIES: {
+						buff.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
+						break;
+					}
+					case HttpGSClient.GET_VERTEX: {
+						buff.appendGSVertex(root.getVertex(gsBuffer.getLong()));
+						break;
+					}
+					case HttpGSClient.APPLY: {
+						try {
+							root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
+						} catch (Exception e) {
+							throw new IllegalStateException(e);
+						}
+						buff.appendInt(0);
+						break;
+					}
+					default:
+						throw new IllegalStateException("unable to find method:" + methodId + " " + "id :" + id);
+					}
+					// System.out.println(">>>>>>: after server switch" + id);
+					assert !webSocket.writeQueueFull();
+					webSocket.writeBinaryMessage(buff);
+				});
 
 		});
-
 		httpServer.listen();
 		System.out.println("Receiver ready!");
 	}

@@ -5,13 +5,14 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
-import java.io.Serializable;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
@@ -49,7 +50,7 @@ public class HttpGSClient implements Server {
 					break;
 				}
 				case GET_DEPENDENCIES: {
-					System.out.println(">>>Client side getdependencies response" + id);
+					// System.out.println(">>>Client side getdependencies response" + id);
 					int size = buff.getInt();
 					long[] result = new long[size];
 					for (int i = 0; i < size; i++) {
@@ -69,10 +70,8 @@ public class HttpGSClient implements Server {
 				default:
 					throw new IllegalStateException("no method called");
 				}
-				System.out.println("countDown " + id + " " + results.get(id));
-				CountDownLatch countDownLatch = countDownLatchs.get(id);
-				System.out.println(">>> countDown on latch : " + id + " " + System.identityHashCode(countDownLatch));
-				countDownLatch.countDown();
+				// System.out.println("countDown " + id + " " + results.get(id));
+				countDownLatchs.get(id).countDown();
 
 			});
 			socketArray[0] = socket;
@@ -85,45 +84,9 @@ public class HttpGSClient implements Server {
 			e.printStackTrace();
 		}
 		webSocket = socketArray[0];
-		// webSocket.exceptionHandler(e -> {
-		// e.printStackTrace();
-		// });
-		// webSocket.handler(buffer -> {
-		// GSBuffer buff = new GSBuffer(buffer);
-		// int id = buff.getInt();
-		// int methodId = buff.getInt();
-		// switch (methodId) {
-		// case PICK_NEW_TS: {
-		// results.put(id, buff.getLong());
-		// break;
-		// }
-		// case GET_DEPENDENCIES: {
-		// System.out.println(">>>Client side getdependencies response" + id);
-		// int size = buff.getInt();
-		// long[] result = new long[size];
-		// for (int i = 0; i < size; i++) {
-		// result[i] = buff.getLong();
-		// }
-		// results.put(id, result);
-		// break;
-		// }
-		// case GET_VERTEX: {
-		// results.put(id, buff.getGSVertex());
-		// break;
-		// }
-		// case APPLY: {
-		// buff.getInt();
-		// break;
-		// }
-		// default:
-		// throw new IllegalStateException("no method called");
-		// }
-		// System.out.println("countDown " + id + " " + results.get(id));
-		// CountDownLatch countDownLatch = countDownLatchs.get(id);
-		// System.out.println(">>> countDown on latch : " + id + " " + System.identityHashCode(countDownLatch));
-		// countDownLatch.countDown();
-		//
-		// });
+		webSocket.exceptionHandler(e -> {
+			e.printStackTrace();
+		});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -136,45 +99,42 @@ public class HttpGSClient implements Server {
 		assert oldCountDownLatch == null;
 		Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
 
-		System.out.println("before writeFinalBinaryFrame(buffer) : " + id);
+		// System.out.println("before writeFinalBinaryFrame(buffer) : " + id);
 		assert !webSocket.writeQueueFull();
 		AsyncResult<T>[] asyncResult = new AsyncResult[1];
 		vertx.executeBlocking(future -> {
-
 			webSocket.writeBinaryMessage(buffer);
-
-			System.out.println("after writeFinalBinaryFrame(buffer) : " + id);
-			boolean latchResult = false;
-			try {
-				System.out.println(">>> waiting for : " + id + " " + System.identityHashCode(countDownLatch));
-				latchResult = countDownLatch.await(5000, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				engine.getCurrentCache().discardWithException(e);
-			}
-			if (!latchResult) {
-				engine.getCurrentCache().discardWithException(new IllegalStateException("no response received during waiting time"));
-			}
-			T result = (T) results.get(id);
-			countDownLatchs.remove(id);
-			results.remove(id);
-			future.complete(result);
-		}, res -> {
-			asyncResult[0] = (AsyncResult<T>) res;
-			mainCountDownLatch.countDown();
-		});
+			// System.out.println("after writeFinalBinaryFrame(buffer) : " + id);
+				boolean latchResult = false;
+				try {
+					// System.out.println(">>> waiting for : " + id + " " + System.identityHashCode(countDownLatch));
+					latchResult = countDownLatch.await(5000, TimeUnit.MILLISECONDS);
+				} catch (InterruptedException e) {
+					engine.getCurrentCache().discardWithException(e);
+				}
+				if (!latchResult) {
+					engine.getCurrentCache().discardWithException(new IllegalStateException("No response received from server during waiting time"));
+				}
+				T result = (T) results.get(id);
+				countDownLatchs.remove(id);
+				results.remove(id);
+				future.complete(result);
+			}, res -> {
+				asyncResult[0] = (AsyncResult<T>) res;
+				mainCountDownLatch.countDown();
+			});
 		try {
 			mainCountDownLatch.await();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Thread.currentThread().interrupt();
 		}
 		return asyncResult[0].result();
 	}
 
 	@Override
 	public Vertex getVertex(long id) {
-		Buffer buff = Buffer.buffer().appendLong(id);
-		Vertex result = (Vertex) synchronize(GET_VERTEX, buff);
+		Vertex result = (Vertex) synchronize(GET_VERTEX, Buffer.buffer().appendLong(id));
 		if (result == null)
 			throw new IllegalStateException("Vertex id: " + id);
 		return result;
@@ -182,22 +142,7 @@ public class HttpGSClient implements Server {
 
 	@Override
 	public long[] getDependencies(long ts, long id) {
-		Buffer buff = Buffer.buffer().appendLong(ts).appendLong(id);
-		return (long[]) synchronize(GET_DEPENDENCIES, buff);
-	}
-
-	public static class Apply implements Serializable {
-
-		private static final long serialVersionUID = 8725793789149242073L;
-		public long ts;
-		public long[] removes;
-		public Vertex[] adds;
-
-		Apply(long ts, long[] removes, Vertex[] adds) {
-			this.ts = ts;
-			this.removes = removes;
-			this.adds = adds;
-		}
+		return (long[]) synchronize(GET_DEPENDENCIES, Buffer.buffer().appendLong(ts).appendLong(id));
 	}
 
 	@Override
