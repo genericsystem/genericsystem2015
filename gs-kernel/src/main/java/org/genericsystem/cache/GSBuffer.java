@@ -23,106 +23,132 @@ public class GSBuffer implements Buffer {
 		this.internal = internal;
 	}
 
+	@Override
 	public void writeToBuffer(Buffer buffer) {
 		internal.writeToBuffer(buffer);
 	}
 
+	@Override
 	public int readFromBuffer(int pos, Buffer buffer) {
 		return internal.readFromBuffer(pos, buffer);
 	}
 
+	@Override
 	public String toString(String enc) {
 		return internal.toString(enc);
 	}
 
+	@Override
 	public byte getByte(int pos) {
 		return internal.getByte(pos);
 	}
 
+	@Override
 	public int getInt(int pos) {
 		return internal.getInt(pos);
 	}
 
+	@Override
 	public long getLong(int pos) {
 		return internal.getLong(pos);
 	}
 
+	@Override
 	public double getDouble(int pos) {
 		return internal.getDouble(pos);
 	}
 
+	@Override
 	public float getFloat(int pos) {
 		return internal.getFloat(pos);
 	}
 
+	@Override
 	public short getShort(int pos) {
 		return internal.getShort(pos);
 	}
 
+	@Override
 	public byte[] getBytes() {
 		return internal.getBytes();
 	}
 
+	@Override
 	public byte[] getBytes(int start, int end) {
 		return internal.getBytes(start, end);
 	}
 
+	@Override
 	public Buffer getBuffer(int start, int end) {
 		return internal.getBuffer(start, end);
 	}
 
+	@Override
 	public String getString(int start, int end, String enc) {
 		return internal.getString(start, end, enc);
 	}
 
+	@Override
 	public String getString(int start, int end) {
 		return internal.getString(start, end);
 	}
 
+	@Override
 	public Buffer appendBuffer(Buffer buff) {
 		return internal.appendBuffer(buff);
 	}
 
+	@Override
 	public Buffer appendBuffer(Buffer buff, int offset, int len) {
 		return internal.appendBuffer(buff, offset, len);
 	}
 
+	@Override
 	public Buffer appendBytes(byte[] bytes) {
 		return internal.appendBytes(bytes);
 	}
 
+	@Override
 	public Buffer appendBytes(byte[] bytes, int offset, int len) {
 		return internal.appendBytes(bytes, offset, len);
 	}
 
+	@Override
 	public Buffer appendByte(byte b) {
 		return internal.appendByte(b);
 	}
 
+	@Override
 	public Buffer appendInt(int i) {
 		return internal.appendInt(i);
 	}
 
+	@Override
 	public Buffer appendLong(long l) {
 		return internal.appendLong(l);
 	}
 
+	@Override
 	public Buffer appendShort(short s) {
 		return internal.appendShort(s);
 	}
 
+	@Override
 	public Buffer appendFloat(float f) {
 		return internal.appendFloat(f);
 	}
 
+	@Override
 	public Buffer appendDouble(double d) {
 		return internal.appendDouble(d);
 	}
 
+	@Override
 	public Buffer appendString(String str, String enc) {
 		return internal.appendString(str, enc);
 	}
 
+	@Override
 	public Buffer appendString(String str) {
 		return internal.appendString(str);
 	}
@@ -166,8 +192,7 @@ public class GSBuffer implements Buffer {
 	}
 
 	public Buffer appendGSValue(Serializable value) {
-		for (Entry<Integer, Class<?>> entry : ApiStatics.SUPPORTED_VALUE_CLASSES
-				.entrySet()) {
+		for (Entry<Integer, Class<?>> entry : ApiStatics.SUPPORTED_VALUE_CLASSES.entrySet()) {
 			if (entry.getValue().isInstance(value)) {
 				appendInt(entry.getKey());
 
@@ -214,9 +239,7 @@ public class GSBuffer implements Buffer {
 					return this;
 				}
 				default:
-					throw new IllegalStateException(
-							"unknowned class code in appendGSValue"
-									+ entry.getKey());
+					throw new IllegalStateException("unknowned class code in appendGSValue" + entry.getKey());
 				}
 			}
 		}
@@ -274,11 +297,9 @@ public class GSBuffer implements Buffer {
 		Class<?> clazz = getGSClazz();
 		long ts = getLong();
 		long meta = getLong();
-		List<Long> supers = Arrays.stream(getGSLongArray()).mapToObj(l -> l)
-				.collect(Collectors.toList());
+		List<Long> supers = Arrays.stream(getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
 		Serializable value = getGSValue();
-		List<Long> components = Arrays.stream(getGSLongArray())
-				.mapToObj(l -> l).collect(Collectors.toList());
+		List<Long> components = Arrays.stream(getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
 		long[] otherTs = getGSLongArray();
 		return new Vertex(clazz, ts, meta, supers, value, components, otherTs);
 	}
@@ -350,76 +371,139 @@ public class GSBuffer implements Buffer {
 		return result;
 	}
 
+	@Override
 	public Buffer setByte(int pos, byte b) {
 		return internal.setByte(pos, b);
 	}
 
+	@Override
 	public Buffer setInt(int pos, int i) {
 		return internal.setInt(pos, i);
 	}
 
+	@Override
 	public Buffer setLong(int pos, long l) {
 		return internal.setLong(pos, l);
 	}
 
+	@Override
 	public Buffer setDouble(int pos, double d) {
 		return internal.setDouble(pos, d);
 	}
 
+	@Override
 	public Buffer setFloat(int pos, float f) {
 		return internal.setFloat(pos, f);
 	}
 
+	@Override
 	public Buffer setShort(int pos, short s) {
 		return internal.setShort(pos, s);
 	}
 
+	@Override
 	public Buffer setBuffer(int pos, Buffer b) {
 		return internal.setBuffer(pos, b);
 	}
 
+	@Override
 	public Buffer setBuffer(int pos, Buffer b, int offset, int len) {
 		return internal.setBuffer(pos, b, offset, len);
 	}
 
+	@Override
 	public Buffer setBytes(int pos, ByteBuffer b) {
 		return internal.setBytes(pos, b);
 	}
 
+	@Override
 	public Buffer setBytes(int pos, byte[] b) {
 		return internal.setBytes(pos, b);
 	}
 
+	@Override
 	public Buffer setBytes(int pos, byte[] b, int offset, int len) {
 		return internal.setBytes(pos, b, offset, len);
 	}
 
+	@Override
 	public Buffer setString(int pos, String str) {
 		return internal.setString(pos, str);
 	}
 
+	@Override
 	public Buffer setString(int pos, String str, String enc) {
 		return internal.setString(pos, str, enc);
 	}
 
+	@Override
 	public int length() {
 		return internal.length();
 	}
 
+	@Override
 	public Buffer copy() {
 		return internal.copy();
 	}
 
+	@Override
 	public Buffer slice() {
 		return internal.slice();
 	}
 
+	@Override
 	public Buffer slice(int start, int end) {
 		return internal.slice(start, end);
 	}
 
+	@Override
 	public ByteBuf getByteBuf() {
 		return internal.getByteBuf();
+	}
+
+	@Override
+	public Buffer appendUnsignedByte(short arg0) {
+		return internal.appendUnsignedByte(arg0);
+	}
+
+	@Override
+	public Buffer appendUnsignedInt(long arg0) {
+		return internal.appendUnsignedInt(arg0);
+	}
+
+	@Override
+	public Buffer appendUnsignedShort(int arg0) {
+		return internal.appendUnsignedShort(arg0);
+	}
+
+	@Override
+	public short getUnsignedByte(int arg0) {
+		return internal.getUnsignedByte(arg0);
+	}
+
+	@Override
+	public long getUnsignedInt(int arg0) {
+		return internal.getUnsignedInt(arg0);
+	}
+
+	@Override
+	public int getUnsignedShort(int arg0) {
+		return internal.getUnsignedShort(arg0);
+	}
+
+	@Override
+	public Buffer setUnsignedByte(int arg0, short arg1) {
+		return internal.setUnsignedByte(arg0, arg1);
+	}
+
+	@Override
+	public Buffer setUnsignedInt(int arg0, long arg1) {
+		return internal.setUnsignedInt(arg0, arg1);
+	}
+
+	@Override
+	public Buffer setUnsignedShort(int arg0, int arg1) {
+		return internal.setUnsignedShort(arg0, arg1);
 	}
 
 }

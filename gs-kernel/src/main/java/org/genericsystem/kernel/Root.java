@@ -2,7 +2,6 @@ package org.genericsystem.kernel;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
@@ -32,17 +31,15 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 		this(value, null, userClasses);
 	}
 
-	public Root(String value, String persistentDirectoryPath,
-			Class<?>... userClasses) {
-		super(value, null, persistentDirectoryPath, userClasses);
+	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
+		super(value, null, 8081, persistentDirectoryPath, userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
 		if (Root.class.equals(getClass()))
 			isInitialized = true;
 	}
 
 	@Override
-	protected void initSubRoot(String value, String host,
-			String persistentDirectoryPath, java.lang.Class<?>... userClasses) {
+	protected void initSubRoot(String value, String host, int port, String persistentDirectoryPath, java.lang.Class<?>... userClasses) {
 		generator = new TsGenerator();
 	};
 
@@ -77,11 +74,8 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	}
 
 	@Override
-	protected RootWrapped buildHandler(Class<?> clazz, Generic meta,
-			List<Generic> supers, Serializable value, List<Generic> components,
-			long ts, long[] otherTs) {
-		return new RootWrapped(clazz, meta, supers, value, components, ts,
-				otherTs);
+	protected RootWrapped buildHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
+		return new RootWrapped(clazz, meta, supers, value, components, ts, otherTs);
 	}
 
 	class RootWrapped extends Wrapped {
@@ -89,9 +83,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 		private final LifeManager lifeManager;
 		private final AbstractTsDependencies dependencies;
 
-		private RootWrapped(Class<?> clazz, Generic meta, List<Generic> supers,
-				Serializable value, List<Generic> components, long ts,
-				long[] otherTs) {
+		private RootWrapped(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
 			super(clazz, meta, supers, value, components, ts, otherTs);
 			this.lifeManager = new LifeManager(getOtherTs());
 			this.dependencies = new AbstractTsDependencies() {
@@ -129,15 +121,11 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	@Override
 	public long[] getDependencies(long ts, long id) {
 		Generic genericById = this.getGenericById(id);
-		return genericById != null ? genericById.getProxyHandler()
-				.getDependencies().stream(ts)
-				.mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
+		return genericById != null ? genericById.getProxyHandler().getDependencies().stream(ts).mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
 	}
 
 	@Override
-	public void apply(long ts, long[] removes, Vertex[] adds)
-			throws ConcurrencyControlException,
-			OptimisticLockConstraintViolationException {
+	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		new Transaction(this, ts).remoteApply(removes, adds);
 	}
 
