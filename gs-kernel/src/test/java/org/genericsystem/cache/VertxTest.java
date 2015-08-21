@@ -4,6 +4,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.genericsystem.kernel.Statics;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -20,7 +21,7 @@ public class VertxTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 	}
 
-	@BeforeClass
+	@AfterClass
 	public void afterClass() {
 		Vertx.vertx().undeploy(HttpGSServer.class.getName());
 	}

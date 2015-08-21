@@ -10,6 +10,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -109,28 +110,26 @@ public class HttpGSClient implements Server {
 		// } catch (InterruptedException e1) {
 		// e1.printStackTrace();
 		// }
-		int id = requestId.getAndIncrement();
-		final BlockingQueue<Object> b = new ArrayBlockingQueue<>(1);
-		BlockingQueue<Object> oldBlockingQueue = bockingQueues.put(id, b);
-		assert oldBlockingQueue == null;
 
-		Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
-		new Thread() {
-			@Override
-			public void run() {
-				webSocket.writeFinalBinaryFrame(buffer);
-			};
-		}.start();
-		// webSocket.writeFinalBinaryFrame(buffer);
 		T result = null;
-		try {
-			result = (T) b.take();
-
-		} catch (InterruptedException e) {
-			engine.getCurrentCache().discardWithException(e);
+		for (;;) {
+			int id = requestId.getAndIncrement();
+			final BlockingQueue<Object> b = new ArrayBlockingQueue<>(1);
+			BlockingQueue<Object> oldBlockingQueue = bockingQueues.put(id, b);
+			assert oldBlockingQueue == null;
+			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
+			webSocket.writeFinalBinaryFrame(buffer);
+			try {
+				result = (T) b.poll(50, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				engine.getCurrentCache().discardWithException(e);
+			}
+			if (result != null) {
+				bockingQueues.remove(id);
+				return result;
+			}
+			System.out.println("Failure");
 		}
-		bockingQueues.remove(id);
-		return result;
 	}
 
 	@Override
