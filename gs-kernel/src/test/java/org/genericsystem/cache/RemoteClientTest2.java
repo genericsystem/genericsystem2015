@@ -1,49 +1,23 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
-import io.vertx.core.json.JsonObject;
+
 import java.util.concurrent.CountDownLatch;
-import org.genericsystem.kernel.Statics;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class RemoteClientTest2 extends AbstractTest {
 
-	// @BeforeTest
-	// public void beforeClass() {
-	// HttpLocalGSServer.create();
-	//
-	// }
-
-	private interface HttpLocalGSServer {
-
-		public static void close() {
-			Vertx.vertx().undeploy(HttpGSServer.class.getName());
-		};
-
-		public static void create(int port, String persistanceRepositoryPath) {
-			Vertx.vertx().deployVerticle(HttpGSServer.class.getName(), new DeploymentOptions().setConfig(new JsonObject().put("port", port).put("persistanceRepositoryPath", persistanceRepositoryPath)));
-		}
-
-		public static void create() {
-			create(Statics.DEFAULT_PORT, null);
-		}
-
-	}
-
-	// @AfterTest
-	// public void afterClass() {
-	// HttpLocalGSServer.close();
-	// }
-
 	public static void main(String[] args) {
-		Vertx.vertx().createHttpServer().websocketHandler(ws -> ws.handler(buffer -> {
-			System.out.println("Server : " + i);
-			ws.writeBinaryMessage(buffer);
-		})).requestHandler(req -> {}).listen(8081);
+		Vertx.vertx().createHttpServer()
+				.websocketHandler(ws -> ws.handler(buffer -> {
+					System.out.println("Server : " + i);
+					ws.writeBinaryMessage(buffer);
+				})).requestHandler(req -> {
+				}).listen(8081);
 	}
 
 	WebSocket[] webSocketArray = new WebSocket[1];
@@ -53,14 +27,15 @@ public class RemoteClientTest2 extends AbstractTest {
 	@BeforeClass
 	public void beforeClass() {
 		CountDownLatch cdl = new CountDownLatch(1);
-		Vertx.vertx().createHttpClient().websocket(8081, "localhost", "/some-uri", websocket -> {
-			websocket.handler(data -> {
-				System.out.println(i++);
-				cdlt.countDown();
-			});
-			webSocketArray[0] = websocket;
-			cdl.countDown();
-		});
+		Vertx.vertx().createHttpClient()
+				.websocket(8081, "localhost", "/some-uri", websocket -> {
+					websocket.handler(data -> {
+						System.out.println(i++);
+						cdlt.countDown();
+					});
+					webSocketArray[0] = websocket;
+					cdl.countDown();
+				});
 		try {
 			cdl.await();
 		} catch (InterruptedException e) {
@@ -80,28 +55,5 @@ public class RemoteClientTest2 extends AbstractTest {
 			e.printStackTrace();
 		}
 	}
-
-	// System.out.println("Thread : " + System.identityHashCode(Thread.currentThread()));
-	// ClientEngine clientEngine = new ClientEngine("firstEngine");
-	// Thread thread = new Thread() {
-	// @Override
-	// public void run() {
-	// System.out.println("Thread : " + System.identityHashCode(Thread.currentThread()));
-	// ClientEngine clientEngine = new ClientEngine("firstEngine");
-	// }
-	// };
-	// thread.start();
-	// try {
-	// thread.join();
-	// } catch (InterruptedException e) {
-	// e.printStackTrace();
-	// }
-
-	// System.out.println("Thread : " + System.identityHashCode(Thread.currentThread()));
-	// ClientEngine clientEngine = new ClientEngine("firstEngine");
-	// ClientGeneric myVehicle = clientEngine.addInstance("Vehicle");
-	// clientEngine.getCurrentCache().flush();
-	// ClientEngine clientEngine2 = new ClientEngine("secondEngine");
-	// ClientGeneric mySecondVehicle = clientEngine2.getInstance("Vehicle");
 
 }

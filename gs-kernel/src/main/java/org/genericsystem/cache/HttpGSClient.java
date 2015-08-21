@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
@@ -36,7 +38,10 @@ public class HttpGSClient implements Server {
 		WebSocket[] socketArray = new WebSocket[1];
 		this.engine = engine;
 		this.vertx = Vertx.vertx();
-		vertx.createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST))
+		vertx.createHttpClient(
+				new HttpClientOptions().setDefaultPort(port).setDefaultHost(
+						host != null ? host
+								: HttpClientOptions.DEFAULT_DEFAULT_HOST))
 
 		.websocket(path, socket -> {
 			socket.handler(buffer -> {
@@ -49,7 +54,6 @@ public class HttpGSClient implements Server {
 					break;
 				}
 				case GET_DEPENDENCIES: {
-					System.out.println(">>>Client side getdependencies response" + id);
 					int size = buff.getInt();
 					long[] result = new long[size];
 					for (int i = 0; i < size; i++) {
@@ -69,9 +73,7 @@ public class HttpGSClient implements Server {
 				default:
 					throw new IllegalStateException("no method called");
 				}
-				System.out.println("countDown " + id + " " + results.get(id));
 				CountDownLatch countDownLatch = countDownLatchs.get(id);
-				System.out.println(">>> countDown on latch : " + id + " " + System.identityHashCode(countDownLatch));
 				countDownLatch.countDown();
 
 			});
@@ -85,45 +87,7 @@ public class HttpGSClient implements Server {
 			e.printStackTrace();
 		}
 		webSocket = socketArray[0];
-		// webSocket.exceptionHandler(e -> {
-		// e.printStackTrace();
-		// });
-		// webSocket.handler(buffer -> {
-		// GSBuffer buff = new GSBuffer(buffer);
-		// int id = buff.getInt();
-		// int methodId = buff.getInt();
-		// switch (methodId) {
-		// case PICK_NEW_TS: {
-		// results.put(id, buff.getLong());
-		// break;
-		// }
-		// case GET_DEPENDENCIES: {
-		// System.out.println(">>>Client side getdependencies response" + id);
-		// int size = buff.getInt();
-		// long[] result = new long[size];
-		// for (int i = 0; i < size; i++) {
-		// result[i] = buff.getLong();
-		// }
-		// results.put(id, result);
-		// break;
-		// }
-		// case GET_VERTEX: {
-		// results.put(id, buff.getGSVertex());
-		// break;
-		// }
-		// case APPLY: {
-		// buff.getInt();
-		// break;
-		// }
-		// default:
-		// throw new IllegalStateException("no method called");
-		// }
-		// System.out.println("countDown " + id + " " + results.get(id));
-		// CountDownLatch countDownLatch = countDownLatchs.get(id);
-		// System.out.println(">>> countDown on latch : " + id + " " + System.identityHashCode(countDownLatch));
-		// countDownLatch.countDown();
-		//
-		// });
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,28 +95,20 @@ public class HttpGSClient implements Server {
 		int id = requestId.incrementAndGet();
 		final CountDownLatch mainCountDownLatch = new CountDownLatch(1);
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		CountDownLatch oldCountDownLatch = countDownLatchs.put(id, countDownLatch);
+		CountDownLatch oldCountDownLatch = countDownLatchs.put(id,
+				countDownLatch);
 
 		assert oldCountDownLatch == null;
-		Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
-
-		System.out.println("before writeFinalBinaryFrame(buffer) : " + id);
+		Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId)
+				.appendBuffer(parameters);
 		assert !webSocket.writeQueueFull();
 		AsyncResult<T>[] asyncResult = new AsyncResult[1];
 		vertx.executeBlocking(future -> {
-
 			webSocket.writeBinaryMessage(buffer);
-
-			System.out.println("after writeFinalBinaryFrame(buffer) : " + id);
-			boolean latchResult = false;
 			try {
-				System.out.println(">>> waiting for : " + id + " " + System.identityHashCode(countDownLatch));
-				latchResult = countDownLatch.await(5000, TimeUnit.MILLISECONDS);
+				countDownLatch.await(5000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				engine.getCurrentCache().discardWithException(e);
-			}
-			if (!latchResult) {
-				engine.getCurrentCache().discardWithException(new IllegalStateException("no response received during waiting time"));
 			}
 			T result = (T) results.get(id);
 			countDownLatchs.remove(id);
@@ -165,7 +121,7 @@ public class HttpGSClient implements Server {
 		try {
 			mainCountDownLatch.await();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 		return asyncResult[0].result();
@@ -201,13 +157,17 @@ public class HttpGSClient implements Server {
 	}
 
 	@Override
-	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(long ts, long[] removes, Vertex[] adds)
+			throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
 		GSBuffer gsBuffer = new GSBuffer(Buffer.buffer());
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		assert Arrays.stream(adds).allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
-		if (Arrays.stream(adds).anyMatch(v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
+		assert Arrays.stream(adds).allMatch(
+				add -> add.getOtherTs()[0] == Long.MAX_VALUE);
+		if (Arrays.stream(adds).anyMatch(
+				v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
 			throw new IllegalStateException("");
 		synchronize(APPLY, gsBuffer);
 	}
