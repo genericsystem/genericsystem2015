@@ -1,5 +1,7 @@
 package org.genericsystem.common;
 
+import io.vertx.core.Vertx;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -9,10 +11,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -36,7 +40,11 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	}
 
 	public AbstractRoot(String persistentDirectoryPath, Class<?>... userClasses) {
-		this(Statics.ENGINE_VALUE, null, 8081, persistentDirectoryPath, userClasses);
+		this(null, Statics.ENGINE_VALUE, null, 8081, persistentDirectoryPath, userClasses);
+	}
+
+	public AbstractRoot(Vertx vertx, String persistentDirectoryPath, Class<?>... userClasses) {
+		this(vertx, Statics.ENGINE_VALUE, null, 8081, persistentDirectoryPath, userClasses);
 	}
 
 	@Override
@@ -45,9 +53,9 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	}
 
 	@SuppressWarnings("unchecked")
-	public AbstractRoot(String value, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+	public AbstractRoot(Vertx vertx, String value, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init((T) this, buildHandler(getClass(), (T) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
-		initSubRoot(value, host, port, persistentDirectoryPath, userClasses);
+		initSubRoot(vertx, value, host, port, persistentDirectoryPath, userClasses);
 
 		newCache().start();
 		systemCache = new SystemCache<>(this, getClass());
@@ -68,7 +76,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return handler;
 	}
 
-	protected abstract void initSubRoot(String value, String host, int port, String persistentDirectoryPath, Class<?>... userClasses);
+	protected abstract void initSubRoot(Vertx vertx, String value, String host, int port, String persistentDirectoryPath, Class<?>... userClasses);
 
 	@Override
 	public abstract AbstractContext<T> newCache();
