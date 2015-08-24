@@ -1,12 +1,11 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
-import io.vertx.core.json.JsonObject;
+
 import java.util.concurrent.CountDownLatch;
-import org.genericsystem.kernel.Statics;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -18,21 +17,21 @@ public class RemoteClientTest2 extends AbstractTest {
 	//
 	// }
 
-	private interface HttpLocalGSServer {
-
-		public static void close() {
-			Vertx.vertx().undeploy(HttpGSServer.class.getName());
-		};
-
-		public static void create(int port, String persistanceRepositoryPath) {
-			Vertx.vertx().deployVerticle(HttpGSServer.class.getName(), new DeploymentOptions().setConfig(new JsonObject().put("port", port).put("persistanceRepositoryPath", persistanceRepositoryPath)));
-		}
-
-		public static void create() {
-			create(Statics.DEFAULT_PORT, null);
-		}
-
-	}
+	// private interface HttpLocalGSServer {
+	//
+	// public static void close() {
+	// Vertx.vertx().undeploy(WebSocketGSServer.class.getName());
+	// };
+	//
+	// public static void create(int port, String persistanceRepositoryPath) {
+	// Vertx.vertx().deployVerticle(WebSocketGSServer.class.getName(), new DeploymentOptions().setConfig(new JsonObject().put("port", port).put("persistanceRepositoryPath", persistanceRepositoryPath)));
+	// }
+	//
+	// public static void create() {
+	// create(Statics.DEFAULT_PORT, null);
+	// }
+	//
+	// }
 
 	// @AfterTest
 	// public void afterClass() {
@@ -43,7 +42,8 @@ public class RemoteClientTest2 extends AbstractTest {
 		Vertx.vertx().createHttpServer().websocketHandler(ws -> ws.handler(buffer -> {
 			System.out.println("Server : " + i);
 			ws.writeBinaryMessage(buffer);
-		})).requestHandler(req -> {}).listen(8081);
+		})).requestHandler(req -> {
+		}).listen(8081);
 	}
 
 	WebSocket[] webSocketArray = new WebSocket[1];

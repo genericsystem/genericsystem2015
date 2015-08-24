@@ -1,77 +1,63 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.Statics;
 
-public class HttpGSServer extends AbstractVerticle {
-
-	private final Map<String, Root> roots = new ConcurrentHashMap<>();
-
+public class HttpGSServer extends AbstractGSServer {
 	@Override
 	public void start() {
+		super.start();
 		HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(config().getInteger("port")));
-
-		httpServer.websocketHandler(webSocket -> {
-			String path = webSocket.path();
-			Root root_ = roots.get(path);
-			if (root_ == null) {
-				Root result = roots.putIfAbsent(path, root_ = new Root(path.substring(1, path.length()), config().getString("persistanceRepositoryPath")));
-				if (result != null) {
-					root_.close();
-					root_ = result;
-				}
-
-			}
-
-			final Root root = root_;
-			webSocket.exceptionHandler(e -> {
+		httpServer.requestHandler(request -> {
+			String path = request.path();
+			Root root = getRoots().get(path);
+			if (root == null)
+				throw new IllegalStateException("Unable to find database :" + path);
+			request.exceptionHandler(e -> {
 				e.printStackTrace();
 			});
-			webSocket.handler(buffer -> {
-				GSBuffer gsBuffer = new GSBuffer(buffer);
-				int id = gsBuffer.getInt();
-				int methodId = gsBuffer.getInt();
-				GSBuffer buff = new GSBuffer(Buffer.buffer());
-				buff.appendInt(id).appendInt(methodId);
-				// System.out.println("Server will respond to id : " + id);
-				switch (methodId) {
-				case HttpGSClient.PICK_NEW_TS: {
-					buff.appendLong(root.pickNewTs());
-					break;
-				}
-				case HttpGSClient.GET_DEPENDENCIES: {
-					buff.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
-					break;
-				}
-				case HttpGSClient.GET_VERTEX: {
-					buff.appendGSVertex(root.getVertex(gsBuffer.getLong()));
-					break;
-				}
-				case HttpGSClient.APPLY: {
-					try {
-						root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
-						buff.appendLong(0);
-					} catch (Exception e) {
-						e.printStackTrace();
-						throw new IllegalStateException(e);
-					}
-					break;
-				}
-				default:
-					throw new IllegalStateException("unable to find method:" + methodId + " " + "id :" + id);
-				}
-				// System.out.println(">>>>>>: after server switch" + id);
-					assert !webSocket.writeQueueFull();
-					webSocket.writeFinalBinaryFrame(buff);
-				});
-
+			request.handler(getHandler(root, buffer -> {
+				request.response().end(buffer);
+				request.response().close();
+			}));
 		});
 		httpServer.listen();
-		System.out.println("Receiver ready!");
+		System.out.println("Generic System server ready!");
+	}
+
+	@Override
+	public void stop() {
+		super.stop();
+		System.out.println("Generic System server stopped!");
+	}
+
+	public static class GsDeploymentConfig extends JsonObject {
+
+		public GsDeploymentConfig() {
+			super.put("host", Statics.DEFAULT_HOST);
+			super.put("port", Statics.DEFAULT_PORT);
+			super.put("engines", new JsonArray());
+			addEngine(null, null);
+		}
+
+		public GsDeploymentConfig setHost(String host) {
+			super.put("host", host);
+			return this;
+		}
+
+		public GsDeploymentConfig setPort(int port) {
+			super.put("port", port);
+			return this;
+		}
+
+		public GsDeploymentConfig addEngine(String engineValue, String repositoryPath) {
+			super.getJsonArray("engines").add(new JsonObject().put("engineValue", engineValue).put("engineRepositoryPath", repositoryPath));
+			return this;
+		}
 	}
 }
