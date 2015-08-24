@@ -30,6 +30,12 @@ public class HttpGSServer extends AbstractGSServer {
 		System.out.println("Generic System server ready!");
 	}
 
+	@Override
+	public void stop() {
+		super.stop();
+		System.out.println("Generic System server stopped!");
+	}
+
 	public static class GsDeploymentConfig extends JsonObject {
 
 		public GsDeploymentConfig() {

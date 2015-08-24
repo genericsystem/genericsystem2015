@@ -37,7 +37,7 @@ public class VertxTest extends AbstractTest {
 		System.out.println("beforeClass ok");
 	}
 
-	@Test(invocationCount = 1000)
+	@Test(invocationCount = 10)
 	public void test_001() {
 		assert vertx != null;
 		ClientEngine engine = new ClientEngine(vertx);
@@ -45,6 +45,20 @@ public class VertxTest extends AbstractTest {
 
 	@AfterClass
 	public void afterClass() {
-		vertxServer.undeploy(WebSocketGSServer.class.getName());
+		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
+		vertxServer.undeploy(HttpGSServer.class.getName(), result -> {
+			try {
+				queue.put(0);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
+		try {
+			queue.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("afterClass ok");
 	}
 }
