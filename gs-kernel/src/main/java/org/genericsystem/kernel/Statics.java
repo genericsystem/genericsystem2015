@@ -25,7 +25,7 @@ public class Statics {
 	public static final long GARBAGE_INITIAL_DELAY = 1000L;
 	public static final long LIFE_TIMEOUT = 1386174608777L;// 30 minutes
 	public final static String DEFAULT_HOST = "localhost";
-	public final static int DEFAULT_PORT = 8081;
+	public final static int DEFAULT_PORT = 8082;
 
 	public static void debugCurrentThread() {
 		threadDebugged.set(System.currentTimeMillis());
@@ -41,7 +41,8 @@ public class Statics {
 
 	public static void logTimeIfCurrentThreadDebugged(String message) {
 		if (isCurrentThreadDebugged())
-			log.info(message + " : " + (System.currentTimeMillis() - threadDebugged.get()));
+			log.info(message + " : "
+					+ (System.currentTimeMillis() - threadDebugged.get()));
 	}
 
 	public static class Supers<T extends DefaultVertex<T>> extends ArrayList<T> {

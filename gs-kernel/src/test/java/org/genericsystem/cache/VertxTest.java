@@ -6,7 +6,6 @@ import io.vertx.core.Vertx;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.genericsystem.cache.HttpGSServer.GsDeploymentConfig;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
