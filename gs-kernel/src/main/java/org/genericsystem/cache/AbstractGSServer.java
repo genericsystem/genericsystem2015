@@ -28,7 +28,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			engineValue = engineValue == null ? Statics.ENGINE_VALUE
 					: engineValue;
 			Root root = new Root(engineValue,
-					engineJson.getString("persistanceRepositoryPath"));
+					engineJson.getString("engineRepositoryPath"));
 			roots.put("/" + engineValue, root);
 			System.out.println("Starts engine : " + "/" + engineValue);
 		}

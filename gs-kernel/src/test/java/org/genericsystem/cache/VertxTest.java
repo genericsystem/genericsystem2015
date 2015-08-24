@@ -14,7 +14,7 @@ public class VertxTest extends AbstractTest {
 	Vertx vertx = Vertx.vertx();
 	Vertx vertxServer = Vertx.vertx();
 
-	String id;
+	String ServerVerticleId;
 
 	@BeforeClass
 	public void beforeClass() {
@@ -27,7 +27,7 @@ public class VertxTest extends AbstractTest {
 			};
 		});
 		try {
-			id = queue.take();
+			ServerVerticleId = queue.take();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return;
@@ -44,7 +44,7 @@ public class VertxTest extends AbstractTest {
 	@AfterClass
 	public void afterClass() {
 		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
-		vertxServer.undeploy(id, result -> {
+		vertxServer.undeploy(ServerVerticleId, result -> {
 			try {
 				assert result.succeeded() : result.cause();
 				queue.put(0);

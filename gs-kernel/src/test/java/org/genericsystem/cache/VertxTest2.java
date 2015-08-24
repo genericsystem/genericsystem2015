@@ -14,6 +14,7 @@ public class VertxTest2 extends AbstractTest {
 
 	Vertx vertx = Vertx.vertx();
 	Vertx vertxServer = Vertx.vertx();
+	String ServerVerticleId;
 
 	private final String directoryPath = System.getenv("HOME")
 			+ "/test/snapshot_save";
@@ -21,7 +22,7 @@ public class VertxTest2 extends AbstractTest {
 	@BeforeClass
 	public void beforeClass() {
 
-		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
+		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
 
 		vertxServer.deployVerticle(
 				HttpGSServer.class.getName(),
@@ -29,14 +30,14 @@ public class VertxTest2 extends AbstractTest {
 						directoryPath).addEngine("database1", null),
 				result -> {
 					try {
-						queue.put(0);
+						queue.put(result.result());
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 					;
 				});
 		try {
-			queue.take();
+			ServerVerticleId = queue.take();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return;
@@ -82,7 +83,7 @@ public class VertxTest2 extends AbstractTest {
 	@AfterClass
 	public void afterClass() {
 		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
-		vertxServer.undeploy(HttpGSServer.class.getName(), result -> {
+		vertxServer.undeploy(ServerVerticleId, result -> {
 			try {
 				queue.put(0);
 			} catch (Exception e1) {
