@@ -15,31 +15,37 @@ import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSServer extends AbstractVerticle {
 
-	private Map<String, Root> roots;// must be shared if several verticles instances
+	private Map<String, Root> roots;// must be shared if several verticles
+									// instances
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void start() {
 		roots = new HashMap<String, Root>();
-		for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
-			String engineName = engineJson.getString("engineName");
-			engineName = engineName == null ? Statics.ENGINE_VALUE : engineName;
-			Root root = new Root(engineName, engineJson.getString("persistanceRepositoryPath"));
-			roots.put("/" + engineName, root);
-			System.out.println("Starts engine : " + "/" + engineName);
+		for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray(
+				"engines").getList()) {
+			String engineValue = engineJson.getString("engineValue");
+			engineValue = engineValue == null ? Statics.ENGINE_VALUE
+					: engineValue;
+			Root root = new Root(engineValue,
+					engineJson.getString("engineRepositoryPath"));
+			roots.put("/" + engineValue, root);
+			System.out.println("Starts engine : " + "/" + engineValue);
 		}
 	}
 
 	@Override
 	public void stop() {
 		System.out.println("Stopping engines...");
-		for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
-			String engineName = engineJson.getString("engineName");
-			engineName = engineName == null ? Statics.ENGINE_VALUE : engineName;
-			Root root = roots.get("/" + engineName);
+		for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray(
+				"engines").getList()) {
+			String engineValue = engineJson.getString("engineValue");
+			engineValue = engineValue == null ? Statics.ENGINE_VALUE
+					: engineValue;
+			Root root = roots.get("/" + engineValue);
 			root.close();
-			roots.remove("/" + engineName);
-			System.out.println("Stops engine : " + "/" + engineName);
+			roots.remove("/" + engineValue);
+			System.out.println("Stops engine : " + "/" + engineValue);
 		}
 	}
 
@@ -61,7 +67,8 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 				break;
 			}
 			case WebSocketGSClient.GET_DEPENDENCIES: {
-				replyBuffer.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
+				replyBuffer.appendGSLongArray(root.getDependencies(
+						gsBuffer.getLong(), gsBuffer.getLong()));
 				break;
 			}
 			case WebSocketGSClient.GET_VERTEX: {
@@ -70,7 +77,8 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			}
 			case WebSocketGSClient.APPLY: {
 				try {
-					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
+					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(),
+							gsBuffer.getGSVertexArray());
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -79,7 +87,8 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 				break;
 			}
 			default:
-				throw new IllegalStateException("unable to find method:" + methodId + " " + "id :" + id);
+				throw new IllegalStateException("unable to find method:"
+						+ methodId + " " + "id :" + id);
 			}
 			sender.accept(replyBuffer);
 		};

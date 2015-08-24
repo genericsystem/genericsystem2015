@@ -2,11 +2,8 @@ package org.genericsystem.cache;
 
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import org.genericsystem.kernel.Root;
-import org.genericsystem.kernel.Statics;
 
 public class HttpGSServer extends AbstractGSServer {
 	@Override
@@ -34,30 +31,5 @@ public class HttpGSServer extends AbstractGSServer {
 	public void stop() {
 		super.stop();
 		System.out.println("Generic System server stopped!");
-	}
-
-	public static class GsDeploymentConfig extends JsonObject {
-
-		public GsDeploymentConfig() {
-			super.put("host", Statics.DEFAULT_HOST);
-			super.put("port", Statics.DEFAULT_PORT);
-			super.put("engines", new JsonArray());
-			addEngine(null, null);
-		}
-
-		public GsDeploymentConfig setHost(String host) {
-			super.put("host", host);
-			return this;
-		}
-
-		public GsDeploymentConfig setPort(int port) {
-			super.put("port", port);
-			return this;
-		}
-
-		public GsDeploymentConfig addEngine(String engineValue, String repositoryPath) {
-			super.getJsonArray("engines").add(new JsonObject().put("engineValue", engineValue).put("engineRepositoryPath", repositoryPath));
-			return this;
-		}
 	}
 }
