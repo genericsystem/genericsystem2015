@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class RemoteClientTest2 extends AbstractTest {
+public class RemoteClientTest extends AbstractTest {
 
 	// @BeforeTest
 	// public void beforeClass() {

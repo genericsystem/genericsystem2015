@@ -1,7 +1,10 @@
 package org.genericsystem.cache;
 
+import io.vertx.core.Vertx;
+
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
@@ -13,20 +16,20 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 
 	protected Server server;
 
-	public ClientEngine(Class<?>... userClasses) {
-		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
+	public ClientEngine(Vertx vertx, Class<?>... userClasses) {
+		this(vertx, Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public ClientEngine(String engineValue, Class<?>... userClasses) {
-		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
+	public ClientEngine(Vertx vertx, String engineValue, Class<?>... userClasses) {
+		this(vertx, engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
-		this(engineValue, host, port, null, userClasses);
+	public ClientEngine(Vertx vertx, String engineValue, String host, int port, Class<?>... userClasses) {
+		this(vertx, engineValue, host, port, null, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(engineValue, host, port, persistentDirectoryPath, userClasses);
+	public ClientEngine(Vertx vertx, String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+		super(vertx, engineValue, host, port, persistentDirectoryPath, userClasses);
 		isInitialized = true;
 	}
 
@@ -36,8 +39,8 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	protected void initSubRoot(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
-		server = new HttpGSClient(this, host, port, "/" + engineValue);
+	protected void initSubRoot(Vertx vertx, String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+		server = new HttpGSClient(vertx, this, host, port, "/" + engineValue);
 	}
 
 	@Override

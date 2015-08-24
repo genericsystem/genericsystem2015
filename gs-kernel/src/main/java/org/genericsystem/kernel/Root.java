@@ -1,7 +1,10 @@
 package org.genericsystem.kernel;
 
+import io.vertx.core.Vertx;
+
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
@@ -32,14 +35,14 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	}
 
 	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(value, null, 8081, persistentDirectoryPath, userClasses);
+		super(null, value, null, 8081, persistentDirectoryPath, userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
 		if (Root.class.equals(getClass()))
 			isInitialized = true;
 	}
 
 	@Override
-	protected void initSubRoot(String value, String host, int port, String persistentDirectoryPath, java.lang.Class<?>... userClasses) {
+	protected void initSubRoot(Vertx vertx, String value, String host, int port, String persistentDirectoryPath, java.lang.Class<?>... userClasses) {
 		generator = new TsGenerator();
 	};
 
