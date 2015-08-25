@@ -17,7 +17,8 @@ import org.genericsystem.kernel.Server;
 public abstract class AbstractGSClient implements Server {
 	private final ClientEngine engine;
 	private static final AtomicInteger requestId = new AtomicInteger(0);
-	// private static final Map<Integer, BlockingQueue<Object>> bockingQueues = new ConcurrentHashMap<>();
+	// private static final Map<Integer, BlockingQueue<Object>> bockingQueues =
+	// new ConcurrentHashMap<>();
 	BlockingQueue<Object> blockingQueue;
 	public static final int PICK_NEW_TS = 0;
 	public static final int GET_DEPENDENCIES = 1;
@@ -39,7 +40,8 @@ public abstract class AbstractGSClient implements Server {
 				break;
 			}
 			case GET_DEPENDENCIES: {
-				// System.out.println(">>>Client side getdependencies response" + id);
+				// System.out.println(">>>Client side getdependencies response"
+				// + id);
 				int size = buff.getInt();
 				long[] result = new long[size];
 				for (int i = 0; i < size; i++) {
@@ -87,12 +89,34 @@ public abstract class AbstractGSClient implements Server {
 		for (;;) {
 			int id = requestId.getAndIncrement();
 			blockingQueue = new ArrayBlockingQueue<>(1);
-			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
+			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId)
+					.appendBuffer(parameters);
 			send(buffer);
 			try {
 				result = (T) blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				engine.getCurrentCache().discardWithException(e);
+			}
+
+			if (result instanceof ConcurrencyControlException) {
+				try {
+					throw new ConcurrencyControlException("");
+				} catch (ConcurrencyControlException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				blockingQueue = null;
+
+			}
+			if (result instanceof OptimisticLockConstraintViolationException) {
+
+				try {
+					throw new OptimisticLockConstraintViolationException("");
+				} catch (OptimisticLockConstraintViolationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				blockingQueue = null;
 			}
 			if (result != null) {
 				blockingQueue = null;
@@ -107,7 +131,8 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public Vertex getVertex(long id) {
-		Vertex result = (Vertex) synchronize(GET_VERTEX, Buffer.buffer().appendLong(id));
+		Vertex result = (Vertex) synchronize(GET_VERTEX, Buffer.buffer()
+				.appendLong(id));
 		if (result == null)
 			throw new IllegalStateException("Vertex id: " + id);
 		return result;
@@ -115,17 +140,22 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public long[] getDependencies(long ts, long id) {
-		return (long[]) synchronize(GET_DEPENDENCIES, Buffer.buffer().appendLong(ts).appendLong(id));
+		return (long[]) synchronize(GET_DEPENDENCIES, Buffer.buffer()
+				.appendLong(ts).appendLong(id));
 	}
 
 	@Override
-	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(long ts, long[] removes, Vertex[] adds)
+			throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
 		GSBuffer gsBuffer = new GSBuffer(Buffer.buffer());
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		assert Arrays.stream(adds).allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
-		if (Arrays.stream(adds).anyMatch(v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
+		assert Arrays.stream(adds).allMatch(
+				add -> add.getOtherTs()[0] == Long.MAX_VALUE);
+		if (Arrays.stream(adds).anyMatch(
+				v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
 			throw new IllegalStateException("");
 		synchronize(APPLY, gsBuffer);
 	}
