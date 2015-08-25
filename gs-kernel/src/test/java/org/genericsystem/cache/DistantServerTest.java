@@ -11,11 +11,10 @@ public class DistantServerTest extends AbstractTest {
 	Vertx vertxServer = Vertx.vertx();
 	String ServerVerticleId;
 
-	@Test(invocationCount = 1000)
+	@Test(invocationCount = 100)
 	public void test_001() {
 		assert vertx != null;
-		ClientEngine engine = new ClientEngine(vertx, Statics.ENGINE_VALUE,
-				"192.168.1.13", 8082);
+		ClientEngine engine = new ClientEngine(vertx, Statics.ENGINE_VALUE, "82.240.164.123", 8082);
 	}
 
 }
