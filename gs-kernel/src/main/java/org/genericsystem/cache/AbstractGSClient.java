@@ -97,26 +97,37 @@ public abstract class AbstractGSClient implements Server {
 			} catch (InterruptedException e) {
 				engine.getCurrentCache().discardWithException(e);
 			}
+			if (result != null) {
+				blockingQueue = null;
+				return result;
+			}
+			System.out.println("Failure");
+			// throw new IllegalStateException();// For now
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T unsafeSynchronize(int methodId, Buffer parameters)
+			throws ConcurrencyControlException,
+			OptimisticLockConstraintViolationException {
+		T result = null;
+		for (;;) {
+			int id = requestId.getAndIncrement();
+			blockingQueue = new ArrayBlockingQueue<>(1);
+			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId)
+					.appendBuffer(parameters);
+			send(buffer);
+			try {
+				result = (T) blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				engine.getCurrentCache().discardWithException(e);
+			}
 
 			if (result instanceof ConcurrencyControlException) {
-				try {
-					throw new ConcurrencyControlException("");
-				} catch (ConcurrencyControlException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				blockingQueue = null;
-
+				throw new ConcurrencyControlException("reaching synchronize");
 			}
 			if (result instanceof OptimisticLockConstraintViolationException) {
-
-				try {
-					throw new OptimisticLockConstraintViolationException("");
-				} catch (OptimisticLockConstraintViolationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				blockingQueue = null;
+				throw new OptimisticLockConstraintViolationException("");
 			}
 			if (result != null) {
 				blockingQueue = null;
@@ -157,7 +168,7 @@ public abstract class AbstractGSClient implements Server {
 		if (Arrays.stream(adds).anyMatch(
 				v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
 			throw new IllegalStateException("");
-		synchronize(APPLY, gsBuffer);
+		unsafeSynchronize(APPLY, gsBuffer);
 	}
 
 	@Override
