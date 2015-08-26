@@ -9,43 +9,33 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 @Test
 public class VertxTest2 extends AbstractTest {
 
 	String ServerVerticleId;
-	private final String directoryPath = System.getenv("HOME")
-			+ "/test/Vertx_tests/snapshot_save";
+	private final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
 
-	@BeforeTest
-	public void cleanDirectory() {
+	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
 		if (file.exists())
 			for (File f : file.listFiles())
 				f.delete();
-		System.out.println("directory cleaned");
 	}
 
 	@BeforeClass
 	public void beforeClass() {
-
+		System.out.println("before class");
+		cleanDirectory(directoryPath);
 		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
-		GSVertx.vertx()
-				.getVertx()
-				.deployVerticle(
-						HttpGSServer.class.getName(),
-						new GSDeploymentOptions().addEngine(
-								Statics.ENGINE_VALUE, null).addEngine(
-								"Engine1", directoryPath), result -> {
-							try {
-								queue.put(result.result());
-							} catch (Exception e1) {
-								e1.printStackTrace();
-							}
-							;
-						});
+		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath), result -> {
+			try {
+				queue.put(result.result());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
 		try {
 			ServerVerticleId = queue.take();
 		} catch (InterruptedException e) {
@@ -70,13 +60,13 @@ public class VertxTest2 extends AbstractTest {
 	}
 
 	public void testPersistanceOK() {
-		ClientEngine engine = new ClientEngine("Engine1");
+		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric myVehicle = engine.addInstance("Vehicle2");
 		engine.getCurrentCache().flush();
 		engine.close();
 		afterClass();
 		beforeClass();
-		ClientEngine secondEngine = new ClientEngine("Engine1");
+		ClientEngine secondEngine = new ClientEngine(Statics.ENGINE_VALUE);
 		assert secondEngine.getInstance("Vehicle2") != null;
 	}
 
