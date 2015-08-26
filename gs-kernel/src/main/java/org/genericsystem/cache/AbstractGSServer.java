@@ -18,42 +18,60 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 	private Map<String, Root> roots;// must be shared if several verticles
 									// instances
 
+	private final String directoryPath = System.getenv("HOME")
+			+ "/test/snapshot_save";
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void start() {
+
 		roots = new HashMap<String, Root>();
-		for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray(
-				"engines").getList()) {
-			String engineValue = engineJson.getString("engineValue");
-			engineValue = engineValue == null ? Statics.ENGINE_VALUE
-					: engineValue;
-			Root root = new Root(engineValue,
-					engineJson.getString("engineRepositoryPath"));
-			roots.put("/" + engineValue, root);
-			System.out.println("Starts engine : " + "/" + engineValue);
-		}
+		if (config().getJsonArray("engines").isEmpty()) {
+			Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
+			roots.put("/" + Statics.ENGINE_VALUE, root);
+			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
+		} else
+			for (JsonObject engineJson : (List<JsonObject>) config()
+					.getJsonArray("engines").getList()) {
+
+				String engineValue = engineJson.getString("engineValue");
+				engineValue = engineValue == null ? Statics.ENGINE_VALUE
+						: engineValue;
+				Root root = new Root(engineValue,
+						engineJson.getString("engineRepositoryPath"));
+				roots.put("/" + engineValue, root);
+				System.out.println("Starts engine : " + "/" + engineValue);
+			}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void stop() {
 		System.out.println("Stopping engines...");
-		for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray(
-				"engines").getList()) {
-			String engineValue = engineJson.getString("engineValue");
-			engineValue = engineValue == null ? Statics.ENGINE_VALUE
-					: engineValue;
-			Root root = roots.get("/" + engineValue);
+		if (config().getJsonArray("engines").isEmpty()) {
+			Root root = roots.get("/" + Statics.ENGINE_VALUE);
 			root.close();
-			roots.remove("/" + engineValue);
-			System.out.println("Stops engine : " + "/" + engineValue);
-		}
+			roots.remove("/" + Statics.ENGINE_VALUE);
+			System.out.println("Stops engine : " + "/" + Statics.ENGINE_VALUE);
+		} else
+			for (JsonObject engineJson : (List<JsonObject>) config()
+					.getJsonArray("engines").getList()) {
+				String engineValue = engineJson.getString("engineValue");
+				engineValue = engineValue == null ? Statics.ENGINE_VALUE
+						: engineValue;
+				Root root = roots.get("/" + engineValue);
+				root.close();
+				roots.remove("/" + engineValue);
+				System.out.println("Stops engine : " + "/" + engineValue);
+			}
 	}
 
 	protected Map<String, Root> getRoots() {
 		return roots;
 	}
 
-	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender) {
+	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender,
+			Consumer<Exception> exceptionSender) {
 		return buffer -> {
 			GSBuffer gsBuffer = new GSBuffer(buffer);
 			int id = gsBuffer.getInt();
@@ -82,6 +100,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {
 					e.printStackTrace();
+					exceptionSender.accept(e);
 					throw new IllegalStateException(e);
 				}
 				break;
@@ -93,4 +112,5 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			sender.accept(replyBuffer);
 		};
 	}
+
 }

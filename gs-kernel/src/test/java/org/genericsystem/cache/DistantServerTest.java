@@ -9,7 +9,6 @@ public class DistantServerTest extends AbstractTest {
 
 	Vertx vertx = Vertx.vertx();
 	Vertx vertxServer = Vertx.vertx();
-	String ServerVerticleId;
 
 	@Test(invocationCount = 1000)
 	public void test_001() {
