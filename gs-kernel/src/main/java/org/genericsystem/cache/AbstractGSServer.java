@@ -18,9 +18,6 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 	private Map<String, Root> roots;// must be shared if several verticles
 									// instances
 
-	private final String directoryPath = System.getenv("HOME")
-			+ "/test/snapshot_save";
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void start() {
@@ -99,7 +96,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 							gsBuffer.getGSVertexArray());
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {
-					e.printStackTrace();
+					// e.printStackTrace();
 					exceptionSender.accept(e);
 					throw new IllegalStateException(e);
 				}

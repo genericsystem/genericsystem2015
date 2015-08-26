@@ -32,20 +32,16 @@ public class HttpGSServer extends AbstractGSServer {
 
 							},
 							exception -> {
-
+								int statusCode = 0;
 								if (exception instanceof ConcurrencyControlException) {
-									request.response().setStatusMessage(
-											exception.getClass().toString());
-									request.response().setStatusCode(400).end();
-									request.response().close();
+									statusCode = 400;
 								}
 								if (exception instanceof OptimisticLockConstraintViolationException) {
-									request.response().setStatusMessage(
-											exception.getClass().toString());
-									request.response().setStatusCode(401).end();
-									request.response().close();
+									statusCode = 401;
 								}
-
+								request.response().setStatusCode(statusCode)
+										.end();
+								request.response().close();
 							}));
 				});
 		httpServer.listen();
