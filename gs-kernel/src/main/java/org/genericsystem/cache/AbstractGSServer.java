@@ -18,9 +18,6 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 	private Map<String, Root> roots;// must be shared if several verticles
 									// instances
 
-	private final String directoryPath = System.getenv("HOME")
-			+ "/test/snapshot_save";
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void start() {
@@ -30,18 +27,26 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
 			roots.put("/" + Statics.ENGINE_VALUE, root);
 			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
-		} else
-			for (JsonObject engineJson : (List<JsonObject>) config()
-					.getJsonArray("engines").getList()) {
+		} else {
+			List<JsonObject> list = config().getJsonArray("classes").getList();
+			Class<?>[] classArray = new Class<?>[list.size()];
+			for (int i = 0; i < list.size(); i++) {
+				try {
+					classArray[i] = Class.forName(list.get(i).getString("clazz"));
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
 
 				String engineValue = engineJson.getString("engineValue");
-				engineValue = engineValue == null ? Statics.ENGINE_VALUE
-						: engineValue;
-				Root root = new Root(engineValue,
-						engineJson.getString("engineRepositoryPath"));
+				engineValue = engineValue == null ? Statics.ENGINE_VALUE : engineValue;
+				Root root = new Root(engineValue, engineJson.getString("engineRepositoryPath"), classArray);
 				roots.put("/" + engineValue, root);
 				System.out.println("Starts engine : " + "/" + engineValue);
 			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -54,11 +59,9 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			roots.remove("/" + Statics.ENGINE_VALUE);
 			System.out.println("Stops engine : " + "/" + Statics.ENGINE_VALUE);
 		} else
-			for (JsonObject engineJson : (List<JsonObject>) config()
-					.getJsonArray("engines").getList()) {
+			for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
 				String engineValue = engineJson.getString("engineValue");
-				engineValue = engineValue == null ? Statics.ENGINE_VALUE
-						: engineValue;
+				engineValue = engineValue == null ? Statics.ENGINE_VALUE : engineValue;
 				Root root = roots.get("/" + engineValue);
 				root.close();
 				roots.remove("/" + engineValue);
@@ -70,8 +73,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 		return roots;
 	}
 
-	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender,
-			Consumer<Exception> exceptionSender) {
+	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {
 		return buffer -> {
 			GSBuffer gsBuffer = new GSBuffer(buffer);
 			int id = gsBuffer.getInt();
@@ -80,34 +82,31 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			replyBuffer.appendInt(id).appendInt(methodId);
 			// System.out.println("Server will respond to id : " + id);
 			switch (methodId) {
-			case WebSocketGSClient.PICK_NEW_TS: {
+			case AbstractGSClient.PICK_NEW_TS: {
 				replyBuffer.appendLong(root.pickNewTs());
 				break;
 			}
-			case WebSocketGSClient.GET_DEPENDENCIES: {
-				replyBuffer.appendGSLongArray(root.getDependencies(
-						gsBuffer.getLong(), gsBuffer.getLong()));
+			case AbstractGSClient.GET_DEPENDENCIES: {
+				replyBuffer.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 				break;
 			}
-			case WebSocketGSClient.GET_VERTEX: {
+			case AbstractGSClient.GET_VERTEX: {
 				replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
 				break;
 			}
-			case WebSocketGSClient.APPLY: {
+			case AbstractGSClient.APPLY: {
 				try {
-					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(),
-							gsBuffer.getGSVertexArray());
+					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {
-					e.printStackTrace();
+					// e.printStackTrace();
 					exceptionSender.accept(e);
 					throw new IllegalStateException(e);
 				}
 				break;
 			}
 			default:
-				throw new IllegalStateException("unable to find method:"
-						+ methodId + " " + "id :" + id);
+				throw new IllegalStateException("unable to find method:" + methodId + " " + "id :" + id);
 			}
 			sender.accept(replyBuffer);
 		};

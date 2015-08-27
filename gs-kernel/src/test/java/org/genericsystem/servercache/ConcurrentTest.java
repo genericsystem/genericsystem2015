@@ -88,27 +88,21 @@ public class ConcurrentTest extends AbstractTest {
 		ServerCache cache = engine.newCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();
-
 		ServerCache cache2 = engine.newCache().start();
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
-
 		cache.start();
 		car.remove();
 		assert !cache.isAlive(car);
 		assert !engine.getInstances().contains(car);
-
 		cache2.start();
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
-
 		cache.start();
 		cache.flush();
-
 		cache2.start();
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
-
 		catchAndCheckCause(() -> {
 			car.remove();
 			cache2.flush();

@@ -1,14 +1,50 @@
 package org.genericsystem.cache;
 
+import java.io.File;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.kernel.Statics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 public abstract class AbstractTest {
 
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
+	String ServerVerticleId;
+	private final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
+
+	private void cleanDirectory(String directoryPath) {
+		File file = new File(directoryPath);
+		if (file.exists())
+			for (File f : file.listFiles())
+				f.delete();
+	}
+
+	@BeforeMethod
+	public void beforeClass() {
+		System.out.println("before class");
+		cleanDirectory(directoryPath);
+		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
+		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath), result -> {
+			try {
+				queue.put(result.result());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
+		try {
+			ServerVerticleId = queue.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("beforeClass ok");
+	}
 
 	@FunctionalInterface
 	public static interface VoidSupplier {
@@ -39,5 +75,24 @@ public abstract class AbstractTest {
 			return;
 		}
 		assert false : "Unable to catch any rollback exception!";
+	}
+
+	@AfterMethod
+	public void afterClass() {
+		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
+		GSVertx.vertx().getVertx().undeploy(ServerVerticleId, result -> {
+			try {
+				queue.put(0);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
+		try {
+			queue.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("afterClass ok");
 	}
 }

@@ -36,8 +36,7 @@ public class HttpGSClient extends AbstractGSClient {
 						reponse -> {
 							if (reponse.statusCode() != 200) {
 								System.out.println("An exception as occured: "
-										+ reponse.statusCode() + " "
-										+ reponse.statusMessage());
+										+ reponse.statusCode());
 								try {
 									blockingQueue
 											.put(reponse.statusCode() == 400 ? new ConcurrencyControlException(

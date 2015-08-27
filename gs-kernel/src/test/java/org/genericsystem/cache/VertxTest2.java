@@ -1,38 +1,41 @@
 package org.genericsystem.cache;
 
+import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.kernel.Generic;
-import org.genericsystem.kernel.ServerCache;
-import org.genericsystem.kernel.ServerEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test
 public class VertxTest2 extends AbstractTest {
 
 	String ServerVerticleId;
+	private final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
+
+	private void cleanDirectory(String directoryPath) {
+		File file = new File(directoryPath);
+		if (file.exists())
+			for (File f : file.listFiles())
+				f.delete();
+	}
 
 	@BeforeClass
 	public void beforeClass() {
-
+		System.out.println("before class");
+		cleanDirectory(directoryPath);
 		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
-		GSVertx.vertx()
-				.getVertx()
-				.deployVerticle(HttpGSServer.class.getName(),
-						new GSDeploymentOptions(), result -> {
-							try {
-								queue.put(result.result());
-							} catch (Exception e1) {
-								e1.printStackTrace();
-							}
-							;
-						});
+		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath), result -> {
+			try {
+				queue.put(result.result());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
 		try {
 			ServerVerticleId = queue.take();
 		} catch (InterruptedException e) {
@@ -42,46 +45,10 @@ public class VertxTest2 extends AbstractTest {
 		System.out.println("beforeClass ok");
 	}
 
-	@Test(invocationCount = 10)
 	public void test_001() {
 		ClientEngine engine = new ClientEngine();
 	}
 
-	// @Test
-	public void test_003() {
-
-		ClientEngine engine = new ClientEngine("database1");
-		ClientEngine engine2 = new ClientEngine(Statics.ENGINE_VALUE);
-	}
-
-	// @Test
-	public void test_004() {
-		ClientEngine engine = new ClientEngine();
-		ClientGeneric myVehicle = engine.addInstance("Vehicle2");
-		engine.getCurrentCache().flush();
-		engine.close();
-		afterClass();
-		beforeClass();
-		ClientEngine secondEngine = new ClientEngine();
-		assert secondEngine.getInstance("Vehicle2") != null;
-	}
-
-	// @Test
-	public void test001_() {
-		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar1 = car.addInstance("myCar1");
-		ClientCache cache1 = engine.getCurrentCache();
-		cache1.flush();
-		myCar1.remove();
-		cache1.flush();
-		ClientCache cache2 = engine.newCache().start();
-		catchAndCheckCause(() -> myCar1.remove(),
-				AliveConstraintViolationException.class);
-		cache2.flush();
-	}
-
-	@Test
 	public void test_002() {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric myVehicle = engine.addInstance("Vehicle");
@@ -92,67 +59,57 @@ public class VertxTest2 extends AbstractTest {
 		assert secondEngine.getInstance("Vehicle") != null;
 	}
 
-	@Test
-	public void testConcurentRemoveKO() {
+	public void testPersistanceOK() {
+		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
+		ClientGeneric myVehicle = engine.addInstance("Vehicle2");
+		engine.getCurrentCache().flush();
+		engine.close();
+		afterClass();
+		beforeClass();
+		ClientEngine secondEngine = new ClientEngine(Statics.ENGINE_VALUE);
+		assert secondEngine.getInstance("Vehicle2") != null;
+	}
+
+	public void testConcurrencyControlException() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache().start();
 		final ClientGeneric car = engine.addInstance("Car");
 		cache.flush();
-
 		ClientEngine engine2 = new ClientEngine();
 		ClientCache cache2 = engine2.newCache().start();
-
 		ClientGeneric car2 = engine2.getInstance("Car");
 		engine.getCurrentCache().start();
 		car.remove();
 		assert !engine.getCurrentCache().isAlive(car);
 		assert !engine.getInstances().contains(car);
-
 		engine2.getCurrentCache().start();
 		assert engine2.getCurrentCache().isAlive(car2);
-		assert !engine.getInstances().contains(car);
-
+		assert engine2.getInstances().contains(car2);
 		engine.getCurrentCache().start();
-		engine.getCurrentCache().flush();
-
-		engine2.getCurrentCache().start();
-
-		catchAndCheckCause(() -> {
-			car2.remove();
-			engine2.getCurrentCache().flush();
-		}, OptimisticLockConstraintViolationException.class);
-
-	}
-
-	@Test
-	public void testConcurrencyControlException() {
-		ServerEngine engine = new ServerEngine();
-		ServerCache cache = engine.newCache().start();
-		final Generic car = engine.addInstance("Car");
-		cache.flush();
-
-		ServerCache cache2 = engine.newCache().start();
-		assert cache2.isAlive(car);
-		assert engine.getInstances().contains(car);
-
-		cache.start();
-		car.remove();
-		assert !cache.isAlive(car);
-		assert !engine.getInstances().contains(car);
-
-		cache2.start();
-		assert cache2.isAlive(car);
-		assert engine.getInstances().contains(car);
-
-		cache.start();
-
 		try {
-			cache.tryFlush();
+			engine.getCurrentCache().tryFlush();
 			throw new IllegalStateException();
 		} catch (ConcurrencyControlException ex) {
 			// ignore
 		}
+	}
 
+	public void testConcurentRemoveKO() {
+		ClientEngine engine = new ClientEngine();
+		ClientCache cache = engine.getCurrentCache().start();
+		final ClientGeneric car = engine.addInstance("Car");
+		cache.flush();
+		ClientEngine engine2 = new ClientEngine();
+		ClientCache cache2 = engine2.newCache().start();
+		ClientGeneric car2 = engine2.getInstance("Car");
+		engine.getCurrentCache().start();
+		car.remove();
+		engine.getCurrentCache().flush();
+		engine2.getCurrentCache().start();
+		catchAndCheckCause(() -> {
+			car2.remove();
+			engine2.getCurrentCache().flush();
+		}, OptimisticLockConstraintViolationException.class);
 	}
 
 	@AfterClass
