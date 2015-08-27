@@ -3,7 +3,7 @@ package org.genericsystem.cache;
 import org.testng.annotations.Test;
 
 @Test
-public class AdjustMetaTest extends AbstractTest {
+public class AdjustMetaTest extends AbstractClassicTest {
 
 	public void test001_AdjustMeta_MetaLevel_metaAttribut_NoComposite() {
 		ClientEngine engine = new ClientEngine();
@@ -16,8 +16,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientGeneric car = engine.addInstance("Car");
 		assert engine.adjustMeta(car).equals(metaAttribute);
 
-		assert engine.adjustMeta(car).getValue()
-				.equals(metaAttribute.getValue());
+		assert engine.adjustMeta(car).getValue().equals(metaAttribute.getValue());
 		assert metaAttribute.equals(engine.adjustMeta(car));
 	}
 
@@ -43,8 +42,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric metaRelation = engine.getMetaRelation();
 		assert metaRelation.equals(engine.adjustMeta(engine, engine));
-		assert metaRelation.equals(engine.setInstance(engine.getValue(),
-				engine, engine));
+		assert metaRelation.equals(engine.setInstance(engine.getValue(), engine, engine));
 		ClientGeneric car = engine.addInstance("Car");
 		ClientGeneric color = engine.addInstance("Color");
 		engine.addInstance("CarColor", car, color);
@@ -56,8 +54,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric car = vehicle.addInstance("Car");
 		ClientGeneric red = color.addInstance("Red");
 		assert vehicleColor == vehicleColor.adjustMeta(car, red);
@@ -67,8 +64,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric color2 = engine.addInstance(color, "Color2");
 		ClientGeneric car = vehicle.addInstance("Car");
 		ClientGeneric red = color2.addInstance("Red");
@@ -79,8 +75,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle
-				.addAttribute("VehicleColor", color);
+		ClientGeneric vehicleColor = vehicle.addAttribute("VehicleColor", color);
 		ClientGeneric red = color.addInstance("red");
 		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
 		assert vehicleColor.equals(vehicleColor.adjustMeta(myVehicle, red));
@@ -90,8 +85,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric vehicle2 = engine.addInstance(vehicle, "Vehicle2");
 		ClientGeneric color2 = engine.addInstance(color, "Color2");
 		ClientGeneric car = vehicle2.addInstance("Car");
@@ -103,8 +97,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric vehicle2 = engine.addInstance("Vehicle2");
 		ClientGeneric red = color.addInstance("red");
 		ClientGeneric myVehicle2 = vehicle2.addInstance("myVehicle2");
@@ -115,8 +108,7 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric vehicle2 = engine.addInstance(vehicle, "Vehicle2");
 		ClientGeneric red = color.addInstance("red");
 		ClientGeneric car = vehicle2.addInstance("Car");
@@ -127,63 +119,52 @@ public class AdjustMetaTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric vehicle2 = engine.addInstance(vehicle, "Vehicle2");
 		ClientGeneric red = color.addInstance("red");
 		ClientGeneric finition = engine.addInstance("Finition");
 		ClientGeneric myVehicle2 = vehicle2.addInstance("myVehicle2");
 
-		assert vehicleColor.equals(vehicleColor.adjustMeta(myVehicle2, red,
-				finition));
+		assert vehicleColor.equals(vehicleColor.adjustMeta(myVehicle2, red, finition));
 	}
 
 	public void test013_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = engine.addInstance("VehicleColor",
-				vehicle, color);
+		ClientGeneric vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
 		ClientGeneric vehicle2 = engine.addInstance(vehicle, "Vehicle2");
-		ClientGeneric vehicleColor2 = engine.addInstance(vehicleColor,
-				"VehicleColor2", vehicle2, color);
+		ClientGeneric vehicleColor2 = engine.addInstance(vehicleColor, "VehicleColor2", vehicle2, color);
 		ClientGeneric red = color.addInstance("red");
 		ClientGeneric finition = engine.addInstance("Finition");
 		ClientGeneric myVehicle2 = vehicle2.addInstance("myVehicle2");
-		assert vehicleColor2.equals(vehicleColor.adjustMeta(myVehicle2, red,
-				finition));
+		assert vehicleColor2.equals(vehicleColor.adjustMeta(myVehicle2, red, finition));
 	}
 
 	public void test014_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle
-				.addAttribute("VehicleColor", color);
+		ClientGeneric vehicleColor = vehicle.addAttribute("VehicleColor", color);
 		ClientGeneric vehicle2 = engine.addInstance(vehicle, "Vehicle2");
 		ClientGeneric red = color.addInstance("red");
-		ClientGeneric vehicleColor2 = vehicle2.addAttribute(vehicleColor,
-				"VehicleColor2", color);
+		ClientGeneric vehicleColor2 = vehicle2.addAttribute(vehicleColor, "VehicleColor2", color);
 		ClientGeneric finition = engine.addInstance("Finition");
 		ClientGeneric myVehicle2 = vehicle2.addInstance("myVehicle2");
-		assert vehicleColor2.equals(vehicleColor.adjustMeta(myVehicle2, red,
-				finition));
+		assert vehicleColor2.equals(vehicleColor.adjustMeta(myVehicle2, red, finition));
 	}
 
 	public void test015_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
 		ClientEngine engine = new ClientEngine();
 		ClientGeneric vehicle = engine.addInstance("Vehicle");
 		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle
-				.addAttribute("VehicleColor", color);
+		ClientGeneric vehicleColor = vehicle.addAttribute("VehicleColor", color);
 		ClientGeneric vehicle2 = engine.addInstance(vehicle, "Vehicle2");
 		ClientGeneric red = color.addInstance("red");
 		ClientGeneric finition = engine.addInstance("Finition");
 		ClientGeneric myVehicle2 = vehicle2.addInstance("myVehicle2");
-		ClientGeneric vehicleColor2 = vehicle2.addAttribute(vehicleColor,
-				"VehicleColor2", color);
-		assert vehicleColor2.equals(vehicleColor.adjustMeta(myVehicle2, red,
-				finition));
+		ClientGeneric vehicleColor2 = vehicle2.addAttribute(vehicleColor, "VehicleColor2", color);
+		assert vehicleColor2.equals(vehicleColor.adjustMeta(myVehicle2, red, finition));
 	}
 
 	public void test020_AdjustMeta_TypeLevel_Attribute() {

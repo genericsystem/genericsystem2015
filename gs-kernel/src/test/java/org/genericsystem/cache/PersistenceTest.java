@@ -9,7 +9,7 @@ import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class PersistenceTest extends AbstractPersistenceTest {
+public class PersistenceTest extends AbstractClassicTest {
 
 	public void testDefaultConfiguration() {
 		System.out.println("test1");

@@ -21,31 +21,35 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void start() {
+		try {
+			roots = new HashMap<String, Root>();
+			if (config().getJsonArray("engines").isEmpty()) {
+				Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
+				roots.put("/" + Statics.ENGINE_VALUE, root);
+				System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
+			} else {
+				List<JsonObject> list = config().getJsonArray("classes").getList();
+				Class<?>[] classArray = new Class<?>[list.size()];
+				for (int i = 0; i < list.size(); i++) {
+					System.out.println("mount class: " + list.get(i).getString("className"));
+					try {
+						classArray[i] = Class.forName(list.get(i).getString("className"));
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
 
-		roots = new HashMap<String, Root>();
-		if (config().getJsonArray("engines").isEmpty()) {
-			Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
-			roots.put("/" + Statics.ENGINE_VALUE, root);
-			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
-		} else {
-			List<JsonObject> list = config().getJsonArray("classes").getList();
-			Class<?>[] classArray = new Class<?>[list.size()];
-			for (int i = 0; i < list.size(); i++) {
-				try {
-					classArray[i] = Class.forName(list.get(i).getString("clazz"));
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					String engineValue = engineJson.getString("engineValue");
+					engineValue = engineValue == null ? Statics.ENGINE_VALUE : engineValue;
+					Root root = new Root(engineValue, engineJson.getString("engineRepositoryPath"), classArray);
+					roots.put("/" + engineValue, root);
+					System.out.println("Starts engine : " + "/" + engineValue);
 				}
 			}
-			for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
-
-				String engineValue = engineJson.getString("engineValue");
-				engineValue = engineValue == null ? Statics.ENGINE_VALUE : engineValue;
-				Root root = new Root(engineValue, engineJson.getString("engineRepositoryPath"), classArray);
-				roots.put("/" + engineValue, root);
-				System.out.println("Starts engine : " + "/" + engineValue);
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

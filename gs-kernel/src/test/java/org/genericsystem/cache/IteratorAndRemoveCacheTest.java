@@ -8,7 +8,7 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.testng.annotations.Test;
 
 @Test
-public class IteratorAndRemoveCacheTest extends AbstractTest {
+public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 
 	public void test002_IterateAndRemove() {
 		ClientEngine engine = new ClientEngine();
@@ -48,8 +48,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		myCar1.remove();
 		cache1.flush();
 		ClientCache cache2 = engine.newCache().start();
-		catchAndCheckCause(() -> myCar1.remove(),
-				AliveConstraintViolationException.class);
+		catchAndCheckCause(() -> myCar1.remove(), AliveConstraintViolationException.class);
 		cache2.flush();
 	}
 

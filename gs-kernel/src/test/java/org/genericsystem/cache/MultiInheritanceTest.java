@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.testng.annotations.Test;
 
 @Test
-public class MultiInheritanceTest extends AbstractTest {
+public class MultiInheritanceTest extends AbstractClassicTest {
 
 	public void test_multiInheritance() {
 		ClientEngine engine = new ClientEngine();

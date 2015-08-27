@@ -5,7 +5,7 @@ import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViola
 import org.testng.annotations.Test;
 
 @Test
-public class NotRemovableTest extends AbstractTest {
+public class NotRemovableTest extends AbstractClassicTest {
 
 	public void test001_aliveEx() {
 		ClientEngine engine = new ClientEngine();

@@ -10,7 +10,7 @@ import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolati
 import org.testng.annotations.Test;
 
 @Test
-public class FileSystemTest extends AbstractTest {
+public class FileSystemTest extends AbstractFileSystemTest {
 
 	public void testUpdateRootDirectory() {
 		ClientEngine engine = new ClientEngine(FileSystem.class);

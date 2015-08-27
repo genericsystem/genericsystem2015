@@ -6,7 +6,7 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.testng.annotations.Test;
 
 @Test
-public class VertexTest extends AbstractTest {
+public class VertexTest extends AbstractClassicTest {
 
 	public void test001_getInheritings() {
 		ClientEngine engine = new ClientEngine();

@@ -4,7 +4,7 @@ import org.genericsystem.defaults.exceptions.SingularConstraintViolationExceptio
 import org.testng.annotations.Test;
 
 @Test
-public class WeakEquivTest extends AbstractTest {
+public class WeakEquivTest extends AbstractClassicTest {
 
 	// public void test001_weakEquiv_Relation_SingularConstraint() {
 	// Engine engine = new Engine();

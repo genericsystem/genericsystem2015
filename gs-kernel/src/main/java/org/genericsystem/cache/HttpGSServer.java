@@ -33,6 +33,7 @@ public class HttpGSServer extends AbstractGSServer {
 				if (exception instanceof OptimisticLockConstraintViolationException) {
 					statusCode = 401;
 				}
+
 				request.response().setStatusCode(statusCode).end();
 				request.response().close();
 			}));

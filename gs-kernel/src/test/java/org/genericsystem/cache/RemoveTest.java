@@ -3,7 +3,7 @@ package org.genericsystem.cache;
 import org.testng.annotations.Test;
 
 @Test
-public class RemoveTest extends AbstractTest {
+public class RemoveTest extends AbstractClassicTest {
 
 	public void test001_simpleHolder() {
 		ClientEngine engine = new ClientEngine();
