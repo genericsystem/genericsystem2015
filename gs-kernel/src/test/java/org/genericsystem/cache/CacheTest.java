@@ -6,7 +6,7 @@ import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.testng.annotations.Test;
 
 @Test
-public class CacheTest extends AbstractTest {
+public class CacheTest extends AbstractClassicTest {
 	public void test000() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();

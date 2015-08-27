@@ -6,7 +6,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.kernel.Statics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -16,7 +15,8 @@ public abstract class AbstractTest {
 
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 	String ServerVerticleId;
-	private final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
+	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
+	private final static String FAILURE = "notStarted";
 
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
@@ -25,24 +25,27 @@ public abstract class AbstractTest {
 				f.delete();
 	}
 
+	public abstract GSDeploymentOptions getDeploymentOptions();
+
 	@BeforeMethod
 	public void beforeClass() {
 		System.out.println("before class");
 		cleanDirectory(directoryPath);
 		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
-		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath), result -> {
+		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), getDeploymentOptions(), result -> {
 			try {
-				queue.put(result.result());
+				queue.put(result.result() != null ? result.result() : FAILURE);
 			} catch (Exception e1) {
-				e1.printStackTrace();
 			}
 		});
 		try {
 			ServerVerticleId = queue.take();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			return;
+			throw new IllegalStateException("unable to start server: " + e);
 		}
+		if (FAILURE.equals(ServerVerticleId))
+			throw new IllegalStateException("unable to start server");
 		System.out.println("beforeClass ok");
 	}
 
@@ -95,4 +98,5 @@ public abstract class AbstractTest {
 		}
 		System.out.println("afterClass ok");
 	}
+
 }

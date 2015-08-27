@@ -3,7 +3,7 @@ package org.genericsystem.cache;
 import org.testng.annotations.Test;
 
 @Test
-public class AutomaticMetaAttributeCreationTest extends AbstractTest {
+public class AutomaticMetaAttributeCreationTest extends AbstractClassicTest {
 
 	public void test001_addInstance_metaAttribute() {
 		ClientEngine engine = new ClientEngine();

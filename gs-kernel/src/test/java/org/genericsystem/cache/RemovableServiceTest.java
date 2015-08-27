@@ -6,7 +6,7 @@ import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViola
 import org.testng.annotations.Test;
 
 @Test
-public class RemovableServiceTest extends AbstractTest {
+public class RemovableServiceTest extends AbstractClassicTest {
 
 	public void test100_remove_instance_NormalStrategy() {
 		// given

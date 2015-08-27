@@ -3,7 +3,7 @@ package org.genericsystem.cache;
 import org.testng.annotations.Test;
 
 @Test
-public class ConcurrentTest extends AbstractTest {
+public class ConcurrentTest extends AbstractClassicTest {
 
 	public void test() {
 		ClientEngine engine = new ClientEngine();

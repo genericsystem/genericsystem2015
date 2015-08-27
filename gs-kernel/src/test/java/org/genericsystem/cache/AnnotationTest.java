@@ -15,7 +15,7 @@ import org.genericsystem.api.core.annotations.value.IntValue;
 import org.testng.annotations.Test;
 
 @Test
-public class AnnotationTest extends AbstractTest {
+public class AnnotationTest extends AbstractGetClassTest {
 
 	public void test001_Generic() {
 		ClientEngine engine = new ClientEngine(Vehicle.class, Human.class, Myck.class);
@@ -82,7 +82,7 @@ public class AnnotationTest extends AbstractTest {
 		catchAndCheckCause(() -> new ClientEngine(MyMercedes.class), InstantiationException.class);
 	}
 
-	public static class VehicleInstance implements ClientGeneric {
+	public static class VehicleInstance {
 
 	}
 
@@ -93,12 +93,12 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static class MyBmw implements ClientGeneric {
+	public static class MyBmw extends VehicleInstance {
 	}
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static class MyMercedes {
+	public static class MyMercedes extends VehicleInstance {
 	}
 
 	@SystemGeneric

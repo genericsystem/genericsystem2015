@@ -4,7 +4,7 @@ import org.genericsystem.api.core.exceptions.ExistsException;
 import org.testng.annotations.Test;
 
 @Test
-public class BindingServiceTest extends AbstractTest {
+public class BindingServiceTest extends AbstractClassicTest {
 
 	public void test001_addInstance() {
 		// given

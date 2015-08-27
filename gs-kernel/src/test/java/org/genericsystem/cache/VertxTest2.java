@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test
-public class VertxTest2 extends AbstractTest {
+public class VertxTest2 extends AbstractClassicTest {
 
 	String ServerVerticleId;
 	private final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
@@ -24,6 +24,7 @@ public class VertxTest2 extends AbstractTest {
 				f.delete();
 	}
 
+	@Override
 	@BeforeClass
 	public void beforeClass() {
 		System.out.println("before class");
@@ -112,6 +113,7 @@ public class VertxTest2 extends AbstractTest {
 		}, OptimisticLockConstraintViolationException.class);
 	}
 
+	@Override
 	@AfterClass
 	public void afterClass() {
 		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
