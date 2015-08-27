@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.testng.annotations.Test;
 
 @Test
@@ -58,22 +58,20 @@ public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 		ClientGeneric myCar = car.addInstance("myCar");
 		ClientCache cache = engine.getCurrentCache();
 		cache.flush();
-
 		ClientCache cache2 = engine.newCache().start();
 		myCar.remove();
-
 		cache.start();
 		cache.shiftTs();
 		myCar.remove();
 		cache.flush();
 		cache2.start();
-
-		try {
-			cache2.tryFlush();
-		} catch (ConcurrencyControlException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		catchAndCheckCause(() -> cache2.flush(), OptimisticLockConstraintViolationException.class);
+		// try {
+		// cache2.tryFlush();
+		// } catch (ConcurrencyControlException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 	}
 
 	public void test003_IterateAndRemove() {

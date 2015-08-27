@@ -1,8 +1,8 @@
 package org.genericsystem.cache;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.testng.annotations.Test;
 
@@ -84,19 +84,18 @@ public class NotRemovableManyCachesTest extends AbstractClassicTest {
 		ClientGeneric myCar = car.addInstance("myCar");
 		ClientCache cache = engine.getCurrentCache();
 		cache.flush();
-
 		ClientCache cache2 = engine.newCache().start();
 		myCar.remove();
-
 		cache.start();
 		myCar.remove();
 		cache.flush();
 		cache2.start();
-		try {
-			cache2.tryFlush();
-		} catch (ConcurrencyControlException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		catchAndCheckCause(() -> cache2.flush(), OptimisticLockConstraintViolationException.class);
+		// try {
+		// cache2.tryFlush();
+		// } catch (ConcurrencyControlException e) {
+		//
+		// e.printStackTrace();
+		// }
 	}
 }
