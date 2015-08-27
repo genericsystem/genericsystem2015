@@ -279,7 +279,8 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test014_MultiInheritanceComplexValue() {
-		ClientEngine engine = new ClientEngine(MyGames.class, MyChildren.class, MyVehicle.class, Myck.class, MyChildrenGames.class, ChildrenGames.class, MyTransformer.class, Transformer.class, TransformerChildrenGames.class, MyTransformerChildrenGames.class);
+		ClientEngine engine = new ClientEngine(MyGames.class, MyChildren.class, MyVehicle.class, Myck.class, MyChildrenGames.class, ChildrenGames.class, MyTransformer.class, Transformer.class, TransformerChildrenGames.class,
+				MyTransformerChildrenGames.class);
 		ClientGeneric myGames = engine.find(MyGames.class);
 		ClientGeneric myChildren = engine.find(MyChildren.class);
 		ClientGeneric myVehicle = engine.find(MyVehicle.class);

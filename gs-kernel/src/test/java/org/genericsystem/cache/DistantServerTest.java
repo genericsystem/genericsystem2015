@@ -13,7 +13,7 @@ public class DistantServerTest extends AbstractTest {
 	@Test(invocationCount = 1000)
 	public void test_001() {
 		assert vertx != null;
-		ClientEngine engine = new ClientEngine(vertx, Statics.ENGINE_VALUE,
+		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE,
 				"192.168.1.13", 8082);
 	}
 
