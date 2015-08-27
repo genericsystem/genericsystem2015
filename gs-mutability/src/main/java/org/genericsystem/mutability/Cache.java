@@ -20,19 +20,20 @@ import javassist.util.proxy.ProxyObject;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.defaults.DefaultContext;
 
-public class Cache implements DefaultContext<Generic>, ContextEventListener<org.genericsystem.cache.ClientGeneric> {
+public class Cache implements DefaultContext<Generic>, ContextEventListener<org.genericsystem.kernel.Generic> {
 	private final Engine engine;
-	final org.genericsystem.cache.ClientCache cache;
-	final Map<Generic, org.genericsystem.cache.ClientGeneric> mutabilityMap = new IdentityHashMap<>();
-	private final Map<org.genericsystem.cache.ClientGeneric, Set<Generic>> reverseMultiMap = new IdentityHashMap<>();
+	final org.genericsystem.kernel.ServerCache cache;
+	final Map<Generic, org.genericsystem.kernel.Generic> mutabilityMap = new IdentityHashMap<>();
+	private final Map<org.genericsystem.kernel.Generic, Set<Generic>> reverseMultiMap = new IdentityHashMap<>();
 
-	private final Deque<Map<Generic, org.genericsystem.cache.ClientGeneric>> revertMutations = new ArrayDeque<>();
+	private final Deque<Map<Generic, org.genericsystem.kernel.Generic>> revertMutations = new ArrayDeque<>();
 
-	public Cache(Engine engine, org.genericsystem.cache.ClientEngine cacheEngine) {
+	public Cache(Engine engine, org.genericsystem.kernel.ServerEngine cacheEngine) {
 		this.engine = engine;
 		put(engine, cacheEngine);
 		this.cache = cacheEngine.newCache(this);
@@ -54,17 +55,17 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 		engine.stop(this);
 	}
 
-	protected org.genericsystem.cache.ClientGeneric unwrap(Generic mutable) {
+	protected org.genericsystem.kernel.Generic unwrap(Generic mutable) {
 		if (mutable == null)
 			return null;
 
-		org.genericsystem.cache.ClientGeneric result = mutabilityMap.get(mutable);
+		org.genericsystem.kernel.Generic result = mutabilityMap.get(mutable);
 		if (result == null)
 			cache.discardWithException(new AliveConstraintViolationException("Your mutable is not still available"));
 		return result;
 	}
 
-	protected Generic wrap(Class<?> clazz, org.genericsystem.cache.ClientGeneric generic) {
+	protected Generic wrap(Class<?> clazz, org.genericsystem.kernel.Generic generic) {
 		if (generic == null)
 			return null;
 		Set<Generic> resultSet = reverseMultiMap.get(generic);
@@ -85,11 +86,11 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 		return result;
 	}
 
-	protected Generic wrap(org.genericsystem.cache.ClientGeneric generic) {
+	protected Generic wrap(org.genericsystem.kernel.Generic generic) {
 		return generic != null ? wrap(generic.getRoot().findAnnotedClass(generic), generic) : null;
 	}
 
-	private void put(Generic mutable, org.genericsystem.cache.ClientGeneric generic) {
+	private void put(Generic mutable, org.genericsystem.kernel.Generic generic) {
 		mutabilityMap.put(mutable, generic);
 		Set<Generic> set = Collections.newSetFromMap(new IdentityHashMap<Generic, Boolean>());
 		set.add(mutable);
@@ -97,7 +98,7 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 	}
 
 	@Override
-	public void triggersMutationEvent(org.genericsystem.cache.ClientGeneric oldDependency, org.genericsystem.cache.ClientGeneric newDependency) {
+	public void triggersMutationEvent(org.genericsystem.kernel.Generic oldDependency, org.genericsystem.kernel.Generic newDependency) {
 		Set<Generic> resultSet = reverseMultiMap.remove(oldDependency);
 		if (resultSet == null)
 			return;
@@ -113,9 +114,9 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 
 	@Override
 	public void triggersRefreshEvent() {
-		Iterator<Entry<org.genericsystem.cache.ClientGeneric, Set<Generic>>> iterator = reverseMultiMap.entrySet().iterator();
+		Iterator<Entry<org.genericsystem.kernel.Generic, Set<Generic>>> iterator = reverseMultiMap.entrySet().iterator();
 		while (iterator.hasNext()) {
-			Entry<org.genericsystem.cache.ClientGeneric, Set<Generic>> entry = iterator.next();
+			Entry<org.genericsystem.kernel.Generic, Set<Generic>> entry = iterator.next();
 			if (!cache.isAlive(entry.getKey())) {
 				for (Generic mutable : entry.getValue())
 					mutabilityMap.remove(mutable);
@@ -127,7 +128,7 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 	@Override
 	public void triggersClearEvent() {
 		revertMutations.peek().forEach((mutable, generic) -> {
-			org.genericsystem.cache.ClientGeneric newDependency = mutabilityMap.get(mutable);
+			org.genericsystem.kernel.Generic newDependency = mutabilityMap.get(mutable);
 			mutabilityMap.put(mutable, generic);
 			if (newDependency != null) {
 				Set<Generic> set = reverseMultiMap.get(newDependency);
@@ -143,19 +144,19 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 		revertMutations.push(new IdentityHashMap<>());
 	}
 
-	protected List<Generic> wrap(List<org.genericsystem.cache.ClientGeneric> listT) {
+	protected List<Generic> wrap(List<org.genericsystem.kernel.Generic> listT) {
 		return listT.stream().map(this::wrap).collect(Collectors.toList());
 	}
 
-	protected List<org.genericsystem.cache.ClientGeneric> unwrap(List<Generic> listM) {
+	protected List<org.genericsystem.kernel.Generic> unwrap(List<Generic> listM) {
 		return listM.stream().map(this::unwrap).collect(Collectors.toList());
 	}
 
-	protected Generic[] wrap(org.genericsystem.cache.ClientGeneric... array) {
+	protected Generic[] wrap(org.genericsystem.kernel.Generic... array) {
 		return Arrays.asList(array).stream().map(this::wrap).collect(Collectors.toList()).toArray(new Generic[array.length]);
 	}
 
-	protected org.genericsystem.cache.ClientGeneric[] unwrap(Generic... listM) {
+	protected org.genericsystem.kernel.Generic[] unwrap(Generic... listM) {
 		return engine.getConcurrencyEngine().coerceToTArray(Arrays.asList(listM).stream().map(this::unwrap).collect(Collectors.toList()).toArray());
 	}
 
@@ -166,7 +167,7 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 
 	@Override
 	public boolean isAlive(Generic mutable) {
-		org.genericsystem.cache.ClientGeneric generic = mutabilityMap.get(mutable);
+		org.genericsystem.kernel.Generic generic = mutabilityMap.get(mutable);
 		return generic != null && cache.isAlive(generic);
 	}
 
@@ -174,7 +175,7 @@ public class Cache implements DefaultContext<Generic>, ContextEventListener<org.
 		cache.shiftTs();// triggers refresh automatically
 	}
 
-	public void tryFlush() {
+	public void tryFlush() throws ConcurrencyControlException {
 		cache.tryFlush(); // triggers flush automatically
 	}
 
