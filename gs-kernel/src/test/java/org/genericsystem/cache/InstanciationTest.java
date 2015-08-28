@@ -9,7 +9,7 @@ import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class InstanciationTest extends AbstractTest {
+public class InstanciationTest extends AbstractClassicTest {
 
 	public void testEngineInstanciation() {
 		ClientEngine engine = new ClientEngine();

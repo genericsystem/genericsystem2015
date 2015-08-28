@@ -51,8 +51,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		myCar1.remove();
 		cache1.flush();
 		ServerCache cache2 = engine.newCache().start();
-		catchAndCheckCause(() -> myCar1.remove(),
-				AliveConstraintViolationException.class);
+		catchAndCheckCause(() -> myCar1.remove(), AliveConstraintViolationException.class);
 		cache2.flush();
 	}
 
@@ -62,10 +61,8 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		Generic myCar = car.addInstance("myCar");
 		ServerCache cache = engine.getCurrentCache();
 		cache.flush();
-
 		ServerCache cache2 = engine.newCache().start();
 		myCar.remove();
-
 		cache.start();
 		cache.shiftTs();
 		myCar.remove();

@@ -7,7 +7,7 @@ import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationExceptio
 import org.testng.annotations.Test;
 
 @Test
-public class UpdatableServiceTest extends AbstractTest {
+public class UpdatableServiceTest extends AbstractClassicTest {
 
 	public void test001_setValue_Type() {
 		ClientGeneric engine = new ClientEngine();

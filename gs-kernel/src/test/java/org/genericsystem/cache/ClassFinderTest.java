@@ -6,7 +6,7 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.testng.annotations.Test;
 
 @Test
-public class ClassFinderTest extends AbstractTest {
+public class ClassFinderTest extends AbstractClassicTest {
 
 	public void test1() {
 		ClientGeneric engine = new ClientEngine();

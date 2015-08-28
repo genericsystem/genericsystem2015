@@ -7,7 +7,7 @@ import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class MultipleRootsTest extends AbstractTest {
+public class MultipleRootsTest extends AbstractMultipleBasesTest {
 
 	public void test001_Engine_name() {
 		ClientEngine engine1 = new ClientEngine();

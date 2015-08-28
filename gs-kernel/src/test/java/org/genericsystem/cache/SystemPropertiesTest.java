@@ -3,7 +3,7 @@ package org.genericsystem.cache;
 import org.testng.annotations.Test;
 
 @Test
-public class SystemPropertiesTest extends AbstractTest {
+public class SystemPropertiesTest extends AbstractClassicTest {
 
 	public void test001_enableConstraint() {
 		ClientEngine Engine = new ClientEngine();

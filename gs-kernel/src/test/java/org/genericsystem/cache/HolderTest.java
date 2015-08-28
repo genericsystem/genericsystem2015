@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.testng.annotations.Test;
 
 @Test
-public class HolderTest extends AbstractTest {
+public class HolderTest extends AbstractClassicTest {
 
 	public void testHolder1Attribut() {
 		ClientEngine engine = new ClientEngine();

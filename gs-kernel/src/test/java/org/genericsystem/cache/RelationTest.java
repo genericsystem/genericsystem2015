@@ -6,7 +6,7 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.testng.annotations.Test;
 
 @Test
-public class RelationTest extends AbstractTest {
+public class RelationTest extends AbstractClassicTest {
 
 	public void test001_addInstance_NotAliveException() {
 		final ClientEngine cache = new ClientEngine();

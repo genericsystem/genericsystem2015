@@ -9,10 +9,10 @@ import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class PersistenceTest extends AbstractPersistenceTest {
+public class PersistenceTest extends AbstractClassicTest {
 
 	public void testDefaultConfiguration() {
-		System.out.println("test1");
+
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
@@ -21,30 +21,24 @@ public class PersistenceTest extends AbstractPersistenceTest {
 	}
 
 	public void testAnnotType() {
-		System.out.println("test2");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		compareGraph(root, engine);
 		assert engine.find(Vehicle.class) instanceof Vehicle : engine.find(Vehicle.class).info();
-
 	}
 
 	public void testAnnotType2() {
-		System.out.println("test3");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		root.close();
-
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraphWitoutTs(root, engine);
 		engine.getCurrentCache().flush();
 		engine.close();
-
 		ClientEngine engine2 = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		compareGraph(root, engine2);
-
 		assert engine2.find(Vehicle.class) instanceof Vehicle : engine2.find(Vehicle.class).info();
 	}
 
@@ -62,31 +56,28 @@ public class PersistenceTest extends AbstractPersistenceTest {
 	}
 
 	public void testType() {
-		System.out.println("test4");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		root.addInstance("Vehicle");
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 		assert null != engine.getInstance("Vehicle");
 	}
 
 	public void testHolder() {
-		System.out.println("test5");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric vehicle = root.addInstance("Vehicle");
 		ClientGeneric vehiclePower = vehicle.setAttribute("power");
 		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
 		myVehicle.setHolder(vehiclePower, "123");
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 	}
 
 	public void testAddAndRemove() throws InterruptedException {
-		System.out.println("test6");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric vehicle = root.addInstance("Vehicle");
 		ClientGeneric car = root.addInstance(vehicle, "Car");
@@ -96,13 +87,12 @@ public class PersistenceTest extends AbstractPersistenceTest {
 		root.getCurrentCache().flush();
 		assert vehicle.getTs() < truck.getTs();
 		assert vehicle.getBirthTs() == truck.getBirthTs();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 	}
 
 	public void testLink() {
-		System.out.println("test7");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric vehicle = root.addInstance("Vehicle");
 		ClientGeneric color = root.addInstance("Color");
@@ -111,38 +101,35 @@ public class PersistenceTest extends AbstractPersistenceTest {
 		ClientGeneric red = color.addInstance("red");
 		myVehicle.setHolder(vehicleColor, "myVehicleRed", red);
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 	}
 
 	public void testHeritageMultiple() {
-		System.out.println("test8");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric vehicle = root.addInstance("Vehicle");
 		ClientGeneric robot = root.addInstance("Robot");
 		root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 	}
 
 	public void testHeritageMultipleDiamond() {
-		System.out.println("test9");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric nommable = root.addInstance("Nommable");
 		ClientGeneric vehicle = root.addInstance(nommable, "Vehicle");
 		ClientGeneric robot = root.addInstance(nommable, "Robot");
 		root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 	}
 
 	public void testTree() {
-		System.out.println("test10");
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		ClientGeneric tree = root.addInstance("Tree");
 		ClientGeneric rootTree = tree.addInstance("Root");
@@ -150,7 +137,7 @@ public class PersistenceTest extends AbstractPersistenceTest {
 		tree.addInstance(rootTree, "Child2");
 		tree.addInstance(child, "Child3");
 		root.getCurrentCache().flush();
-		root.close();
+		// root.close();
 		compareGraph(root, new ClientEngine(Statics.ENGINE_VALUE));
 	}
 

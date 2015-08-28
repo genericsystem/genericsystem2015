@@ -26,17 +26,20 @@ public class GSDeploymentOptions extends DeploymentOptions {
 		config.setPort(port);
 	}
 
-	public GSDeploymentOptions(String engineValue, int port,
-			String persistanceRepositoryPath) {
+	public GSDeploymentOptions(String engineValue, int port, String persistanceRepositoryPath) {
 		this();
 		config.addEngine(engineValue, persistanceRepositoryPath);
 		config.setPort(port);
 
 	}
 
-	public GSDeploymentOptions addEngine(String engineValue,
-			String repositoryPath) {
+	public GSDeploymentOptions addEngine(String engineValue, String repositoryPath) {
 		config.addEngine(engineValue, repositoryPath);
+		return this;
+	}
+
+	public GSDeploymentOptions addClasses(Class<?>... classes) {
+		config.addClasses(classes);
 		return this;
 	}
 }

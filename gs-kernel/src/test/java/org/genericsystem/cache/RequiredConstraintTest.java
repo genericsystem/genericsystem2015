@@ -8,7 +8,7 @@ import org.genericsystem.defaults.exceptions.RequiredConstraintViolationExceptio
 import org.testng.annotations.Test;
 
 @Test
-public class RequiredConstraintTest extends AbstractTest {
+public class RequiredConstraintTest extends AbstractClassicTest {
 
 	public void test00_Inheritance() {
 		ClientEngine engine = new ClientEngine();

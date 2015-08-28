@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 @Test
-public class GenericTest extends AbstractTest {
+public class GenericTest extends AbstractClassicTest {
 
 	public void testEngine() {
 		ClientEngine engine = new ClientEngine();

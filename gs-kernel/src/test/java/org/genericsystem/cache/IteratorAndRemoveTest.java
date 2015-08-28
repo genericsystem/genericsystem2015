@@ -6,7 +6,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.testng.annotations.Test;
 
 @Test
-public class IteratorAndRemoveTest extends AbstractTest {
+public class IteratorAndRemoveTest extends AbstractClassicTest {
 
 	public void test002_IterateAndRemove() {
 		ClientEngine engine = new ClientEngine();

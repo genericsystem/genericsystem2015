@@ -4,7 +4,7 @@ import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationExceptio
 import org.testng.annotations.Test;
 
 @Test
-public class UpdateWithCacheTest extends AbstractTest {
+public class UpdateWithCacheTest extends AbstractClassicTest {
 
 	public void test002_updateMeta() {
 		ClientEngine engine = new ClientEngine();

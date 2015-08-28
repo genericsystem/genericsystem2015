@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.testng.annotations.Test;
 
 @Test
-public class AncestorsServiceTest extends AbstractTest {
+public class AncestorsServiceTest extends AbstractClassicTest {
 
 	public void isAncestorOfByInheritence() {
 		ClientEngine engine = new ClientEngine();
