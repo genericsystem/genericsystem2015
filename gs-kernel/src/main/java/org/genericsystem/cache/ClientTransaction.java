@@ -48,7 +48,7 @@ public class ClientTransaction implements IDifferential<ClientGeneric> {
 	@Override
 	public void apply(Snapshot<ClientGeneric> removes, Snapshot<ClientGeneric> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		// adds.stream().forEach(add -> System.out.println(add));
-		assert adds.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
+		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		engine.getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
 		removes.forEach(remove -> remove.getComponents().forEach(component -> dependenciesMap.remove(component)));
 		removes.forEach(remove -> remove.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
@@ -58,7 +58,7 @@ public class ClientTransaction implements IDifferential<ClientGeneric> {
 		adds.forEach(add -> add.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
 		adds.forEach(add -> dependenciesMap.remove(add.getMeta()));
 		adds.forEach(add -> dependenciesMap.remove(add));
-		adds.forEach(add -> add.getOtherTs()[0] = getTs());
+		adds.forEach(add -> add.getProxyHandler().otherTs[0] = getTs());
 	}
 
 	// @Override

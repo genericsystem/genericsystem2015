@@ -1,7 +1,7 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.GenericProxy;
-import org.genericsystem.kernel.Root.RootWrapped;
+import org.genericsystem.kernel.Root.RootServerHandler;
 
 public interface Generic extends GenericProxy<Generic>, Comparable<Generic> {
 
@@ -10,15 +10,14 @@ public interface Generic extends GenericProxy<Generic>, Comparable<Generic> {
 		return (Root) GenericProxy.super.getRoot();
 	}
 
-	// @Override
 	@Override
 	default long getBirthTs() {
 		return getLifeManager().getBirthTs();
 	}
 
 	@Override
-	default public RootWrapped getProxyHandler() {
-		return (RootWrapped) GenericProxy.super.getProxyHandler();
+	default public RootServerHandler getProxyHandler() {
+		return (RootServerHandler) GenericProxy.super.getProxyHandler();
 	}
 
 	default LifeManager getLifeManager() {

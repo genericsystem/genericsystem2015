@@ -10,8 +10,7 @@ import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public class ClientEngine extends AbstractRoot<ClientGeneric> implements
-		ClientGeneric {
+public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
 
 	protected Server server;
 
@@ -23,13 +22,11 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port,
-			Class<?>... userClasses) {
+	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
 		this(engineValue, host, port, null, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port,
-			String persistentDirectoryPath, Class<?>... userClasses) {
+	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(engineValue, host, port, persistentDirectoryPath, userClasses);
 		isInitialized = true;
 	}
@@ -40,8 +37,7 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	}
 
 	@Override
-	protected void initSubRoot(String engineValue, String host, int port,
-			String persistentDirectoryPath, Class<?>... userClasses) {
+	protected void initSubRoot(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		server = new HttpGSClient(this, host, port, "/" + engineValue);
 	}
 
@@ -59,9 +55,7 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 		return (ClientCache) super.getCurrentCache();
 	}
 
-	public static class LocalContextWrapper extends
-			InheritableThreadLocal<ClientCache> implements
-			Wrapper<ClientGeneric> {
+	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<ClientGeneric> {
 		@Override
 		public void set(AbstractContext<ClientGeneric> context) {
 			super.set((ClientCache) context);
@@ -103,18 +97,13 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	}
 
 	@Override
-	protected EngineWrapped buildHandler(Class<?> clazz, ClientGeneric meta,
-			List<ClientGeneric> supers, Serializable value,
-			List<ClientGeneric> components, long ts, long[] otherTs) {
-		return new EngineWrapped(clazz, meta, supers, value, components, ts,
-				otherTs);
+	protected EngineWrapped buildHandler(Class<?> clazz, ClientGeneric meta, List<ClientGeneric> supers, Serializable value, List<ClientGeneric> components, long ts, long[] otherTs) {
+		return new EngineWrapped(clazz, meta, supers, value, components, ts, otherTs);
 	}
 
-	class EngineWrapped extends Wrapped {
+	class EngineWrapped extends ClientHandler {
 
-		public EngineWrapped(Class<?> clazz, ClientGeneric meta,
-				List<ClientGeneric> supers, Serializable value,
-				List<ClientGeneric> components, long ts, long[] otherTs) {
+		public EngineWrapped(Class<?> clazz, ClientGeneric meta, List<ClientGeneric> supers, Serializable value, List<ClientGeneric> components, long ts, long[] otherTs) {
 			super(clazz, meta, supers, value, components, ts, otherTs);
 		}
 

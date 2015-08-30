@@ -41,7 +41,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 	@Override
 	protected Generic plug(Generic generic) {
 		if (getRoot().isInitialized()) {
-			generic.getOtherTs()[0] = getTs();
+			generic.getProxyHandler().otherTs[0] = getTs();
 			generic.getLifeManager().beginLife(getTs());
 		}
 

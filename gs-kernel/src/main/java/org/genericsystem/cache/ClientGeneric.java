@@ -14,9 +14,4 @@ public interface ClientGeneric extends GenericProxy<ClientGeneric> {
 		return (ClientCache) GenericProxy.super.getCurrentCache();
 	}
 
-	@Override
-	default long getBirthTs() {
-		return getOtherTs()[0];
-	}
-
 }
