@@ -149,8 +149,7 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		assert Arrays.stream(adds).allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
-		if (Arrays.stream(adds).anyMatch(v -> (v.getOtherTs()[0] != Long.MAX_VALUE)))
+		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() != Long.MAX_VALUE)))
 			throw new IllegalStateException("");
 		unsafeSynchronize(APPLY, gsBuffer);
 	}

@@ -41,11 +41,8 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 	@Override
 	protected Generic plug(Generic generic) {
-		if (getRoot().isInitialized()) {
-			generic.getProxyHandler().otherTs[0] = getTs();
+		if (getRoot().isInitialized())
 			((RootServerHandler) generic.getProxyHandler()).getLifeManager().beginLife(getTs());
-		}
-
 		Set<Generic> set = new HashSet<>();
 		if (!generic.isMeta())
 			set.add(generic.getMeta());
@@ -109,7 +106,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 	// archiver acces
 	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
-		return plug(build(ts, clazz, meta, supers, value, components, otherTs));
+		return plug(getRoot().build(ts, clazz, meta, supers, value, components, otherTs));
 
 	}
 
@@ -184,7 +181,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 		// getRoot().getGenericById(removeId)).allMatch(g -> true);
 		// assert Arrays.stream(addVertices).map(add ->
 		// add.getTs()).distinct().count() == addVertices.length;
-		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
+		// assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
 		Arrays.stream(addVertices).forEach(addVertex -> getRoot().build(addVertex));
 		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
 	}

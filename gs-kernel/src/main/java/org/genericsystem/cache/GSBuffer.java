@@ -165,7 +165,7 @@ public class GSBuffer implements Buffer {
 		appendGSLongList(vertex.getSupers());
 		appendGSValue(vertex.getValue());
 		appendGSLongList(vertex.getComponents());
-		appendGSLongArray(vertex.getOtherTs());
+		appendLong(vertex.getBirthTs());
 		return this;
 
 	}
@@ -300,8 +300,8 @@ public class GSBuffer implements Buffer {
 		List<Long> supers = Arrays.stream(getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
 		Serializable value = getGSValue();
 		List<Long> components = Arrays.stream(getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
-		long[] otherTs = getGSLongArray();
-		return new Vertex(clazz, ts, meta, supers, value, components, otherTs);
+		long birthTs = getLong();
+		return new Vertex(clazz, ts, meta, supers, value, components, birthTs);
 	}
 
 	public Vertex[] getGSVertexArray() {

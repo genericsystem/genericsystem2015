@@ -11,6 +11,7 @@ import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.cache.ClientEngine.ClientEngineHandler;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Generic;
@@ -59,7 +60,7 @@ public class ClientTransaction implements IDifferential<Generic> {
 		adds.forEach(add -> add.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
 		adds.forEach(add -> dependenciesMap.remove(add.getMeta()));
 		adds.forEach(add -> dependenciesMap.remove(add));
-		adds.forEach(add -> add.getProxyHandler().otherTs[0] = getTs());
+		adds.forEach(add -> ((ClientEngineHandler) add.getProxyHandler()).birthTs = getTs());
 	}
 
 	// @Override

@@ -14,9 +14,9 @@ public class Vertex implements Serializable {
 	private final List<Long> supers;
 	private final Serializable value;
 	private final List<Long> components;
-	private final long[] otherTs;
+	private final long birthTs;
 
-	public Vertex(Class<?> clazz, long ts, long meta, List<Long> supers, Serializable value, List<Long> components, long[] otherTs) {
+	public Vertex(Class<?> clazz, long ts, long meta, List<Long> supers, Serializable value, List<Long> components, long birthTs) {
 		assert !Object.class.equals(clazz);
 		this.clazz = clazz;
 		this.ts = ts;
@@ -26,7 +26,7 @@ public class Vertex implements Serializable {
 			assert component != null;
 		this.components = Collections.unmodifiableList(new ArrayList<>(components));
 		this.supers = Collections.unmodifiableList(new ArrayList<>(supers));
-		this.otherTs = otherTs.clone();
+		this.birthTs = birthTs;
 	}
 
 	public Class<?> getClazz() {
@@ -53,8 +53,8 @@ public class Vertex implements Serializable {
 		return components;
 	}
 
-	public long[] getOtherTs() {
-		return otherTs;
+	public long getBirthTs() {
+		return birthTs;
 	}
 	// public Vertex(JsonObject json) throws ClassNotFoundException {
 	// this((Class) Class.forName(json.getString("class")), (long)

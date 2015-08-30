@@ -1,9 +1,11 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
@@ -14,7 +16,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 
 	private final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
-	private TsGenerator generator;
+	private TsGenerator generator = new TsGenerator();;
 
 	@Override
 	public Root getRoot() {
@@ -34,16 +36,11 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	}
 
 	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(value, null, 8081, persistentDirectoryPath, userClasses);
+		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
+		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
-		if (Root.class.equals(getClass()))
-			isInitialized = true;
+		isInitialized = true;
 	}
-
-	@Override
-	protected void initSubRoot(String value, String host, int port, String persistentDirectoryPath, java.lang.Class<?>... userClasses) {
-		generator = new TsGenerator();
-	};
 
 	@Override
 	public AbstractContext<Generic> newCache() {
@@ -76,6 +73,14 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	}
 
 	@Override
+	protected Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long birhTs) {
+		return build(ts, clazz, meta, supers, value, components, isInitialized() ? new long[] { birhTs, birhTs, Long.MAX_VALUE } : ApiStatics.SYSTEM_TS);
+	}
+
+	protected Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
+		return init(newT(adaptClass(clazz, meta)), buildHandler(clazz, meta, supers, value, components, ts == null ? pickNewTs() : ts, otherTs));
+	}
+
 	protected RootServerHandler buildHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
 		return new RootServerHandler(clazz, meta, supers, value, components, ts, otherTs);
 	}
@@ -86,7 +91,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 		private final AbstractTsDependencies dependencies;
 
 		private RootServerHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
-			super(clazz, meta, supers, value, components, ts, otherTs);
+			super(clazz, meta, supers, value, components, ts);
 			this.lifeManager = new LifeManager(otherTs);
 			this.dependencies = new AbstractTsDependencies() {
 				@Override
@@ -107,6 +112,11 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 		@Override
 		protected Root getRoot() {
 			return Root.this;
+		}
+
+		@Override
+		public long getBirthTs() {
+			return lifeManager.getBirthTs();
 		}
 	}
 
