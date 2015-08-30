@@ -80,7 +80,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 		return new RootServerHandler(clazz, meta, supers, value, components, ts, otherTs);
 	}
 
-	class RootServerHandler extends ClientHandler {
+	class RootServerHandler extends DefaultHandler {
 
 		private final LifeManager lifeManager;
 		private final AbstractTsDependencies dependencies;
@@ -123,7 +123,7 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	@Override
 	public long[] getDependencies(long ts, long id) {
 		Generic genericById = this.getGenericById(id);
-		return genericById != null ? genericById.getProxyHandler().getDependencies().stream(ts).mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
+		return genericById != null ? ((RootServerHandler) genericById.getProxyHandler()).getDependencies().stream(ts).mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
 	}
 
 	@Override

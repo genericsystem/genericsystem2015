@@ -9,6 +9,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueClassCons
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.cache.FileSystem.Directory;
 import org.genericsystem.cache.FileSystem.FileType;
+import org.genericsystem.kernel.Generic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +17,12 @@ import org.slf4j.LoggerFactory;
 @InstanceValueClassConstraint(String.class)
 @Dependencies(FileType.class)
 @InstanceClass(Directory.class)
-public class FileSystem implements ClientGeneric {
+public class FileSystem implements Generic {
 	protected static Logger log = LoggerFactory.getLogger(FileSystem.class);
 	private static final String SEPARATOR = "/";
 	private static final byte[] EMPTY = "<html/>".getBytes();
 
-	public static class Directory implements ClientGeneric {
+	public static class Directory implements Generic {
 		public Snapshot<File> getFiles() {
 			return (Snapshot) getHolders(getRoot().find(FileType.class));
 		}
@@ -73,11 +74,11 @@ public class FileSystem implements ClientGeneric {
 	@InstanceValueClassConstraint(String.class)
 	@InstanceClass(File.class)
 	@Dependencies(FileContent.class)
-	public static class FileType implements ClientGeneric {
+	public static class FileType implements Generic {
 
 	}
 
-	public static class File implements ClientGeneric {
+	public static class File implements Generic {
 		public byte[] getContent() {
 			return (byte[]) getHolders(getRoot().find(FileContent.class)).first().getValue();
 		}
@@ -96,10 +97,10 @@ public class FileSystem implements ClientGeneric {
 	@SingularConstraint
 	@Components(FileType.class)
 	@InstanceValueClassConstraint(byte[].class)
-	public static class FileContent implements ClientGeneric {
+	public static class FileContent implements Generic {
 	}
 
-	public Snapshot<ClientGeneric> getRootDirectories() {
+	public Snapshot<Generic> getRootDirectories() {
 		return getInstances();
 	}
 
@@ -135,11 +136,11 @@ public class FileSystem implements ClientGeneric {
 		return file.getContent();
 	}
 
-	public ClientGeneric setFile(String resource) {
+	public Generic setFile(String resource) {
 		return setFile(resource, EMPTY);
 	}
 
-	public ClientGeneric setFile(String resource, byte[] content) {
+	public Generic setFile(String resource, byte[] content) {
 		if (resource.startsWith(SEPARATOR))
 			resource = resource.substring(1);
 		String[] pathToResource = resource.split(SEPARATOR);

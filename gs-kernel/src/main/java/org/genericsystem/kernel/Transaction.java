@@ -14,6 +14,7 @@ import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.kernel.Root.RootServerHandler;
 
 public class Transaction extends AbstractContext<Generic> implements IDifferential<Generic> {
 
@@ -42,7 +43,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 	protected Generic plug(Generic generic) {
 		if (getRoot().isInitialized()) {
 			generic.getProxyHandler().otherTs[0] = getTs();
-			generic.getLifeManager().beginLife(getTs());
+			((RootServerHandler) generic.getProxyHandler()).getLifeManager().beginLife(getTs());
 		}
 
 		Set<Generic> set = new HashSet<>();
@@ -57,7 +58,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 	private void kill(Generic generic) {
 		getChecker().checkAfterBuild(false, false, generic);
-		generic.getLifeManager().kill(getTs());
+		((RootServerHandler) generic.getProxyHandler()).getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
 
@@ -70,7 +71,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
 		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).remove(generic));
-		generic.getLifeManager().kill(getTs());
+		((RootServerHandler) generic.getProxyHandler()).getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
 
@@ -81,22 +82,22 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 			@Override
 			public Stream<Generic> stream() {
-				return ancestor.getProxyHandler().getDependencies().stream(getTs());
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs());
 			}
 
 			@Override
 			public Generic get(Object o) {
-				return ancestor.getProxyHandler().getDependencies().get((Generic) o, getTs());
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
 			}
 
 			@Override
 			public void add(Generic add) {
-				ancestor.getProxyHandler().getDependencies().add(add);
+				((RootServerHandler) ancestor.getProxyHandler()).getDependencies().add(add);
 			}
 
 			@Override
 			public boolean remove(Generic remove) {
-				return ancestor.getProxyHandler().getDependencies().remove(remove);
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().remove(remove);
 			}
 		};
 	}
@@ -153,7 +154,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 		private void writeLockAndCheckMvcc(Generic generic) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			if (generic != null) {
-				LifeManager manager = generic.getLifeManager();
+				LifeManager manager = ((RootServerHandler) generic.getProxyHandler()).getLifeManager();
 				if (!lockedLifeManagers.contains(manager)) {
 					manager.writeLock();
 					lockedLifeManagers.add(manager);

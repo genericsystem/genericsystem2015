@@ -158,20 +158,20 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	public abstract long pickNewTs();
 
 	T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
-		ClientHandler handler = buildHandler(clazz, meta, supers, value, components, ts == null ? pickNewTs() : ts, otherTs);
+		DefaultHandler handler = buildHandler(clazz, meta, supers, value, components, ts == null ? pickNewTs() : ts, otherTs);
 		T generic = newT(adaptClass(handler.getClazz(), meta));
 		return init(generic, handler);
 	}
 
-	private T init(T generic, ClientHandler handler) {
+	private T init(T generic, DefaultHandler handler) {
 		((ProxyObject) generic).setHandler(handler);
-		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.ClientHandler;
+		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.DefaultHandler;
 		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
 		assert gresult == null : gresult.info();
 		return generic;
 	}
 
-	protected abstract ClientHandler buildHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
+	protected abstract DefaultHandler buildHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
 
 	protected abstract Class<T> getTClass();
 
@@ -204,7 +204,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return isInitialized;
 	}
 
-	public abstract class ClientHandler implements MethodHandler, ISignature<T> {
+	public abstract class DefaultHandler implements MethodHandler, ISignature<T> {
 
 		private final Class<?> clazz;
 		private final T meta;
@@ -214,7 +214,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		private final long ts;
 		public final long[] otherTs;
 
-		protected ClientHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
+		protected DefaultHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs) {
 			this.clazz = clazz;
 			this.meta = meta;
 			this.supers = supers;

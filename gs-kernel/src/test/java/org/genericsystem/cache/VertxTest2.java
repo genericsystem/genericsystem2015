@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -52,7 +53,7 @@ public class VertxTest2 extends AbstractClassicTest {
 
 	public void test_002() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric myVehicle = engine.addInstance("Vehicle");
+		Generic myVehicle = engine.addInstance("Vehicle");
 		engine.getCurrentCache().flush();
 		ClientEngine secondEngine = new ClientEngine();
 		secondEngine.newCache().start();
@@ -62,7 +63,7 @@ public class VertxTest2 extends AbstractClassicTest {
 
 	public void testPersistanceOK() {
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
-		ClientGeneric myVehicle = engine.addInstance("Vehicle2");
+		Generic myVehicle = engine.addInstance("Vehicle2");
 		engine.getCurrentCache().flush();
 		engine.close();
 		afterClass();
@@ -74,11 +75,11 @@ public class VertxTest2 extends AbstractClassicTest {
 	public void testConcurrencyControlException() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache().start();
-		final ClientGeneric car = engine.addInstance("Car");
+		final Generic car = engine.addInstance("Car");
 		cache.flush();
 		ClientEngine engine2 = new ClientEngine();
 		ClientCache cache2 = engine2.newCache().start();
-		ClientGeneric car2 = engine2.getInstance("Car");
+		Generic car2 = engine2.getInstance("Car");
 		engine.getCurrentCache().start();
 		car.remove();
 		assert !engine.getCurrentCache().isAlive(car);
@@ -98,11 +99,11 @@ public class VertxTest2 extends AbstractClassicTest {
 	public void testConcurentRemoveKO() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache().start();
-		final ClientGeneric car = engine.addInstance("Car");
+		final Generic car = engine.addInstance("Car");
 		cache.flush();
 		ClientEngine engine2 = new ClientEngine();
 		ClientCache cache2 = engine2.newCache().start();
-		ClientGeneric car2 = engine2.getInstance("Car");
+		Generic car2 = engine2.getInstance("Car");
 		engine.getCurrentCache().start();
 		car.remove();
 		engine.getCurrentCache().flush();

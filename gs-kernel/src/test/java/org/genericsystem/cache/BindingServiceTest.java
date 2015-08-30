@@ -1,6 +1,7 @@
 package org.genericsystem.cache;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -8,10 +9,10 @@ public class BindingServiceTest extends AbstractClassicTest {
 
 	public void test001_addInstance() {
 		// given
-		ClientGeneric engine = new ClientEngine();
+		Generic engine = new ClientEngine();
 
 		// when
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 
 		// then
 		assert "Vehicle".equals(vehicle.getValue());
@@ -20,7 +21,7 @@ public class BindingServiceTest extends AbstractClassicTest {
 
 	public void test002_addSameValueKO() {
 		// given
-		ClientGeneric engine = new ClientEngine();
+		Generic engine = new ClientEngine();
 		engine.addInstance("Vehicle");
 
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);

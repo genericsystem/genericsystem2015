@@ -1,6 +1,7 @@
 package org.genericsystem.cache;
 
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -8,14 +9,14 @@ public class UpdateWithCacheTest extends AbstractClassicTest {
 
 	public void test002_updateMeta() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric power = car.addAttribute("Power");
-		ClientGeneric myCar = car.addInstance("MyCar");
+		Generic car = engine.addInstance("Car");
+		Generic power = car.addAttribute("Power");
+		Generic myCar = car.addInstance("MyCar");
 
-		ClientGeneric myCarV233 = myCar.addHolder(power, "myCarV233");
+		Generic myCarV233 = myCar.addHolder(power, "myCarV233");
 
 		assert myCar.getMeta().equals(car);
-		ClientGeneric carUpdate = car.updateValue("CarUpdate");
+		Generic carUpdate = car.updateValue("CarUpdate");
 		engine.getCurrentCache().flush();
 		assert carUpdate.getInstances().stream().allMatch(x -> "MyCar".equals(x.getValue()));
 		assert carUpdate.getInstances().stream().allMatch(x -> x.getHolders(power).stream().allMatch(y -> "myCarV233".equals(y.getValue())));
@@ -30,16 +31,16 @@ public class UpdateWithCacheTest extends AbstractClassicTest {
 
 	public void test004_updateHolder() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric power = car.addAttribute("Power");
-		ClientGeneric myCar = car.addInstance("MyCar");
-		ClientGeneric v233 = myCar.addHolder(power, 233);
+		Generic car = engine.addInstance("Car");
+		Generic power = car.addAttribute("Power");
+		Generic myCar = car.addInstance("MyCar");
+		Generic v233 = myCar.addHolder(power, 233);
 
 		assert myCar.getComposites().contains(v233);
 		assert myCar.getComposites().size() == 1;
 		assert v233.getValue().equals(233);
 
-		ClientGeneric v455 = v233.updateValue(455);
+		Generic v455 = v233.updateValue(455);
 
 		assert !v233.isAlive();
 		assert myCar.getComposites().contains(v455);
@@ -49,12 +50,12 @@ public class UpdateWithCacheTest extends AbstractClassicTest {
 
 	public void test005_updateSuper() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic car = engine.addInstance(vehicle, "Car");
 
 		assert car.getSupers().contains(vehicle);
-		ClientGeneric vehicleBis = engine.addInstance("VehicleBis");
-		ClientGeneric carBis = car.updateSupers(vehicleBis);
+		Generic vehicleBis = engine.addInstance("VehicleBis");
+		Generic carBis = car.updateSupers(vehicleBis);
 
 		assert !car.isAlive();
 		assert vehicle.isAlive();
@@ -72,11 +73,11 @@ public class UpdateWithCacheTest extends AbstractClassicTest {
 
 	public void test006_attributeToRelation() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric power = car.addAttribute("Power");
-		ClientGeneric myCar = car.addInstance("MyCar");
-		ClientGeneric v233 = myCar.addHolder(power, 233);
-		ClientGeneric powerType = engine.addInstance("PowerType");
+		Generic car = engine.addInstance("Car");
+		Generic power = car.addAttribute("Power");
+		Generic myCar = car.addInstance("MyCar");
+		Generic v233 = myCar.addHolder(power, 233);
+		Generic powerType = engine.addInstance("PowerType");
 
 		engine.getCurrentCache().flush();
 		catchAndCheckCause(() -> power.update("carPower", powerType), MetaRuleConstraintViolationException.class);
@@ -92,13 +93,13 @@ public class UpdateWithCacheTest extends AbstractClassicTest {
 
 	public void test007_structurel_WithInheritings_AndInstances() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric power = car.addAttribute("Power");
-		ClientGeneric myCar = car.addInstance("myCar");
-		ClientGeneric v233 = myCar.addHolder(power, 233);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic power = car.addAttribute("Power");
+		Generic myCar = car.addInstance("myCar");
+		Generic v233 = myCar.addHolder(power, 233);
 
-		ClientGeneric vehicleUpdate = vehicle.update("VehicleUpdate");
+		Generic vehicleUpdate = vehicle.update("VehicleUpdate");
 
 		assert vehicleUpdate.isAlive();
 		assert !vehicle.isAlive();

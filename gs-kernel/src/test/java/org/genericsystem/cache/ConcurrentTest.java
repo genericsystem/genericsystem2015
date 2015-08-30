@@ -1,5 +1,6 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -9,7 +10,7 @@ public class ConcurrentTest extends AbstractClassicTest {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric car = engine.addInstance("Car");
+		Generic car = engine.addInstance("Car");
 
 		assert cache2.isAlive(car);
 		assert !cache.isAlive(car);
@@ -25,7 +26,7 @@ public class ConcurrentTest extends AbstractClassicTest {
 
 	public void testNonFlushedModificationsStillAliveInCache() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
+		Generic car = engine.addInstance("Car");
 		ClientCache cache = engine.getCurrentCache();
 
 		assert cache.isAlive(car);
@@ -35,7 +36,7 @@ public class ConcurrentTest extends AbstractClassicTest {
 	public void testFlushedModificationsAvailableInNewCacheOk() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric car = engine.addInstance("Car");
+		Generic car = engine.addInstance("Car");
 		cache.flush();
 
 		assert cache.isAlive(car);
@@ -50,7 +51,7 @@ public class ConcurrentTest extends AbstractClassicTest {
 	public void testNonFlushedModificationsAreNotAvailableInNewCacheOk() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric car = engine.addInstance("Car");
+		Generic car = engine.addInstance("Car");
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);

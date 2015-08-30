@@ -6,6 +6,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.genericsystem.kernel.Root.RootServerHandler;
+
 public class GarbageCollector extends LinkedHashSet<Generic> {
 
 	private static final long serialVersionUID = -2021341943811568201L;
@@ -26,7 +28,7 @@ public class GarbageCollector extends LinkedHashSet<Generic> {
 			Iterator<Generic> iterator = GarbageCollector.this.iterator();
 			while (iterator.hasNext()) {
 				Generic generic = iterator.next();
-				if (ts - generic.getLifeManager().getDeathTs() >= timeOut) {
+				if (ts - ((RootServerHandler) generic.getProxyHandler()).getLifeManager().getDeathTs() >= timeOut) {
 					generic.remove();
 					iterator.remove();
 				}

@@ -29,9 +29,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
+import org.genericsystem.kernel.Root.RootServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -237,9 +239,9 @@ public class Archiver {
 		}
 
 		protected void writeOtherTs(Generic dependency) throws IOException {
-			objectOutputStream.writeLong(dependency.getLifeManager().getBirthTs());
-			objectOutputStream.writeLong(dependency.getLifeManager().getLastReadTs());
-			objectOutputStream.writeLong(dependency.getLifeManager().getDeathTs());
+			objectOutputStream.writeLong(((RootServerHandler) dependency.getProxyHandler()).getLifeManager().getBirthTs());
+			objectOutputStream.writeLong(((RootServerHandler) dependency.getProxyHandler()).getLifeManager().getLastReadTs());
+			objectOutputStream.writeLong(((RootServerHandler) dependency.getProxyHandler()).getLifeManager().getDeathTs());
 		}
 
 		private void writeAncestorsId(Generic dependency, List<Generic> ancestors) throws IOException {
@@ -279,7 +281,8 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {}
+			} catch (EOFException ignore) {
+			}
 		}
 
 		protected long loadTs() throws IOException {

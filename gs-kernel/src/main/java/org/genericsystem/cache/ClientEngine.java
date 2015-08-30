@@ -7,10 +7,11 @@ import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientGeneric {
+public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 
 	protected Server server;
 
@@ -46,7 +47,7 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 		return new ClientCache(this);
 	}
 
-	public ClientCache newCache(ContextEventListener<ClientGeneric> listener) {
+	public ClientCache newCache(ContextEventListener<Generic> listener) {
 		return new ClientCache(this, listener);
 	}
 
@@ -55,21 +56,21 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 		return (ClientCache) super.getCurrentCache();
 	}
 
-	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<ClientGeneric> {
+	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<Generic> {
 		@Override
-		public void set(AbstractContext<ClientGeneric> context) {
+		public void set(AbstractContext<Generic> context) {
 			super.set((ClientCache) context);
 		}
 	}
 
 	@Override
-	protected Wrapper<ClientGeneric> buildContextWrapper() {
+	protected Wrapper<Generic> buildContextWrapper() {
 		return new LocalContextWrapper();
 	}
 
 	@Override
-	public ClientGeneric getGenericById(long ts) {
-		ClientGeneric generic = super.getGenericById(ts);
+	public Generic getGenericById(long ts) {
+		Generic generic = super.getGenericById(ts);
 		if (generic == null) {
 			Vertex vertex = server.getVertex(ts);
 			generic = build(vertex);
@@ -78,8 +79,8 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	public final ClientGeneric[] newTArray(int dim) {
-		return new ClientGeneric[dim];
+	public final Generic[] newTArray(int dim) {
+		return new Generic[dim];
 	}
 
 	@Override
@@ -88,8 +89,8 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	protected Class<ClientGeneric> getTClass() {
-		return ClientGeneric.class;
+	protected Class<Generic> getTClass() {
+		return Generic.class;
 	}
 
 	public Server getServer() {
@@ -97,13 +98,13 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements ClientG
 	}
 
 	@Override
-	protected EngineWrapped buildHandler(Class<?> clazz, ClientGeneric meta, List<ClientGeneric> supers, Serializable value, List<ClientGeneric> components, long ts, long[] otherTs) {
+	protected EngineWrapped buildHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
 		return new EngineWrapped(clazz, meta, supers, value, components, ts, otherTs);
 	}
 
-	class EngineWrapped extends ClientHandler {
+	class EngineWrapped extends DefaultHandler {
 
-		public EngineWrapped(Class<?> clazz, ClientGeneric meta, List<ClientGeneric> supers, Serializable value, List<ClientGeneric> components, long ts, long[] otherTs) {
+		public EngineWrapped(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long[] otherTs) {
 			super(clazz, meta, supers, value, components, ts, otherTs);
 		}
 
