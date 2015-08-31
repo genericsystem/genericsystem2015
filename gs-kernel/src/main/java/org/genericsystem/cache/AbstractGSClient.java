@@ -13,6 +13,7 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Server;
+import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSClient implements Server {
 	private final ClientEngine engine;
@@ -105,7 +106,7 @@ public abstract class AbstractGSClient implements Server {
 	@SuppressWarnings("unchecked")
 	public <T> T unsafeSynchronize(int methodId, Buffer parameters) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		T result = null;
-		for (;;) {
+		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			int id = requestId.getAndIncrement();
 			blockingQueue = new ArrayBlockingQueue<>(1);
 			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
@@ -126,6 +127,7 @@ public abstract class AbstractGSClient implements Server {
 			System.out.println("Failure");
 			// throw new IllegalStateException();// For now
 		}
+		throw new IllegalStateException("Unable to apply transaction for " + Statics.HTTP_ATTEMPTS + " times");
 	}
 
 	abstract void send(Buffer buffer);
@@ -149,7 +151,7 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() != Long.MAX_VALUE)))
+		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() == Long.MAX_VALUE)))
 			throw new IllegalStateException("");
 		unsafeSynchronize(APPLY, gsBuffer);
 	}

@@ -70,11 +70,16 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	@Override
 	protected Generic build(Vertex vertex) {
 		return super.build(vertex);
+		// Generic generic = super.getGenericById(vertex.getTs());
+		// if (generic == null) {
+		// generic = super.build(vertex);
+		// }
+		// return generic;
 	}
 
 	@Override
 	protected Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long birhTs) {
-		return build(ts, clazz, meta, supers, value, components, isInitialized() ? new long[] { birhTs, birhTs, Long.MAX_VALUE } : ApiStatics.SYSTEM_TS);
+		return build(ts, clazz, meta, supers, value, components, isInitialized() ? new long[] { birhTs, 0L, Long.MAX_VALUE } : ApiStatics.SYSTEM_TS);
 	}
 
 	protected Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {

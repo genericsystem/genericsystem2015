@@ -42,8 +42,6 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		// shiftContext();
 	}
 
-	// protected abstract T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs);
-
 	private MethodHandler handler;
 
 	@Override
@@ -56,12 +54,11 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return handler;
 	}
 
-	// protected abstract void initSubRoot(String value, String host, int port, String persistentDirectoryPath, Class<?>... userClasses);
-
 	@Override
 	public abstract AbstractContext<T> newCache();
 
 	public static interface Wrapper<T extends DefaultVertex<T>> {
+
 		AbstractContext<T> get();
 
 		void set(AbstractContext<T> context);

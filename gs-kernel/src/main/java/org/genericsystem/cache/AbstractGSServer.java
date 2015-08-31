@@ -104,7 +104,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 				} catch (Exception e) {
 					e.printStackTrace();
 					exceptionSender.accept(e);
-					throw new IllegalStateException(e);
+					return;
 				}
 				break;
 			}
