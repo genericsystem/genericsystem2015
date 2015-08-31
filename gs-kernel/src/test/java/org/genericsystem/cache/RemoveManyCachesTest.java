@@ -1,5 +1,6 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -8,12 +9,12 @@ public class RemoveManyCachesTest extends AbstractClassicTest {
 	public void test001_simpleHolder() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
 		cache.flush();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;
@@ -26,16 +27,16 @@ public class RemoveManyCachesTest extends AbstractClassicTest {
 	public void test002_simpleHolder() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
 		cache.flush();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric myBmw2 = car.addInstance("myBmw");
-		ClientGeneric myBmwRed2 = myBmw2.addHolder(color, "red");
+		Generic myBmw2 = car.addInstance("myBmw");
+		Generic myBmwRed2 = myBmw2.addHolder(color, "red");
 		cache.start();
 		cache.shiftTs();
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		cache.flush();
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;

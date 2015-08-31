@@ -14,6 +14,7 @@ import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.kernel.Root.RootServerHandler;
 
 public class Transaction extends AbstractContext<Generic> implements IDifferential<Generic> {
 
@@ -40,11 +41,8 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 	@Override
 	protected Generic plug(Generic generic) {
-		if (getRoot().isInitialized()) {
-			generic.getOtherTs()[0] = getTs();
-			generic.getLifeManager().beginLife(getTs());
-		}
-
+		if (getRoot().isInitialized())
+			((RootServerHandler) generic.getProxyHandler()).getLifeManager().beginLife(getTs());
 		Set<Generic> set = new HashSet<>();
 		if (!generic.isMeta())
 			set.add(generic.getMeta());
@@ -57,7 +55,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 	private void kill(Generic generic) {
 		getChecker().checkAfterBuild(false, false, generic);
-		generic.getLifeManager().kill(getTs());
+		((RootServerHandler) generic.getProxyHandler()).getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
 
@@ -70,7 +68,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
 		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).remove(generic));
-		generic.getLifeManager().kill(getTs());
+		((RootServerHandler) generic.getProxyHandler()).getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
 
@@ -81,22 +79,22 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 			@Override
 			public Stream<Generic> stream() {
-				return ancestor.getProxyHandler().getDependencies().stream(getTs());
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(getTs());
 			}
 
 			@Override
 			public Generic get(Object o) {
-				return ancestor.getProxyHandler().getDependencies().get((Generic) o, getTs());
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().get((Generic) o, getTs());
 			}
 
 			@Override
 			public void add(Generic add) {
-				ancestor.getProxyHandler().getDependencies().add(add);
+				((RootServerHandler) ancestor.getProxyHandler()).getDependencies().add(add);
 			}
 
 			@Override
 			public boolean remove(Generic remove) {
-				return ancestor.getProxyHandler().getDependencies().remove(remove);
+				return ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().remove(remove);
 			}
 		};
 	}
@@ -108,7 +106,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 	// archiver acces
 	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
-		return plug(build(ts, clazz, meta, supers, value, components, otherTs));
+		return plug(getRoot().build(ts, clazz, meta, supers, value, components, otherTs));
 
 	}
 
@@ -153,7 +151,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 
 		private void writeLockAndCheckMvcc(Generic generic) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			if (generic != null) {
-				LifeManager manager = generic.getLifeManager();
+				LifeManager manager = ((RootServerHandler) generic.getProxyHandler()).getLifeManager();
 				if (!lockedLifeManagers.contains(manager)) {
 					manager.writeLock();
 					lockedLifeManagers.add(manager);
@@ -183,7 +181,7 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 		// getRoot().getGenericById(removeId)).allMatch(g -> true);
 		// assert Arrays.stream(addVertices).map(add ->
 		// add.getTs()).distinct().count() == addVertices.length;
-		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
+		// assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
 		Arrays.stream(addVertices).forEach(addVertex -> getRoot().build(addVertex));
 		apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
 	}

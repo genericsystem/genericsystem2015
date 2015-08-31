@@ -4,6 +4,7 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -13,10 +14,10 @@ public class NotRemovableManyCachesTest extends AbstractClassicTest {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		cache.start();
 		catchAndCheckCause(() -> myBmwRed.remove(), AliveConstraintViolationException.class);
 
@@ -26,24 +27,24 @@ public class NotRemovableManyCachesTest extends AbstractClassicTest {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		cache.start();
-		ClientGeneric car2 = engine.addInstance("Car2");
-		ClientGeneric myBmw2 = car2.addInstance("myBmw2");
+		Generic car2 = engine.addInstance("Car2");
+		Generic myBmw2 = car2.addInstance("myBmw2");
 		catchAndCheckCause(() -> myBmw2.addHolder(color, "red2"), MetaRuleConstraintViolationException.class);
 	}
 
 	public void test001_referenceEx() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric car = engine.addInstance("Car");
+		Generic car = engine.addInstance("Car");
 		cache.flush();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
 		catchAndCheckCause(() -> car.remove(), ReferentialIntegrityConstraintViolationException.class);
 	}
 
@@ -52,13 +53,13 @@ public class NotRemovableManyCachesTest extends AbstractClassicTest {
 		ClientCache cache = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
 		ClientCache cache3 = engine.newCache().start();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
 		cache3.flush();
 		cache2.start();
 		cache2.shiftTs();
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		cache2.flush();
 		cache.start();
 		cache.shiftTs();
@@ -67,8 +68,8 @@ public class NotRemovableManyCachesTest extends AbstractClassicTest {
 
 	public void test001_() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar1 = car.addInstance("myCar1");
+		Generic car = engine.addInstance("Car");
+		Generic myCar1 = car.addInstance("myCar1");
 		ClientCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
@@ -80,8 +81,8 @@ public class NotRemovableManyCachesTest extends AbstractClassicTest {
 
 	public void test002_() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar = car.addInstance("myCar");
+		Generic car = engine.addInstance("Car");
+		Generic myCar = car.addInstance("myCar");
 		ClientCache cache = engine.getCurrentCache();
 		cache.flush();
 		ClientCache cache2 = engine.newCache().start();

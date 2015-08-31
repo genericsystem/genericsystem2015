@@ -2,6 +2,7 @@ package org.genericsystem.cache;
 
 import java.util.Arrays;
 
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -10,10 +11,10 @@ public class HolderTest extends AbstractClassicTest {
 	public void testHolder1Attribut() {
 		ClientEngine engine = new ClientEngine();
 
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
 		int powerValue = 1;
-		ClientGeneric v1 = power.addInstance(powerValue, vehicle);
+		Generic v1 = power.addInstance(powerValue, vehicle);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -32,11 +33,11 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolder1AttributWith2LevelsInheritance1AttributOnParent() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		int powerValue = 1;
-		ClientGeneric v1 = power.addInstance(powerValue, vehicle);
+		Generic v1 = power.addInstance(powerValue, vehicle);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -57,13 +58,13 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolderOverrideWithDifferentValue1AttributWith2LevelsInheritance1AttributOnParent() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		int powerValue1 = 1;
 		int powerValue2 = 2;
-		ClientGeneric v1 = power.addInstance(powerValue1, vehicle);
-		ClientGeneric v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
+		Generic v1 = power.addInstance(powerValue1, vehicle);
+		Generic v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -88,13 +89,13 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolderOverrideWithSameValue1AttributWith2LevelsInheritance1AttributOnParent() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		int powerValue1 = 1;
 		int powerValue2 = 1;
-		ClientGeneric v1 = power.addInstance(powerValue1, vehicle);
-		ClientGeneric v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
+		Generic v1 = power.addInstance(powerValue1, vehicle);
+		Generic v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -119,12 +120,12 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolder1AttributWith2LevelsInheritance1AttributOnFirstChild() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		ClientGeneric power = engine.addInstance("Power", car);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic power = engine.addInstance("Power", car);
 
 		int powerValue = 1;
-		ClientGeneric v1 = power.addInstance(powerValue, car);
+		Generic v1 = power.addInstance(powerValue, car);
 
 		assert v1.isInstanceOf(power);
 
@@ -140,12 +141,12 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolder1AttributWith2LevelsInheritance2children1AttributOnParent() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		ClientGeneric bike = engine.addInstance(Arrays.asList(vehicle), "bike");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic bike = engine.addInstance(Arrays.asList(vehicle), "bike");
+		Generic power = engine.addInstance("Power", vehicle);
 		int powerValue = 1;
-		ClientGeneric v1 = power.addInstance(powerValue, vehicle);
+		Generic v1 = power.addInstance(powerValue, vehicle);
 
 		assert v1.isInstanceOf(power);
 
@@ -169,15 +170,15 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolderOverrideWithDifferentValue1AttributWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		ClientGeneric microcar = engine.addInstance(Arrays.asList(car), "Microcar");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic microcar = engine.addInstance(Arrays.asList(car), "Microcar");
 
 		int powerValue1 = 1;
 		int powerValue2 = 1;
-		ClientGeneric v1 = power.addInstance(powerValue1, vehicle);
-		ClientGeneric v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
+		Generic v1 = power.addInstance(powerValue1, vehicle);
+		Generic v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -209,15 +210,15 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolderOverrideWithDifferentValue1AttributWith3LevelsInheritance1AttributOnParentOverrideOnSecondChild() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		ClientGeneric microcar = engine.addInstance(Arrays.asList(car), "Microcar");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic microcar = engine.addInstance(Arrays.asList(car), "Microcar");
 
 		int powerValue1 = 1;
 		int powerValue2 = 1;
-		ClientGeneric v1 = power.addInstance(powerValue1, vehicle);
-		ClientGeneric v2 = power.addInstance(Arrays.asList(v1), powerValue2, microcar);
+		Generic v1 = power.addInstance(powerValue1, vehicle);
+		Generic v2 = power.addInstance(Arrays.asList(v1), powerValue2, microcar);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -250,14 +251,14 @@ public class HolderTest extends AbstractClassicTest {
 	public void test2ChainedAttributs() {
 
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric unit = engine.addInstance("Unit", power);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic unit = engine.addInstance("Unit", power);
 		int powerValue = 1;
 		String unitValue = "Watt";
 
-		ClientGeneric v1 = power.addInstance(powerValue, vehicle);
-		ClientGeneric vUnit = unit.addInstance(unitValue, power);
+		Generic v1 = power.addInstance(powerValue, vehicle);
+		Generic vUnit = unit.addInstance(unitValue, power);
 
 		assert v1.isInstanceOf(power);
 		assert vehicle.getHolders(power) != null;
@@ -289,19 +290,19 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolderOverrideWithDifferentValue2ChainedAttributWith2LevelsInheritance2AttributsOnParent() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power = engine.addInstance("Power", vehicle);
-		ClientGeneric unit = engine.addInstance("Unit", power);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power = engine.addInstance("Power", vehicle);
+		Generic unit = engine.addInstance("Unit", power);
 
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 
 		int powerValue1 = 1;
 		int powerValue2 = 2;
 		String unitValue = "Watt";
-		ClientGeneric v1 = power.addInstance(powerValue1, vehicle);
-		ClientGeneric v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
+		Generic v1 = power.addInstance(powerValue1, vehicle);
+		Generic v2 = power.addInstance(Arrays.asList(v1), powerValue2, car);
 
-		ClientGeneric vUnit = unit.addInstance(unitValue, power);
+		Generic vUnit = unit.addInstance(unitValue, power);
 
 		assert v1.isInstanceOf(power);
 		assert v2.isInstanceOf(power);
@@ -340,23 +341,23 @@ public class HolderTest extends AbstractClassicTest {
 
 	public void testHolderOverrideWithDifferentValue2ChainedAttributsWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric power1 = engine.addInstance("Power", vehicle);
-		ClientGeneric unit = engine.addInstance("Unit", power1);
-		ClientGeneric car = engine.addInstance(Arrays.asList(vehicle), "Car");
-		ClientGeneric power2 = engine.addInstance("Power", car);
-		ClientGeneric microcar = engine.addInstance(Arrays.asList(car), "Microcar");
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power1 = engine.addInstance("Power", vehicle);
+		Generic unit = engine.addInstance("Unit", power1);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic power2 = engine.addInstance("Power", car);
+		Generic microcar = engine.addInstance(Arrays.asList(car), "Microcar");
 
 		// same value for power1 and power2
 		int powerValue = 1;
 		String unitValue1 = "Watt";
 		String unitValue2 = "KWatt";
 
-		ClientGeneric v1 = power1.addInstance(powerValue, vehicle);
-		ClientGeneric v2 = power2.addInstance(Arrays.asList(v1), powerValue, car);
+		Generic v1 = power1.addInstance(powerValue, vehicle);
+		Generic v2 = power2.addInstance(Arrays.asList(v1), powerValue, car);
 
-		ClientGeneric vUnit1 = unit.addInstance(unitValue1, power1);
-		ClientGeneric vUnit2 = unit.addInstance(Arrays.asList(vUnit1), unitValue2, power2);
+		Generic vUnit1 = unit.addInstance(unitValue1, power1);
+		Generic vUnit2 = unit.addInstance(Arrays.asList(vUnit1), unitValue2, power2);
 
 		assert !power1.equals(power2);
 		assert v1.isInstanceOf(power1);

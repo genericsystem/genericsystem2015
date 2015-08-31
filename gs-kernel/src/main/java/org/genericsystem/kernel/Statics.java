@@ -20,6 +20,7 @@ public class Statics {
 
 	public static final int ATTEMPT_SLEEP = 15;
 	public static final int ATTEMPTS = 50;
+	public static final int HTTP_ATTEMPTS = 3;
 
 	public static final long GARBAGE_PERIOD = 1000L;
 	public static final long GARBAGE_INITIAL_DELAY = 1000L;
@@ -41,8 +42,7 @@ public class Statics {
 
 	public static void logTimeIfCurrentThreadDebugged(String message) {
 		if (isCurrentThreadDebugged())
-			log.info(message + " : "
-					+ (System.currentTimeMillis() - threadDebugged.get()));
+			log.info(message + " : " + (System.currentTimeMillis() - threadDebugged.get()));
 	}
 
 	public static class Supers<T extends DefaultVertex<T>> extends ArrayList<T> {

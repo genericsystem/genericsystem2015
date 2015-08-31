@@ -1,5 +1,6 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -7,10 +8,10 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test001_simpleHolder() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;
@@ -22,17 +23,17 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test002_multipleHolders() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
-		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
+		Generic myBmwBlue = myBmw.addHolder(color, "blue");
 
 		myBmwRed.remove();
 		assert myBmw.getHolders(color).contains(myBmwBlue);
 		assert myBmw.getHolders(color).size() == 1;
 
-		ClientGeneric myBmwGreen = myBmw.addHolder(color, "green");
+		Generic myBmwGreen = myBmw.addHolder(color, "green");
 
 		myBmwBlue.remove();
 		assert myBmw.getHolders(color).contains(myBmwGreen);
@@ -41,11 +42,11 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test003_removeAndAdd() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
-		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
+		Generic myBmwBlue = myBmw.addHolder(color, "blue");
 
 		myBmwRed.remove();
 		myBmwRed = myBmw.addHolder(color, "red");
@@ -57,17 +58,17 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test004_removeAndAddAndRemove() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
-		ClientGeneric myBmwBlue = myBmw.addHolder(color, "blue");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
+		Generic myBmwBlue = myBmw.addHolder(color, "blue");
 
 		myBmwRed.remove();
 		assert !myBmwRed.isAlive();
 		engine.getCurrentCache().flush();
 		assert !myBmwRed.isAlive();
-		ClientGeneric myBmwRed2 = myBmw.addHolder(color, "red");
+		Generic myBmwRed2 = myBmw.addHolder(color, "red");
 		assert myBmwRed2.isAlive();
 		assert myBmwRed.getTs() != myBmwRed2.getTs();
 		engine.getCurrentCache().flush();
@@ -81,10 +82,10 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test005_removeConcret_withHolder() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 
 		assert color.getInstances().contains(myBmwRed);
 		assert color.getInstances().size() == 1;
@@ -96,10 +97,10 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test006_removeStructural_withHolder() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		myBmw.remove();
 		car.remove();
 
@@ -109,10 +110,10 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test007_removeConcretAndAttribut() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		myBmw.remove();
 		color.remove();
 
@@ -124,10 +125,10 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test008_removeInstanceAndAttribute() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		myBmwRed.remove();
 		color.remove();
 
@@ -139,10 +140,10 @@ public class RemoveTest extends AbstractClassicTest {
 
 	public void test009_removeConcret() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric color = car.addAttribute("Color");
-		ClientGeneric myBmw = car.addInstance("myBmw");
-		ClientGeneric myBmwRed = myBmw.addHolder(color, "red");
+		Generic car = engine.addInstance("Car");
+		Generic color = car.addAttribute("Color");
+		Generic myBmw = car.addInstance("myBmw");
+		Generic myBmwRed = myBmw.addHolder(color, "red");
 		myBmwRed.remove();
 
 		assert color.getInstances().size() == 0;

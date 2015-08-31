@@ -3,6 +3,7 @@ package org.genericsystem.cache;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -10,7 +11,7 @@ public class CacheTest extends AbstractClassicTest {
 	public void test000() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.flush();
 		assert vehicle.isAlive();
@@ -25,7 +26,7 @@ public class CacheTest extends AbstractClassicTest {
 	public void test001() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.clear();
 		assert !vehicle.isAlive();
@@ -37,7 +38,7 @@ public class CacheTest extends AbstractClassicTest {
 
 	public void test002() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().mount();
 		assert vehicle.isAlive();
@@ -47,7 +48,7 @@ public class CacheTest extends AbstractClassicTest {
 
 	public void test003() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().mount();
 		vehicle.remove();
@@ -58,49 +59,49 @@ public class CacheTest extends AbstractClassicTest {
 
 	public void test001_getInheritings() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
+		Generic car = engine.addInstance(vehicle, "Car");
 		assert vehicle.getInheritings().stream().anyMatch(car::equals);
 	}
 
 	public void test001_getInstances() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		assert engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test001_getMetaComponents() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric powerVehicle = engine.addInstance("power", vehicle);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic powerVehicle = engine.addInstance("power", vehicle);
 		assert vehicle.getComposites().contains(powerVehicle);
-		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
-		ClientGeneric myVehicle123 = powerVehicle.addInstance("123", myVehicle);
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic myVehicle123 = powerVehicle.addInstance("123", myVehicle);
 		assert myVehicle.getComposites().contains(myVehicle123);
 	}
 
 	public void test001_getSuperComponents() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric powerVehicle = engine.addInstance("power", vehicle);
-		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
-		ClientGeneric vehicle256 = powerVehicle.addInstance("256", vehicle);
-		ClientGeneric myVehicle123 = powerVehicle.addInstance(vehicle256, "123", myVehicle);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic powerVehicle = engine.addInstance("power", vehicle);
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic vehicle256 = powerVehicle.addInstance("256", vehicle);
+		Generic myVehicle123 = powerVehicle.addInstance(vehicle256, "123", myVehicle);
 		assert myVehicle123.inheritsFrom(vehicle256);
 		assert myVehicle.getComposites().contains(myVehicle123);
 	}
 
 	public void test002_getSuperComponents() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric powerVehicle = engine.addInstance("power", vehicle);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic powerVehicle = engine.addInstance("power", vehicle);
 		powerVehicle.enablePropertyConstraint();
 		assert powerVehicle.isPropertyConstraintEnabled();
-		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
-		ClientGeneric vehicle256 = powerVehicle.addInstance("256", vehicle);
-		ClientGeneric myVehicle123 = powerVehicle.addInstance("123", myVehicle);
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic vehicle256 = powerVehicle.addInstance("256", vehicle);
+		Generic myVehicle123 = powerVehicle.addInstance("123", myVehicle);
 		assert !vehicle256.equals(myVehicle123);
 		assert myVehicle123.inheritsFrom(vehicle256);
 		assert myVehicle.getComposites().contains(myVehicle123);
@@ -108,7 +109,7 @@ public class CacheTest extends AbstractClassicTest {
 
 	public void test002_flush() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		engine.addInstance(vehicle, "Car");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().flush();
@@ -118,7 +119,7 @@ public class CacheTest extends AbstractClassicTest {
 
 	public void test002_clear() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle");
 		engine.getCurrentCache().clear();
 		assert !engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
@@ -144,8 +145,8 @@ public class CacheTest extends AbstractClassicTest {
 	public void test005_TwoComponentsWithSameMetaInDifferentCaches_remove() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache currentCache = engine.getCurrentCache();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric vehiclePower = engine.addInstance("vehiclePower", vehicle);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic vehiclePower = engine.addInstance("vehiclePower", vehicle);
 		assert currentCache.getCacheLevel() == 0;
 		currentCache.mount();
 		assert currentCache.getCacheLevel() == 1;
