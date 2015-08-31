@@ -60,6 +60,7 @@ public class ClientTransaction implements IDifferential<Generic> {
 		adds.forEach(add -> add.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
 		adds.forEach(add -> dependenciesMap.remove(add.getMeta()));
 		adds.forEach(add -> dependenciesMap.remove(add));
+		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		adds.forEach(add -> ((ClientEngineHandler) add.getProxyHandler()).birthTs = getTs());
 	}
 

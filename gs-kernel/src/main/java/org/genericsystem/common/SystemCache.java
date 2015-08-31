@@ -53,11 +53,13 @@ public class SystemCache<T extends DefaultVertex<T>> {
 	public void mount(List<Class<?>> systemClasses, Class<?>... userClasses) {
 		for (Class<?> clazz : systemClasses)
 			bind(clazz);
-		for (Class<?> clazz : userClasses)
+		for (Class<?> clazz : userClasses) {
 			bind(clazz);
+		}
 	}
 
 	private T set(Class<?> clazz) {
+
 		if (root.isInitialized())
 			throw new IllegalStateException("Class : " + clazz + " has not been built at startup");
 		T systemProperty = systemCache.get(clazz);
@@ -91,8 +93,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 	public T bind(Class<?> clazz) {
 		T result = find(clazz);
 		if (result == null) {
-			// if (!(root instanceof Root))
-			// throw new IllegalStateException("unable to find : " + clazz);
+			System.out.println("mount class: " + clazz);
 			result = set(clazz);
 		}
 		return result;

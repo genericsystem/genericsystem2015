@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.kernel.Root;
 
 public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 	protected final AbstractContext<T> context;
@@ -181,7 +182,7 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 			super(context, meta, overrides, value, components);
 		}
 
-		public final T resolve() {
+		public T resolve() {
 			return getOrBuild();
 		}
 	}
@@ -203,6 +204,18 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 		@Override
 		protected T build() {
 			return gettable = context.buildAndPlug(clazz, isMeta() ? null : adjustedMeta, supers, value, components);
+		}
+
+		@Override
+		public final T resolve() {
+			T instance = get();
+			if (!(context.getRoot() instanceof Root)) {
+				if (instance == null)
+					throw new IllegalStateException("could not find class on server : " + clazz.getName());
+				return instance;
+			}
+			return instance == null ? build() : instance;
+
 		}
 	}
 

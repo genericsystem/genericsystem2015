@@ -31,6 +31,8 @@ public class AnnotationTest extends AbstractGetClassTest {
 	public void test001_remove() {
 		ClientEngine engine = new ClientEngine(Vehicle.class);
 		Generic vehicle = engine.find(Vehicle.class);
+		assert vehicle.getBirthTs() == 0L;
+		assert vehicle.isSystem();
 		catchAndCheckCause(() -> vehicle.remove(), IllegalAccessException.class);
 	}
 
@@ -77,11 +79,12 @@ public class AnnotationTest extends AbstractGetClassTest {
 		assert engine.find(MyAudi.class) instanceof MyAudi : engine.find(MyAudi.class).getClass();
 	}
 
-	public void test004_instanceof() {
-
-		catchAndCheckCause(() -> new ClientEngine(MyBmw.class), InstantiationException.class);
-		catchAndCheckCause(() -> new ClientEngine(MyMercedes.class), InstantiationException.class);
-	}
+	//
+	// public void test004_instanceof() {
+	//
+	// catchAndCheckCause(() -> new ClientEngine(MyBmw.class), InstantiationException.class);
+	// catchAndCheckCause(() -> new ClientEngine(MyMercedes.class), InstantiationException.class);
+	// }
 
 	public static class VehicleInstance implements Generic {
 
@@ -94,12 +97,12 @@ public class AnnotationTest extends AbstractGetClassTest {
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public abstract class MyBmw implements Generic {
+	public static class MyBmw extends VehicleInstance {
 	}
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static abstract class MyMercedes {
+	public static class MyMercedes extends VehicleInstance {
 	}
 
 	@SystemGeneric

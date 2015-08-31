@@ -32,6 +32,7 @@ public abstract class AbstractTest {
 		System.out.println("before class");
 		cleanDirectory(directoryPath);
 		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
+
 		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), getDeploymentOptions(), result -> {
 			try {
 				queue.put(result.result() != null ? result.result() : FAILURE);
@@ -47,6 +48,7 @@ public abstract class AbstractTest {
 		if (FAILURE.equals(ServerVerticleId))
 			throw new IllegalStateException("unable to start server");
 		System.out.println("beforeClass ok");
+
 	}
 
 	@FunctionalInterface

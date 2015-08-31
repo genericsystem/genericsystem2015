@@ -31,7 +31,6 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 				List<JsonObject> list = config().getJsonArray("classes").getList();
 				Class<?>[] classArray = new Class<?>[list.size()];
 				for (int i = 0; i < list.size(); i++) {
-					System.out.println("mount class: " + list.get(i).getString("className"));
 					try {
 						classArray[i] = Class.forName(list.get(i).getString("className"));
 					} catch (ClassNotFoundException e) {
@@ -50,6 +49,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new IllegalStateException(e);
 		}
 	}
 
