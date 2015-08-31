@@ -47,8 +47,4 @@ public interface Generic extends DefaultVertex<Generic> {
 		return getCurrentCache().unwrap(this).getBirthTs();
 	}
 
-	@Override
-	default long[] getOtherTs() {
-		return getCurrentCache().unwrap(this).getOtherTs();
-	}
 }
