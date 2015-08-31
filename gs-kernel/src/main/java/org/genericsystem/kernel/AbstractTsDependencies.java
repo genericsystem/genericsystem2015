@@ -7,6 +7,7 @@ import java.util.stream.StreamSupport;
 
 import org.genericsystem.common.AbstractGeneralAwareIterator;
 import org.genericsystem.common.TsDependencies;
+import org.genericsystem.kernel.Root.RootServerHandler;
 
 abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 
@@ -30,7 +31,7 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 			}
 		}
 
-		if (result != null && result.getLifeManager().isAlive(ts))
+		if (result != null && ((RootServerHandler) result.getProxyHandler()).getLifeManager().isAlive(ts))
 			return result;
 		return null;
 	}
@@ -114,7 +115,7 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 				}
 				next = nextNode;
 				Generic content = next.content;
-				if (content != null && content.getLifeManager().isAlive(ts))
+				if (content != null && ((RootServerHandler) content.getProxyHandler()).getLifeManager().isAlive(ts))
 					break;
 
 			}

@@ -11,10 +11,12 @@ import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.cache.ClientEngine.ClientEngineHandler;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.kernel.Generic;
 
-public class ClientTransaction implements IDifferential<ClientGeneric> {
+public class ClientTransaction implements IDifferential<Generic> {
 
 	private final ClientEngine engine;
 	private final long ts;
@@ -46,9 +48,9 @@ public class ClientTransaction implements IDifferential<ClientGeneric> {
 	// }
 
 	@Override
-	public void apply(Snapshot<ClientGeneric> removes, Snapshot<ClientGeneric> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		// adds.stream().forEach(add -> System.out.println(add));
-		assert adds.stream().allMatch(add -> add.getOtherTs()[0] == Long.MAX_VALUE);
+		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		engine.getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
 		removes.forEach(remove -> remove.getComponents().forEach(component -> dependenciesMap.remove(component)));
 		removes.forEach(remove -> remove.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
@@ -58,7 +60,7 @@ public class ClientTransaction implements IDifferential<ClientGeneric> {
 		adds.forEach(add -> add.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
 		adds.forEach(add -> dependenciesMap.remove(add.getMeta()));
 		adds.forEach(add -> dependenciesMap.remove(add));
-		adds.forEach(add -> add.getOtherTs()[0] = getTs());
+		adds.forEach(add -> ((ClientEngineHandler) add.getProxyHandler()).birthTs = getTs());
 	}
 
 	// @Override
@@ -66,27 +68,27 @@ public class ClientTransaction implements IDifferential<ClientGeneric> {
 		return engine;
 	}
 
-	private Map<ClientGeneric, Snapshot<ClientGeneric>> dependenciesMap = new HashMap<>();
+	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
 
 	@Override
-	public Snapshot<ClientGeneric> getDependencies(ClientGeneric generic) {
-		Snapshot<ClientGeneric> dependencies = dependenciesMap.get(generic);
+	public Snapshot<Generic> getDependencies(Generic generic) {
+		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			final Map<ClientGeneric, ClientGeneric> container = Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts)).collect(Collectors.toMap(g -> g, g -> g, (u, v) -> {
+			final Map<Generic, Generic> container = Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts)).collect(Collectors.toMap(g -> g, g -> g, (u, v) -> {
 				throw new IllegalStateException(String.format("Duplicate key %s", u));
 			}, LinkedHashMap::new));
-			dependencies = new IteratorSnapshot<ClientGeneric>() {
+			dependencies = new IteratorSnapshot<Generic>() {
 				@Override
-				public Iterator<ClientGeneric> iterator() {
+				public Iterator<Generic> iterator() {
 					return container.keySet().iterator();
 				}
 
 				@Override
-				public ClientGeneric get(Object o) {
+				public Generic get(Object o) {
 					return container.get(o);
 				}
 			};
-			Snapshot<ClientGeneric> result = dependenciesMap.put(generic, dependencies);
+			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}
 		return dependencies;

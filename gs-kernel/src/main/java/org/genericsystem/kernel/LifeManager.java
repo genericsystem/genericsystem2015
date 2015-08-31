@@ -11,11 +11,6 @@ import org.slf4j.LoggerFactory;
 
 class LifeManager {
 
-	// public final static long TS_OLD_SYSTEM = 1L;
-	// public final static long TS_SYSTEM = 0L;
-	// public final static long[] SYSTEM_TS = new long[] { TS_SYSTEM, 0L, Long.MAX_VALUE };
-	// public final static long[] USER_TS = new long[] { Long.MAX_VALUE, 0L, Long.MAX_VALUE };
-
 	protected static Logger log = LoggerFactory.getLogger(LifeManager.class);
 
 	private long birthTs;
@@ -43,10 +38,10 @@ class LifeManager {
 			this.birthTs = birthTs;
 	}
 
-	void cancelBeginLife() {
-		assert isWriteLockedByCurrentThread();
-		birthTs = Long.MAX_VALUE;
-	}
+	// void cancelBeginLife() {
+	// assert isWriteLockedByCurrentThread();
+	// birthTs = Long.MAX_VALUE;
+	// }
 
 	public boolean isAlive(long contextTs) {
 		if (contextTs < birthTs)

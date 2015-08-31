@@ -73,5 +73,8 @@ public interface ISignature<T extends ISignature<T>> {
 
 	long getTs();
 
-	long[] getOtherTs();
+	long getBirthTs();
+
+	// long getDeathTs();
+
 }

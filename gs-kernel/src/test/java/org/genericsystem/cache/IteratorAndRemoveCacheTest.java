@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -14,15 +15,15 @@ public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache1 = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar1 = car.addInstance("myCar1");
-		ClientGeneric myCar2 = car.addInstance("myCar2");
-		ClientGeneric myCar3 = car.addInstance("myCar3");
-		ClientGeneric myCar4 = car.addInstance("myCar4");
+		Generic car = engine.addInstance("Car");
+		Generic myCar1 = car.addInstance("myCar1");
+		Generic myCar2 = car.addInstance("myCar2");
+		Generic myCar3 = car.addInstance("myCar3");
+		Generic myCar4 = car.addInstance("myCar4");
 
 		cache2.flush();
 		int cpt = 0;
-		for (ClientGeneric g : car.getInstances()) {
+		for (Generic g : car.getInstances()) {
 			if (cpt % 2 == 0) {
 				cache1.start();
 				cache1.shiftTs();
@@ -41,8 +42,8 @@ public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 
 	public void test001_() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar1 = car.addInstance("myCar1");
+		Generic car = engine.addInstance("Car");
+		Generic myCar1 = car.addInstance("myCar1");
 		ClientCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
@@ -54,8 +55,8 @@ public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 
 	public void test002_() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar = car.addInstance("myCar");
+		Generic car = engine.addInstance("Car");
+		Generic myCar = car.addInstance("myCar");
 		ClientCache cache = engine.getCurrentCache();
 		cache.flush();
 		ClientCache cache2 = engine.newCache().start();
@@ -78,15 +79,15 @@ public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache1 = engine.getCurrentCache();
 		ClientCache cache2 = engine.newCache().start();
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar1 = car.addInstance("myCar1");
-		ClientGeneric myCar2 = car.addInstance("myCar2");
+		Generic car = engine.addInstance("Car");
+		Generic myCar1 = car.addInstance("myCar1");
+		Generic myCar2 = car.addInstance("myCar2");
 		cache2.flush();
-		ClientGeneric myCar3 = car.addInstance("myCar3");
-		ClientGeneric myCar4 = car.addInstance("myCar4");
+		Generic myCar3 = car.addInstance("myCar3");
+		Generic myCar4 = car.addInstance("myCar4");
 
 		int cpt = 0;
-		for (ClientGeneric g : car.getInstances()) {
+		for (Generic g : car.getInstances()) {
 			if (g.equals(myCar3))
 				cache2.flush();
 			if (cpt % 2 == 0) {
@@ -144,19 +145,19 @@ public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache1 = engine.getCurrentCache();
 
-		ClientGeneric car = engine.addInstance("Car");
-		ClientGeneric myCar1 = car.addInstance("myCar1");
-		ClientGeneric myCar2 = car.addInstance("myCar2");
-		ClientGeneric myCar3 = car.addInstance("myCar3");
-		ClientGeneric myCar4 = car.addInstance("myCar4");
+		Generic car = engine.addInstance("Car");
+		Generic myCar1 = car.addInstance("myCar1");
+		Generic myCar2 = car.addInstance("myCar2");
+		Generic myCar3 = car.addInstance("myCar3");
+		Generic myCar4 = car.addInstance("myCar4");
 
 		cache1.flush();
 
-		Snapshot<ClientGeneric> myCars = car.getInstances();
+		Snapshot<Generic> myCars = car.getInstances();
 
-		Iterator<ClientGeneric> iterator = myCars.iterator();
-		ClientGeneric myCar5 = car.addInstance("myCar5");
-		ClientGeneric myCar6 = car.addInstance("myCar6");
+		Iterator<Generic> iterator = myCars.iterator();
+		Generic myCar5 = car.addInstance("myCar5");
+		Generic myCar6 = car.addInstance("myCar6");
 
 		int cpt = 0;
 		while (iterator.hasNext()) {

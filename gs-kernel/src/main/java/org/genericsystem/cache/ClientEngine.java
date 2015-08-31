@@ -1,17 +1,19 @@
 package org.genericsystem.cache;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public class ClientEngine extends AbstractRoot<ClientGeneric> implements
-		ClientGeneric {
+public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 
 	protected Server server;
 
@@ -23,14 +25,14 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port,
-			Class<?>... userClasses) {
+	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
 		this(engineValue, host, port, null, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port,
-			String persistentDirectoryPath, Class<?>... userClasses) {
-		super(engineValue, host, port, persistentDirectoryPath, userClasses);
+	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
+		server = new HttpGSClient(this, host, port, "/" + engineValue);
+		startSystemCache(userClasses);
 		isInitialized = true;
 	}
 
@@ -40,17 +42,11 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	}
 
 	@Override
-	protected void initSubRoot(String engineValue, String host, int port,
-			String persistentDirectoryPath, Class<?>... userClasses) {
-		server = new HttpGSClient(this, host, port, "/" + engineValue);
-	}
-
-	@Override
 	public ClientCache newCache() {
 		return new ClientCache(this);
 	}
 
-	public ClientCache newCache(ContextEventListener<ClientGeneric> listener) {
+	public ClientCache newCache(ContextEventListener<Generic> listener) {
 		return new ClientCache(this, listener);
 	}
 
@@ -59,23 +55,21 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 		return (ClientCache) super.getCurrentCache();
 	}
 
-	public static class LocalContextWrapper extends
-			InheritableThreadLocal<ClientCache> implements
-			Wrapper<ClientGeneric> {
+	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<Generic> {
 		@Override
-		public void set(AbstractContext<ClientGeneric> context) {
+		public void set(AbstractContext<Generic> context) {
 			super.set((ClientCache) context);
 		}
 	}
 
 	@Override
-	protected Wrapper<ClientGeneric> buildContextWrapper() {
+	protected Wrapper<Generic> buildContextWrapper() {
 		return new LocalContextWrapper();
 	}
 
 	@Override
-	public ClientGeneric getGenericById(long ts) {
-		ClientGeneric generic = super.getGenericById(ts);
+	public Generic getGenericById(long ts) {
+		Generic generic = super.getGenericById(ts);
 		if (generic == null) {
 			Vertex vertex = server.getVertex(ts);
 			generic = build(vertex);
@@ -84,8 +78,8 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	}
 
 	@Override
-	public final ClientGeneric[] newTArray(int dim) {
-		return new ClientGeneric[dim];
+	public final Generic[] newTArray(int dim) {
+		return new Generic[dim];
 	}
 
 	@Override
@@ -94,8 +88,8 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	}
 
 	@Override
-	protected Class<ClientGeneric> getTClass() {
-		return ClientGeneric.class;
+	protected Class<Generic> getTClass() {
+		return Generic.class;
 	}
 
 	public Server getServer() {
@@ -103,24 +97,31 @@ public class ClientEngine extends AbstractRoot<ClientGeneric> implements
 	}
 
 	@Override
-	protected EngineWrapped buildHandler(Class<?> clazz, ClientGeneric meta,
-			List<ClientGeneric> supers, Serializable value,
-			List<ClientGeneric> components, long ts, long[] otherTs) {
-		return new EngineWrapped(clazz, meta, supers, value, components, ts,
-				otherTs);
+	protected Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long birthTs) {
+		return init(newT(adaptClass(clazz, meta)), buildHandler(clazz, meta, supers, value, components, ts == null ? pickNewTs() : ts, birthTs));
 	}
 
-	class EngineWrapped extends Wrapped {
+	ClientEngineHandler buildHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long birthTs) {
+		return new ClientEngineHandler(clazz, meta, supers, value, components, ts, birthTs);
+	}
 
-		public EngineWrapped(Class<?> clazz, ClientGeneric meta,
-				List<ClientGeneric> supers, Serializable value,
-				List<ClientGeneric> components, long ts, long[] otherTs) {
-			super(clazz, meta, supers, value, components, ts, otherTs);
+	class ClientEngineHandler extends DefaultHandler {
+
+		long birthTs;
+
+		public ClientEngineHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts, long birthTs) {
+			super(clazz, meta, supers, value, components, ts);
+			this.birthTs = birthTs;
 		}
 
 		@Override
 		protected ClientEngine getRoot() {
 			return ClientEngine.this;
+		}
+
+		@Override
+		public long getBirthTs() {
+			return birthTs;
 		}
 	}
 

@@ -3,6 +3,7 @@ package org.genericsystem.cache;
 import java.util.List;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -10,11 +11,11 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test001_addInstance_NotAliveException() {
 		final ClientEngine cache = new ClientEngine();
-		ClientGeneric car = cache.addInstance("Car");
-		ClientGeneric color = cache.addInstance("Color");
-		final ClientGeneric carColor = cache.addInstance("CarColor", car, color);
-		final ClientGeneric myCar = car.addInstance("myCar");
-		final ClientGeneric green = color.addInstance("green");
+		Generic car = cache.addInstance("Car");
+		Generic color = cache.addInstance("Color");
+		final Generic carColor = cache.addInstance("CarColor", car, color);
+		final Generic myCar = car.addInstance("myCar");
+		final Generic green = color.addInstance("green");
 		myCar.remove();
 		assert !myCar.isAlive();
 		catchAndCheckCause(() -> carColor.addInstance("myCarColor", myCar, green), AliveConstraintViolationException.class);
@@ -22,13 +23,13 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test001_addInstance_NotAliveException_withMetaRelation() {
 		final ClientEngine Engine = new ClientEngine();
-		ClientGeneric metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
-		ClientGeneric car = Engine.addInstance("Car");
-		ClientGeneric color = Engine.addInstance("Color");
-		final ClientGeneric carColor = Engine.addInstance("CarColor", car, color);
+		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
+		Generic car = Engine.addInstance("Car");
+		Generic color = Engine.addInstance("Color");
+		final Generic carColor = Engine.addInstance("CarColor", car, color);
 		assert carColor.isInstanceOf(metaRelation);
-		final ClientGeneric myCar = car.addInstance("myCar");
-		final ClientGeneric green = color.addInstance("green");
+		final Generic myCar = car.addInstance("myCar");
+		final Generic green = color.addInstance("green");
 		myCar.remove();
 		assert !myCar.isAlive();
 		catchAndCheckCause(() -> carColor.addInstance("myCarColor", myCar, green), AliveConstraintViolationException.class);
@@ -36,36 +37,36 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test002_addInstance_2composites() {
 		final ClientEngine cache = new ClientEngine();
-		ClientGeneric car = cache.addInstance("Car");
-		ClientGeneric color = cache.addInstance("Color");
-		final ClientGeneric carColor = cache.addInstance("CarColor", car, color);
-		final ClientGeneric myCar = car.addInstance("myCar");
-		final ClientGeneric green = color.addInstance("green");
+		Generic car = cache.addInstance("Car");
+		Generic color = cache.addInstance("Color");
+		final Generic carColor = cache.addInstance("CarColor", car, color);
+		final Generic myCar = car.addInstance("myCar");
+		final Generic green = color.addInstance("green");
 		assert myCar.isAlive();
 		carColor.addInstance("myCarColor", myCar, green);
 	}
 
 	public void test002_addInstance_2composites_MetaRelation() {
 		final ClientEngine Engine = new ClientEngine();
-		ClientGeneric metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
-		ClientGeneric car = Engine.addInstance("Car");
-		ClientGeneric color = Engine.addInstance("Color");
-		final ClientGeneric carColor = Engine.addInstance("CarColor", car, color);
+		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
+		Generic car = Engine.addInstance("Car");
+		Generic color = Engine.addInstance("Color");
+		final Generic carColor = Engine.addInstance("CarColor", car, color);
 		assert carColor.isInstanceOf(metaRelation);
-		final ClientGeneric myCar = car.addInstance("myCar");
-		final ClientGeneric green = color.addInstance("green");
+		final Generic myCar = car.addInstance("myCar");
+		final Generic green = color.addInstance("green");
 		assert myCar.isAlive();
 		carColor.addInstance("myCarColor", myCar, green);
 	}
 
 	public void test003_addInstance_reflexiveRelation() {
 		final ClientEngine Engine = new ClientEngine();
-		ClientGeneric vehicle = Engine.addInstance("Vehicle");
-		ClientGeneric car = vehicle.addInstance("Car");
-		ClientGeneric caravane = vehicle.addInstance("Caravane");
-		ClientGeneric vehicleHaveSameOwnerAsVehicle = Engine.addInstance("VehicleHaveSameOwnerAsVehicle", vehicle, vehicle);
-		ClientGeneric myVehicleHaveSameOwnerAsVehicle = vehicleHaveSameOwnerAsVehicle.addInstance("myVehicleHaveSameOwnerAsVehicle", car, caravane);
-		List<ClientGeneric> composites = myVehicleHaveSameOwnerAsVehicle.getComponents();
+		Generic vehicle = Engine.addInstance("Vehicle");
+		Generic car = vehicle.addInstance("Car");
+		Generic caravane = vehicle.addInstance("Caravane");
+		Generic vehicleHaveSameOwnerAsVehicle = Engine.addInstance("VehicleHaveSameOwnerAsVehicle", vehicle, vehicle);
+		Generic myVehicleHaveSameOwnerAsVehicle = vehicleHaveSameOwnerAsVehicle.addInstance("myVehicleHaveSameOwnerAsVehicle", car, caravane);
+		List<Generic> composites = myVehicleHaveSameOwnerAsVehicle.getComponents();
 		assert composites.size() == 2 : composites.size();
 		assert composites.contains(caravane) : composites;
 		assert composites.contains(car) : composites;
@@ -73,14 +74,14 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test003_addInstance_reflexiveRelation_MetaRelation() {
 		final ClientEngine Engine = new ClientEngine();
-		ClientGeneric metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
-		ClientGeneric vehicle = Engine.addInstance("Vehicle");
-		ClientGeneric car = vehicle.addInstance("Car");
-		ClientGeneric caravane = vehicle.addInstance("Caravane");
-		ClientGeneric vehicleHaveSameOwnerAsVehicle = Engine.addInstance("VehicleHaveSameOwnerAsVehicle", vehicle, vehicle);
+		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
+		Generic vehicle = Engine.addInstance("Vehicle");
+		Generic car = vehicle.addInstance("Car");
+		Generic caravane = vehicle.addInstance("Caravane");
+		Generic vehicleHaveSameOwnerAsVehicle = Engine.addInstance("VehicleHaveSameOwnerAsVehicle", vehicle, vehicle);
 		assert vehicleHaveSameOwnerAsVehicle.isInstanceOf(metaRelation);
-		ClientGeneric myVehicleHaveSameOwnerAsVehicle = vehicleHaveSameOwnerAsVehicle.addInstance("myVehicleHaveSameOwnerAsVehicle", car, caravane);
-		List<ClientGeneric> composites = myVehicleHaveSameOwnerAsVehicle.getComponents();
+		Generic myVehicleHaveSameOwnerAsVehicle = vehicleHaveSameOwnerAsVehicle.addInstance("myVehicleHaveSameOwnerAsVehicle", car, caravane);
+		List<Generic> composites = myVehicleHaveSameOwnerAsVehicle.getComponents();
 		assert composites.size() == 2 : composites.size();
 		assert composites.contains(caravane) : composites;
 		assert composites.contains(car) : composites;
@@ -88,13 +89,13 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test004_addInheritsRelation() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
 
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric colorMat = engine.addInstance(color, "ColorMat");
-		ClientGeneric carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
 
 		assert carColorMat.inheritsFrom(vehicleColor);
 		assert vehicleColor.getInheritings().contains(carColorMat);
@@ -104,10 +105,10 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test005_addInheritsRelations_OnSameStructural() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
-		ClientGeneric vehicleColorMat = vehicle.addAttribute(vehicleColor, "vehicleColorMat", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicleColorMat = vehicle.addAttribute(vehicleColor, "vehicleColorMat", color);
 
 		assert vehicleColorMat.inheritsFrom(vehicleColor);
 		assert vehicleColor.getInheritings().contains(vehicleColorMat);
@@ -117,17 +118,17 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test006_inherits_different_than_instance() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
 
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric colorMat = engine.addInstance(color, "ColorMat");
-		ClientGeneric carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
 
-		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
-		ClientGeneric red = color.addInstance("red");
-		ClientGeneric myVehicleRed = myVehicle.addHolder(vehicleColor, "myVehicleRed", red);
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic red = color.addInstance("red");
+		Generic myVehicleRed = myVehicle.addHolder(vehicleColor, "myVehicleRed", red);
 
 		assert myVehicleRed.isInstanceOf(vehicleColor);
 		assert !myVehicleRed.isInstanceOf(carColorMat);
@@ -136,17 +137,17 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test007_addInstance_ofSubRelation() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
 
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric colorMat = engine.addInstance(color, "ColorMat");
-		ClientGeneric carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
 
-		ClientGeneric myCar = car.addInstance("myCar");
-		ClientGeneric redMat = colorMat.addInstance("redMat");
-		ClientGeneric myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
+		Generic myCar = car.addInstance("myCar");
+		Generic redMat = colorMat.addInstance("redMat");
+		Generic myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
 
 		assert myCarRedMat.isInstanceOf(carColorMat);
 		assert myCarRedMat.isInstanceOf(vehicleColor);
@@ -156,42 +157,42 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test008() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
 
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric colorMat = engine.addInstance(color, "ColorMat");
-		ClientGeneric carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
 
-		ClientGeneric myCar = car.addInstance("myCar");
-		ClientGeneric redMat = colorMat.addInstance("redMat");
-		ClientGeneric myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
+		Generic myCar = car.addInstance("myCar");
+		Generic redMat = colorMat.addInstance("redMat");
+		Generic myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
 
-		ClientGeneric vehicleColorIsCold = vehicleColor.addAttribute("vehicleColorIsCold");
+		Generic vehicleColorIsCold = vehicleColor.addAttribute("vehicleColorIsCold");
 
 		assert carColorMat.getAttributes().contains(vehicleColorIsCold);
 	}
 
 	public void test009() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
 
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric colorMat = engine.addInstance(color, "ColorMat");
-		ClientGeneric carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
 
-		ClientGeneric myCar = car.addInstance("myCar");
-		ClientGeneric redMat = colorMat.addInstance("redMat");
-		ClientGeneric myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
+		Generic myCar = car.addInstance("myCar");
+		Generic redMat = colorMat.addInstance("redMat");
+		Generic myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
 
-		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
-		ClientGeneric red = color.addInstance("red");
-		ClientGeneric myVehicleRed = myVehicle.addHolder(vehicleColor, "myVehicleRed", red);
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic red = color.addInstance("red");
+		Generic myVehicleRed = myVehicle.addHolder(vehicleColor, "myVehicleRed", red);
 
-		ClientGeneric vehicleColorIsCold = vehicleColor.addAttribute("vehicleColorIsCold");
+		Generic vehicleColorIsCold = vehicleColor.addAttribute("vehicleColorIsCold");
 
 		assert carColorMat.getAttributes().contains(vehicleColorIsCold);
 		assert vehicleColor.getAttributes().contains(vehicleColorIsCold);
@@ -199,24 +200,24 @@ public class RelationTest extends AbstractClassicTest {
 
 	public void test010() {
 		ClientEngine engine = new ClientEngine();
-		ClientGeneric vehicle = engine.addInstance("Vehicle");
-		ClientGeneric color = engine.addInstance("Color");
-		ClientGeneric vehicleColor = vehicle.addAttribute("vehicleColor", color);
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
 
-		ClientGeneric car = engine.addInstance(vehicle, "Car");
-		ClientGeneric colorMat = engine.addInstance(color, "ColorMat");
-		ClientGeneric carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
 
-		ClientGeneric myVehicle = vehicle.addInstance("myVehicle");
-		ClientGeneric red = color.addInstance("red");
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic red = color.addInstance("red");
 		myVehicle.addHolder(vehicleColor, "myVehicleRed", red);
 
-		ClientGeneric myCar = car.addInstance("myCar");
-		ClientGeneric redMat = colorMat.addInstance("redMat");
+		Generic myCar = car.addInstance("myCar");
+		Generic redMat = colorMat.addInstance("redMat");
 		myCar.addHolder(carColorMat, "myCarRedMat", redMat);
 
-		ClientGeneric vehiclePower = vehicle.addAttribute("power");
-		ClientGeneric myVehicle125 = myVehicle.addHolder(vehiclePower, "125");
+		Generic vehiclePower = vehicle.addAttribute("power");
+		Generic myVehicle125 = myVehicle.addHolder(vehiclePower, "125");
 
 		assert myVehicle.getHolders(vehiclePower).contains(myVehicle125) : myVehicle.getHolders(vehiclePower).info();
 		assert myVehicle125.getValue().equals("125");

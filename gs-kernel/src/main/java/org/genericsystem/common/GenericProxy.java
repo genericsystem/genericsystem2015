@@ -19,8 +19,8 @@ public interface GenericProxy<T extends DefaultVertex<T>> extends DefaultVertex<
 	}
 
 	@SuppressWarnings("unchecked")
-	default AbstractRoot<T>.Wrapped getProxyHandler() {
-		return ((AbstractRoot<T>.Wrapped) ((ProxyObject) this).getHandler());
+	default AbstractRoot<T>.DefaultHandler getProxyHandler() {
+		return ((AbstractRoot<T>.DefaultHandler) ((ProxyObject) this).getHandler());
 	}
 
 	@Override
@@ -51,8 +51,8 @@ public interface GenericProxy<T extends DefaultVertex<T>> extends DefaultVertex<
 	}
 
 	@Override
-	default long[] getOtherTs() {
-		return getProxyHandler().getOtherTs();
+	default long getBirthTs() {
+		return getProxyHandler().getBirthTs();
 	}
 
 	default Vertex getVertex() {

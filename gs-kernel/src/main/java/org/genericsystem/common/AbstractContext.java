@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.GenericBuilder.AddBuilder;
 import org.genericsystem.common.GenericBuilder.MergeBuilder;
@@ -100,11 +99,7 @@ public abstract class AbstractContext<T extends DefaultVertex<T>> implements Def
 	public abstract Snapshot<T> getDependencies(T ancestor);
 
 	T buildAndPlug(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components) {
-		return plug(build(null, clazz, meta, supers, value, components, getRoot().isInitialized() ? ApiStatics.USER_TS : ApiStatics.SYSTEM_TS));
-	}
-
-	protected T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long[] otherTs) {
-		return getRoot().build(ts, clazz, meta, supers, value, components, otherTs);
+		return plug(getRoot().build(null, clazz, meta, supers, value, components));
 	}
 
 	@SuppressWarnings("unchecked")

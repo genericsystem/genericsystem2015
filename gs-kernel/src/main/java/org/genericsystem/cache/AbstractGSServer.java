@@ -84,7 +84,6 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			int methodId = gsBuffer.getInt();
 			GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
 			replyBuffer.appendInt(id).appendInt(methodId);
-			// System.out.println("Server will respond to id : " + id);
 			switch (methodId) {
 			case AbstractGSClient.PICK_NEW_TS: {
 				replyBuffer.appendLong(root.pickNewTs());
@@ -103,9 +102,9 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {
-					// e.printStackTrace();
+					e.printStackTrace();
 					exceptionSender.accept(e);
-					throw new IllegalStateException(e);
+					return;
 				}
 				break;
 			}

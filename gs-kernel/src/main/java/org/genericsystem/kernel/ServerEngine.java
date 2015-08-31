@@ -12,10 +12,8 @@ public class ServerEngine extends Root {
 		this(engineValue, null, userClasses);
 	}
 
-	public ServerEngine(String engineValue, String persistentDirectoryPath,
-			Class<?>... userClasses) {
+	public ServerEngine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(engineValue, persistentDirectoryPath, userClasses);
-		isInitialized = true;
 	}
 
 	@Override
