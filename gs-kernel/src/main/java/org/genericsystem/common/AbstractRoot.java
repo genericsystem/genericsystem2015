@@ -164,6 +164,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	@SuppressWarnings("unchecked")
 	private T newInstance(Class<?> clazz) {
+
 		PROXY_FACTORY.setSuperclass(clazz.isInterface() ? Object.class : clazz);
 		PROXY_FACTORY.setInterfaces(clazz.isInterface() ? getTClass().isAssignableFrom(clazz) ? new Class[] { clazz } : new Class[] { clazz, getTClass() } : getTClass().isAssignableFrom(clazz) ? new Class[] {} : new Class[] { getTClass() });
 		try {

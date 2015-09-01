@@ -20,6 +20,7 @@ public class HttpGSServer extends AbstractGSServer {
 				throw new IllegalStateException("Unable to find database :" + path);
 			request.exceptionHandler(e -> {
 				e.printStackTrace();
+				throw new IllegalStateException(e);
 			});
 			request.handler(getHandler(root, buffer -> {
 				request.response().end(buffer);

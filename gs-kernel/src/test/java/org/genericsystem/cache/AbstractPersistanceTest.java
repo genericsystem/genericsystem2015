@@ -1,6 +1,6 @@
 package org.genericsystem.cache;
 
-import org.genericsystem.cache.AnnotationTest.Vehicle;
+import org.genericsystem.cache.PersistenceTest.Vehicle;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractPersistanceTest extends AbstractTest {

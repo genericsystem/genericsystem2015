@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.IteratorSnapshot;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -49,7 +48,6 @@ public class ClientTransaction implements IDifferential<Generic> {
 
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		// adds.stream().forEach(add -> System.out.println(add));
 		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		engine.getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
 		removes.forEach(remove -> remove.getComponents().forEach(component -> dependenciesMap.remove(component)));
@@ -60,6 +58,7 @@ public class ClientTransaction implements IDifferential<Generic> {
 		adds.forEach(add -> add.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
 		adds.forEach(add -> dependenciesMap.remove(add.getMeta()));
 		adds.forEach(add -> dependenciesMap.remove(add));
+		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		adds.forEach(add -> ((ClientEngineHandler) add.getProxyHandler()).birthTs = getTs());
 	}
 
@@ -75,7 +74,7 @@ public class ClientTransaction implements IDifferential<Generic> {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
 			final Map<Generic, Generic> container = Arrays.stream(engine.getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts)).collect(Collectors.toMap(g -> g, g -> g, (u, v) -> {
-				throw new IllegalStateException(String.format("Duplicate key %s", u));
+				throw new IllegalStateException("Duplicate key : " + u);
 			}, LinkedHashMap::new));
 			dependencies = new IteratorSnapshot<Generic>() {
 				@Override
