@@ -10,6 +10,7 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Container;
 import org.genericsystem.common.Vertex;
 
 public class Root extends AbstractRoot<Generic> implements Generic, Server {
@@ -143,18 +144,16 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 
 	@Override
 	public void apply(long ts, long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		new Transaction(this, ts).apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
+		System.out.println("APPLY RECEIVED FOR TS : " + ts);
+		Arrays.stream(removeIds).forEach(removeId -> System.out.println("Remove : " + removeId));
+		Arrays.stream(addVertices).forEach(addVertex -> System.out.println("Add : " + addVertex.getTs()));
+		new Transaction(this, ts).apply(new Container(Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId))), new Container(Arrays.stream(addVertices).map(addVertex -> {
+			System.out.println("Commit " + addVertex.getTs() + " " + addVertex.getValue());
+			assert getRoot().getGenericById(addVertex.getTs()) == null : "" + addVertex.getTs() + addVertex.getValue() + " " + getGenericById(addVertex.getTs()).info();
+			assert addVertex.getBirthTs() == Long.MAX_VALUE;
+			return getRoot().build(addVertex);
+		})));
 	}
-
-	// public void remoteApply(long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-	// // Arrays.stream(removeIds).mapToObj(removeId ->
-	// // getRoot().getGenericById(removeId)).allMatch(g -> true);
-	// // assert Arrays.stream(addVertices).map(add ->
-	// // add.getTs()).distinct().count() == addVertices.length;
-	// // assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
-	// Arrays.stream(addVertices).forEach(addVertex -> getRoot().build(addVertex));
-	// apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
-	// }
 
 	private static class TsGenerator {
 		private final long startTime = System.currentTimeMillis() * Statics.MILLI_TO_NANOSECONDS - System.nanoTime();

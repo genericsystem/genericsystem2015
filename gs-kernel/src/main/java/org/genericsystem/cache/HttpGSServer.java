@@ -2,7 +2,6 @@ package org.genericsystem.cache;
 
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.kernel.Root;
@@ -36,7 +35,11 @@ public class HttpGSServer extends AbstractGSServer {
 				request.response().close();
 			}));
 		});
-		httpServer.listen();
+		httpServer.listen(res -> {
+			System.out.println("Generic System server is really ready!");
+			assert res.succeeded();
+		});
+
 		System.out.println("Generic System server ready!");
 	}
 

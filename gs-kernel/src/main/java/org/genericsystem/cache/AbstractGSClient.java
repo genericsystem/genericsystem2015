@@ -2,13 +2,11 @@ package org.genericsystem.cache;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
@@ -84,7 +82,7 @@ public abstract class AbstractGSClient implements Server {
 	@SuppressWarnings("unchecked")
 	public <T> T synchronize(int methodId, Buffer parameters) {
 		T result = null;
-		for (;;) {
+		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			int id = requestId.getAndIncrement();
 			blockingQueue = new ArrayBlockingQueue<>(1);
 			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
@@ -101,6 +99,7 @@ public abstract class AbstractGSClient implements Server {
 			System.out.println("Failure");
 			// throw new IllegalStateException();// For now
 		}
+		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -110,6 +109,7 @@ public abstract class AbstractGSClient implements Server {
 			int id = requestId.getAndIncrement();
 			blockingQueue = new ArrayBlockingQueue<>(1);
 			Buffer buffer = Buffer.buffer().appendInt(id).appendInt(methodId).appendBuffer(parameters);
+			// System.out.println("SEND APPLY");
 			send(buffer);
 			try {
 				result = (T) blockingQueue.poll(2000, TimeUnit.MILLISECONDS);

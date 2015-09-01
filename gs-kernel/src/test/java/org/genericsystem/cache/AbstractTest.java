@@ -1,10 +1,10 @@
 package org.genericsystem.cache;
 
+import io.vertx.core.Vertx;
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
-
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ import org.testng.annotations.BeforeMethod;
 public abstract class AbstractTest {
 
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
+	Vertx serverVertx = Vertx.vertx();
 	String ServerVerticleId;
 	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
 	private final static String FAILURE = "notStarted";
@@ -33,10 +34,11 @@ public abstract class AbstractTest {
 		cleanDirectory(directoryPath);
 		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
 
-		GSVertx.vertx().getVertx().deployVerticle(HttpGSServer.class.getName(), getDeploymentOptions(), result -> {
+		serverVertx.deployVerticle(HttpGSServer.class.getName(), getDeploymentOptions(), result -> {
 			try {
 				queue.put(result.result() != null ? result.result() : FAILURE);
-			} catch (Exception e1) {
+			} catch (InterruptedException e1) {
+				throw new IllegalStateException(e1);
 			}
 		});
 		try {
@@ -85,7 +87,7 @@ public abstract class AbstractTest {
 	@AfterMethod
 	public void afterClass() {
 		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
-		GSVertx.vertx().getVertx().undeploy(ServerVerticleId, result -> {
+		serverVertx.undeploy(ServerVerticleId, result -> {
 			try {
 				queue.put(0);
 			} catch (Exception e1) {

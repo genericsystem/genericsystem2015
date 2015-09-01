@@ -3,7 +3,6 @@ package org.genericsystem.kernel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.genericsystem.defaults.DefaultVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,7 @@ public class Statics {
 
 	public static final int ATTEMPT_SLEEP = 15;
 	public static final int ATTEMPTS = 50;
-	public static final int HTTP_ATTEMPTS = 3;
+	public static final int HTTP_ATTEMPTS = 1;
 
 	public static final long GARBAGE_PERIOD = 1000L;
 	public static final long GARBAGE_INITIAL_DELAY = 1000L;

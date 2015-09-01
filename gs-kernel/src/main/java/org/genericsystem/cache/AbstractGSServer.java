@@ -4,25 +4,24 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSServer extends AbstractVerticle {
 
 	private Map<String, Root> roots;// must be shared if several verticles
-									// instances
+
+	// instances
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void start() {
 		try {
-			roots = new HashMap<String, Root>();
+			roots = new HashMap<>();
 			if (config().getJsonArray("engines").isEmpty()) {
 				Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
 				roots.put("/" + Statics.ENGINE_VALUE, root);
@@ -86,19 +85,23 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			replyBuffer.appendInt(id).appendInt(methodId);
 			switch (methodId) {
 			case AbstractGSClient.PICK_NEW_TS: {
+				System.out.println(Thread.currentThread());
 				replyBuffer.appendLong(root.pickNewTs());
 				break;
 			}
 			case AbstractGSClient.GET_DEPENDENCIES: {
+				System.out.println(Thread.currentThread());
 				replyBuffer.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 				break;
 			}
 			case AbstractGSClient.GET_VERTEX: {
+				System.out.println(Thread.currentThread());
 				replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
 				break;
 			}
 			case AbstractGSClient.APPLY: {
 				try {
+					System.out.println(Thread.currentThread());
 					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {

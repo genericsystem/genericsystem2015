@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -93,7 +92,7 @@ public class SystemCache<T extends DefaultVertex<T>> {
 	public T bind(Class<?> clazz) {
 		T result = find(clazz);
 		if (result == null) {
-			System.out.println("mount class: " + clazz);
+			// System.out.println("mount class: " + clazz);
 			result = set(clazz);
 		}
 		return result;
