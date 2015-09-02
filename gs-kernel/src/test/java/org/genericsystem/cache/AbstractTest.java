@@ -1,9 +1,7 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import java.io.File;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.slf4j.Logger;
@@ -14,10 +12,9 @@ import org.testng.annotations.BeforeMethod;
 public abstract class AbstractTest {
 
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
-	Vertx serverVertx = Vertx.vertx();
 	String ServerVerticleId;
 	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
-	private final static String FAILURE = "notStarted";
+	private HttpGSServer httpGsServer;
 
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
@@ -32,25 +29,14 @@ public abstract class AbstractTest {
 	public void beforeClass() {
 		System.out.println("before class");
 		cleanDirectory(directoryPath);
-		BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
-
-		serverVertx.deployVerticle(HttpGSServer.class.getName(), getDeploymentOptions(), result -> {
-			try {
-				queue.put(result.result() != null ? result.result() : FAILURE);
-			} catch (InterruptedException e1) {
-				throw new IllegalStateException(e1);
+		httpGsServer = new HttpGSServer() {
+			@Override
+			public JsonObject config() {
+				return getDeploymentOptions().getConfig();
 			}
-		});
-		try {
-			ServerVerticleId = queue.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IllegalStateException("unable to start server: " + e);
-		}
-		if (FAILURE.equals(ServerVerticleId))
-			throw new IllegalStateException("unable to start server");
+		};
+		httpGsServer.start();
 		System.out.println("beforeClass ok");
-
 	}
 
 	@FunctionalInterface
@@ -86,21 +72,7 @@ public abstract class AbstractTest {
 
 	@AfterMethod
 	public void afterClass() {
-		BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
-		serverVertx.undeploy(ServerVerticleId, result -> {
-			try {
-				queue.put(0);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		});
-		try {
-			queue.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return;
-		}
-		System.out.println("afterClass ok");
+		httpGsServer.stop();
 	}
 
 }

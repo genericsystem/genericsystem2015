@@ -1,6 +1,5 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -11,14 +10,13 @@ import java.util.function.Consumer;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractGSServer extends AbstractVerticle {
+public abstract class AbstractGSServer {
 
-	private Map<String, Root> roots;// must be shared if several verticles
+	private Map<String, Root> roots;
 
-	// instances
+	public abstract JsonObject config();
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public void start() {
 		try {
 			roots = new HashMap<>();
@@ -53,7 +51,6 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public void stop() {
 		System.out.println("Stopping engines...");
 		if (config().getJsonArray("engines").isEmpty()) {
@@ -78,6 +75,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 
 	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {
 		return buffer -> {
+			System.out.println(Thread.currentThread());
 			GSBuffer gsBuffer = new GSBuffer(buffer);
 			int id = gsBuffer.getInt();
 			int methodId = gsBuffer.getInt();
@@ -85,23 +83,19 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 			replyBuffer.appendInt(id).appendInt(methodId);
 			switch (methodId) {
 			case AbstractGSClient.PICK_NEW_TS: {
-				System.out.println(Thread.currentThread());
 				replyBuffer.appendLong(root.pickNewTs());
 				break;
 			}
 			case AbstractGSClient.GET_DEPENDENCIES: {
-				System.out.println(Thread.currentThread());
 				replyBuffer.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 				break;
 			}
 			case AbstractGSClient.GET_VERTEX: {
-				System.out.println(Thread.currentThread());
 				replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
 				break;
 			}
 			case AbstractGSClient.APPLY: {
 				try {
-					System.out.println(Thread.currentThread());
 					root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {

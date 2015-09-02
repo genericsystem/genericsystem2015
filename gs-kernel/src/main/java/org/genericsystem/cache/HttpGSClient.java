@@ -35,7 +35,7 @@ public class HttpGSClient extends AbstractGSClient {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();
 		});
-		System.out.println("SEND A REQUEST");
+		System.out.println("SEND A REQUEST from : " + Thread.currentThread());
 		resquest.end(buffer);
 	}
 
