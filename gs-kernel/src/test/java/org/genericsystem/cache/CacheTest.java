@@ -1,7 +1,6 @@
 package org.genericsystem.cache;
 
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
@@ -11,8 +10,9 @@ public class CacheTest extends AbstractClassicTest {
 	public void test000() {
 		ClientEngine engine = new ClientEngine();
 		ClientCache cache = engine.getCurrentCache();
-		Generic vehicle = engine.addInstance("Vehicle");
+		Generic vehicle = engine.addInstance("Vehicle2");
 		assert vehicle.isAlive();
+		System.out.println("----------------------------------------------");
 		cache.flush();
 		assert vehicle.isAlive();
 		cache.flush();

@@ -4,7 +4,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 
@@ -33,8 +32,10 @@ public class HttpGSClient extends AbstractGSClient {
 				reponse.bodyHandler(getHandler());
 		});
 		resquest.exceptionHandler(e -> {
-			System.out.println("Discard http request because of : " + e);
+			System.out.println("Discard http request because of : ");
+			e.printStackTrace();
 		});
+		System.out.println("SEND A REQUEST from : " + Thread.currentThread());
 		resquest.end(buffer);
 	}
 

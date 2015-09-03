@@ -22,8 +22,7 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 	protected abstract IDifferential<T> buildTransaction(AbstractRoot<T> root);
 
 	protected AbstractCache(AbstractRoot<T> root) {
-		this(root, new ContextEventListener<T>() {
-		});
+		this(root, new ContextEventListener<T>() {});
 	}
 
 	protected AbstractCache(AbstractRoot<T> root, ContextEventListener<T> listener) {
@@ -66,9 +65,11 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 
 	@Override
 	public void flush() {
+		System.out.println("FLUSH");
 		Throwable cause = null;
 		for (int attempt = 0; attempt < Statics.ATTEMPTS; attempt++) {
 			try {
+				System.out.println("TRYFLUSH");
 				// TODO reactivate this
 				// if (getEngine().pickNewTs() - getTs() >= timeOut)
 				// throw new ConcurrencyControlException("The timestamp cache (" + getTs() + ") is bigger than the life time out : " + Statics.LIFE_TIMEOUT);
@@ -175,17 +176,13 @@ public abstract class AbstractCache<T extends DefaultVertex<T>> extends Abstract
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

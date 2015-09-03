@@ -1,28 +1,25 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractGSServer extends AbstractVerticle {
+public abstract class AbstractGSServer {
 
-	private Map<String, Root> roots;// must be shared if several verticles
-									// instances
+	private Map<String, Root> roots;
+
+	public abstract JsonObject config();
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public void start() {
 		try {
-			roots = new HashMap<String, Root>();
+			roots = new HashMap<>();
 			if (config().getJsonArray("engines").isEmpty()) {
 				Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
 				roots.put("/" + Statics.ENGINE_VALUE, root);
@@ -54,7 +51,6 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public void stop() {
 		System.out.println("Stopping engines...");
 		if (config().getJsonArray("engines").isEmpty()) {
@@ -79,6 +75,7 @@ public abstract class AbstractGSServer extends AbstractVerticle {
 
 	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {
 		return buffer -> {
+			System.out.println(Thread.currentThread());
 			GSBuffer gsBuffer = new GSBuffer(buffer);
 			int id = gsBuffer.getInt();
 			int methodId = gsBuffer.getInt();

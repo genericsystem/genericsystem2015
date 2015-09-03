@@ -3,7 +3,6 @@ package org.genericsystem.cache;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractContext;
