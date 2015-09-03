@@ -16,7 +16,7 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.kernel.Root;
 
-public abstract class HttpGSServer extends AbstractGSServer {
+public class HttpGSServer extends AbstractGSServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
@@ -28,7 +28,6 @@ public abstract class HttpGSServer extends AbstractGSServer {
 		this.host = options.getHost();
 	}
 
-	@Override
 	public void start() {
 		Vertx vertx = Vertx.vertx();
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {

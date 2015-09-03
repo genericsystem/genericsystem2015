@@ -1,8 +1,8 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.json.JsonObject;
 import java.io.File;
 import java.util.function.Supplier;
+
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +29,7 @@ public abstract class AbstractTest {
 	public void beforeClass() {
 		System.out.println("before class");
 		cleanDirectory(directoryPath);
-		httpGsServer = new HttpGSServer() {
-			@Override
-			public JsonObject config() {
-				return getDeploymentOptions().getConfig();
-			}
-		};
+		httpGsServer = new HttpGSServer(getDeploymentOptions());
 		httpGsServer.start();
 		System.out.println("beforeClass ok");
 	}

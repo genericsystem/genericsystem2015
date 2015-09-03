@@ -2,75 +2,44 @@ package org.genericsystem.cache;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSServer {
 
-	private Map<String, Root> roots;
+	protected Map<String, Root> roots;
 
-	public abstract JsonObject config();
-
-	@SuppressWarnings("unchecked")
-	public void start() {
-		try {
-			roots = new HashMap<>();
-			if (config().getJsonArray("engines").isEmpty()) {
-				Root root = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
-				roots.put("/" + Statics.ENGINE_VALUE, root);
-				System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
-			} else {
-				List<JsonObject> list = config().getJsonArray("classes").getList();
-				Class<?>[] classArray = new Class<?>[list.size()];
-				for (int i = 0; i < list.size(); i++) {
-					try {
-						classArray[i] = Class.forName(list.get(i).getString("className"));
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
-
-					String engineValue = engineJson.getString("engineValue");
-					engineValue = engineValue == null ? Statics.ENGINE_VALUE : engineValue;
-					Root root = new Root(engineValue, engineJson.getString("engineRepositoryPath"), classArray);
-					roots.put("/" + engineValue, root);
-					System.out.println("Starts engine : " + "/" + engineValue);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new IllegalStateException(e);
-		}
+	public AbstractGSServer(Root... roots) {
+		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
-	@SuppressWarnings("unchecked")
-	public void stop() {
-		System.out.println("Stopping engines...");
-		if (config().getJsonArray("engines").isEmpty()) {
-			Root root = roots.get("/" + Statics.ENGINE_VALUE);
-			root.close();
-			roots.remove("/" + Statics.ENGINE_VALUE);
-			System.out.println("Stops engine : " + "/" + Statics.ENGINE_VALUE);
+	public AbstractGSServer(GSDeploymentOptions options) {
+		this(getRoots(options));
+	}
+
+	private static Root[] getRoots(GSDeploymentOptions options) {
+		Set<Root> roots = new HashSet<>();
+		if (options.getEngines().isEmpty()) {
+			Root defaultRoot = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
+			roots.add(defaultRoot);
+			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
 		} else
-			for (JsonObject engineJson : (List<JsonObject>) config().getJsonArray("engines").getList()) {
-				String engineValue = engineJson.getString("engineValue");
-				engineValue = engineValue == null ? Statics.ENGINE_VALUE : engineValue;
-				Root root = roots.get("/" + engineValue);
-				root.close();
-				roots.remove("/" + engineValue);
-				System.out.println("Stops engine : " + "/" + engineValue);
+			for (Entry<String, String> entry : options.getEngines().entrySet()) {
+				roots.add(new Root(entry.getKey(), entry.getValue(), options.getClasses()));
+				System.out.println("Starts engine : " + "/" + entry.getKey());
 			}
+		return roots.toArray(new Root[roots.size()]);
 	}
 
-	protected Map<String, Root> getRoots() {
-		return roots;
+	public void stop() {
+		roots.values().forEach(root -> root.close());
 	}
 
 	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {

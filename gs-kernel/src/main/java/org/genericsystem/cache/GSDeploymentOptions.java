@@ -1,13 +1,13 @@
 package org.genericsystem.cache;
 
-import io.vertx.core.DeploymentOptions;
+import java.util.Map;
 
-public class GSDeploymentOptions extends DeploymentOptions {
+public class GSDeploymentOptions {
 
-	GsDeploymentConfig config = new GsDeploymentConfig();
+	GsDeploymentConfig config;
 
 	public GSDeploymentOptions() {
-		setConfig(config);
+		this.config = new GsDeploymentConfig();
 	}
 
 	public GSDeploymentOptions(int port) {
@@ -30,7 +30,6 @@ public class GSDeploymentOptions extends DeploymentOptions {
 		this();
 		config.addEngine(engineValue, persistanceRepositoryPath);
 		config.setPort(port);
-
 	}
 
 	public GSDeploymentOptions addEngine(String engineValue, String repositoryPath) {
@@ -41,5 +40,21 @@ public class GSDeploymentOptions extends DeploymentOptions {
 	public GSDeploymentOptions addClasses(Class<?>... classes) {
 		config.addClasses(classes);
 		return this;
+	}
+
+	public Map<String, String> getEngines() {
+		return config.getEngines();
+	}
+
+	public Class<?>[] getClasses() {
+		return config.getClasses();
+	}
+
+	public int getPort() {
+		return config.getPort();
+	}
+
+	public String getHost() {
+		return config.getHost();
 	}
 }
