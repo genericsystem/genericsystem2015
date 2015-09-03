@@ -19,16 +19,23 @@ import org.genericsystem.kernel.Root;
 public abstract class HttpGSServer extends AbstractGSServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
+	private final int port;
+	private final String host;
+
+	public HttpGSServer(GSDeploymentOptions options) {
+		super(options);
+		this.port = options.getPort();
+		this.host = options.getHost();
+	}
 
 	@Override
 	public void start() {
-		super.start();
 		Vertx vertx = Vertx.vertx();
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
-			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(config().getInteger("port")));
+			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 			httpServer.requestHandler(request -> {
 				String path = request.path();
-				Root root = getRoots().get(path);
+				Root root = roots.get(path);
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
 				request.exceptionHandler(e -> {
@@ -57,7 +64,6 @@ public abstract class HttpGSServer extends AbstractGSServer {
 	@Override
 	public void stop() {
 		httpServers.forEach(httpServer -> HttpGSServer.<Void> synchonizeTask(handler -> httpServer.close(handler)));
-		super.stop();
 		System.out.println("Generic System server stopped!");
 	}
 
