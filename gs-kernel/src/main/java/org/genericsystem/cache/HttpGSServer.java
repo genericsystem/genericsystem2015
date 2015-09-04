@@ -1,6 +1,7 @@
 package org.genericsystem.cache;
 
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -42,7 +44,6 @@ public class HttpGSServer extends AbstractGSServer {
 				request.handler(getHandler(root, buffer -> {
 					request.response().end(buffer);
 					request.response().close();
-
 				}, exception -> {
 					int statusCode = 0;
 					if (exception instanceof ConcurrencyControlException)
@@ -53,23 +54,7 @@ public class HttpGSServer extends AbstractGSServer {
 					request.response().close();
 				}));
 			});
-
-			BlockingQueue<AsyncResult<HttpServer>> blockingQueue = new ArrayBlockingQueue<>(1);
-			httpServer.listen(res -> {
-				try {
-					blockingQueue.put(res);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			});
-			AsyncResult<HttpServer> res = null;
-			try {
-				res = blockingQueue.take();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
+			HttpGSServer.<HttpServer> synchonizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
 		System.out.println("Generic System server ready!");
@@ -77,26 +62,27 @@ public class HttpGSServer extends AbstractGSServer {
 
 	@Override
 	public void stop() {
-		httpServers.forEach(httpServer -> {
-			BlockingQueue<AsyncResult<Void>> blockingQueue = new ArrayBlockingQueue<>(1);
-			httpServer.close(res -> {
-				try {
-					blockingQueue.put(res);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			});
-			AsyncResult<Void> res = null;
+		httpServers.forEach(httpServer -> HttpGSServer.<Void> synchonizeTask(handler -> httpServer.close(handler)));
+		System.out.println("Generic System server stopped!");
+	}
+
+	private static <T> T synchonizeTask(Consumer<Handler<AsyncResult<T>>> consumer) {
+		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
+		consumer.accept(res -> {
 			try {
-				res = blockingQueue.take();
+				blockingQueue.put(res);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if (res.failed())
-				throw new IllegalStateException(res.cause());
 		});
-		// TODO Wait transaction timeout here
-		super.stop();
-		System.out.println("Generic System server stopped!");
+		AsyncResult<T> res = null;
+		try {
+			res = blockingQueue.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (res.failed())
+			throw new IllegalStateException(res.cause());
+		return res.result();
 	}
 }

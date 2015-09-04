@@ -2,7 +2,6 @@ package org.genericsystem.cache;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -19,7 +17,7 @@ public abstract class AbstractGSServer {
 	protected Map<String, Root> roots;
 
 	public AbstractGSServer(Root... roots) {
-		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> (String) root.getValue(), root -> root));
+		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
 	public AbstractGSServer(GSDeploymentOptions options) {
