@@ -18,6 +18,7 @@ public abstract class AbstractGSServer {
 
 	public AbstractGSServer(Root... roots) {
 		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
+		assert roots.length == this.roots.size();
 	}
 
 	public AbstractGSServer(GSDeploymentOptions options) {
@@ -44,12 +45,11 @@ public abstract class AbstractGSServer {
 
 	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {
 		return buffer -> {
-			System.out.println(Thread.currentThread());
+			// System.out.println(Thread.currentThread());
 			GSBuffer gsBuffer = new GSBuffer(buffer);
-			int id = gsBuffer.getInt();
 			int methodId = gsBuffer.getInt();
 			GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
-			replyBuffer.appendInt(id).appendInt(methodId);
+			replyBuffer.appendInt(methodId);
 			switch (methodId) {
 			case AbstractGSClient.PICK_NEW_TS: {
 				replyBuffer.appendLong(root.pickNewTs());
@@ -75,7 +75,7 @@ public abstract class AbstractGSServer {
 				break;
 			}
 			default:
-				throw new IllegalStateException("unable to find method:" + methodId + " " + "id :" + id);
+				throw new IllegalStateException("unable to find method:" + methodId + " ");
 			}
 			sender.accept(replyBuffer);
 		};

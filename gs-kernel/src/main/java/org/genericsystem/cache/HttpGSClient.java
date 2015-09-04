@@ -1,43 +1,28 @@
 package org.genericsystem.cache;
 
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
-import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import io.vertx.core.http.HttpClientResponse;
 
 public class HttpGSClient extends AbstractGSClient {
 
 	private final HttpClient httpClient;
 	private final String path;
 
-	HttpGSClient(ClientEngine engine, String host, int port, String path) {
-		super(engine);
+	HttpGSClient(String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
 		this.path = path;
 	}
 
 	@Override
-	void send(Buffer buffer) {
-		HttpClientRequest resquest = httpClient.post(path, reponse -> {
-			if (reponse.statusCode() != 200) {
-				System.out.println("An exception as occured: " + reponse.statusCode());
-				try {
-					blockingQueue.put(reponse.statusCode() == 400 ? new ConcurrencyControlException("") : new OptimisticLockConstraintViolationException(""));
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			} else
-				reponse.bodyHandler(getHandler());
-		});
-		resquest.exceptionHandler(e -> {
+	void send(Buffer buffer, Handler<HttpClientResponse> handler) {
+		httpClient.post(path, handler).exceptionHandler(e -> {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();
-		});
-		System.out.println("SEND A REQUEST from : " + Thread.currentThread());
-		resquest.end(buffer);
-	}
+		}).end(buffer);
+	};
 
 	@Override
 	public void close() {

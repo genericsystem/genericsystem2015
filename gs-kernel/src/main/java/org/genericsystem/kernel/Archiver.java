@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
@@ -111,6 +110,7 @@ public class Archiver {
 			scheduler.shutdown();
 			try {
 				doSnapshot();
+				System.out.println("CLOSE LOCKFILE !!!!!!!!!!!!!!!");
 				lockFile.close();
 				lockFile = null;
 			} catch (IOException e) {
@@ -281,8 +281,7 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {
-			}
+			} catch (EOFException ignore) {}
 		}
 
 		protected long loadTs() throws IOException {

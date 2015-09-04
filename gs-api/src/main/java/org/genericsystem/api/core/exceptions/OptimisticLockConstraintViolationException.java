@@ -3,7 +3,7 @@ package org.genericsystem.api.core.exceptions;
 //TODO ???
 /**
  * Thrown when an attempt is done to remove an alive Generic.
- * 
+ *
  * @author Nicolas Feybesse
  */
 public class OptimisticLockConstraintViolationException extends ConstraintViolationException {

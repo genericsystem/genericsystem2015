@@ -2,7 +2,6 @@ package org.genericsystem.cache;
 
 import java.io.File;
 import java.util.function.Supplier;
-
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,10 @@ public abstract class AbstractTest {
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
 		if (file.exists())
-			for (File f : file.listFiles())
-				f.delete();
+			for (File f : file.listFiles()) {
+				if (!".lock".equals(f.getName()))
+					f.delete();
+			}
 	}
 
 	public abstract GSDeploymentOptions getDeploymentOptions();

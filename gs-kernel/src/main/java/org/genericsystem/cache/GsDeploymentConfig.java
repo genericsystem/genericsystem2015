@@ -2,16 +2,12 @@ package org.genericsystem.cache;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.kernel.Statics;
 
 public class GsDeploymentConfig extends JsonObject {
-
-	private Map<String, String> valueAndPath = new HashMap<>();
 
 	public GsDeploymentConfig() {
 		super.put("host", Statics.DEFAULT_HOST);
@@ -44,6 +40,7 @@ public class GsDeploymentConfig extends JsonObject {
 
 	@SuppressWarnings("unchecked")
 	public Map<String, String> getEngines() {
+		Map<String, String> valueAndPath = new HashMap<>();
 		for (JsonObject engine : (List<JsonObject>) super.getJsonArray("engines").getList())
 			valueAndPath.put(engine.getString("engineValue"), engine.getString("engineRepositoryPath"));
 		return valueAndPath;

@@ -3,19 +3,18 @@ package org.genericsystem.cache;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class PersistenceTest extends AbstractClassicTest {
+public class PersistenceTest extends AbstractPersistanceTest {
 
 	public void testDefaultConfiguration() {
 
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 
@@ -53,8 +52,7 @@ public class PersistenceTest extends AbstractClassicTest {
 	}
 
 	@SystemGeneric
-	public static class Vehicle implements Generic {
-	}
+	public static class Vehicle implements Generic {}
 
 	public void testType() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);

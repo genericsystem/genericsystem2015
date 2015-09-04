@@ -30,7 +30,7 @@ public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 
 	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new HttpGSClient(this, host, port, "/" + engineValue);
+		server = new HttpGSClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
