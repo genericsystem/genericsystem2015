@@ -2,7 +2,6 @@ package org.genericsystem.cache;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -30,7 +28,7 @@ public abstract class AbstractGSServer {
 	private static Root[] getRoots(GSDeploymentOptions options) {
 		Set<Root> roots = new HashSet<>();
 		if (options.getEngines().isEmpty()) {
-			Root defaultRoot = new Root(Statics.ENGINE_VALUE, null, new Class<?>[] {});
+			Root defaultRoot = new Root(Statics.ENGINE_VALUE, null, options.getClasses());
 			roots.add(defaultRoot);
 			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
 		} else

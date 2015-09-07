@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -15,9 +14,11 @@ import org.genericsystem.admin.model.Color;
 import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
+import org.genericsystem.cache.ClientEngine;
+import org.genericsystem.cache.GSDeploymentOptions;
+import org.genericsystem.cache.HttpGSServer;
 import org.genericsystem.javafx.Crud;
-import org.genericsystem.mutability.Engine;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.kernel.Generic;
 
 /**
  * @author Nicolas Feybesse
@@ -26,6 +27,8 @@ import org.genericsystem.mutability.Generic;
 public class App extends Application {
 
 	public static void main(String args[]) {
+		HttpGSServer server = new HttpGSServer(new GSDeploymentOptions().addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		server.start();
 		launch(args);
 	}
 
@@ -35,7 +38,7 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		Engine engine = new Engine(Car.class, Power.class, CarColor.class, Color.class);
+		ClientEngine engine = new ClientEngine(Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.addInstance("myBmw");

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -14,12 +13,11 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-
 import org.genericsystem.admin.UiFunctions;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
 import org.genericsystem.javafx.AbstractColumn.GenericComponentColumn;
 import org.genericsystem.javafx.AbstractColumn.TargetComponentColumn;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.kernel.Generic;
 
 //import org.genericsystem.mutability.Generic;
 

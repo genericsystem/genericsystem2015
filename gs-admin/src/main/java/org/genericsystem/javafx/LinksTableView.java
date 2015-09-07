@@ -1,15 +1,13 @@
 package org.genericsystem.javafx;
 
 import java.util.function.BiConsumer;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
-
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
 import org.genericsystem.javafx.AbstractColumn.TargetComponentColumn;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.kernel.Generic;
 
 /**
  * @author Nicolas Feybesse
