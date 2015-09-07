@@ -6,12 +6,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.kernel.Root;
@@ -26,6 +24,10 @@ public class HttpGSServer extends AbstractGSServer {
 		super(options);
 		this.port = options.getPort();
 		this.host = options.getHost();
+	}
+
+	public static void main(String[] args) {
+		new HttpGSServer(new GSDeploymentOptions()).start();
 	}
 
 	public void start() {
