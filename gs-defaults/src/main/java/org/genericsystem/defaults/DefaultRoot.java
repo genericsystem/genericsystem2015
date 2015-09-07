@@ -9,7 +9,7 @@ import org.genericsystem.defaults.DefaultConfig.SystemMap;
 public interface DefaultRoot<T extends DefaultVertex<T>> extends IRoot<T>, DefaultVertex<T> {
 
 	@Override
-	DefaultContext<T> getCurrentCache();
+	DefaultCache<T> getCurrentCache();
 
 	public DefaultContext<T> newCache();
 

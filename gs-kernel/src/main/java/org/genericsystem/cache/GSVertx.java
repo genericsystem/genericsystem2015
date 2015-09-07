@@ -19,4 +19,10 @@ public class GSVertx {
 		return vertx;
 	}
 
+	public void close() {
+		vertx.close();
+		vertx = null;
+
+	}
+
 }

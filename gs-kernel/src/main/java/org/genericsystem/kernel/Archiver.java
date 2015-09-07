@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.Cache;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.genericsystem.kernel.Root.RootServerHandler;
 import org.slf4j.Logger;
@@ -111,6 +111,7 @@ public class Archiver {
 			scheduler.shutdown();
 			try {
 				doSnapshot();
+				// System.out.println("CLOSE LOCKFILE !!!!!!!!!!!!!!!");
 				lockFile.close();
 				lockFile = null;
 			} catch (IOException e) {
@@ -258,16 +259,11 @@ public class Archiver {
 	protected class Loader {
 
 		protected final ObjectInputStream objectInputStream;
-		protected final Transaction transaction;
+		protected final Cache context;
 
 		protected Loader(ObjectInputStream objectInputStream) {
 			this.objectInputStream = objectInputStream;
-			AbstractContext<Generic> context = root.newCache();
-			transaction = (context instanceof ServerCache) ? (Transaction) ((ServerCache) context).getTransaction() : (Transaction) context;
-		}
-
-		public Transaction getTransaction() {
-			return transaction;
+			context = root.newCache();
 		}
 
 		private void loadSnapshot() throws ClassNotFoundException, IOException {
@@ -302,9 +298,9 @@ public class Archiver {
 			Generic meta = loadAncestor(ts, vertexMap);
 			List<Generic> supers = loadAncestors(ts, vertexMap);
 			List<Generic> components = loadAncestors(ts, vertexMap);
-			vertexMap.put(ts, new SetArchiverHandler(ts, transaction, meta, supers, value, components, otherTs).resolve());
+			vertexMap.put(ts, new SetArchiverHandler(ts, context, meta, supers, value, components, otherTs).resolve());
 			// log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " + vertexMap.get(ts).getLifeManager().getBirthTs());
-			assert getTransaction().isAlive(vertexMap.get(ts)) : vertexMap.get(ts).info();
+			assert ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)) : vertexMap.get(ts).info();
 		}
 
 		protected List<Generic> loadAncestors(long ts, Map<Long, Generic> vertexMap) throws IOException {
@@ -355,12 +351,12 @@ public class Archiver {
 		}
 	}
 
-	private static class SetArchiverHandler extends AtomicBuilder<Generic> {
+	private static class SetArchiverHandler extends AtomicBuilder {
 
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, Transaction context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
+		SetArchiverHandler(long ts, Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
 			this.otherTs = otherTs;
@@ -368,7 +364,7 @@ public class Archiver {
 
 		@Override
 		protected Generic build() {
-			return gettable = ((Transaction) context).plug(((Transaction) context).getRoot().build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
+			return gettable = ((Transaction) context.getTransaction()).plug(((Root) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
 		}
 	}
 

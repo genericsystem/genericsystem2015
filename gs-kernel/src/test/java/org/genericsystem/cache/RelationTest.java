@@ -9,16 +9,25 @@ import org.testng.annotations.Test;
 @Test
 public class RelationTest extends AbstractClassicTest {
 
-	public void test001_addInstance_NotAliveException() {
-		final ClientEngine cache = new ClientEngine();
-		Generic car = cache.addInstance("Car");
-		Generic color = cache.addInstance("Color");
-		final Generic carColor = cache.addInstance("CarColor", car, color);
-		final Generic myCar = car.addInstance("myCar");
-		final Generic green = color.addInstance("green");
-		myCar.remove();
-		assert !myCar.isAlive();
-		catchAndCheckCause(() -> carColor.addInstance("myCarColor", myCar, green), AliveConstraintViolationException.class);
+	private static class Test {
+		@Override
+		protected void finalize() throws Throwable {
+			System.out.println("Finalize test");
+			super.finalize();
+		}
+	}
+
+	public void test001_addInstance_NotAliveException() throws InterruptedException {
+		ClientEngine engine = new ClientEngine();
+		// engine.close();
+		System.out.println("-------------------------------");
+		engine.close();
+		engine = null;
+		// assert engine.getCurrentCache() != null;
+		System.gc();
+		// assert engine.getCurrentCache() != null;
+		Thread.sleep(500);
+		System.out.println("-------------------------------");
 	}
 
 	public void test001_addInstance_NotAliveException_withMetaRelation() {

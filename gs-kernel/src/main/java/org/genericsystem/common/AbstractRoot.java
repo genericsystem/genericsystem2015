@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -20,16 +22,17 @@ import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.kernel.Generic;
 
-public abstract class AbstractRoot<T extends DefaultVertex<T>> implements DefaultRoot<T>, GenericProxy<T>, ProxyObject {
+public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy, ProxyObject {
 
-	private final Map<Long, T> tMap = new ConcurrentHashMap<>();
-	protected Wrapper<T> contextWrapper = buildContextWrapper();
-	private final SystemCache<T> systemCache = new SystemCache<>(this);
+	private final Map<Long, Generic> tMap = new ConcurrentHashMap<>();
+	protected Wrapper contextWrapper = buildContextWrapper();
+	private final SystemCache systemCache = new SystemCache(this);
 	protected boolean isInitialized = false;
 
 	@Override
-	public AbstractRoot<T> getRoot() {
+	public AbstractRoot getRoot() {
 		return this;
 	}
 
@@ -53,38 +56,38 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 	}
 
 	@Override
-	public abstract AbstractContext<T> newCache();
+	public abstract Cache newCache();
 
-	public static interface Wrapper<T extends DefaultVertex<T>> {
+	public static interface Wrapper {
 
-		AbstractContext<T> get();
+		Cache get();
 
-		void set(AbstractContext<T> context);
+		void set(Cache context);
 	}
 
-	public class ContextWrapper implements Wrapper<T> {
+	public class ContextWrapper implements Wrapper {
 
-		private AbstractContext<T> context;
+		private Cache context;
 
 		@Override
-		public AbstractContext<T> get() {
+		public Cache get() {
 			return context;
 		}
 
 		@Override
-		public void set(AbstractContext<T> context) {
+		public void set(Cache context) {
 			this.context = context;
 
 		}
 	}
 
-	protected Wrapper<T> buildContextWrapper() {
+	protected Wrapper buildContextWrapper() {
 		return new ContextWrapper();
 	}
 
 	@Override
-	public AbstractContext<T> getCurrentCache() {
-		AbstractContext<T> context = contextWrapper.get();
+	public Cache getCurrentCache() {
+		Cache context = contextWrapper.get();
 		if (context == null)
 			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
 		return context;
@@ -92,26 +95,26 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <Custom extends T> Custom find(Class<?> clazz) {
+	public <Custom extends Generic> Custom find(Class<?> clazz) {
 		return (Custom) systemCache.find(clazz);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <Custom extends T> Custom bind(Class<?> clazz) {
+	public <Custom extends Generic> Custom bind(Class<?> clazz) {
 		return (Custom) systemCache.bind(clazz);
 	}
 
 	@Override
-	public Class<?> findAnnotedClass(T generic) {
+	public Class<?> findAnnotedClass(Generic generic) {
 		return systemCache.getClassByVertex(generic);
 	}
 
-	public T getGenericById(long ts) {
+	public Generic getGenericById(long ts) {
 		return tMap.get(ts);
 	}
 
-	protected T newT(Class<?> clazz) {
+	protected Generic newT(Class<?> clazz) {
 		try {
 			return newInstance(clazz);
 		} catch (IllegalArgumentException e) {
@@ -120,12 +123,12 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return null; // Not reached
 	}
 
-	protected T build(Vertex vertex) {
+	protected Generic build(Vertex vertex) {
 		return build(vertex.getTs(), vertex.getClazz(), vertex.getMeta() == vertex.getTs() ? null : getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex
 				.getComponents().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getBirthTs());
 	}
 
-	protected Class<?> adaptClass(Class<?> clazz, T meta) {
+	protected Class<?> adaptClass(Class<?> clazz, Generic meta) {
 		InstanceClass metaAnnotation = meta == null ? null : getAnnotedClass(meta).getAnnotation(InstanceClass.class);
 		if (metaAnnotation != null)
 			if (clazz == null || clazz.isAssignableFrom(metaAnnotation.value()))
@@ -139,40 +142,38 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	public abstract long pickNewTs();
 
-	T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components) {
+	Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
 		return build(ts, clazz, meta, supers, value, components, isInitialized() ? Long.MAX_VALUE : ApiStatics.TS_SYSTEM);
 	}
 
-	protected abstract T build(Long ts, Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long birhTs);
+	protected abstract Generic build(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long birhTs);
 
-	protected T init(T generic, DefaultHandler handler) {
+	protected Generic init(Generic generic, DefaultHandler handler) {
 		((ProxyObject) generic).setHandler(handler);
 		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.DefaultHandler;
-		T gresult = tMap.putIfAbsent(handler.getTs(), generic);
+		Generic gresult = tMap.putIfAbsent(handler.getTs(), generic);
 		assert gresult == null : gresult.info();
 		return generic;
 	}
 
-	// protected abstract DefaultHandler buildHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts, long[] otherTs);
-
-	protected abstract Class<T> getTClass();
+	protected abstract Class<Generic> getTClass();
 
 	private final static ProxyFactory PROXY_FACTORY = new ProxyFactory();
 	private final static MethodFilter METHOD_FILTER = method -> method.getName().equals("toString");
 
 	@SuppressWarnings("unchecked")
-	private T newInstance(Class<?> clazz) {
+	private Generic newInstance(Class<?> clazz) {
 
 		PROXY_FACTORY.setSuperclass(clazz.isInterface() ? Object.class : clazz);
 		PROXY_FACTORY.setInterfaces(clazz.isInterface() ? getTClass().isAssignableFrom(clazz) ? new Class[] { clazz } : new Class[] { clazz, getTClass() } : getTClass().isAssignableFrom(clazz) ? new Class[] {} : new Class[] { getTClass() });
 		try {
-			return (T) PROXY_FACTORY.createClass(METHOD_FILTER).newInstance();
+			return (Generic) PROXY_FACTORY.createClass(METHOD_FILTER).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	public Class<?> getAnnotedClass(T generic) {
+	public Class<?> getAnnotedClass(Generic generic) {
 		if (generic.isSystem()) {
 			Class<?> annotedClass = findAnnotedClass(generic);
 			if (annotedClass != null)
@@ -187,25 +188,22 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		return isInitialized;
 	}
 
-	public abstract class DefaultHandler implements MethodHandler, ISignature<T> {
+	public abstract class DefaultHandler implements MethodHandler, ISignature<Generic> {
 
 		private final Class<?> clazz;
-		private final T meta;
-		private final List<T> supers;
+		private final Generic meta;
+		private final List<Generic> supers;
 		private final Serializable value;
-		private final List<T> components;
+		private final List<Generic> components;
 		private final long ts;
 
-		// public final long[] otherTs;
-
-		protected DefaultHandler(Class<?> clazz, T meta, List<T> supers, Serializable value, List<T> components, long ts) {
+		protected DefaultHandler(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long ts) {
 			this.clazz = clazz;
 			this.meta = meta;
 			this.supers = supers;
 			this.value = value;
 			this.components = components;
 			this.ts = ts;
-			// this.otherTs = otherTs.clone();
 		}
 
 		@Override
@@ -213,11 +211,11 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 			return ((DefaultVertex<?>) self).defaultToString();
 		}
 
-		abstract protected AbstractRoot<T> getRoot();
+		abstract protected AbstractRoot getRoot();
 
 		public Vertex getVertex() {
-			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(T::getTs).collect(Collectors.toList()), getValue(), getComponents().stream().map(T::getTs).collect(Collectors.toList()),
-					getBirthTs());
+			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(Generic::getTs).collect(Collectors.toList()), getValue(), getComponents().stream().map(Generic::getTs)
+					.collect(Collectors.toList()), getBirthTs());
 		}
 
 		public Class<?> getClazz() {
@@ -225,12 +223,12 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		}
 
 		@Override
-		public T getMeta() {
+		public Generic getMeta() {
 			return meta;
 		}
 
 		@Override
-		public List<T> getSupers() {
+		public List<Generic> getSupers() {
 			return supers;
 		}
 
@@ -240,7 +238,7 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 		}
 
 		@Override
-		public List<T> getComponents() {
+		public List<Generic> getComponents() {
 			return components;
 		}
 
@@ -251,13 +249,18 @@ public abstract class AbstractRoot<T extends DefaultVertex<T>> implements Defaul
 
 	};
 
-	protected AbstractContext<T> start(AbstractContext<T> context) {
+	protected Cache start(Cache context) {
 		contextWrapper.set(context);
 		return context;
 	}
 
-	protected void stop(AbstractContext<T> context) {
+	protected void stop(Cache context) {
 		assert contextWrapper.get() == context;
+		contextWrapper.set(null);
+	}
+
+	@Override
+	public void close() {
 		contextWrapper.set(null);
 	}
 

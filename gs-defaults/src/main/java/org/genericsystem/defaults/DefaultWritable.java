@@ -216,7 +216,7 @@ public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> 
 	}
 
 	@Override
-	default DefaultContext<T> getCurrentCache() {
+	default DefaultCache<T> getCurrentCache() {
 		return getRoot().getCurrentCache();
 	}
 

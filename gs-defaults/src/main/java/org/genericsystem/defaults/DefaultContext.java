@@ -53,20 +53,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		throw new RollbackException(exception);
 	}
 
-	T addInstance(T meta, List<T> overrides, Serializable value, List<T> components);
-
-	T update(T update, List<T> overrides, Serializable newValue, List<T> newComponents);
-
-	T merge(T update, List<T> overrides, Serializable newValue, List<T> newComponents);
-
-	T setInstance(T meta, List<T> overrides, Serializable value, List<T> components);
-
-	void forceRemove(T generic);
-
-	void remove(T generic);
-
-	void conserveRemove(T generic);
-
 	default NavigableSet<T> computeDependencies(T node) {
 		class OrderedDependencies extends TreeSet<T> {
 			private static final long serialVersionUID = -441180182522681264L;

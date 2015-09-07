@@ -6,10 +6,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.genericsystem.common.AbstractGeneralAwareIterator;
-import org.genericsystem.common.TsDependencies;
 import org.genericsystem.kernel.Root.RootServerHandler;
 
-abstract class AbstractTsDependencies implements TsDependencies<Generic> {
+abstract class AbstractTsDependencies {
 
 	private Node head = null;
 	private Node tail = null;
@@ -17,7 +16,6 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 
 	public abstract LifeManager getLifeManager();
 
-	@Override
 	public Generic get(Generic generic, long ts) {
 		Generic result = map.get(generic);// this no lock read requires a concurrent hash map
 		if (result == null) {
@@ -36,7 +34,6 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 		return null;
 	}
 
-	@Override
 	public void add(Generic element) {
 		assert element != null;
 		// assert getLifeManager().isWriteLockedByCurrentThread();
@@ -50,7 +47,6 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 		assert result == null;
 	}
 
-	@Override
 	public boolean remove(Generic generic) {
 		assert generic != null : "generic is null";
 		assert head != null : "head is null";
@@ -82,7 +78,6 @@ abstract class AbstractTsDependencies implements TsDependencies<Generic> {
 		return false;
 	}
 
-	@Override
 	public Stream<Generic> stream(long ts) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
 	}

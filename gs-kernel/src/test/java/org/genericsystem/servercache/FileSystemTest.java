@@ -3,8 +3,8 @@ package org.genericsystem.servercache;
 import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
+import org.genericsystem.common.Cache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.kernel.ServerCache;
 import org.genericsystem.kernel.ServerEngine;
 import org.genericsystem.servercache.FileSystem.Directory;
 import org.genericsystem.servercache.FileSystem.File;
@@ -75,7 +75,7 @@ public class FileSystemTest extends AbstractTest {
 		Directory directory1 = rootDirectory.addDirectory("directory1");
 		final Directory directory2 = rootDirectory.addDirectory("directory2");
 		assert !directory2.addDirectory("directory1").equals(directory1); // No Exception
-		ServerCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		engine.getCurrentCache().mount();
 
 		catchAndCheckCause(() -> directory2.addDirectory("directory1"), ExistsException.class); // Exception

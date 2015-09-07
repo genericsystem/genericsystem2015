@@ -19,19 +19,21 @@ public abstract class AbstractTest {
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
 		if (file.exists())
-			for (File f : file.listFiles())
-				f.delete();
+			for (File f : file.listFiles()) {
+				if (!".lock".equals(f.getName()))
+					f.delete();
+			}
 	}
 
 	public abstract GSDeploymentOptions getDeploymentOptions();
 
 	@BeforeMethod
 	public void beforeClass() {
-		System.out.println("before class");
+		// System.out.println("before class");
 		cleanDirectory(directoryPath);
 		httpGsServer = new HttpGSServer(getDeploymentOptions());
 		httpGsServer.start();
-		System.out.println("beforeClass ok");
+		// System.out.println("beforeClass ok");
 	}
 
 	@FunctionalInterface
@@ -68,6 +70,7 @@ public abstract class AbstractTest {
 	@AfterMethod
 	public void afterClass() {
 		httpGsServer.stop();
+		System.gc();
 	}
 
 }

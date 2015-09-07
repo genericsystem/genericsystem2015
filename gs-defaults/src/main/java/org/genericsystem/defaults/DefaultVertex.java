@@ -17,7 +17,7 @@ import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationExceptio
 public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
 
 	@Override
-	default DefaultContext<T> getCurrentCache() {
+	default DefaultCache<T> getCurrentCache() {
 		return getRoot().getCurrentCache();
 	}
 
@@ -272,6 +272,7 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return result;
 	}
 
+	@Override
 	long getBirthTs();
 
 	// long getDeathTs();

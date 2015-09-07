@@ -10,12 +10,12 @@ import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class PersistenceTest extends AbstractClassicTest {
+public class PersistenceTest extends AbstractPersistanceTest {
 
 	public void testDefaultConfiguration() {
 
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
-		root.close();
+		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 
@@ -24,16 +24,16 @@ public class PersistenceTest extends AbstractClassicTest {
 	public void testAnnotType() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		compareGraph(root, engine);
 		assert engine.find(Vehicle.class) instanceof Vehicle : engine.find(Vehicle.class).info();
+		// root.close();
 	}
 
 	public void testAnnotType2() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		// root.close();
+		root = null;
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraphWitoutTs(root, engine);
 		engine.getCurrentCache().flush();

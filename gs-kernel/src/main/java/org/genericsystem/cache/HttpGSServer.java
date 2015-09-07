@@ -3,6 +3,7 @@ package org.genericsystem.cache;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.function.Consumer;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -29,7 +29,7 @@ public class HttpGSServer extends AbstractGSServer {
 	}
 
 	public void start() {
-		Vertx vertx = Vertx.vertx();
+		Vertx vertx = GSVertx.vertx().getVertx();
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 			httpServer.requestHandler(request -> {
@@ -50,7 +50,7 @@ public class HttpGSServer extends AbstractGSServer {
 						statusCode = 400;
 					else if (exception instanceof OptimisticLockConstraintViolationException)
 						statusCode = 401;
-					request.response().setStatusCode(statusCode).end();
+					request.response().setStatusCode(statusCode).end(Buffer.buffer().appendInt(AbstractGSClient.APPLY));
 					request.response().close();
 				}));
 			});
@@ -63,12 +63,13 @@ public class HttpGSServer extends AbstractGSServer {
 	@Override
 	public void stop() {
 		httpServers.forEach(httpServer -> HttpGSServer.<Void> synchonizeTask(handler -> httpServer.close(handler)));
+		super.stop();
 		System.out.println("Generic System server stopped!");
 	}
 
-	private static <T> T synchonizeTask(Consumer<Handler<AsyncResult<T>>> consumer) {
+	private static <T> T synchonizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
 		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
-		consumer.accept(res -> {
+		consumer.handle(res -> {
 			try {
 				blockingQueue.put(res);
 			} catch (InterruptedException e) {

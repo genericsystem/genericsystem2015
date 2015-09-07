@@ -1,59 +1,60 @@
 package org.genericsystem.common;
 
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.kernel.Generic;
 
-public class Differential<T extends DefaultVertex<T>> implements IDifferential<T> {
+public class Differential implements IDifferential<Generic> {
 
-	private final IDifferential<T> differential;
-	private final PseudoConcurrentCollection<T> adds = new PseudoConcurrentCollection<>();
-	private final PseudoConcurrentCollection<T> removes = new PseudoConcurrentCollection<>();
+	private final IDifferential<Generic> differential;
+	private final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
+	private final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
 
-	public Differential(IDifferential<T> subCache) {
+	public Differential(IDifferential<Generic> subCache) {
 		this.differential = subCache;
 	}
 
-	public IDifferential<T> getSubCache() {
+	public IDifferential<Generic> getSubCache() {
 		return differential;
 	}
 
 	public int getCacheLevel() {
-		return differential instanceof Differential ? ((Differential<T>) differential).getCacheLevel() + 1 : 0;
+		return differential instanceof Differential ? ((Differential) differential).getCacheLevel() + 1 : 0;
 	}
 
-	void checkConstraints(Checker<T> checker) throws RollbackException {
+	void checkConstraints(Checker checker) throws RollbackException {
 		adds.forEach(x -> checker.checkAfterBuild(true, true, x));
 		removes.forEach(x -> checker.checkAfterBuild(false, true, x));
 	}
 
-	protected T plug(T generic) {
+	protected Generic plug(Generic generic) {
 		// assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
 		return generic;
 	}
 
-	protected void unplug(T generic) {
+	protected void unplug(Generic generic) {
 		if (!adds.remove(generic))
 			removes.add(generic);
 	}
 
 	@Override
-	public Snapshot<T> getDependencies(T generic) {
-		return new Snapshot<T>() {
+	public Snapshot<Generic> getDependencies(Generic generic) {
+		return new Snapshot<Generic>() {
 			@Override
-			public T get(Object o) {
-				T result = adds.get(o);
+			public Generic get(Object o) {
+				Generic result = adds.get(o);
 				if (result != null)
 					return generic.isDirectAncestorOf(result) ? result : null;
 				return !removes.contains(o) ? differential.getDependencies(generic).get(o) : null;
 			}
 
 			@Override
-			public Stream<T> stream() {
+			public Stream<Generic> stream() {
 				return Stream.concat(adds.contains(generic) ? Stream.empty() : differential.getDependencies(generic).stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
 			}
 		};
@@ -64,10 +65,10 @@ public class Differential<T extends DefaultVertex<T>> implements IDifferential<T
 	}
 
 	@Override
-	public void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		for (T generic : removes)
+	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		for (Generic generic : removes)
 			unplug(generic);
-		for (T generic : adds)
+		for (Generic generic : adds)
 			plug(generic);
 	}
 

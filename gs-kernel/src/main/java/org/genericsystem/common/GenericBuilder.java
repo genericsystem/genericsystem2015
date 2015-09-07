@@ -6,23 +6,23 @@ import java.util.Objects;
 
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Root;
 
-public abstract class GenericBuilder<T extends DefaultVertex<T>> {
-	protected final AbstractContext<T> context;
-	final T meta;
-	protected T adjustedMeta;
-	final List<T> overrides;
-	protected List<T> supers;
+public abstract class GenericBuilder {
+	protected final Cache context;
+	final Generic meta;
+	protected Generic adjustedMeta;
+	final List<Generic> overrides;
+	protected List<Generic> supers;
 	protected final Serializable value;
-	protected final List<T> components;
-	protected T gettable;
+	protected final List<Generic> components;
+	protected Generic gettable;
 
-	GenericBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+	GenericBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		assert overrides != null;
 		this.context = context;
-		this.meta = meta != null ? meta : (T) context.getRoot();
+		this.meta = meta != null ? meta : (Generic) context.getRoot();
 		this.overrides = overrides;
 		this.components = components;
 		this.value = generateValue(value);
@@ -58,35 +58,35 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 
 	}
 
-	T get() {
+	Generic get() {
 		if (gettable == null)
 			gettable = adjustedMeta.getDirectInstance(supers, value, components);
 		return gettable;
 	}
 
-	T getEquiv() {
+	Generic getEquiv() {
 		return adjustedMeta.getDirectEquivInstance(supers, value, components);
 	}
 
-	public T getOrBuild() {
-		T instance = get();
+	public Generic getOrBuild() {
+		Generic instance = get();
 		return instance == null ? build() : instance;
 	}
 
-	protected T build() {
+	protected Generic build() {
 		return gettable = context.buildAndPlug(null, isMeta() ? null : adjustedMeta, supers, value, components);
 	}
 
-	T add() {
+	Generic add() {
 		return context.getRestructurator().rebuildAll(null, () -> build(), context.computePotentialDependencies(adjustedMeta, supers, value, components));
 	}
 
-	T set(T update) {
+	Generic set(Generic update) {
 		assert update != null;
 		return context.getRestructurator().rebuildAll(update, () -> build(), context.computeDependencies(update));
 	}
 
-	T merge(T update) {
+	Generic merge(Generic update) {
 		assert update != null;
 		return context.getRestructurator().rebuildAll(update, () -> getOrBuild(), context.computeDependencies(update));
 	}
@@ -115,28 +115,28 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 	// }
 	// }
 
-	public static class AddBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
+	public static class AddBuilder extends GenericBuilder {
 
-		AddBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		AddBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
-		public T resolve() {
-			T generic = get();
+		public Generic resolve() {
+			Generic generic = get();
 			if (generic != null)
 				context.discardWithException(new ExistsException("An equivalent instance already exists : " + generic.info()));
 			return add();
 		}
 	}
 
-	static class SetBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
+	static class SetBuilder extends GenericBuilder {
 
-		SetBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		SetBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
-		T resolve() {
-			T generic = get();
+		Generic resolve() {
+			Generic generic = get();
 			if (generic != null)
 				return generic;
 			generic = getEquiv();
@@ -144,17 +144,17 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class UpdateBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
+	static class UpdateBuilder extends GenericBuilder {
 
-		private final T update;
+		private final Generic update;
 
-		UpdateBuilder(AbstractContext<T> context, T update, T meta, List<T> overrides, Serializable value, List<T> components) {
+		UpdateBuilder(Cache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
 
-		T resolve() {
-			T generic = get();
+		Generic resolve() {
+			Generic generic = get();
 			if (generic != null)
 				if (update != generic)
 					context.discardWithException(new ExistsException("An equivalent instance already exists : " + generic.info()));
@@ -162,36 +162,36 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 		}
 	}
 
-	static class MergeBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
+	static class MergeBuilder extends GenericBuilder {
 
-		private final T update;
+		private final Generic update;
 
-		MergeBuilder(AbstractContext<T> context, T update, T meta, List<T> overrides, Serializable value, List<T> components) {
+		MergeBuilder(Cache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
 
-		T resolve() {
+		Generic resolve() {
 			return merge(update);
 		}
 	}
 
-	public static class AtomicBuilder<T extends DefaultVertex<T>> extends GenericBuilder<T> {
+	public static class AtomicBuilder extends GenericBuilder {
 
-		protected AtomicBuilder(AbstractContext<T> context, T meta, List<T> overrides, Serializable value, List<T> components) {
+		protected AtomicBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
-		public T resolve() {
+		public Generic resolve() {
 			return getOrBuild();
 		}
 	}
 
-	protected static class SetSystemBuilder<T extends DefaultVertex<T>> extends AtomicBuilder<T> {
+	protected static class SetSystemBuilder extends AtomicBuilder {
 
 		private final Class<?> clazz;
 
-		SetSystemBuilder(AbstractContext<T> context, Class<?> clazz, T meta, List<T> overrides, Serializable value, List<T> components) {
+		SetSystemBuilder(Cache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.clazz = clazz;
 		}
@@ -202,13 +202,13 @@ public abstract class GenericBuilder<T extends DefaultVertex<T>> {
 		}
 
 		@Override
-		protected T build() {
+		protected Generic build() {
 			return gettable = context.buildAndPlug(clazz, isMeta() ? null : adjustedMeta, supers, value, components);
 		}
 
 		@Override
-		public final T resolve() {
-			T instance = get();
+		public final Generic resolve() {
+			Generic instance = get();
 			if (!(context.getRoot() instanceof Root)) {
 				if (instance == null)
 					throw new IllegalStateException("could not find class on server : " + clazz.getName());

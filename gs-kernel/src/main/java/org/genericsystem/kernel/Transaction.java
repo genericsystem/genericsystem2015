@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -13,7 +14,7 @@ import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.Root.RootServerHandler;
 
-public class Transaction extends AbstractContext<Generic> implements IDifferential<Generic> {
+public class Transaction extends AbstractContext implements IDifferential<Generic> {
 
 	private final long ts;
 
@@ -36,7 +37,6 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 		return ts;
 	}
 
-	@Override
 	protected Generic plug(Generic generic) {
 		if (getRoot().isInitialized())
 			((RootServerHandler) generic.getProxyHandler()).getLifeManager().beginLife(getTs());
@@ -56,7 +56,6 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 		getRoot().getGarbageCollector().add(generic);
 	}
 
-	@Override
 	protected void unplug(Generic generic) {
 		getChecker().checkAfterBuild(false, false, generic);
 		Set<Generic> set = new HashSet<>();
@@ -105,11 +104,6 @@ public class Transaction extends AbstractContext<Generic> implements IDifferenti
 	protected Generic buildAndPlug(Long ts, Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components, long[] otherTs) {
 		return plug(getRoot().build(ts, clazz, meta, supers, value, components, otherTs));
 
-	}
-
-	@Override
-	protected Generic setMeta(int dim) {
-		return super.setMeta(dim);
 	}
 
 	private class LockedLifeManager {

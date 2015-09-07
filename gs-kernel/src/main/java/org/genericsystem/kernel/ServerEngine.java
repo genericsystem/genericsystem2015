@@ -1,6 +1,8 @@
 package org.genericsystem.kernel;
 
-import org.genericsystem.common.AbstractCache.ContextEventListener;
+import org.genericsystem.common.Cache;
+import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.IDifferential;
 
 public class ServerEngine extends Root {
 
@@ -22,16 +24,21 @@ public class ServerEngine extends Root {
 	}
 
 	@Override
-	public ServerCache newCache() {
-		return new ServerCache(this);
+	public Cache newCache() {
+		return new Cache(this) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction((Root) getRoot());
+			}
+		};
 	}
 
-	public ServerCache newCache(ContextEventListener<Generic> listener) {
-		return new ServerCache(this, listener);
-	}
-
-	@Override
-	public ServerCache getCurrentCache() {
-		return (ServerCache) super.getCurrentCache();
+	public Cache newCache(ContextEventListener<Generic> listener) {
+		return new Cache(this, listener) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction((Root) getRoot());
+			}
+		};
 	}
 }

@@ -3,16 +3,17 @@ package org.genericsystem.cache;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.AbstractCache.ContextEventListener;
-import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.Cache;
+import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public class ClientEngine extends AbstractRoot<Generic> implements Generic {
+public class ClientEngine extends AbstractRoot implements Generic {
 
 	protected Server server;
 
@@ -30,7 +31,7 @@ public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 
 	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new HttpGSClient(this, host, port, "/" + engineValue);
+		server = new HttpGSClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
@@ -41,28 +42,48 @@ public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
-	public ClientCache newCache() {
-		return new ClientCache(this);
+	public Cache newCache() {
+		return new Cache(this) {
+			@Override
+			protected ClientTransaction buildTransaction() {
+				return new ClientTransaction((ClientEngine) (getRoot()), getRoot().pickNewTs());
+			}
+		};
 	}
 
-	public ClientCache newCache(ContextEventListener<Generic> listener) {
-		return new ClientCache(this, listener);
+	public Cache newCache(ContextEventListener<Generic> listener) {
+		return new Cache(this, listener) {
+			@Override
+			protected ClientTransaction buildTransaction() {
+				return new ClientTransaction((ClientEngine) (getRoot()), getRoot().pickNewTs());
+			}
+		};
 	}
 
 	@Override
-	public ClientCache getCurrentCache() {
-		return (ClientCache) super.getCurrentCache();
+	public Cache getCurrentCache() {
+		return super.getCurrentCache();
 	}
 
-	public static class LocalContextWrapper extends InheritableThreadLocal<ClientCache> implements Wrapper<Generic> {
+	public static class LocalContextWrapper implements Wrapper {
+		private ThreadLocal<Cache> local = new InheritableThreadLocal<>();
+
 		@Override
-		public void set(AbstractContext<Generic> context) {
-			super.set((ClientCache) context);
+		public void set(Cache context) {
+			if (context != null)
+				local.set(context);
+			else
+				local.remove();
+		}
+
+		@Override
+		public Cache get() {
+			return local.get();
 		}
 	}
 
 	@Override
-	protected Wrapper<Generic> buildContextWrapper() {
+	protected Wrapper buildContextWrapper() {
 		return new LocalContextWrapper();
 	}
 
@@ -82,8 +103,16 @@ public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 	}
 
 	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALIZE CLIENT ENGINE !!!!!!!!");
+		super.finalize();
+	}
+
+	@Override
 	public void close() {
 		server.close();
+		server = null;
+		super.close();
 	}
 
 	@Override
@@ -128,9 +157,4 @@ public class ClientEngine extends AbstractRoot<Generic> implements Generic {
 	public long pickNewTs() {
 		return server.pickNewTs();
 	}
-
-	// public static void main(String[] args) {
-	// ExampleRunner.runJavaExample("gs-kernel/src/main/java/",
-	// ClientEngine.class, true);
-	// }
 }
