@@ -2,6 +2,7 @@ package org.genericsystem.cache;
 
 import java.io.File;
 import java.util.function.Supplier;
+
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,11 @@ public abstract class AbstractTest {
 
 	@BeforeMethod
 	public void beforeClass() {
-		System.out.println("before class");
+		// System.out.println("before class");
 		cleanDirectory(directoryPath);
 		httpGsServer = new HttpGSServer(getDeploymentOptions());
 		httpGsServer.start();
-		System.out.println("beforeClass ok");
+		// System.out.println("beforeClass ok");
 	}
 
 	@FunctionalInterface
@@ -69,6 +70,7 @@ public abstract class AbstractTest {
 	@AfterMethod
 	public void afterClass() {
 		httpGsServer.stop();
+		System.gc();
 	}
 
 }

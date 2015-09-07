@@ -6,21 +6,21 @@ import java.util.List;
 import javassist.util.proxy.ProxyObject;
 
 import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.kernel.Generic;
 
-public interface GenericProxy<T extends DefaultVertex<T>> extends DefaultVertex<T> {
+public interface GenericProxy extends DefaultVertex<Generic> {
 	@Override
-	default AbstractRoot<T> getRoot() {
+	default AbstractRoot getRoot() {
 		return getProxyHandler().getRoot();
 	}
 
 	@Override
-	default AbstractContext<T> getCurrentCache() {
-		return (AbstractContext<T>) DefaultVertex.super.getCurrentCache();
+	default Cache getCurrentCache() {
+		return (Cache) DefaultVertex.super.getCurrentCache();
 	}
 
-	@SuppressWarnings("unchecked")
-	default AbstractRoot<T>.DefaultHandler getProxyHandler() {
-		return ((AbstractRoot<T>.DefaultHandler) ((ProxyObject) this).getHandler());
+	default AbstractRoot.DefaultHandler getProxyHandler() {
+		return ((AbstractRoot.DefaultHandler) ((ProxyObject) this).getHandler());
 	}
 
 	@Override
@@ -28,15 +28,14 @@ public interface GenericProxy<T extends DefaultVertex<T>> extends DefaultVertex<
 		return getProxyHandler().getTs();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	default T getMeta() {
-		T result = getProxyHandler().getMeta();
-		return result != null ? result : (T) this;
+	default Generic getMeta() {
+		Generic result = getProxyHandler().getMeta();
+		return result != null ? result : (Generic) this;
 	}
 
 	@Override
-	default List<T> getSupers() {
+	default List<Generic> getSupers() {
 		return getProxyHandler().getSupers();
 	}
 
@@ -46,7 +45,7 @@ public interface GenericProxy<T extends DefaultVertex<T>> extends DefaultVertex<
 	}
 
 	@Override
-	default List<T> getComponents() {
+	default List<Generic> getComponents() {
 		return getProxyHandler().getComponents();
 	}
 

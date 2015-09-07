@@ -5,19 +5,27 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.Cache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Container;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 
-public class Root extends AbstractRoot<Generic> implements Generic, Server {
+public class Root extends AbstractRoot implements Generic, Server {
 
 	private final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
 	private TsGenerator generator = new TsGenerator();;
+
+	// @Override
+	// protected void finalize() throws Throwable {
+	// System.out.println("FINALIZE ROOT !!!!!!!!");
+	// super.finalize();
+	// }
 
 	@Override
 	public Root getRoot() {
@@ -44,12 +52,30 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	}
 
 	@Override
-	public AbstractContext<Generic> newCache() {
-		return new Transaction(this, pickNewTs());
+	public Cache newCache() {
+		return new Cache(this) {
+
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction((Root) getRoot());
+			}
+
+			@Override
+			protected Generic plug(Generic generic) {
+				return ((Transaction) getTransaction()).plug(generic);
+			}
+
+			@Override
+			protected void unplug(Generic generic) {
+				((Transaction) getTransaction()).unplug(generic);
+			}
+
+		};
 	}
 
 	@Override
 	public void close() {
+		super.close();
 		archiver.close();
 		garbageCollector.stopsScheduler();
 	}
@@ -71,11 +97,6 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 	@Override
 	protected Generic build(Vertex vertex) {
 		return super.build(vertex);
-		// Generic generic = super.getGenericById(vertex.getTs());
-		// if (generic == null) {
-		// generic = super.build(vertex);
-		// }
-		// return generic;
 	}
 
 	@Override
@@ -144,15 +165,15 @@ public class Root extends AbstractRoot<Generic> implements Generic, Server {
 
 	@Override
 	public void apply(long ts, long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		System.out.println("APPLY RECEIVED FOR TS : " + ts);
+		// System.out.println("APPLY RECEIVED FOR TS : " + ts);
 		Arrays.stream(removeIds).forEach(removeId -> System.out.println("Remove : " + removeId));
 		Arrays.stream(addVertices).forEach(addVertex -> System.out.println("Add : " + addVertex.getTs()));
 		new Transaction(this, ts).apply(new Container(Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId))), new Container(Arrays.stream(addVertices).map(addVertex -> {
-			System.out.println("Commit " + addVertex.getTs() + " " + addVertex.getValue());
-			assert getRoot().getGenericById(addVertex.getTs()) == null : "" + addVertex.getTs() + addVertex.getValue() + " " + getGenericById(addVertex.getTs()).info();
-			assert addVertex.getBirthTs() == Long.MAX_VALUE;
-			return getRoot().build(addVertex);
-		})));
+			// System.out.println("Commit " + addVertex.getTs() + " " + addVertex.getValue());
+				assert getRoot().getGenericById(addVertex.getTs()) == null : "" + addVertex.getTs() + addVertex.getValue() + " " + getGenericById(addVertex.getTs()).info();
+				assert addVertex.getBirthTs() == Long.MAX_VALUE;
+				return getRoot().build(addVertex);
+			})));
 	}
 
 	private static class TsGenerator {

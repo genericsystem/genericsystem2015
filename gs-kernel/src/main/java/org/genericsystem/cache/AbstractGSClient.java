@@ -3,10 +3,12 @@ package org.genericsystem.cache;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
+
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
@@ -24,58 +26,54 @@ public abstract class AbstractGSClient implements Server {
 		return buffer -> {
 			GSBuffer buff = new GSBuffer(buffer);
 			int methodId = buff.getInt();
-			switch (methodId) {
-			case PICK_NEW_TS: {
-				consumer.handle(buff.getLong());
-				break;
-			}
-			case GET_DEPENDENCIES: {
-				int size = buff.getInt();
-				long[] result = new long[size];
-				for (int i = 0; i < size; i++) {
-					result[i] = buff.getLong();
-				}
-				consumer.handle(result);
-				break;
-			}
-			case GET_VERTEX: {
-				consumer.handle(buff.getGSVertex());
-				break;
-			}
-			case APPLY: {
-				consumer.handle(buff.getLong());
-				break;
-			}
-			default:
-				throw new IllegalStateException("no method called");
-			}
+			consumer.handle(getResult(buff, methodId));
 		};
 	}
 
-	public <T> T synchronize(Buffer buffer) {
+	private Object getResult(GSBuffer buff, int methodId) {
+		switch (methodId) {
+		case PICK_NEW_TS: {
+			return buff.getLong();
+		}
+		case GET_DEPENDENCIES: {
+			int size = buff.getInt();
+			long[] result = new long[size];
+			for (int i = 0; i < size; i++)
+				result[i] = buff.getLong();
+			return result;
+		}
+		case GET_VERTEX: {
+			return buff.getGSVertex();
+		}
+		case APPLY: {
+			return buff.getLong();
+		}
+		default:
+			throw new IllegalStateException("no method called");
+		}
+	}
+
+	public <T> T synchronizeSend(Buffer buffer) {
 		try {
-			return unsafeSynchronize(buffer);
+			return unsafeSynchronizeSend(buffer);
 		} catch (OptimisticLockConstraintViolationException | ConcurrencyControlException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	public <T> T unsafeSynchronize(Buffer buffer) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		return synchonizeTask(objectHandler -> {
-			send(buffer, reponse -> {
-				reponse.bodyHandler(getHandler(object -> {
-					objectHandler.handle(reponse.statusCode() == 200 ? object : reponse.statusCode() == 400 ? new ConcurrencyControlException("") : new OptimisticLockConstraintViolationException(""));
-				}));
-			});
-		});
+	public <T> T unsafeSynchronizeSend(Buffer buffer) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		return synchonizeTask(objectHandler -> send(buffer, reponse -> reponse.bodyHandler(getHandler(object -> {
+			objectHandler.handle(reponse.statusCode() == 200 ? object : reponse.statusCode() == 400 ? new ConcurrencyControlException("") : new OptimisticLockConstraintViolationException(""));
+		}))));
 	}
 
+	@SuppressWarnings("unchecked")
 	private static <T> T synchonizeTask(Handler<Handler<Object>> consumer) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(1);
-			consumer.handle(res -> {
+			consumer.handle(resultObject -> {
 				try {
-					blockingQueue.put(res);
+					blockingQueue.put(resultObject);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -88,11 +86,12 @@ public abstract class AbstractGSClient implements Server {
 			}
 			if (result != null) {
 				if (result instanceof ConcurrencyControlException)
-					throw new ConcurrencyControlException("reaching synchronize");
+					throw (ConcurrencyControlException) result;
 				else if (result instanceof OptimisticLockConstraintViolationException)
-					throw new OptimisticLockConstraintViolationException("");
+					throw (OptimisticLockConstraintViolationException) result;
 				return (T) result;
 			}
+			System.out.println("Response failure");
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
 	}
@@ -101,7 +100,7 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public Vertex getVertex(long id) {
-		Vertex result = (Vertex) synchronize(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id));
+		Vertex result = (Vertex) synchronizeSend(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id));
 		if (result == null)
 			throw new IllegalStateException("Vertex id: " + id);
 		return result;
@@ -109,7 +108,7 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public long[] getDependencies(long ts, long id) {
-		return (long[]) synchronize(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id));
+		return (long[]) synchronizeSend(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id));
 	}
 
 	@Override
@@ -121,12 +120,12 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendGSVertexArray(adds);
 		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() == Long.MAX_VALUE)))
 			throw new IllegalStateException("");
-		unsafeSynchronize(gsBuffer);
+		unsafeSynchronizeSend(gsBuffer);
 	}
 
 	@Override
 	public long pickNewTs() {
-		return (Long) synchronize(Buffer.buffer().appendInt(PICK_NEW_TS));
+		return (Long) synchronizeSend(Buffer.buffer().appendInt(PICK_NEW_TS));
 	}
 
 	@Override

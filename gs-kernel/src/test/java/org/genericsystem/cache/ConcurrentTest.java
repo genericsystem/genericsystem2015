@@ -1,5 +1,6 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.common.Cache;
 import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
@@ -8,8 +9,8 @@ public class ConcurrentTest extends AbstractClassicTest {
 
 	public void test() {
 		ClientEngine engine = new ClientEngine();
-		ClientCache cache = engine.getCurrentCache();
-		ClientCache cache2 = engine.newCache().start();
+		Cache cache = engine.getCurrentCache();
+		Cache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 
 		assert cache2.isAlive(car);
@@ -27,7 +28,7 @@ public class ConcurrentTest extends AbstractClassicTest {
 	public void testNonFlushedModificationsStillAliveInCache() {
 		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
-		ClientCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
@@ -35,14 +36,14 @@ public class ConcurrentTest extends AbstractClassicTest {
 
 	public void testFlushedModificationsAvailableInNewCacheOk() {
 		ClientEngine engine = new ClientEngine();
-		ClientCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 
-		ClientCache cache2 = engine.newCache().start();
+		Cache cache2 = engine.newCache().start();
 
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
@@ -50,13 +51,13 @@ public class ConcurrentTest extends AbstractClassicTest {
 
 	public void testNonFlushedModificationsAreNotAvailableInNewCacheOk() {
 		ClientEngine engine = new ClientEngine();
-		ClientCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 
-		ClientCache cache2 = engine.newCache().start();
+		Cache cache2 = engine.newCache().start();
 		assert !cache2.isAlive(car);
 		assert !engine.getInstances().contains(car);
 	}

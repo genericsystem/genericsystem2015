@@ -169,7 +169,7 @@ public class AnnotationTest extends AbstractGetClassTest {
 		engine.find(Vehicle.class);
 		Generic human = engine.find(Human.class);
 		Generic possess = engine.find(HumanPossessVehicle.class);
-		assert human.getAttributes().contains(possess);
+		assert human.getAttributes().contains(possess) : human.getAttributes().info();
 	}
 
 	public void test008_SubRelation() {

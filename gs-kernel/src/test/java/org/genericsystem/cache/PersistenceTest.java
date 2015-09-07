@@ -3,6 +3,7 @@ package org.genericsystem.cache;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Statics;
@@ -23,16 +24,16 @@ public class PersistenceTest extends AbstractPersistanceTest {
 	public void testAnnotType() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		// root.close();
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		compareGraph(root, engine);
 		assert engine.find(Vehicle.class) instanceof Vehicle : engine.find(Vehicle.class).info();
+		// root.close();
 	}
 
 	public void testAnnotType2() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		// root.close();
+		root = null;
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraphWitoutTs(root, engine);
 		engine.getCurrentCache().flush();
@@ -52,7 +53,8 @@ public class PersistenceTest extends AbstractPersistanceTest {
 	}
 
 	@SystemGeneric
-	public static class Vehicle implements Generic {}
+	public static class Vehicle implements Generic {
+	}
 
 	public void testType() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);

@@ -26,6 +26,7 @@ public class HttpGSClient extends AbstractGSClient {
 
 	@Override
 	public void close() {
+		System.out.println("Close httpclient");
 		httpClient.close();
 	}
 }
