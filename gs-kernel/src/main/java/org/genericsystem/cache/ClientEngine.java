@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
-import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Server;
@@ -15,7 +15,7 @@ import org.genericsystem.kernel.Statics;
 
 public class ClientEngine extends AbstractRoot implements Generic {
 
-	protected Server server;
+	protected final Server server;
 
 	public ClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
@@ -65,27 +65,27 @@ public class ClientEngine extends AbstractRoot implements Generic {
 		return super.getCurrentCache();
 	}
 
-	public static class LocalContextWrapper implements Wrapper {
-		private ThreadLocal<Cache> local = new InheritableThreadLocal<>();
+	// public static class LocalContextWrapper implements Wrapper {
+	// private ThreadLocal<Cache> local = new InheritableThreadLocal<>();
+	//
+	// @Override
+	// public void set(Cache context) {
+	// if (context != null)
+	// local.set(context);
+	// else
+	// local.remove();
+	// }
+	//
+	// @Override
+	// public Cache get() {
+	// return local.get();
+	// }
+	// }
 
-		@Override
-		public void set(Cache context) {
-			if (context != null)
-				local.set(context);
-			else
-				local.remove();
-		}
-
-		@Override
-		public Cache get() {
-			return local.get();
-		}
-	}
-
-	@Override
-	protected Wrapper buildContextWrapper() {
-		return new LocalContextWrapper();
-	}
+	// @Override
+	// protected Wrapper buildContextWrapper() {
+	// return new LocalContextWrapper();
+	// }
 
 	@Override
 	public Generic getGenericById(long ts) {
@@ -105,13 +105,13 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	@Override
 	protected void finalize() throws Throwable {
 		System.out.println("FINALIZE CLIENT ENGINE !!!!!!!!");
+		server.close();
 		super.finalize();
 	}
 
 	@Override
 	public void close() {
 		server.close();
-		server = null;
 		super.close();
 	}
 

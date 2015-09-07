@@ -9,15 +9,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Cache;
 import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Cache;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 
 public class Root extends AbstractRoot implements Generic, Server {
 
-	private final Archiver archiver;
+	protected final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
 	private TsGenerator generator = new TsGenerator();;
 

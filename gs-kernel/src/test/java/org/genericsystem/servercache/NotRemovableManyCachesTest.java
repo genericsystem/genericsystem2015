@@ -1,8 +1,8 @@
 package org.genericsystem.servercache;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.kernel.Generic;
@@ -95,11 +95,12 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 		myCar.remove();
 		cache.flush();
 		cache2.start();
-		try {
-			cache2.tryFlush();
-		} catch (ConcurrencyControlException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		catchAndCheckCause(() -> cache2.flush(), OptimisticLockConstraintViolationException.class);
+		// try {
+		// cache2.tryFlush();
+		// } catch (ConcurrencyControlException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 	}
 }

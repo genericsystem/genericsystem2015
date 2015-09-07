@@ -20,9 +20,9 @@ public class Engine extends org.genericsystem.mutability.Engine {
 
 	@Override
 	public Cache getCurrentCache() {
-		Cache cacheInThreadLocal = cacheLocal.get();
-		if (cacheInThreadLocal != null)
-			return cacheInThreadLocal;
+		// Cache cacheInThreadLocal = cacheLocal.get();
+		// if (cacheInThreadLocal != null)
+		// return cacheInThreadLocal;
 		Cache cache = cacheSupplier.get();
 		if (cache == null)
 			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");

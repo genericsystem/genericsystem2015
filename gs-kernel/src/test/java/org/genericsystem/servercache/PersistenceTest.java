@@ -19,7 +19,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testDefaultConfiguration() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		root.close();
 		ServerEngine engine = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
@@ -27,7 +32,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testAnnotType() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		root.getCurrentCache().flush();
 		root.close();
 		ServerEngine engine = new ServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
@@ -37,7 +47,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testAnnotType2() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		root.getCurrentCache().flush();
 		root.close();
 
@@ -67,7 +82,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testType() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		root.addInstance("Vehicle");
 		root.getCurrentCache().flush();
 		root.close();
@@ -78,7 +98,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testHolder() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.setAttribute("power");
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -91,7 +116,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testAddAndRemove() throws InterruptedException {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic truck = root.addInstance(vehicle, "Truck");
@@ -107,7 +137,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testLink() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.setAttribute("VehicleColor", color);
@@ -122,7 +157,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testHeritageMultiple() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic robot = root.addInstance("Robot");
 		root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -134,7 +174,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testHeritageMultipleDiamond() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic nommable = root.addInstance("Nommable");
 		Generic vehicle = root.addInstance(nommable, "Vehicle");
 		Generic robot = root.addInstance(nommable, "Robot");
@@ -147,7 +192,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testTree() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot);
+		ServerEngine root = new ServerEngine(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic tree = root.addInstance("Tree");
 		Generic rootTree = tree.addInstance("Root");
 		Generic child = tree.addInstance(rootTree, "Child");

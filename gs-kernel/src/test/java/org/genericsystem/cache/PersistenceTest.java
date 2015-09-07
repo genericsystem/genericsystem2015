@@ -33,7 +33,6 @@ public class PersistenceTest extends AbstractPersistanceTest {
 	public void testAnnotType2() {
 		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE, Vehicle.class);
 		root.getCurrentCache().flush();
-		root = null;
 		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE);
 		compareGraphWitoutTs(root, engine);
 		engine.getCurrentCache().flush();

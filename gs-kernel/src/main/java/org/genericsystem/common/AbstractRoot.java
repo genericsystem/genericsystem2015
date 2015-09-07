@@ -27,9 +27,10 @@ import org.genericsystem.kernel.Generic;
 public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy, ProxyObject {
 
 	private final Map<Long, Generic> tMap = new ConcurrentHashMap<>();
-	protected Wrapper contextWrapper = buildContextWrapper();
+	// protected Wrapper contextWrapper = buildContextWrapper();
 	private final SystemCache systemCache = new SystemCache(this);
 	protected boolean isInitialized = false;
+	private volatile Cache context;
 
 	@Override
 	public AbstractRoot getRoot() {
@@ -65,29 +66,30 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy
 		void set(Cache context);
 	}
 
-	public class ContextWrapper implements Wrapper {
+	// public class ContextWrapper implements Wrapper {
+	//
+	//
+	//
+	// @Override
+	// public Cache get() {
+	// return context;
+	// }
+	//
+	// @Override
+	// public void set(Cache context) {
+	// this.context = context;
+	//
+	// }
+	// }
 
-		private Cache context;
-
-		@Override
-		public Cache get() {
-			return context;
-		}
-
-		@Override
-		public void set(Cache context) {
-			this.context = context;
-
-		}
-	}
-
-	protected Wrapper buildContextWrapper() {
-		return new ContextWrapper();
-	}
+	//
+	// protected final Wrapper buildContextWrapper() {
+	// return new ContextWrapper();
+	// }
 
 	@Override
 	public Cache getCurrentCache() {
-		Cache context = contextWrapper.get();
+		// Cache context = contextWrapper.get();
 		if (context == null)
 			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
 		return context;
@@ -161,9 +163,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy
 	private final static ProxyFactory PROXY_FACTORY = new ProxyFactory();
 	private final static MethodFilter METHOD_FILTER = method -> method.getName().equals("toString");
 
-	@SuppressWarnings("unchecked")
 	private Generic newInstance(Class<?> clazz) {
-
 		PROXY_FACTORY.setSuperclass(clazz.isInterface() ? Object.class : clazz);
 		PROXY_FACTORY.setInterfaces(clazz.isInterface() ? getTClass().isAssignableFrom(clazz) ? new Class[] { clazz } : new Class[] { clazz, getTClass() } : getTClass().isAssignableFrom(clazz) ? new Class[] {} : new Class[] { getTClass() });
 		try {
@@ -250,18 +250,18 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy
 	};
 
 	protected Cache start(Cache context) {
-		contextWrapper.set(context);
+		this.context = context;
 		return context;
 	}
 
 	protected void stop(Cache context) {
-		assert contextWrapper.get() == context;
-		contextWrapper.set(null);
+		assert this.context == context;
+		context = null;
 	}
 
 	@Override
 	public void close() {
-		contextWrapper.set(null);
+		context = null;
 	}
 
 	@Override

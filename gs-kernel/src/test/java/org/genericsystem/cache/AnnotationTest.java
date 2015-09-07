@@ -12,6 +12,7 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 import org.genericsystem.api.core.annotations.value.IntValue;
+import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
@@ -33,7 +34,7 @@ public class AnnotationTest extends AbstractGetClassTest {
 		Generic vehicle = engine.find(Vehicle.class);
 		assert vehicle.getBirthTs() == 0L;
 		assert vehicle.isSystem();
-		catchAndCheckCause(() -> vehicle.remove(), IllegalAccessException.class);
+		catchAndCheckCause(() -> vehicle.remove(), ReferentialIntegrityConstraintViolationException.class);
 	}
 
 	public void test002_remove() {
@@ -165,10 +166,11 @@ public class AnnotationTest extends AbstractGetClassTest {
 	}
 
 	public void test007_Relation() {
-		ClientEngine engine = new ClientEngine(Vehicle.class, Human.class, HumanPossessVehicle.class);
+		ClientEngine engine = new ClientEngine(Vehicle.class, Human.class, HumanPossessCar.class);
 		engine.find(Vehicle.class);
 		Generic human = engine.find(Human.class);
-		Generic possess = engine.find(HumanPossessVehicle.class);
+		Generic possess = engine.find(HumanPossessCar.class);
+		assert possess != null;
 		assert human.getAttributes().contains(possess) : human.getAttributes().info();
 	}
 
@@ -184,13 +186,14 @@ public class AnnotationTest extends AbstractGetClassTest {
 	}
 
 	public void test009_SymetricSuperRelation() {
-		ClientEngine engine = new ClientEngine(Car.class, Human.class, Man.class, HumanPossessVehicle.class, ManPossessCar.class);
+		ClientEngine engine = new ClientEngine(Car.class, Human.class, Man.class, HumanPossessCar.class, ManPossessCar.class, HumanPossessVehicle.class);
 		engine.find(Car.class);
 		Generic human = engine.find(Human.class);
 		Generic man = engine.find(Man.class);
+		Generic humanPossessCar = engine.find(HumanPossessCar.class);
 		Generic humanPossessVehicle = engine.find(HumanPossessVehicle.class);
 		Generic manPossessCar = engine.find(ManPossessCar.class);
-		assert human.getAttributes().contains(humanPossessVehicle);
+		assert human.getAttributes().contains(humanPossessCar);
 		assert man.getAttributes().contains(manPossessCar) : man.getAttributes();
 		assert manPossessCar.inheritsFrom(humanPossessVehicle);
 	}

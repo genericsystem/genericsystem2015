@@ -14,16 +14,38 @@ public class PersistenceTest extends AbstractTest {
 
 	private final String directoryPath = System.getenv("HOME") + "/test/snapshot_save";
 
-	public void test001() {
+	public void test00() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		root.close();
 		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
 	}
 
-	public void test002() {
+	public void test001() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
 		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		// root.close();
+		try {
+			Root root2 = new Root(Statics.ENGINE_VALUE, snapshot);
+			assert false;
+		} catch (Exception e) {
+			// ignore
+		}
+	}
+
+	public void test002() {
+		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		root.addInstance("Vehicle");
 		root.close();
 		Root root2 = new Root(Statics.ENGINE_VALUE, snapshot);
@@ -57,7 +79,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test004() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.setAttribute("power");
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -68,7 +95,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test005() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		root.addInstance(vehicle, "Bike");
@@ -80,7 +112,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test006() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.setAttribute("CarColor", color);
@@ -93,7 +130,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test007() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		root.addInstance(Arrays.asList(car, robot), "Transformer");
@@ -103,7 +145,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test008() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic object = root.addInstance("Object");
 		Generic car = root.addInstance(object, "Car");
 		Generic robot = root.addInstance(object, "Robot");
@@ -114,7 +161,12 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test009() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+			@Override
+			public void close() {
+				archiver.close();
+			}
+		};
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
 		Generic electriccar = vehicle.addInstance(car, "Electriccar");

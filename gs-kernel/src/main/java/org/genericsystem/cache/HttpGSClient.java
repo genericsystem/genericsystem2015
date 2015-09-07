@@ -8,7 +8,7 @@ import io.vertx.core.http.HttpClientResponse;
 
 public class HttpGSClient extends AbstractGSClient {
 
-	private final HttpClient httpClient;
+	private HttpClient httpClient;
 	private final String path;
 
 	HttpGSClient(String host, int port, String path) {
@@ -27,6 +27,8 @@ public class HttpGSClient extends AbstractGSClient {
 	@Override
 	public void close() {
 		System.out.println("Close httpclient");
-		httpClient.close();
+		if (httpClient != null)
+			httpClient.close();
+		httpClient = null;
 	}
 }
