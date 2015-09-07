@@ -3,7 +3,7 @@ package org.genericsystem.cdi;
 import java.io.Serializable;
 
 import org.genericsystem.api.core.annotations.SystemGeneric;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test

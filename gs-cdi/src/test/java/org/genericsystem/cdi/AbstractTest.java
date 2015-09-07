@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.cdi.PersistenceTest.Count;
-import org.genericsystem.mutability.Cache;
+import org.genericsystem.common.Cache;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
