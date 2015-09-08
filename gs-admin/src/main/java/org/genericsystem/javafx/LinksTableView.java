@@ -24,7 +24,7 @@ public class LinksTableView<G> extends TableView<G> {
 		for (G component : attFunctions.genericComponents.apply(attribute)) {
 			if (i != axe) {
 				final Integer pos = i;
-				getColumns().add(new TargetComponentColumn<G>(component.toString(), (t) -> attFunctions.genericComponentGetter.apply(t, pos), (BiConsumer<G, G>) (t, u) -> {
+				getColumns().add(new TargetComponentColumn<>(component.toString(), (t) -> attFunctions.genericComponentGetter.apply(t, pos), (BiConsumer<G, G>) (t, u) -> {
 					attFunctions.genericComponentSetter.accept(t, pos, u);
 				}, () -> attFunctions.genericSubInstances.apply(component)));
 			}

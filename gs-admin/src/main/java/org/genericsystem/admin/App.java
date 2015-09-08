@@ -15,10 +15,9 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.cache.ClientEngine;
-import org.genericsystem.cache.GSDeploymentOptions;
-import org.genericsystem.cache.HttpGSServer;
 import org.genericsystem.javafx.Crud;
 import org.genericsystem.kernel.Generic;
+import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse
@@ -27,9 +26,10 @@ import org.genericsystem.kernel.Generic;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		HttpGSServer server = new HttpGSServer(new GSDeploymentOptions().addClasses(Car.class, Power.class, CarColor.class, Color.class));
-		server.start();
+		// HttpGSServer server = new HttpGSServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		// server.start();
 		launch(args);
+		// server.stop();
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		ClientEngine engine = new ClientEngine(Car.class, Power.class, CarColor.class, Color.class);
+		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE, "192.168.1.17", Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.addInstance("myBmw");
@@ -79,7 +79,6 @@ public class App extends Application {
 		stage.setScene(scene);
 		stage.show();
 	}
-
 	// public static abstract class GsList extends AbstractSet<Generic> {
 	//
 	// private final Snapshot<Generic> dependencies;

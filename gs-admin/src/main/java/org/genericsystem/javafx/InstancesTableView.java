@@ -107,11 +107,12 @@ public class InstancesTableView<G> extends TableView<G> {
 				else if (((Generic) attribute).isSingularConstraintEnabled(pos) && attributeComponents.size() == 2 && ((Generic) attribute).getInstanceValueGenerator() != null)
 					columns.add(new TargetComponentColumn<G>(attribute.toString(), (base) -> gsFunctions.genericComponentGetter.apply(baseFirstLink.apply(base), pos == 0 ? 1 : 0), (base, newTarget) -> {
 						G link = baseFirstLink.apply(base);
-						if (link != null)
+						if (link != null && (gsFunctions.genericComponentGetter.apply(baseFirstLink.apply(base), pos) == base))
 							gsFunctions.genericComponentSetter.accept(link, pos == 0 ? 1 : 0, newTarget);
 						else {
-							List<G> components = new ArrayList<G>(gsFunctions.genericComponents.apply(base));
-							components.set(pos == 0 ? 1 : 0, newTarget);
+							List<G> components = new ArrayList<G>();
+							components.add(pos == 0 ? base : newTarget);
+							components.add(pos == 0 ? newTarget : base);
 							attFunctions.addAction.apply(null, components);
 						}
 					}, () -> gsFunctions.genericSubInstances.apply(gsFunctions.genericComponentGetter.apply(attribute, pos == 0 ? 1 : 0))));
