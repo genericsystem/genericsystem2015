@@ -27,10 +27,9 @@ import org.genericsystem.kernel.Generic;
 public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy, ProxyObject {
 
 	private final Map<Long, Generic> tMap = new ConcurrentHashMap<>();
-	// protected Wrapper contextWrapper = buildContextWrapper();
 	private final SystemCache systemCache = new SystemCache(this);
 	protected boolean isInitialized = false;
-	private volatile Cache context;
+	protected volatile Cache context;
 
 	@Override
 	public AbstractRoot getRoot() {

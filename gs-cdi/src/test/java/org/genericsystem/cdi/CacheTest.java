@@ -1,8 +1,7 @@
 package org.genericsystem.cdi;
 
-import org.genericsystem.api.core.exceptions.CacheNoStartedException;
-import org.genericsystem.mutability.Cache;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.common.Cache;
+import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
 
 @Test
@@ -24,11 +23,11 @@ public class CacheTest extends AbstractTest {
 		assert engine.getInstance("Vehicle") == null;
 	}
 
-	public void test001_newCache_nostarted() {
-		Cache currentCache = engine.getCurrentCache();
-		engine.newCache().start();
-		catchAndCheckCause(() -> currentCache.flush(), CacheNoStartedException.class);
-	}
+	// public void test001_newCache_nostarted() {
+	// Cache currentCache = engine.getCurrentCache();
+	// engine.newCache().start();
+	// catchAndCheckCause(() -> currentCache.flush(), CacheNoStartedException.class);
+	// }
 
 	public void test001_mountNewCache() {
 		Cache currentCache = engine.getCurrentCache();

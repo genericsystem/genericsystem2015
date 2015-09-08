@@ -4,10 +4,10 @@ import java.util.function.Supplier;
 
 import javax.enterprise.inject.Vetoed;
 
-import org.genericsystem.mutability.Cache;
+import org.genericsystem.common.Cache;
 
 @Vetoed
-public class Engine extends org.genericsystem.mutability.Engine {
+public class Engine extends org.genericsystem.kernel.ServerEngine {
 
 	private final Supplier<Cache> cacheSupplier;
 
@@ -15,18 +15,20 @@ public class Engine extends org.genericsystem.mutability.Engine {
 		super(engineValue, persistentDirectoryPath, userClasses);
 		assert cacheSupplier != null : "Unable to find the current cache. Did you miss to call start() method on it ?";
 		this.cacheSupplier = cacheSupplier;
-		getCurrentCache().stop();
+		context = null;
 	}
 
 	@Override
 	public Cache getCurrentCache() {
-		// Cache cacheInThreadLocal = cacheLocal.get();
-		// if (cacheInThreadLocal != null)
-		// return cacheInThreadLocal;
-		Cache cache = cacheSupplier.get();
-		if (cache == null)
-			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
-		return cache;
-	}
 
+		if (!isInitialized())
+			return super.getCurrentCache();
+		else {
+			Cache cache = cacheSupplier.get();
+			if (cache == null)
+				throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
+			return cache;
+		}
+
+	}
 }

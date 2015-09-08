@@ -1,11 +1,13 @@
 package org.genericsystem.cdi;
 
 import java.io.Serializable;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
-import org.genericsystem.mutability.Cache;
+
+import org.genericsystem.common.Cache;
 
 @SessionScoped
 public class CacheSessionProvider implements Serializable {
