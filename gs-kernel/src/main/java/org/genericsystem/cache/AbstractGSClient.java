@@ -22,49 +22,53 @@ public abstract class AbstractGSClient implements Server {
 	public static final int GET_VERTEX = 2;
 	public static final int APPLY = 3;
 
-	protected Handler<Buffer> getHandler(Handler<Object> consumer) {
-		return buffer -> {
-			GSBuffer buff = new GSBuffer(buffer);
-			int methodId = buff.getInt();
-			consumer.handle(getResult(buff, methodId));
-		};
-	}
-
-	private Object getResult(GSBuffer buff, int methodId) {
-		switch (methodId) {
-		case PICK_NEW_TS: {
-			return buff.getLong();
-		}
-		case GET_DEPENDENCIES: {
-			int size = buff.getInt();
-			long[] result = new long[size];
-			for (int i = 0; i < size; i++)
-				result[i] = buff.getLong();
-			return result;
-		}
-		case GET_VERTEX: {
-			return buff.getGSVertex();
-		}
-		case APPLY: {
-			return buff.getLong();
-		}
-		default:
-			throw new IllegalStateException("no method called");
-		}
-	}
-
-	public <T> T synchronizeSend(Buffer buffer) {
+	public <T> T synchronizeSend(Buffer buffer, int methodId) {
 		try {
-			return unsafeSynchronizeSend(buffer);
+			return unsafeSynchronizeSend(buffer, methodId);
 		} catch (OptimisticLockConstraintViolationException | ConcurrencyControlException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	public <T> T unsafeSynchronizeSend(Buffer buffer) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		return synchonizeTask(objectHandler -> send(buffer, reponse -> reponse.bodyHandler(getHandler(object -> {
-			objectHandler.handle(reponse.statusCode() == 200 ? object : reponse.statusCode() == 400 ? new ConcurrencyControlException("") : new OptimisticLockConstraintViolationException(""));
-		}))));
+	public <T> T unsafeSynchronizeSend(Buffer buffer, int methodId) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		return synchonizeTask(task -> send(buffer, reponse -> {
+			if (reponse.statusCode() == 200) {
+				switch (methodId) {
+				case PICK_NEW_TS: {
+					reponse.bodyHandler(buff -> {
+						task.handle(new GSBuffer(buff).getLong());
+					});
+					break;
+				}
+				case GET_DEPENDENCIES: {
+					reponse.bodyHandler(buff -> {
+						GSBuffer gsBuffer = new GSBuffer(buff);
+						int size = gsBuffer.getInt();
+						long[] result = new long[size];
+						for (int i = 0; i < size; i++)
+							result[i] = gsBuffer.getLong();
+						task.handle(result);
+					});
+					break;
+				}
+				case GET_VERTEX: {
+					reponse.bodyHandler(buff -> {
+						task.handle(new GSBuffer(buff).getGSVertex());
+					});
+					break;
+				}
+				case APPLY: {
+					reponse.bodyHandler(buff -> {
+						task.handle(new GSBuffer(buff).getLong());
+					});
+					break;
+				}
+				default:
+					throw new IllegalStateException("no method called");
+				}
+			} else
+				task.handle(reponse.statusCode() == 400 ? new ConcurrencyControlException("") : new OptimisticLockConstraintViolationException(""));
+		}));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -100,7 +104,7 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public Vertex getVertex(long id) {
-		Vertex result = (Vertex) synchronizeSend(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id));
+		Vertex result = (Vertex) synchronizeSend(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), GET_VERTEX);
 		if (result == null)
 			throw new IllegalStateException("Vertex id: " + id);
 		return result;
@@ -108,7 +112,7 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public long[] getDependencies(long ts, long id) {
-		return (long[]) synchronizeSend(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id));
+		return (long[]) synchronizeSend(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), GET_DEPENDENCIES);
 	}
 
 	@Override
@@ -120,12 +124,12 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendGSVertexArray(adds);
 		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() == Long.MAX_VALUE)))
 			throw new IllegalStateException("");
-		unsafeSynchronizeSend(gsBuffer);
+		unsafeSynchronizeSend(gsBuffer, APPLY);
 	}
 
 	@Override
 	public long pickNewTs() {
-		return (Long) synchronizeSend(Buffer.buffer().appendInt(PICK_NEW_TS));
+		return (Long) synchronizeSend(Buffer.buffer().appendInt(PICK_NEW_TS), PICK_NEW_TS);
 	}
 
 	@Override

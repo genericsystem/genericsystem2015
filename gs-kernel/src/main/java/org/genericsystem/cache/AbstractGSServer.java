@@ -2,6 +2,7 @@ package org.genericsystem.cache;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -46,11 +48,10 @@ public abstract class AbstractGSServer {
 
 	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {
 		return buffer -> {
-			// System.out.println(Thread.currentThread());
 			GSBuffer gsBuffer = new GSBuffer(buffer);
 			int methodId = gsBuffer.getInt();
 			GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
-			replyBuffer.appendInt(methodId);
+			// replyBuffer.appendInt(methodId);
 			switch (methodId) {
 			case AbstractGSClient.PICK_NEW_TS: {
 				replyBuffer.appendLong(root.pickNewTs());

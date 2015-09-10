@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -29,7 +30,7 @@ public class App extends Application {
 	public static void main(String args[]) {
 		HttpGSServer server = new HttpGSServer(new GSDeploymentOptions().addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		launch(args);
+		// launch(args);
 	}
 
 	@Override
