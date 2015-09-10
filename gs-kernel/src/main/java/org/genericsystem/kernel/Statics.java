@@ -24,7 +24,7 @@ public class Statics {
 	public static final long GARBAGE_PERIOD = 1000L;
 	public static final long GARBAGE_INITIAL_DELAY = 1000L;
 	public static final long LIFE_TIMEOUT = 1386174608777L;// 30 minutes
-	public final static String DEFAULT_HOST = "localhost";
+	public final static String DEFAULT_HOST = "0.0.0.0";
 	public final static int DEFAULT_PORT = 8082;
 
 	public static void debugCurrentThread() {

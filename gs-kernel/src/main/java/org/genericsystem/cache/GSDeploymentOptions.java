@@ -32,6 +32,13 @@ public class GSDeploymentOptions {
 		config.setPort(port);
 	}
 
+	public GSDeploymentOptions(String engineValue, String host, int port, String persistanceRepositoryPath) {
+		this();
+		config.addEngine(engineValue, persistanceRepositoryPath);
+		config.setPort(port);
+		config.setHost(host);
+	}
+
 	public GSDeploymentOptions addEngine(String engineValue, String repositoryPath) {
 		config.addEngine(engineValue, repositoryPath);
 		return this;
