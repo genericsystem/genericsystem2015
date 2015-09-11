@@ -2,7 +2,6 @@ package org.genericsystem.cache;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientResponse;
 
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -23,23 +22,23 @@ public abstract class AbstractGSClient implements Server {
 	public static final int GET_VERTEX = 2;
 	public static final int APPLY = 3;
 
-	abstract void send(Buffer buffer, Handler<HttpClientResponse> handler);
+	abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
 
 	@Override
 	public Vertex getVertex(long id) {
-		return (Vertex) synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), reponse -> reponse.bodyHandler(buff -> task.handle(new GSBuffer(buff).getGSVertex()))));
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
 	}
 
 	@Override
 	public long[] getDependencies(long ts, long id) {
-		return (long[]) synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), reponse -> reponse.bodyHandler(buff -> {
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), buff -> {
 			GSBuffer gsBuffer = new GSBuffer(buff);
 			int size = gsBuffer.getInt();
 			long[] result = new long[size];
 			for (int i = 0; i < size; i++)
 				result[i] = gsBuffer.getLong();
 			task.handle(result);
-		})));
+		}));
 
 	}
 
@@ -52,9 +51,7 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-
-		Long receivedTs = (Long) synchonizeTask(task -> send(gsBuffer, reponse -> reponse.bodyHandler(buff -> task.handle(new GSBuffer(buff).getLong()))));
-		;
+		Long receivedTs = (Long) synchonizeTask(task -> send(gsBuffer, buff -> task.handle(new GSBuffer(buff).getLong())));
 		if (receivedTs == Statics.CONCURRENCY_CONTROL_EXCEPTION)
 			throw new ConcurrencyControlException("");
 		else if (receivedTs == Statics.OTHER_EXCEPTION)
@@ -63,13 +60,12 @@ public abstract class AbstractGSClient implements Server {
 
 	@Override
 	public long pickNewTs() {
-		return (Long) synchonizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), reponse -> reponse.bodyHandler(buff -> task.handle(new GSBuffer(buff).getLong()))));
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
-	private static Object synchonizeTask(Consumer<Handler<Object>> consumer) {
-
+	protected static <T> T synchonizeTask(Consumer<Handler<T>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
-			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(1);
+			BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(1);
 			consumer.accept(resultObject -> {
 				try {
 					blockingQueue.put(resultObject);
@@ -77,20 +73,17 @@ public abstract class AbstractGSClient implements Server {
 					e.printStackTrace();
 				}
 			});
-			Object result = null;
+			T result = null;
 			try {
 				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
 			if (result != null)
 				return result;
-
 			System.out.println("Response failure");
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
-
 	}
 
 	@Override

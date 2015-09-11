@@ -3,11 +3,12 @@ package org.genericsystem.cache;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Cache;
-import org.genericsystem.common.Generic;
 import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
@@ -21,7 +22,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	public ClientEngine(String engineValue, Class<?>... userClasses) {
-		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
+		this(engineValue, "82.240.164.123", Statics.DEFAULT_PORT, userClasses);
 	}
 
 	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
@@ -30,7 +31,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 
 	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new HttpGSClient(host, port, "/" + engineValue);
+		server = new WebSocketGSClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}

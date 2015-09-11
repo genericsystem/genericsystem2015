@@ -14,7 +14,7 @@ public abstract class AbstractTest {
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 	String ServerVerticleId;
 	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
-	private HttpGSServer httpGsServer;
+	private AbstractGSServer httpGsServer;
 
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
@@ -31,7 +31,7 @@ public abstract class AbstractTest {
 	public void beforeClass() {
 		// System.out.println("before class");
 		cleanDirectory(directoryPath);
-		httpGsServer = new HttpGSServer(getDeploymentOptions());
+		httpGsServer = new WebSocketGSServer(getDeploymentOptions());
 		httpGsServer.start();
 		// System.out.println("beforeClass ok");
 	}
