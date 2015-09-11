@@ -2,11 +2,10 @@ package org.genericsystem.servercache;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Cache;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.RequiredConstraintViolationException;
-import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.ServerEngine;
 import org.testng.annotations.Test;
 

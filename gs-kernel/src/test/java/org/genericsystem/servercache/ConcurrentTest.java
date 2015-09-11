@@ -3,7 +3,7 @@ package org.genericsystem.servercache;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Cache;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.ServerEngine;
 import org.testng.annotations.Test;
 

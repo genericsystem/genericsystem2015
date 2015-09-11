@@ -15,8 +15,8 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.cache.ClientEngine;
+import org.genericsystem.common.Generic;
 import org.genericsystem.javafx.Crud;
-import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Statics;
 
 /**

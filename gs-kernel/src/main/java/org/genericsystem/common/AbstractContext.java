@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultContext;
-import org.genericsystem.kernel.Generic;
 
 public abstract class AbstractContext implements DefaultContext<Generic> {
 

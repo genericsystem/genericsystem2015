@@ -3,7 +3,7 @@ package org.genericsystem.cache;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

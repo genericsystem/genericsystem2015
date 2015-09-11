@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Container;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 

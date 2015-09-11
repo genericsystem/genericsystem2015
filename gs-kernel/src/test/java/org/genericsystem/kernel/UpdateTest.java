@@ -2,6 +2,7 @@ package org.genericsystem.kernel;
 
 import java.util.Collections;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
 import org.testng.annotations.Test;
 

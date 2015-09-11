@@ -2,8 +2,8 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

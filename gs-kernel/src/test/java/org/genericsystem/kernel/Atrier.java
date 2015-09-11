@@ -1,6 +1,7 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultConfig.NoReferentialIntegrityProperty;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
 import org.testng.annotations.Test;

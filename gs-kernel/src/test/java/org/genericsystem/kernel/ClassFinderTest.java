@@ -1,8 +1,8 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
-
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

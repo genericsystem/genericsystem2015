@@ -6,8 +6,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
+import org.genericsystem.common.Generic;
 import org.genericsystem.javafx.AbstractColumn.TargetComponentColumn;
-import org.genericsystem.kernel.Generic;
 
 /**
  * @author Nicolas Feybesse

@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.annotations.Priority;
@@ -21,7 +20,6 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.constraints.Constraint;
-import org.genericsystem.kernel.Generic;
 
 public class Checker {
 

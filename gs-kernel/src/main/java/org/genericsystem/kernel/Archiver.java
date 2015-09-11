@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Cache;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.genericsystem.kernel.Root.RootServerHandler;
 import org.slf4j.Logger;
