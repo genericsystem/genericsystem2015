@@ -1,5 +1,6 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.kernel.Generic;
 import org.testng.annotations.Test;
@@ -23,6 +24,30 @@ public class ConcurrentTest extends AbstractClassicTest {
 		assert !cache.isAlive(car);
 		cache.shiftTs();
 		assert cache.isAlive(car);
+	}
+
+	public void testConcurrencyControlException() {
+		ClientEngine engine = new ClientEngine();
+		Cache cache = engine.getCurrentCache().start();
+		final Generic car = engine.addInstance("Car");
+		cache.flush();
+		ClientEngine engine2 = new ClientEngine();
+		Cache cache2 = engine2.newCache().start();
+		Generic car2 = engine2.getInstance("Car");
+		engine.getCurrentCache().start();
+		car.remove();
+		assert !engine.getCurrentCache().isAlive(car);
+		assert !engine.getInstances().contains(car);
+		engine2.getCurrentCache().start();
+		assert engine2.getCurrentCache().isAlive(car2);
+		assert engine2.getInstances().contains(car2);
+		engine.getCurrentCache().start();
+		try {
+			engine.getCurrentCache().tryFlush();
+			throw new IllegalStateException();
+		} catch (ConcurrencyControlException ex) {
+			// ignore
+		}
 	}
 
 	public void testNonFlushedModificationsStillAliveInCache() {

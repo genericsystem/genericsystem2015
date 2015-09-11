@@ -23,14 +23,6 @@ public abstract class AbstractGSClient implements Server {
 	public static final int APPLY = 3;
 
 	public <T> T synchronizeSend(Buffer buffer, int methodId) {
-		try {
-			return unsafeSynchronizeSend(buffer, methodId);
-		} catch (OptimisticLockConstraintViolationException | ConcurrencyControlException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	public <T> T unsafeSynchronizeSend(Buffer buffer, int methodId) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		return synchonizeTask(task -> send(buffer, reponse -> {
 			if (reponse.statusCode() == 200) {
 				switch (methodId) {
@@ -66,13 +58,12 @@ public abstract class AbstractGSClient implements Server {
 				default:
 					throw new IllegalStateException("no method called");
 				}
-			} else
-				task.handle(reponse.statusCode() == 400 ? new ConcurrencyControlException("") : new OptimisticLockConstraintViolationException(""));
+			}
 		}));
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T synchonizeTask(Handler<Handler<Object>> consumer) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+	private static <T> T synchonizeTask(Handler<Handler<Object>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(1);
 			consumer.handle(resultObject -> {
@@ -89,10 +80,6 @@ public abstract class AbstractGSClient implements Server {
 				e.printStackTrace();
 			}
 			if (result != null) {
-				if (result instanceof ConcurrencyControlException)
-					throw (ConcurrencyControlException) result;
-				else if (result instanceof OptimisticLockConstraintViolationException)
-					throw (OptimisticLockConstraintViolationException) result;
 				return (T) result;
 			}
 			System.out.println("Response failure");
@@ -124,7 +111,11 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendGSVertexArray(adds);
 		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() == Long.MAX_VALUE)))
 			throw new IllegalStateException("");
-		unsafeSynchronizeSend(gsBuffer, APPLY);
+		Long receivedTs = synchronizeSend(gsBuffer, APPLY);
+		if (receivedTs == Statics.CONCURRENCY_CONTROL_EXCEPTION)
+			throw new ConcurrencyControlException("");
+		else if (receivedTs == Statics.OTHER_EXCEPTION)
+			throw new OptimisticLockConstraintViolationException("");
 	}
 
 	@Override

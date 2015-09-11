@@ -3,7 +3,6 @@ package org.genericsystem.cache;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
-import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.kernel.Root;
 
 public class HttpGSServer extends AbstractGSServer {
@@ -47,14 +44,6 @@ public class HttpGSServer extends AbstractGSServer {
 				});
 				request.handler(getHandler(root, buffer -> {
 					request.response().end(buffer);
-					request.response().close();
-				}, exception -> {
-					int statusCode = 0;
-					if (exception instanceof ConcurrencyControlException)
-						statusCode = 400;
-					else if (exception instanceof OptimisticLockConstraintViolationException)
-						statusCode = 401;
-					request.response().setStatusCode(statusCode).end(Buffer.buffer().appendInt(AbstractGSClient.APPLY));
 					request.response().close();
 				}));
 			});
