@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -46,12 +47,11 @@ public abstract class AbstractGSServer {
 		roots = null;
 	}
 
-	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender, Consumer<Exception> exceptionSender) {
+	protected Handler<Buffer> getHandler(Root root, Consumer<Buffer> sender) {
 		return buffer -> {
 			GSBuffer gsBuffer = new GSBuffer(buffer);
 			int methodId = gsBuffer.getInt();
 			GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
-			// replyBuffer.appendInt(methodId);
 			switch (methodId) {
 			case AbstractGSClient.PICK_NEW_TS: {
 				replyBuffer.appendLong(root.pickNewTs());
@@ -71,8 +71,10 @@ public abstract class AbstractGSServer {
 					replyBuffer.appendLong(0);
 				} catch (Exception e) {
 					e.printStackTrace();
-					exceptionSender.accept(e);
-					return;
+					if (e instanceof ConcurrencyControlException)
+						replyBuffer.appendLong(Statics.CONCURRENCY_CONTROL_EXCEPTION);
+					else
+						replyBuffer.appendLong(Statics.OTHER_EXCEPTION);
 				}
 				break;
 			}
@@ -82,5 +84,4 @@ public abstract class AbstractGSServer {
 			sender.accept(replyBuffer);
 		};
 	}
-
 }
