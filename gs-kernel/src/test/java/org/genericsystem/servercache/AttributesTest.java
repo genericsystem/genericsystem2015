@@ -1,8 +1,7 @@
 package org.genericsystem.servercache;
 
 import java.util.Arrays;
-
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.ServerEngine;
 import org.testng.annotations.Test;
 

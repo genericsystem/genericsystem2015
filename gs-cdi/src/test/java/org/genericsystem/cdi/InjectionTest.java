@@ -1,6 +1,6 @@
 package org.genericsystem.cdi;
 
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

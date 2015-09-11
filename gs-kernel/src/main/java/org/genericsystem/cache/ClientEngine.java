@@ -3,13 +3,12 @@ package org.genericsystem.cache;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Cache;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 

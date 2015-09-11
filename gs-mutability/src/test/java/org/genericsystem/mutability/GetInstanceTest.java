@@ -1,8 +1,7 @@
 package org.genericsystem.mutability;
 
 import java.util.Collections;
-
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 

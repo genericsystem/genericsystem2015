@@ -1,6 +1,7 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Cache;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.IDifferential;
 

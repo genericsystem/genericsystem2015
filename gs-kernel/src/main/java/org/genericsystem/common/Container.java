@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.genericsystem.api.core.IteratorSnapshot;
-import org.genericsystem.kernel.Generic;
 
 public class Container implements IteratorSnapshot<Generic> {
 	final Map<Generic, Generic> container = new LinkedHashMap<>();

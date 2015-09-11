@@ -3,16 +3,15 @@ package org.genericsystem.cache;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.cache.ClientEngine.ClientEngineHandler;
 import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.Container;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.kernel.Generic;
 
 public class ClientTransaction extends AbstractContext implements IDifferential<Generic> {
 

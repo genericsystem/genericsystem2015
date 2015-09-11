@@ -1,9 +1,8 @@
 package org.genericsystem.servercache;
 
 import java.util.List;
-
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.ServerEngine;
 import org.testng.annotations.Test;
 

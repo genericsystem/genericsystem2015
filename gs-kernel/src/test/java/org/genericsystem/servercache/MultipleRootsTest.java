@@ -1,9 +1,8 @@
 package org.genericsystem.servercache;
 
 import java.util.Arrays;
-
 import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.ServerEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
