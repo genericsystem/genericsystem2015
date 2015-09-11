@@ -15,9 +15,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.genericsystem.admin.UiFunctions;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
+import org.genericsystem.common.Generic;
 import org.genericsystem.javafx.AbstractColumn.GenericComponentColumn;
 import org.genericsystem.javafx.AbstractColumn.TargetComponentColumn;
-import org.genericsystem.kernel.Generic;
 
 //import org.genericsystem.mutability.Generic;
 

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

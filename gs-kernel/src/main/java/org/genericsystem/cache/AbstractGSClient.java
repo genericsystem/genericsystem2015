@@ -40,6 +40,7 @@ public abstract class AbstractGSClient implements Server {
 				result[i] = gsBuffer.getLong();
 			task.handle(result);
 		})));
+
 	}
 
 	@Override
@@ -51,8 +52,9 @@ public abstract class AbstractGSClient implements Server {
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		
-		Long receivedTs = synchronizeSend(gsBuffer, APPLY);
+
+		Long receivedTs = (Long) synchonizeTask(task -> send(gsBuffer, reponse -> reponse.bodyHandler(buff -> task.handle(new GSBuffer(buff).getLong()))));
+		;
 		if (receivedTs == Statics.CONCURRENCY_CONTROL_EXCEPTION)
 			throw new ConcurrencyControlException("");
 		else if (receivedTs == Statics.OTHER_EXCEPTION)
@@ -65,6 +67,7 @@ public abstract class AbstractGSClient implements Server {
 	}
 
 	private static Object synchonizeTask(Consumer<Handler<Object>> consumer) {
+
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(1);
 			consumer.accept(resultObject -> {
@@ -80,11 +83,14 @@ public abstract class AbstractGSClient implements Server {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+
 			if (result != null)
 				return result;
+
 			System.out.println("Response failure");
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
+
 	}
 
 	@Override

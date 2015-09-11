@@ -2,6 +2,7 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

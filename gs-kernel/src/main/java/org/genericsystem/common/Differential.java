@@ -1,12 +1,10 @@
 package org.genericsystem.common;
 
 import java.util.stream.Stream;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.kernel.Generic;
 
 public class Differential implements IDifferential<Generic> {
 

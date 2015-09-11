@@ -1,10 +1,9 @@
 package org.genericsystem.cache;
 
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.common.Cache;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

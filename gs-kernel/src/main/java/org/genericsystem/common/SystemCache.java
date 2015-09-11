@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -31,7 +30,6 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.Root;
 
 public class SystemCache {

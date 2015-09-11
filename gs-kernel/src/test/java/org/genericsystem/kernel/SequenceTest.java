@@ -3,6 +3,7 @@ package org.genericsystem.kernel;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.IntSequenceGenerator;
 import org.genericsystem.defaults.IntSequenceGenerator.StringSequenceGenerator;
 import org.testng.annotations.Test;

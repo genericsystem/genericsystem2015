@@ -3,10 +3,10 @@ package org.genericsystem.kernel;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.IVertex.Visitor;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.ExistsException;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

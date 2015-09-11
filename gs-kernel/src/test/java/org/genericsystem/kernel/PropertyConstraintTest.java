@@ -1,7 +1,7 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
-
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
 import org.testng.annotations.Test;
 

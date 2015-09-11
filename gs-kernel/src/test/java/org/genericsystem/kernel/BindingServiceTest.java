@@ -1,10 +1,10 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.api.core.exceptions.NotFoundException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
 import org.testng.annotations.Test;
 

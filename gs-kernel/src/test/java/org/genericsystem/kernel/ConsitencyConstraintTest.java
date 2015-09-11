@@ -1,6 +1,7 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;

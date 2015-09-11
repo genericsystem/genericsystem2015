@@ -11,9 +11,9 @@ import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.common.Generic;
 import org.genericsystem.javafx.AbstractColumn;
 import org.genericsystem.javafx.LinksTableView.TriConsumer;
-import org.genericsystem.kernel.Generic;
 
 public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions<G>> {
 	public Function<G, Serializable> genericGetter;

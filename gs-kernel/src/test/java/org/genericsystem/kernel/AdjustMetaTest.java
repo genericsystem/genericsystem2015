@@ -2,9 +2,9 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ExistsException;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

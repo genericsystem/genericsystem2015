@@ -1,9 +1,8 @@
 package org.genericsystem.cdi;
 
 import java.io.Serializable;
-
 import org.genericsystem.api.core.annotations.SystemGeneric;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
 @Test

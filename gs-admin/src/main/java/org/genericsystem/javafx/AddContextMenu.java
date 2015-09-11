@@ -21,7 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
 import org.genericsystem.admin.UiFunctions;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
-import org.genericsystem.kernel.Generic;
+import org.genericsystem.common.Generic;
 
 /**
  * @author Nicolas Feybesse

@@ -1,7 +1,7 @@
 package org.genericsystem.servercache;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.kernel.Generic;
 import org.genericsystem.kernel.ServerEngine;
 import org.testng.annotations.Test;
 

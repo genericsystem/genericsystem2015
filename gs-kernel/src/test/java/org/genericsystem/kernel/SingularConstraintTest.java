@@ -2,8 +2,8 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
 import org.testng.annotations.Test;
 
