@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -13,13 +12,13 @@ import org.genericsystem.common.AbstractContext;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
-import org.genericsystem.kernel.Root.RootServerHandler;
+import org.genericsystem.kernel.AbstractRoot.RootServerHandler;
 
 public class Transaction extends AbstractContext implements IDifferential<Generic> {
 
 	private final long ts;
 
-	public Transaction(Root root, long ts) {
+	public Transaction(AbstractRoot root, long ts) {
 		super(root);
 		this.ts = ts;
 	}

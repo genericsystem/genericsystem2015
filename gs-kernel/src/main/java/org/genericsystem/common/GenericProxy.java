@@ -7,7 +7,7 @@ import org.genericsystem.defaults.DefaultVertex;
 
 public interface GenericProxy extends DefaultVertex<Generic> {
 	@Override
-	default AbstractRoot getRoot() {
+	default AbstractEngine getRoot() {
 		return getProxyHandler().getRoot();
 	}
 
@@ -16,8 +16,8 @@ public interface GenericProxy extends DefaultVertex<Generic> {
 		return (Cache) DefaultVertex.super.getCurrentCache();
 	}
 
-	default AbstractRoot.DefaultHandler getProxyHandler() {
-		return ((AbstractRoot.DefaultHandler) ((ProxyObject) this).getHandler());
+	default AbstractEngine.DefaultHandler getProxyHandler() {
+		return ((AbstractEngine.DefaultHandler) ((ProxyObject) this).getHandler());
 	}
 
 	@Override

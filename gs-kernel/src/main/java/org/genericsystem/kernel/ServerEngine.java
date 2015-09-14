@@ -1,11 +1,16 @@
 package org.genericsystem.kernel;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
+import org.genericsystem.common.Protocole.ServerCacheProtocole;
+import org.genericsystem.common.Vertex;
 
-public class ServerEngine extends Root {
+public class ServerEngine extends AbstractRoot implements ServerCacheProtocole {
 
 	public ServerEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -41,6 +46,86 @@ public class ServerEngine extends Root {
 				return new Transaction((Root) getRoot());
 			}
 		};
+	}
+
+	@Override
+	public Vertex[] getDependencies(long id) {
+		Generic ancestor = this.getGenericById(id);
+		return ancestor != null ? getCurrentCache().getDependencies(ancestor).stream().map(generic -> generic.getVertex()).toArray(Vertex[]::new) : Statics.EMPTY;
+	}
+
+	@Override
+	public Vertex addInstance(long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return getCurrentCache().addInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+				components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex();
+	}
+
+	@Override
+	public Vertex update(long update, List<Long> overrides, Serializable value, List<Long> components) {
+		return getCurrentCache().update(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+				components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex();
+	}
+
+	@Override
+	public long merge(long update, List<Long> overrides, Serializable value, List<Long> components) {
+		return getCurrentCache().merge(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+				components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs();
+	}
+
+	@Override
+	public long setInstance(long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return getCurrentCache().setInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+				components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs();
+	}
+
+	@Override
+	public long remove(long generic) {
+		try {
+			getCurrentCache().remove(getRoot().getGenericById(generic));
+			return generic;
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
+	}
+
+	@Override
+	public long forceRemove(long generic) {
+		try {
+			getCurrentCache().forceRemove(getRoot().getGenericById(generic));
+			return generic;
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
+	}
+
+	@Override
+	public long conserveRemove(long generic) {
+		try {
+			getCurrentCache().conserveRemove(getRoot().getGenericById(generic));
+			return generic;
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
+	}
+
+	@Override
+	public long flush() {
+		try {
+			getCurrentCache().flush();
+			return getCurrentCache().getTs();
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
+	}
+
+	@Override
+	public long tryFlush() {
+		try {
+			getCurrentCache().tryFlush();
+			return getCurrentCache().getTs();
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
 	}
 
 }

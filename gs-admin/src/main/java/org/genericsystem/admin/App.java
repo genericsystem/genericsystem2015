@@ -14,8 +14,8 @@ import org.genericsystem.admin.model.Color;
 import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
-import org.genericsystem.cache.ClientEngine;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.HeavyClientEngine;
 import org.genericsystem.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 
@@ -38,7 +38,7 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE, "192.168.1.17", Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
+		HeavyClientEngine engine = new HeavyClientEngine(Statics.ENGINE_VALUE, "192.168.1.17", Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.addInstance("myBmw");

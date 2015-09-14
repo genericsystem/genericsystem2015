@@ -31,7 +31,7 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 
 	protected abstract IDifferential<Generic> buildTransaction();
 
-	protected Cache(AbstractRoot root) {
+	protected Cache(AbstractEngine root) {
 		this(root, new ContextEventListener<Generic>() {
 		});
 	}
@@ -40,7 +40,7 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 		return transaction;
 	}
 
-	protected Cache(AbstractRoot root, ContextEventListener<Generic> listener) {
+	protected Cache(AbstractEngine root, ContextEventListener<Generic> listener) {
 		super(root);
 		this.restructurator = buildRestructurator();
 		this.listener = listener;

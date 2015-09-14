@@ -3,7 +3,7 @@ package org.genericsystem.kernel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +24,15 @@ public class Statics {
 
 	public static final long CONCURRENCY_CONTROL_EXCEPTION = -1;
 	public static final long OTHER_EXCEPTION = -2;
+	public static final long ROLLBACK_EXCEPTION = -1;
 
 	public static final long GARBAGE_PERIOD = 1000L;
 	public static final long GARBAGE_INITIAL_DELAY = 1000L;
 	public static final long LIFE_TIMEOUT = 1386174608777L;// 30 minutes
 	public final static String DEFAULT_HOST = "0.0.0.0";
 	public final static int DEFAULT_PORT = 8082;
+
+	public final static Vertex[] EMPTY = new Vertex[] {};
 
 	public static void debugCurrentThread() {
 		threadDebugged.set(System.currentTimeMillis());

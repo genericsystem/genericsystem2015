@@ -38,10 +38,10 @@ public class SystemCache {
 
 	private final Map<Generic, Class<?>> reverseSystemCache = new IdentityHashMap<>();
 
-	protected final AbstractRoot root;
+	protected final AbstractEngine root;
 
 	@SuppressWarnings("unchecked")
-	public SystemCache(AbstractRoot root) {
+	public SystemCache(AbstractEngine root) {
 		this.root = root;
 		put(DefaultRoot.class, (Generic) root);
 		put(Root.class, (Generic) root);

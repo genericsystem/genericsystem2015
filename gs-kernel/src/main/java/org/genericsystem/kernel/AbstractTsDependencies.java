@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.genericsystem.common.AbstractGeneralAwareIterator;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root.RootServerHandler;
+import org.genericsystem.kernel.AbstractRoot.RootServerHandler;
 
 abstract class AbstractTsDependencies {
 

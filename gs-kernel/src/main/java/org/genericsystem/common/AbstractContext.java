@@ -5,10 +5,10 @@ import org.genericsystem.defaults.DefaultContext;
 
 public abstract class AbstractContext implements DefaultContext<Generic> {
 
-	private final AbstractRoot root;
+	private final AbstractEngine root;
 	private final Checker checker;
 
-	protected AbstractContext(AbstractRoot root) {
+	protected AbstractContext(AbstractEngine root) {
 		assert root != null;
 		this.root = root;
 		this.checker = buildChecker();
@@ -25,7 +25,7 @@ public abstract class AbstractContext implements DefaultContext<Generic> {
 	}
 
 	@Override
-	public AbstractRoot getRoot() {
+	public AbstractEngine getRoot() {
 		return root;
 	}
 

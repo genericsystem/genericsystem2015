@@ -33,7 +33,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
-import org.genericsystem.kernel.Root.RootServerHandler;
+import org.genericsystem.kernel.AbstractRoot.RootServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class Archiver {
 
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-	protected final Root root;
+	protected final AbstractRoot root;
 	private final File directory;
 	private FileLock lockFile;
 
@@ -70,7 +70,7 @@ public class Archiver {
 		return GS_EXTENSION + ZIP_EXTENSION;
 	}
 
-	public Archiver(Root root, String directoryPath) {
+	public Archiver(AbstractRoot root, String directoryPath) {
 		this.root = root;
 		directory = prepareAndLockDirectory(directoryPath);
 		if (directory != null) {
@@ -277,8 +277,7 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {
-			}
+			} catch (EOFException ignore) {}
 		}
 
 		protected long loadTs() throws IOException {
