@@ -7,15 +7,15 @@ import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Cache;
+import org.genericsystem.common.ClientCacheProtocole;
 import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
 public class ClientEngine extends AbstractRoot implements Generic {
 
-	protected final Server server;
+	protected final ClientCacheProtocole server;
 
 	public ClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
@@ -128,7 +128,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 		return Generic.class;
 	}
 
-	public Server getServer() {
+	public ClientCacheProtocole getServer() {
 		return server;
 	}
 

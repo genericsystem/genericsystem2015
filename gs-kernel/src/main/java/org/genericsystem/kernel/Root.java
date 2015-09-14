@@ -12,12 +12,13 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Cache;
+import org.genericsystem.common.ClientCacheProtocole;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 
-public class Root extends AbstractRoot implements Generic, Server {
+public class Root extends AbstractRoot implements Generic, ClientCacheProtocole {
 
 	protected final Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);

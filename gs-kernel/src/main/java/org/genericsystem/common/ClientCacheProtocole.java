@@ -1,10 +1,9 @@
-package org.genericsystem.kernel;
+package org.genericsystem.common;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Vertex;
 
-public interface Server {
+public interface ClientCacheProtocole {
 
 	final static Vertex[] EMPTY = new Vertex[] {};
 

@@ -11,11 +11,11 @@ import java.util.function.Consumer;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.ClientCacheProtocole;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.kernel.Server;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractGSClient implements Server {
+public abstract class AbstractGSClient implements ClientCacheProtocole {
 
 	public static final int PICK_NEW_TS = 0;
 	public static final int GET_DEPENDENCIES = 1;
