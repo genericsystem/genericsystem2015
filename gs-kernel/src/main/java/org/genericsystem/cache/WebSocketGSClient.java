@@ -8,8 +8,8 @@ import io.vertx.core.http.WebSocket;
 
 public class WebSocketGSClient extends AbstractGSClient {
 
-	private HttpClient httpClient;
-	private WebSocket webSocket;
+	private final HttpClient httpClient;
+	private final WebSocket webSocket;
 
 	WebSocketGSClient(String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
@@ -28,13 +28,15 @@ public class WebSocketGSClient extends AbstractGSClient {
 
 	@Override
 	public void close() {
-		System.out.println("Close socket");
-		if (webSocket != null)
+		try {
 			webSocket.close();
-		webSocket = null;
-		System.out.println("Close httpclient");
-		if (httpClient != null)
+			System.out.println("Close socket");
+		} catch (Exception ignore) {
+		}
+		try {
 			httpClient.close();
-		httpClient = null;
+			System.out.println("Close httpClient");
+		} catch (Exception ignore) {
+		}
 	}
 }

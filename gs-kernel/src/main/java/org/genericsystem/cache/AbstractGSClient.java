@@ -30,14 +30,9 @@ public abstract class AbstractGSClient implements Server {
 	}
 
 	@Override
-	public long[] getDependencies(long ts, long id) {
+	public Vertex[] getDependencies(long ts, long id) {
 		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), buff -> {
-			GSBuffer gsBuffer = new GSBuffer(buff);
-			int size = gsBuffer.getInt();
-			long[] result = new long[size];
-			for (int i = 0; i < size; i++)
-				result[i] = gsBuffer.getLong();
-			task.handle(result);
+			task.handle(new GSBuffer(buff).getGSVertexArray());
 		}));
 
 	}
@@ -79,8 +74,15 @@ public abstract class AbstractGSClient implements Server {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if (result != null)
+			if (result != null) {
+				// try {
+				// Thread.sleep(50);
+				// } catch (InterruptedException e) {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// }
 				return result;
+			}
 			System.out.println("Response failure");
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");

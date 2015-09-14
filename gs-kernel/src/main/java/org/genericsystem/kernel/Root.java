@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractRoot;
@@ -158,22 +160,23 @@ public class Root extends AbstractRoot implements Generic, Server {
 	}
 
 	@Override
-	public long[] getDependencies(long ts, long id) {
+	public Vertex[] getDependencies(long ts, long id) {
 		Generic ancestor = this.getGenericById(id);
-		return ancestor != null ? ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(ts).mapToLong(generic -> generic.getTs()).toArray() : EMPTY;
+		return ancestor != null ? ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(ts).map(generic -> generic.getVertex()).toArray(Vertex[]::new) : EMPTY;
 	}
 
 	@Override
 	public void apply(long ts, long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		// System.out.println("APPLY RECEIVED FOR TS : " + ts);
-		Arrays.stream(removeIds).forEach(removeId -> System.out.println("Remove : " + removeId));
-		Arrays.stream(addVertices).forEach(addVertex -> System.out.println("Add : " + addVertex.getTs()));
-		new Transaction(this, ts).apply(new Container(Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId))), new Container(Arrays.stream(addVertices).map(addVertex -> {
-			// System.out.println("Commit " + addVertex.getTs() + " " + addVertex.getValue());
-				assert getRoot().getGenericById(addVertex.getTs()) == null : "" + addVertex.getTs() + addVertex.getValue() + " " + getGenericById(addVertex.getTs()).info();
-				assert addVertex.getBirthTs() == Long.MAX_VALUE;
-				return getRoot().build(addVertex);
-			})));
+		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
+		assert Arrays.stream(addVertices).allMatch(addVertex -> addVertex.getBirthTs() == Long.MAX_VALUE);
+		Snapshot<Generic> removes = new Container(Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)));
+		Snapshot<Generic> adds = new Container(Arrays.stream(addVertices).map(addVertex -> getRoot().build(addVertex)));
+		try {
+			new Transaction(this, ts).apply(removes, adds);
+		} catch (ConcurrencyControlException | OptimisticLockConstraintViolationException e) {
+			adds.forEach(add -> getRoot().release(add.getTs()));
+			throw e;
+		}
 	}
 
 	private static class TsGenerator {

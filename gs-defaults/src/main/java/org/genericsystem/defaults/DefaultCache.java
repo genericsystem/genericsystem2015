@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface DefaultCache<T extends DefaultVertex<T>> extends DefaultContext<T> {
+
 	T addInstance(T meta, List<T> overrides, Serializable value, List<T> components);
 
 	T update(T update, List<T> overrides, Serializable newValue, List<T> newComponents);

@@ -3,6 +3,7 @@ package org.genericsystem.cache;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -70,7 +71,7 @@ public class ClientTransaction extends AbstractContext implements IDifferential<
 	public Snapshot<Generic> getDependencies(Generic generic) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(getTs(), generic.getTs())).mapToObj(ts -> getRoot().getGenericById(ts)));
+			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(getTs(), generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}

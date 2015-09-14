@@ -50,7 +50,7 @@ public abstract class AbstractGSServer {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());
 		case AbstractGSClient.GET_DEPENDENCIES:
-			return replyBuffer.appendGSLongArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
+			return replyBuffer.appendGSVertexArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 		case AbstractGSClient.GET_VERTEX:
 			return replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
 		case AbstractGSClient.APPLY:

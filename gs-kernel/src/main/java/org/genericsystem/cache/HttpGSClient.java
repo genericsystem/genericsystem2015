@@ -7,7 +7,7 @@ import io.vertx.core.http.HttpClientOptions;
 
 public class HttpGSClient extends AbstractGSClient {
 
-	private HttpClient httpClient;
+	private final HttpClient httpClient;
 	private final String path;
 
 	HttpGSClient(String host, int port, String path) {
@@ -25,9 +25,10 @@ public class HttpGSClient extends AbstractGSClient {
 
 	@Override
 	public void close() {
-		System.out.println("Close httpclient");
-		if (httpClient != null)
+		try {
 			httpClient.close();
-		httpClient = null;
+			System.out.println("Close socket");
+		} catch (Exception ignore) {
+		}
 	}
 }

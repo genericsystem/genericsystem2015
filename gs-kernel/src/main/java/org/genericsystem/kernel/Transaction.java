@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -157,23 +158,4 @@ public class Transaction extends AbstractContext implements IDifferential<Generi
 			lockedLifeManagers = new HashSet<>();
 		}
 	}
-
-	// public Snapshot<Long> getRemoteDependencies(long ts) {
-	// org.genericsystem.kernel.Generic serverGeneric = getRoot().getGenericById(ts);
-	// // What to do if serverGeneric not alive ???
-	// if (serverGeneric != null)
-	// return () -> getDependencies(serverGeneric).stream().map(serverDependency -> serverDependency.getTs());
-	// else
-	// return () -> Stream.empty();
-	// }
-	//
-	// public void remoteApply(long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-	// // Arrays.stream(removeIds).mapToObj(removeId ->
-	// // getRoot().getGenericById(removeId)).allMatch(g -> true);
-	// // assert Arrays.stream(addVertices).map(add ->
-	// // add.getTs()).distinct().count() == addVertices.length;
-	// // assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
-	// Arrays.stream(addVertices).forEach(addVertex -> getRoot().build(addVertex));
-	// apply(() -> Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)), () -> Arrays.stream(addVertices).map(addVertex -> getRoot().getGenericById(addVertex.getTs())));
-	// }
 }

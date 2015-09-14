@@ -22,7 +22,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	public ClientEngine(String engineValue, Class<?>... userClasses) {
-		this(engineValue, "82.240.164.123", Statics.DEFAULT_PORT, userClasses);
+		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
 	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
@@ -60,10 +60,10 @@ public class ClientEngine extends AbstractRoot implements Generic {
 		};
 	}
 
-	@Override
-	public Cache getCurrentCache() {
-		return super.getCurrentCache();
-	}
+	// @Override
+	// public Cache getCurrentCache() {
+	// return super.getCurrentCache();
+	// }
 
 	// public static class LocalContextWrapper implements Wrapper {
 	// private ThreadLocal<Cache> local = new InheritableThreadLocal<>();
@@ -87,6 +87,14 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	// return new LocalContextWrapper();
 	// }
 
+	public Generic getGenericByVertex(Vertex vertex) {
+		Generic generic = super.getGenericById(vertex.getTs());
+		if (generic == null) {
+			generic = build(vertex);
+		}
+		return generic;
+	}
+
 	@Override
 	public Generic getGenericById(long ts) {
 		Generic generic = super.getGenericById(ts);
@@ -104,7 +112,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 
 	@Override
 	protected void finalize() throws Throwable {
-		System.out.println("FINALIZE CLIENT ENGINE !!!!!!!!");
+		// System.out.println("FINALIZE CLIENT ENGINE !!!!!!!!");
 		server.close();
 		super.finalize();
 	}
@@ -157,4 +165,5 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	public long pickNewTs() {
 		return server.pickNewTs();
 	}
+
 }
