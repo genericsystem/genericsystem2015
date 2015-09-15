@@ -3,13 +3,11 @@ package org.genericsystem.distributed;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.genericsystem.kernel.Root;
 
-public class HttpGSServer extends AbstractGSServer {
+public class HttpGSServer extends AbstractLightGSServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;

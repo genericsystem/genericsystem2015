@@ -2,14 +2,14 @@ package org.genericsystem.servercache;
 
 import java.util.Arrays;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class HolderTest extends AbstractTest {
 
 	public void testHolder1Attribut() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -32,7 +32,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolder1AttributWith2LevelsInheritance1AttributOnParent() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -57,7 +57,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue1AttributWith2LevelsInheritance1AttributOnParent() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -88,7 +88,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithSameValue1AttributWith2LevelsInheritance1AttributOnParent() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -119,7 +119,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolder1AttributWith2LevelsInheritance1AttributOnFirstChild() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -140,7 +140,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolder1AttributWith2LevelsInheritance2children1AttributOnParent() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		Generic bike = engine.addInstance(Arrays.asList(vehicle), "bike");
@@ -169,7 +169,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue1AttributWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -209,7 +209,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue1AttributWith3LevelsInheritance1AttributOnParentOverrideOnSecondChild() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -250,7 +250,7 @@ public class HolderTest extends AbstractTest {
 
 	public void test2ChainedAttributs() {
 
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power);
@@ -289,7 +289,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue2ChainedAttributWith2LevelsInheritance2AttributsOnParent() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power);
@@ -340,7 +340,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue2ChainedAttributsWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power1 = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power1);

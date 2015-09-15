@@ -7,14 +7,14 @@ import java.util.List;
 import javassist.util.proxy.MethodHandler;
 
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.genericsystem.kernel.Statics;
 
 public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 
 	protected final InheritableThreadLocal<Cache> cacheLocal = new InheritableThreadLocal<>();
 
-	private final ServerEngine cacheEngine;
+	private final HeavyServerEngine cacheEngine;
 
 	public Engine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
@@ -25,7 +25,7 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 	}
 
 	public Engine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		this.cacheEngine = new ServerEngine(engineValue, persistentDirectoryPath, userClasses);
+		this.cacheEngine = new HeavyServerEngine(engineValue, persistentDirectoryPath, userClasses);
 		newCache().start();
 	}
 
@@ -88,7 +88,7 @@ public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {
 		return currentCache;
 	}
 
-	public org.genericsystem.kernel.ServerEngine getConcurrencyEngine() {
+	public org.genericsystem.kernel.HeavyServerEngine getConcurrencyEngine() {
 		return cacheEngine;
 	}
 

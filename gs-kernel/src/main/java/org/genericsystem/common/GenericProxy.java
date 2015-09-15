@@ -11,10 +11,10 @@ public interface GenericProxy extends DefaultVertex<Generic> {
 		return getProxyHandler().getRoot();
 	}
 
-	@Override
-	default Cache getCurrentCache() {
-		return (Cache) DefaultVertex.super.getCurrentCache();
-	}
+	// @Override
+	// default DefaultCache<Generic> getCurrentCache() {
+	// return DefaultVertex.super.getCurrentCache();
+	// }
 
 	default AbstractEngine.DefaultHandler getProxyHandler() {
 		return ((AbstractEngine.DefaultHandler) ((ProxyObject) this).getHandler());

@@ -2,14 +2,14 @@ package org.genericsystem.servercache;
 
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class UpdateTest extends AbstractTest {
 
 	public void test001_updateValue() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		assert "Car".equals(car.getValue());
 		Generic carRename = car.update("CarRename");
@@ -18,7 +18,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test002_updateValue() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		assert "Car".equals(car.getValue());
 		Generic carRename = car.updateValue("CarRename");
@@ -27,7 +27,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test002_updateMeta() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -46,7 +46,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test004_updateHolder() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -65,7 +65,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test005_updateSuper() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -88,7 +88,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test006_attributeToRelation() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -108,7 +108,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test007_structurel_WithInheritings_AndInstances() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = car.addAttribute("Power");

@@ -30,6 +30,7 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
+import org.genericsystem.kernel.AbstractRoot;
 import org.genericsystem.kernel.Root;
 
 public class SystemCache {
@@ -67,8 +68,16 @@ public class SystemCache {
 		}
 		Generic meta = setMeta(clazz);
 		List<Generic> overrides = setOverrides(clazz);
+		Serializable value = findValue(clazz);
 		List<Generic> components = setComponents(clazz);
-		systemProperty = new SetSystemBuilder(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
+		AbstractCache cache = ((AbstractRoot) root).getCurrentCache();
+		if(cache instanceof Cache) 
+			systemProperty =  new SetSystemBuilder((Cache) cache, clazz, meta, overrides, value, components).resolve();
+		else {
+			systemProperty =  cache.get(meta, overrides, value, components);
+			if(systemProperty==null)
+				throw new IllegalStateException("Unable to find class on server : " + clazz.getName());
+		}
 		put(clazz, systemProperty);
 		mountConstraints(clazz, systemProperty);
 		triggersDependencies(clazz);

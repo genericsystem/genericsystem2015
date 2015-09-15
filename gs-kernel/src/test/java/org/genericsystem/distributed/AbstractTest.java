@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.WebSocketGSServer;
+import org.genericsystem.distributed.WebSocketGSLightServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -33,7 +33,7 @@ public abstract class AbstractTest {
 	public void beforeClass() {
 		// System.out.println("before class");
 		cleanDirectory(directoryPath);
-		httpGsServer = new WebSocketGSServer(getDeploymentOptions());
+		httpGsServer = new WebSocketGSLightServer(getDeploymentOptions());
 		httpGsServer.start();
 		// System.out.println("beforeClass ok");
 	}

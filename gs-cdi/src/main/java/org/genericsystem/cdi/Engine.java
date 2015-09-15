@@ -7,7 +7,7 @@ import javax.enterprise.inject.Vetoed;
 import org.genericsystem.common.Cache;
 
 @Vetoed
-public class Engine extends org.genericsystem.kernel.ServerEngine {
+public class Engine extends org.genericsystem.kernel.HeavyServerEngine {
 
 	private final Supplier<Cache> cacheSupplier;
 

@@ -6,14 +6,14 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.RequiredConstraintViolationException;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RequiredConstraintTest extends AbstractTest {
 
 	public void test00_Inheritance() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = engine.addAttribute("Power");
 
@@ -23,7 +23,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test01_Inheritance() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = engine.addAttribute("Power", engine);
 		Generic unit = engine.addInstance("Unit");
@@ -36,7 +36,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test000_Inheritance() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 
@@ -49,7 +49,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test001_Inheritance() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic unit = engine.addInstance("Unit");
 		Generic power = car.addAttribute("Power", unit);
@@ -65,7 +65,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test001_enableRequired() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
@@ -80,7 +80,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test002_removeAttribute() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
@@ -96,7 +96,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test003_removeAttribute_inherintings() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");

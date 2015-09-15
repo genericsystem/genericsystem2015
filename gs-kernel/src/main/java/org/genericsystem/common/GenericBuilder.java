@@ -3,7 +3,6 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.kernel.Root;
@@ -29,6 +28,7 @@ public abstract class GenericBuilder {
 		adjust();
 	}
 
+	// TODO remove this
 	Serializable generateValue(Serializable value) {
 		Class<? extends ValueGenerator> instanceValueGenerator = meta.getInstanceValueGenerator();
 		if (instanceValueGenerator != null) {
@@ -54,7 +54,6 @@ public abstract class GenericBuilder {
 		if (!isMeta() && adjustedMeta.getComponents().size() != components.size())
 			adjustedMeta = context.setMeta(components.size());
 		supers = context.computeAndCheckOverridesAreReached(adjustedMeta, overrides, value, components);
-
 	}
 
 	Generic get() {
@@ -89,30 +88,6 @@ public abstract class GenericBuilder {
 		assert update != null;
 		return context.getRestructurator().rebuildAll(update, () -> getOrBuild(), context.computeDependencies(update));
 	}
-
-	// static class GetHandler extends GenericHandler {
-	//
-	// GetHandler(Context context, Generic gettable) {
-	// super(context, gettable.getMeta(), gettable.getSupers(), gettable.getValue(), gettable.getComponents());
-	// this.gettable = gettable;
-	// this.adjustedMeta = gettable.getMeta();
-	// this.supers = gettable.getSupers();
-	// }
-	//
-	// GetHandler(Context context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
-	// super(context, meta, overrides, value, components);
-	// }
-	//
-	// Generic resolve() {
-	// return get();
-	// }
-	//
-	// @Override
-	// Serializable generateValue(Serializable value) {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-	// }
 
 	public static class AddBuilder extends GenericBuilder {
 

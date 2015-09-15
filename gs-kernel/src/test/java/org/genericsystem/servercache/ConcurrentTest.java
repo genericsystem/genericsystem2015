@@ -4,14 +4,14 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class ConcurrentTest extends AbstractTest {
 
 	public void test() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Cache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -29,7 +29,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testNonFlushedModificationsStillAliveInCache() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Cache cache = engine.getCurrentCache();
 
@@ -38,7 +38,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testFlushedModificationsAvailableInNewCacheOk() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -53,7 +53,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testNonFlushedModificationsAreNotAvailableInNewCacheOk() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 
@@ -84,7 +84,7 @@ public class ConcurrentTest extends AbstractTest {
 	// }
 	//
 	public void testConcurentRemoveKO() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.newCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -111,7 +111,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testConcurrencyControlException() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.newCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();

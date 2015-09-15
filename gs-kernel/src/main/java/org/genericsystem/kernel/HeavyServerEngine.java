@@ -10,22 +10,22 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 
-public class ServerEngine extends AbstractRoot implements ServerCacheProtocole {
+public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtocole {
 
-	public ServerEngine(Class<?>... userClasses) {
+	public HeavyServerEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public ServerEngine(String engineValue, Class<?>... userClasses) {
+	public HeavyServerEngine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, userClasses);
 	}
 
-	public ServerEngine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
+	public HeavyServerEngine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(engineValue, persistentDirectoryPath, userClasses);
 	}
 
 	@Override
-	public ServerEngine getRoot() {
+	public HeavyServerEngine getRoot() {
 		return this;
 	}
 
@@ -37,6 +37,11 @@ public class ServerEngine extends AbstractRoot implements ServerCacheProtocole {
 				return new Transaction((Root) getRoot());
 			}
 		};
+	}
+
+	@Override
+	public Cache getCurrentCache() {
+		return (Cache) super.getCurrentCache();
 	}
 
 	public Cache newCache(ContextEventListener<Generic> listener) {

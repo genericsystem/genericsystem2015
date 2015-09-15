@@ -14,6 +14,7 @@ import javassist.util.proxy.ProxyObject;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
+import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.MetaRelation;
 import org.genericsystem.defaults.DefaultConfig.Sequence;
@@ -26,7 +27,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 	private final Map<Long, Generic> tMap = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = new SystemCache(this);
 	protected boolean isInitialized = false;
-	protected volatile Cache context;
+	protected volatile AbstractCache context;
 
 	@Override
 	public AbstractEngine getRoot() {
@@ -53,7 +54,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 	}
 
 	@Override
-	public abstract Cache newCache();
+	public abstract AbstractCache newCache();
 
 	public static interface Wrapper {
 
@@ -84,7 +85,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 	// }
 
 	@Override
-	public Cache getCurrentCache() {
+	public AbstractCache getCurrentCache() {
 		// Cache context = contextWrapper.get();
 		if (context == null)
 			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
@@ -249,12 +250,12 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 
 	};
 
-	protected Cache start(Cache context) {
+	protected AbstractCache start(AbstractCache context) {
 		this.context = context;
 		return context;
 	}
 
-	protected void stop(Cache context) {
+	protected void stop(DefaultCache<Generic> context) {
 		assert this.context == context;
 		context = null;
 	}

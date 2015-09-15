@@ -1,8 +1,6 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.genericsystem.api.core.Snapshot;
@@ -10,15 +8,11 @@ import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.common.GenericBuilder.AddBuilder;
-import org.genericsystem.common.GenericBuilder.MergeBuilder;
-import org.genericsystem.common.GenericBuilder.SetBuilder;
-import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.distributed.LightClientEngine;
 import org.genericsystem.kernel.Statics;
 
-public abstract class LightCache extends AbstractContext implements DefaultCache<Generic> {
+public abstract class LightCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private IDifferential<Generic> transaction;
 	protected Differential differential;
@@ -65,6 +59,7 @@ public abstract class LightCache extends AbstractContext implements DefaultCache
 		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
 	}
 
+	@Override
 	public void tryFlush() throws ConcurrencyControlException {
 		if (!equals(getRoot().getCurrentCache()))
 			discardWithException(new CacheNoStartedException("The Cache isn't started"));
@@ -78,6 +73,7 @@ public abstract class LightCache extends AbstractContext implements DefaultCache
 		}
 	}
 
+	@Override
 	public void flush() {
 		// System.out.println("FLUSH");
 		Throwable cause = null;
@@ -142,9 +138,9 @@ public abstract class LightCache extends AbstractContext implements DefaultCache
 			listener.triggersMutationEvent(oldDependency, newDependency);
 	}
 
-	Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
-		return plug(getRoot().build(null, clazz, meta, supers, value, components));
-	}
+	// Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
+	// return plug(getRoot().build(null, clazz, meta, supers, value, components));
+	// }
 
 	protected Generic plug(Generic generic) {
 		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info() + generic.getBirthTs();
@@ -170,11 +166,6 @@ public abstract class LightCache extends AbstractContext implements DefaultCache
 
 	public int getCacheLevel() {
 		return differential.getCacheLevel();
-	}
-
-	public Generic setMeta(int dim) {
-		getRoot().getServer().setInstance(meta, overrides, value, components).
-		//return new SetBuilder(this, null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim))).resolve();
 	}
 
 	@Override
@@ -206,26 +197,20 @@ public abstract class LightCache extends AbstractContext implements DefaultCache
 
 	@Override
 	public void forceRemove(Generic generic) {
-		getRestructurator().rebuildAll(null, null, computeDependencies(generic));
+		getRoot().getServer().forceRemove(generic.getTs());
+		// getRestructurator().rebuildAll(null, null, computeDependencies(generic));
 	}
 
 	@Override
 	public void remove(Generic generic) {
-		getRestructurator().rebuildAll(null, null, computeRemoveDependencies(generic));
+		getRoot().getServer().remove(generic.getTs());
+		// getRestructurator().rebuildAll(null, null, computeRemoveDependencies(generic));
 	}
 
 	@Override
 	public void conserveRemove(Generic generic) {
-		getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
-	}
-
-	@SuppressWarnings("unchecked")
-	public final <U extends LightCache> U start() {
-		return (U) getRoot().start(this);
-	}
-
-	public final void stop() {
-		getRoot().stop(this);
+		getRoot().getServer().conserveRemove(generic.getTs());
+		// getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
 	}
 
 	private class TransactionDifferential implements IDifferential<Generic> {

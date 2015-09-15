@@ -1,10 +1,7 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -17,7 +14,7 @@ import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.kernel.Statics;
 
-public abstract class Cache extends AbstractContext implements DefaultCache<Generic> {
+public abstract class Cache extends AbstractCache implements DefaultCache<Generic> {
 
 	private final Restructurator restructurator;
 	private IDifferential<Generic> transaction;
@@ -32,8 +29,7 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected Cache(AbstractEngine root) {
-		this(root, new ContextEventListener<Generic>() {
-		});
+		this(root, new ContextEventListener<Generic>() {});
 	}
 
 	public IDifferential<Generic> getTransaction() {
@@ -74,6 +70,7 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
 	}
 
+	@Override
 	public void tryFlush() throws ConcurrencyControlException {
 		if (!equals(getRoot().getCurrentCache()))
 			discardWithException(new CacheNoStartedException("The Cache isn't started"));
@@ -87,6 +84,7 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 		}
 	}
 
+	@Override
 	public void flush() {
 		// System.out.println("FLUSH");
 		Throwable cause = null;
@@ -181,10 +179,6 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 		return differential.getCacheLevel();
 	}
 
-	public Generic setMeta(int dim) {
-		return new SetBuilder(this, null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim))).resolve();
-	}
-
 	@Override
 	public Generic setInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		return new SetBuilder(this, meta, overrides, value, components).resolve();
@@ -220,15 +214,6 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 		getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
 	}
 
-	@SuppressWarnings("unchecked")
-	public final <U extends Cache> U start() {
-		return (U) getRoot().start(this);
-	}
-
-	public final void stop() {
-		getRoot().stop(this);
-	}
-
 	private class TransactionDifferential implements IDifferential<Generic> {
 
 		@Override
@@ -249,17 +234,13 @@ public abstract class Cache extends AbstractContext implements DefaultCache<Gene
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

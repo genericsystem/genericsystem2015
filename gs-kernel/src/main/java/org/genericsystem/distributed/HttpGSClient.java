@@ -5,7 +5,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 
-public class HttpGSClient extends AbstractGSClient {
+public class HttpGSClient extends AbstractGSHeavyClient {
 
 	private final HttpClient httpClient;
 	private final String path;

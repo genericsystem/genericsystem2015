@@ -2,7 +2,7 @@ package org.genericsystem.servercache;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
@@ -50,7 +50,7 @@ public class WeakEquivTest extends AbstractTest {
 	// }
 
 	public void test004_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_supers() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);
@@ -64,7 +64,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test005_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_setInstance() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);

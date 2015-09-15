@@ -4,14 +4,14 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveOneCacheTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -29,7 +29,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -49,7 +49,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -70,7 +70,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_multipleHolders() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -91,7 +91,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -111,7 +111,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -131,7 +131,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeAndAddAndRemove() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -151,7 +151,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -168,7 +168,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");

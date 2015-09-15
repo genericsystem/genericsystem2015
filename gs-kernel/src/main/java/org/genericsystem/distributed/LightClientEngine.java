@@ -8,7 +8,7 @@ import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Protocole.ClientCacheProtocole;
+import org.genericsystem.common.LightCache;
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
@@ -31,7 +31,7 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 
 	public LightClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new WebSocketGSClient(host, port, "/" + engineValue);
+		server = new WebSocketGSLightClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
@@ -42,11 +42,11 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 	}
 
 	@Override
-	public Cache newCache() {
-		return new Cache(this) {
+	public LightCache newCache() {
+		return new LightCache(this) {
 			@Override
 			protected ClientTransaction buildTransaction() {
-				return new ClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
+				return new ClientTransaction(getRoot(), getRoot().pickNewTs());
 			}
 		};
 	}

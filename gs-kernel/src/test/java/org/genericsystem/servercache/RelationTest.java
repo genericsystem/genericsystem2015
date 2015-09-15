@@ -3,14 +3,14 @@ package org.genericsystem.servercache;
 import java.util.List;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RelationTest extends AbstractTest {
 
 	public void test001_addInstance_NotAliveException() {
-		final ServerEngine cache = new ServerEngine();
+		final HeavyServerEngine cache = new HeavyServerEngine();
 		Generic car = cache.addInstance("Car");
 		Generic color = cache.addInstance("Color");
 		final Generic carColor = cache.addInstance("CarColor", car, color);
@@ -22,7 +22,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test001_addInstance_NotAliveException_withMetaRelation() {
-		final ServerEngine ServerEngine = new ServerEngine();
+		final HeavyServerEngine ServerEngine = new HeavyServerEngine();
 		Generic metaRelation = ServerEngine.setInstance(ServerEngine.getValue(), ServerEngine, ServerEngine);
 		Generic car = ServerEngine.addInstance("Car");
 		Generic color = ServerEngine.addInstance("Color");
@@ -36,7 +36,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_2composites() {
-		final ServerEngine cache = new ServerEngine();
+		final HeavyServerEngine cache = new HeavyServerEngine();
 		Generic car = cache.addInstance("Car");
 		Generic color = cache.addInstance("Color");
 		final Generic carColor = cache.addInstance("CarColor", car, color);
@@ -47,7 +47,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_2composites_MetaRelation() {
-		final ServerEngine ServerEngine = new ServerEngine();
+		final HeavyServerEngine ServerEngine = new HeavyServerEngine();
 		Generic metaRelation = ServerEngine.setInstance(ServerEngine.getValue(), ServerEngine, ServerEngine);
 		Generic car = ServerEngine.addInstance("Car");
 		Generic color = ServerEngine.addInstance("Color");
@@ -60,7 +60,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_reflexiveRelation() {
-		final ServerEngine ServerEngine = new ServerEngine();
+		final HeavyServerEngine ServerEngine = new HeavyServerEngine();
 		Generic vehicle = ServerEngine.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
 		Generic caravane = vehicle.addInstance("Caravane");
@@ -73,7 +73,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_reflexiveRelation_MetaRelation() {
-		final ServerEngine ServerEngine = new ServerEngine();
+		final HeavyServerEngine ServerEngine = new HeavyServerEngine();
 		Generic metaRelation = ServerEngine.setInstance(ServerEngine.getValue(), ServerEngine, ServerEngine);
 		Generic vehicle = ServerEngine.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
@@ -88,7 +88,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test004_addInheritsRelation() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -104,7 +104,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test005_addInheritsRelations_OnSameStructural() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -117,7 +117,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test006_inherits_different_than_instance() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -136,7 +136,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test007_addInstance_ofSubRelation() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -156,7 +156,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test008() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -175,7 +175,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test009() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -199,7 +199,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test010() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);

@@ -2,8 +2,6 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,8 +10,6 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
-
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
@@ -42,28 +38,6 @@ public abstract class AbstractGSServer {
 				System.out.println("Starts engine : " + "/" + entry.getKey());
 			}
 		return roots.toArray(new Root[roots.size()]);
-	}
-
-	Buffer getReplyBuffer(int methodId, Root root, GSBuffer gsBuffer) {
-		GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
-		switch (methodId) {
-		case AbstractGSClient.PICK_NEW_TS:
-			return replyBuffer.appendLong(root.pickNewTs());
-		case AbstractGSClient.GET_DEPENDENCIES:
-			return replyBuffer.appendGSVertexArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
-		case AbstractGSClient.GET_VERTEX:
-			return replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
-		case AbstractGSClient.APPLY:
-			try {
-				root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
-				return replyBuffer.appendLong(0);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return replyBuffer.appendLong(e instanceof ConcurrencyControlException ? Statics.CONCURRENCY_CONTROL_EXCEPTION : Statics.OTHER_EXCEPTION);
-			}
-		default:
-			throw new IllegalStateException("unable to find method:" + methodId + " ");
-		}
 	}
 
 	public void stop() {

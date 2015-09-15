@@ -30,7 +30,7 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 
 	public HeavyClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new WebSocketGSClient(host, port, "/" + engineValue);
+		server = new WebSocketGSHeavyClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
@@ -57,6 +57,11 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 				return new ClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
 			}
 		};
+	}
+
+	@Override
+	public Cache getCurrentCache() {
+		return (Cache) super.getCurrentCache();
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {

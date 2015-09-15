@@ -1,5 +1,7 @@
 package org.genericsystem.common;
 
+import java.io.Serializable;
+import java.util.List;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultContext;
 
@@ -29,10 +31,17 @@ public abstract class AbstractContext implements DefaultContext<Generic> {
 		return root;
 	}
 
-	protected void triggersMutation(Generic oldDependency, Generic newDependency) {
-	}
+	protected void triggersMutation(Generic oldDependency, Generic newDependency) {}
 
 	@Override
 	public abstract Snapshot<Generic> getDependencies(Generic ancestor);
 
+	public Generic get(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		meta = meta != null ? meta : (Generic) getRoot();
+		meta = meta.adjustMeta(components);
+		if (meta.getComponents().size() != components.size())
+			return null;
+		overrides = computeAndCheckOverridesAreReached(meta, overrides, value, components);
+		return meta.getDirectInstance(overrides, value, components);
+	}
 }

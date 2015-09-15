@@ -2,7 +2,7 @@ package org.genericsystem.servercache;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
@@ -10,7 +10,7 @@ public class BindingServiceTest extends AbstractTest {
 
 	public void test001_addInstance() {
 		// given
-		Generic engine = new ServerEngine();
+		Generic engine = new HeavyServerEngine();
 
 		// when
 		Generic vehicle = engine.addInstance("Vehicle");
@@ -22,7 +22,7 @@ public class BindingServiceTest extends AbstractTest {
 
 	public void test002_addSameValueKO() {
 		// given
-		Generic engine = new ServerEngine();
+		Generic engine = new HeavyServerEngine();
 		engine.addInstance("Vehicle");
 
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);

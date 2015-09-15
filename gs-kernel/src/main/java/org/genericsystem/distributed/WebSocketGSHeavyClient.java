@@ -6,12 +6,12 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
 
-public class WebSocketGSClient extends AbstractGSClient {
+public class WebSocketGSHeavyClient extends AbstractGSHeavyClient {
 
 	private final HttpClient httpClient;
 	private final WebSocket webSocket;
 
-	WebSocketGSClient(String host, int port, String path) {
+	WebSocketGSHeavyClient(String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
 		webSocket = synchonizeTask(task -> httpClient.websocket(path, task));
 		webSocket.exceptionHandler(e -> {
@@ -20,6 +20,7 @@ public class WebSocketGSClient extends AbstractGSClient {
 		});
 	}
 
+	// TODO synchronize this method ?
 	@Override
 	<T> void send(Buffer buffer, Handler<Buffer> responseHandler) {
 		webSocket.handler(responseHandler);
@@ -31,12 +32,10 @@ public class WebSocketGSClient extends AbstractGSClient {
 		try {
 			webSocket.close();
 			System.out.println("Close socket");
-		} catch (Exception ignore) {
-		}
+		} catch (Exception ignore) {}
 		try {
 			httpClient.close();
 			System.out.println("Close httpClient");
-		} catch (Exception ignore) {
-		}
+		} catch (Exception ignore) {}
 	}
 }

@@ -18,4 +18,6 @@ public interface DefaultCache<T extends DefaultVertex<T>> extends DefaultContext
 	void remove(T generic);
 
 	void conserveRemove(T generic);
+
+	void flush();
 }

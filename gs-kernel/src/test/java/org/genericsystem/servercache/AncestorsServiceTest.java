@@ -2,14 +2,14 @@ package org.genericsystem.servercache;
 
 import java.util.Arrays;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class AncestorsServiceTest extends AbstractTest {
 
 	public void isAncestorOfByInheritence() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic device = engine.addInstance("Device");
@@ -62,7 +62,7 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void isAncestorOfByInheritenceSimpleConfiguration() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic microcar = engine.addInstance(car, "Microcar");
@@ -78,7 +78,7 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void isAncestorOfViaComposite() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -103,7 +103,7 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void isAncestorOfViaComponent() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");

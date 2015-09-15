@@ -6,14 +6,14 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Cache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -26,7 +26,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test003_aliveEx() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Cache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -40,7 +40,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test001_referenceEx() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -51,7 +51,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Cache cache = engine.getCurrentCache();
 		Cache cache2 = engine.newCache().start();
 		Cache cache3 = engine.newCache().start();
@@ -69,7 +69,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Cache cache1 = engine.getCurrentCache();
@@ -82,7 +82,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_() {
-		ServerEngine engine = new ServerEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Cache cache = engine.getCurrentCache();

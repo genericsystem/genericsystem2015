@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.kernel.ServerEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.genericsystem.servercache.FileSystem.Directory;
 import org.genericsystem.servercache.FileSystem.File;
 import org.genericsystem.servercache.FileSystem.FileType;
@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class FileSystemTest extends AbstractTest {
 
 	public void testUpdateRootDirectory() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		assert rootDirectory.isAlive();
@@ -27,7 +27,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateRootDirectoryWithFile() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		rootDirectory.addFile("file");
@@ -38,7 +38,7 @@ public class FileSystemTest extends AbstractTest {
 
 	//
 	public void testUpdateDirectory() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory = rootDirectory.addDirectory("directory");
@@ -48,7 +48,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateDirectoryWithFile() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory = rootDirectory.addDirectory("directory");
@@ -59,7 +59,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateFile() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		File file = rootDirectory.addFile("file");
@@ -69,7 +69,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testDirectoryNameNotUniqueInDifferentDirectories() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory1 = rootDirectory.addDirectory("directory1");
@@ -86,7 +86,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testFileNameNotUniqueInDifferentDirectories() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
@@ -98,7 +98,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testFileNameValueClassViolation() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem directoryTree = engine.find(FileSystem.class);
 		final Directory rootDirectory = directoryTree.addRootDirectory("rootDirectory");
 		final FileType fileSystem = engine.find(FileType.class);
@@ -108,7 +108,7 @@ public class FileSystemTest extends AbstractTest {
 
 	// Modifier par rapport au test d'origine
 	public void testGetRootDirectories() {
-		ServerEngine engine = new ServerEngine(FileSystem.class);
+		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		// System.out.println("fileSystem " + fileSystem.info());
 		Directory root = fileSystem.addRootDirectory("root");
