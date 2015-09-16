@@ -6,11 +6,18 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.genericsystem.common.Protocole;
+import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractGSClient {
+public abstract class AbstractGSClient implements Protocole {
 
 	abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
+
+	@Override
+	public Vertex getVertex(long id) {
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+	}
 
 	protected static <T> T synchonizeTask(Consumer<Handler<T>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
@@ -42,5 +49,6 @@ public abstract class AbstractGSClient {
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
 	}
 
+	@Override
 	public abstract void close();
 }

@@ -9,17 +9,15 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.kernel.Statics;
 
-public abstract class LightCache extends AbstractCache implements DefaultCache<Generic> {
+public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private LightClientTransaction transaction;
-	protected TransactionDifferential differential;
 
 	public void shiftTs() throws RollbackException {
-		transaction = buildTransaction();
+		getRoot().getServer().shiftTs();
 	}
-
-	protected abstract LightClientTransaction buildTransaction();
 
 	public LightClientTransaction getTransaction() {
 		return transaction;
@@ -27,8 +25,7 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 
 	protected LightCache(LightClientEngine root) {
 		super(root);
-		this.transaction = buildTransaction();
-		initialize();
+		this.transaction = new LightClientTransaction(root);
 	}
 
 	@Override
@@ -43,40 +40,42 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic vertex) {
-		return differential.getDependencies(vertex);
-	}
-
-	protected void initialize() {
-		differential = new TransactionDifferential();
+		return transaction.getDependencies(vertex);
 	}
 
 	@Override
 	public void tryFlush() throws ConcurrencyControlException {
 		long result = getRoot().getServer().tryFlush();
-		if(result==-2)
-			rollback
+		if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result)
+			throw new ConcurrencyControlException("");
+		if (Statics.OTHER_EXCEPTION == result)
+			discardWithException(new IllegalStateException("Other exception"));
+		assert result == getTs();
 	}
 
 	@Override
 	public void flush() {
 		long result = getRoot().getServer().flush();
-		if(result==-2)
-			rollback
+		if (Statics.OTHER_EXCEPTION == result)
+			discardWithException(new IllegalStateException("Other exception"));
+		if (result != getTs()) {
+			assert result > getTs();
+			transaction = new LightClientTransaction(getRoot(), result);
+		}
 	}
 
 	public void clear() {
 		getRoot().getServer().clear();
-		initialize();
+		transaction.initializeDependencies();
 	}
 
 	public void mount() {
 		getRoot().getServer().mount();
-		cleanDependencies();
 	}
 
 	public void unmount() {
 		getRoot().getServer().unmount();
-		cleanDependencies();
+		transaction.initializeDependencies();
 	}
 
 	@Override
@@ -94,56 +93,46 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 	public Generic setInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		return getRoot().getGenericById(
 				getRoot().getServer().setInstance(meta.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
+		transaction.initializeDependencies();
+
 	}
 
 	@Override
 	public Generic addInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		return getRoot().getGenericByVertex(
 				getRoot().getServer().addInstance(meta.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
-
+		transaction.initializeDependencies();
 	}
 
 	@Override
 	public Generic update(Generic update, List<Generic> overrides, Serializable value, List<Generic> components) {
 		return getRoot().getGenericByVertex(
 				getRoot().getServer().update(update.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
-
+		transaction.initializeDependencies();
 	}
 
 	@Override
 	public Generic merge(Generic update, List<Generic> overrides, Serializable value, List<Generic> components) {
 		return getRoot().getGenericById(
 				getRoot().getServer().merge(update.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
-
+		transaction.initializeDependencies();
 	}
 
 	@Override
 	public void forceRemove(Generic generic) {
 		getRoot().getServer().forceRemove(generic.getTs());
-		// getRestructurator().rebuildAll(null, null, computeDependencies(generic));
+		transaction.initializeDependencies();
 	}
 
 	@Override
 	public void remove(Generic generic) {
 		getRoot().getServer().remove(generic.getTs());
-		// getRestructurator().rebuildAll(null, null, computeRemoveDependencies(generic));
+		transaction.initializeDependencies();
 	}
 
 	@Override
 	public void conserveRemove(Generic generic) {
 		getRoot().getServer().conserveRemove(generic.getTs());
-		// getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
+		transaction.initializeDependencies();
 	}
-
-	private class TransactionDifferential {
-
-		public Snapshot<Generic> getDependencies(Generic vertex) {
-			return transaction.getDependencies(vertex);
-		}
-
-		public long getTs() {
-			return transaction.getTs();
-		}
-	}
-
 }

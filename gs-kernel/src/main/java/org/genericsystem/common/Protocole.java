@@ -6,6 +6,9 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 
 public interface Protocole {
+	public static final int PICK_NEW_TS = 0;
+	public static final int GET_DEPENDENCIES = 1;
+	public static final int GET_VERTEX = 2;
 
 	long pickNewTs();
 
@@ -16,6 +19,7 @@ public interface Protocole {
 	void close();
 
 	public static interface ClientCacheProtocole extends Protocole {
+		public static final int APPLY = 3;
 
 		void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
@@ -48,6 +52,8 @@ public interface Protocole {
 		void unmount();
 
 		int getCacheLevel();
+
+		void shiftTs();
 
 	}
 

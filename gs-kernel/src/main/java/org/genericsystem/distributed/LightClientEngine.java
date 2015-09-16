@@ -3,7 +3,6 @@ package org.genericsystem.distributed;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Cache;
@@ -43,12 +42,7 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 
 	@Override
 	public LightCache newCache() {
-		return new LightCache(this) {
-			@Override
-			protected LightClientTransaction buildTransaction() {
-				return new LightClientTransaction(getRoot(), getRoot().pickNewTs());
-			}
-		};
+		return new LightCache(this);
 	}
 
 	public Cache newCache(ContextEventListener<Generic> listener) {

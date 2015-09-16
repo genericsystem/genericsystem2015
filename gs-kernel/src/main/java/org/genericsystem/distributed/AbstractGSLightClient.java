@@ -17,6 +17,12 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	@Override
+	public void shiftTs() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public Vertex getVertex(long id) {
 		// TODO Auto-generated method stub
 		return null;
@@ -102,12 +108,6 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public void unmount() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	<T> void send(Buffer buffer, Handler<Buffer> reponseHandler) {
 		// TODO Auto-generated method stub
 
 	}

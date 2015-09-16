@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import java.util.Arrays;
 import java.util.Collections;
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
@@ -10,8 +9,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected AbstractCache(AbstractEngine root) {
 		super(root);
 	}
-
-	public abstract void tryFlush() throws ConcurrencyControlException;
 
 	public Generic setMeta(int dim) {
 		return setInstance(null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim)));
