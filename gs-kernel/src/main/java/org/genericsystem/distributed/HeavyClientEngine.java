@@ -3,6 +3,7 @@ package org.genericsystem.distributed;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Cache;
@@ -80,11 +81,6 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 			generic = build(vertex);
 		}
 		return generic;
-	}
-
-	@Override
-	public final Generic[] newTArray(int dim) {
-		return new Generic[dim];
 	}
 
 	@Override
