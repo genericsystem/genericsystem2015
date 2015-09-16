@@ -5,7 +5,7 @@ import java.util.Collections;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.defaults.DefaultCache;
 
-public abstract class AbstractCache extends AbstractContext implements DefaultCache<Generic> {
+public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
 
 	protected AbstractCache(AbstractEngine root) {
 		super(root);

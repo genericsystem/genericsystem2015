@@ -23,13 +23,13 @@ import org.genericsystem.defaults.constraints.Constraint;
 
 public class Checker {
 
-	private final AbstractContext context;
+	private final CheckedContext context;
 
-	public Checker(AbstractContext context) {
+	public Checker(CheckedContext context) {
 		this.context = context;
 	}
 
-	public AbstractContext getContext() {
+	public CheckedContext getContext() {
 		return context;
 	}
 

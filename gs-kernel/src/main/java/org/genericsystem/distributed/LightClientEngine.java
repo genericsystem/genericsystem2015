@@ -8,7 +8,6 @@ import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.LightCache;
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
@@ -45,8 +44,8 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 	public LightCache newCache() {
 		return new LightCache(this) {
 			@Override
-			protected ClientTransaction buildTransaction() {
-				return new ClientTransaction(getRoot(), getRoot().pickNewTs());
+			protected LightClientTransaction buildTransaction() {
+				return new LightClientTransaction(getRoot(), getRoot().pickNewTs());
 			}
 		};
 	}
@@ -54,8 +53,8 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 	public Cache newCache(ContextEventListener<Generic> listener) {
 		return new Cache(this, listener) {
 			@Override
-			protected ClientTransaction buildTransaction() {
-				return new ClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
+			protected HeavyClientTransaction buildTransaction() {
+				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
 			}
 		};
 	}
@@ -76,11 +75,6 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 			generic = build(vertex);
 		}
 		return generic;
-	}
-
-	@Override
-	public final Generic[] newTArray(int dim) {
-		return new Generic[dim];
 	}
 
 	@Override

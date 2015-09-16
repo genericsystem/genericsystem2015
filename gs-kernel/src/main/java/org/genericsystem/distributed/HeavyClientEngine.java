@@ -44,8 +44,8 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 	public Cache newCache() {
 		return new Cache(this) {
 			@Override
-			protected ClientTransaction buildTransaction() {
-				return new ClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
+			protected HeavyClientTransaction buildTransaction() {
+				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
 			}
 		};
 	}
@@ -53,8 +53,8 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 	public Cache newCache(ContextEventListener<Generic> listener) {
 		return new Cache(this, listener) {
 			@Override
-			protected ClientTransaction buildTransaction() {
-				return new ClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
+			protected HeavyClientTransaction buildTransaction() {
+				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
 			}
 		};
 	}
@@ -80,11 +80,6 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 			generic = build(vertex);
 		}
 		return generic;
-	}
-
-	@Override
-	public final Generic[] newTArray(int dim) {
-		return new Generic[dim];
 	}
 
 	@Override

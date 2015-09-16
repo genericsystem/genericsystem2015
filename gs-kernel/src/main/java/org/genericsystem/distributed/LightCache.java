@@ -1,4 +1,4 @@
-package org.genericsystem.common;
+package org.genericsystem.distributed;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,36 +8,32 @@ import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.Differential;
+import org.genericsystem.common.Generic;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.distributed.LightClientEngine;
 import org.genericsystem.kernel.Statics;
 
 public abstract class LightCache extends AbstractCache implements DefaultCache<Generic> {
 
-	private IDifferential<Generic> transaction;
+	private LightClientTransaction transaction;
 	protected Differential differential;
-	private final ContextEventListener<Generic> listener;
 
 	public void shiftTs() throws RollbackException {
 		transaction = buildTransaction();
-		listener.triggersRefreshEvent();
 	}
 
-	protected abstract IDifferential<Generic> buildTransaction();
+	protected abstract LightClientTransaction buildTransaction();
 
 	protected LightCache(LightClientEngine root) {
-		this(root, new ContextEventListener<Generic>() {});
-	}
-
-	public IDifferential<Generic> getTransaction() {
-		return transaction;
-	}
-
-	protected LightCache(LightClientEngine root, ContextEventListener<Generic> listener) {
 		super(root);
-		this.listener = listener;
 		this.transaction = buildTransaction();
 		initialize();
+	}
+
+	public LightClientTransaction getTransaction() {
+		return transaction;
 	}
 
 	@Override
@@ -67,7 +63,6 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 			checkConstraints();
 			doSynchronizedApplyInSubContext();
 			initialize();
-			listener.triggersFlushEvent();
 		} catch (OptimisticLockConstraintViolationException exception) {
 			discardWithException(exception);
 		}

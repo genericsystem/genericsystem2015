@@ -9,21 +9,19 @@ public interface Protocole {
 
 	long pickNewTs();
 
+	Vertex[] getDependencies(long ts, long id);
+
 	Vertex getVertex(long id);
 
 	void close();
 
 	public static interface ClientCacheProtocole extends Protocole {
 
-		Vertex[] getDependencies(long ts, long id);
-
 		void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
 	}
 
 	public static interface ServerCacheProtocole extends Protocole {
-
-		Vertex[] getDependencies(long id);
 
 		Vertex addInstance(long meta, List<Long> overrides, Serializable value, List<Long> components);
 

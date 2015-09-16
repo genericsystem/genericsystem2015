@@ -9,6 +9,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long pickNewTs() {
+		KK
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -26,7 +27,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	@Override
-	public Vertex[] getDependencies(long id) {
+	public Vertex[] getDependencies(long ts, long id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -6,23 +6,23 @@ import java.util.Map;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.AbstractContext;
+import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.HeavyClientEngine.ClientEngineHandler;
 
-public class ClientTransaction extends AbstractContext implements IDifferential<Generic> {
+public class HeavyClientTransaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
 
-	protected ClientTransaction(HeavyClientEngine engine, long ts) {
+	protected HeavyClientTransaction(HeavyClientEngine engine, long ts) {
 		super(engine);
 		this.ts = ts;
 	}
 
-	protected ClientTransaction(HeavyClientEngine engine) {
+	protected HeavyClientTransaction(HeavyClientEngine engine) {
 		this(engine, engine.pickNewTs());
 	}
 

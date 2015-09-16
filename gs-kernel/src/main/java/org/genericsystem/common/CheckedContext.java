@@ -5,12 +5,12 @@ import java.util.List;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultContext;
 
-public abstract class AbstractContext implements DefaultContext<Generic> {
+public abstract class CheckedContext implements DefaultContext<Generic> {
 
 	private final AbstractEngine root;
 	private final Checker checker;
 
-	protected AbstractContext(AbstractEngine root) {
+	protected CheckedContext(AbstractEngine root) {
 		assert root != null;
 		this.root = root;
 		this.checker = buildChecker();
