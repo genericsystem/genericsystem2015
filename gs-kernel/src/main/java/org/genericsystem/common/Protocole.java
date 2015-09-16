@@ -41,6 +41,14 @@ public interface Protocole {
 
 		long tryFlush();
 
+		void clear();
+
+		void mount();
+
+		void unmount();
+
+		int getCacheLevel();
+
 	}
 
 }

@@ -54,7 +54,8 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	}
 
 	@Override
-	public Vertex[] getDependencies(long id) {
+	public Vertex[] getDependencies(long ts, long id) {
+		KK
 		Generic ancestor = this.getGenericById(id);
 		return ancestor != null ? getCurrentCache().getDependencies(ancestor).stream().map(generic -> generic.getVertex()).toArray(Vertex[]::new) : Statics.EMPTY;
 	}

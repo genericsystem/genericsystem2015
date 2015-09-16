@@ -1,5 +1,7 @@
 package org.genericsystem.distributed;
 
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import java.io.Serializable;
 import java.util.List;
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
@@ -82,6 +84,36 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long tryFlush() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mount() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void unmount() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	<T> void send(Buffer buffer, Handler<Buffer> reponseHandler) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int getCacheLevel() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

@@ -71,11 +71,6 @@ public abstract class AbstractRoot extends AbstractEngine implements Generic, Pr
 		garbageCollector.stopsScheduler();
 	}
 
-	@Override
-	public final Generic[] newTArray(int dim) {
-		return new Generic[dim];
-	}
-
 	GarbageCollector getGarbageCollector() {
 		return garbageCollector;
 	}
@@ -137,7 +132,8 @@ public abstract class AbstractRoot extends AbstractEngine implements Generic, Pr
 			return lifeManager.getBirthTs();
 		}
 	}
-	
+
+	@Override
 	public long pickNewTs() {
 		return generator.pickNewTs();
 	}

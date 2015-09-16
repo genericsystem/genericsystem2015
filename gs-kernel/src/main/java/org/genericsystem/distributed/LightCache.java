@@ -4,21 +4,16 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
-import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
-import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.IDifferential;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.kernel.Statics;
 
 public abstract class LightCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private LightClientTransaction transaction;
-	protected Differential differential;
+	protected TransactionDifferential differential;
 
 	public void shiftTs() throws RollbackException {
 		transaction = buildTransaction();
@@ -26,14 +21,14 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 
 	protected abstract LightClientTransaction buildTransaction();
 
+	public LightClientTransaction getTransaction() {
+		return transaction;
+	}
+
 	protected LightCache(LightClientEngine root) {
 		super(root);
 		this.transaction = buildTransaction();
 		initialize();
-	}
-
-	public LightClientTransaction getTransaction() {
-		return transaction;
 	}
 
 	@Override
@@ -52,105 +47,36 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 	}
 
 	protected void initialize() {
-		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
+		differential = new TransactionDifferential();
 	}
 
 	@Override
 	public void tryFlush() throws ConcurrencyControlException {
-		if (!equals(getRoot().getCurrentCache()))
-			discardWithException(new CacheNoStartedException("The Cache isn't started"));
-		try {
-			checkConstraints();
-			doSynchronizedApplyInSubContext();
-			initialize();
-		} catch (OptimisticLockConstraintViolationException exception) {
-			discardWithException(exception);
-		}
+		long result = getRoot().getServer().tryFlush();
+		if(result==-2)
+			rollback
 	}
 
 	@Override
 	public void flush() {
-		// System.out.println("FLUSH");
-		Throwable cause = null;
-		for (int attempt = 0; attempt < Statics.ATTEMPTS; attempt++) {
-			try {
-				// System.out.println("TRYFLUSH");
-				// TODO reactivate this
-				// if (getEngine().pickNewTs() - getTs() >= timeOut)
-				// throw new ConcurrencyControlException("The timestamp cache (" + getTs() + ") is bigger than the life time out : " + Statics.LIFE_TIMEOUT);
-				tryFlush();
-				return;
-			} catch (ConcurrencyControlException e) {
-				cause = e;
-				try {
-					Thread.sleep(Statics.ATTEMPT_SLEEP);
-					shiftTs();
-				} catch (InterruptedException ex) {
-					discardWithException(ex);
-				}
-			}
-		}
-		discardWithException(cause);
-	}
-
-	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		Differential originalCacheElement = this.differential;
-		if (this.differential.getSubCache() instanceof Differential)
-			this.differential = (Differential) this.differential.getSubCache();
-		try {
-			synchronizedApply(originalCacheElement);
-		} finally {
-			this.differential = originalCacheElement;
-		}
-	}
-
-	private void synchronizedApply(Differential cacheElement) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		synchronized (getRoot()) {
-			cacheElement.apply();
-		}
+		long result = getRoot().getServer().flush();
+		if(result==-2)
+			rollback
 	}
 
 	public void clear() {
+		getRoot().getServer().clear();
 		initialize();
-		listener.triggersClearEvent();
-		listener.triggersRefreshEvent();
 	}
 
 	public void mount() {
-		differential = new Differential(differential);
+		getRoot().getServer().mount();
+		cleanDependencies();
 	}
 
 	public void unmount() {
-		IDifferential<Generic> subCache = differential.getSubCache();
-		differential = subCache instanceof Differential ? (Differential) subCache : new Differential(subCache);
-		listener.triggersClearEvent();
-		listener.triggersRefreshEvent();
-	}
-
-	@Override
-	protected void triggersMutation(Generic oldDependency, Generic newDependency) {
-		if (listener != null)
-			listener.triggersMutationEvent(oldDependency, newDependency);
-	}
-
-	// Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
-	// return plug(getRoot().build(null, clazz, meta, supers, value, components));
-	// }
-
-	protected Generic plug(Generic generic) {
-		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info() + generic.getBirthTs();
-		differential.plug(generic);
-		getChecker().checkAfterBuild(true, false, generic);
-		return generic;
-	}
-
-	protected void unplug(Generic generic) {
-		getChecker().checkAfterBuild(false, false, generic);
-		differential.unplug(generic);
-	}
-
-	protected void checkConstraints() throws RollbackException {
-		differential.checkConstraints(getChecker());
+		getRoot().getServer().unmount();
+		cleanDependencies();
 	}
 
 	@Override
@@ -160,7 +86,8 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 	}
 
 	public int getCacheLevel() {
-		return differential.getCacheLevel();
+		return getRoot().getServer().getCacheLevel();
+		// return differential.getCacheLevel();
 	}
 
 	@Override
@@ -208,33 +135,15 @@ public abstract class LightCache extends AbstractCache implements DefaultCache<G
 		// getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
 	}
 
-	private class TransactionDifferential implements IDifferential<Generic> {
+	private class TransactionDifferential {
 
-		@Override
-		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-			transaction.apply(removes, adds);
-		}
-
-		@Override
 		public Snapshot<Generic> getDependencies(Generic vertex) {
 			return transaction.getDependencies(vertex);
 		}
 
-		@Override
 		public long getTs() {
 			return transaction.getTs();
 		}
-	}
-
-	public static interface ContextEventListener<X> {
-
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
-
-		default void triggersRefreshEvent() {}
-
-		default void triggersClearEvent() {}
-
-		default void triggersFlushEvent() {}
 	}
 
 }

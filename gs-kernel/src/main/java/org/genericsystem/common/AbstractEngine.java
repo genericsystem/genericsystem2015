@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -117,13 +119,18 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 		tMap.remove(ts);
 	}
 
-	protected Generic newT(Class<?> clazz) {
+	protected final Generic newT(Class<?> clazz) {
 		try {
 			return newInstance(clazz);
 		} catch (IllegalArgumentException e) {
 			getCurrentCache().discardWithException(e);
 		}
 		return null; // Not reached
+	}
+
+	@Override
+	public final Generic[] newTArray(int dim) {
+		return new Generic[dim];
 	}
 
 	protected Generic build(Vertex vertex) {
