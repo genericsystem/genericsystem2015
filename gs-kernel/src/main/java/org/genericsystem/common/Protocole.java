@@ -2,24 +2,21 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 
 public interface Protocole {
-	public static final int PICK_NEW_TS = 0;
-	public static final int GET_DEPENDENCIES = 1;
-	public static final int GET_VERTEX = 2;
 
 	long pickNewTs();
-
-	Vertex[] getDependencies(long ts, long id);
 
 	Vertex getVertex(long id);
 
 	void close();
 
 	public static interface ClientCacheProtocole extends Protocole {
-		public static final int APPLY = 3;
+
+		Vertex[] getDependencies(long ts, long id);
 
 		void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
@@ -27,33 +24,35 @@ public interface Protocole {
 
 	public static interface ServerCacheProtocole extends Protocole {
 
-		Vertex addInstance(long meta, List<Long> overrides, Serializable value, List<Long> components);
+		Vertex[] getDependencies(long cacheId, long id);
 
-		Vertex update(long update, List<Long> overrides, Serializable value, List<Long> newComponents);
+		Vertex addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components);
 
-		long merge(long update, List<Long> overrides, Serializable value, List<Long> newComponents);
+		Vertex update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components);
 
-		long setInstance(long meta, List<Long> overrides, Serializable value, List<Long> components);
+		long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components);
 
-		long forceRemove(long generic);
+		long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components);
 
-		long remove(long generic);
+		long forceRemove(long cacheId, long generic);
 
-		long conserveRemove(long generic);
+		long remove(long cacheId, long generic);
 
-		long flush();
+		long conserveRemove(long cacheId, long generic);
 
-		long tryFlush();
+		long flush(long cacheId);
 
-		void clear();
+		long tryFlush(long cacheId);
 
-		void mount();
+		long clear(long cacheId);
 
-		void unmount();
+		long mount(long cacheId);
 
-		int getCacheLevel();
+		long unmount(long cacheId);
 
-		void shiftTs();
+		int getCacheLevel(long cacheId);
+
+		long shiftTs(long cacheId);
 
 	}
 

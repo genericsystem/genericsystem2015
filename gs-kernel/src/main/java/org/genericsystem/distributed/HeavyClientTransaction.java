@@ -3,6 +3,7 @@ package org.genericsystem.distributed;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -47,16 +48,21 @@ public class HeavyClientTransaction extends CheckedContext implements IDifferent
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		getRoot().getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
-		removes.forEach(remove -> remove.getComponents().forEach(component -> dependenciesMap.remove(component)));
-		removes.forEach(remove -> remove.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
-		removes.forEach(remove -> dependenciesMap.remove(remove.getMeta()));
-		removes.forEach(remove -> dependenciesMap.remove(remove));
-		adds.forEach(add -> add.getComponents().forEach(component -> dependenciesMap.remove(component)));
-		adds.forEach(add -> add.getComponents().forEach(superG -> dependenciesMap.remove(superG)));
-		adds.forEach(add -> dependenciesMap.remove(add.getMeta()));
-		adds.forEach(add -> dependenciesMap.remove(add));
-		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
-		adds.forEach(add -> ((ClientEngineHandler) add.getProxyHandler()).birthTs = getTs());
+		removes.forEach(this::invalid);// Not efficient ! plug and unplug is better
+		adds.forEach(this::invalid);// Not efficient !
+		adds.forEach(this::giveBirth);
+	}
+
+	private void giveBirth(Generic generic) {
+		assert Long.MAX_VALUE == generic.getBirthTs();
+		((ClientEngineHandler) generic.getProxyHandler()).birthTs = getTs();
+	}
+
+	private void invalid(Generic generic) {
+		generic.getComponents().forEach(component -> dependenciesMap.remove(component));
+		generic.getSupers().forEach(superG -> dependenciesMap.remove(superG));
+		dependenciesMap.remove(generic.getMeta());
+		dependenciesMap.remove(generic);
 	}
 
 	@Override

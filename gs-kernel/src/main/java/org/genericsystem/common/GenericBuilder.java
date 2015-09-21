@@ -3,9 +3,9 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.kernel.Root;
 
 public abstract class GenericBuilder {
 	protected final Cache context;
@@ -50,7 +50,7 @@ public abstract class GenericBuilder {
 	}
 
 	void adjust() {
-		adjustedMeta = meta.adjustMeta(components);
+		adjustedMeta = meta.adjustMeta(components);// do adjustmeta() on context
 		if (!isMeta() && adjustedMeta.getComponents().size() != components.size())
 			adjustedMeta = context.setMeta(components.size());
 		supers = context.computeAndCheckOverridesAreReached(adjustedMeta, overrides, value, components);
@@ -183,13 +183,7 @@ public abstract class GenericBuilder {
 		@Override
 		public final Generic resolve() {
 			Generic instance = get();
-			if (!(context.getRoot() instanceof Root)) {
-				if (instance == null)
-					throw new IllegalStateException("could not find class on server : " + clazz.getName());
-				return instance;
-			}
 			return instance == null ? build() : instance;
-
 		}
 	}
 
