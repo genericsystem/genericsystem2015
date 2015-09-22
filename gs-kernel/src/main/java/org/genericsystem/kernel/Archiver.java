@@ -363,7 +363,7 @@ public class Archiver {
 
 		@Override
 		protected Generic build() {
-			return gettable = ((Transaction) context.getTransaction()).plug(((Root) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
+			return gettable = ((Transaction) context.getTransaction()).plug(((AbstractRoot) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
 		}
 	}
 

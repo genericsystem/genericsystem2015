@@ -1,10 +1,8 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.buffer.Buffer;
-
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 
@@ -26,39 +24,39 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public Vertex addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(ADD_INSTANCE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+		return synchonizeTask(task -> send(new GSBuffer().appendInt(ADD_INSTANCE).appendLong(cacheId).appendGSSignature(meta, overrides, value, components), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
 	}
 
 	@Override
 	public Vertex update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(UPDATE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+		return synchonizeTask(task -> send(new GSBuffer().appendInt(UPDATE).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
 	}
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(MERGE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchonizeTask(task -> send(new GSBuffer().appendInt(MERGE).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents), buff -> task.handle(new GSBuffer(buff).getLong())));
 
 	}
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(SET_INSTANCE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchonizeTask(task -> send(new GSBuffer().appendInt(SET_INSTANCE).appendLong(cacheId).appendGSSignature(meta, overrides, value, components), buff -> task.handle(new GSBuffer(buff).getLong())));
 
 	}
 
 	@Override
 	public long forceRemove(long cacheId, long generic) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(FORCE_REMOVE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(FORCE_REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 	@Override
 	public long remove(long cacheId, long generic) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(REMOVE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(CONSERVE_REMOVE).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(CONSERVE_REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 	@Override

@@ -3,14 +3,12 @@ package org.genericsystem.distributed;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.common.Vertex;
@@ -18,6 +16,10 @@ import org.genericsystem.common.Vertex;
 public class GSBuffer implements Buffer {
 	private int index = 0;
 	private final Buffer internal;
+
+	public GSBuffer() {
+		this(Buffer.buffer());
+	}
 
 	public GSBuffer(Buffer internal) {
 		this.internal = internal;
@@ -119,13 +121,15 @@ public class GSBuffer implements Buffer {
 	}
 
 	@Override
-	public Buffer appendInt(int i) {
-		return internal.appendInt(i);
+	public GSBuffer appendInt(int i) {
+		internal.appendInt(i);
+		return this;
 	}
 
 	@Override
-	public Buffer appendLong(long l) {
-		return internal.appendLong(l);
+	public GSBuffer appendLong(long l) {
+		internal.appendLong(l);
+		return this;
 	}
 
 	@Override
@@ -167,7 +171,14 @@ public class GSBuffer implements Buffer {
 		appendGSLongList(vertex.getComponents());
 		appendLong(vertex.getBirthTs());
 		return this;
+	}
 
+	public Buffer appendGSSignature(long meta, List<Long> supers, Serializable value, List<Long> components) {
+		appendLong(meta);
+		appendGSLongList(supers);
+		appendGSValue(value);
+		appendGSLongList(components);
+		return this;
 	}
 
 	public Buffer appendGSVertexArray(Vertex[] vertexArray) {

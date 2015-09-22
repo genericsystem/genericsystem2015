@@ -3,7 +3,6 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
 

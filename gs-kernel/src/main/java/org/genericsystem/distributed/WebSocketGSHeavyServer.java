@@ -6,15 +6,15 @@ import io.vertx.core.http.HttpServerOptions;
 import java.util.ArrayList;
 import java.util.List;
 import org.genericsystem.kernel.AbstractRoot;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.HeavyServerEngine;
 
-public class WebSocketGSLightServer extends AbstractLightGSServer {
+public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
 
-	public WebSocketGSLightServer(GSDeploymentOptions options) {
+	public WebSocketGSHeavyServer(GSDeploymentOptions options) {
 		super(options);
 		this.port = options.getPort();
 		this.host = options.getHost();
@@ -41,7 +41,7 @@ public class WebSocketGSLightServer extends AbstractLightGSServer {
 				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					webSocket.writeBinaryMessage(getReplyBuffer(methodId, (Root) root, gsBuffer));
+					webSocket.writeBinaryMessage(getReplyBuffer(methodId, (HeavyServerEngine) root, gsBuffer));
 				});
 
 			});
@@ -60,7 +60,6 @@ public class WebSocketGSLightServer extends AbstractLightGSServer {
 
 	@Override
 	protected AbstractRoot buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new Root(value, persistentDirectoryPath, userClasses);
+		return new HeavyServerEngine(value, persistentDirectoryPath, userClasses);
 	}
-
 }

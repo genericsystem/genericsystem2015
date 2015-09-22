@@ -1,9 +1,7 @@
 package org.genericsystem.cdi;
 
 import java.util.function.Supplier;
-
 import javax.enterprise.inject.Vetoed;
-
 import org.genericsystem.common.Cache;
 
 @Vetoed

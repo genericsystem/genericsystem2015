@@ -1,7 +1,6 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.buffer.Buffer;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
@@ -13,7 +12,7 @@ public abstract class AbstractLightGSServer extends AbstractGSServer {
 	}
 
 	Buffer getReplyBuffer(int methodId, Root root, GSBuffer gsBuffer) {
-		GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
+		GSBuffer replyBuffer = new GSBuffer();
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());

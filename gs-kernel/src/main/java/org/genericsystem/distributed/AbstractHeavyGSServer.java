@@ -1,8 +1,10 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.buffer.Buffer;
-
-import org.genericsystem.common.Vertex;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.genericsystem.kernel.HeavyServerEngine;
 
 public abstract class AbstractHeavyGSServer extends AbstractGSServer {
@@ -11,7 +13,7 @@ public abstract class AbstractHeavyGSServer extends AbstractGSServer {
 	}
 
 	Buffer getReplyBuffer(int methodId, HeavyServerEngine root, GSBuffer gsBuffer) {
-		GSBuffer replyBuffer = new GSBuffer(Buffer.buffer());
+		GSBuffer replyBuffer = new GSBuffer();
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());
@@ -21,23 +23,35 @@ public abstract class AbstractHeavyGSServer extends AbstractGSServer {
 			return replyBuffer.appendLong(root.shiftTs(gsBuffer.getLong()));
 		case AbstractGSClient.ADD_INSTANCE: {
 			long cacheId = gsBuffer.getLong();
-			Vertex vertex = gsBuffer.getGSVertex();
-			return replyBuffer.appendGSVertex(root.addInstance(cacheId, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents()));
+			long meta = gsBuffer.getLong();
+			List<Long> supers = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			Serializable value = gsBuffer.getGSValue();
+			List<Long> components = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			return replyBuffer.appendGSVertex(root.addInstance(cacheId, meta, supers, value, components));
 		}
 		case AbstractGSClient.SET_INSTANCE: {
 			long cacheId = gsBuffer.getLong();
-			Vertex vertex = gsBuffer.getGSVertex();
-			return replyBuffer.appendLong(root.setInstance(cacheId, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents()));
+			long meta = gsBuffer.getLong();
+			List<Long> supers = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			Serializable value = gsBuffer.getGSValue();
+			List<Long> components = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			return replyBuffer.appendLong(root.setInstance(cacheId, meta, supers, value, components));
 		}
 		case AbstractGSClient.MERGE: {
 			long cacheId = gsBuffer.getLong();
-			Vertex vertex = gsBuffer.getGSVertex();
-			return replyBuffer.appendLong(root.merge(cacheId, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents()));
+			long meta = gsBuffer.getLong();
+			List<Long> supers = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			Serializable value = gsBuffer.getGSValue();
+			List<Long> components = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			return replyBuffer.appendLong(root.merge(cacheId, meta, supers, value, components));
 		}
 		case AbstractGSClient.UPDATE: {
 			long cacheId = gsBuffer.getLong();
-			Vertex vertex = gsBuffer.getGSVertex();
-			return replyBuffer.appendGSVertex(root.update(cacheId, vertex.getMeta(), vertex.getSupers(), vertex.getValue(), vertex.getComponents()));
+			long meta = gsBuffer.getLong();
+			List<Long> supers = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			Serializable value = gsBuffer.getGSValue();
+			List<Long> components = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
+			return replyBuffer.appendGSVertex(root.update(cacheId, meta, supers, value, components));
 		}
 		case AbstractGSClient.REMOVE:
 			return replyBuffer.appendLong(root.remove(gsBuffer.getLong(), gsBuffer.getLong()));

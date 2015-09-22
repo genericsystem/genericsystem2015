@@ -2,7 +2,6 @@ package org.genericsystem.distributed;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.RollbackException;

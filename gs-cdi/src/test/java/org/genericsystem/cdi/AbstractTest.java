@@ -1,10 +1,8 @@
 package org.genericsystem.cdi;
 
 import java.util.function.Supplier;
-
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.cdi.PersistenceTest.Count;
 import org.genericsystem.common.Cache;

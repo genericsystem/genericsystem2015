@@ -23,13 +23,13 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		this.ts = ts;
 	}
 
-	public Transaction(Root root) {
+	public Transaction(AbstractRoot root) {
 		this(root, root.pickNewTs());
 	}
 
 	@Override
-	public Root getRoot() {
-		return (Root) super.getRoot();
+	public AbstractRoot getRoot() {
+		return (AbstractRoot) super.getRoot();
 	}
 
 	@Override

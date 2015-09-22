@@ -10,26 +10,26 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
+import org.genericsystem.kernel.AbstractRoot;
 import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSServer {
 
-	protected Map<String, Root> roots;
+	protected Map<String, AbstractRoot> roots;
 
-	public AbstractGSServer(Root... roots) {
+	public AbstractGSServer(AbstractRoot... roots) {
 		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
-		assert roots.length == this.roots.size();
 	}
 
 	public AbstractGSServer(GSDeploymentOptions options) {
-		this(getRoots(options));
+		this.roots = Arrays.stream(getRoots(options)).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
-	private static Root[] getRoots(GSDeploymentOptions options) {
-		Set<Root> roots = new HashSet<>();
+	private AbstractRoot[] getRoots(GSDeploymentOptions options) {
+		Set<AbstractRoot> roots = new HashSet<>();
 		if (options.getEngines().isEmpty()) {
-			Root defaultRoot = new Root(Statics.ENGINE_VALUE, null, options.getClasses());
+			AbstractRoot defaultRoot = buildRoot(Statics.ENGINE_VALUE, null, options.getClasses());
 			roots.add(defaultRoot);
 			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
 		} else
@@ -39,6 +39,8 @@ public abstract class AbstractGSServer {
 			}
 		return roots.toArray(new Root[roots.size()]);
 	}
+
+	protected abstract AbstractRoot buildRoot(String value, String persistantDirectoryPath, Class<?>[] userClasses);
 
 	public void stop() {
 		roots.values().forEach(root -> root.close());

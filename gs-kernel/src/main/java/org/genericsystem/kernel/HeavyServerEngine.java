@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
@@ -17,6 +16,9 @@ import org.genericsystem.defaults.DefaultCache;
 
 public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtocole {
 
+	private ThreadLocal<Long> contextIds = new ThreadLocal<>();
+	private ConcurrentHashMap<Long, AbstractCache> map = new ConcurrentHashMap<>();
+
 	public HeavyServerEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
@@ -27,6 +29,12 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 
 	public HeavyServerEngine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(engineValue, persistentDirectoryPath, userClasses);
+		newCache().start();
+	}
+
+	@Override
+	protected Generic init(Generic generic, DefaultHandler handler) {
+		return super.init(generic, handler);
 	}
 
 	@Override
@@ -39,7 +47,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		return new Cache(this) {
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((Root) getRoot());
+				return new Transaction((AbstractRoot) getRoot());
 			}
 		};
 	}
@@ -48,7 +56,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		return new Cache(this, listener) {
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((Root) getRoot());
+				return new Transaction((AbstractRoot) getRoot());
 			}
 		};
 	}
@@ -191,34 +199,48 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		}
 	}
 
-	private final ThreadLocal<Long> contextIds = new ThreadLocal<Long>();
-	private final ConcurrentHashMap<Long, AbstractCache> map = new ConcurrentHashMap<>();
-
 	@Override
 	public Cache getCurrentCache() {
-		return getRoot().isInitialized() ? getCurrentCache(contextIds.get()) : (Cache) super.getCurrentCache();
+		if (getRoot().isInitialized())
+			assert contextIds.get() != null : contextIds.get();
+		return (Cache) (getRoot().isInitialized() ? getCurrentCache(contextIds.get()) : super.getCurrentCache());
 	}
 
 	@Override
 	protected AbstractCache start(AbstractCache context) {
-		if (!isInitialized())
+		if (!isInitialized()) {
+			System.out.println("system context is ok");
 			super.start(context);
-		Long cacheId = context.getCacheId();
+			return context;
+		}
+		long cacheId = ((Cache) context).getCacheId();
 		map.put(cacheId, context);
 		contextIds.set(cacheId);
+		assert getCurrentCache() == context;
+		System.out.println("context is ok : " + contextIds.get());
+		return context;
 	}
 
 	@Override
 	protected void stop(DefaultCache<Generic> context) {
-		if (!isInitialized())
+		if (!isInitialized()) {
 			super.stop(context);
-		Long cacheId = context.getCacheId();
+			return;
+		}
+		Long cacheId = ((Cache) context).getCacheId();
+		assert false;
 		contextIds.remove();
 		map.remove(cacheId);
 	}
 
-	public AbstractCache getCurrentCache(Long id) {
-		return map.get(id);
+	public Cache getCurrentCache(long id) {
+		return (Cache) map.get(id);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALIZE");
+		super.finalize();
 	}
 
 }

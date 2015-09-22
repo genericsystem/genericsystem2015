@@ -51,6 +51,7 @@ public class WeakEquivTest extends AbstractTest {
 
 	public void test004_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_supers() {
 		HeavyServerEngine engine = new HeavyServerEngine();
+		assert engine.getCurrentCache() != null;
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);
