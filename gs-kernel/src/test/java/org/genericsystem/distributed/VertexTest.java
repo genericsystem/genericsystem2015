@@ -1,13 +1,13 @@
 package org.genericsystem.distributed;
 
 import java.util.Arrays;
+
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class VertexTest extends AbstractClassicTest {
+public class VertexTest extends AbstractTest {
 
 	public void test001_getInheritings() {
 		HeavyClientEngine engine = new HeavyClientEngine();

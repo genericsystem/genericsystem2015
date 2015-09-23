@@ -1,12 +1,12 @@
 package org.genericsystem.distributed;
 
 import java.util.Arrays;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class HolderTest extends AbstractClassicTest {
+public class HolderTest extends AbstractTest {
 
 	public void testHolder1Attribut() {
 		HeavyClientEngine engine = new HeavyClientEngine();

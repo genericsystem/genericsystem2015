@@ -2,11 +2,10 @@ package org.genericsystem.distributed;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class WeakEquivTest extends AbstractClassicTest {
+public class WeakEquivTest extends AbstractTest {
 
 	// public void test001_weakEquiv_Relation_SingularConstraint() {
 	// Engine engine = new Engine();

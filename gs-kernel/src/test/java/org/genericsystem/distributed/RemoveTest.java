@@ -1,11 +1,10 @@
 package org.genericsystem.distributed;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class RemoveTest extends AbstractClassicTest {
+public class RemoveTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
 		HeavyClientEngine engine = new HeavyClientEngine();

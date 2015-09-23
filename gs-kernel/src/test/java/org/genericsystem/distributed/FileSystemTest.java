@@ -1,17 +1,23 @@
 package org.genericsystem.distributed;
 
 import java.util.Arrays;
+
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.genericsystem.distributed.FileSystem.Directory;
 import org.genericsystem.distributed.FileSystem.File;
 import org.genericsystem.distributed.FileSystem.FileType;
+import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class FileSystemTest extends AbstractFileSystemTest {
+public class FileSystemTest extends AbstractTest {
+
+	@Override
+	public GSDeploymentOptions getDeploymentOptions() {
+		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addClasses(FileSystem.class, FileType.class);
+	}
 
 	public void testUpdateRootDirectory() {
 		HeavyClientEngine engine = new HeavyClientEngine(FileSystem.class);

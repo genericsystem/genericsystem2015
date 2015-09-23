@@ -2,11 +2,10 @@ package org.genericsystem.distributed;
 
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class RemoveManyCachesTest extends AbstractClassicTest {
+public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
 		HeavyClientEngine engine = new HeavyClientEngine();

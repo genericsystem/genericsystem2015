@@ -1,13 +1,13 @@
 package org.genericsystem.distributed;
 
 import java.util.List;
+
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class RelationTest extends AbstractClassicTest {
+public class RelationTest extends AbstractTest {
 
 	private static class Test {
 		@Override

@@ -1,16 +1,16 @@
 package org.genericsystem.distributed;
 
 import java.util.Iterator;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class IteratorAndRemoveCacheTest extends AbstractClassicTest {
+public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
 		HeavyClientEngine engine = new HeavyClientEngine();

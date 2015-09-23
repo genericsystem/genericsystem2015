@@ -1,11 +1,10 @@
 package org.genericsystem.distributed;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class AutomaticMetaAttributeCreationTest extends AbstractClassicTest {
+public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 
 	public void test001_addInstance_metaAttribute() {
 		HeavyClientEngine engine = new HeavyClientEngine();

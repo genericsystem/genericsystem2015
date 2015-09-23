@@ -14,11 +14,19 @@ import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 import org.genericsystem.api.core.annotations.value.IntValue;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
+import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class AnnotationTest extends AbstractGetClassTest {
+public class AnnotationTest extends AbstractTest {
+
+	@Override
+	public GSDeploymentOptions getDeploymentOptions() {
+		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addClasses(Vehicle.class, MyAudi.class, MyBmw.class, MyMercedes.class, VehicleType.class, OtherVehicleType.class, HumanPossessVehicleTime.class, ManPossessCar.class,
+				HumanPossessCar.class, HumanPossessVehicle.class, Time.class, Myck.class, Man.class, Human.class, Unit.class, ElectrikPower.class, myCar.class, Car.class, V123.class, Voiture.class, Couleur.class, Puissance.class, Power.class,
+				MyVehicle.class, OtherVehicle.class, MySelectableWindow.class, SelectableWindow.class, Selected.class, Selectable.class, Window.class, Size.class, GraphicComposite.class, MyTransformerChildrenGames.class, TransformerChildrenGames.class,
+				MyTransformer.class, Transformer.class, MyChildrenGames.class, ChildrenGames.class, MyChildren.class, Children.class, MyGames2.class, MyGames.class, Games.class);
+	}
 
 	public void test001_Generic() {
 		HeavyClientEngine engine = new HeavyClientEngine(Vehicle.class, Human.class, Myck.class);

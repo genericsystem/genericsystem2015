@@ -2,13 +2,13 @@ package org.genericsystem.distributed;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class UpdatableServiceTest extends AbstractClassicTest {
+public class UpdatableServiceTest extends AbstractTest {
 
 	public void test001_setValue_Type() {
 		Generic engine = new HeavyClientEngine();

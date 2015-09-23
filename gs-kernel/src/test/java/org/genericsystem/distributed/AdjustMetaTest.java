@@ -1,11 +1,10 @@
 package org.genericsystem.distributed;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class AdjustMetaTest extends AbstractClassicTest {
+public class AdjustMetaTest extends AbstractTest {
 
 	public void test001_AdjustMeta_MetaLevel_metaAttribut_NoComposite() {
 		HeavyClientEngine engine = new HeavyClientEngine();

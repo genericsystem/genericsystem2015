@@ -3,14 +3,14 @@ package org.genericsystem.distributed;
 import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class InstanciationTest extends AbstractClassicTest {
+public class InstanciationTest extends AbstractTest {
 
 	public void testEngineInstanciation() {
 		HeavyClientEngine engine = new HeavyClientEngine();

@@ -1,14 +1,19 @@
 package org.genericsystem.distributed;
 
 import java.util.Arrays;
+
 import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class MultipleRootsTest extends AbstractMultipleBasesTest {
+public class MultipleRootsTest extends AbstractTest {
+
+	@Override
+	public GSDeploymentOptions getDeploymentOptions() {
+		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addEngine("SecondEngine", null).addEngine("FirstEngine", null);
+	}
 
 	public void test001_Engine_name() {
 		HeavyClientEngine engine1 = new HeavyClientEngine();

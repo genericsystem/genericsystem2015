@@ -2,11 +2,10 @@ package org.genericsystem.distributed;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class BindingServiceTest extends AbstractClassicTest {
+public class BindingServiceTest extends AbstractTest {
 
 	public void test001_addInstance() {
 		// given

@@ -4,11 +4,10 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class RemovableServiceTest extends AbstractClassicTest {
+public class RemovableServiceTest extends AbstractTest {
 
 	public void test100_remove_instance_NormalStrategy() {
 		// given

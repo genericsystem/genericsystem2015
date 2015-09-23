@@ -2,15 +2,15 @@ package org.genericsystem.distributed;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 @Test
-public class GenericTest extends AbstractClassicTest {
+public class GenericTest extends AbstractTest {
 
 	public void testEngine() {
 		HeavyClientEngine engine = new HeavyClientEngine();

@@ -6,11 +6,10 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class NotRemovableManyCachesTest extends AbstractClassicTest {
+public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test001_aliveEx() {
 		HeavyClientEngine engine = new HeavyClientEngine();

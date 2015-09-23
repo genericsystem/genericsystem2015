@@ -3,11 +3,10 @@ package org.genericsystem.distributed;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class ConcurrentTest extends AbstractClassicTest {
+public class ConcurrentTest extends AbstractTest {
 
 	public void test() {
 		HeavyClientEngine engine = new HeavyClientEngine();

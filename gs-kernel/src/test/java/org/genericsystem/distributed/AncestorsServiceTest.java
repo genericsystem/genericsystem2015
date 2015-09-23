@@ -1,12 +1,12 @@
 package org.genericsystem.distributed;
 
 import java.util.Arrays;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class AncestorsServiceTest extends AbstractClassicTest {
+public class AncestorsServiceTest extends AbstractTest {
 
 	public void isAncestorOfByInheritence() {
 		HeavyClientEngine engine = new HeavyClientEngine();

@@ -1,13 +1,13 @@
 package org.genericsystem.distributed;
 
 import java.util.Iterator;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class IteratorAndRemoveTest extends AbstractClassicTest {
+public class IteratorAndRemoveTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
 		HeavyClientEngine engine = new HeavyClientEngine();

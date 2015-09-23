@@ -2,15 +2,15 @@ package org.genericsystem.distributed;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.RequiredConstraintViolationException;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class RequiredConstraintTest extends AbstractClassicTest {
+public class RequiredConstraintTest extends AbstractTest {
 
 	public void test00_Inheritance() {
 		HeavyClientEngine engine = new HeavyClientEngine();

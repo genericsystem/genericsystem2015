@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
@@ -93,8 +94,11 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 
 	@Override
 	public long shiftTs(long cacheId) {
-		return safeContextExecute(cacheId, cache -> getCurrentCache().shiftTs());
-		// TODO rollback
+		try {
+			return safeContextExecute(cacheId, cache -> getCurrentCache().shiftTs());
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
 	}
 
 	@Override
@@ -105,38 +109,50 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 
 	@Override
 	public Vertex addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return safeContextExecute(
-				cacheId,
-				cache -> getCurrentCache().addInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-						components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
-		// TODO rollback
+		try {
+			return safeContextExecute(
+					cacheId,
+					cache -> getCurrentCache().addInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
+		} catch (Exception e) {
+			return null;// TODO what to do here ?
+		}
 	}
 
 	@Override
 	public Vertex update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components) {
-		return safeContextExecute(
-				cacheId,
-				cache -> getCurrentCache().update(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-						components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
-		// TODO rollback
+		try {
+			return safeContextExecute(
+					cacheId,
+					cache -> getCurrentCache().update(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
+		} catch (Exception e) {
+			return null;// TODO what to do here ?
+		}
 	}
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components) {
-		return safeContextExecute(
-				cacheId,
-				cache -> getCurrentCache().merge(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-						components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
-		// TODO rollback
+		try {
+			return safeContextExecute(
+					cacheId,
+					cache -> getCurrentCache().merge(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
 	}
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return safeContextExecute(
-				cacheId,
-				cache -> cache.setInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-						components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
-		// TODO rollback
+		try {
+			return safeContextExecute(
+					cacheId,
+					cache -> cache.setInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
+							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
+		} catch (Exception e) {
+			return Statics.ROLLBACK_EXCEPTION;
+		}
 	}
 
 	private <T> T safeContextExecute(long cacheId, Function<Cache, T> function) {

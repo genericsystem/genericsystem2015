@@ -1,14 +1,14 @@
 package org.genericsystem.distributed;
 
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class CacheTest extends AbstractClassicTest {
+public class CacheTest extends AbstractTest {
 	public void test000() {
 		HeavyClientEngine engine = new HeavyClientEngine();
 		Cache cache = engine.getCurrentCache();

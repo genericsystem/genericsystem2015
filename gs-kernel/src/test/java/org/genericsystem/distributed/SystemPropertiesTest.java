@@ -1,11 +1,10 @@
 package org.genericsystem.distributed;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class SystemPropertiesTest extends AbstractClassicTest {
+public class SystemPropertiesTest extends AbstractTest {
 
 	public void test001_enableConstraint() {
 		HeavyClientEngine Engine = new HeavyClientEngine();

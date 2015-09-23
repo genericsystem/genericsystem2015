@@ -2,11 +2,10 @@ package org.genericsystem.distributed;
 
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class UpdateTest extends AbstractClassicTest {
+public class UpdateTest extends AbstractTest {
 
 	public void test001_updateValue() {
 		HeavyClientEngine engine = new HeavyClientEngine();

@@ -1,12 +1,12 @@
 package org.genericsystem.distributed;
 
 import java.util.Arrays;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class MultiInheritanceTest extends AbstractClassicTest {
+public class MultiInheritanceTest extends AbstractTest {
 
 	public void test_multiInheritance() {
 		HeavyClientEngine engine = new HeavyClientEngine();

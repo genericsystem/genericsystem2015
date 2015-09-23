@@ -4,11 +4,10 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test
-public class NotRemovableOneCacheTest extends AbstractClassicTest {
+public class NotRemovableOneCacheTest extends AbstractTest {
 
 	public void test001_aliveEx() {
 		HeavyClientEngine engine = new HeavyClientEngine();

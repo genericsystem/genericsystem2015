@@ -3,19 +3,23 @@ package org.genericsystem.distributed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
-public class PersistenceTest extends AbstractPersistanceTest {
+public class PersistenceTest extends AbstractTest {
+
+	@Override
+	public GSDeploymentOptions getDeploymentOptions() {
+		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addClasses(Vehicle.class);
+	}
 
 	public void testDefaultConfiguration() {
 
 		HeavyClientEngine root = new HeavyClientEngine(Statics.ENGINE_VALUE);
-		// root.close();
 		HeavyClientEngine engine = new HeavyClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
 
