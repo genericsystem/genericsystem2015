@@ -3,8 +3,10 @@ package org.genericsystem.distributed;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.genericsystem.kernel.AbstractRoot;
 import org.genericsystem.kernel.HeavyServerEngine;
 
@@ -21,7 +23,7 @@ public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 	}
 
 	public static void main(String[] args) {
-		new WebSocketGSLightServer(new GSDeploymentOptions()).start();
+		new WebSocketGSHeavyServer(new GSDeploymentOptions()).start();
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package org.genericsystem.common;
 
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
@@ -15,7 +16,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	@SuppressWarnings("unchecked")
-	public final <U extends Cache> U start() {
+	public final <U extends AbstractCache> U start() {
 		return (U) getRoot().start(this);
 	}
 

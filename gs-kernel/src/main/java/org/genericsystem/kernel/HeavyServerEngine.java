@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Cache;
 import org.genericsystem.common.Cache.ContextEventListener;
@@ -168,8 +169,11 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	@Override
 	public long remove(long cacheId, long generic) {
 		try {
-			getCurrentCache().remove(getRoot().getGenericById(generic));
-			return generic;
+			return this.<Long> safeContextExecute(cacheId, cache -> {
+				Generic toRemove = getRoot().getGenericById(generic);
+				getCurrentCache().remove(toRemove);
+				return toRemove.getTs();
+			});
 		} catch (Exception e) {
 			return Statics.ROLLBACK_EXCEPTION;
 		}
@@ -178,8 +182,11 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	@Override
 	public long forceRemove(long cacheId, long generic) {
 		try {
-			getCurrentCache().forceRemove(getRoot().getGenericById(generic));
-			return generic;
+			return this.<Long> safeContextExecute(cacheId, cache -> {
+				Generic toRemove = getRoot().getGenericById(generic);
+				getCurrentCache().forceRemove(toRemove);
+				return toRemove.getTs();
+			});
 		} catch (Exception e) {
 			return Statics.ROLLBACK_EXCEPTION;
 		}
@@ -188,8 +195,11 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
 		try {
-			getCurrentCache().conserveRemove(getRoot().getGenericById(generic));
-			return generic;
+			return this.<Long> safeContextExecute(cacheId, cache -> {
+				Generic toRemove = getRoot().getGenericById(generic);
+				getCurrentCache().conserveRemove(toRemove);
+				return toRemove.getTs();
+			});
 		} catch (Exception e) {
 			return Statics.ROLLBACK_EXCEPTION;
 		}
@@ -198,8 +208,10 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	@Override
 	public long flush(long cacheId) {
 		try {
-			getCurrentCache().flush();
-			return getCurrentCache().getTs();
+			return this.<Long> safeContextExecute(cacheId, cache -> {
+				getCurrentCache().flush();
+				return getCurrentCache().getTs();
+			});
 		} catch (Exception e) {
 			return Statics.ROLLBACK_EXCEPTION;
 		}
@@ -208,8 +220,14 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	@Override
 	public long tryFlush(long cacheId) {
 		try {
-			getCurrentCache().tryFlush();
-			return getCurrentCache().getTs();
+			return this.<Long> safeContextExecute(cacheId, cache -> {
+				try {
+					getCurrentCache().tryFlush();
+				} catch (ConcurrencyControlException e) {
+					return Statics.CONCURRENCY_CONTROL_EXCEPTION;
+				}
+				return getCurrentCache().getTs();
+			});
 		} catch (Exception e) {
 			return Statics.ROLLBACK_EXCEPTION;
 		}
@@ -244,13 +262,20 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 			return;
 		}
 		Long cacheId = ((Cache) context).getCacheId();
-		assert false;
 		contextIds.remove();
 		map.remove(cacheId);
 	}
 
 	public Cache getCurrentCache(long id) {
-		return (Cache) map.get(id);
+		Cache cache = (Cache) map.get(id);
+		if (cache == null) {
+			cache = newCache();
+			Cache result = (Cache) map.putIfAbsent(id, newCache());
+			if (result != null)
+				cache = result;
+		}
+		return cache;
+
 	}
 
 	@Override

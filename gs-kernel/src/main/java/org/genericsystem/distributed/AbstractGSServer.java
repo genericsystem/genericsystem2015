@@ -2,6 +2,7 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,8 +11,8 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
+
 import org.genericsystem.kernel.AbstractRoot;
-import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSServer {
@@ -34,10 +35,10 @@ public abstract class AbstractGSServer {
 			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
 		} else
 			for (Entry<String, String> entry : options.getEngines().entrySet()) {
-				roots.add(new Root(entry.getKey(), entry.getValue(), options.getClasses()));
+				roots.add(buildRoot(entry.getKey(), entry.getValue(), options.getClasses()));
 				System.out.println("Starts engine : " + "/" + entry.getKey());
 			}
-		return roots.toArray(new Root[roots.size()]);
+		return roots.toArray(new AbstractRoot[roots.size()]);
 	}
 
 	protected abstract AbstractRoot buildRoot(String value, String persistantDirectoryPath, Class<?>[] userClasses);
