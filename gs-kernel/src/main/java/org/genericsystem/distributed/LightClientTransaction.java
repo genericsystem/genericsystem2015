@@ -40,7 +40,7 @@ public class LightClientTransaction {
 	public Snapshot<Generic> getDependencies(Generic generic) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
-			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(getTs(), generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
+			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(cacheId, generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}

@@ -2,6 +2,7 @@ package org.genericsystem.distributed;
 
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -26,6 +27,7 @@ public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 	protected LightCache(LightClientEngine root) {
 		super(root);
 		cacheId = getRoot().getServer().pickNewTs();
+		System.out.println("Create LightCache : " + cacheId);
 		this.transaction = new LightClientTransaction(root, cacheId);
 	}
 
@@ -57,26 +59,30 @@ public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 	@Override
 	public void flush() {
 		long result = getRoot().getServer().flush(cacheId);
+		if (Statics.ROLLBACK_EXCEPTION == result)
+			discardWithException(new IllegalStateException("Rollback"));
 		if (Statics.OTHER_EXCEPTION == result)
 			discardWithException(new IllegalStateException("Other exception"));
 		if (result != getTs()) {
 			assert result > getTs();
-			transaction = new LightClientTransaction(getRoot(), result);
+			System.out.println("Change Client Transaction");
+			transaction = new LightClientTransaction(getRoot(), cacheId, result);
 		}
 	}
 
 	public void clear() {
-		getRoot().getServer().clear(cacheId);
-		transaction = new LightClientTransaction(getRoot(), getTs());
+		long result = getRoot().getServer().clear(cacheId);
+		transaction = new LightClientTransaction(getRoot(), cacheId, result);
 	}
 
 	public void mount() {
-		getRoot().getServer().mount(cacheId);
+		long result = getRoot().getServer().mount(cacheId);
+		transaction = new LightClientTransaction(getRoot(), cacheId, result);
 	}
 
 	public void unmount() {
-		getRoot().getServer().unmount(cacheId);
-		transaction = new LightClientTransaction(getRoot(), getTs());
+		long result = getRoot().getServer().unmount(cacheId);
+		transaction = new LightClientTransaction(getRoot(), cacheId, result);
 	}
 
 	@Override

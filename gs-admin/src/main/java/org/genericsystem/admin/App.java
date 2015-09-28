@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -15,7 +16,9 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.HeavyClientEngine;
+import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.LightClientEngine;
+import org.genericsystem.distributed.WebSocketGSHeavyServer;
 import org.genericsystem.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 
@@ -26,8 +29,8 @@ import org.genericsystem.kernel.Statics;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		// HttpGSServer server = new HttpGSServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
-		// server.start();
+		WebSocketGSHeavyServer server = new WebSocketGSHeavyServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test2").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		server.start();
 		launch(args);
 		// server.stop();
 	}
@@ -38,20 +41,22 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		HeavyClientEngine engine = new HeavyClientEngine(Statics.ENGINE_VALUE, "192.168.1.17", Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
+		LightClientEngine engine = new LightClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
-		Generic base = type.addInstance("myBmw");
-		// type.addInstance("myAudi");
-		// type.addInstance("myMercedes");
+		Generic base = type.setInstance("myBmw");
+		assert base.isAlive();
+		type.setInstance("myAudi");
+		type.setInstance("myMercedes");
 
 		Generic attribute = engine.find(Power.class);
 		Generic relation = engine.find(CarColor.class);
-		base.addHolder(attribute, 333);
-		base.addLink(relation, "myBmwRed", engine.find(Red.class));
-		// base.addLink(relation, "myBmwYellow", engine.find(Yellow.class));
-		Generic base2 = type.addInstance("myMercedes");
-		base2.addLink(relation, "myMercedesYellow", engine.find(Yellow.class));
+		base.setHolder(attribute, 333);
+		base.setLink(relation, "myBmwRed", engine.find(Red.class));
+		base.setLink(relation, "myBmwYellow", engine.find(Yellow.class));
+		Generic base2 = type.setInstance("myMercedes");
+		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
+		engine.getCurrentCache().flush();
 		class InvalidableObjectProperty extends SimpleObjectProperty<Generic> {
 			public InvalidableObjectProperty(Generic engine) {
 				super(engine);

@@ -66,6 +66,7 @@ public abstract class AbstractHeavyGSServer extends AbstractGSServer {
 		case AbstractGSClient.TRY_FLUSH:
 			return replyBuffer.appendLong(root.tryFlush(gsBuffer.getLong()));
 		case AbstractGSClient.FLUSH:
+			System.out.println("FLUSH !!!!!!!!!!!!!!!");
 			return replyBuffer.appendLong(root.flush(gsBuffer.getLong()));
 		case AbstractGSClient.MOUNT:
 			return replyBuffer.appendLong(root.mount(gsBuffer.getLong()));

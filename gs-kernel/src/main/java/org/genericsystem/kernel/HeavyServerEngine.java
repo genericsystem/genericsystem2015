@@ -116,6 +116,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 					cache -> getCurrentCache().addInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
 							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;// TODO what to do here ?
 		}
 	}
@@ -251,7 +252,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		map.put(cacheId, context);
 		contextIds.set(cacheId);
 		assert getCurrentCache() == context;
-		System.out.println("context is ok : " + contextIds.get());
+		System.out.println("context ok cacheId : " + cacheId + " ts : " + context.getTs());
 		return context;
 	}
 
@@ -268,14 +269,10 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 
 	public Cache getCurrentCache(long id) {
 		Cache cache = (Cache) map.get(id);
-		if (cache == null) {
-			cache = newCache();
-			Cache result = (Cache) map.putIfAbsent(id, newCache());
-			if (result != null)
-				cache = result;
-		}
-		return cache;
-
+		if (cache != null)
+			return cache;
+		Cache result = (Cache) map.putIfAbsent(id, cache = newCache(id));
+		return result != null ? result : cache;
 	}
 
 	@Override

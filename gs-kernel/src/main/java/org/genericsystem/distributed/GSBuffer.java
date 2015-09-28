@@ -3,12 +3,14 @@ package org.genericsystem.distributed;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.common.Vertex;
@@ -203,10 +205,10 @@ public class GSBuffer implements Buffer {
 	}
 
 	public Buffer appendGSValue(Serializable value) {
+		//System.out.println("Append value : " + value);
 		for (Entry<Integer, Class<?>> entry : ApiStatics.SUPPORTED_VALUE_CLASSES.entrySet()) {
 			if (entry.getValue().isInstance(value)) {
 				appendInt(entry.getKey());
-
 				switch (entry.getKey()) {
 				case 0: {
 					appendGSClazz(((AxedPropertyClass) value).getClazz());

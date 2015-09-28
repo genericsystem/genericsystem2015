@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.annotations.Priority;
@@ -119,7 +120,7 @@ public class Checker {
 
 	public void checkIsAlive(Generic vertex) {
 		if (!context.isAlive(vertex))
-			context.discardWithException(new AliveConstraintViolationException("" + vertex.getBirthTs()));
+			context.discardWithException(new AliveConstraintViolationException("" + vertex.info()));
 	}
 
 	private void checkIsNotAlive(Generic vertex) {
