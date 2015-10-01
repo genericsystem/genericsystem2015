@@ -28,13 +28,13 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	@Override
-	public Vertex addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return synchonizeTask(task -> send(new GSBuffer().appendInt(ADD_INSTANCE).appendLong(cacheId).appendGSSignature(meta, overrides, value, components), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return synchonizeTask(task -> send(new GSBuffer().appendInt(ADD_INSTANCE).appendLong(cacheId).appendGSSignature(meta, overrides, value, components), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 	@Override
-	public Vertex update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return synchonizeTask(task -> send(new GSBuffer().appendInt(UPDATE).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
+		return synchonizeTask(task -> send(new GSBuffer().appendInt(UPDATE).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 	@Override

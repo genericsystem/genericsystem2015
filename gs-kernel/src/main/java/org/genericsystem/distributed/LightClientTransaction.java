@@ -63,12 +63,12 @@ public class LightClientTransaction {
 	}
 
 	Generic addInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
-		return getRoot().getGenericByVertex(
+		return getRoot().getGenericById(
 				getRoot().getServer().addInstance(cacheId, meta.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
 	}
 
 	Generic update(Generic update, List<Generic> overrides, Serializable value, List<Generic> components) {
-		Generic result = getRoot().getGenericByVertex(
+		Generic result = getRoot().getGenericById(
 				getRoot().getServer().update(cacheId, update.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
 		invalid(update);
 		return result;

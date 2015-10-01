@@ -90,24 +90,24 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	public long mount(long cacheId) {
 		return safeContextExecute(cacheId, cache -> {
 			getCurrentCache().mount();// TODO must return getTs() ?
-			return getTs();
-		});
+				return getTs();
+			});
 	}
 
 	@Override
 	public long unmount(long cacheId) {
 		return safeContextExecute(cacheId, cache -> {
 			getCurrentCache().unmount();// TODO must return getTs() ?
-			return getTs();
-		});
+				return getTs();
+			});
 	}
 
 	@Override
 	public long clear(long cacheId) {
 		return safeContextExecute(cacheId, cache -> {
 			getCurrentCache().clear();// TODO must return getTs() ?
-			return getTs();
-		});
+				return getTs();
+			});
 	}
 
 	@Override
@@ -126,27 +126,26 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	}
 
 	@Override
-	public Vertex addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
+	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
 		try {
 			return safeContextExecute(
 					cacheId,
 					cache -> getCurrentCache().addInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
+							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;// TODO what to do here ?
+			return Statics.ROLLBACK_EXCEPTION;
 		}
 	}
 
 	@Override
-	public Vertex update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components) {
+	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components) {
 		try {
 			return safeContextExecute(
 					cacheId,
 					cache -> getCurrentCache().update(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getVertex());
+							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
 		} catch (Exception e) {
-			return null;// TODO what to do here ?
+			return Statics.ROLLBACK_EXCEPTION;
 		}
 	}
 
@@ -235,6 +234,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 				return newTs == ts ? ts : Statics.CONCURRENCY_CONTROL_EXCEPTION;
 			});
 		} catch (Exception e) {
+			e.printStackTrace();
 			return Statics.ROLLBACK_EXCEPTION;
 		}
 	}
@@ -251,6 +251,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 				return getCurrentCache().getTs();
 			});
 		} catch (Exception e) {
+			e.printStackTrace();
 			return Statics.ROLLBACK_EXCEPTION;
 		}
 	}

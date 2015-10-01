@@ -57,7 +57,7 @@ public abstract class AbstractGSClient implements Protocole {
 			T result = null;
 			try {
 				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
-				result = blockingQueue.poll(20000, TimeUnit.MILLISECONDS);
+				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

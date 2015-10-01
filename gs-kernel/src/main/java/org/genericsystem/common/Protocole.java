@@ -25,9 +25,9 @@ public interface Protocole {
 
 		Vertex[] getDependencies(long cacheId, long id);
 
-		Vertex addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components);
+		long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components);
 
-		Vertex update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components);
+		long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components);
 
 		long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components);
 

@@ -29,7 +29,7 @@ public abstract class AbstractHeavyGSServer extends AbstractGSServer {
 			List<Long> supers = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
 			Serializable value = gsBuffer.getGSValue();
 			List<Long> components = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
-			return replyBuffer.appendGSVertex(root.addInstance(cacheId, meta, supers, value, components));
+			return replyBuffer.appendLong(root.addInstance(cacheId, meta, supers, value, components));
 		}
 		case AbstractGSClient.SET_INSTANCE: {
 			long cacheId = gsBuffer.getLong();
@@ -53,7 +53,7 @@ public abstract class AbstractHeavyGSServer extends AbstractGSServer {
 			List<Long> supers = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
 			Serializable value = gsBuffer.getGSValue();
 			List<Long> components = Arrays.stream(gsBuffer.getGSLongArray()).mapToObj(l -> l).collect(Collectors.toList());
-			return replyBuffer.appendGSVertex(root.update(cacheId, meta, supers, value, components));
+			return replyBuffer.appendLong(root.update(cacheId, meta, supers, value, components));
 		}
 		case AbstractGSClient.REMOVE:
 			return replyBuffer.appendLong(root.remove(gsBuffer.getLong(), gsBuffer.getLong()));
