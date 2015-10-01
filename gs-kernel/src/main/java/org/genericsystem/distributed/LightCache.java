@@ -2,7 +2,6 @@ package org.genericsystem.distributed;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -26,7 +25,7 @@ public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 
 	protected LightCache(LightClientEngine root) {
 		super(root);
-		cacheId = getRoot().getServer().pickNewTs();
+		cacheId = getRoot().getServer().newCacheId();
 		System.out.println("Create LightCache : " + cacheId);
 		this.transaction = new LightClientTransaction(root, cacheId);
 	}
@@ -34,11 +33,6 @@ public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 	@Override
 	public LightClientEngine getRoot() {
 		return (LightClientEngine) super.getRoot();
-	}
-
-	@Override
-	public long getTs() {
-		return transaction.getTs();
 	}
 
 	@Override
@@ -53,36 +47,34 @@ public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 			throw new ConcurrencyControlException("");
 		if (Statics.OTHER_EXCEPTION == result)
 			discardWithException(new IllegalStateException("Other exception"));
-		assert result == getTs();
 	}
 
 	@Override
 	public void flush() {
 		long result = getRoot().getServer().flush(cacheId);
+		if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result) {
+			System.out.println("Change Client Transaction");
+			transaction = new LightClientTransaction(getRoot(), cacheId);
+		}
 		if (Statics.ROLLBACK_EXCEPTION == result)
 			discardWithException(new IllegalStateException("Rollback"));
 		if (Statics.OTHER_EXCEPTION == result)
 			discardWithException(new IllegalStateException("Other exception"));
-		if (result != getTs()) {
-			assert result > getTs();
-			System.out.println("Change Client Transaction");
-			transaction = new LightClientTransaction(getRoot(), cacheId, result);
-		}
 	}
 
 	public void clear() {
 		long result = getRoot().getServer().clear(cacheId);
-		transaction = new LightClientTransaction(getRoot(), cacheId, result);
+		transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	public void mount() {
 		long result = getRoot().getServer().mount(cacheId);
-		transaction = new LightClientTransaction(getRoot(), cacheId, result);
+		// transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	public void unmount() {
 		long result = getRoot().getServer().unmount(cacheId);
-		transaction = new LightClientTransaction(getRoot(), cacheId, result);
+		transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	@Override

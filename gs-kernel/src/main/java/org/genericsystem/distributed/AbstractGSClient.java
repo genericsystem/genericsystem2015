@@ -2,12 +2,10 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
@@ -31,6 +29,7 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int MOUNT = 14;
 	public static final int UNMOUNT = 15;
 	public static final int GET_CACHE_LEVEL = 16;
+	public static final int NEW_CACHE = 17;
 
 	abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
 
@@ -46,9 +45,10 @@ public abstract class AbstractGSClient implements Protocole {
 
 	protected static <T> T synchonizeTask(Consumer<Handler<T>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
-			BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(1);
+			BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
 			consumer.accept(resultObject -> {
 				try {
+					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
 					blockingQueue.put(resultObject);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -56,20 +56,16 @@ public abstract class AbstractGSClient implements Protocole {
 			});
 			T result = null;
 			try {
-				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
+				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
+				result = blockingQueue.poll(20000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			if (result != null) {
-				// try {
-				// Thread.sleep(50);
-				// } catch (InterruptedException e) {
-				// // TODO Auto-generated catch block
-				// e.printStackTrace();
-				// }
 				return result;
 			}
-			System.out.println("Response failure");
+
+			System.out.println("Response failure " + Thread.currentThread());
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
 	}

@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 
@@ -53,6 +52,8 @@ public interface Protocole {
 		int getCacheLevel(long cacheId);
 
 		long shiftTs(long cacheId);
+
+		long newCacheId();
 
 	}
 

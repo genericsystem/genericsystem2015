@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
@@ -15,21 +14,23 @@ public class LightClientTransaction {
 
 	private LightClientEngine engine;
 	private final long cacheId;
-	private final long ts;
 
-	protected LightClientTransaction(LightClientEngine engine, long cacheId, long ts) {
-		this.engine = engine;
-		this.cacheId = cacheId;
-		this.ts = ts;
-	}
+	// private final long ts;
+
+	// protected LightClientTransaction(LightClientEngine engine, long cacheId, long ts) {
+	// this.engine = engine;
+	// this.cacheId = cacheId;
+	// // this.ts = ts;
+	// }
 
 	protected LightClientTransaction(LightClientEngine engine, long cacheId) {
-		this(engine, cacheId, engine.pickNewTs());
+		this.engine = engine;
+		this.cacheId = cacheId;
 	}
 
-	public long getTs() {
-		return ts;
-	}
+	// public long getTs() {
+	// return ts;
+	// }
 
 	public LightClientEngine getRoot() {
 		return engine;

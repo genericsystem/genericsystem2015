@@ -3,14 +3,12 @@ package org.genericsystem.distributed;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.common.Vertex;
@@ -205,7 +203,7 @@ public class GSBuffer implements Buffer {
 	}
 
 	public Buffer appendGSValue(Serializable value) {
-		//System.out.println("Append value : " + value);
+		// System.out.println("Append value : " + value);
 		for (Entry<Integer, Class<?>> entry : ApiStatics.SUPPORTED_VALUE_CLASSES.entrySet()) {
 			if (entry.getValue().isInstance(value)) {
 				appendInt(entry.getKey());
@@ -249,6 +247,9 @@ public class GSBuffer implements Buffer {
 				}
 				case 9: {
 					appendGSClazz((Class<?>) value);
+					return this;
+				}
+				case 10: {
 					return this;
 				}
 				default:
@@ -354,6 +355,8 @@ public class GSBuffer implements Buffer {
 			return getGSString();
 		case 9:
 			return getGSClazz();
+		case 10:
+			return null;
 		default:
 			throw new IllegalStateException("unknowned class code");
 		}
@@ -519,4 +522,23 @@ public class GSBuffer implements Buffer {
 		return internal.setUnsignedShort(arg0, arg1);
 	}
 
+	@Override
+	public Buffer getBytes(byte[] arg0) {
+		return internal.getBytes(arg0);
+	}
+
+	@Override
+	public Buffer getBytes(byte[] arg0, int arg1) {
+		return internal.getBytes(arg0, arg1);
+	}
+
+	@Override
+	public Buffer getBytes(int arg0, int arg1, byte[] arg2) {
+		return internal.getBytes(arg0, arg1, arg2);
+	}
+
+	@Override
+	public Buffer getBytes(int arg0, int arg1, byte[] arg2, int arg3) {
+		return internal.getBytes(arg0, arg1, arg2, arg3);
+	}
 }

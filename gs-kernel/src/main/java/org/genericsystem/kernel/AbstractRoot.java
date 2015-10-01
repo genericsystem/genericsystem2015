@@ -1,7 +1,6 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import org.genericsystem.api.core.ApiStatics;
@@ -14,7 +13,7 @@ import org.genericsystem.common.Vertex;
 
 public abstract class AbstractRoot extends AbstractEngine implements Generic, Protocole {
 
-	protected final Archiver archiver;
+	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
 	private TsGenerator generator = new TsGenerator();;
 
@@ -23,24 +22,24 @@ public abstract class AbstractRoot extends AbstractEngine implements Generic, Pr
 		return this;
 	}
 
-	public AbstractRoot() {
-		this(new Class[] {});
-	}
-
-	public AbstractRoot(Class<?>... userClasses) {
-		this(Statics.ENGINE_VALUE, userClasses);
-	}
-
-	public AbstractRoot(String value, Class<?>... userClasses) {
-		this(value, null, userClasses);
-	}
-
-	public AbstractRoot(String value, String persistentDirectoryPath, Class<?>... userClasses) {
-		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
-		startSystemCache(userClasses);
-		archiver = new Archiver(this, persistentDirectoryPath);
-		isInitialized = true;
-	}
+	// public AbstractRoot() {
+	// this(new Class[] {});
+	// }
+	//
+	// public AbstractRoot(Class<?>... userClasses) {
+	// this(Statics.ENGINE_VALUE, userClasses);
+	// }
+	//
+	// public AbstractRoot(String value, Class<?>... userClasses) {
+	// this(value, null, userClasses);
+	// }
+	//
+	// public AbstractRoot(String value, String persistentDirectoryPath, Class<?>... userClasses) {
+	// init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
+	// startSystemCache(userClasses);
+	// archiver = new Archiver(this, persistentDirectoryPath);
+	// isInitialized = true;
+	// }
 
 	@Override
 	public Cache newCache() {

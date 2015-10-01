@@ -9,6 +9,11 @@ import org.genericsystem.common.Vertex;
 public abstract class AbstractGSLightClient extends AbstractGSClient implements ServerCacheProtocole {
 
 	@Override
+	public long newCacheId() {
+		return synchonizeTask(task -> send(Buffer.buffer().appendInt(NEW_CACHE), buff -> task.handle(new GSBuffer(buff).getLong())));
+	}
+
+	@Override
 	public long shiftTs(long cacheId) {
 		return synchonizeTask(task -> send(Buffer.buffer().appendInt(SHIFT_TS).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLong())));
 

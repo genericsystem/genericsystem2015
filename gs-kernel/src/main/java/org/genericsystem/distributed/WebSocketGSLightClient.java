@@ -23,7 +23,7 @@ public class WebSocketGSLightClient extends AbstractGSLightClient {
 	@Override
 	<T> void send(Buffer buffer, Handler<Buffer> responseHandler) {
 		webSocket.handler(responseHandler);
-		webSocket.writeBinaryMessage(buffer);
+		webSocket.write(buffer);
 	}
 
 	@Override

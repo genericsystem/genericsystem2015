@@ -1,12 +1,10 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.buffer.Buffer;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.kernel.HeavyServerEngine;
 
 public abstract class AbstractHeavyGSServer extends AbstractGSServer {
@@ -74,15 +72,8 @@ public abstract class AbstractHeavyGSServer extends AbstractGSServer {
 			return replyBuffer.appendLong(root.unmount(gsBuffer.getLong()));
 		case AbstractGSClient.GET_CACHE_LEVEL:
 			return replyBuffer.appendInt(root.getCacheLevel(gsBuffer.getLong()));
-
-			// case AbstractGSClient.APPLY:
-			// try {
-			// root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
-			// return replyBuffer.appendLong(0);
-			// } catch (Exception e) {
-			// e.printStackTrace();
-			// return replyBuffer.appendLong(e instanceof ConcurrencyControlException ? Statics.CONCURRENCY_CONTROL_EXCEPTION : Statics.OTHER_EXCEPTION);
-			// }
+		case AbstractGSClient.NEW_CACHE:
+			return replyBuffer.appendLong(root.newCacheId());
 		default:
 			throw new IllegalStateException("unable to find method : " + methodId);
 		}

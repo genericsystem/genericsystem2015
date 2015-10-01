@@ -16,7 +16,7 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 		this.checker = buildChecker();
 	}
 
-	public abstract long getTs();
+	// public abstract long getTs();
 
 	protected Checker buildChecker() {
 		return new Checker(this);

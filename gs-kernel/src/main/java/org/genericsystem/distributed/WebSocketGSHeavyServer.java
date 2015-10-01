@@ -1,12 +1,11 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.genericsystem.kernel.AbstractRoot;
 import org.genericsystem.kernel.HeavyServerEngine;
 
@@ -43,8 +42,10 @@ public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					webSocket.writeBinaryMessage(getReplyBuffer(methodId, (HeavyServerEngine) root, gsBuffer));
-				});
+					Buffer result = getReplyBuffer(methodId, (HeavyServerEngine) root, gsBuffer);
+					// System.out.println("Write result");
+						webSocket.writeBinaryMessage(result);
+					});
 
 			});
 			AbstractGSServer.<HttpServer> synchonizeTask(handler -> httpServer.listen(handler));

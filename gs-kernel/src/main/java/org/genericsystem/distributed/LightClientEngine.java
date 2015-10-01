@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
-import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
@@ -43,15 +41,6 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 	@Override
 	public LightCache newCache() {
 		return new LightCache(this);
-	}
-
-	public Cache newCache(ContextEventListener<Generic> listener) {
-		return new Cache(this, listener) {
-			@Override
-			protected HeavyClientTransaction buildTransaction() {
-				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
-			}
-		};
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {

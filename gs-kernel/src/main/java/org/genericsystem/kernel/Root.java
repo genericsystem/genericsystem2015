@@ -1,6 +1,8 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
+import java.util.Collections;
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -31,7 +33,10 @@ public class Root extends AbstractRoot implements Generic, ClientCacheProtocole 
 	}
 
 	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(value, persistentDirectoryPath, userClasses);
+		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
+		startSystemCache(userClasses);
+		archiver = new Archiver(this, persistentDirectoryPath);
+		isInitialized = true;
 	}
 
 	@Override
