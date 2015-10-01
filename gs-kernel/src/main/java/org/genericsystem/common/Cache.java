@@ -2,6 +2,7 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -31,12 +32,22 @@ public abstract class Cache extends AbstractCache implements DefaultCache<Generi
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected Cache(AbstractEngine root) {
-		this(root, new ContextEventListener<Generic>() {});
+		this(root, new ContextEventListener<Generic>() {
+		});
+	}
+
+	protected Cache(AbstractEngine root, long cacheId) {
+		this(root, new ContextEventListener<Generic>() {
+		});
 	}
 
 	protected Cache(AbstractEngine root, ContextEventListener<Generic> listener) {
+		this(root, root.pickNewTs(), listener);
+	}
+
+	protected Cache(AbstractEngine root, long cacheId, ContextEventListener<Generic> listener) {
 		super(root);
-		this.cacheId = root.pickNewTs();
+		this.cacheId = cacheId;
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
 		this.transaction = buildTransaction();
@@ -241,13 +252,17 @@ public abstract class Cache extends AbstractCache implements DefaultCache<Generi
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {
+		}
 
-		default void triggersRefreshEvent() {}
+		default void triggersRefreshEvent() {
+		}
 
-		default void triggersClearEvent() {}
+		default void triggersClearEvent() {
+		}
 
-		default void triggersFlushEvent() {}
+		default void triggersFlushEvent() {
+		}
 	}
 
 }

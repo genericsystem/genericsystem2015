@@ -267,12 +267,21 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		map.remove(cacheId);
 	}
 
-	public Cache getCurrentCache(long id) {
-		Cache cache = (Cache) map.get(id);
+	public Cache getCurrentCache(long cacheId) {
+		Cache cache = (Cache) map.get(cacheId);
 		if (cache != null)
 			return cache;
-		Cache result = (Cache) map.putIfAbsent(id, cache = newCache(id));
+		Cache result = (Cache) map.putIfAbsent(cacheId, cache = newCache(cacheId));
 		return result != null ? result : cache;
+	}
+
+	private Cache newCache(long cacheId) {
+		return new Cache(this, cacheId) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction((AbstractRoot) getRoot());
+			}
+		};
 	}
 
 	@Override
