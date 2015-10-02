@@ -5,9 +5,11 @@ import java.util.Arrays;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.distributed.FileSystem.Directory;
-import org.genericsystem.distributed.FileSystem.File;
-import org.genericsystem.distributed.FileSystem.FileType;
+import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
+import org.genericsystem.distributed.cacheonclient.FileSystem.Directory;
+import org.genericsystem.distributed.cacheonclient.FileSystem.File;
+import org.genericsystem.distributed.cacheonclient.FileSystem.FileType;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 

@@ -3,8 +3,9 @@ package org.genericsystem.cacheonserver;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
+import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
 import org.testng.annotations.Test;
 
 @Test

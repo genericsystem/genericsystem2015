@@ -3,6 +3,7 @@ package org.genericsystem.kernel;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Generic;

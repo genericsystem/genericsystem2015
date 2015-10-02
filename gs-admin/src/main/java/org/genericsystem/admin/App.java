@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -16,8 +17,8 @@ import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.HeavyClientEngine;
-import org.genericsystem.distributed.WebSocketGSLightServer;
+import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
+import org.genericsystem.distributed.cacheonclient.WebSocketGSLightServer;
 import org.genericsystem.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 

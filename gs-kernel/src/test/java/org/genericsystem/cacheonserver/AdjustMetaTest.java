@@ -1,7 +1,7 @@
 package org.genericsystem.cacheonserver;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.LightClientEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test

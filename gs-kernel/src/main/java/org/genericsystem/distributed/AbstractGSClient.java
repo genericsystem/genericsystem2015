@@ -2,10 +2,12 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
@@ -31,7 +33,7 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int GET_CACHE_LEVEL = 16;
 	public static final int NEW_CACHE = 17;
 
-	abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
+	protected abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
 
 	@Override
 	public Vertex getVertex(long id) {

@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.WebSocketGSHeavyServer;
+import org.genericsystem.distributed.cacheonserver.WebSocketGSHeavyServer;
 import org.genericsystem.kernel.Statics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
