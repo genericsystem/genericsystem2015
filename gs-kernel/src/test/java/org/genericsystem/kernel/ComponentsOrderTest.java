@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class ComponentsOrderTest extends AbstractTest {
 
 	public void test001() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -21,7 +21,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test002() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -31,7 +31,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test003() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -41,7 +41,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test004() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -51,7 +51,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test005() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -61,7 +61,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test006() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -71,7 +71,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test007() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -81,7 +81,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test008() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -91,7 +91,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test009() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -100,7 +100,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test010() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		final Generic largerThan = root.addInstance("largerThan", car, car);
 		final Generic myBmw = car.addInstance("myBmw");
@@ -117,7 +117,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test011() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		final Generic largerThan = root.addInstance("largerThan", car, car);
 		final Generic myBmw = car.addInstance("myBmw");
@@ -134,7 +134,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test012() {
-		final Root engine = new Root();
+		final LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		final Generic largerThan = engine.addInstance("largerThan", car, car);
 		final Generic myBmw = car.addInstance("myBmw");
@@ -151,7 +151,7 @@ public class ComponentsOrderTest extends AbstractTest {
 	}
 
 	public void test013() {
-		final Root engine = new Root();
+		final LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		final Generic largerThan = engine.addInstance("largerThan", car, car);
 		final Generic myBmw = car.addInstance("myBmw");

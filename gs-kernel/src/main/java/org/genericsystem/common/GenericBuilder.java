@@ -7,7 +7,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
 import org.genericsystem.api.core.exceptions.ExistsException;
 
 public abstract class GenericBuilder {
-	protected final Cache context;
+	protected final HeavyCache context;
 	final Generic meta;
 	protected Generic adjustedMeta;
 	final List<Generic> overrides;
@@ -16,7 +16,7 @@ public abstract class GenericBuilder {
 	protected final List<Generic> components;
 	protected Generic gettable;
 
-	GenericBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+	GenericBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		assert overrides != null;
 		this.context = context;
 		this.meta = meta != null ? meta : (Generic) context.getRoot();
@@ -90,7 +90,7 @@ public abstract class GenericBuilder {
 
 	public static class AddBuilder extends GenericBuilder {
 
-		AddBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		AddBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -104,7 +104,7 @@ public abstract class GenericBuilder {
 
 	static class SetBuilder extends GenericBuilder {
 
-		SetBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		SetBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -121,7 +121,7 @@ public abstract class GenericBuilder {
 
 		private final Generic update;
 
-		UpdateBuilder(Cache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		UpdateBuilder(HeavyCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -139,7 +139,7 @@ public abstract class GenericBuilder {
 
 		private final Generic update;
 
-		MergeBuilder(Cache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		MergeBuilder(HeavyCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -151,7 +151,7 @@ public abstract class GenericBuilder {
 
 	public static class AtomicBuilder extends GenericBuilder {
 
-		protected AtomicBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		protected AtomicBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -164,7 +164,7 @@ public abstract class GenericBuilder {
 
 		private final Class<?> clazz;
 
-		SetSystemBuilder(Cache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		SetSystemBuilder(HeavyCache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.clazz = clazz;
 		}

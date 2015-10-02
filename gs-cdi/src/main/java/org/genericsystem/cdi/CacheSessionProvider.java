@@ -5,7 +5,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
 
 @SessionScoped
 public class CacheSessionProvider implements Serializable {
@@ -15,14 +15,14 @@ public class CacheSessionProvider implements Serializable {
 	@Inject
 	private transient Engine engine;
 
-	private transient Cache currentCache;
+	private transient HeavyCache currentCache;
 
 	@PostConstruct
 	public void init() {
 		currentCache = engine.newCache();
 	}
 
-	public Cache getCurrentCache() {
+	public HeavyCache getCurrentCache() {
 		return currentCache;
 	}
 

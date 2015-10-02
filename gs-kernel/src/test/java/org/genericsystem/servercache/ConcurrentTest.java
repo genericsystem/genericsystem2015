@@ -2,7 +2,7 @@ package org.genericsystem.servercache;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
@@ -12,8 +12,8 @@ public class ConcurrentTest extends AbstractTest {
 
 	public void test() {
 		HeavyServerEngine engine = new HeavyServerEngine();
-		Cache cache = engine.getCurrentCache();
-		Cache cache2 = engine.newCache().start();
+		HeavyCache cache = engine.getCurrentCache();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 
 		assert cache2.isAlive(car);
@@ -31,7 +31,7 @@ public class ConcurrentTest extends AbstractTest {
 	public void testNonFlushedModificationsStillAliveInCache() {
 		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic car = engine.addInstance("Car");
-		Cache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
@@ -39,14 +39,14 @@ public class ConcurrentTest extends AbstractTest {
 
 	public void testFlushedModificationsAvailableInNewCacheOk() {
 		HeavyServerEngine engine = new HeavyServerEngine();
-		Cache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 
-		Cache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
@@ -54,13 +54,13 @@ public class ConcurrentTest extends AbstractTest {
 
 	public void testNonFlushedModificationsAreNotAvailableInNewCacheOk() {
 		HeavyServerEngine engine = new HeavyServerEngine();
-		Cache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 
-		Cache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		assert !cache2.isAlive(car);
 		assert !engine.getInstances().contains(car);
 	}
@@ -85,10 +85,10 @@ public class ConcurrentTest extends AbstractTest {
 	//
 	public void testConcurentRemoveKO() {
 		HeavyServerEngine engine = new HeavyServerEngine();
-		Cache cache = engine.newCache().start();
+		HeavyCache cache = engine.newCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();
-		Cache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
 		cache.start();
@@ -112,11 +112,11 @@ public class ConcurrentTest extends AbstractTest {
 
 	public void testConcurrencyControlException() {
 		HeavyServerEngine engine = new HeavyServerEngine();
-		Cache cache = engine.newCache().start();
+		HeavyCache cache = engine.newCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();
 
-		Cache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
 

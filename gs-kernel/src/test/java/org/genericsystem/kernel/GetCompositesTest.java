@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class GetCompositesTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = vehicle.addAttribute("power");
 		vehicle.addAttribute("option");
@@ -16,7 +16,7 @@ public class GetCompositesTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		vehicle.addAttribute("power");

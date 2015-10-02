@@ -12,21 +12,21 @@ import org.testng.annotations.Test;
 public class BindingServiceTest extends AbstractTest {
 
 	public void test001() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert "Vehicle".equals(vehicle.getValue());
 		assert vehicle.isAlive();
 	}
 
 	public void test002() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		engine.addInstance("Vehicle");
 
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);
 	}
 
 	public void test003() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic animal = engine.addInstance("Animal");// Alone type
 		Generic machine = engine.addInstance("Machine");
 		Generic vehicle = engine.addInstance(machine, "Vehicle");
@@ -43,7 +43,7 @@ public class BindingServiceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power");
 
@@ -53,7 +53,7 @@ public class BindingServiceTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power");
 		Generic vehiclePower = vehicle.addAttribute(power, "VehiclePower");
@@ -70,7 +70,7 @@ public class BindingServiceTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power");
 		Generic vehiclePower = vehicle.addAttribute(power, "VehiclePower");
@@ -87,7 +87,7 @@ public class BindingServiceTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power");
 
@@ -96,7 +96,7 @@ public class BindingServiceTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Generic engine = new Root();
+		Generic engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power");
 		Generic vehiclePower = vehicle.addAttribute(power, "VehiclePower");

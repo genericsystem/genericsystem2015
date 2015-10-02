@@ -6,33 +6,33 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Protocole.ClientCacheProtocole;
 import org.genericsystem.common.Vertex;
 
-public class Root extends AbstractRoot implements Generic, ClientCacheProtocole {
+public class LightServerEngine extends AbstractServer implements Generic, ClientCacheProtocole {
 
 	@Override
-	public Root getRoot() {
+	public LightServerEngine getRoot() {
 		return this;
 	}
 
-	public Root() {
+	public LightServerEngine() {
 		this(new Class[] {});
 	}
 
-	public Root(Class<?>... userClasses) {
+	public LightServerEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public Root(String value, Class<?>... userClasses) {
+	public LightServerEngine(String value, Class<?>... userClasses) {
 		this(value, null, userClasses);
 	}
 
-	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
+	public LightServerEngine(String value, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
@@ -40,12 +40,12 @@ public class Root extends AbstractRoot implements Generic, ClientCacheProtocole 
 	}
 
 	@Override
-	public Cache newCache() {
-		return new Cache(this) {
+	public HeavyCache newCache() {
+		return new HeavyCache(this) {
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((Root) getRoot());
+				return new Transaction((LightServerEngine) getRoot());
 			}
 
 			@Override

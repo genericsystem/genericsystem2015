@@ -16,22 +16,22 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test00() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
 			}
 		};
 		root.close();
-		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new LightServerEngine(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	public void test001() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot);
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot);
 		// root.close();
 		try {
-			Root root2 = new Root(Statics.ENGINE_VALUE, snapshot);
+			LightServerEngine root2 = new LightServerEngine(Statics.ENGINE_VALUE, snapshot);
 			assert false;
 		} catch (Exception e) {
 			// ignore
@@ -40,7 +40,7 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test002() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -48,14 +48,14 @@ public class PersistenceTest extends AbstractTest {
 		};
 		root.addInstance("Vehicle");
 		root.close();
-		Root root2 = new Root(Statics.ENGINE_VALUE, snapshot);
+		LightServerEngine root2 = new LightServerEngine(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, root2);
 		assert null != root2.getInstance("Vehicle");
 	}
 
 	public void test003() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
 		Generic vehicle = root.find(Vehicle.class);
 		vehicle.addInstance("myVehicle");
 		assert vehicle.getBirthTs() == ApiStatics.TS_SYSTEM;
@@ -63,13 +63,13 @@ public class PersistenceTest extends AbstractTest {
 		assert vehicle.isSystem();
 		root.close();
 
-		Root root2 = new Root(Statics.ENGINE_VALUE, snapshot);
+		LightServerEngine root2 = new LightServerEngine(Statics.ENGINE_VALUE, snapshot);
 		Generic vehicle2 = root2.getInstance(Vehicle.class);
 		assert vehicle2.getInstance("myVehicle").getBirthTs() > vehicle2.getBirthTs();
 		assert !vehicle2.isSystem();
 		root2.close();
 
-		Root root3 = new Root(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		LightServerEngine root3 = new LightServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
 		Generic vehicle3 = root3.find(Vehicle.class);
 		assert vehicle3.getBirthTs() == ApiStatics.TS_SYSTEM;
 		assert vehicle3.getInstance("myVehicle").getBirthTs() > vehicle3.getBirthTs();
@@ -79,7 +79,7 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test004() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -90,12 +90,12 @@ public class PersistenceTest extends AbstractTest {
 		Generic myVehicle = vehicle.addInstance("myVehicle");
 		myVehicle.setHolder(vehiclePower, "123");
 		root.close();
-		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new LightServerEngine(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	public void test005() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -106,13 +106,13 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance(vehicle, "Bike");
 		car.remove();
 		root.close();
-		Root root2 = new Root(Statics.ENGINE_VALUE, snapshot);
+		LightServerEngine root2 = new LightServerEngine(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, root2);
 	}
 
 	public void test006() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -125,12 +125,12 @@ public class PersistenceTest extends AbstractTest {
 		Generic red = color.addInstance("red");
 		myCar.setHolder(carColor, "myCarRed", red);
 		root.close();
-		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new LightServerEngine(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	public void test007() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -140,12 +140,12 @@ public class PersistenceTest extends AbstractTest {
 		Generic robot = root.addInstance("Robot");
 		root.addInstance(Arrays.asList(car, robot), "Transformer");
 		root.close();
-		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new LightServerEngine(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	public void test008() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -156,12 +156,12 @@ public class PersistenceTest extends AbstractTest {
 		Generic robot = root.addInstance(object, "Robot");
 		root.addInstance(Arrays.asList(car, robot), "Transformer");
 		root.close();
-		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new LightServerEngine(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	public void test009() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Root root = new Root(Statics.ENGINE_VALUE, snapshot) {
+		LightServerEngine root = new LightServerEngine(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -173,7 +173,7 @@ public class PersistenceTest extends AbstractTest {
 		vehicle.addInstance(car, "Microcar");
 		vehicle.addInstance(electriccar, "Hybrid");
 		root.close();
-		compareGraph(root, new Root(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new LightServerEngine(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	private static String cleanDirectory(String directoryPath) {

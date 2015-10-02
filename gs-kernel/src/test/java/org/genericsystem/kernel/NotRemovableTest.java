@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 public class NotRemovableTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("myBmw");
@@ -23,7 +23,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.addAttribute("Color");
 		car.addInstance("myBmw");
@@ -32,7 +32,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("myBmw");
@@ -42,7 +42,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root(Power.class);
+		LightServerEngine root = new LightServerEngine(Power.class);
 		Generic power = root.find(Power.class);
 		assert power.isPropertyConstraintEnabled();
 		catchAndCheckCause(() -> power.disablePropertyConstraint(), IllegalAccessException.class);

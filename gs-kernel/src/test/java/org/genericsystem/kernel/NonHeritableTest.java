@@ -8,27 +8,27 @@ import org.testng.annotations.Test;
 public class NonHeritableTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.enableInheritance();
 		assert car.isInheritanceEnabled();
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		assert car.isInheritanceEnabled();
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.disableInheritance();
 		assert !car.isInheritanceEnabled();
 	}
 
 	public void test004() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		assert car.isInheritanceEnabled();
 		car.disableInheritance();
@@ -38,7 +38,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.enableInheritance();
 		assert car.isInheritanceEnabled();
@@ -47,7 +47,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic defaultPower = car.addHolder(power, 233);
@@ -59,7 +59,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = vehicle.addAttribute("Power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -77,7 +77,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
@@ -106,7 +106,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addAttribute("CarColor", color);

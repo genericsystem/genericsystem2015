@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class CascadeRemoveTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -26,7 +26,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -42,7 +42,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -57,7 +57,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -72,7 +72,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -83,7 +83,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);

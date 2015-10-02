@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class MetaRelationTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic metaRelation = root.getMetaRelation();
 		assert metaRelation != null;
 		assert root.getLevel() == 0;
@@ -22,7 +22,7 @@ public class MetaRelationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic metaRelation = root.getMetaRelation();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");

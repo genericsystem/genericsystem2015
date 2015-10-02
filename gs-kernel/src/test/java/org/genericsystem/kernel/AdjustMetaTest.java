@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class AdjustMetaTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic metaAttribute = root.getMetaAttribute();
 		assert metaAttribute.equals(root.adjustMeta(root));
 		assert metaAttribute == root.adjustMeta(root);
@@ -23,25 +23,25 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		assert root == root.adjustMeta(Collections.emptyList());
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		assert root.getMetaAttribute() == root.adjustMeta(car);
 	}
 
 	public void test004() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		assert root.getMetaRelation() == root.adjustMeta(car, color);
 	}
 
 	public void test005() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		assert root.getMetaAttribute() == root.adjustMeta(root);
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
@@ -53,7 +53,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -63,7 +63,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		assert root.getMetaAttribute().equalsRegardlessSupers(root.getMetaAttribute(), root.getMetaAttribute().getValue(), Collections.singletonList(root));
 
 		Generic car = root.addInstance("Car");
@@ -75,7 +75,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -85,7 +85,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -96,7 +96,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -107,7 +107,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test011() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -121,7 +121,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test012() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -136,7 +136,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test013() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		// TODO power n'est pas un attribut comme ça ? carPower n'a aucun rapport avec car ?
 		Generic power = root.addInstance("Power", root);
 		Generic car = root.addInstance("Car", root);
@@ -149,7 +149,7 @@ public class AdjustMetaTest extends AbstractTest {
 	 */
 
 	public void test014() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic bike = root.addInstance(vehicle, "Bike");
@@ -161,7 +161,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test015() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic bike = root.addInstance(vehicle, "Bike");
@@ -176,7 +176,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test016() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic bike = root.addInstance(vehicle, "Bike");
 		Generic vtt = root.addInstance(bike, "VTT");
@@ -190,7 +190,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test017() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -207,7 +207,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test018() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -221,7 +221,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test019() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic systemMap = root.getMap();
 		assert systemMap.getMeta().equals(metaAttribute);

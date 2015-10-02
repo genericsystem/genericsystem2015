@@ -1,6 +1,6 @@
 package org.genericsystem.cdi;
 
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
 
@@ -30,7 +30,7 @@ public class CacheTest extends AbstractTest {
 	// }
 
 	public void test001_mountNewCache() {
-		Cache currentCache = engine.getCurrentCache();
+		HeavyCache currentCache = engine.getCurrentCache();
 		currentCache.mount();
 		assert engine.getCurrentCache() == currentCache;
 		engine.addInstance("Vehicle");
@@ -41,7 +41,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_mountNewCache() {
-		Cache currentCache = engine.getCurrentCache();
+		HeavyCache currentCache = engine.getCurrentCache();
 		assert currentCache.getCacheLevel() == 0;
 		currentCache.mount();
 		Generic vehicle = engine.addInstance("Vehicle");

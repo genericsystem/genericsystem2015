@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class LinkTest extends AbstractTest {
 
 	public void test001() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -20,7 +20,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test002() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -31,7 +31,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test003() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -44,7 +44,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test004() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -57,7 +57,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test005() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic door = root.addInstance("Door");
@@ -72,7 +72,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test006() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -85,7 +85,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test007() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -96,7 +96,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test008() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -108,7 +108,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test009() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic humain = root.addInstance("Human");
 		Generic hierarchy = humain.addRelation("Hierarchy", humain);
 		Generic nicolas = humain.addInstance("nicolas");
@@ -122,7 +122,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test010() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic humain = root.addInstance("Human");
 		Generic hierarchy = humain.addRelation("Hierarchy", humain);
 		Generic nicolas = humain.addInstance("nicolas");
@@ -133,7 +133,7 @@ public class LinkTest extends AbstractTest {
 	}
 
 	public void test011() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic humain = root.addInstance("Human");
 		Generic hierarchy = humain.addRelation("Hierarchy", humain);
 		Generic nicolas = humain.addInstance("nicolas");

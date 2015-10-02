@@ -14,7 +14,7 @@ import org.genericsystem.api.core.exceptions.ConstraintViolationException;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.constraints.Constraint.CheckedConstraint;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.LightServerEngine;
 import org.genericsystem.mutability.Engine;
 import org.genericsystem.mutability.Generic;
 import org.testng.annotations.Test;
@@ -54,7 +54,7 @@ public class MyConstraint extends AbstractTest {
 	@SystemGeneric
 	@Meta(MetaAttribute.class)
 	@Supers(SystemMap.class)
-	@Components(Root.class)
+	@Components(LightServerEngine.class)
 	@AxedPropertyClassValue(propertyClass = InstanceSizeConstraint.class, pos = ApiStatics.NO_POSITION)
 	@Dependencies({ DefaultValue.class })
 	public static class DefaultInstanceSizeConstraint {

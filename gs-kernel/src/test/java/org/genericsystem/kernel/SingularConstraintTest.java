@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class SingularConstraintTest extends AbstractTest {
 
 	public void test000() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addAttribute("CarColor", color);
@@ -24,7 +24,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -39,7 +39,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -53,7 +53,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic red = color.addInstance("red");
@@ -66,7 +66,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");
@@ -84,7 +84,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -99,7 +99,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");
@@ -117,7 +117,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -137,7 +137,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -154,7 +154,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -174,7 +174,7 @@ public class SingularConstraintTest extends AbstractTest {
 
 	public void test010() {
 
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("myBmw");
@@ -189,7 +189,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test011() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");
@@ -206,7 +206,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test012() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");

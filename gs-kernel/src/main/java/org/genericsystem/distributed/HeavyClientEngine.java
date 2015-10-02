@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.Protocole.ClientCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
@@ -41,8 +41,8 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 	}
 
 	@Override
-	public Cache newCache() {
-		return new Cache(this) {
+	public HeavyCache newCache() {
+		return new HeavyCache(this) {
 			@Override
 			protected HeavyClientTransaction buildTransaction() {
 				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
@@ -50,8 +50,8 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 		};
 	}
 
-	public Cache newCache(ContextEventListener<Generic> listener) {
-		return new Cache(this, listener) {
+	public HeavyCache newCache(ContextEventListener<Generic> listener) {
+		return new HeavyCache(this, listener) {
 			@Override
 			protected HeavyClientTransaction buildTransaction() {
 				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
@@ -60,8 +60,8 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 	}
 
 	@Override
-	public Cache getCurrentCache() {
-		return (Cache) super.getCurrentCache();
+	public HeavyCache getCurrentCache() {
+		return (HeavyCache) super.getCurrentCache();
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {

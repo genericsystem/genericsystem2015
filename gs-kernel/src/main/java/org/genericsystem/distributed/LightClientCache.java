@@ -10,7 +10,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.kernel.Statics;
 
-public class LightCache extends AbstractCache implements DefaultCache<Generic> {
+public class LightClientCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private final long cacheId;
 	private LightClientTransaction transaction;
@@ -23,7 +23,7 @@ public class LightCache extends AbstractCache implements DefaultCache<Generic> {
 		return transaction;
 	}
 
-	protected LightCache(LightClientEngine root) {
+	protected LightClientCache(LightClientEngine root) {
 		super(root);
 		cacheId = getRoot().getServer().newCacheId();
 		System.out.println("Create LightCache : " + cacheId);

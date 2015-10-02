@@ -58,9 +58,9 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 
 	public static interface Wrapper {
 
-		Cache get();
+		HeavyCache get();
 
-		void set(Cache context);
+		void set(HeavyCache context);
 	}
 
 	// public class ContextWrapper implements Wrapper {

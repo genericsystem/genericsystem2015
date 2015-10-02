@@ -39,8 +39,8 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 	}
 
 	@Override
-	public LightCache newCache() {
-		return new LightCache(this);
+	public LightClientCache newCache() {
+		return new LightClientCache(this);
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {

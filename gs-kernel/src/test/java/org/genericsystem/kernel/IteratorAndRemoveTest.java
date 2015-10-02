@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class IteratorAndRemoveTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.addInstance("myFirstCar");
 		car.addInstance("mySecondCar");
@@ -29,7 +29,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myFirstCar = car.addInstance("myFirstCar");
 		car.addInstance("mySecondCar");
@@ -43,7 +43,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.addInstance("myFirstCar");
 		car.addInstance("mySecondCar");
@@ -66,7 +66,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		car.addAttribute("Options");
 		car.addAttribute("Power");
@@ -78,7 +78,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Generic root = new Root();
+		Generic root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic options = car.addAttribute("Options");
 		Generic power = car.addAttribute("Power");

@@ -30,7 +30,7 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.LightServerEngine;
 
 public class SystemCache {
 
@@ -44,7 +44,7 @@ public class SystemCache {
 	public SystemCache(AbstractEngine root) {
 		this.root = root;
 		put(DefaultRoot.class, (Generic) root);
-		put(Root.class, (Generic) root);
+		put(LightServerEngine.class, (Generic) root);
 		put(root.getClass(), (Generic) root);
 	}
 
@@ -70,8 +70,8 @@ public class SystemCache {
 		Serializable value = findValue(clazz);
 		List<Generic> components = setComponents(clazz);
 		AbstractCache cache = root.getCurrentCache();
-		if (cache instanceof Cache)
-			systemProperty = new SetSystemBuilder((Cache) cache, clazz, meta, overrides, value, components).resolve();
+		if (cache instanceof HeavyCache)
+			systemProperty = new SetSystemBuilder((HeavyCache) cache, clazz, meta, overrides, value, components).resolve();
 		else {
 			systemProperty = cache.get(meta, overrides, value, components);
 			if (systemProperty == null)

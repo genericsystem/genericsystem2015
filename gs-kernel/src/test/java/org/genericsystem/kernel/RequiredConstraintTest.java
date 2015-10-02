@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class RequiredConstraintTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic numberDoors = root.addInstance("NumberDoors");

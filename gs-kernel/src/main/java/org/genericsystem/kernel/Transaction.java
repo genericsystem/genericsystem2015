@@ -13,24 +13,24 @@ import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
-import org.genericsystem.kernel.AbstractRoot.RootServerHandler;
+import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 public class Transaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
 
-	public Transaction(AbstractRoot root, long ts) {
+	public Transaction(AbstractServer root, long ts) {
 		super(root);
 		this.ts = ts;
 	}
 
-	public Transaction(AbstractRoot root) {
+	public Transaction(AbstractServer root) {
 		this(root, root.pickNewTs());
 	}
 
 	@Override
-	public AbstractRoot getRoot() {
-		return (AbstractRoot) super.getRoot();
+	public AbstractServer getRoot() {
+		return (AbstractServer) super.getRoot();
 	}
 
 	@Override

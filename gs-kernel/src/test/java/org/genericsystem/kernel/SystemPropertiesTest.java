@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class SystemPropertiesTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		power.enablePropertyConstraint();
@@ -28,7 +28,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = root.addInstance("Power", vehicle);
@@ -52,7 +52,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = root.addInstance("Power", vehicle);

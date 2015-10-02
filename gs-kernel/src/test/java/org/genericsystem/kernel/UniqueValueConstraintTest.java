@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class UniqueValueConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic power = root.addInstance("Power", car);
@@ -23,7 +23,7 @@ public class UniqueValueConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -35,7 +35,7 @@ public class UniqueValueConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -47,7 +47,7 @@ public class UniqueValueConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");

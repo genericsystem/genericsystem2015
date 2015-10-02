@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -17,8 +16,8 @@ import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.LightClientEngine;
-import org.genericsystem.distributed.WebSocketGSHeavyServer;
+import org.genericsystem.distributed.HeavyClientEngine;
+import org.genericsystem.distributed.WebSocketGSLightServer;
 import org.genericsystem.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 
@@ -29,7 +28,7 @@ import org.genericsystem.kernel.Statics;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		WebSocketGSHeavyServer server = new WebSocketGSHeavyServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test2").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		WebSocketGSLightServer server = new WebSocketGSLightServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test2").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		launch(args);
 		// server.stop();
@@ -41,7 +40,7 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		LightClientEngine engine = new LightClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
+		HeavyClientEngine engine = new HeavyClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.setInstance("myBmw");

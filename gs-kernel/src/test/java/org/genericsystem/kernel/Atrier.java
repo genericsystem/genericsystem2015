@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 public class Atrier extends AbstractTest {
 
 	public void test001() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		final Generic carColor = car.addRelation("CarColor", color);
@@ -43,7 +43,7 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void test002() {
-		final Root engine = new Root();
+		final LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		final Generic carColor = car.setRelation("CarColor", color);
@@ -63,7 +63,7 @@ public class Atrier extends AbstractTest {
 
 	public void test003() {
 
-		final Root engine = new Root();
+		final LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic time = engine.addInstance("Time");
@@ -128,7 +128,7 @@ public class Atrier extends AbstractTest {
 	// }
 
 	public void test006() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		final Generic carColor = car.setRelation("CarColor", color).enableSingularConstraint(ApiStatics.TARGET_POSITION);
@@ -142,7 +142,7 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void testMixin5() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic carPower = car.addAttribute("Power");
 		car.addHolder(carPower, 123);
@@ -165,7 +165,7 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void test007() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("Power");
 		Generic defaultVehiclePower = vehicle.addHolder(vehiclePower, 123);

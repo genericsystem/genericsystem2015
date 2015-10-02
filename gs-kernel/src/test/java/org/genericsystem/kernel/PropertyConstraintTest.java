@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class PropertyConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -24,7 +24,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic myCar = car.addInstance("myCar");
@@ -41,7 +41,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -53,7 +53,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root Root = new Root();
+		LightServerEngine Root = new LightServerEngine();
 		Generic car = Root.addInstance("Car");
 		Generic power = Root.addInstance("Power", car);
 		power.enablePropertyConstraint();
@@ -65,7 +65,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		power.enablePropertyConstraint();

@@ -14,7 +14,7 @@ import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.kernel.Statics;
 
-public abstract class Cache extends AbstractCache implements DefaultCache<Generic> {
+public abstract class HeavyCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private final Restructurator restructurator;
 	private IDifferential<Generic> transaction;
@@ -30,7 +30,7 @@ public abstract class Cache extends AbstractCache implements DefaultCache<Generi
 
 	protected abstract IDifferential<Generic> buildTransaction();
 
-	protected Cache(AbstractEngine root) {
+	protected HeavyCache(AbstractEngine root) {
 		this(root, new ContextEventListener<Generic>() {});
 	}
 
@@ -38,11 +38,11 @@ public abstract class Cache extends AbstractCache implements DefaultCache<Generi
 	// this(root, new ContextEventListener<Generic>() {});
 	// }
 
-	protected Cache(AbstractEngine root, ContextEventListener<Generic> listener) {
+	protected HeavyCache(AbstractEngine root, ContextEventListener<Generic> listener) {
 		this(root, root.pickNewTs(), listener);
 	}
 
-	protected Cache(AbstractEngine root, long cacheId, ContextEventListener<Generic> listener) {
+	protected HeavyCache(AbstractEngine root, long cacheId, ContextEventListener<Generic> listener) {
 		super(root);
 		this.cacheId = cacheId;
 		this.restructurator = buildRestructurator();

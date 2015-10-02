@@ -6,7 +6,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import java.util.ArrayList;
 import java.util.List;
-import org.genericsystem.kernel.AbstractRoot;
+import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.HeavyServerEngine;
 
 public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
@@ -32,7 +32,7 @@ public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
-				AbstractRoot root = roots.get(path);
+				AbstractServer root = roots.get(path);
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
 				webSocket.exceptionHandler(e -> {
@@ -62,7 +62,7 @@ public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 	}
 
 	@Override
-	protected AbstractRoot buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
+	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
 		return new HeavyServerEngine(value, persistentDirectoryPath, userClasses);
 	}
 }

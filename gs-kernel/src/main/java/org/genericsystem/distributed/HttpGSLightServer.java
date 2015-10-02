@@ -5,23 +5,23 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import java.util.ArrayList;
 import java.util.List;
-import org.genericsystem.kernel.AbstractRoot;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.AbstractServer;
+import org.genericsystem.kernel.LightServerEngine;
 
-public class HttpGSServer extends AbstractLightGSServer {
+public class HttpGSLightServer extends AbstractLightGSServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
 
-	public HttpGSServer(GSDeploymentOptions options) {
+	public HttpGSLightServer(GSDeploymentOptions options) {
 		super(options);
 		this.port = options.getPort();
 		this.host = options.getHost();
 	}
 
 	public static void main(String[] args) {
-		new HttpGSServer(new GSDeploymentOptions()).start();
+		new HttpGSLightServer(new GSDeploymentOptions()).start();
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class HttpGSServer extends AbstractLightGSServer {
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 			httpServer.requestHandler(request -> {
 				String path = request.path();
-				AbstractRoot root = roots.get(path);
+				AbstractServer root = roots.get(path);
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
 				request.exceptionHandler(e -> {
@@ -41,7 +41,7 @@ public class HttpGSServer extends AbstractLightGSServer {
 				request.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					request.response().end(getReplyBuffer(methodId, (Root) root, gsBuffer));
+					request.response().end(getReplyBuffer(methodId, (LightServerEngine) root, gsBuffer));
 					request.response().close();
 				});
 			});
@@ -59,7 +59,7 @@ public class HttpGSServer extends AbstractLightGSServer {
 	}
 
 	@Override
-	protected AbstractRoot buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new Root(value, persistentDirectoryPath, userClasses);
+	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
+		return new LightServerEngine(value, persistentDirectoryPath, userClasses);
 	}
 }

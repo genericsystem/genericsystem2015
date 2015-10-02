@@ -9,15 +9,15 @@ import java.util.stream.Collectors;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.AbstractCache;
-import org.genericsystem.common.Cache;
-import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultCache;
 
-public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtocole {
+public class HeavyServerEngine extends AbstractServer implements ServerCacheProtocole {
 
 	private ThreadLocal<Long> contextIds = new ThreadLocal<>();
 	private ConcurrentHashMap<Long, AbstractCache> map;
@@ -50,33 +50,33 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	}
 
 	@Override
-	public Cache newCache() {
-		Cache cache = new Cache(this) {
+	public HeavyCache newCache() {
+		HeavyCache cache = new HeavyCache(this) {
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((AbstractRoot) getRoot());
+				return new Transaction((AbstractServer) getRoot());
 			}
 		};
-		Cache result = (Cache) map.putIfAbsent(cache.getCacheId(), cache);
+		HeavyCache result = (HeavyCache) map.putIfAbsent(cache.getCacheId(), cache);
 		assert result == null;
 		return cache;
 	}
 
-	public Cache newCache(ContextEventListener<Generic> listener) {
-		Cache cache = new Cache(this, listener) {
+	public HeavyCache newCache(ContextEventListener<Generic> listener) {
+		HeavyCache cache = new HeavyCache(this, listener) {
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((AbstractRoot) getRoot());
+				return new Transaction((AbstractServer) getRoot());
 			}
 		};
-		Cache result = (Cache) map.putIfAbsent(cache.getCacheId(), cache);
+		HeavyCache result = (HeavyCache) map.putIfAbsent(cache.getCacheId(), cache);
 		assert result == null;
 		return cache;
 	}
 
 	@Override
 	public long newCacheId() {
-		Cache cache = newCache();
+		HeavyCache cache = newCache();
 		return cache.getCacheId();
 	}
 
@@ -174,9 +174,9 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		}
 	}
 
-	private <T> T safeContextExecute(long cacheId, Function<Cache, T> function) {
+	private <T> T safeContextExecute(long cacheId, Function<HeavyCache, T> function) {
 		// System.out.println("Safe context : " + cacheId);
-		Cache cache = getCurrentCache(cacheId);
+		HeavyCache cache = getCurrentCache(cacheId);
 		cache.start();
 		try {
 			return function.apply(cache);
@@ -257,10 +257,10 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 	}
 
 	@Override
-	public Cache getCurrentCache() {
+	public HeavyCache getCurrentCache() {
 		if (getRoot().isInitialized())
 			assert contextIds.get() != null : contextIds.get();
-		return (Cache) (getRoot().isInitialized() ? getCurrentCache(contextIds.get()) : super.getCurrentCache());
+		return (HeavyCache) (getRoot().isInitialized() ? getCurrentCache(contextIds.get()) : super.getCurrentCache());
 	}
 
 	@Override
@@ -270,7 +270,7 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 			super.start(context);
 			return context;
 		}
-		long cacheId = ((Cache) context).getCacheId();
+		long cacheId = ((HeavyCache) context).getCacheId();
 		// map.put(cacheId, context);
 		contextIds.set(cacheId);
 		assert getCurrentCache() == context;
@@ -289,8 +289,8 @@ public class HeavyServerEngine extends AbstractRoot implements ServerCacheProtoc
 		// map.remove(cacheId);
 	}
 
-	public Cache getCurrentCache(long cacheId) {
-		return (Cache) map.get(cacheId);
+	public HeavyCache getCurrentCache(long cacheId) {
+		return (HeavyCache) map.get(cacheId);
 		// Cache cache = (Cache) map.get(cacheId);
 		// if (cache != null)
 		// return cache;

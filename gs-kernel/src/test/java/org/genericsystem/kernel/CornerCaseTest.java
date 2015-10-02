@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class CornerCaseTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -19,7 +19,7 @@ public class CornerCaseTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -32,7 +32,7 @@ public class CornerCaseTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		assert root.getInstance("Power", car) == null;

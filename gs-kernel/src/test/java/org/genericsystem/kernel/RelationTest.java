@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class RelationTest extends AbstractTest {
 
 	public void test001() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -23,7 +23,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -35,7 +35,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("carColor", color);
@@ -45,7 +45,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test004() {
-		final Root engine = new Root();
+		final LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic door = engine.addInstance("Door");
@@ -56,7 +56,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test005() {
-		final Root root = new Root();
+		final LightServerEngine root = new LightServerEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("MyAudi");

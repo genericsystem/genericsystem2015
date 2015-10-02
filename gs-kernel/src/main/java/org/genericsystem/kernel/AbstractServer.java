@@ -5,49 +5,30 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
-import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 
-public abstract class AbstractRoot extends AbstractEngine implements Generic, Protocole {
+public abstract class AbstractServer extends AbstractEngine implements Generic, Protocole {
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
 	private TsGenerator generator = new TsGenerator();;
 
 	@Override
-	public AbstractRoot getRoot() {
+	public AbstractServer getRoot() {
 		return this;
 	}
 
-	// public AbstractRoot() {
-	// this(new Class[] {});
-	// }
-	//
-	// public AbstractRoot(Class<?>... userClasses) {
-	// this(Statics.ENGINE_VALUE, userClasses);
-	// }
-	//
-	// public AbstractRoot(String value, Class<?>... userClasses) {
-	// this(value, null, userClasses);
-	// }
-	//
-	// public AbstractRoot(String value, String persistentDirectoryPath, Class<?>... userClasses) {
-	// init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
-	// startSystemCache(userClasses);
-	// archiver = new Archiver(this, persistentDirectoryPath);
-	// isInitialized = true;
-	// }
-
 	@Override
-	public Cache newCache() {
-		return new Cache(this) {
+	public HeavyCache newCache() {
+		return new HeavyCache(this) {
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((Root) getRoot());
+				return new Transaction((LightServerEngine) getRoot());
 			}
 
 			@Override
@@ -59,7 +40,6 @@ public abstract class AbstractRoot extends AbstractEngine implements Generic, Pr
 			protected void unplug(Generic generic) {
 				((Transaction) getTransaction()).unplug(generic);
 			}
-
 		};
 	}
 
@@ -122,8 +102,8 @@ public abstract class AbstractRoot extends AbstractEngine implements Generic, Pr
 		}
 
 		@Override
-		protected AbstractRoot getRoot() {
-			return AbstractRoot.this;
+		protected AbstractServer getRoot() {
+			return AbstractServer.this;
 		}
 
 		@Override

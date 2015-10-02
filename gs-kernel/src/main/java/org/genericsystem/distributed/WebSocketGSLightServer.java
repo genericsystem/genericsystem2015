@@ -5,8 +5,8 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import java.util.ArrayList;
 import java.util.List;
-import org.genericsystem.kernel.AbstractRoot;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.AbstractServer;
+import org.genericsystem.kernel.LightServerEngine;
 
 public class WebSocketGSLightServer extends AbstractLightGSServer {
 
@@ -31,7 +31,7 @@ public class WebSocketGSLightServer extends AbstractLightGSServer {
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
-				AbstractRoot root = roots.get(path);
+				AbstractServer root = roots.get(path);
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
 				webSocket.exceptionHandler(e -> {
@@ -41,7 +41,7 @@ public class WebSocketGSLightServer extends AbstractLightGSServer {
 				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					webSocket.writeBinaryMessage(getReplyBuffer(methodId, (Root) root, gsBuffer));
+					webSocket.writeBinaryMessage(getReplyBuffer(methodId, (LightServerEngine) root, gsBuffer));
 				});
 
 			});
@@ -59,8 +59,8 @@ public class WebSocketGSLightServer extends AbstractLightGSServer {
 	}
 
 	@Override
-	protected AbstractRoot buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new Root(value, persistentDirectoryPath, userClasses);
+	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
+		return new LightServerEngine(value, persistentDirectoryPath, userClasses);
 	}
 
 }
