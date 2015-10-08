@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
@@ -173,10 +175,12 @@ public class Cache implements DefaultCache<Generic>, ContextEventListener<org.ge
 		cache.shiftTs();// triggers refresh automatically
 	}
 
+	@Override
 	public void tryFlush() throws ConcurrencyControlException {
 		cache.tryFlush(); // triggers flush automatically
 	}
 
+	@Override
 	public void flush() {
 		cache.flush();
 	}

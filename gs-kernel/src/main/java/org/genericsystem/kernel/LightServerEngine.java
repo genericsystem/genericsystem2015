@@ -2,16 +2,17 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
-import org.genericsystem.common.Protocole.ClientCacheProtocole;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.distributed.cacheonclient.ClientCacheProtocole;
 
 public class LightServerEngine extends AbstractServer implements Generic, ClientCacheProtocole {
 

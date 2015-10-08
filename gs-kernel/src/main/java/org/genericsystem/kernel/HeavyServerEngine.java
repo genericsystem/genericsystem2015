@@ -6,16 +6,18 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.api.core.exceptions.NotFoundException;
 import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.HeavyCache.ContextEventListener;
-import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
-import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.distributed.cacheonserver.ServerCacheProtocole;
 
 public class HeavyServerEngine extends AbstractServer implements ServerCacheProtocole {
 
@@ -104,6 +106,7 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 
 	@Override
 	public long clear(long cacheId) {
+
 		return safeContextExecute(cacheId, cache -> {
 			getCurrentCache().clear();// TODO must return getTs() ?
 				return getTs();
@@ -112,11 +115,7 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 
 	@Override
 	public long shiftTs(long cacheId) {
-		try {
-			return safeContextExecute(cacheId, cache -> getCurrentCache().shiftTs());
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return safeContextExecute(cacheId, cache -> getCurrentCache().shiftTs());
 	}
 
 	@Override
@@ -127,51 +126,38 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 
 	@Override
 	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		try {
-			return safeContextExecute(
-					cacheId,
-					cache -> getCurrentCache().addInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return safeContextExecute(cacheId,
+				cache -> getCurrentCache().addInstance(getById(meta), overrides.stream().map(override -> getById(override)).collect(Collectors.toList()), value, components.stream().map(component -> getById(component)).collect(Collectors.toList())).getTs());
+
+	}
+
+	private Generic getById(long genericId) {
+		Generic generic = getRoot().getGenericById(genericId);
+		if (generic == null)
+			getCurrentCache().discardWithException(new NotFoundException("Unknown Id : " + genericId));
+		return generic;
 	}
 
 	@Override
 	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components) {
-		try {
-			return safeContextExecute(
-					cacheId,
-					cache -> getCurrentCache().update(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return safeContextExecute(cacheId,
+				cache -> getCurrentCache().update(getById(update), overrides.stream().map(override -> getById(override)).collect(Collectors.toList()), value, components.stream().map(component -> getById(component)).collect(Collectors.toList())).getTs());
 	}
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> components) {
-		try {
-			return safeContextExecute(
-					cacheId,
-					cache -> getCurrentCache().merge(getRoot().getGenericById(update), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return safeContextExecute(cacheId,
+				cache -> getCurrentCache().merge(getById(update), overrides.stream().map(override -> getById(override)).collect(Collectors.toList()), value, components.stream().map(component -> getById(component)).collect(Collectors.toList())).getTs());
 	}
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		try {
-			return safeContextExecute(
-					cacheId,
-					cache -> getCurrentCache().setInstance(getRoot().getGenericById(meta), overrides.stream().map(override -> getRoot().getGenericById(override)).collect(Collectors.toList()), value,
-							components.stream().map(component -> getRoot().getGenericById(component)).collect(Collectors.toList())).getTs());
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return safeContextExecute(cacheId,
+				cache -> getCurrentCache().setInstance(getById(meta), overrides.stream().map(override -> getById(override)).collect(Collectors.toList()), value, components.stream().map(component -> getById(component)).collect(Collectors.toList())).getTs());
+	}
+
+	static interface ConcurrenctFunction<T, R> {
+		R apply(T t) throws ConcurrencyControlException;
 	}
 
 	private <T> T safeContextExecute(long cacheId, Function<HeavyCache, T> function) {
@@ -185,75 +171,62 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 		}
 	}
 
+	private <T> T concurrentSafeContextExecute(long cacheId, ConcurrenctFunction<HeavyCache, T> function) throws ConcurrencyControlException {
+		// System.out.println("Safe context : " + cacheId);
+		HeavyCache cache = getCurrentCache(cacheId);
+		cache.start();
+		try {
+			return function.apply(cache);
+		} finally {
+			cache.stop();
+		}
+	}
+
 	@Override
 	public long remove(long cacheId, long generic) {
-		try {
-			return this.<Long> safeContextExecute(cacheId, cache -> {
-				Generic toRemove = getRoot().getGenericById(generic);
-				getCurrentCache().remove(toRemove);
-				return toRemove.getTs();
-			});
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return this.<Long> safeContextExecute(cacheId, cache -> {
+			Generic toRemove = getById(generic);
+			getCurrentCache().remove(toRemove);
+			return toRemove.getTs();
+		});
+
 	}
 
 	@Override
 	public long forceRemove(long cacheId, long generic) {
-		try {
-			return this.<Long> safeContextExecute(cacheId, cache -> {
-				Generic toRemove = getRoot().getGenericById(generic);
-				getCurrentCache().forceRemove(toRemove);
-				return toRemove.getTs();
-			});
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return this.<Long> safeContextExecute(cacheId, cache -> {
+			Generic toRemove = getById(generic);
+			getCurrentCache().forceRemove(toRemove);
+			return toRemove.getTs();
+		});
 	}
 
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
-		try {
-			return this.<Long> safeContextExecute(cacheId, cache -> {
-				Generic toRemove = getRoot().getGenericById(generic);
-				getCurrentCache().conserveRemove(toRemove);
-				return toRemove.getTs();
-			});
-		} catch (Exception e) {
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return this.<Long> safeContextExecute(cacheId, cache -> {
+			Generic toRemove = getById(generic);
+			getCurrentCache().conserveRemove(toRemove);
+			return toRemove.getTs();
+		});
 	}
 
 	@Override
 	public long flush(long cacheId) {
-		try {
-			return this.<Long> safeContextExecute(cacheId, cache -> {
-				long ts = getCurrentCache().getTs();
-				getCurrentCache().flush();
-				long newTs = getCurrentCache().getTs();
-				return newTs == ts ? ts : Statics.CONCURRENCY_CONTROL_EXCEPTION;
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+		return this.<Long> safeContextExecute(cacheId, cache -> {
+			long ts = getCurrentCache().getTs();
+			getCurrentCache().flush();
+			long newTs = getCurrentCache().getTs();
+			return newTs == ts ? ts : Statics.CONCURRENCY_CONTROL_EXCEPTION;
+		});
+
 	}
 
 	@Override
-	public long tryFlush(long cacheId) {
-		try {
-			return this.<Long> safeContextExecute(cacheId, cache -> {
-				try {
-					getCurrentCache().tryFlush();
-				} catch (ConcurrencyControlException e) {
-					return Statics.CONCURRENCY_CONTROL_EXCEPTION;
-				}
-				return getCurrentCache().getTs();
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Statics.ROLLBACK_EXCEPTION;
-		}
+	public long tryFlush(long cacheId) throws ConcurrencyControlException {
+		return this.<Long> concurrentSafeContextExecute(cacheId, cache -> {
+			getCurrentCache().tryFlush();
+			return getCurrentCache().getTs();
+		});
 	}
 
 	@Override

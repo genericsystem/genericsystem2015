@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 
 public class Restructurator {

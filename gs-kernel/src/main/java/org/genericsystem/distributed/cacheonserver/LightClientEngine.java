@@ -7,7 +7,6 @@ import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Protocole.ServerCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
@@ -42,6 +41,14 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 	@Override
 	public LightClientCache newCache() {
 		return new LightClientCache(this);
+	}
+
+	@Override
+	public LightClientCache getCurrentCache() {
+		// Cache context = contextWrapper.get();
+		if (context == null)
+			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
+		return ((LightClientCache) super.getCurrentCache());
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {

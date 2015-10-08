@@ -4,16 +4,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.RequiredConstraintViolationException;
+import org.genericsystem.distributed.cacheonserver.LightClientCache;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RequiredConstraintTest extends AbstractTest {
 
 	public void test00_Inheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = engine.addAttribute("Power");
 
@@ -23,7 +24,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test01_Inheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = engine.addAttribute("Power", engine);
 		Generic unit = engine.addInstance("Unit");
@@ -36,7 +37,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test000_Inheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 
@@ -49,7 +50,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test001_Inheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic unit = engine.addInstance("Unit");
 		Generic power = car.addAttribute("Power", unit);
@@ -65,7 +66,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test001_enableRequired() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
@@ -80,14 +81,14 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test002_removeAttribute() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
 		Generic myBmw = car.addInstance("myBmw");
 		Generic v236 = myBmw.addHolder(power, 236);
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientCache cache = engine.getCurrentCache();
 		assert myBmw.getHolders(power).contains(v236);
 		cache.flush();
 		v236.remove();
@@ -96,7 +97,7 @@ public class RequiredConstraintTest extends AbstractTest {
 	}
 
 	public void test003_removeAttribute_inherintings() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -105,7 +106,7 @@ public class RequiredConstraintTest extends AbstractTest {
 		Generic myBmw = car.addInstance("myBmw");
 		Generic v236 = myBmw.addHolder(power, 236);
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientCache cache = engine.getCurrentCache();
 		// power.getComponents().stream().forEach(x -> System.out.println(x.detailedInfo()));
 		cache.flush();
 		v236.remove();

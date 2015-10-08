@@ -2,6 +2,7 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -23,6 +24,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	private final long cacheId;
 
 	public long shiftTs() throws RollbackException {
+
 		transaction = buildTransaction();
 		listener.triggersRefreshEvent();
 		return getTs();
@@ -31,7 +33,8 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected HeavyCache(AbstractEngine root) {
-		this(root, new ContextEventListener<Generic>() {});
+		this(root, new ContextEventListener<Generic>() {
+		});
 	}
 
 	// protected Cache(AbstractEngine root, long cacheId) {
@@ -108,6 +111,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 				// TODO reactivate this
 				// if (getEngine().pickNewTs() - getTs() >= timeOut)
 				// throw new ConcurrencyControlException("The timestamp cache (" + getTs() + ") is bigger than the life time out : " + Statics.LIFE_TIMEOUT);
+
 				tryFlush();
 				return;
 			} catch (ConcurrencyControlException e) {
@@ -200,6 +204,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	@Override
 	public Generic addInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+
 		return new AddBuilder(this, meta, overrides, value, components).resolve();
 	}
 
@@ -248,13 +253,17 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {
+		}
 
-		default void triggersRefreshEvent() {}
+		default void triggersRefreshEvent() {
+		}
 
-		default void triggersClearEvent() {}
+		default void triggersClearEvent() {
+		}
 
-		default void triggersFlushEvent() {}
+		default void triggersFlushEvent() {
+		}
 	}
 
 }

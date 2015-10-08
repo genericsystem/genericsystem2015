@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonserver;
 
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -17,6 +18,7 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	public void shiftTs() throws RollbackException {
 		getRoot().getServer().shiftTs(cacheId);
+		this.transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	public LightClientTransaction getTransaction() {
@@ -42,11 +44,7 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public void tryFlush() throws ConcurrencyControlException {
-		long result = getRoot().getServer().tryFlush(cacheId);
-		if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result)
-			throw new ConcurrencyControlException("");
-		if (Statics.OTHER_EXCEPTION == result)
-			discardWithException(new IllegalStateException("Other exception"));
+		getRoot().getServer().tryFlush(cacheId);
 	}
 
 	@Override
@@ -56,31 +54,30 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 			System.out.println("Change Client Transaction");
 			transaction = new LightClientTransaction(getRoot(), cacheId);
 		}
-		if (Statics.ROLLBACK_EXCEPTION == result)
-			discardWithException(new IllegalStateException("Rollback"));
-		if (Statics.OTHER_EXCEPTION == result)
-			discardWithException(new IllegalStateException("Other exception"));
 	}
 
 	public void clear() {
-		long result = getRoot().getServer().clear(cacheId);
+		getRoot().getServer().clear(cacheId);
 		transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	public void mount() {
-		long result = getRoot().getServer().mount(cacheId);
+		getRoot().getServer().mount(cacheId);
 		// transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	public void unmount() {
-		long result = getRoot().getServer().unmount(cacheId);
+		getRoot().getServer().unmount(cacheId);
 		transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	@Override
 	public void discardWithException(Throwable exception) throws RollbackException {
-		clear();
-		throw new RollbackException(exception);
+		try {
+			clear();
+		} catch (Exception e) {
+			throw new RollbackException(exception);
+		}
 	}
 
 	public int getCacheLevel() {
@@ -94,6 +91,7 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public Generic addInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+
 		return transaction.addInstance(meta, overrides, value, components);
 	}
 
@@ -109,16 +107,17 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public void forceRemove(Generic generic) {
-		transaction.forceRemove(generic);
+		transaction.forceRemove(generic, computeDependencies(generic));
 	}
 
 	@Override
 	public void remove(Generic generic) {
-		transaction.remove(generic);
+		transaction.remove(generic, computeDependencies(generic));
+		// transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
 	@Override
 	public void conserveRemove(Generic generic) {
-		transaction.remove(generic);
+		transaction.conserveRemove(generic, computeDependencies(generic));
 	}
 }

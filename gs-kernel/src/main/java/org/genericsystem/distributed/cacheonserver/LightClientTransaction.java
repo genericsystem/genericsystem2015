@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
@@ -39,17 +41,18 @@ public class LightClientTransaction {
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
 
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
-		if (dependencies == null) {
-			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(cacheId, generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
-			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
-			assert result == null;
-		}
-		return dependencies;
+		return () -> {
+			Snapshot<Generic> dependencies = dependenciesMap.get(generic);
+			if (dependencies == null) {
+				dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(cacheId, generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
+				Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
+				assert result == null;
+			}
+			return dependencies.stream();
+		};
 	}
 
-	private Generic invalid(Generic generic) {
-		// TODO deep invalid
+	private Generic evict(Generic generic) {
 		generic.getComponents().forEach(component -> dependenciesMap.remove(component));
 		generic.getSupers().forEach(superG -> dependenciesMap.remove(superG));
 		dependenciesMap.remove(generic.getMeta());
@@ -58,42 +61,43 @@ public class LightClientTransaction {
 	}
 
 	Generic setInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
-		return invalid(getRoot().getGenericById(
+		return evict(getRoot().getGenericById(
 				getRoot().getServer().setInstance(cacheId, meta.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList()))));
 	}
 
 	Generic addInstance(Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
-		return getRoot().getGenericById(
-				getRoot().getServer().addInstance(cacheId, meta.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
+		return evict(getRoot().getGenericById(
+				getRoot().getServer().addInstance(cacheId, meta.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList()))));
 	}
 
 	Generic update(Generic update, List<Generic> overrides, Serializable value, List<Generic> components) {
 		Generic result = getRoot().getGenericById(
 				getRoot().getServer().update(cacheId, update.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
-		invalid(update);
+		evict(update);
 		return result;
 	}
 
 	Generic merge(Generic update, List<Generic> overrides, Serializable value, List<Generic> components) {
 		Generic result = getRoot().getGenericById(
 				getRoot().getServer().merge(cacheId, update.getTs(), overrides.stream().map(override -> override.getTs()).collect(Collectors.toList()), value, components.stream().map(component -> component.getTs()).collect(Collectors.toList())));
-		invalid(update);
+		evict(update);
 		return result;
 	}
 
-	void forceRemove(Generic generic) {
+	void forceRemove(Generic generic, NavigableSet<Generic> dependencies) {
 		getRoot().getServer().forceRemove(cacheId, generic.getTs());
-		invalid(generic);
+		dependencies.forEach(g -> evict(g));
 	}
 
-	void remove(Generic generic) {
-		getRoot().getServer().remove(cacheId, generic.getTs());
-		invalid(generic);
+	long remove(Generic generic, NavigableSet<Generic> dependencies) {
+		long result = getRoot().getServer().remove(cacheId, generic.getTs());
+		dependencies.forEach(g -> evict(g));
+		return result;
 	}
 
-	void conserveRemove(Generic generic) {
+	void conserveRemove(Generic generic, NavigableSet<Generic> dependencies) {
 		getRoot().getServer().conserveRemove(cacheId, generic.getTs());
-		invalid(generic);
+		dependencies.forEach(g -> evict(g));
 	}
 
 	public int getCacheLevel() {

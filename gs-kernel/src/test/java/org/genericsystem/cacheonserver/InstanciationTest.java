@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -13,7 +14,7 @@ import org.testng.annotations.Test;
 public class InstanciationTest extends AbstractTest {
 
 	public void testEngineInstanciation() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		assert engine.getMeta().equals(engine);
 		assert engine.getSupers().isEmpty();
 		assert engine.getComponents().isEmpty();
@@ -23,7 +24,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTypeInstanciation() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 
 		assert car.getMeta().equals(engine);
@@ -37,7 +38,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTwoTypeInstanciationDifferentNames() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic robot = engine.addInstance("Robot");
 
@@ -61,13 +62,13 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTwoTypeInstanciationSameNamesAddInstance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		engine.addInstance("Car");
 		catchAndCheckCause(() -> engine.addInstance("Car"), ExistsException.class);
 	}
 
 	public void testTwoTypeInstanciationSameNamesSetInstance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic car2 = engine.setInstance("Car");
 
@@ -88,7 +89,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTwoTypeInstanciationWithInheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		// log.info(engine.info());
@@ -117,13 +118,13 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void testTypeInstanciationWithSelfInheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert !engine.addInstance(Arrays.asList(vehicle), "Vehicle").equals(vehicle);
 	}
 
 	public void test3TypeInstanciationWithMultipleInheritence() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Arrays.asList(car, robot), "Transformer");
@@ -156,7 +157,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test5TypeInstanciationWithMultipleInheritence() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		Generic device = engine.addInstance("Device");
@@ -204,7 +205,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test6TypeInstanciationWithMultipleInheritence() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		Generic device = engine.addInstance("Device");

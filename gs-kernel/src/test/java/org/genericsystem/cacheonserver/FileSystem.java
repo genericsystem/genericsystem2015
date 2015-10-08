@@ -7,9 +7,9 @@ import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
+import org.genericsystem.cacheonserver.FileSystem.Directory;
+import org.genericsystem.cacheonserver.FileSystem.FileType;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.FileSystem.Directory;
-import org.genericsystem.distributed.cacheonclient.FileSystem.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

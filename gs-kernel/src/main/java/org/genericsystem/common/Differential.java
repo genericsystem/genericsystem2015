@@ -1,6 +1,7 @@
 package org.genericsystem.common;
 
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -14,6 +15,12 @@ public class Differential implements IDifferential<Generic> {
 
 	public Differential(IDifferential<Generic> subCache) {
 		this.differential = subCache;
+	}
+
+	public Stream<Generic> getLivingToRespawn() {
+		return adds.stream().filter(g -> {
+			return g.getTs() == Long.MAX_VALUE && g.isAlive();
+		});
 	}
 
 	public IDifferential<Generic> getSubCache() {

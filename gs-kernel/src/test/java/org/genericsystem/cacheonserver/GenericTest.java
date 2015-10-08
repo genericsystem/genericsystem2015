@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -13,7 +14,7 @@ import org.testng.collections.Lists;
 public class GenericTest extends AbstractTest {
 
 	public void testEngine() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		assert engine.isAlive();
 		assert engine.getComponents().isEmpty();
 		assert engine.getLevel() == 0;
@@ -27,7 +28,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testGetInstances() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		// assert engine.getInstances().isEmpty();
 		Generic vehicleVertex = engine.addInstance("Vehicle");
 		Generic powerVehicleVertex = engine.addInstance("Power", vehicleVertex);
@@ -41,28 +42,28 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddInstance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert engine.getInstances().contains(vehicle) : engine.getInstances().stream().collect(Collectors.toList());
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);
 	}
 
 	public void testSetInstance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.setInstance("Vehicle");
 		assert engine.getInstances().contains(vehicle);
 		assert engine.setInstance("Vehicle").equals(vehicle);
 	}
 
 	public void testAddInheriting() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		assert vehicle.getInheritings().contains(car);
 	}
 
 	public void testAddAttribute() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -73,7 +74,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -84,7 +85,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride2() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -96,7 +97,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride3() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -110,7 +111,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
@@ -121,7 +122,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance2() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
@@ -135,7 +136,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance3() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
