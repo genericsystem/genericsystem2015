@@ -1,6 +1,7 @@
 package org.genericsystem.cacheonserver;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -8,7 +9,7 @@ import org.testng.annotations.Test;
 public class VertxTest extends AbstractTest {
 
 	public void test000() {
-		HeavyClientEngine root = new HeavyClientEngine(Statics.ENGINE_VALUE);
+		LightClientEngine root = new LightClientEngine(Statics.ENGINE_VALUE);
 		Generic vehicle = root.addInstance("Vehicle");
 		root.getCurrentCache().flush();
 		root.close();

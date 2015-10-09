@@ -1,13 +1,14 @@
 package org.genericsystem.cacheonserver;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class SystemPropertiesTest extends AbstractTest {
 
 	public void test001_enableConstraint() {
-		HeavyClientEngine Engine = new HeavyClientEngine();
+		LightClientEngine Engine = new LightClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic power = Engine.addInstance("Power", vehicle);
 		power.enablePropertyConstraint();
@@ -28,7 +29,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test002_inheritedConstraint() {
-		HeavyClientEngine Engine = new HeavyClientEngine();
+		LightClientEngine Engine = new LightClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = Engine.addInstance(vehicle, "Car");
 		Generic power = Engine.addInstance("Power", vehicle);
@@ -52,7 +53,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test003_inheritedModifiedConstraint() {
-		HeavyClientEngine Engine = new HeavyClientEngine();
+		LightClientEngine Engine = new LightClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = Engine.addInstance(vehicle, "Car");
 		Generic power = Engine.addInstance("Power", vehicle);

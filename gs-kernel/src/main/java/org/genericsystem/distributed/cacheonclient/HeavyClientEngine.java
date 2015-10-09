@@ -6,10 +6,9 @@ import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.HeavyCache.ContextEventListener;
-import org.genericsystem.common.Protocole.ClientCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 

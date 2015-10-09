@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
+import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
@@ -42,6 +43,8 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		List<T> previousOrderComp = new ArrayList<>(components);
 		List<T> result = new ArrayList<>();
 		for (T type : getComponents()) {
+			if (!type.isAlive())
+				getCurrentCache().discardWithException(new AliveConstraintViolationException(type.info()));
 			T matchedComponent = previousOrderComp.stream().filter(component -> component.isSpecializationOf(type)).findFirst().orElse(null);
 			if (matchedComponent != null) {
 				result.add(matchedComponent);

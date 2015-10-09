@@ -3,14 +3,22 @@ package org.genericsystem.distributed;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Vertex;
 
 public class GSBuffer implements Buffer {
@@ -249,11 +257,8 @@ public class GSBuffer implements Buffer {
 					appendGSClazz((Class<?>) value);
 					return this;
 				}
-				case 10: {
-					return this;
-				}
 				default:
-					throw new IllegalStateException("unknowned class code in appendGSValue" + entry.getKey());
+					throw new IllegalStateException("unknown class code in appendGSValue" + entry.getKey());
 				}
 			}
 		}
@@ -269,6 +274,77 @@ public class GSBuffer implements Buffer {
 	public Buffer appendGSClazz(Class<?> clazz) {
 		appendGSString(clazz != null ? clazz.getName() : "");
 		return this;
+	}
+
+	// public Buffer appendResponse(Response<Long> response) {
+	// appendInt(response.isSwitchedToT() ? 1 : 0);
+	// if (response.isSwitchedToT())
+	// appendLong(response.getResult());
+	// else {
+	// appendGSSerializable(response.getException().getClass());
+	// appendGSClazz(response.getException().getCause().getClass());
+	// }
+	// return this;
+	// }
+
+	public Object getLongThrowException() {
+		if (getInt() == 1)
+			return getLong();
+		return getGSSerializable();
+	}
+
+	public interface ConcurrentSupplier<T> {
+		T get() throws ConcurrencyControlException;
+	}
+
+	public Buffer appendLongThrowException(ConcurrentSupplier<Long> supplier) {
+		try {
+			long result = supplier.get();
+			appendInt(1);
+			appendLong(result);
+		} catch (Throwable t) {
+			appendInt(0);
+			t.printStackTrace();
+			appendGSSerializable(t);
+		}
+		return this;
+	}
+
+	// public Buffer appendLongThrowException(Object value) {
+	// if (value instanceof Long) {
+	// appendInt(1);
+	// appendLong((Long) value);
+	// } else {
+	// appendInt(0);
+	// appendGSSerializable((Serializable) value);
+	// }
+	// return this;
+	// }
+
+	public Buffer appendGSSerializable(Serializable serializable) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeObject(serializable);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalStateException(e);
+		}
+		appendGSBytes(bos.toByteArray());
+		return this;
+	}
+
+	public Serializable getGSSerializable() {
+		ByteArrayInputStream bis = new ByteArrayInputStream(getGSBytes());
+		Serializable serializable;
+		try {
+			ObjectInputStream ois = new ObjectInputStream(bis);
+			serializable = (Serializable) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new IllegalStateException();
+		}
+		return serializable;
 	}
 
 	public int getInt() {

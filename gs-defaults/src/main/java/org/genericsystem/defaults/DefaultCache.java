@@ -2,6 +2,7 @@ package org.genericsystem.defaults;
 
 import java.io.Serializable;
 import java.util.List;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 
 public interface DefaultCache<T extends DefaultVertex<T>> extends DefaultContext<T> {

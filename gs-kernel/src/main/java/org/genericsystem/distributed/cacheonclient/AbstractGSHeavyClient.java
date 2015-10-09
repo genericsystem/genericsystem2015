@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Protocole.ClientCacheProtocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
@@ -16,12 +15,12 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 
 	@Override
 	public Vertex getVertex(long id) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
 	}
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), buff -> {
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), buff -> {
 			task.handle(new GSBuffer(buff).getGSVertexArray());
 		}));
 
@@ -36,7 +35,7 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		Long receivedTs = (Long) synchonizeTask(task -> send(gsBuffer, buff -> task.handle(new GSBuffer(buff).getLong())));
+		Long receivedTs = (Long) synchronizeTask(task -> send(gsBuffer, buff -> task.handle(new GSBuffer(buff).getLong())));
 		if (receivedTs == Statics.CONCURRENCY_CONTROL_EXCEPTION)
 			throw new ConcurrencyControlException("");
 		else if (receivedTs == Statics.OTHER_EXCEPTION)
@@ -45,7 +44,7 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 
 	@Override
 	public long pickNewTs() {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 }

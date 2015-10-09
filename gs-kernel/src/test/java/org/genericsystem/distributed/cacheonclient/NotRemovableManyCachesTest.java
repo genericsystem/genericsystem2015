@@ -1,11 +1,10 @@
 package org.genericsystem.distributed.cacheonclient;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
-import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.testng.annotations.Test;
 
 @Test
@@ -35,7 +34,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 		cache.start();
 		Generic car2 = engine.addInstance("Car2");
 		Generic myBmw2 = car2.addInstance("myBmw2");
-		catchAndCheckCause(() -> myBmw2.addHolder(color, "red2"), MetaRuleConstraintViolationException.class);
+		catchAndCheckCause(() -> myBmw2.addHolder(color, "red2"), AliveConstraintViolationException.class);
 	}
 
 	public void test001_referenceEx() {

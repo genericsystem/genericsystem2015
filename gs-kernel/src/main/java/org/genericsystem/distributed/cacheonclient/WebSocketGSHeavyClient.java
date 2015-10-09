@@ -15,7 +15,7 @@ public class WebSocketGSHeavyClient extends AbstractGSHeavyClient {
 
 	WebSocketGSHeavyClient(String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
-		webSocket = synchonizeTask(task -> httpClient.websocket(path, task));
+		webSocket = synchronizeTask(task -> httpClient.websocket(path, webSock -> task.handle(webSock)));
 		webSocket.exceptionHandler(e -> {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();
