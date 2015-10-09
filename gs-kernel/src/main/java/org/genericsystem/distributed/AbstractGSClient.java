@@ -32,22 +32,23 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int UNMOUNT = 15;
 	public static final int GET_CACHE_LEVEL = 16;
 	public static final int NEW_CACHE = 17;
+	public static final int CLEAR = 18;
 
 	protected abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
 
 	@Override
 	public Vertex getVertex(long id) {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
 	}
 
 	@Override
 	public long pickNewTs() {
-		return synchonizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
-	protected static <T> T synchonizeTask(Consumer<Handler<T>> consumer) {
+	protected static <T> T synchronizeTask(Consumer<Handler<Object>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
-			BlockingQueue<T> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
+			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
 			consumer.accept(resultObject -> {
 				try {
 					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
@@ -56,7 +57,7 @@ public abstract class AbstractGSClient implements Protocole {
 					e.printStackTrace();
 				}
 			});
-			T result = null;
+			Object result = null;
 			try {
 				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
 				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
@@ -64,7 +65,10 @@ public abstract class AbstractGSClient implements Protocole {
 				e.printStackTrace();
 			}
 			if (result != null) {
-				return result;
+				if (result instanceof RuntimeException)
+					throw (RuntimeException) result;
+				else
+					return (T) result;
 			}
 
 			System.out.println("Response failure " + Thread.currentThread());
