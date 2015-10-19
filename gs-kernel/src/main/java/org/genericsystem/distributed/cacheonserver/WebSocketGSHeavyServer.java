@@ -15,7 +15,7 @@ import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.HeavyServerEngine;
 
-public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
+public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;

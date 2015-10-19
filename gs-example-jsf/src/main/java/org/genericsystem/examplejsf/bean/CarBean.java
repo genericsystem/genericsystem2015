@@ -10,11 +10,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.genericsystem.cdi.Engine;
+import org.genericsystem.common.Generic;
 import org.genericsystem.examplejsf.model.Car;
 import org.genericsystem.examplejsf.model.CarColor;
 import org.genericsystem.examplejsf.model.Color;
 import org.genericsystem.examplejsf.model.Power;
-import org.genericsystem.mutability.Generic;
 
 @Named
 @RequestScoped

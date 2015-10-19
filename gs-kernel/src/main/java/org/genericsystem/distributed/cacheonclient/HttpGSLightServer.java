@@ -14,7 +14,7 @@ import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.LightServerEngine;
 
-public class HttpGSLightServer extends AbstractLightGSServer {
+public class HttpGSLightServer extends AbstractGSLightServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;

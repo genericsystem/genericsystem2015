@@ -46,6 +46,12 @@ public abstract class AbstractGSClient implements Protocole {
 		return synchronizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
+	/*
+	 * static List<Object> globalResultContainer = new List<>();
+	 * 
+	 * public static <T> T callbackBottom() { if (!globalResultContainer.isEmpty()) return (T) globalResultContainer.get(); }
+	 */
+
 	protected static <T> T synchronizeTask(Consumer<Handler<Object>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
@@ -53,6 +59,9 @@ public abstract class AbstractGSClient implements Protocole {
 				try {
 					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
 					blockingQueue.put(resultObject);
+					/*
+					 * globalResultContainer.put(resultObject) ; return;
+					 */
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
