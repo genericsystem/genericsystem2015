@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -29,7 +28,7 @@ import org.genericsystem.kernel.Statics;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		WebSocketGSLightServer server = new WebSocketGSLightServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test2").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		WebSocketGSLightServer server = new WebSocketGSLightServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		launch(args);
 		// server.stop();

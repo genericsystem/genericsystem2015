@@ -3,10 +3,8 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -41,6 +39,7 @@ public class WebSocketGSLightServer extends AbstractGSLightServer {
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
 				webSocket.exceptionHandler(e -> {
+
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
