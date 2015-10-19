@@ -10,9 +10,9 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.LightServerEngine;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractLightGSServer extends AbstractGSServer {
+public abstract class AbstractGSLightServer extends AbstractGSServer {
 
-	public AbstractLightGSServer(GSDeploymentOptions options) {
+	public AbstractGSLightServer(GSDeploymentOptions options) {
 		super(options);
 	}
 

@@ -13,8 +13,8 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.HeavyServerEngine;
 
-public abstract class AbstractHeavyGSServer extends AbstractGSServer {
-	public AbstractHeavyGSServer(GSDeploymentOptions options) {
+public abstract class AbstractGSHeavyServer extends AbstractGSServer {
+	public AbstractGSHeavyServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
