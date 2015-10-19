@@ -48,7 +48,7 @@ public abstract class AbstractGSServer {
 		roots = null;
 	}
 
-	protected static <T> T synchonizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
+	protected static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
 		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
 		consumer.handle(res -> {
 			try {

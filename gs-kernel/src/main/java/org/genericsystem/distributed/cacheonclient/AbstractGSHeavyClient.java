@@ -9,7 +9,6 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractGSHeavyClient extends AbstractGSClient implements ClientCacheProtocole {
 
@@ -35,11 +34,14 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 		gsBuffer.appendLong(ts);
 		gsBuffer.appendGSLongArray(removes);
 		gsBuffer.appendGSVertexArray(adds);
-		Long receivedTs = (Long) synchronizeTask(task -> send(gsBuffer, buff -> task.handle(new GSBuffer(buff).getLong())));
-		if (receivedTs == Statics.CONCURRENCY_CONTROL_EXCEPTION)
-			throw new ConcurrencyControlException("");
-		else if (receivedTs == Statics.OTHER_EXCEPTION)
-			throw new OptimisticLockConstraintViolationException("");
+		Object res = synchronizeTask(task -> send(gsBuffer, buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		// so as to be sent up
+		if (res instanceof OptimisticLockConstraintViolationException) {
+			throw (OptimisticLockConstraintViolationException) res;
+		}
+		if (res instanceof ConcurrencyControlException) {
+			throw (ConcurrencyControlException) res;
+		}
 	}
 
 	@Override

@@ -51,7 +51,7 @@ public class WebSocketGSLightServer extends AbstractGSLightServer {
 				});
 
 			});
-			AbstractGSServer.<HttpServer> synchonizeTask(handler -> httpServer.listen(handler));
+			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
 		System.out.println("Generic System server ready!");
@@ -59,7 +59,7 @@ public class WebSocketGSLightServer extends AbstractGSLightServer {
 
 	@Override
 	public void stop() {
-		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchonizeTask(handler -> httpServer.close(handler)));
+		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		super.stop();
 		System.out.println("Generic System server stopped!");
 	}
