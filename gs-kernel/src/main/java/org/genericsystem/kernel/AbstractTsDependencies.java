@@ -4,9 +4,9 @@ import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import org.genericsystem.common.AbstractGeneralAwareIterator;
-import org.genericsystem.kernel.Root.RootServerHandler;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 abstract class AbstractTsDependencies {
 

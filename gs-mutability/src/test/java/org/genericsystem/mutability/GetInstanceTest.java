@@ -1,16 +1,15 @@
 package org.genericsystem.mutability;
 
 import java.util.Collections;
-
-import org.genericsystem.kernel.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.LightServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class GetInstanceTest extends AbstractTest {
 
 	public void test001_getInstance() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -21,7 +20,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test002_getInstance() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -33,7 +32,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test003_getInstance() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic car = engine.addInstance("Car");
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic carVehicle = engine.addInstance(vehicle, "Car");
@@ -43,7 +42,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test004_getInstance() {
-		Root engine = new Root();
+		LightServerEngine engine = new LightServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
 		Generic car = engine.addInstance(vehicle, "Car");

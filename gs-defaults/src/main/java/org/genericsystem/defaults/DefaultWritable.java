@@ -98,6 +98,7 @@ public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> 
 	@Override
 	@SuppressWarnings("unchecked")
 	default T addHolder(T attribute, Serializable value, T... targets) {
+		System.out.println("def writ" + value);
 		return attribute.addInstance(value, addThisToTargets(targets));
 	}
 

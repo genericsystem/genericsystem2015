@@ -4,11 +4,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+
 import org.genericsystem.api.core.IteratorSnapshot;
-import org.genericsystem.kernel.Generic;
 
 public class Container implements IteratorSnapshot<Generic> {
-	final Map<Generic, Generic> container = new LinkedHashMap<>();
+	final Map<Generic, Generic> container = new LinkedHashMap<>();// TODO is pseudoConcurrrentCollection needed ?
 
 	public Container(Stream<Generic> stream) {
 		stream.forEach(add -> container.put(add, add));

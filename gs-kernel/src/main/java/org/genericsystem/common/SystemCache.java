@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -31,8 +30,7 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.LightServerEngine;
 
 public class SystemCache {
 
@@ -40,13 +38,13 @@ public class SystemCache {
 
 	private final Map<Generic, Class<?>> reverseSystemCache = new IdentityHashMap<>();
 
-	protected final AbstractRoot root;
+	protected final AbstractEngine root;
 
 	@SuppressWarnings("unchecked")
-	public SystemCache(AbstractRoot root) {
+	public SystemCache(AbstractEngine root) {
 		this.root = root;
 		put(DefaultRoot.class, (Generic) root);
-		put(Root.class, (Generic) root);
+		put(LightServerEngine.class, (Generic) root);
 		put(root.getClass(), (Generic) root);
 	}
 
@@ -69,8 +67,16 @@ public class SystemCache {
 		}
 		Generic meta = setMeta(clazz);
 		List<Generic> overrides = setOverrides(clazz);
+		Serializable value = findValue(clazz);
 		List<Generic> components = setComponents(clazz);
-		systemProperty = new SetSystemBuilder(root.getCurrentCache(), clazz, meta, overrides, findValue(clazz), components).resolve();
+		AbstractCache cache = root.getCurrentCache();
+		if (cache instanceof HeavyCache)
+			systemProperty = new SetSystemBuilder((HeavyCache) cache, clazz, meta, overrides, value, components).resolve();
+		else {
+			systemProperty = cache.get(meta, overrides, value, components);
+			if (systemProperty == null)
+				throw new IllegalStateException("Unable to find class on server : " + clazz.getName());
+		}
 		put(clazz, systemProperty);
 		mountConstraints(clazz, systemProperty);
 		triggersDependencies(clazz);
@@ -82,7 +88,6 @@ public class SystemCache {
 		reverseSystemCache.put(vertex, clazz);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Generic find(Class<?> clazz) {
 		if (IRoot.class.isAssignableFrom(clazz))
 			return (Generic) root;

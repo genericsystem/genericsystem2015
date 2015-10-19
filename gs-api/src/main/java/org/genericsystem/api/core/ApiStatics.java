@@ -46,9 +46,7 @@ public class ApiStatics {
 	 */
 	public static final int CONCRETE = 2;
 	/**
-	 * Indicates the level which corresponds to feelings. Feelings are data
-	 * which are released by the concretes : for example, the mood of a person,
-	 * its emotions and so on.
+	 * Indicates the level which corresponds to feelings. Feelings are data which are released by the concretes : for example, the mood of a person, its emotions and so on.
 	 */
 	public static final int SENSOR = 3;
 
@@ -59,10 +57,8 @@ public class ApiStatics {
 
 	public static final long TS_SYSTEM = 0L;
 	public final static long TS_OLD_SYSTEM = 1L;
-	public final static long[] SYSTEM_TS = new long[] { TS_SYSTEM, 0L,
-			Long.MAX_VALUE };
-	public final static long[] USER_TS = new long[] { Long.MAX_VALUE, 0L,
-			Long.MAX_VALUE };
+	public final static long[] SYSTEM_TS = new long[] { TS_SYSTEM, 0L, Long.MAX_VALUE };
+	public final static long[] USER_TS = new long[] { Long.MAX_VALUE, 0L, Long.MAX_VALUE };
 
 	public final static Map<Integer, Class<?>> SUPPORTED_VALUE_CLASSES = new LinkedHashMap<Integer, Class<?>>() {
 		{
@@ -81,8 +77,7 @@ public class ApiStatics {
 	};
 
 	/**
-	 * Checks that each of the <code>overrides</code> is inherited by at least
-	 * one of the <code>supers</code>.
+	 * Checks that each of the <code>overrides</code> is inherited by at least one of the <code>supers</code>.
 	 * 
 	 * @param <T>
 	 *            the implementation of IVertex used for all nodes.
@@ -90,14 +85,9 @@ public class ApiStatics {
 	 *            the Generics that may inherit.
 	 * @param overrides
 	 *            the Generics that may be inherited.
-	 * @return <code>true</code> if each of the <code>overrides</code> is
-	 *         inherited by at least one of the <code>supers</code>,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if each of the <code>overrides</code> is inherited by at least one of the <code>supers</code>, <code>false</code> otherwise.
 	 */
-	public static <T extends IVertex<T>> boolean areOverridesReached(
-			List<T> supers, List<T> overrides) {
-		return overrides.stream().allMatch(
-				override -> supers.stream().anyMatch(
-						superVertex -> superVertex.inheritsFrom(override)));
+	public static <T extends IVertex<T>> boolean areOverridesReached(List<T> supers, List<T> overrides) {
+		return overrides.stream().allMatch(override -> supers.stream().anyMatch(superVertex -> superVertex.inheritsFrom(override)));
 	}
 }

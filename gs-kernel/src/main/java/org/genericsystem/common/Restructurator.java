@@ -8,13 +8,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
-import org.genericsystem.kernel.Generic;
 
 public class Restructurator {
 
-	private final Cache context;
+	private final HeavyCache context;
 
-	Restructurator(Cache context) {
+	Restructurator(HeavyCache context) {
 		this.context = context;
 	}
 

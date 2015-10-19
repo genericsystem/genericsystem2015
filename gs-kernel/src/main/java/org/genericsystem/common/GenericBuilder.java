@@ -3,14 +3,11 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.kernel.Generic;
-import org.genericsystem.kernel.Root;
 
 public abstract class GenericBuilder {
-	protected final Cache context;
+	protected final HeavyCache context;
 	final Generic meta;
 	protected Generic adjustedMeta;
 	final List<Generic> overrides;
@@ -19,7 +16,7 @@ public abstract class GenericBuilder {
 	protected final List<Generic> components;
 	protected Generic gettable;
 
-	GenericBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+	GenericBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		assert overrides != null;
 		this.context = context;
 		this.meta = meta != null ? meta : (Generic) context.getRoot();
@@ -30,6 +27,7 @@ public abstract class GenericBuilder {
 		adjust();
 	}
 
+	// TODO remove this
 	Serializable generateValue(Serializable value) {
 		Class<? extends ValueGenerator> instanceValueGenerator = meta.getInstanceValueGenerator();
 		if (instanceValueGenerator != null) {
@@ -51,11 +49,10 @@ public abstract class GenericBuilder {
 	}
 
 	void adjust() {
-		adjustedMeta = meta.adjustMeta(components);
+		adjustedMeta = meta.adjustMeta(components);// do adjustmeta() on context
 		if (!isMeta() && adjustedMeta.getComponents().size() != components.size())
 			adjustedMeta = context.setMeta(components.size());
 		supers = context.computeAndCheckOverridesAreReached(adjustedMeta, overrides, value, components);
-
 	}
 
 	Generic get() {
@@ -91,33 +88,9 @@ public abstract class GenericBuilder {
 		return context.getRestructurator().rebuildAll(update, () -> getOrBuild(), context.computeDependencies(update));
 	}
 
-	// static class GetHandler extends GenericHandler {
-	//
-	// GetHandler(Context context, Generic gettable) {
-	// super(context, gettable.getMeta(), gettable.getSupers(), gettable.getValue(), gettable.getComponents());
-	// this.gettable = gettable;
-	// this.adjustedMeta = gettable.getMeta();
-	// this.supers = gettable.getSupers();
-	// }
-	//
-	// GetHandler(Context context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
-	// super(context, meta, overrides, value, components);
-	// }
-	//
-	// Generic resolve() {
-	// return get();
-	// }
-	//
-	// @Override
-	// Serializable generateValue(Serializable value) {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-	// }
-
 	public static class AddBuilder extends GenericBuilder {
 
-		AddBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		AddBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -131,7 +104,7 @@ public abstract class GenericBuilder {
 
 	static class SetBuilder extends GenericBuilder {
 
-		SetBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		SetBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -148,7 +121,7 @@ public abstract class GenericBuilder {
 
 		private final Generic update;
 
-		UpdateBuilder(Cache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		UpdateBuilder(HeavyCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -166,7 +139,7 @@ public abstract class GenericBuilder {
 
 		private final Generic update;
 
-		MergeBuilder(Cache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		MergeBuilder(HeavyCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -178,7 +151,7 @@ public abstract class GenericBuilder {
 
 	public static class AtomicBuilder extends GenericBuilder {
 
-		protected AtomicBuilder(Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		protected AtomicBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -191,7 +164,7 @@ public abstract class GenericBuilder {
 
 		private final Class<?> clazz;
 
-		SetSystemBuilder(Cache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		SetSystemBuilder(HeavyCache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.clazz = clazz;
 		}
@@ -209,13 +182,7 @@ public abstract class GenericBuilder {
 		@Override
 		public final Generic resolve() {
 			Generic instance = get();
-			if (!(context.getRoot() instanceof Root)) {
-				if (instance == null)
-					throw new IllegalStateException("could not find class on server : " + clazz.getName());
-				return instance;
-			}
 			return instance == null ? build() : instance;
-
 		}
 	}
 

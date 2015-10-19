@@ -21,17 +21,16 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.constraints.Constraint;
-import org.genericsystem.kernel.Generic;
 
 public class Checker {
 
-	private final AbstractContext context;
+	private final CheckedContext context;
 
-	public Checker(AbstractContext context) {
+	public Checker(CheckedContext context) {
 		this.context = context;
 	}
 
-	public AbstractContext getContext() {
+	public CheckedContext getContext() {
 		return context;
 	}
 
@@ -121,7 +120,7 @@ public class Checker {
 
 	public void checkIsAlive(Generic vertex) {
 		if (!context.isAlive(vertex))
-			context.discardWithException(new AliveConstraintViolationException("" + vertex.getBirthTs()));
+			context.discardWithException(new AliveConstraintViolationException("" + vertex.info()));
 	}
 
 	private void checkIsNotAlive(Generic vertex) {

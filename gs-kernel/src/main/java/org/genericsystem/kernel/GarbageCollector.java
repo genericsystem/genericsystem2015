@@ -5,16 +5,16 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.genericsystem.kernel.Root.RootServerHandler;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 public class GarbageCollector extends LinkedHashSet<Generic> {
 
 	private static final long serialVersionUID = -2021341943811568201L;
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-	private final Root root;
+	private final AbstractServer root;
 
-	public GarbageCollector(Root root) {
+	public GarbageCollector(AbstractServer root) {
 		this.root = root;
 	}
 

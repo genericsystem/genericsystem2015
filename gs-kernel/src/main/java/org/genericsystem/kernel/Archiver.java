@@ -29,11 +29,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
-import org.genericsystem.kernel.Root.RootServerHandler;
+import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class Archiver {
 
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-	protected final Root root;
+	protected final AbstractServer root;
 	private final File directory;
 	private FileLock lockFile;
 
@@ -70,7 +70,7 @@ public class Archiver {
 		return GS_EXTENSION + ZIP_EXTENSION;
 	}
 
-	public Archiver(Root root, String directoryPath) {
+	public Archiver(AbstractServer root, String directoryPath) {
 		this.root = root;
 		directory = prepareAndLockDirectory(directoryPath);
 		if (directory != null) {
@@ -259,7 +259,7 @@ public class Archiver {
 	protected class Loader {
 
 		protected final ObjectInputStream objectInputStream;
-		protected final Cache context;
+		protected final HeavyCache context;
 
 		protected Loader(ObjectInputStream objectInputStream) {
 			this.objectInputStream = objectInputStream;
@@ -277,8 +277,7 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {
-			}
+			} catch (EOFException ignore) {}
 		}
 
 		protected long loadTs() throws IOException {
@@ -356,7 +355,7 @@ public class Archiver {
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
+		SetArchiverHandler(long ts, HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
 			this.otherTs = otherTs;
@@ -364,7 +363,7 @@ public class Archiver {
 
 		@Override
 		protected Generic build() {
-			return gettable = ((Transaction) context.getTransaction()).plug(((Root) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
+			return gettable = ((Transaction) context.getTransaction()).plug(((AbstractServer) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
 		}
 	}
 

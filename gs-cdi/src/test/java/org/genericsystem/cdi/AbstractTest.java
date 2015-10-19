@@ -1,13 +1,11 @@
 package org.genericsystem.cdi;
 
 import java.util.function.Supplier;
-
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.cdi.PersistenceTest.Count;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.HeavyCache;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -24,7 +22,7 @@ public abstract class AbstractTest extends Arquillian {
 	Engine engine;
 
 	@Inject
-	Instance<Cache> cacheProvider;
+	Instance<HeavyCache> cacheProvider;
 
 	@Deployment
 	public static JavaArchive createDeployment() {

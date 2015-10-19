@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
@@ -16,7 +15,6 @@ import javafx.util.StringConverter;
 import javafx.util.converter.BooleanStringConverter;
 import javafx.util.converter.DefaultStringConverter;
 import javafx.util.converter.IntegerStringConverter;
-
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
 
 /**
@@ -107,20 +105,20 @@ public abstract class AbstractColumn<G, T> extends TableColumn<G, T> {
 		if (Class.class.equals(clazz))
 			return (StringConverter<T>) new StringConverter<Class<?>>() {
 
-				@Override
-				public String toString(Class<?> clazz) {
-					return clazz != null ? clazz.getSimpleName() : null;
-				}
+			@Override
+			public String toString(Class<?> clazz) {
+				return clazz != null ? clazz.getSimpleName() : null;
+			}
 
-				@Override
-				public Class<?> fromString(String className) {
-					try {
-						return Class.forName(className);
-					} catch (ClassNotFoundException e) {
-						throw new IllegalStateException(e);
-					}
+			@Override
+			public Class<?> fromString(String className) {
+				try {
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalStateException(e);
 				}
-			};
+			}
+		};
 		if (Integer.class.equals(clazz))
 			return (StringConverter<T>) new IntegerStringConverter();
 		if (String.class.equals(clazz))
@@ -139,7 +137,7 @@ public abstract class AbstractColumn<G, T> extends TableColumn<G, T> {
 
 			@Override
 			public T fromString(String string) {
-				throw new IllegalStateException("Unsupported Class write opertaion for class : " + clazz);
+				return (T) string;
 			}
 
 		};
