@@ -9,7 +9,6 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.kernel.Statics;
 
 public class LightClientCache extends AbstractCache implements DefaultCache<Generic> {
 
@@ -49,10 +48,12 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public void flush() {
-		long result = getRoot().getServer().flush(cacheId);
-		if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result) {
+		try {
+			getRoot().getServer().flush(cacheId);
+		} catch (Exception e) {
 			System.out.println("Change Client Transaction");
 			transaction = new LightClientTransaction(getRoot(), cacheId);
+			throw e;
 		}
 	}
 
