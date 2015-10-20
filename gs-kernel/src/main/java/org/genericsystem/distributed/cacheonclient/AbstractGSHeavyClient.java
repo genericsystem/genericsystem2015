@@ -36,12 +36,12 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 		gsBuffer.appendGSVertexArray(adds);
 		Object res = synchronizeTask(task -> send(gsBuffer, buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
 		// so as to be sent up
-		if (res instanceof OptimisticLockConstraintViolationException) {
+		if (res instanceof OptimisticLockConstraintViolationException)
 			throw (OptimisticLockConstraintViolationException) res;
-		}
-		if (res instanceof ConcurrencyControlException) {
+		if (res instanceof ConcurrencyControlException)
 			throw (ConcurrencyControlException) res;
-		}
+		if (res instanceof Throwable)
+			throw new IllegalStateException((Throwable) res);
 	}
 
 	@Override
