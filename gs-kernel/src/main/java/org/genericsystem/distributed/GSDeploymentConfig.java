@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import org.genericsystem.kernel.Statics;
 
-public class GsDeploymentConfig extends JsonObject {
+public class GSDeploymentConfig extends JsonObject {
 
-	public GsDeploymentConfig() {
+	public GSDeploymentConfig() {
 		super.put("host", Statics.DEFAULT_HOST);
 		super.put("port", Statics.DEFAULT_PORT);
 		super.put("engines", new JsonArray());
@@ -17,22 +17,22 @@ public class GsDeploymentConfig extends JsonObject {
 
 	}
 
-	public GsDeploymentConfig setHost(String host) {
+	public GSDeploymentConfig setHost(String host) {
 		super.put("host", host);
 		return this;
 	}
 
-	public GsDeploymentConfig setPort(int port) {
+	public GSDeploymentConfig setPort(int port) {
 		super.put("port", port);
 		return this;
 	}
 
-	public GsDeploymentConfig addEngine(String engineValue, String repositoryPath) {
+	public GSDeploymentConfig addEngine(String engineValue, String repositoryPath) {
 		super.getJsonArray("engines").add(new JsonObject().put("engineValue", engineValue).put("engineRepositoryPath", repositoryPath));
 		return this;
 	}
 
-	public GsDeploymentConfig addClasses(Class<?>... classes) {
+	public GSDeploymentConfig addClasses(Class<?>... classes) {
 		for (Class<?> clazz : classes)
 			super.getJsonArray("classes").add(new JsonObject().put("className", clazz.getName()));
 		return this;

@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
 
 public class GSBuffer implements Buffer {
@@ -294,7 +295,7 @@ public class GSBuffer implements Buffer {
 	}
 
 	public interface ConcurrentSupplier<T> {
-		T get() throws ConcurrencyControlException;
+		T get() throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 	}
 
 	public Buffer appendLongThrowException(ConcurrentSupplier<Long> supplier) {

@@ -15,7 +15,7 @@ import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.HeavyServerEngine;
 
-public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
+public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
@@ -54,7 +54,7 @@ public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 					});
 
 			});
-			AbstractGSServer.<HttpServer> synchonizeTask(handler -> httpServer.listen(handler));
+			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
 		System.out.println("Generic System server ready!");
@@ -62,7 +62,7 @@ public class WebSocketGSHeavyServer extends AbstractHeavyGSServer {
 
 	@Override
 	public void stop() {
-		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchonizeTask(handler -> httpServer.close(handler)));
+		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		super.stop();
 		System.out.println("Generic System server stopped!");
 	}

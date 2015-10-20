@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class GSDeploymentOptions {
 
-	GsDeploymentConfig config;
+	GSDeploymentConfig config;
 
 	public GSDeploymentOptions() {
-		this.config = new GsDeploymentConfig();
+		this.config = new GSDeploymentConfig();
 	}
 
 	public GSDeploymentOptions(int port) {

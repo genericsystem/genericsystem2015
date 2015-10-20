@@ -2,17 +2,15 @@ package org.genericsystem.distributed.cacheonclient;
 
 import io.vertx.core.buffer.Buffer;
 
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.LightServerEngine;
-import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractLightGSServer extends AbstractGSServer {
+public abstract class AbstractGSLightServer extends AbstractGSServer {
 
-	public AbstractLightGSServer(GSDeploymentOptions options) {
+	public AbstractGSLightServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
@@ -26,13 +24,15 @@ public abstract class AbstractLightGSServer extends AbstractGSServer {
 		case AbstractGSClient.GET_VERTEX:
 			return replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
 		case AbstractGSClient.APPLY:
-			try {
+			// try {
+			return replyBuffer.appendLongThrowException(() -> {
 				root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
-				return replyBuffer.appendLong(0);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return replyBuffer.appendLong(e instanceof ConcurrencyControlException ? Statics.CONCURRENCY_CONTROL_EXCEPTION : Statics.OTHER_EXCEPTION);
-			}
+				return 0L;
+			});
+			// } catch (Exception e) {
+			// e.printStackTrace();
+			// return replyBuffer.appendLong(e instanceof ConcurrencyControlException ? Statics.CONCURRENCY_CONTROL_EXCEPTION : Statics.OTHER_EXCEPTION);
+			// }
 		default:
 			throw new IllegalStateException("unable to find method:" + methodId + " ");
 		}
