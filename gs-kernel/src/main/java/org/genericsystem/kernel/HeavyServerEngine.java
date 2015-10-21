@@ -218,7 +218,6 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 			long newTs = getCurrentCache().getTs();
 			return newTs == ts ? ts : Statics.CONCURRENCY_CONTROL_EXCEPTION;
 		});
-
 	}
 
 	@Override

@@ -2,7 +2,9 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
+
 import javassist.util.proxy.ProxyObject;
+
 import org.genericsystem.defaults.DefaultVertex;
 
 public interface GenericProxy extends DefaultVertex<Generic> {
