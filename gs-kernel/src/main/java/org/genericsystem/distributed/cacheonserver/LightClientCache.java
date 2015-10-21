@@ -9,6 +9,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.kernel.Statics;
 
 public class LightClientCache extends AbstractCache implements DefaultCache<Generic> {
 
@@ -48,13 +49,41 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public void flush() {
-		try {
-			getRoot().getServer().flush(cacheId);
-		} catch (Exception e) {
-			System.out.println("Change Client Transaction");
-			transaction = new LightClientTransaction(getRoot(), cacheId);
-			throw e;
+		// long result = getRoot().getServer().flush(cacheId);
+		// if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result) {
+		// System.out.println("Change Client Transaction");
+		// transaction = new LightClientTransaction(getRoot(), cacheId);
+		// }
+		// try {
+		// long result = getRoot().getServer().flush(cacheId);
+		// // TODO compare with Ts
+		// } catch (RuntimeException e) {
+		// System.out.println("Change Client Transaction");
+		// transaction = new LightClientTransaction(getRoot(), cacheId);
+		// throw e;
+		// }
+		Throwable cause = null;
+		for (int attempt = 0; attempt < Statics.ATTEMPTS; attempt++) {
+			try {
+				// System.out.println("TRYFLUSH");
+				// TODO reactivate this
+				// if (getEngine().pickNewTs() - getTs() >= timeOut)
+				// throw new ConcurrencyControlException("The timestamp cache (" + getTs() + ") is bigger than the life time out : " + Statics.LIFE_TIMEOUT);
+
+				tryFlush();
+				return;
+			} catch (ConcurrencyControlException e) {
+				cause = e;
+				// try {
+				// Thread.sleep(Statics.ATTEMPT_SLEEP);
+				shiftTs();
+				// } catch (InterruptedException ex) {
+				// discardWithException(ex);
+				// }
+			}
 		}
+		discardWithException(cause);
+
 	}
 
 	public void clear() {

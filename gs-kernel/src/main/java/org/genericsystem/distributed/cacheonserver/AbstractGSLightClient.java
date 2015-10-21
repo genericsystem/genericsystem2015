@@ -5,6 +5,7 @@ import io.vertx.core.buffer.Buffer;
 import java.io.Serializable;
 import java.util.List;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
@@ -67,14 +68,19 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 		return synchronizeTask(task -> send(Buffer.buffer().appendInt(CONSERVE_REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
 	}
 
+	// get rid of this?
 	@Override
 	public long flush(long cacheId) {
 		return synchronizeTask(task -> send(Buffer.buffer().appendInt(FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
 	}
 
 	@Override
-	public long tryFlush(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(TRY_FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+	public long tryFlush(long cacheId) throws ConcurrencyControlException {
+		// Buffer buff1 = Buffer.buffer().appendInt(TRY_FLUSH).appendLong(cacheId);
+		// send(buff, buff3 -> new GSBuffer(buff3).getLongThrowException());
+
+		Object result = synchronizeTaskWithException(task -> send(Buffer.buffer().appendInt(TRY_FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (Long) result;
 	}
 
 	@Override
