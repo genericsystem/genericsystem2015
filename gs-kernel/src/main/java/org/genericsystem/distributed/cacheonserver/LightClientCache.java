@@ -1,7 +1,9 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -9,6 +11,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine.ClientEngineHandler;
 import org.genericsystem.kernel.Statics;
 
 public class LightClientCache extends AbstractCache implements DefaultCache<Generic> {
@@ -17,8 +20,20 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 	private LightClientTransaction transaction;
 
 	public void shiftTs() throws RollbackException {
-		getRoot().getServer().shiftTs(cacheId);
+
+		Long birthTs = getRoot().getServer().shiftTs(cacheId);
 		this.transaction = new LightClientTransaction(getRoot(), cacheId);
+
+		Iterator<Map.Entry<Long, Generic>> iterator = getRoot().itPseudoCacheClient();
+		Map.Entry<Long, Generic> entryGeneric;
+
+		while (iterator.hasNext()) {
+			entryGeneric = iterator.next();
+			if (!entryGeneric.getValue().isAlive())
+				iterator.remove();
+			else if (entryGeneric.getValue().getBirthTs() == Long.MAX_VALUE)
+				((ClientEngineHandler) entryGeneric.getValue().getProxyHandler()).birthTs = birthTs;
+		}
 	}
 
 	public LightClientTransaction getTransaction() {
@@ -44,12 +59,14 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public void tryFlush() throws ConcurrencyControlException {
-		getRoot().getServer().tryFlush(cacheId);
+		long BirthTs = getRoot().getServer().tryFlush(cacheId);
+
 	}
 
 	@Override
 	public void flush() {
 		long result = getRoot().getServer().flush(cacheId);
+
 		if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result) {
 			System.out.println("Change Client Transaction");
 			transaction = new LightClientTransaction(getRoot(), cacheId);
