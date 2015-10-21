@@ -21,10 +21,10 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	public void shiftTs() throws RollbackException {
 
-		Long birthTs = getRoot().getServer().shiftTs(cacheId);
+		long birthTs = getRoot().getServer().shiftTs(cacheId);
 		this.transaction = new LightClientTransaction(getRoot(), cacheId);
 
-		Iterator<Map.Entry<Long, Generic>> iterator = getRoot().itPseudoCacheClient();
+		Iterator<Map.Entry<Long, Generic>> iterator = getRoot().genericsByIdIterator();
 		Map.Entry<Long, Generic> entryGeneric;
 
 		while (iterator.hasNext()) {
@@ -59,18 +59,31 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	@Override
 	public void tryFlush() throws ConcurrencyControlException {
-		long BirthTs = getRoot().getServer().tryFlush(cacheId);
+		long birthTs = getRoot().getServer().tryFlush(cacheId);
 
+		Iterator<Map.Entry<Long, Generic>> iterator = getRoot().genericsByIdIterator();
+		Map.Entry<Long, Generic> entryGeneric;
+
+		while (iterator.hasNext()) {
+			entryGeneric = iterator.next();
+			if (entryGeneric.getValue().getBirthTs() == Long.MAX_VALUE)
+				((ClientEngineHandler) entryGeneric.getValue().getProxyHandler()).birthTs = birthTs;
+		}
 	}
 
 	@Override
 	public void flush() {
-		long result = getRoot().getServer().flush(cacheId);
-
-		if (Statics.CONCURRENCY_CONTROL_EXCEPTION == result) {
-			System.out.println("Change Client Transaction");
-			transaction = new LightClientTransaction(getRoot(), cacheId);
+		Throwable cause = null;
+		for (int attempt = 0; attempt < Statics.ATTEMPTS; attempt++) {
+			try {
+				tryFlush();
+				return;
+			} catch (ConcurrencyControlException e) {
+				cause = e;
+				shiftTs();
+			}
 		}
+		discardWithException(cause);
 	}
 
 	public void clear() {
