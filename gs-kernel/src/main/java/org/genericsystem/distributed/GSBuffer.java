@@ -289,8 +289,11 @@ public class GSBuffer implements Buffer {
 	// }
 
 	public Object getLongThrowException() {
-		if (getInt() == 1)
+		if (getInt() == 1) {
+			System.out.println("getLongThrowException **** getLong");
 			return getLong();
+		}
+		System.out.println("getLongThrowException ***** getGSSerializable");
 		return getGSSerializable();
 	}
 

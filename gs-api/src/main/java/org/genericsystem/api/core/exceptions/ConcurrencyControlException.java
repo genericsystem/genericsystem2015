@@ -7,7 +7,7 @@ package org.genericsystem.api.core.exceptions;
  */
 public class ConcurrencyControlException extends Exception {
 
-	private static final long serialVersionUID = 7631483467570784262L;
+	private static final long serialVersionUID = 7631483467570784261L;
 
 	/**
 	 * Constructs a <code>ConcurrencyControlException</code> with the specified detail message.
