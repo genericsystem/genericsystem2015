@@ -97,11 +97,5 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 		cache.flush();
 		cache2.start();
 		catchAndCheckCause(() -> cache2.flush(), OptimisticLockConstraintViolationException.class);
-		// try {
-		// cache2.tryFlush();
-		// } catch (ConcurrencyControlException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
 	}
 }
