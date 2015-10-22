@@ -91,8 +91,10 @@ public class PersistenceTest extends AbstractTest {
 		assert vehicle.getTs() < truck.getTs();
 		car.remove();
 		root.getCurrentCache().flush();
+
 		assert vehicle.getTs() < truck.getTs();
 		assert vehicle.getBirthTs() == truck.getBirthTs();
+
 		// root.close();
 		LightClientEngine engine = new LightClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
@@ -148,6 +150,7 @@ public class PersistenceTest extends AbstractTest {
 	}
 
 	private void compareGraph(Generic persistedNode, Generic readNode) {
+
 		List<Generic> persistVisit = new ArrayList<>(persistedNode.getCurrentCache().computeDependencies(persistedNode));
 		List<Generic> readVisit = new ArrayList<>(readNode.getCurrentCache().computeDependencies(readNode));
 		assert persistVisit.size() == readVisit.size() : persistVisit + " \n " + readVisit;
@@ -155,6 +158,7 @@ public class PersistenceTest extends AbstractTest {
 			assert persistVisit.get(i).genericEquals(readVisit.get(i));
 			Generic persitedGeneric = persistVisit.get(i);
 			Generic readGeneric = readVisit.get(i);
+
 			assert persitedGeneric.getBirthTs() == readGeneric.getBirthTs() : persistVisit.get(i).info() + " " + persitedGeneric.getBirthTs() + "  " + readGeneric.getBirthTs();
 			// assert persistLifeManager.getLastReadTs() == readLifeManager.getLastReadTs();
 			// assert persitedGeneric.getDeathTs() == readGeneric.getDeathTs();

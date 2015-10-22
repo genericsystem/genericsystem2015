@@ -3,6 +3,7 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,10 +27,14 @@ import org.genericsystem.defaults.DefaultVertex;
 
 public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericProxy, ProxyObject {
 
-	private final Map<Long, Generic> tMap = new ConcurrentHashMap<>();
+	protected final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = new SystemCache(this);
 	protected boolean isInitialized = false;
 	protected volatile AbstractCache context;
+
+	public Iterator<Map.Entry<Long, Generic>> genericsByIdIterator() {
+		return genericsById.entrySet().iterator();
+	}
 
 	@Override
 	public AbstractEngine getRoot() {
@@ -112,11 +117,11 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 	}
 
 	public Generic getGenericById(long ts) {
-		return tMap.get(ts);
+		return genericsById.get(ts);
 	}
 
 	protected void release(long ts) {
-		tMap.remove(ts);
+		genericsById.remove(ts);
 	}
 
 	protected final Generic newT(Class<?> clazz) {
@@ -161,7 +166,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 	protected Generic init(Generic generic, DefaultHandler handler) {
 		((ProxyObject) generic).setHandler(handler);
 		assert ((ProxyObject) generic).getHandler() instanceof AbstractEngine.DefaultHandler;
-		Generic gresult = tMap.putIfAbsent(handler.getTs(), generic);
+		Generic gresult = genericsById.putIfAbsent(handler.getTs(), generic);
 		assert gresult == null : gresult.info();
 		return generic;
 	}
