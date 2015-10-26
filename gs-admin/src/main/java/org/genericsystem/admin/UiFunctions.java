@@ -6,12 +6,15 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
+
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
 import org.genericsystem.javafx.AbstractColumn;
 import org.genericsystem.javafx.LinksTableView.TriConsumer;
 
@@ -28,14 +31,22 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 	public Function<G, ObservableList<G>> genericSubInstances;
 	public Consumer<G> removeConsumer;
 
+	// juba
+	public Consumer<G> flushConsumer;
+	public Consumer<G> mountConsumer;
+	public Consumer<G> unmountConsumer;
+	public Consumer<G> cancelConsumer;
+
 	public static abstract class AttributeUiFunctions<G> extends UiFunctions<G> {
 		public BiFunction<Serializable, List<G>, G> addAction;
 		public StringConverter<Serializable> converter;
 		public Function<G, ObservableList<G>> linksGetter;
-
 	}
 
 	public static class GsUiFunctions extends UiFunctions<Generic> {
+		Generic vehicle;
+		Generic vehiclePower;
+
 		public GsUiFunctions() {
 			genericGetter = generic -> generic != null ? generic.getValue() : null;
 			genericSetter = (generic, value) -> {
@@ -57,10 +68,28 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 			attributeGetter = attribute -> generic -> FXCollections.observableArrayList((generic.getHolders(attribute).toList()));
 			typeAttributes = typ -> typ.getAttributes().filter(attribute -> attribute.isCompositeForInstances(typ));
 			genericSubInstances = targetComponent -> FXCollections.observableArrayList((targetComponent.getSubInstances().toList()));
+
 			removeConsumer = generic -> {
 				generic.remove();
 				System.out.println("Remove from GS : " + generic.info());
 			};
+
+			flushConsumer = generic -> {
+				generic.getRoot().getCurrentCache().flush();
+			};
+
+			cancelConsumer = generic -> {
+				((HeavyClientEngine) generic).getCurrentCache().clear();
+			};
+
+			mountConsumer = generic -> {
+				((HeavyClientEngine) generic).getCurrentCache().mount();
+			};
+
+			unmountConsumer = generic -> {
+				((HeavyClientEngine) generic).getCurrentCache().unmount();
+			};
+
 		}
 
 		@Override
@@ -82,6 +111,8 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 			typeAttributes = uiFunctions.typeAttributes;
 			genericSubInstances = uiFunctions.genericSubInstances;
 			removeConsumer = uiFunctions.removeConsumer;
+			flushConsumer = uiFunctions.flushConsumer;
+
 			addAction = attributeAddAction.apply(attribute);
 			converter = attributeConverter.apply(attribute);
 			linksGetter = attributeGetter.apply(attribute);
