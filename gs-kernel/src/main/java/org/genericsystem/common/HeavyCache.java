@@ -3,6 +3,8 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -74,6 +76,21 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	public Snapshot<Generic> getDependencies(Generic vertex) {
 		return differential.getDependencies(vertex);
 	}
+
+	// ************************************
+	public ObservableList<Generic> getObservableDependencies(Generic vertex) {
+		return differential.getObservableDependencies(vertex);
+	}
+
+	public ObservableList<Generic> getObservableInstances(Generic vertex) {
+		return differential.getObservableDependencies(vertex).filtered((x -> (vertex).equals(x.getMeta())));
+	}
+
+	public ObservableList<Generic> getObservableInheritings(Generic generic) {
+		return differential.getObservableDependencies(generic).filtered(x -> x.getSupers().contains(generic));
+	}
+
+	// *****************************************
 
 	protected Restructurator buildRestructurator() {
 		return new Restructurator(this);
@@ -238,6 +255,13 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		@Override
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			transaction.apply(removes, adds);
+		}
+
+		@Override
+		public ObservableList<Generic> getObservableDependencies(Generic generic) {
+			// TODO Auto-generated method stub
+
+			return getDependencies(generic).toObservable();
 		}
 
 		@Override
