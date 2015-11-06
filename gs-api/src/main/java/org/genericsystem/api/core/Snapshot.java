@@ -7,9 +7,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 /**
  * Represents a <code>Set</code> of results <em>aware</em> of its context.
  * <p>
@@ -137,7 +134,19 @@ public interface Snapshot<T> extends Iterable<T> {
 		return stream().collect(Collectors.toList());
 	}
 
-	default ObservableList<T> toObservable() {
-		return FXCollections.observableArrayList(this.toList());
-	}
+	// default ObservableList<T> toObservable(Observable... observables) {
+	// return new ListBinding() {
+	// {
+	// for (Observable observable : observables) {
+	// this.bind(observable);
+	// }
+	// }
+	//
+	// @Override
+	// protected ObservableList<T> computeValue() {
+	// return FXCollections.observableArrayList(toList());
+	// }
+	// };
+	//
+	// }
 }

@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class HolderTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -33,7 +33,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -60,7 +60,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -87,7 +87,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic power = root.addInstance("Power", car);
@@ -106,7 +106,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic bike = root.addInstance(Arrays.asList(vehicle), "bike");
@@ -130,7 +130,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test006() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -162,7 +162,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test007() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -196,7 +196,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test008() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power);
@@ -228,7 +228,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test009() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power);
@@ -269,7 +269,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test010() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power1 = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power1);
@@ -339,7 +339,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test011() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("myCar");
@@ -348,7 +348,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test012() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic maxSpeed = car.addAttribute("MaxSpeed");
@@ -361,7 +361,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test013() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("myCar");
@@ -371,7 +371,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test014() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic carDefaultPower = car.setHolder(power, 200);
@@ -380,7 +380,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test015() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power").enablePropertyConstraint();
 		car.setHolder(power, 200);
@@ -390,7 +390,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test016() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		car.setHolder(power, 200);
@@ -400,7 +400,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test017() {
-		final LightServerEngine engine = new LightServerEngine();
+		final Root engine = new Root();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic carDefaultPower = car.setHolder(power, 200);
@@ -410,7 +410,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test018() {
-		final LightServerEngine engine = new LightServerEngine();
+		final Root engine = new Root();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		car.setHolder(power, 200);

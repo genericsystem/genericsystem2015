@@ -5,8 +5,11 @@ import io.vertx.core.buffer.Buffer;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Protocole;
@@ -52,6 +55,15 @@ public abstract class AbstractGSClient implements Protocole {
 	 * 
 	 * public static <T> T callbackBottom() { if (!globalResultContainer.isEmpty()) return (T) globalResultContainer.get(); }
 	 */
+
+	protected static <T> T doTaskWithoutSynchronizing(Runnable method, Function<Void, T> callback) {
+		try {
+			return CompletableFuture.runAsync(method).thenApplyAsync(callback).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		}
+		// doTaskWithoutSynchronizing(() -> {sendBuffer();}, () -> {readBuffer();});
+	}
 
 	protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {

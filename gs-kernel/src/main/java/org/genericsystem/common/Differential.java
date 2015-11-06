@@ -19,24 +19,33 @@ public class Differential implements IDifferential<Generic> {
 
 		@Override
 		public javafx.collections.ObservableList<Generic> get(Object key) {
+
 			ObservableList<Generic> result = super.get(key);
-			if (result != null)
+			if (result != null) {
 				return result;
+			}
 
 			result = new ListBinding<Generic>() {
 				{
-					super.bind(addsObservable, removesObservable);
+					super.bind(addsObservable, removesObservable, differential.getObservableDependencies((Generic) key));
 				}
 
 				@Override
 				public void dispose() {
-					super.unbind(addsObservable, removesObservable);
+					super.unbind(addsObservable, removesObservable, differential.getObservableDependencies((Generic) key));
 				}
 
 				@Override
 				protected ObservableList<Generic> computeValue() {
-					System.out.println("buileObList");
-					return buildObservableList((Generic) key);
+					return FXCollections.concat(addsObservable.contains(key) ? FXCollections.emptyObservableList() : differential.getObservableDependencies((Generic) key).filtered(x -> !removesObservable.contains(x)),
+							addsObservable.filtered(x -> ((Generic) key).isDirectAncestorOf(x)));
+				}
+
+				@Override
+				public String toString() {
+					if (!isValid())
+						get();
+					return super.toString();
 				}
 
 			};
@@ -59,14 +68,14 @@ public class Differential implements IDifferential<Generic> {
 		return mapCache.get(generic);
 	}
 
-	private ObservableList<Generic> buildObservableList(Generic generic) {
-		return FXCollections.concat(addsObservable.contains(generic) ? FXCollections.emptyObservableList() : differential.getObservableDependencies(generic).filtered(x -> !removesObservable.contains(x)),
-				addsObservable.filtered(x -> generic.isDirectAncestorOf(x)));
-	}
+	// private ObservableList<Generic> buildObservableList(Generic generic) {
+	// return FXCollections.concat(addsObservable.contains(generic) ? FXCollections.emptyObservableList() : differential.getDependencies(generic).toObservable().filtered(x -> !removesObservable.contains(x)),
+	// addsObservable.filtered(x -> generic.isDirectAncestorOf(x)));
+	// }
 
 	public Differential(IDifferential<Generic> subCache) {
 		this.differential = subCache;
-		addsObservable = FXCollections.observableArrayList();
+		addsObservable = FXCollections.observableArrayList(); // constructor with list parameter builds observable alongside
 		removesObservable = FXCollections.observableArrayList();
 
 	}
@@ -93,8 +102,8 @@ public class Differential implements IDifferential<Generic> {
 
 	protected Generic plug(Generic generic) {
 		adds.add(generic);
-		System.out.println("plug add obs");
 		addsObservable.add(generic);
+		// mapCache.get(generic);
 		return generic;
 	}
 

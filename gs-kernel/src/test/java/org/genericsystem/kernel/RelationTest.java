@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class RelationTest extends AbstractTest {
 
 	public void test001() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -25,7 +25,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -37,7 +37,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("carColor", color);
@@ -47,7 +47,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test004() {
-		final LightServerEngine engine = new LightServerEngine();
+		final Root engine = new Root();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic door = engine.addInstance("Door");
@@ -58,7 +58,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test005() {
-		final LightServerEngine root = new LightServerEngine();
+		final Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("MyAudi");

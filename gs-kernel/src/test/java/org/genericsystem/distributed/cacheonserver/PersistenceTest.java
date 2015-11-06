@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.EngineImpl;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -18,20 +18,20 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testDefaultConfiguration() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
 			}
 		};
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 	}
 
 	public void testAnnotType() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot, Vehicle.class) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -39,14 +39,14 @@ public class PersistenceTest extends AbstractTest {
 		};
 		root.getCurrentCache().flush();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
 		compareGraph(root, engine);
 		assert engine.find(Vehicle.class) instanceof Vehicle : engine.find(Vehicle.class).info();
 	}
 
 	public void testAnnotType2() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot, Vehicle.class) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -55,12 +55,12 @@ public class PersistenceTest extends AbstractTest {
 		root.getCurrentCache().flush();
 		root.close();
 
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraphWitoutTs(root, engine);
 		engine.getCurrentCache().flush();
 		engine.close();
 
-		HeavyServerEngine engine2 = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		EngineImpl engine2 = new EngineImpl(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
 		compareGraph(root, engine2);
 
 		assert engine2.find(Vehicle.class) instanceof Vehicle : engine2.find(Vehicle.class).info();
@@ -81,7 +81,7 @@ public class PersistenceTest extends AbstractTest {
 
 	public void testType() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -90,14 +90,14 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance("Vehicle");
 		root.getCurrentCache().flush();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 		assert null != engine.getInstance("Vehicle");
 	}
 
 	public void testHolder() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -109,13 +109,13 @@ public class PersistenceTest extends AbstractTest {
 		myVehicle.setHolder(vehiclePower, "123");
 		root.getCurrentCache().flush();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 	}
 
 	public void testAddAndRemove() throws InterruptedException {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -130,13 +130,13 @@ public class PersistenceTest extends AbstractTest {
 		assert vehicle.getTs() < truck.getTs();
 		assert vehicle.getBirthTs() == truck.getBirthTs();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 	}
 
 	public void testLink() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -150,13 +150,13 @@ public class PersistenceTest extends AbstractTest {
 		myVehicle.setHolder(vehicleColor, "myVehicleRed", red);
 		root.getCurrentCache().flush();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 	}
 
 	public void testHeritageMultiple() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -167,13 +167,13 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 		root.getCurrentCache().flush();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 	}
 
 	public void testHeritageMultipleDiamond() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -185,13 +185,13 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
 		root.getCurrentCache().flush();
 		root.close();
-		HeavyServerEngine engine = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot);
+		EngineImpl engine = new EngineImpl(Statics.ENGINE_VALUE, snapshot);
 		compareGraph(root, engine);
 	}
 
 	public void testTree() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		HeavyServerEngine root = new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot) {
+		EngineImpl root = new EngineImpl(Statics.ENGINE_VALUE, snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -204,7 +204,7 @@ public class PersistenceTest extends AbstractTest {
 		tree.addInstance(child, "Child3");
 		root.getCurrentCache().flush();
 		root.close();
-		compareGraph(root, new HeavyServerEngine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new EngineImpl(Statics.ENGINE_VALUE, snapshot));
 	}
 
 	private static String cleanDirectory(String directoryPath) {

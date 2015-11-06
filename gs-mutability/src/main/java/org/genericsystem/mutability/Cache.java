@@ -33,7 +33,7 @@ public class Cache implements DefaultCache<Generic>, ContextEventListener<org.ge
 
 	private final Deque<Map<Generic, org.genericsystem.common.Generic>> revertMutations = new ArrayDeque<>();
 
-	public Cache(Engine engine, org.genericsystem.kernel.HeavyServerEngine cacheEngine) {
+	public Cache(Engine engine, org.genericsystem.kernel.EngineImpl cacheEngine) {
 		this.engine = engine;
 		put(engine, cacheEngine);
 		this.cache = cacheEngine.newCache(this);

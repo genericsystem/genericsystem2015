@@ -8,20 +8,20 @@ import org.genericsystem.api.core.IVertex.Visitor;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class TreeTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		assert tree.getSupers().isEmpty();
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		Generic rootNode = tree.addInstance("rootNode");
 
@@ -36,7 +36,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("tree");
 		Generic html = tree.addInstance("html");
 		assert html.getMeta().equals(tree);
@@ -44,7 +44,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("tree");
 		Generic html = tree.addInstance("html");
 		Generic head = tree.addInstance(html, "head");
@@ -73,7 +73,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("tree");
 		Generic rootNode = tree.addInstance("rootNode");
 		Generic htmlNode = tree.addInstance(rootNode, "htmlNode");
@@ -89,13 +89,13 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test006() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		root.addInstance("Tree");
 		catchAndCheckCause(() -> root.addInstance("Tree"), ExistsException.class);
 	}
 
 	public void test007() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 
 		Generic tree = root.addInstance("Tree");
 		Generic color = root.addInstance("Color");
@@ -122,7 +122,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test008() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 
 		Generic html5Tags = root.addInstance("Html5Tags");
 
@@ -165,7 +165,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test009() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic a1 = root.addInstance("A");
 		Generic b = root.addInstance(a1, "B");
 		Generic a2 = root.addInstance(b, "A");
@@ -175,7 +175,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test010() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic a1 = root.addInstance("A");
 		Generic b = root.addInstance("B");
 		Generic a2 = root.addInstance(b, "A");
@@ -185,7 +185,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test011() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic b = root.addInstance("B");
 		Generic c = root.addInstance("C");
 		Generic a1 = root.addInstance(b, "A");

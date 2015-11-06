@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class InstanciationTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		assert root.getMeta().equals(root);
 		assert root.getComponents().isEmpty();
 		assert Statics.ENGINE_VALUE.equals(root.getValue());
@@ -24,7 +24,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		assert root.getInstance("Car") == car;
 		assert car.getMeta().equals(root);
@@ -38,7 +38,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.setInstance("Car");
 		assert root.getInstance("Car") == car;
 		assert car.getMeta().equals(root);
@@ -52,7 +52,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		assert car.getMeta().equals(root);
@@ -74,13 +74,13 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		root.addInstance("Car");
 		catchAndCheckCause(() -> root.addInstance("Car"), ExistsException.class);
 	}
 
 	public void test006() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic otherCar = root.setInstance("Car");
 		assert car == otherCar;
@@ -95,7 +95,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test007() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		assert vehicle.getMeta().equals(root);
@@ -114,7 +114,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test008() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic otherCar = root.addInstance(car, "Car");
 		assert car.isAlive();
@@ -123,7 +123,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test009() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		Generic transformer = root.addInstance(Arrays.asList(car, robot), "Transformer");
@@ -146,7 +146,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test010() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic device = root.addInstance("Device");

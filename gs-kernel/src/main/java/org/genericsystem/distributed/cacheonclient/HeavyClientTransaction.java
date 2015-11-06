@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -11,6 +13,7 @@ import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
+import org.genericsystem.common.ObservableContainer;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.HeavyClientEngine.ClientEngineHandler;
 
@@ -72,15 +75,32 @@ public class HeavyClientTransaction extends CheckedContext implements IDifferent
 
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
 
+	// @Override
+	// public ObservableList<Generic> getObservableDependencies(Generic generic) {
+	// return getRoot().getCurrentCache().getObservableDependencies(generic);
+	// }
+
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
 			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(getTs(), generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
+			// container m b async: observable container
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}
 		return dependencies;
+	}
+
+	@Override
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		ObservableContainer result = new ObservableContainer();
+
+		getRoot().getServer().sendRequestForObservableDependencies(result, (vertex) -> {
+			return getRoot().getGenericByVertex(vertex);
+		}, getTs(), generic.getTs());
+
+		return result;
 	}
 
 }

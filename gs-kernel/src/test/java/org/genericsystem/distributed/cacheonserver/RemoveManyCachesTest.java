@@ -2,14 +2,14 @@ package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.EngineImpl;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		EngineImpl engine = new EngineImpl();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -27,7 +27,7 @@ public class RemoveManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		EngineImpl engine = new EngineImpl();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");

@@ -259,9 +259,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 		@Override
 		public ObservableList<Generic> getObservableDependencies(Generic generic) {
-			// TODO Auto-generated method stub
-
-			return getDependencies(generic).toObservable();
+			return transaction.getObservableDependencies(generic);
 		}
 
 		@Override

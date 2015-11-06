@@ -29,7 +29,7 @@ public abstract class AbstractServer extends AbstractEngine implements Generic, 
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((LightServerEngine) getRoot());
+				return new Transaction((Root) getRoot());
 			}
 
 			@Override
@@ -78,7 +78,7 @@ public abstract class AbstractServer extends AbstractEngine implements Generic, 
 		return new RootServerHandler(clazz, meta, supers, value, components, ts, otherTs);
 	}
 
-	class RootServerHandler extends DefaultHandler {
+	public class RootServerHandler extends DefaultHandler {
 
 		private final LifeManager lifeManager;
 		private final AbstractTsDependencies dependencies;
@@ -98,7 +98,7 @@ public abstract class AbstractServer extends AbstractEngine implements Generic, 
 			return lifeManager;
 		}
 
-		AbstractTsDependencies getDependencies() {
+		public AbstractTsDependencies getDependencies() {
 			return dependencies;
 		}
 

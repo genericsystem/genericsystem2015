@@ -1,14 +1,14 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class MetasTests extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic metaRelation = metaAttribute.getInheritings().first();
 
@@ -24,7 +24,7 @@ public class MetasTests extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		assert root.getCurrentCache().getMeta(1).equals(root.getMetaAttribute());
 		assert root.getCurrentCache().getMeta(5) == null;
 		Generic pentaMeta = root.getCurrentCache().setMeta(5);
@@ -38,7 +38,7 @@ public class MetasTests extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		assert root.setInstance(root.getValue(), root).equals(root.getMetaAttribute());
 		assert root.setInstance(root.getValue(), root, root).equals(root.getMetaRelation());
 		assert root.setInstance(root.getValue(), root, root, root).equals(root.getCurrentCache().getMeta(3));

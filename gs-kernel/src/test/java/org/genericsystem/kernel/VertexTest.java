@@ -6,14 +6,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class VertexTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 
@@ -21,7 +21,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		List<Generic> list = new ArrayList<>();
@@ -35,13 +35,13 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		assert root.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic carPower = root.addInstance("power", car);
 		Generic myBmw = car.addInstance("myBmw");
@@ -51,7 +51,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic carPower = root.addInstance("power", car);
 		carPower.enablePropertyConstraint();
@@ -63,7 +63,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic otherVehicle = root.addInstance("OtherVehicle");
 		assert !otherVehicle.inheritsFrom(vehicle);
@@ -135,14 +135,14 @@ public class VertexTest extends AbstractTest {
 
 	@Test(enabled = false)
 	public void test007() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		root.addInstance("OtherVehicle");
 		assert vehicle == root.setInstance("Vehicle");
 	}
 
 	public void test008() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic vehiclePower = root.addInstance("VehiclePower", vehicle);
@@ -151,7 +151,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic vehiclePower = root.addInstance("VehiclePower", vehicle);
@@ -160,7 +160,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic sportCar = root.addInstance(car, "SportCar");
@@ -171,7 +171,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test011() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic robot = root.addInstance("robot");
 		Generic transformer = root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -181,7 +181,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test012() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic robot = root.addInstance("robot");
 		Generic transformer = root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -192,7 +192,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test013() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic robot = root.addInstance("robot");
 		Generic transformer = root.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -203,7 +203,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test014() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		assert car.getCurrentCache().computeDependencies(car).contains(car);
@@ -215,7 +215,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test015() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic sportCar = root.addInstance(car, "SportCar");
@@ -234,7 +234,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test016() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("myBmw");
@@ -251,7 +251,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test017() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = root.addInstance("Power", car);
@@ -270,7 +270,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test018() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(vehicle, "Car");

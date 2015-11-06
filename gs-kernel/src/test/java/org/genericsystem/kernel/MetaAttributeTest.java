@@ -1,14 +1,14 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class MetaAttributeTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic metaAttribute = root.getMetaAttribute();
 		assert metaAttribute != null;
 		assert root.getLevel() == 0;
@@ -25,7 +25,7 @@ public class MetaAttributeTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
@@ -34,7 +34,7 @@ public class MetaAttributeTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic option = root.addInstance("Option", vehicle);
@@ -45,7 +45,7 @@ public class MetaAttributeTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic options = root.addInstance("Options", vehicle);

@@ -3,14 +3,14 @@ package org.genericsystem.kernel;
 import java.util.Arrays;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class AncestorsServiceTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic device = root.addInstance("Device");
@@ -77,7 +77,7 @@ public class AncestorsServiceTest extends AbstractTest {
 
 	public void test002() {
 
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic microcar = root.addInstance(car, "Microcar");
@@ -90,7 +90,7 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(vehicle, "Car");
@@ -113,7 +113,7 @@ public class AncestorsServiceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic airConditioner = root.addInstance("AirConditioner", car);
