@@ -5,13 +5,11 @@ import io.vertx.core.buffer.Buffer;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.ObservableContainer;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
@@ -56,10 +54,10 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 	}
 
 	@Override
-	public void sendRequestForObservableDependencies(ObservableContainer container, Function<Vertex, Generic> transform, long ts, long id) {
+	public void sendRequestForObservableDependencies(Consumer container, HeavyClientEngine root, long ts, long id) {
 
 		send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(ts).appendLong(id), buff -> {
-			container.fill(Arrays.stream(new GSBuffer(buff).getGSVertexArray()).map(vertex -> transform.apply(vertex)).collect(Collectors.toList()));
+			container.accept(Arrays.stream(new GSBuffer(buff).getGSVertexArray()).map(vertex -> root.getGenericByVertex(vertex)).collect(Collectors.toList()));
 		});
 
 	}
@@ -91,18 +89,19 @@ public abstract class AbstractGSHeavyClient extends AbstractGSClient implements 
 			throw new IllegalStateException((Throwable) res);
 	}
 
+	// to desync
 	@Override
 	public long pickNewTs() {
-		CompletableFuture<Long> promise = new CompletableFuture<>();
-		send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> {
-			promise.complete(new GSBuffer(buff).getLong());
-		});
-		try {
-			return promise.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		// return synchronizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
+		// CompletableFuture<Long> promise = new CompletableFuture<>();
+		// send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> {
+		// promise.complete(new GSBuffer(buff).getLong());
+		// });
+		// try {
+		// return promise.get();
+		// } catch (Exception e) {
+		// throw new RuntimeException(e);
+		// }
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
 	}
 
 }

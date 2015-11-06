@@ -1,11 +1,9 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.ObservableContainer;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 
@@ -15,7 +13,7 @@ public interface ClientCacheProtocole extends Protocole {
 
 	void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
-	default void sendRequestForObservableDependencies(ObservableContainer container, Function<Vertex, Generic> transform, long ts, long id) {
+	default void sendRequestForObservableDependencies(Consumer container, HeavyClientEngine root, long ts, long id) {
 	}
 
 }

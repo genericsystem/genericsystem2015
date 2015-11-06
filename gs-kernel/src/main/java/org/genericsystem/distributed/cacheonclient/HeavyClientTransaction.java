@@ -73,6 +73,7 @@ public class HeavyClientTransaction extends CheckedContext implements IDifferent
 		return (HeavyClientEngine) super.getRoot();
 	}
 
+	private Map<Generic, ObservableContainer> observableDependenciesMap = new HashMap<>();
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
 
 	// @Override
@@ -85,22 +86,22 @@ public class HeavyClientTransaction extends CheckedContext implements IDifferent
 		Snapshot<Generic> dependencies = dependenciesMap.get(generic);
 		if (dependencies == null) {
 			dependencies = new Container(Arrays.stream(getRoot().getServer().getDependencies(getTs(), generic.getTs())).map(vertex -> getRoot().getGenericByVertex(vertex)));
-			// container m b async: observable container
 			Snapshot<Generic> result = dependenciesMap.put(generic, dependencies);
 			assert result == null;
 		}
 		return dependencies;
 	}
 
+	// send getRoot()
 	@Override
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		ObservableContainer result = new ObservableContainer();
-
-		getRoot().getServer().sendRequestForObservableDependencies(result, (vertex) -> {
-			return getRoot().getGenericByVertex(vertex);
-		}, getTs(), generic.getTs());
-
-		return result;
+		ObservableContainer observableDependencies = observableDependenciesMap.get(generic);
+		if (observableDependencies == null) {
+			observableDependencies = new ObservableContainer();
+			getRoot().getServer().sendRequestForObservableDependencies(observableDependencies, getRoot(), getTs(), generic.getTs());
+			ObservableContainer result = observableDependenciesMap.put(generic, observableDependencies);
+			assert result == null;
+		}
+		return observableDependencies;
 	}
-
 }

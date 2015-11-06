@@ -39,6 +39,7 @@ public class Differential implements IDifferential<Generic> {
 				protected ObservableList<Generic> computeValue() {
 					return FXCollections.concat(addsObservable.contains(key) ? FXCollections.emptyObservableList() : differential.getObservableDependencies((Generic) key).filtered(x -> !removesObservable.contains(x)),
 							addsObservable.filtered(x -> ((Generic) key).isDirectAncestorOf(x)));
+
 				}
 
 				@Override
