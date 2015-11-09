@@ -12,15 +12,26 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 import org.genericsystem.api.core.annotations.value.IntValue;
+import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
 public class AnnotationTest extends AbstractTest {
 
+	@Override
+	public GSDeploymentOptions getDeploymentOptions() {
+		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addClasses(Vehicle.class, MyAudi.class, MyBmw.class, MyMercedes.class, VehicleType.class, OtherVehicleType.class, HumanPossessVehicleTime.class, ManPossessCar.class,
+				HumanPossessCar.class, HumanPossessVehicle.class, Time.class, Myck.class, Man.class, Human.class, Unit.class, ElectrikPower.class, myCar.class, Car.class, V123.class, Voiture.class, Couleur.class, Puissance.class, Power.class,
+				MyVehicle.class, OtherVehicle.class, MySelectableWindow.class, SelectableWindow.class, Selected.class, Selectable.class, Window.class, Size.class, GraphicComposite.class, MyTransformerChildrenGames.class, TransformerChildrenGames.class,
+				MyTransformer.class, Transformer.class, MyChildrenGames.class, ChildrenGames.class, MyChildren.class, Children.class, MyGames2.class, MyGames.class, Games.class);
+	}
+
 	public void test001_Generic() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Human.class, Myck.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Human.class, Myck.class);
 		Generic vehicle = engine.find(Vehicle.class);
 		Generic human = engine.find(Human.class);
 		Generic myck = engine.find(Myck.class);
@@ -30,26 +41,28 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test001_remove() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class);
 		Generic vehicle = engine.find(Vehicle.class);
-		catchAndCheckCause(() -> vehicle.remove(), IllegalAccessException.class);
+		assert vehicle.getBirthTs() == 0L;
+		assert vehicle.isSystem();
+		catchAndCheckCause(() -> vehicle.remove(), ReferentialIntegrityConstraintViolationException.class);
 	}
 
 	public void test002_remove() {
-		HeavyServerEngine engine = new HeavyServerEngine(OtherVehicle.class);
+		LightClientEngine engine = new LightClientEngine(OtherVehicle.class);
 		Generic vehicle = engine.find(OtherVehicle.class);
 		catchAndCheckCause(() -> vehicle.remove(), IllegalAccessException.class);
 	}
 
 	public void test001_instanceof() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class);
 		assert engine.find(Vehicle.class) instanceof Vehicle : Vehicle.class.isInterface() + " " + engine.find(Vehicle.class).getClass();
 		assert engine.getInstance(Vehicle.class) instanceof Vehicle : engine.find(Vehicle.class).info() + "   " + engine.getInstance(Vehicle.class).info();
 		assert engine.getInstances().stream().anyMatch(x -> x instanceof Vehicle);
 	}
 
 	public void test002_instanceof() {
-		HeavyServerEngine engine = new HeavyServerEngine(VehicleType.class);
+		LightClientEngine engine = new LightClientEngine(VehicleType.class);
 		assert engine.find(VehicleType.class) instanceof VehicleType;
 		VehicleType vehicle = engine.find(VehicleType.class);
 		assert vehicle.addInstance("myBmw") instanceof VehicleInstance;
@@ -58,7 +71,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test0022_instanceof() {
-		HeavyServerEngine engine = new HeavyServerEngine(OtherVehicleType.class);
+		LightClientEngine engine = new LightClientEngine(OtherVehicleType.class);
 		Generic vehicle = engine.find(OtherVehicleType.class);
 		assert vehicle.addInstance("myBmw") instanceof VehicleInstance;
 		assert vehicle.setInstance("myBmw") instanceof VehicleInstance;
@@ -66,23 +79,24 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test002_instanceof_getInstances() {
-		HeavyServerEngine engine = new HeavyServerEngine(VehicleType.class);
+		LightClientEngine engine = new LightClientEngine(VehicleType.class);
 		VehicleType vehicle = engine.find(VehicleType.class);
 		assert vehicle.addInstance("myBmw") instanceof VehicleInstance;
 		assert vehicle.getInstances().stream().allMatch(x -> x instanceof VehicleInstance);
 	}
 
 	public void test003_instanceof() {
-		HeavyServerEngine engine = new HeavyServerEngine(MyAudi.class);
+		LightClientEngine engine = new LightClientEngine(MyAudi.class);
 		assert engine.find(MyAudi.class) instanceof VehicleInstance : engine.find(MyAudi.class).getClass();
 		assert engine.find(MyAudi.class) instanceof MyAudi : engine.find(MyAudi.class).getClass();
 	}
 
-	public void test004_instanceof() {
-
-		catchAndCheckCause(() -> new HeavyServerEngine(MyBmw.class), InstantiationException.class);
-		catchAndCheckCause(() -> new HeavyServerEngine(MyMercedes.class), InstantiationException.class);
-	}
+	//
+	// public void test004_instanceof() {
+	//
+	// catchAndCheckCause(() -> new ClientEngine(MyBmw.class), InstantiationException.class);
+	// catchAndCheckCause(() -> new ClientEngine(MyMercedes.class), InstantiationException.class);
+	// }
 
 	public static class VehicleInstance implements Generic {
 
@@ -95,12 +109,12 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static class MyBmw implements Generic {
+	public static class MyBmw extends VehicleInstance {
 	}
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static class MyMercedes {
+	public static class MyMercedes extends VehicleInstance {
 	}
 
 	@SystemGeneric
@@ -116,7 +130,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test002_SuperGeneric() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Car.class, myCar.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Car.class, myCar.class);
 		Generic vehicle = engine.find(Vehicle.class);
 		Generic car = engine.find(Car.class);
 		Generic myCar = engine.find(myCar.class);
@@ -131,7 +145,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test003_Attribute() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Power.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Power.class);
 		Generic vehicle = engine.find(Vehicle.class);
 		Generic power = engine.find(Power.class);
 		assert power.isStructural();
@@ -139,7 +153,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test004_AttributeValue() {
-		HeavyServerEngine engine = new HeavyServerEngine(V123.class);
+		LightClientEngine engine = new LightClientEngine(V123.class);
 		Generic myVehicle = engine.find(MyVehicle.class);
 		engine.find(V123.class);
 		assert myVehicle.getValues(engine.find(Power.class)).size() == 1;
@@ -147,14 +161,14 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test005_SuperAttribute() {
-		HeavyServerEngine engine = new HeavyServerEngine(Car.class, ElectrikPower.class);
+		LightClientEngine engine = new LightClientEngine(Car.class, ElectrikPower.class);
 		Generic car = engine.find(Car.class);
 		Generic electrikPowerCar = engine.find(ElectrikPower.class);
 		assert car.getAttributes(engine).contains(electrikPowerCar) : car.getAttributes(engine);
 	}
 
 	public void test006_AttributeOnAttribute() {
-		HeavyServerEngine engine = new HeavyServerEngine(ElectrikPower.class, Unit.class);
+		LightClientEngine engine = new LightClientEngine(ElectrikPower.class, Unit.class);
 		Generic electrikPowerCar = engine.find(ElectrikPower.class);
 		Generic unit = engine.find(Unit.class);
 		assert unit.isCompositeOf(electrikPowerCar);
@@ -163,15 +177,16 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test007_Relation() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Human.class, HumanPossessVehicle.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Human.class, HumanPossessCar.class);
 		engine.find(Vehicle.class);
 		Generic human = engine.find(Human.class);
-		Generic possess = engine.find(HumanPossessVehicle.class);
-		assert human.getAttributes().contains(possess);
+		Generic possess = engine.find(HumanPossessCar.class);
+		assert possess != null;
+		assert human.getAttributes().contains(possess) : human.getAttributes().info();
 	}
 
 	public void test008_SubRelation() {
-		HeavyServerEngine engine = new HeavyServerEngine(Car.class, Human.class, HumanPossessVehicle.class, HumanPossessCar.class);
+		LightClientEngine engine = new LightClientEngine(Car.class, Human.class, HumanPossessVehicle.class, HumanPossessCar.class);
 		engine.find(Car.class);
 		Generic human = engine.find(Human.class);
 		Generic possessVehicle = engine.find(HumanPossessVehicle.class);
@@ -182,19 +197,20 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test009_SymetricSuperRelation() {
-		HeavyServerEngine engine = new HeavyServerEngine(Car.class, Human.class, Man.class, HumanPossessVehicle.class, ManPossessCar.class);
+		LightClientEngine engine = new LightClientEngine(Car.class, Human.class, Man.class, HumanPossessCar.class, ManPossessCar.class, HumanPossessVehicle.class);
 		engine.find(Car.class);
 		Generic human = engine.find(Human.class);
 		Generic man = engine.find(Man.class);
+		Generic humanPossessCar = engine.find(HumanPossessCar.class);
 		Generic humanPossessVehicle = engine.find(HumanPossessVehicle.class);
 		Generic manPossessCar = engine.find(ManPossessCar.class);
-		assert human.getAttributes().contains(humanPossessVehicle);
+		assert human.getAttributes().contains(humanPossessCar);
 		assert man.getAttributes().contains(manPossessCar) : man.getAttributes();
 		assert manPossessCar.inheritsFrom(humanPossessVehicle);
 	}
 
 	public void test010_TernaryRelation() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Human.class, Time.class, HumanPossessVehicleTime.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Human.class, Time.class, HumanPossessVehicleTime.class);
 		engine.find(Vehicle.class);
 		Generic human = engine.find(Human.class);
 		engine.find(Time.class);
@@ -203,7 +219,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test011_getDirectSubGenericsWithDiamondProblem() {
-		HeavyServerEngine engine = new HeavyServerEngine(GraphicComposite.class, Window.class, Selectable.class, SelectableWindow.class);
+		LightClientEngine engine = new LightClientEngine(GraphicComposite.class, Window.class, Selectable.class, SelectableWindow.class);
 		Generic graphicComposite = engine.find(GraphicComposite.class);
 		Generic window = engine.find(Window.class);
 		Generic selectable = engine.find(Selectable.class);
@@ -229,7 +245,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test012_Value() {
-		HeavyServerEngine engine = new HeavyServerEngine(SelectableWindow.class, Size.class, Selected.class, MySelectableWindow.class);
+		LightClientEngine engine = new LightClientEngine(SelectableWindow.class, Size.class, Selected.class, MySelectableWindow.class);
 		Generic selectableWindow = engine.find(SelectableWindow.class);
 		Generic size = engine.find(Size.class);
 		Generic selectedSelectable = engine.find(Selected.class);
@@ -249,7 +265,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test013_MultiInheritanceComplexStructural() {
-		HeavyServerEngine engine = new HeavyServerEngine(Games.class, Children.class, Vehicle.class, Human.class, ChildrenGames.class, Transformer.class, TransformerChildrenGames.class);
+		LightClientEngine engine = new LightClientEngine(Games.class, Children.class, Vehicle.class, Human.class, ChildrenGames.class, Transformer.class, TransformerChildrenGames.class);
 		Generic games = engine.find(Games.class);
 		Generic children = engine.find(Children.class);
 		Generic vehicle = engine.find(Vehicle.class);
@@ -281,7 +297,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test014_MultiInheritanceComplexValue() {
-		HeavyServerEngine engine = new HeavyServerEngine(MyGames.class, MyChildren.class, MyVehicle.class, Myck.class, MyChildrenGames.class, ChildrenGames.class, MyTransformer.class, Transformer.class, TransformerChildrenGames.class,
+		LightClientEngine engine = new LightClientEngine(MyGames.class, MyChildren.class, MyVehicle.class, Myck.class, MyChildrenGames.class, ChildrenGames.class, MyTransformer.class, Transformer.class, TransformerChildrenGames.class,
 				MyTransformerChildrenGames.class);
 		Generic myGames = engine.find(MyGames.class);
 		Generic myChildren = engine.find(MyChildren.class);
@@ -341,7 +357,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test015_propertyConstraint() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Puissance.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Puissance.class);
 		Generic voiture = engine.find(Vehicle.class);
 		Generic puissance = engine.find(Puissance.class);
 
@@ -349,7 +365,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	// public void test016_requiredConstraint() {
-	// ServerEngine engine = new ServerEngine(Vehicle.class, Puissance.class);
+	// Engine engine = new Engine(Vehicle.class, Puissance.class);
 	// Generic voiture = engine.find(Vehicle.class);
 	// Generic puissance = engine.find(Puissance.class);
 	//
@@ -357,7 +373,7 @@ public class AnnotationTest extends AbstractTest {
 	// }
 
 	public void test017_singularConstraint() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Puissance.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Puissance.class);
 		Generic voiture = engine.find(Vehicle.class);
 		Generic puissance = engine.find(Puissance.class);
 
@@ -365,7 +381,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test018_uniqueValueConstraint() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Puissance.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Puissance.class);
 		Generic voiture = engine.find(Vehicle.class);
 		Generic puissance = engine.find(Puissance.class);
 
@@ -373,7 +389,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test019_uniqueClassConstraint() {
-		HeavyServerEngine engine = new HeavyServerEngine(Vehicle.class, Puissance.class);
+		LightClientEngine engine = new LightClientEngine(Vehicle.class, Puissance.class);
 		Generic voiture = engine.find(Vehicle.class);
 		Generic puissance = engine.find(Puissance.class);
 
@@ -381,7 +397,7 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test020_dependencies() {
-		HeavyServerEngine engine = new HeavyServerEngine(Voiture.class);
+		LightClientEngine engine = new LightClientEngine(Voiture.class);
 		Generic puissance = engine.find(Puissance.class);
 		Generic couleur = engine.find(Couleur.class);
 		assert puissance instanceof Puissance;

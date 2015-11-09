@@ -2,9 +2,10 @@ package org.genericsystem.distributed.cacheonserver;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -12,8 +13,8 @@ import org.testng.collections.Lists;
 @Test
 public class GenericTest extends AbstractTest {
 
-	public void testServerEngine() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+	public void testEngine() {
+		LightClientEngine engine = new LightClientEngine();
 		assert engine.isAlive();
 		assert engine.getComponents().isEmpty();
 		assert engine.getLevel() == 0;
@@ -27,12 +28,12 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testGetInstances() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		// assert engine.getInstances().isEmpty();
 		Generic vehicleVertex = engine.addInstance("Vehicle");
 		Generic powerVehicleVertex = engine.addInstance("Power", vehicleVertex);
 		Generic vehicle = engine.getInstances().stream().filter(g -> g.getValue().equals("Vehicle")).findFirst().get();
-		// Generic metaAttribut = engine.getInstances().filter(g -> g.getValue().equals("ServerEngine") && g.getCompositesStream().count() == 1).stream().findFirst().get();
+		// Generic metaAttribut = engine.getInstances().filter(g -> g.getValue().equals("Engine") && g.getCompositesStream().count() == 1).stream().findFirst().get();
 		Generic powerVehicle = engine.getMetaAttribute().getInstances().stream().filter(g -> g.getValue().equals("Power")).findFirst().get();
 		assert vehicle.isAlive();
 		assert vehicleVertex.isAlive();
@@ -41,28 +42,28 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddInstance() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert engine.getInstances().contains(vehicle) : engine.getInstances().stream().collect(Collectors.toList());
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);
 	}
 
 	public void testSetInstance() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.setInstance("Vehicle");
 		assert engine.getInstances().contains(vehicle);
 		assert engine.setInstance("Vehicle").equals(vehicle);
 	}
 
 	public void testAddInheriting() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		assert vehicle.getInheritings().contains(car);
 	}
 
 	public void testAddAttribute() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -73,7 +74,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -84,7 +85,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride2() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -96,7 +97,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride3() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -110,7 +111,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
@@ -121,7 +122,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance2() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
@@ -135,7 +136,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance3() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");

@@ -1,21 +1,22 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.util.Iterator;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientCache;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache1 = engine.getCurrentCache();
-		HeavyCache cache2 = engine.newCache().start();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache1 = engine.getCurrentCache();
+		LightClientCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Generic myCar2 = car.addInstance("myCar2");
@@ -42,25 +43,25 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
-		HeavyCache cache1 = engine.getCurrentCache();
+		LightClientCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
 		cache1.flush();
-		HeavyCache cache2 = engine.newCache().start();
+		LightClientCache cache2 = engine.newCache().start();
 		catchAndCheckCause(() -> myCar1.remove(), AliveConstraintViolationException.class);
 		cache2.flush();
 	}
 
 	public void test002_() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientCache cache = engine.getCurrentCache();
 		cache.flush();
-		HeavyCache cache2 = engine.newCache().start();
+		LightClientCache cache2 = engine.newCache().start();
 		myCar.remove();
 		cache.start();
 		cache.shiftTs();
@@ -68,18 +69,13 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		cache.flush();
 		cache2.start();
 		catchAndCheckCause(() -> cache2.flush(), OptimisticLockConstraintViolationException.class);
-		// try {
-		// cache2.tryFlush();
-		// } catch (ConcurrencyControlException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+
 	}
 
 	public void test003_IterateAndRemove() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache1 = engine.getCurrentCache();
-		HeavyCache cache2 = engine.newCache().start();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache1 = engine.getCurrentCache();
+		LightClientCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Generic myCar2 = car.addInstance("myCar2");
@@ -111,7 +107,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	// public void test005_IterateAndRemove() {
-	// ServerEngine engine = new ServerEngine();
+	// Engine engine = new Engine();
 	// Cache cache1 = engine.getCurrentCache();
 	//
 	// Generic car = engine.addInstance("Car");
@@ -143,8 +139,8 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	// }
 
 	public void test009_IterateAndAdd() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache1 = engine.getCurrentCache();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache1 = engine.getCurrentCache();
 
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
@@ -153,13 +149,11 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		Generic myCar4 = car.addInstance("myCar4");
 
 		cache1.flush();
-
 		Snapshot<Generic> myCars = car.getInstances();
 
-		Iterator<Generic> iterator = myCars.iterator();
 		Generic myCar5 = car.addInstance("myCar5");
 		Generic myCar6 = car.addInstance("myCar6");
-
+		Iterator<Generic> iterator = myCars.iterator();
 		int cpt = 0;
 		while (iterator.hasNext()) {
 			iterator.next();

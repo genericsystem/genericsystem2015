@@ -2,17 +2,16 @@ package org.genericsystem.cache;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class UpdatableServiceTest extends AbstractTest {
 
 	public void test001_setValue_Type() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehicle2 = vehicle.updateValue("Vehicle2");
 		assert "Vehicle2".equals(vehicle2.getValue());
@@ -20,7 +19,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test003_setValue_InstanceOfType() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		String valueCar = "Car";
 		Generic car = vehicle.addInstance(valueCar);
@@ -35,7 +34,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test004_setValue_noCollateralDommage() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.addInstance("Car");
 		String caveValue = "Cave";
@@ -48,7 +47,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test007_setValue_Type() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		String valueMyVehicle = "myVehicle";
 		Generic myVehicle = vehicle.addInstance(valueMyVehicle);
@@ -78,7 +77,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test020_setValue_Inheritance() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "car");
 		Generic newVehicle = vehicle.updateValue("Vehicle2");
@@ -106,7 +105,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test040_setValue_Composite() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		String valuePower = "Power";
 		Generic power = engine.addInstance(valuePower, vehicle);
@@ -126,7 +125,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test060_setValue_Type_Inheritance_Composite() {
-		LightClientEngine engine = new LightClientEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic machine = engine.addInstance("Machine");
 		Generic vehicle = engine.addInstance(machine, "Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -175,7 +174,7 @@ public class UpdatableServiceTest extends AbstractTest {
 
 	public void test100_addSuper_Type() {
 		// given
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance("Car");
 
@@ -198,7 +197,7 @@ public class UpdatableServiceTest extends AbstractTest {
 
 	public void test101_addSuper_TypeBetweenTwoTypes() {
 		// given
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic fourWheels = engine.addInstance(vehicle, "FourWheels");
@@ -233,7 +232,7 @@ public class UpdatableServiceTest extends AbstractTest {
 
 	public void test102_addSuper_AlreadySuper() {
 		// given
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -261,7 +260,7 @@ public class UpdatableServiceTest extends AbstractTest {
 
 	public void test103_addSuper_NoRegressionOnDataModel() {
 		// given
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic animals = engine.addInstance("Animals");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");
@@ -314,7 +313,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test200_replaceComposite() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -352,7 +351,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test201_replaceComposite_KO() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic myCar = car.addInstance("MyCar");
@@ -366,7 +365,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test300_replaceCompositeWithValueModification() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic myCar = car.addInstance("MyCar");
@@ -391,7 +390,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test301_replaceCompositeWithValueModification() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic myCar = car.addInstance("MyCar");

@@ -2,17 +2,17 @@ package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientCache;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableOneCacheTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -22,8 +22,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_aliveEx() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		assert car.isAlive();
 		Generic color = car.addAttribute("Color");
@@ -37,8 +37,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
 		Generic color = car.addAttribute("Color");
@@ -47,8 +47,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientEngine engine = new LightClientEngine();
+		LightClientCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
