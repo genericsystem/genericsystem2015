@@ -1,6 +1,5 @@
 package org.genericsystem.distributed.cacheonserver;
 
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -23,9 +22,8 @@ public class WebSocketGSLightClient extends AbstractGSLightClient {
 
 	// TODO synchronize this method ?
 	@Override
-	protected <T> void send(Buffer buffer, Handler<Buffer> responseHandler) {
-		webSocket.handler(responseHandler);
-		webSocket.write(buffer);
+	protected <T> void send(Buffer buffer) {
+		webSocket.writeBinaryMessage(buffer);
 	}
 
 	@Override

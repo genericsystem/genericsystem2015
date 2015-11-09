@@ -1,9 +1,8 @@
 package org.genericsystem.distributed.cacheonserver;
 
-import io.vertx.core.buffer.Buffer;
-
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
@@ -13,88 +12,147 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long newCacheId() {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(NEW_CACHE), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return (long) unsafe(() -> newCacheIdPromise().get());
+	}
+	
+	public CompletableFuture<Object> newCacheIdPromise(){
+		return promise(NEW_CACHE, buff -> buff.getLong(), buffer -> buffer);
 	}
 
 	@Override
 	public long shiftTs(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(SHIFT_TS).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
-
+		return (long) unsafe(() -> newShiftTsPromise(cacheId).get());
+	}
+	
+	public CompletableFuture<Object> newShiftTsPromise(long cacheId){
+		return promise(NEW_CACHE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public Vertex[] getDependencies(long cacheId, long id) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(GET_DEPENDENCIES).appendLong(cacheId).appendLong(id), buff -> {
-			task.handle(new GSBuffer(buff).getGSVertexArray());
-		}));
-
+		return unsafe(() -> getDependenciesPromise(cacheId, id).get());
+	}
+	
+	public CompletableFuture<Vertex[]> getDependenciesPromise(long cacheId, long id) {
+		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArray(), buffer -> buffer.appendLong(cacheId).appendLong(id));
 	}
 
 	@Override
 	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return synchronizeTask(task -> send(new GSBuffer().appendInt(ADD_INSTANCE).appendLong(cacheId).appendGSSignature(meta, overrides, value, components), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> addInstancePromise(cacheId, meta, overrides, value, components).get());
+	}
+	
+	public CompletableFuture<Object> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return promise(ADD_INSTANCE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(meta, overrides, value, components));
 	}
 
 	@Override
 	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return synchronizeTask(task -> send(new GSBuffer().appendInt(UPDATE).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> updatePromise(cacheId, update, overrides, value, newComponents).get());
+
+	}
+
+	public CompletableFuture<Object> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
+		return promise(UPDATE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer).appendGSSignature(update, overrides, value, newComponents));
 	}
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return synchronizeTask(task -> send(new GSBuffer().appendInt(MERGE).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> mergePromise(cacheId, update, overrides, value, newComponents).get());
+	}
 
+	public CompletableFuture<Object> mergePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
+		return promise(MERGE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(update, overrides, value, newComponents));
 	}
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return synchronizeTask(task -> send(new GSBuffer().appendInt(SET_INSTANCE).appendLong(cacheId).appendGSSignature(meta, overrides, value, components), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> setInstancePromise(cacheId, meta, overrides, value, components).get());
+	}
 
+	public CompletableFuture<Object> setInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return promise(SET_INSTANCE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(meta, overrides, value, components));
 	}
 
 	@Override
 	public long forceRemove(long cacheId, long generic) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(FORCE_REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> forceRemovePromise(cacheId, generic).get());
+	}
+
+	public CompletableFuture<Object> forceRemovePromise(long cacheId, long generic) {
+		return promise(FORCE_REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic));
 	}
 
 	@Override
 	public long remove(long cacheId, long generic) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> removePromise(cacheId, generic).get());
+	}
+
+	public CompletableFuture<Object> removePromise(long cacheId, long generic) {
+		return promise(REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic));
 	}
 
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(CONSERVE_REMOVE).appendLong(cacheId).appendLong(generic), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> conserveRemovePromise(cacheId, generic).get());
+	}
+
+	public CompletableFuture<Object> conserveRemovePromise(long cacheId, long generic) {
+		return promise(CONSERVE_REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic));
 	}
 
 	@Override
 	public long flush(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> flushPromise(cacheId).get());
+	}
+
+	public CompletableFuture<Object> flushPromise(long cacheId) {
+		return promise(FLUSH, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public long tryFlush(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(TRY_FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> tryFlushPromise(cacheId).get());
+	}
+
+	public CompletableFuture<Object> tryFlushPromise(long cacheId) {
+		return promise(TRY_FLUSH, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public long clear(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(CLEAR).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> clearPromise(cacheId).get());
+	}
+
+	public CompletableFuture<Object> clearPromise(long cacheId) {
+		return promise(CLEAR, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public long mount(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(MOUNT).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> mountPromise(cacheId).get());
+	}
+
+	public CompletableFuture<Object> mountPromise(long cacheId) {
+		return promise(MOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public long unmount(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(UNMOUNT).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+		return (long) unsafe(() -> unmountPromise(cacheId).get());
+	}
+	
+	public CompletableFuture<Object> unmountPromise(long cacheId) {
+		return promise(UNMOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public int getCacheLevel(long cacheId) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(GET_CACHE_LEVEL).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getInt())));
+		return (int) unsafe(() -> getCacheLevelPromise(cacheId).get());
+	}
+
+	public CompletableFuture<Object> getCacheLevelPromise(long cacheId) {
+		return promise(GET_CACHE_LEVEL, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 }
