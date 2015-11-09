@@ -94,4 +94,8 @@ public class CacheOnClient extends HeavyCache {
 		return dependenciesAsOservableListCacheMap.get(generic);
 	}
 
+	public ObservableList<Generic> getInstancesObservableList(Generic generic) {
+		return getDependenciesActualObservableList(generic).filtered(x -> generic.equals(x.getMeta()));
+	}
+
 }
