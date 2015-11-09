@@ -1,12 +1,10 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import io.vertx.core.buffer.Buffer;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
@@ -18,8 +16,9 @@ public abstract class AbstractGSHeavyServer extends AbstractGSServer {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, HeavyServerEngine root, GSBuffer gsBuffer) {
+	Buffer getReplyBuffer(int methodId, int op, HeavyServerEngine root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer();
+		replyBuffer.appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());
