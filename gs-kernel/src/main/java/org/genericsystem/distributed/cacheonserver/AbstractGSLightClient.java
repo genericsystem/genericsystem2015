@@ -24,7 +24,10 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	public CompletableFuture<Object> newCacheIdPromise() {
-		return promise(NEW_CACHE, buff -> buff.getLong(), buffer -> buffer);
+		return promise(NEW_CACHE, buff -> {
+			System.out.println("Coucou");
+			return buff.getLong();
+		}, buffer -> buffer);
 	}
 
 	@Override
@@ -78,7 +81,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	public CompletableFuture<Object> setInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return promise(SET_INSTANCE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(meta, overrides, value, components));
+		return promise(SET_INSTANCE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(meta, overrides, value, components));
 	}
 
 	@Override

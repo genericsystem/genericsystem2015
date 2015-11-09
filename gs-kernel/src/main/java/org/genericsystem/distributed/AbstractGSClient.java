@@ -2,7 +2,6 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -13,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
