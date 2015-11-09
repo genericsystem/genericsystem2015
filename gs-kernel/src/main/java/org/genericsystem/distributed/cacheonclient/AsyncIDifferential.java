@@ -1,6 +1,8 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import javafx.collections.ObservableList;
+import java.util.List;
+
+import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
@@ -10,5 +12,5 @@ import org.genericsystem.common.IDifferential;
  *
  */
 public interface AsyncIDifferential extends IDifferential<Generic> {
-	public ObservableList<Generic> getDependenciesObservableList(Generic generic);
+	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic);
 }

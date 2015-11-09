@@ -46,7 +46,7 @@ public abstract class AbstractGSClient implements Protocole {
 	private final Map<Integer, Consumer<GSBuffer>> ops = new HashMap<>();
 	private final AtomicInteger atomicKey = new AtomicInteger(0);
 
-	private Handler<Buffer> handler = buf -> {
+	private final Handler<Buffer> handler = buf -> {
 		GSBuffer gsBuffer = new GSBuffer(buf);
 		int optype = gsBuffer.getInt();
 		ops.remove(optype).accept(gsBuffer);

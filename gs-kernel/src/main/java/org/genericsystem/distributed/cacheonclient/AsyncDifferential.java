@@ -1,9 +1,14 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -14,6 +19,7 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 
 	private final ObservableList<Generic> addsObservableList = FXCollections.observableArrayList();
 	private final ObservableList<Generic> removesObservableList = FXCollections.observableArrayList();
+	private final Map<Generic, ObservableValue<List<Generic>>> dependenciesCache = new HashMap<>();
 
 	public AsyncDifferential(AsyncIDifferential subCache) {
 		super(subCache);
@@ -25,22 +31,40 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	}
 
 	@Override
-	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
-		return new ListBinding<Generic>() {
+	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
+		ObservableValue<List<Generic>> observableValue = dependenciesCache.get(generic);
+		if (observableValue != null)
+			return observableValue;
+		return new ObjectBinding<List<Generic>>() {
 			{
-				super.bind(addsObservableList, removesObservableList, getSubCache().getDependenciesObservableList(generic));
+				bind(addsObservableList, removesObservableList, getSubCache().getDependenciesObservableList(generic));
+				dependenciesCache.put(generic, this);
 			}
 
 			@Override
 			public void dispose() {
-				super.unbind(addsObservableList, removesObservableList, getSubCache().getDependenciesObservableList(generic));
+				unbind(addsObservableList, removesObservableList, getSubCache().getDependenciesObservableList(generic));
+			}
+
+			@Override
+			protected List<Generic> computeValue() {
+				return (Stream.concat(adds.contains(generic) ? Stream.empty() : getSubCache().getDependenciesObservableList(generic).getValue().stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)))
+						.collect(Collectors.toList()));
+			}
+		};
+	}
+
+	public ObservableList<Generic> getActualObservableList(Generic generic) {
+		return new ListBinding<Generic>() {
+			{
+				super.bind(getDependenciesObservableList(generic));
 			}
 
 			@Override
 			protected ObservableList<Generic> computeValue() {
-				return FXCollections.observableArrayList(Stream.concat(adds.contains(generic) ? Stream.empty() : getSubCache().getDependenciesObservableList(generic).stream().filter(x -> !removes.contains(x)),
-						adds.stream().filter(x -> generic.isDirectAncestorOf(x))).collect(Collectors.toList()));
+				return FXCollections.observableArrayList(dependenciesCache.get(generic).getValue());
 			}
+
 		};
 	}
 

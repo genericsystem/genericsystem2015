@@ -12,13 +12,10 @@ public class ObservableListTest extends AbstractTest {
 	public void test001_ObservableList() throws InterruptedException {
 		HeavyClientEngine engine = new HeavyClientEngine();
 		assert engine == engine.adjustMeta();
-
 		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
-		assert dependenciesObservableList.isEmpty();
-		assert dependenciesObservableList.isEmpty();
-		System.out.println(dependenciesObservableList);
-		Thread.sleep(100);
+		if (dependenciesObservableList.isEmpty())
+			Thread.sleep(100);
 		assert !dependenciesObservableList.isEmpty();
-		System.out.println(dependenciesObservableList);
 	}
+
 }

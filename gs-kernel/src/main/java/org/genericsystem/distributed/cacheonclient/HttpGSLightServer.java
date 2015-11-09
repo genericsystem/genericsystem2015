@@ -52,6 +52,7 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 					request.response().close();
 				});
 			});
+			// /!\
 			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
@@ -60,6 +61,7 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 
 	@Override
 	public void stop() {
+		// /!\
 		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		super.stop();
 		System.out.println("Generic System server stopped!");
