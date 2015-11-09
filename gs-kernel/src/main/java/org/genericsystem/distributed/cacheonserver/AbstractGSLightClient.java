@@ -20,7 +20,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long newCacheId() {
-		return (long) unsafe(() -> newCacheIdPromise().get());
+		return unsafeException(() -> unsafe(() -> newCacheIdPromise().get()));
 	}
 
 	public CompletableFuture<Object> newCacheIdPromise() {
@@ -38,7 +38,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public Vertex[] getDependencies(long cacheId, long id) {
-		return unsafe(() -> getDependenciesPromise(cacheId, id).get());
+		return unsafeException(() -> unsafe(() -> getDependenciesPromise(cacheId, id).get()));
 	}
 
 	public CompletableFuture<Vertex[]> getDependenciesPromise(long cacheId, long id) {
@@ -47,7 +47,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return (long) unsafe(() -> addInstancePromise(cacheId, meta, overrides, value, components).get());
+		return unsafeException(() -> unsafe(() -> addInstancePromise(cacheId, meta, overrides, value, components).get()));
 	}
 
 	public CompletableFuture<Object> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
@@ -56,7 +56,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return unsafeException(() -> unsafe(() -> updatePromise(cacheId, update, overrides, value, newComponents).get()));
+		return unsafeException(() -> unsafeException(() -> unsafe(() -> updatePromise(cacheId, update, overrides, value, newComponents).get())));
 	}
 
 	public CompletableFuture<Object> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
@@ -65,7 +65,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return (long) unsafe(() -> mergePromise(cacheId, update, overrides, value, newComponents).get());
+		return unsafeException(() -> unsafe(() -> mergePromise(cacheId, update, overrides, value, newComponents).get()));
 	}
 
 	public CompletableFuture<Object> mergePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
@@ -74,7 +74,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return (long) unsafe(() -> setInstancePromise(cacheId, meta, overrides, value, components).get());
+		return unsafeException(() -> unsafe(() -> setInstancePromise(cacheId, meta, overrides, value, components).get()));
 	}
 
 	public CompletableFuture<Object> setInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
@@ -83,7 +83,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long forceRemove(long cacheId, long generic) {
-		return (long) unsafe(() -> forceRemovePromise(cacheId, generic).get());
+		return unsafeException(() -> unsafe(() -> forceRemovePromise(cacheId, generic).get()));
 	}
 
 	public CompletableFuture<Object> forceRemovePromise(long cacheId, long generic) {
@@ -92,7 +92,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long remove(long cacheId, long generic) {
-		return (long) unsafe(() -> removePromise(cacheId, generic).get());
+		return unsafeException(() -> unsafe(() -> removePromise(cacheId, generic).get()));
 	}
 
 	public CompletableFuture<Object> removePromise(long cacheId, long generic) {
@@ -101,7 +101,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
-		return (long) unsafe(() -> conserveRemovePromise(cacheId, generic).get());
+		return unsafeException(() -> unsafe(() -> conserveRemovePromise(cacheId, generic).get()));
 	}
 
 	public CompletableFuture<Object> conserveRemovePromise(long cacheId, long generic) {
@@ -110,7 +110,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long flush(long cacheId) {
-		return (long) unsafe(() -> flushPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> flushPromise(cacheId).get()));
 	}
 
 	public CompletableFuture<Object> flushPromise(long cacheId) {
@@ -119,7 +119,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long tryFlush(long cacheId) {
-		return (long) unsafe(() -> tryFlushPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> tryFlushPromise(cacheId).get()));
 	}
 
 	public CompletableFuture<Object> tryFlushPromise(long cacheId) {
@@ -128,7 +128,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long clear(long cacheId) {
-		return (long) unsafe(() -> clearPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> clearPromise(cacheId).get()));
 	}
 
 	public CompletableFuture<Object> clearPromise(long cacheId) {
@@ -137,7 +137,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long mount(long cacheId) {
-		return (long) unsafe(() -> mountPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> mountPromise(cacheId).get()));
 	}
 
 	public CompletableFuture<Object> mountPromise(long cacheId) {
@@ -146,7 +146,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public long unmount(long cacheId) {
-		return (long) unsafe(() -> unmountPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> unmountPromise(cacheId).get()));
 	}
 
 	public CompletableFuture<Object> unmountPromise(long cacheId) {
@@ -155,7 +155,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 
 	@Override
 	public int getCacheLevel(long cacheId) {
-		return (int) unsafe(() -> getCacheLevelPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> getCacheLevelPromise(cacheId).get()));
 	}
 
 	public CompletableFuture<Object> getCacheLevelPromise(long cacheId) {
