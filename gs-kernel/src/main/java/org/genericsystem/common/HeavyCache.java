@@ -19,7 +19,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	private final Restructurator restructurator;
 	private IDifferential<Generic> transaction;
-	protected Differential differential;
+	private Differential differential;
 	private final ContextEventListener<Generic> listener;
 	private final long cacheId;
 
@@ -35,6 +35,10 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	protected HeavyCache(AbstractEngine root) {
 		this(root, new ContextEventListener<Generic>() {
 		});
+	}
+
+	protected Differential getDifferential() {
+		return differential;
 	}
 
 	// protected Cache(AbstractEngine root, long cacheId) {
@@ -71,8 +75,8 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	@Override
-	public Snapshot<Generic> getDependencies(Generic vertex) {
-		return differential.getDependencies(vertex);
+	public Snapshot<Generic> getDependencies(Generic generic) {
+		return differential.getDependencies(generic);
 	}
 
 	protected Restructurator buildRestructurator() {
@@ -84,7 +88,15 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	// }
 
 	protected void initialize() {
-		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
+		differential = buildDifferential(differential == null ? buildTransactionDifferential() : differential.getSubCache());
+	}
+
+	protected Differential buildDifferential(IDifferential<Generic> subCache) {
+		return new Differential(subCache);
+	}
+
+	protected TransactionDifferential buildTransactionDifferential() {
+		return new TransactionDifferential();
 	}
 
 	@Override
@@ -233,7 +245,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
 	}
 
-	private class TransactionDifferential implements IDifferential<Generic> {
+	protected class TransactionDifferential implements IDifferential<Generic> {
 
 		@Override
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
@@ -241,14 +253,15 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		}
 
 		@Override
-		public Snapshot<Generic> getDependencies(Generic vertex) {
-			return transaction.getDependencies(vertex);
+		public Snapshot<Generic> getDependencies(Generic generic) {
+			return transaction.getDependencies(generic);
 		}
 
 		@Override
 		public long getTs() {
 			return transaction.getTs();
 		}
+
 	}
 
 	public static interface ContextEventListener<X> {

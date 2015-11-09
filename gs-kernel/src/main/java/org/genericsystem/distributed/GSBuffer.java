@@ -277,26 +277,11 @@ public class GSBuffer implements Buffer {
 		return this;
 	}
 
-	// public Buffer appendResponse(Response<Long> response) {
-	// appendInt(response.isSwitchedToT() ? 1 : 0);
-	// if (response.isSwitchedToT())
-	// appendLong(response.getResult());
-	// else {
-	// appendGSSerializable(response.getException().getClass());
-	// appendGSClazz(response.getException().getCause().getClass());
-	// }
-	// return this;
-	// }
-
 	public Object getLongThrowException() {
-		if (getInt() == 1) {
-			System.out.println("getLongThrowException **** getLong");
-			return getLong();
-		}
-		System.out.println("getLongThrowException ***** getGSSerializable");
-		return getGSSerializable();
+		return getInt() == 1 ? getLong() : getGSSerializable();
 	}
 
+	@FunctionalInterface
 	public interface ConcurrentSupplier<T> {
 		T get() throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 	}
@@ -313,17 +298,6 @@ public class GSBuffer implements Buffer {
 		}
 		return this;
 	}
-
-	// public Buffer appendLongThrowException(Object value) {
-	// if (value instanceof Long) {
-	// appendInt(1);
-	// appendLong((Long) value);
-	// } else {
-	// appendInt(0);
-	// appendGSSerializable((Serializable) value);
-	// }
-	// return this;
-	// }
 
 	public Buffer appendGSSerializable(Serializable serializable) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();

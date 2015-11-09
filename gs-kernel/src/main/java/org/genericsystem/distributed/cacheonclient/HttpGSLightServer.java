@@ -47,7 +47,8 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 				request.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					request.response().end(getReplyBuffer(methodId, (LightServerEngine) root, gsBuffer));
+					int op = gsBuffer.getInt();
+					request.response().end(getReplyBuffer(methodId, op, (LightServerEngine) root, gsBuffer));
 					request.response().close();
 				});
 			});
