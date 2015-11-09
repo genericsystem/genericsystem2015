@@ -4,10 +4,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -48,10 +46,11 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					Buffer result = getReplyBuffer(methodId, (HeavyServerEngine) root, gsBuffer);
+					int op = gsBuffer.getInt();
+					Buffer result = getReplyBuffer(methodId, op, (HeavyServerEngine) root, gsBuffer);
 					// System.out.println("Write result");
-						webSocket.writeBinaryMessage(result);
-					});
+					webSocket.writeBinaryMessage(result);
+				});
 
 			});
 			// /!\

@@ -3,36 +3,44 @@ package org.genericsystem.distributed.cacheonserver;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
+import com.google.common.base.Supplier;
 
 public abstract class AbstractGSLightClient extends AbstractGSClient implements ServerCacheProtocole {
+
+	@SuppressWarnings("unchecked")
+	protected <R> R unsafeException(Supplier<Object> unsafe) {
+		Object result = unsafe.get();
+		if (result instanceof RuntimeException)
+			throw (RuntimeException) result;
+		return (R) result;
+	}
 
 	@Override
 	public long newCacheId() {
 		return (long) unsafe(() -> newCacheIdPromise().get());
 	}
-	
-	public CompletableFuture<Object> newCacheIdPromise(){
+
+	public CompletableFuture<Object> newCacheIdPromise() {
 		return promise(NEW_CACHE, buff -> buff.getLong(), buffer -> buffer);
 	}
 
 	@Override
 	public long shiftTs(long cacheId) {
-		return (long) unsafe(() -> newShiftTsPromise(cacheId).get());
+		return unsafeException(() -> unsafe(() -> newShiftTsPromise(cacheId).get()));
 	}
-	
-	public CompletableFuture<Object> newShiftTsPromise(long cacheId){
-		return promise(NEW_CACHE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+
+	public CompletableFuture<Object> newShiftTsPromise(long cacheId) {
+		return promise(SHIFT_TS, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 	@Override
 	public Vertex[] getDependencies(long cacheId, long id) {
 		return unsafe(() -> getDependenciesPromise(cacheId, id).get());
 	}
-	
+
 	public CompletableFuture<Vertex[]> getDependenciesPromise(long cacheId, long id) {
 		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArray(), buffer -> buffer.appendLong(cacheId).appendLong(id));
 	}
@@ -41,15 +49,14 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
 		return (long) unsafe(() -> addInstancePromise(cacheId, meta, overrides, value, components).get());
 	}
-	
+
 	public CompletableFuture<Object> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
 		return promise(ADD_INSTANCE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(meta, overrides, value, components));
 	}
 
 	@Override
 	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return (long) unsafe(() -> updatePromise(cacheId, update, overrides, value, newComponents).get());
-
+		return unsafeException(() -> unsafe(() -> updatePromise(cacheId, update, overrides, value, newComponents).get()));
 	}
 
 	public CompletableFuture<Object> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
@@ -141,7 +148,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	public long unmount(long cacheId) {
 		return (long) unsafe(() -> unmountPromise(cacheId).get());
 	}
-	
+
 	public CompletableFuture<Object> unmountPromise(long cacheId) {
 		return promise(UNMOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
