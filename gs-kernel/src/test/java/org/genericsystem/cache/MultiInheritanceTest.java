@@ -1,16 +1,15 @@
 package org.genericsystem.cache;
 
 import java.util.Arrays;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class MultiInheritanceTest extends AbstractTest {
 
 	public void test_multiInheritance() {
-		LightClientEngine engine = new LightClientEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehicleSizable = engine.addInstance("Sizable", vehicle);
 		Generic robot = engine.addInstance("Robot");
@@ -28,7 +27,7 @@ public class MultiInheritanceTest extends AbstractTest {
 	}
 
 	public void test_multiInheritanceWithDiamond() {
-		LightClientEngine engine = new LightClientEngine();
+		HeavyServerEngine engine = new HeavyServerEngine();
 		Generic object = engine.addInstance("Object");
 		Generic objectSizable = engine.addInstance("Sizable", object);
 		Generic vehicle = engine.addInstance(Arrays.asList(object), "Vehicle");

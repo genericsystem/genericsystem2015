@@ -2,23 +2,22 @@ package org.genericsystem.cache;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientCache;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.kernel.HeavyServerEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveOneCacheTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myBmwRed = myBmw.addHolder(color, "red");
 		cache.flush();
-
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;
 
@@ -30,8 +29,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -50,8 +49,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -71,8 +70,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_multipleHolders() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -82,7 +81,6 @@ public class RemoveOneCacheTest extends AbstractTest {
 		cache.flush();
 		Generic myBmwBlue = myBmw.addHolder(color, "blue");
 		cache.clear();
-
 		assert myBmw.getHolders(color).size() == 0;
 
 		Generic myBmwGreen = myBmw.addHolder(color, "green");
@@ -93,8 +91,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -104,7 +102,6 @@ public class RemoveOneCacheTest extends AbstractTest {
 		cache.flush();
 		cache.clear();
 		Generic myBmwRed2 = myBmw.addHolder(color, "red");
-		System.out.println(myBmw.getHolders(color).info());
 		cache.clear();
 		assert !myBmwRed2.equals(myBmwRed);
 		assert !myBmwRed2.isAlive();
@@ -114,8 +111,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -134,8 +131,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeAndAddAndRemove() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -154,8 +151,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -171,8 +168,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		HeavyServerEngine engine = new HeavyServerEngine();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

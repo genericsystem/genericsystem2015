@@ -1,15 +1,16 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.util.Arrays;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class AttributesTest extends AbstractTest {
 
 	public void test1Attribut() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.getLevel() == 1 : vehicle.getLevel();
 		Generic power = engine.addInstance("Power", vehicle);
@@ -19,7 +20,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance1AttributOnParent() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -30,7 +31,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance1AttributOnFistChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -47,7 +48,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnParent() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -61,7 +62,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnFirstChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -75,7 +76,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnSecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic microcar = engine.addInstance(car, "Microcar");
@@ -89,12 +90,12 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	/*
-	 * public void testSimple1MetaAttribut() { ServerEngine engine = new ServerEngine(); Generic car = engine.addInstance("Car"); Generic power = engine.addInstance("Power", car); assert power.getCompositesStream().count() == 1; assert
+	 * public void testSimple1MetaAttribut() { Engine engine = new Engine(); Generic car = engine.addInstance("Car"); Generic power = engine.addInstance("Power", car); assert power.getCompositesStream().count() == 1; assert
 	 * car.equals(power.getComposites()[0]); assert power.isAlive(); }
 	 */
 	public void test2Attributs() {
 
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
@@ -107,7 +108,7 @@ public class AttributesTest extends AbstractTest {
 
 	public void test2AttributsWith2LevelsInheritance2AttributsOnParent() {
 
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
@@ -122,7 +123,7 @@ public class AttributesTest extends AbstractTest {
 
 	public void test2AttributsWith2LevelsInheritance2AttributsOnFistChild() {
 
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -137,7 +138,7 @@ public class AttributesTest extends AbstractTest {
 
 	public void test2AttributsWith2LevelsInheritance1AttributOnParentAnd1AttributOnFistChild() {
 
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -151,7 +152,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2AttributOnParent() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic airconditioner = engine.addInstance("AirConditioner", vehicle);
@@ -169,7 +170,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2AttributFirstChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -187,7 +188,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2AttributOnSecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic microcar = engine.addInstance(car, "Microcar");
@@ -205,7 +206,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnParent1AttributOnFirstChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -223,7 +224,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributOnParent1AttributOnSecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -240,7 +241,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance1AttributFirstChild1AttributOnSecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -258,7 +259,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance2ChildrenAt2ndLevel1AttributOnParent() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -272,7 +273,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance2ChildrenAt2ndLevel1AttributOnLevel1FirstChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -286,7 +287,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith2LevelsInheritance2ChildrenAt2ndLevel1AttributOnLevel1SecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic caravan = engine.addInstance(vehicle, "Caravan");
@@ -300,7 +301,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributOnParent() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic power = engine.addInstance("Power", object);
 		Generic vehicle = engine.addInstance(object, "Vehicle");
@@ -318,7 +319,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributLevel1FistChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic vehicle = engine.addInstance(object, "Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -336,7 +337,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributLevel1SecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic vehicle = engine.addInstance(object, "Vehicle");
 		Generic robot = engine.addInstance(object, "Robot");
@@ -354,7 +355,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test1AttributWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel1AttributLevel2Child1() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic vehicle = engine.addInstance(object, "Vehicle");
 		Generic robot = engine.addInstance(object, "Robot");
@@ -371,7 +372,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsOnParent() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic power = engine.addInstance("Power", object);
 		Generic airconditioner = engine.addInstance("AirConditioner", object);
@@ -395,7 +396,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsLevel1FirstChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic vehicle = engine.addInstance(object, "Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -418,7 +419,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsLevel1SecondChild() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic vehicle = engine.addInstance(object, "Vehicle");
 		Generic robot = engine.addInstance(object, "Robot");
@@ -441,7 +442,7 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	public void test2AttributsWith3LevelsInheritance2ChildrenAt2ndLevel1ChildAtThirdLevel2AttributsLevel2() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic vehicle = engine.addInstance(object, "Vehicle");
 		Generic robot = engine.addInstance(object, "Robot");

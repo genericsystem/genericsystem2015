@@ -1,4 +1,4 @@
-package org.genericsystem.cache;
+package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.LightClientEngine;
