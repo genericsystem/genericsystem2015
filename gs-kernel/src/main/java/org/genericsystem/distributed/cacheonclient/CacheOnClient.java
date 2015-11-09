@@ -88,7 +88,7 @@ public class CacheOnClient extends HeavyCache {
 		return (AsyncDifferential) super.getDifferential();
 	}
 
-	public ObservableList<Generic> getDependenciesActualObservableList(Generic generic) {
+	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
 		return dependenciesAsOservableListCacheMap.get(generic);
 	}
 
