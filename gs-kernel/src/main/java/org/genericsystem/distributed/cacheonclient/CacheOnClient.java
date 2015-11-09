@@ -18,11 +18,13 @@ public class CacheOnClient extends HeavyCache {
 
 	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<Generic, ObservableList<Generic>>() {
 
+		private static final long serialVersionUID = -6268341397267444297L;
+
 		@Override
 		public ObservableList<Generic> get(Object key) {
 			ObservableList<Generic> result = super.get(key);
 			if (result == null) {
-				ObservableValue<List<Generic>> dependenciesAsObservableValue = getDependenciesObservableList((Generic) key);
+				ObservableValue<List<Generic>> dependenciesAsObservableValue = getDifferential().getDependenciesObservableList((Generic) key);
 				result = new ListBinding<Generic>() {
 					{
 						bind(dependenciesAsObservableValue);
@@ -86,16 +88,12 @@ public class CacheOnClient extends HeavyCache {
 		return (AsyncDifferential) super.getDifferential();
 	}
 
-	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
-		return getDifferential().getDependenciesObservableList(generic);
-	}
-
-	public ObservableList<Generic> getDependenciesActualObservableList(Generic generic) {
+	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
 		return dependenciesAsOservableListCacheMap.get(generic);
 	}
 
 	public ObservableList<Generic> getInstancesObservableList(Generic generic) {
-		return getDependenciesActualObservableList(generic).filtered(x -> generic.equals(x.getMeta()));
+		return getDependenciesObservableList(generic).filtered(x -> generic.equals(x.getMeta()));
 	}
 
 }
