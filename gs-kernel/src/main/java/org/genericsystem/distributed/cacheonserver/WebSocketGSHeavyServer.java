@@ -54,6 +54,7 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 					});
 
 			});
+			// /!\
 			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
@@ -62,6 +63,7 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 
 	@Override
 	public void stop() {
+		// /!\
 		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		super.stop();
 		System.out.println("Generic System server stopped!");

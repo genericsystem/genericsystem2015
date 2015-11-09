@@ -1,5 +1,12 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javafx.beans.binding.ListBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.AbstractEngine;
@@ -8,6 +15,36 @@ import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 
 public class CacheOnClient extends HeavyCache {
+
+	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<Generic, ObservableList<Generic>>() {
+
+		@Override
+		public ObservableList<Generic> get(Object key) {
+			ObservableList<Generic> result = super.get(key);
+			if (result == null) {
+				ObservableValue<List<Generic>> dependenciesAsObservableValue = getDependenciesObservableList((Generic) key);
+				result = new ListBinding<Generic>() {
+					{
+						bind(dependenciesAsObservableValue);
+					}
+
+					@Override
+					public void dispose() {
+						unbind(dependenciesAsObservableValue);
+					}
+
+					@Override
+					protected ObservableList<Generic> computeValue() {
+						return FXCollections.observableArrayList(dependenciesAsObservableValue.getValue());
+					}
+				};
+				ObservableList<Generic> assertResult = super.put((Generic) key, result);
+				assert assertResult == null;
+			}
+			return result;
+
+		}
+	};
 
 	protected CacheOnClient(AbstractEngine root) {
 		super(root);
@@ -29,7 +66,7 @@ public class CacheOnClient extends HeavyCache {
 
 	protected class AsyncTransactionDifferential extends TransactionDifferential implements AsyncIDifferential {
 		@Override
-		public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
+		public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
 			return getTransaction().getDependenciesObservableList(generic);
 		}
 	}
@@ -49,7 +86,12 @@ public class CacheOnClient extends HeavyCache {
 		return (AsyncDifferential) super.getDifferential();
 	}
 
-	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
+	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
 		return getDifferential().getDependenciesObservableList(generic);
 	}
+
+	public ObservableList<Generic> getDependenciesActualObservableList(Generic generic) {
+		return dependenciesAsOservableListCacheMap.get(generic);
+	}
+
 }

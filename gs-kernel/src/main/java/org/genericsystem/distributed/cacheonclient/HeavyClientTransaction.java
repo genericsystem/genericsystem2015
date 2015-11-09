@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
+import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -19,8 +19,6 @@ import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.HeavyClientEngine.ClientEngineHandler;
-
-import com.sun.javafx.collections.ObservableListWrapper;
 
 @SuppressWarnings("restriction")
 public class HeavyClientTransaction extends CheckedContext implements AsyncIDifferential {
@@ -92,30 +90,32 @@ public class HeavyClientTransaction extends CheckedContext implements AsyncIDiff
 		return dependencies;
 	}
 
-	public class CompletableObservableList2 extends SimpleObjectProperty<List<Generic>> {
-
-		public CompletableObservableList2(CompletableFuture<Vertex[]> promise) {
-			super(new ArrayList<>());
-			promise.thenAccept(elements -> set(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
-		};
-	}
-
-	public class CompletableObservableList extends ObservableListWrapper<Generic> {
+	public class CompletableObservableList extends SimpleObjectProperty<List<Generic>> implements ObservableValue<List<Generic>> {
 
 		public CompletableObservableList(CompletableFuture<Vertex[]> promise) {
 			super(new ArrayList<>());
-			promise.thenApply(elements -> setAll(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
+			promise.thenAccept(elements -> {
+				setValue(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList()));
+			});
 		}
 	}
 
-	private Map<Generic, ObservableList<Generic>> dependenciesPromisesMap = new HashMap<>();
+	// public class CompletableObservableList2 extends ObservableListWrapper<Generic> {
+	//
+	// public CompletableObservableList2(CompletableFuture<Vertex[]> promise) {
+	// super(new ArrayList<>());
+	// promise.thenApply(elements -> setAll(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
+	// }
+	// }
+
+	private Map<Generic, ObservableValue<List<Generic>>> dependenciesPromisesMap = new HashMap<>();
 
 	@Override
-	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
-		ObservableList<Generic> dependencies = dependenciesPromisesMap.get(generic);
+	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
+		ObservableValue<List<Generic>> dependencies = dependenciesPromisesMap.get(generic);
 		if (dependencies == null) {
 			dependencies = new CompletableObservableList(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()));
-			ObservableList<Generic> result = dependenciesPromisesMap.put(generic, dependencies);
+			ObservableValue<List<Generic>> result = dependenciesPromisesMap.put(generic, dependencies);
 			assert result == null;
 		}
 		return dependencies;

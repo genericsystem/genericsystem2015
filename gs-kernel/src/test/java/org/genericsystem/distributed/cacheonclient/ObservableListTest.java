@@ -1,6 +1,8 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import javafx.collections.ObservableList;
+import java.util.List;
+
+import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
@@ -12,13 +14,14 @@ public class ObservableListTest extends AbstractTest {
 	public void test001_ObservableList() throws InterruptedException {
 		HeavyClientEngine engine = new HeavyClientEngine();
 		assert engine == engine.adjustMeta();
-
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
-		assert dependenciesObservableList.isEmpty();
-		assert dependenciesObservableList.isEmpty();
-		System.out.println(dependenciesObservableList);
-		Thread.sleep(100);
-		assert !dependenciesObservableList.isEmpty();
-		System.out.println(dependenciesObservableList);
+		ObservableValue<List<Generic>> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+		if (dependenciesObservableList.getValue().isEmpty()) {
+			Thread.sleep(100);
+			if (dependenciesObservableList.getValue().isEmpty()) {
+				Thread.sleep(100);
+				assert !dependenciesObservableList.getValue().isEmpty();
+			}
+		}
 	}
+
 }
