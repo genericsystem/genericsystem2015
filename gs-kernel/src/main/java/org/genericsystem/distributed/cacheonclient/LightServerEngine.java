@@ -1,25 +1,18 @@
-package org.genericsystem.kernel;
+package org.genericsystem.distributed.cacheonclient;
 
 import java.util.Arrays;
-import java.util.Collections;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
-import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.cacheonclient.ClientCacheProtocole;
+import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.Statics;
+import org.genericsystem.kernel.Transaction;
 
-public class LightServerEngine extends AbstractServer implements Generic, ClientCacheProtocole {
-
-	@Override
-	public LightServerEngine getRoot() {
-		return this;
-	}
+public class LightServerEngine extends Root implements Generic, ClientCacheProtocole {
 
 	public LightServerEngine() {
 		this(new Class[] {});
@@ -34,32 +27,7 @@ public class LightServerEngine extends AbstractServer implements Generic, Client
 	}
 
 	public LightServerEngine(String value, String persistentDirectoryPath, Class<?>... userClasses) {
-		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
-		startSystemCache(userClasses);
-		archiver = new Archiver(this, persistentDirectoryPath);
-		isInitialized = true;
-	}
-
-	@Override
-	public HeavyCache newCache() {
-		return new HeavyCache(this) {
-
-			@Override
-			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((LightServerEngine) getRoot());
-			}
-
-			@Override
-			protected Generic plug(Generic generic) {
-				return ((Transaction) getTransaction()).plug(generic);
-			}
-
-			@Override
-			protected void unplug(Generic generic) {
-				((Transaction) getTransaction()).unplug(generic);
-			}
-
-		};
+		super(value, persistentDirectoryPath, userClasses);
 	}
 
 	@Override
@@ -80,5 +48,10 @@ public class LightServerEngine extends AbstractServer implements Generic, Client
 			adds.forEach(add -> getRoot().release(add.getTs()));
 			throw e;
 		}
+	}
+
+	@Override
+	public LightServerEngine getRoot() {
+		return (LightServerEngine) super.getRoot();
 	}
 }

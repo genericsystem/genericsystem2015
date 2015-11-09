@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class PropertyConstraintTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -26,7 +26,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic myCar = car.addInstance("myCar");
@@ -43,7 +43,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -55,7 +55,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine Root = new LightServerEngine();
+		Root Root = new Root();
 		Generic car = Root.addInstance("Car");
 		Generic power = Root.addInstance("Power", car);
 		power.enablePropertyConstraint();
@@ -67,7 +67,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		power.enablePropertyConstraint();

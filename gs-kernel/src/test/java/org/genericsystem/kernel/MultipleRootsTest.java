@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -12,9 +12,9 @@ import org.testng.annotations.Test;
 public class MultipleRootsTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root1 = new LightServerEngine();
+		Root root1 = new Root();
 		String nameOfsecondRoot = "SecondRoot";
-		LightServerEngine root2 = new LightServerEngine(nameOfsecondRoot);
+		Root root2 = new Root(nameOfsecondRoot);
 		assert root1.getMeta().equals(root1);
 		assert root1.getSupers().isEmpty();
 		assert root1.getComponents().isEmpty();
@@ -29,32 +29,32 @@ public class MultipleRootsTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root1 = new LightServerEngine();
-		LightServerEngine root2 = new LightServerEngine("SecondRoot");
+		Root root1 = new Root();
+		Root root2 = new Root("SecondRoot");
 		Generic car1 = root1.addInstance("Car");
 		Generic car2 = root2.addInstance("Car");
 		catchAndCheckCause(() -> root1.addInstance("Power", car1, car2), CrossEnginesAssignementsException.class);
 	}
 
 	public void test003() {
-		LightServerEngine root1 = new LightServerEngine();
-		LightServerEngine root2 = new LightServerEngine("SecondRoot");
+		Root root1 = new Root();
+		Root root2 = new Root("SecondRoot");
 		Generic car = root1.addInstance("Car");
 		root2.addInstance("Car");
 		catchAndCheckCause(() -> root2.addInstance("Power", car), CrossEnginesAssignementsException.class);
 	}
 
 	public void test004() {
-		LightServerEngine root1 = new LightServerEngine("FirstRoot");
-		LightServerEngine root2 = new LightServerEngine("SecondRoot");
+		Root root1 = new Root("FirstRoot");
+		Root root2 = new Root("SecondRoot");
 		Generic car = root1.addInstance("Car1");
 		root2.addInstance("Car2");
 		catchAndCheckCause(() -> root2.addInstance("Power", car), CrossEnginesAssignementsException.class);
 	}
 
 	public void test005() {
-		LightServerEngine root1 = new LightServerEngine();
-		LightServerEngine root2 = new LightServerEngine("SecondRoot");
+		Root root1 = new Root();
+		Root root2 = new Root("SecondRoot");
 		Generic car = root2.addInstance("Car");
 		Generic robot = root2.addInstance("Robot");
 		catchAndCheckCause(() -> root1.addInstance(Arrays.asList(car, robot), "Transformer"), CrossEnginesAssignementsException.class);

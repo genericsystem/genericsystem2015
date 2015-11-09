@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -19,12 +20,12 @@ public class WebSocketGSHeavyClient extends AbstractGSHeavyClient {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();
 		});
-		webSocket.handler(getHandler());
 	}
 
 	// TODO synchronize this method ?
 	@Override
-	protected <T> void send(Buffer buffer) {
+	protected <T> void send(Buffer buffer, Handler<Buffer> responseHandler) {
+		webSocket.handler(responseHandler);
 		webSocket.writeBinaryMessage(buffer);
 	}
 

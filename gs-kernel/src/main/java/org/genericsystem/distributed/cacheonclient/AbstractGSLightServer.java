@@ -6,7 +6,7 @@ import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 
 public abstract class AbstractGSLightServer extends AbstractGSServer {
 
@@ -14,9 +14,8 @@ public abstract class AbstractGSLightServer extends AbstractGSServer {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, int op, LightServerEngine root, GSBuffer gsBuffer) {
+	Buffer getReplyBuffer(int methodId, Root root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer();
-		replyBuffer.appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());

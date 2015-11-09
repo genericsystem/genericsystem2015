@@ -19,20 +19,20 @@ import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.distributed.cacheonserver.ServerCacheProtocole;
 
-public class HeavyServerEngine extends AbstractServer implements ServerCacheProtocole {
+public class EngineImpl extends AbstractServer implements ServerCacheProtocole {
 
 	private ThreadLocal<Long> contextIds = new ThreadLocal<>();
 	private ConcurrentHashMap<Long, AbstractCache> map;
 
-	public HeavyServerEngine(Class<?>... userClasses) {
+	public EngineImpl(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public HeavyServerEngine(String engineValue, Class<?>... userClasses) {
+	public EngineImpl(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, userClasses);
 	}
 
-	public HeavyServerEngine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
+	public EngineImpl(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		map = new ConcurrentHashMap<>();
 		startSystemCache(userClasses);
@@ -47,7 +47,7 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 	}
 
 	@Override
-	public HeavyServerEngine getRoot() {
+	public EngineImpl getRoot() {
 		return this;
 	}
 

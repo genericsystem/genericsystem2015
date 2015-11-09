@@ -1,16 +1,15 @@
 package org.genericsystem.cache;
 
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.kernel.EngineImpl;
 import org.testng.annotations.Test;
 
 @Test
 public class UpdateTest extends AbstractTest {
 
 	public void test001_updateValue() {
-		LightClientEngine engine = new LightClientEngine();
+		EngineImpl engine = new EngineImpl();
 		Generic car = engine.addInstance("Car");
 		assert "Car".equals(car.getValue());
 		Generic carRename = car.update("CarRename");
@@ -19,7 +18,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test002_updateValue() {
-		LightClientEngine engine = new LightClientEngine();
+		EngineImpl engine = new EngineImpl();
 		Generic car = engine.addInstance("Car");
 		assert "Car".equals(car.getValue());
 		Generic carRename = car.updateValue("CarRename");
@@ -28,7 +27,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test002_updateMeta() {
-		LightClientEngine engine = new LightClientEngine();
+		EngineImpl engine = new EngineImpl();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -47,7 +46,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test004_updateHolder() {
-		LightClientEngine engine = new LightClientEngine();
+		EngineImpl engine = new EngineImpl();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -66,7 +65,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test005_updateSuper() {
-		LightClientEngine engine = new LightClientEngine();
+		EngineImpl engine = new EngineImpl();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -88,8 +87,8 @@ public class UpdateTest extends AbstractTest {
 
 	}
 
-	public void test006_attributeToRelation() throws ConcurrencyControlException {
-		LightClientEngine engine = new LightClientEngine();
+	public void test006_attributeToRelation() {
+		EngineImpl engine = new EngineImpl();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -109,7 +108,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test007_structurel_WithInheritings_AndInstances() {
-		LightClientEngine engine = new LightClientEngine();
+		EngineImpl engine = new EngineImpl();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = car.addAttribute("Power");

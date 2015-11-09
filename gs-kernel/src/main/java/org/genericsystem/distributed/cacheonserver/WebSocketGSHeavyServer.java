@@ -13,7 +13,7 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.EngineImpl;
 
 public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 
@@ -48,7 +48,7 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					Buffer result = getReplyBuffer(methodId, (HeavyServerEngine) root, gsBuffer);
+					Buffer result = getReplyBuffer(methodId, (EngineImpl) root, gsBuffer);
 					// System.out.println("Write result");
 						webSocket.writeBinaryMessage(result);
 					});
@@ -69,6 +69,6 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 
 	@Override
 	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new HeavyServerEngine(value, persistentDirectoryPath, userClasses);
+		return new EngineImpl(value, persistentDirectoryPath, userClasses);
 	}
 }

@@ -1,20 +1,20 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientCache;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.kernel.EngineImpl;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		EngineImpl engine = new EngineImpl();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		cache.flush();
-		LightClientCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myBmwRed = myBmw.addHolder(color, "red");
 
@@ -27,19 +27,18 @@ public class RemoveManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		EngineImpl engine = new EngineImpl();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		cache.flush();
-		LightClientCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic myBmw2 = car.addInstance("myBmw");
 		Generic myBmwRed2 = myBmw2.addHolder(color, "red");
 		cache.start();
 		cache.shiftTs();
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myBmwRed = myBmw.addHolder(color, "red");
-		cache.flush();
 		assert myBmw.getHolders(color).contains(myBmwRed);
 		assert myBmw.getHolders(color).size() == 1;
 

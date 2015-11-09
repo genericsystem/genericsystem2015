@@ -3,6 +3,8 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -19,7 +21,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	private final Restructurator restructurator;
 	private IDifferential<Generic> transaction;
-	private Differential differential;
+	protected Differential differential;
 	private final ContextEventListener<Generic> listener;
 	private final long cacheId;
 
@@ -35,10 +37,6 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	protected HeavyCache(AbstractEngine root) {
 		this(root, new ContextEventListener<Generic>() {
 		});
-	}
-
-	protected Differential getDifferential() {
-		return differential;
 	}
 
 	// protected Cache(AbstractEngine root, long cacheId) {
@@ -75,9 +73,24 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	@Override
-	public Snapshot<Generic> getDependencies(Generic generic) {
-		return differential.getDependencies(generic);
+	public Snapshot<Generic> getDependencies(Generic vertex) {
+		return differential.getDependencies(vertex);
 	}
+
+	// ************************************
+	public ObservableList<Generic> getObservableDependencies(Generic vertex) {
+		return differential.getObservableDependencies(vertex);
+	}
+
+	public ObservableList<Generic> getObservableInstances(Generic vertex) {
+		return differential.getObservableDependencies(vertex).filtered((x -> (vertex).equals(x.getMeta())));
+	}
+
+	public ObservableList<Generic> getObservableInheritings(Generic generic) {
+		return differential.getObservableDependencies(generic).filtered(x -> x.getSupers().contains(generic));
+	}
+
+	// *****************************************
 
 	protected Restructurator buildRestructurator() {
 		return new Restructurator(this);
@@ -88,15 +101,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	// }
 
 	protected void initialize() {
-		differential = buildDifferential(differential == null ? buildTransactionDifferential() : differential.getSubCache());
-	}
-
-	protected Differential buildDifferential(IDifferential<Generic> subCache) {
-		return new Differential(subCache);
-	}
-
-	protected TransactionDifferential buildTransactionDifferential() {
-		return new TransactionDifferential();
+		differential = new Differential(differential == null ? new TransactionDifferential() : differential.getSubCache());
 	}
 
 	@Override
@@ -245,7 +250,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
 	}
 
-	protected class TransactionDifferential implements IDifferential<Generic> {
+	private class TransactionDifferential implements IDifferential<Generic> {
 
 		@Override
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
@@ -253,15 +258,19 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		}
 
 		@Override
-		public Snapshot<Generic> getDependencies(Generic generic) {
-			return transaction.getDependencies(generic);
+		public ObservableList<Generic> getObservableDependencies(Generic generic) {
+			return transaction.getObservableDependencies(generic);
+		}
+
+		@Override
+		public Snapshot<Generic> getDependencies(Generic vertex) {
+			return transaction.getDependencies(vertex);
 		}
 
 		@Override
 		public long getTs() {
 			return transaction.getTs();
 		}
-
 	}
 
 	public static interface ContextEventListener<X> {

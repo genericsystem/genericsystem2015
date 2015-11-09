@@ -12,7 +12,7 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 
 public class HttpGSLightServer extends AbstractGSLightServer {
 
@@ -47,8 +47,7 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 				request.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					int op = gsBuffer.getInt();
-					request.response().end(getReplyBuffer(methodId, op, (LightServerEngine) root, gsBuffer));
+					request.response().end(getReplyBuffer(methodId, (Root) root, gsBuffer));
 					request.response().close();
 				});
 			});
@@ -67,6 +66,6 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 
 	@Override
 	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new LightServerEngine(value, persistentDirectoryPath, userClasses);
+		return new Root(value, persistentDirectoryPath, userClasses);
 	}
 }

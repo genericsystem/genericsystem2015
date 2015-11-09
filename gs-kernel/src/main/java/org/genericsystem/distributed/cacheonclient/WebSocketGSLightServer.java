@@ -3,16 +3,14 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 
 public class WebSocketGSLightServer extends AbstractGSLightServer {
 
@@ -48,8 +46,7 @@ public class WebSocketGSLightServer extends AbstractGSLightServer {
 				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
-					int op = gsBuffer.getInt();
-					webSocket.writeBinaryMessage(getReplyBuffer(methodId, op, (LightServerEngine) root, gsBuffer));
+					webSocket.writeBinaryMessage(getReplyBuffer(methodId, (Root) root, gsBuffer));
 				});
 
 			});
@@ -68,7 +65,7 @@ public class WebSocketGSLightServer extends AbstractGSLightServer {
 
 	@Override
 	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new LightServerEngine(value, persistentDirectoryPath, userClasses);
+		return new Root(value, persistentDirectoryPath, userClasses);
 	}
 
 }

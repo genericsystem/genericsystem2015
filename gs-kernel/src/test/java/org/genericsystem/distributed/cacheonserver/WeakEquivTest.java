@@ -2,14 +2,14 @@ package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class WeakEquivTest extends AbstractTest {
 
 	// public void test001_weakEquiv_Relation_SingularConstraint() {
-	// ServerEngine engine = new ServerEngine();
+	// Engine engine = new Engine();
 	// Generic car = engine.addInstance("Car");
 	// Generic color = engine.addInstance("Color");
 	// Generic carColor = engine.addInstance("CarColor", car, color);
@@ -22,7 +22,7 @@ public class WeakEquivTest extends AbstractTest {
 	// }
 
 	// public void test002_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity() {
-	// ServerEngine engine = new ServerEngine();
+	// Engine engine = new Engine();
 	// Generic car = engine.addInstance("Car");
 	// Generic color = engine.addInstance("Color");
 	// Generic carColor = engine.addInstance("CarColor", car, color);
@@ -36,7 +36,7 @@ public class WeakEquivTest extends AbstractTest {
 	// }
 
 	// public void test003_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_axeOne() {
-	// ServerEngine engine = new ServerEngine();
+	// Engine engine = new Engine();
 	// Generic car = engine.addInstance("Car");
 	// Generic color = engine.addInstance("Color");
 	// Generic carColor = engine.addInstance("CarColor", car, color);
@@ -50,8 +50,7 @@ public class WeakEquivTest extends AbstractTest {
 	// }
 
 	public void test004_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_supers() {
-		HeavyServerEngine engine = new HeavyServerEngine();
-		assert engine.getCurrentCache() != null;
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);
@@ -65,7 +64,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test005_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_setInstance() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		LightClientEngine engine = new LightClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);
@@ -80,7 +79,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	// public void test006_weakEquiv_DefaultValue() {
-	// ServerEngine engine = new ServerEngine();
+	// Engine engine = new Engine();
 	// Generic car = engine.addInstance("Car");
 	// Generic color = engine.addInstance("Color");
 	// Generic defaultColor = color.addInstance("Red", car);

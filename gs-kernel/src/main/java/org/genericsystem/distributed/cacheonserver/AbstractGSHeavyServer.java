@@ -11,14 +11,14 @@ import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.EngineImpl;
 
 public abstract class AbstractGSHeavyServer extends AbstractGSServer {
 	public AbstractGSHeavyServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, HeavyServerEngine root, GSBuffer gsBuffer) {
+	Buffer getReplyBuffer(int methodId, EngineImpl root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer();
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:

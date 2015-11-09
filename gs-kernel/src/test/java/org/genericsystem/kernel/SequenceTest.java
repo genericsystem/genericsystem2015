@@ -6,14 +6,14 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.IntSequenceGenerator;
 import org.genericsystem.defaults.IntSequenceGenerator.StringSequenceGenerator;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class SequenceTest extends AbstractTest {
 
 	public void testFindSequence() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic sequence = root.getSequence();
 		assert sequence != null;
 		assert sequence.getMeta() == root.getMetaAttribute();
@@ -27,7 +27,7 @@ public class SequenceTest extends AbstractTest {
 		// assert myBmw.getValue() instanceof String;
 		// assert ((String) myBmw.getValue()).contains(Car.class.getSimpleName());
 
-		LightServerEngine root = new LightServerEngine(Car.class);
+		Root root = new Root(Car.class);
 		Generic car = root.find(Car.class);
 		Generic myBmw = car.addInstance(null);
 		assert myBmw.getValue() instanceof String;
@@ -35,7 +35,7 @@ public class SequenceTest extends AbstractTest {
 	}
 
 	public void testIntAutoIncrementGenerator() {
-		LightServerEngine root = new LightServerEngine(CarInt.class);
+		Root root = new Root(CarInt.class);
 		Generic car = root.find(CarInt.class);
 		Generic myBmw = car.addInstance(null);
 		assert myBmw.getValue() instanceof Integer;
@@ -43,7 +43,7 @@ public class SequenceTest extends AbstractTest {
 	}
 
 	public void testHolderIntAutoIncrementGenerator() {
-		LightServerEngine root = new LightServerEngine(Id.class);
+		Root root = new Root(Id.class);
 		Generic id = root.find(Id.class);
 		Generic vehicle = root.find(Vehicle.class);
 		Generic myVehicle = vehicle.addInstance("myVehicle");

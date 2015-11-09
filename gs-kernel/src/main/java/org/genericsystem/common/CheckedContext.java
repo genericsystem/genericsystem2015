@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultContext;
 
@@ -32,8 +31,7 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 		return root;
 	}
 
-	protected void triggersMutation(Generic oldDependency, Generic newDependency) {
-	}
+	protected void triggersMutation(Generic oldDependency, Generic newDependency) {}
 
 	@Override
 	public abstract Snapshot<Generic> getDependencies(Generic ancestor);

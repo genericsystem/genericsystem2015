@@ -1,16 +1,17 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.util.Arrays;
+
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class ClassFinderTest extends AbstractTest {
 
 	public void test1() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -20,7 +21,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test2() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("Power", vehicle);
@@ -30,7 +31,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test5() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -40,7 +41,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test6() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -52,7 +53,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test7() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -63,7 +64,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test8() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -75,7 +76,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test9() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -88,7 +89,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test10() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 
@@ -96,7 +97,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test11() {
-		Generic engine = new HeavyServerEngine();
+		Generic engine = new LightClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 
@@ -104,7 +105,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	// public void test12() {
-	// Generic engine = new ServerEngine();
+	// Generic engine = new Engine();
 	// Generic vehicle = engine.addInstance("Vehicle");
 	// Generic car = engine.addInstance(vehicle, "Car");
 	// assert car.computeDependencies().contains(car);
@@ -116,7 +117,7 @@ public class ClassFinderTest extends AbstractTest {
 	// }
 
 	// public void test13() {
-	// Generic engine = new ServerEngine();
+	// Generic engine = new Engine();
 	// Generic vehicle = engine.addInstance("Vehicle");
 	// Generic car = engine.addInstance(vehicle, "Car");
 	// Generic sportCar = engine.addInstance(car, "SportCar");
@@ -132,7 +133,7 @@ public class ClassFinderTest extends AbstractTest {
 	// }
 
 	// public void test14() {
-	// Generic engine = new ServerEngine();
+	// Generic engine = new Engine();
 	// Generic vehicle = engine.addInstance("Vehicle");
 	// Generic car = engine.addInstance(vehicle, "Car");
 	// Generic myCar = car.addInstance("myCar");
@@ -150,7 +151,7 @@ public class ClassFinderTest extends AbstractTest {
 	// }
 
 	// public void test15() {
-	// Generic engine = new ServerEngine();
+	// Generic engine = new Engine();
 	// Generic vehicle = engine.addInstance("Vehicle");
 	// Generic car = engine.addInstance(vehicle, "Car");
 	// Generic power = engine.addInstance("Power", car);
@@ -170,7 +171,7 @@ public class ClassFinderTest extends AbstractTest {
 	// }
 
 	// public void test16() {
-	// Generic engine = new ServerEngine();
+	// Generic engine = new Engine();
 	// Generic vehicle = engine.addInstance("Vehicle");
 	// Generic vehiclePower = engine.addInstance("Power", vehicle);
 	// Generic car = engine.addInstance(vehicle, "Car");

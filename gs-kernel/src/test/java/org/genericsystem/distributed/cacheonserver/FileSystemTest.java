@@ -1,21 +1,27 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.util.Arrays;
-
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
+import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.cacheonserver.LightClientCache;
+import org.genericsystem.distributed.cacheonserver.LightClientEngine;
 import org.genericsystem.distributed.cacheonserver.FileSystem.Directory;
 import org.genericsystem.distributed.cacheonserver.FileSystem.File;
 import org.genericsystem.distributed.cacheonserver.FileSystem.FileType;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
 public class FileSystemTest extends AbstractTest {
 
+	@Override
+	public GSDeploymentOptions getDeploymentOptions() {
+		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addClasses(FileSystem.class, FileType.class);
+	}
+
 	public void testUpdateRootDirectory() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		assert rootDirectory.isAlive();
@@ -27,7 +33,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateRootDirectoryWithFile() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		rootDirectory.addFile("file");
@@ -38,7 +44,7 @@ public class FileSystemTest extends AbstractTest {
 
 	//
 	public void testUpdateDirectory() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory = rootDirectory.addDirectory("directory");
@@ -48,7 +54,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateDirectoryWithFile() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory = rootDirectory.addDirectory("directory");
@@ -59,7 +65,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateFile() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		File file = rootDirectory.addFile("file");
@@ -69,13 +75,13 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testDirectoryNameNotUniqueInDifferentDirectories() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory1 = rootDirectory.addDirectory("directory1");
 		final Directory directory2 = rootDirectory.addDirectory("directory2");
 		assert !directory2.addDirectory("directory1").equals(directory1); // No Exception
-		HeavyCache cache = engine.getCurrentCache();
+		LightClientCache cache = engine.getCurrentCache();
 		engine.getCurrentCache().mount();
 
 		catchAndCheckCause(() -> directory2.addDirectory("directory1"), ExistsException.class); // Exception
@@ -86,7 +92,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testFileNameNotUniqueInDifferentDirectories() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
@@ -98,7 +104,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testFileNameValueClassViolation() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem directoryTree = engine.find(FileSystem.class);
 		final Directory rootDirectory = directoryTree.addRootDirectory("rootDirectory");
 		final FileType fileSystem = engine.find(FileType.class);
@@ -108,7 +114,7 @@ public class FileSystemTest extends AbstractTest {
 
 	// Modifier par rapport au test d'origine
 	public void testGetRootDirectories() {
-		HeavyServerEngine engine = new HeavyServerEngine(FileSystem.class);
+		LightClientEngine engine = new LightClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		// System.out.println("fileSystem " + fileSystem.info());
 		Directory root = fileSystem.addRootDirectory("root");

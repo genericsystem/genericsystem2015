@@ -1,14 +1,9 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
@@ -17,13 +12,12 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.IDifferential;
+import org.genericsystem.common.ObservableContainer;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.HeavyClientEngine.ClientEngineHandler;
 
-import com.sun.javafx.collections.ObservableListWrapper;
-
-@SuppressWarnings("restriction")
-public class HeavyClientTransaction extends CheckedContext implements AsyncIDifferential {
+public class HeavyClientTransaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
 
@@ -79,7 +73,13 @@ public class HeavyClientTransaction extends CheckedContext implements AsyncIDiff
 		return (HeavyClientEngine) super.getRoot();
 	}
 
+	private Map<Generic, ObservableContainer> observableDependenciesMap = new HashMap<>();
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();
+
+	// @Override
+	// public ObservableList<Generic> getObservableDependencies(Generic generic) {
+	// return getRoot().getCurrentCache().getObservableDependencies(generic);
+	// }
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
@@ -92,32 +92,16 @@ public class HeavyClientTransaction extends CheckedContext implements AsyncIDiff
 		return dependencies;
 	}
 
-	public class CompletableObservableList2 extends SimpleObjectProperty<List<Generic>> {
-
-		public CompletableObservableList2(CompletableFuture<Vertex[]> promise) {
-			super(new ArrayList<>());
-			promise.thenAccept(elements -> set(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
-		};
-	}
-
-	public class CompletableObservableList extends ObservableListWrapper<Generic> {
-
-		public CompletableObservableList(CompletableFuture<Vertex[]> promise) {
-			super(new ArrayList<>());
-			promise.thenApply(elements -> setAll(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
-		}
-	}
-
-	private Map<Generic, ObservableList<Generic>> dependenciesPromisesMap = new HashMap<>();
-
+	// send getRoot()
 	@Override
-	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
-		ObservableList<Generic> dependencies = dependenciesPromisesMap.get(generic);
-		if (dependencies == null) {
-			dependencies = new CompletableObservableList(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()));
-			ObservableList<Generic> result = dependenciesPromisesMap.put(generic, dependencies);
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		ObservableContainer observableDependencies = observableDependenciesMap.get(generic);
+		if (observableDependencies == null) {
+			observableDependencies = new ObservableContainer();
+			getRoot().getServer().sendRequestForObservableDependencies(observableDependencies, getRoot(), getTs(), generic.getTs());
+			ObservableContainer result = observableDependenciesMap.put(generic, observableDependencies);
 			assert result == null;
 		}
-		return dependencies;
+		return observableDependencies;
 	}
 }

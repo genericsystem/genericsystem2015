@@ -133,4 +133,20 @@ public interface Snapshot<T> extends Iterable<T> {
 	default List<T> toList() {
 		return stream().collect(Collectors.toList());
 	}
+
+	// default ObservableList<T> toObservable(Observable... observables) {
+	// return new ListBinding() {
+	// {
+	// for (Observable observable : observables) {
+	// this.bind(observable);
+	// }
+	// }
+	//
+	// @Override
+	// protected ObservableList<T> computeValue() {
+	// return FXCollections.observableArrayList(toList());
+	// }
+	// };
+	//
+	// }
 }

@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -17,8 +18,8 @@ public class HttpGSHeavyClient extends AbstractGSHeavyClient {
 	}
 
 	@Override
-	protected <T> void send(Buffer buffer) {
-		httpClient.post(path, reponse -> reponse.bodyHandler(getHandler())).exceptionHandler(e -> {
+	protected <T> void send(Buffer buffer, Handler<Buffer> responseHandler) {
+		httpClient.post(path, reponse -> reponse.bodyHandler(responseHandler)).exceptionHandler(e -> {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();
 		}).end(buffer);
