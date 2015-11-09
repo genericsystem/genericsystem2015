@@ -14,8 +14,9 @@ public abstract class AbstractGSLightServer extends AbstractGSServer {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, LightServerEngine root, GSBuffer gsBuffer) {
+	Buffer getReplyBuffer(int methodId, int op, LightServerEngine root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer();
+		replyBuffer.appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());

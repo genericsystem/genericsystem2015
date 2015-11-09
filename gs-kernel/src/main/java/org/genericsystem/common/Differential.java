@@ -10,8 +10,8 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 public class Differential implements IDifferential<Generic> {
 
 	private final IDifferential<Generic> differential;
-	private final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
-	private final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
+	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
+	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
 
 	public Differential(IDifferential<Generic> subCache) {
 		this.differential = subCache;
@@ -81,4 +81,5 @@ public class Differential implements IDifferential<Generic> {
 	public long getTs() {
 		return getSubCache().getTs();
 	}
+
 }
