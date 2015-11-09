@@ -7,14 +7,13 @@ import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractEngine;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
 public class HeavyClientEngine extends AbstractEngine implements Generic {
 
-	protected final ClientCacheProtocole server;
+	protected final AbstractGSHeavyClient server;
 
 	public HeavyClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
@@ -41,27 +40,17 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 	}
 
 	@Override
-	public HeavyCache newCache() {
-		return new HeavyCache(this) {
-			@Override
-			protected HeavyClientTransaction buildTransaction() {
-				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
-			}
-		};
+	public CacheOnClient newCache() {
+		return new CacheOnClient(this);
 	}
 
-	public HeavyCache newCache(ContextEventListener<Generic> listener) {
-		return new HeavyCache(this, listener) {
-			@Override
-			protected HeavyClientTransaction buildTransaction() {
-				return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
-			}
-		};
+	public CacheOnClient newCache(ContextEventListener<Generic> listener) {
+		return new CacheOnClient(this, listener);
 	}
 
 	@Override
-	public HeavyCache getCurrentCache() {
-		return (HeavyCache) super.getCurrentCache();
+	public CacheOnClient getCurrentCache() {
+		return (CacheOnClient) super.getCurrentCache();
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {
@@ -100,7 +89,7 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 		return Generic.class;
 	}
 
-	public ClientCacheProtocole getServer() {
+	public AbstractGSHeavyClient getServer() {
 		return server;
 	}
 

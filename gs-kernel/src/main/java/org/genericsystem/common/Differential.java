@@ -1,12 +1,6 @@
 package org.genericsystem.common;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
-
-import javafx.beans.binding.ListBinding;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -15,70 +9,21 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 
 public class Differential implements IDifferential<Generic> {
 
-	private Map<Generic, ObservableList<Generic>> mapCache = new HashMap<Generic, ObservableList<Generic>>() {
-
-		@Override
-		public javafx.collections.ObservableList<Generic> get(Object key) {
-			ObservableList<Generic> result = super.get(key);
-			if (result != null)
-				return result;
-
-			result = new ListBinding<Generic>() {
-				{
-					super.bind(addsObservable, removesObservable);
-				}
-
-				@Override
-				public void dispose() {
-					super.unbind(addsObservable, removesObservable);
-				}
-
-				@Override
-				protected ObservableList<Generic> computeValue() {
-					System.out.println("buileObList");
-					return buildObservableList((Generic) key);
-				}
-
-			};
-
-			super.put((Generic) key, result);
-			return result;
-		};
-
-	};
-
-	private ObservableList<Generic> addsObservable;
-	private ObservableList<Generic> removesObservable;
-
 	private final IDifferential<Generic> differential;
 	private final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	private final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
 
-	@Override
-	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		return mapCache.get(generic);
-	}
-
-	private ObservableList<Generic> buildObservableList(Generic generic) {
-		return FXCollections.concat(addsObservable.contains(generic) ? FXCollections.emptyObservableList() : differential.getObservableDependencies(generic).filtered(x -> !removesObservable.contains(x)),
-				addsObservable.filtered(x -> generic.isDirectAncestorOf(x)));
-	}
-
 	public Differential(IDifferential<Generic> subCache) {
 		this.differential = subCache;
-		addsObservable = FXCollections.observableArrayList();
-		removesObservable = FXCollections.observableArrayList();
-
 	}
 
-	// public Stream<Generic> getLivingToRespawn() {
-	// return adds.stream().filter(g -> {
-	// return g.getTs() == Long.MAX_VALUE && g.isAlive();
-	// });
-	// }
+	public Stream<Generic> getLivingToRespawn() {
+		return adds.stream().filter(g -> {
+			return g.getTs() == Long.MAX_VALUE && g.isAlive();
+		});
+	}
 
 	public IDifferential<Generic> getSubCache() {
-
 		return differential;
 	}
 
@@ -92,24 +37,18 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	protected Generic plug(Generic generic) {
+		// assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
-		System.out.println("plug add obs");
-		addsObservable.add(generic);
 		return generic;
 	}
 
 	protected void unplug(Generic generic) {
-
-		if (!adds.remove(generic)) {
-			removesObservable.add(generic);
+		if (!adds.remove(generic))
 			removes.add(generic);
-		} else
-			addsObservable.remove(generic);
 	}
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-
 		return new Snapshot<Generic>() {
 			@Override
 			public Generic get(Object o) {

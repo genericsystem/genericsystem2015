@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -84,17 +81,6 @@ public class PersistenceTest extends AbstractTest {
 		// root.close();
 		LightClientEngine engine = new LightClientEngine(Statics.ENGINE_VALUE);
 		compareGraph(root, engine);
-	}
-
-	public void testRemoveMapGenericsById() {
-		LightClientEngine root = new LightClientEngine(Statics.ENGINE_VALUE);
-		Generic vehicle = root.addInstance("Vehicle");
-		Generic car = root.addInstance(vehicle, "Car");
-		Generic power = car.addAttribute("power");
-		car.remove();
-		root.getCurrentCache().flush();
-		assert root.getGenericByIdMap(car.getTs()) == null;
-		assert root.getGenericByIdMap(power.getTs()) == null;
 	}
 
 	public void testAddAndRemove() {

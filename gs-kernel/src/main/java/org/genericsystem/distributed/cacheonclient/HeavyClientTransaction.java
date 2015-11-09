@@ -1,8 +1,15 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -10,11 +17,13 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.HeavyClientEngine.ClientEngineHandler;
 
-public class HeavyClientTransaction extends CheckedContext implements IDifferential<Generic> {
+import com.sun.javafx.collections.ObservableListWrapper;
+
+@SuppressWarnings("restriction")
+public class HeavyClientTransaction extends CheckedContext implements AsyncIDifferential {
 
 	private final long ts;
 
@@ -83,4 +92,32 @@ public class HeavyClientTransaction extends CheckedContext implements IDifferent
 		return dependencies;
 	}
 
+	public class CompletableObservableList2 extends SimpleObjectProperty<List<Generic>> {
+
+		public CompletableObservableList2(CompletableFuture<Vertex[]> promise) {
+			super(new ArrayList<>());
+			promise.thenAccept(elements -> set(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
+		};
+	}
+
+	public class CompletableObservableList extends ObservableListWrapper<Generic> {
+
+		public CompletableObservableList(CompletableFuture<Vertex[]> promise) {
+			super(new ArrayList<>());
+			promise.thenApply(elements -> setAll(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
+		}
+	}
+
+	private Map<Generic, ObservableList<Generic>> dependenciesPromisesMap = new HashMap<>();
+
+	@Override
+	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
+		ObservableList<Generic> dependencies = dependenciesPromisesMap.get(generic);
+		if (dependencies == null) {
+			dependencies = new CompletableObservableList(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()));
+			ObservableList<Generic> result = dependenciesPromisesMap.put(generic, dependencies);
+			assert result == null;
+		}
+		return dependencies;
+	}
 }

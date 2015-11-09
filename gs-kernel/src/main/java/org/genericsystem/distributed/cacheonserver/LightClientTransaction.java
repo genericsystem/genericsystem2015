@@ -92,7 +92,6 @@ public class LightClientTransaction {
 	long remove(Generic generic, NavigableSet<Generic> dependencies) {
 		long result = getRoot().getServer().remove(cacheId, generic.getTs());
 		dependencies.forEach(g -> evict(g));
-		dependencies.forEach(g -> getRoot().release(g.getTs()));
 		return result;
 	}
 

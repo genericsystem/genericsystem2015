@@ -59,10 +59,6 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 		return generic;
 	}
 
-	public Generic getGenericByIdMap(long ts) {
-		return super.getGenericById(ts);
-	}
-
 	@Override
 	public Generic getGenericById(long ts) {
 		Generic generic = super.getGenericById(ts);
@@ -122,11 +118,6 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 		public long getBirthTs() {
 			return birthTs;
 		}
-	}
-
-	@Override
-	protected void release(long ts) {
-		super.release(ts);
 	}
 
 	@Override

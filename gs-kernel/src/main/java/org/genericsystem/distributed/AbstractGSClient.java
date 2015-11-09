@@ -3,10 +3,16 @@ package org.genericsystem.distributed;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Protocole;
@@ -35,23 +41,64 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int NEW_CACHE = 17;
 	public static final int CLEAR = 18;
 
-	protected abstract <T> void send(Buffer buffer, Handler<Buffer> reponseHandler);
+	protected abstract <T> void send(Buffer buffer);
+
+	private final Map<Integer, Consumer<GSBuffer>> ops = new HashMap<>();
+	private final AtomicInteger atomicKey = new AtomicInteger(0);
+
+	private Handler<Buffer> handler = buf -> {
+		GSBuffer gsBuffer = new GSBuffer(buf);
+		int optype = gsBuffer.getInt();
+		ops.remove(optype).accept(gsBuffer);
+	};
+
+	protected Handler<Buffer> getHandler() {
+		return handler;
+	}
+
+	private int indexCallback(Consumer<GSBuffer> promise) {
+		int key = atomicKey.incrementAndGet();
+		ops.put(key, promise);
+		return key;
+	}
+
+	protected <T> CompletableFuture<T> promise(int method, Function<GSBuffer, T> receiveReturn, Function<Buffer, Buffer> sendParams) {
+		CompletableFuture<T> promise = new CompletableFuture<>();
+		int key = indexCallback(buff -> promise.complete(receiveReturn.apply(buff)));
+		send(sendParams.apply(Buffer.buffer().appendInt(method).appendInt(key)));
+		return promise;
+	}
+
+	@FunctionalInterface
+	public interface UnsafeSupplier<R> {
+		R supply() throws InterruptedException, ExecutionException;
+	}
+
+	protected <T, R> R unsafe(UnsafeSupplier<R> unsafe) {
+		try {
+			return unsafe.supply();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	@Override
 	public Vertex getVertex(long id) {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(GET_VERTEX).appendLong(id), buff -> task.handle(new GSBuffer(buff).getGSVertex())));
+		return unsafe(() -> getVertexPromise(id).get());
+	}
+
+	public CompletableFuture<Vertex> getVertexPromise(long id) {
+		return promise(GET_VERTEX, buff -> buff.getGSVertex(), buffer -> buffer.appendLong(id));
 	}
 
 	@Override
 	public long pickNewTs() {
-		return synchronizeTask(task -> send(Buffer.buffer().appendInt(PICK_NEW_TS), buff -> task.handle(new GSBuffer(buff).getLong())));
+		return unsafe(() -> getPickNewTsPromise().get());
 	}
 
-	/*
-	 * static List<Object> globalResultContainer = new List<>();
-	 * 
-	 * public static <T> T callbackBottom() { if (!globalResultContainer.isEmpty()) return (T) globalResultContainer.get(); }
-	 */
+	public CompletableFuture<Long> getPickNewTsPromise() {
+		return promise(PICK_NEW_TS, buff -> buff.getLong(), buffer -> buffer);
+	}
 
 	protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
@@ -90,6 +137,13 @@ public abstract class AbstractGSClient implements Protocole {
 
 	protected static <T> T synchronizeTask(Consumer<Handler<Object>> consumer) {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
+
+			CompletableFuture<T> promise = CompletableFuture.supplyAsync(() -> {
+				T result = null;
+
+				return result;
+			});
+
 			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
 			consumer.accept(resultObject -> {
 				try {

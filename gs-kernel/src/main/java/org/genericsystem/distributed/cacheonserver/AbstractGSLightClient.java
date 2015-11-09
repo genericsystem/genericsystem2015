@@ -5,7 +5,6 @@ import io.vertx.core.buffer.Buffer;
 import java.io.Serializable;
 import java.util.List;
 
-import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
@@ -74,8 +73,8 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	@Override
-	public long tryFlush(long cacheId) throws ConcurrencyControlException {
-		return synchronizeTaskWithException(task -> send(Buffer.buffer().appendInt(TRY_FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
+	public long tryFlush(long cacheId) {
+		return synchronizeTask(task -> send(Buffer.buffer().appendInt(TRY_FLUSH).appendLong(cacheId), buff -> task.handle(new GSBuffer(buff).getLongThrowException())));
 	}
 
 	@Override
