@@ -143,6 +143,7 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 	@Override
 	public void remove(Generic generic) {
 		transaction.remove(generic, computeDependencies(generic));
+		getRoot().
 		// transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
