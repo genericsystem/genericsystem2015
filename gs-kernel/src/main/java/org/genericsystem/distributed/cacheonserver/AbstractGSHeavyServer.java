@@ -77,7 +77,6 @@ public abstract class AbstractGSHeavyServer extends AbstractGSServer {
 		case AbstractGSClient.GET_CACHE_LEVEL:
 			return replyBuffer.appendInt(root.getCacheLevel(gsBuffer.getLong()));
 		case AbstractGSClient.NEW_CACHE: {
-			System.out.println("zzzzzzzzzzzzzzzzzzzz");
 			return replyBuffer.appendLong(root.newCacheId());
 		}
 		case AbstractGSClient.CLEAR:

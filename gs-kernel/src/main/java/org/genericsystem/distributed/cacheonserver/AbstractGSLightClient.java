@@ -3,9 +3,14 @@ package org.genericsystem.distributed.cacheonserver;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
+
 import com.google.common.base.Supplier;
 
 public abstract class AbstractGSLightClient extends AbstractGSClient implements ServerCacheProtocole {
@@ -24,10 +29,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	public CompletableFuture<Object> newCacheIdPromise() {
-		return promise(NEW_CACHE, buff -> {
-			System.out.println("Coucou");
-			return buff.getLong();
-		}, buffer -> buffer);
+		return promise(NEW_CACHE, buff -> buff.getLong(), buffer -> buffer);
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	public CompletableFuture<Object> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return promise(ADD_INSTANCE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(meta, overrides, value, components));
+		return promise(ADD_INSTANCE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(meta, overrides, value, components));
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	public CompletableFuture<Object> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return promise(UPDATE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer).appendGSSignature(update, overrides, value, newComponents));
+		return promise(UPDATE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendGSSignature(update, overrides, value, newComponents));
 	}
 
 	@Override
@@ -72,7 +74,7 @@ public abstract class AbstractGSLightClient extends AbstractGSClient implements 
 	}
 
 	public CompletableFuture<Object> mergePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return promise(MERGE, buff -> buff.getLongThrowException(), buffer -> ((GSBuffer) buffer.appendLong(cacheId)).appendGSSignature(update, overrides, value, newComponents));
+		return promise(MERGE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents));
 	}
 
 	@Override
