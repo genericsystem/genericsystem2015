@@ -2,14 +2,14 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class CornerCaseTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -20,7 +20,7 @@ public class CornerCaseTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -33,7 +33,7 @@ public class CornerCaseTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		assert root.getInstance("Power", car) == null;

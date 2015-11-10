@@ -2,14 +2,14 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class AliveConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root engine = new Root();
+		BasicEngine engine = new BasicEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = engine.addInstance("Color");
@@ -21,7 +21,7 @@ public class AliveConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root engine = new Root();
+		BasicEngine engine = new BasicEngine();
 		Generic car = engine.addInstance("Car");
 		car.remove();
 		assert !car.isAlive();
@@ -29,7 +29,7 @@ public class AliveConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root engine = new Root();
+		BasicEngine engine = new BasicEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		power.remove();
@@ -39,7 +39,7 @@ public class AliveConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root engine = new Root();
+		BasicEngine engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		car.remove();
@@ -48,7 +48,7 @@ public class AliveConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root engine = new Root();
+		BasicEngine engine = new BasicEngine();
 		Generic car = engine.addInstance("Car");
 		Generic airConditioner = engine.addInstance("airConditioner", car);
 		Generic radio = engine.addInstance("Radio", car);
@@ -65,7 +65,7 @@ public class AliveConstraintTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Generic root = new Root();
+		Generic root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> root.addInstance(vehicle, "Car"), AliveConstraintViolationException.class);

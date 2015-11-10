@@ -2,14 +2,14 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class InstanceValueClassConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 
@@ -24,7 +24,7 @@ public class InstanceValueClassConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic power = root.addInstance("Power");
@@ -35,7 +35,7 @@ public class InstanceValueClassConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic power = root.addInstance("Power");
@@ -47,7 +47,7 @@ public class InstanceValueClassConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic power = root.addInstance("Power");
@@ -60,7 +60,7 @@ public class InstanceValueClassConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic power = root.addInstance("Power");

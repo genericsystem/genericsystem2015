@@ -6,14 +6,14 @@ import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolati
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
 import org.genericsystem.defaults.exceptions.UniqueValueConstraintViolationException;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class ConsitencyConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -27,7 +27,7 @@ public class ConsitencyConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myFirstCar = car.addInstance("myFirstCar");
 		Generic mySecondCar = car.addInstance("mySecondCar");
@@ -39,7 +39,7 @@ public class ConsitencyConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -49,7 +49,7 @@ public class ConsitencyConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic power = root.addInstance("Power");

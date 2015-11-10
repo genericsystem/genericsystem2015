@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class MultiInheritanceTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new Root();
+		Generic root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehicleSizable = root.addInstance("Sizable", vehicle);
 		Generic robot = root.addInstance("Robot");
@@ -24,7 +24,7 @@ public class MultiInheritanceTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new Root();
+		Generic root = new BasicEngine();
 		Generic object = root.addInstance("Object");
 		Generic objectSizable = root.addInstance("Sizable", object);
 		Generic vehicle = root.addInstance(Arrays.asList(object), "Vehicle");
@@ -47,7 +47,7 @@ public class MultiInheritanceTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		root.addInstance(Arrays.asList(car, robot), "Transformer");
@@ -55,7 +55,7 @@ public class MultiInheritanceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		Generic firstTransformer = root.setInstance(Arrays.asList(car, robot), "Transformer");

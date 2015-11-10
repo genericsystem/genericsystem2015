@@ -14,26 +14,26 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocProtocole;
 
-public class Root extends AbstractServer implements Generic, CocProtocole {
+public class BasicEngine extends AbstractServer implements Generic, CocProtocole {
 
 	@Override
-	public Root getRoot() {
+	public BasicEngine getRoot() {
 		return this;
 	}
 
-	public Root() {
+	public BasicEngine() {
 		this(new Class[] {});
 	}
 
-	public Root(Class<?>... userClasses) {
+	public BasicEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public Root(String value, Class<?>... userClasses) {
+	public BasicEngine(String value, Class<?>... userClasses) {
 		this(value, null, userClasses);
 	}
 
-	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
+	public BasicEngine(String value, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
@@ -46,7 +46,7 @@ public class Root extends AbstractServer implements Generic, CocProtocole {
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((Root) getRoot());
+				return new Transaction((BasicEngine) getRoot());
 			}
 
 			@Override

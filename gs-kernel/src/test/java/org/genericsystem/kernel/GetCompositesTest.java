@@ -1,14 +1,14 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class GetCompositesTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = vehicle.addAttribute("power");
 		vehicle.addAttribute("option");
@@ -17,7 +17,7 @@ public class GetCompositesTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		vehicle.addAttribute("power");

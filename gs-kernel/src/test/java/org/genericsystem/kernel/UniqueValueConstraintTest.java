@@ -2,14 +2,14 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.UniqueValueConstraintViolationException;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class UniqueValueConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic power = root.addInstance("Power", car);
@@ -24,7 +24,7 @@ public class UniqueValueConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -36,7 +36,7 @@ public class UniqueValueConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -48,7 +48,7 @@ public class UniqueValueConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");

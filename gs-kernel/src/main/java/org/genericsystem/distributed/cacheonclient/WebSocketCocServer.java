@@ -12,7 +12,7 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 
 public class WebSocketCocServer extends AbstractCocServer {
 
@@ -49,7 +49,7 @@ public class WebSocketCocServer extends AbstractCocServer {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
 					int op = gsBuffer.getInt();
-					webSocket.writeBinaryMessage(getReplyBuffer(methodId, op, (Root) root, gsBuffer));
+					webSocket.writeBinaryMessage(getReplyBuffer(methodId, op, (BasicEngine) root, gsBuffer));
 				});
 
 			});
@@ -70,7 +70,7 @@ public class WebSocketCocServer extends AbstractCocServer {
 
 	@Override
 	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new Root(value, persistentDirectoryPath, userClasses);
+		return new BasicEngine(value, persistentDirectoryPath, userClasses);
 	}
 
 }

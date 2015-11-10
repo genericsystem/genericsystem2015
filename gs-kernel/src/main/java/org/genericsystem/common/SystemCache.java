@@ -30,7 +30,7 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 
 public class SystemCache {
 
@@ -44,7 +44,7 @@ public class SystemCache {
 	public SystemCache(AbstractRoot root) {
 		this.root = root;
 		put(DefaultRoot.class, (Generic) root);
-		put(Root.class, (Generic) root);
+		put(BasicEngine.class, (Generic) root);
 		put(root.getClass(), (Generic) root);
 	}
 

@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class HolderTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -33,7 +33,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -60,7 +60,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -87,7 +87,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic power = root.addInstance("Power", car);
@@ -106,7 +106,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic bike = root.addInstance(Arrays.asList(vehicle), "bike");
@@ -130,7 +130,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -162,7 +162,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -196,7 +196,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power);
@@ -228,7 +228,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power);
@@ -269,7 +269,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power1 = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power1);
@@ -339,7 +339,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test011() {
-		final Root root = new Root();
+		final BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("myCar");
@@ -348,7 +348,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test012() {
-		final Root root = new Root();
+		final BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic maxSpeed = car.addAttribute("MaxSpeed");
@@ -361,7 +361,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test013() {
-		final Root root = new Root();
+		final BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("myCar");
@@ -371,7 +371,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test014() {
-		final Root root = new Root();
+		final BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic carDefaultPower = car.setHolder(power, 200);
@@ -380,7 +380,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test015() {
-		final Root root = new Root();
+		final BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power").enablePropertyConstraint();
 		car.setHolder(power, 200);
@@ -390,7 +390,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test016() {
-		final Root root = new Root();
+		final BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		car.setHolder(power, 200);
@@ -400,7 +400,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test017() {
-		final Root engine = new Root();
+		final BasicEngine engine = new BasicEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic carDefaultPower = car.setHolder(power, 200);
@@ -410,7 +410,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test018() {
-		final Root engine = new Root();
+		final BasicEngine engine = new BasicEngine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		car.setHolder(power, 200);

@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class ClassFinderTest extends AbstractTest {
 
 	public void test001() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -20,7 +20,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		engine.addInstance("Power", vehicle);
@@ -29,7 +29,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -38,7 +38,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -49,7 +49,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -59,7 +59,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -72,7 +72,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -85,7 +85,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -104,7 +104,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic myCar = car.addInstance("myCar");
@@ -121,7 +121,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -140,7 +140,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test011() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -163,14 +163,14 @@ public class ClassFinderTest extends AbstractTest {
 	 */
 
 	public void test012() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> engine.addInstance(vehicle, "Car"), AliveConstraintViolationException.class);
 	}
 
 	public void test013() {
-		Generic engine = new Root();
+		Generic engine = new BasicEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> vehicle.addInstance("myVehicle"), AliveConstraintViolationException.class);

@@ -3,14 +3,14 @@ package org.genericsystem.kernel;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class ReferentialIntegrityConstraintTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		car.addRelation("CarColor", color);
@@ -18,7 +18,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		car.addRelation("CarColor", color);
@@ -26,7 +26,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		car.addRelation("CarColor", color);
@@ -35,7 +35,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -46,7 +46,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -58,7 +58,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		car.addRelation("CarColor", color);
@@ -67,7 +67,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -78,7 +78,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -89,7 +89,7 @@ public class ReferentialIntegrityConstraintTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");

@@ -3,14 +3,14 @@ package org.genericsystem.kernel;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class CascadeRemoveTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -27,7 +27,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -43,7 +43,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -58,7 +58,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -73,7 +73,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);
@@ -84,7 +84,7 @@ public class CascadeRemoveTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("CarColor", color);

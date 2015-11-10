@@ -5,14 +5,14 @@ import java.util.Collections;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
-import org.genericsystem.kernel.Root;
+import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class UpdateTest extends AbstractTest {
 
 	public void test001() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		assert "Car".equals(car.getValue());
 		Generic newCar = car.update("NewCar");
@@ -21,7 +21,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("MyBmw");
@@ -39,7 +39,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("MyBmw");
@@ -58,7 +58,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 
@@ -81,7 +81,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("MyBmw");
@@ -91,7 +91,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = car.addAttribute("Power");
@@ -114,7 +114,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		vehicle.addInstance("myVehicle");
 		Generic car = root.addInstance("Car");
@@ -132,7 +132,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = vehicle.addAttribute("Power");
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -175,7 +175,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 
@@ -192,7 +192,7 @@ public class UpdateTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Root root = new Root();
+		BasicEngine root = new BasicEngine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 
