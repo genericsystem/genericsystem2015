@@ -54,34 +54,10 @@ public class App extends Application {
 		Generic base2 = type.setInstance("myMercedes");
 		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
 		engine.getCurrentCache().flush();
-		// class InvalidableObjectProperty extends SimpleObjectProperty<Generic> {
-		// public InvalidableObjectProperty(Generic engine) {
-		// super(engine);
-		// }
-		//
-		// @Override
-		// protected void fireValueChangedEvent() {
-		// super.fireValueChangedEvent();
-		// }
-		// }
-		// InvalidableObjectProperty engineProperty = new InvalidableObjectProperty(engine);
-		// Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
-		// engineProperty.fireValueChangedEvent();
-		// Alert alert = new Alert(AlertType.WARNING);
-		// alert.setTitle("A problem was detected");
-		// alert.setContentText(throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage());
-		// alert.setHeaderText(throwable.getClass().getSimpleName());
-		// throwable.printStackTrace();
-		// alert.showAndWait();
-		// });
 
 		RootContext rootContext = new RootContext(engine);
 
 		Crud crud = new Crud(rootContext);
-
-		// crud.getContext().rootProperty.set(engine);
-
-		// Crud crud = new Crud(new RootContext(engine));
 
 		((Group) scene.getRoot()).getChildren().add(crud);
 		stage.setScene(scene);
