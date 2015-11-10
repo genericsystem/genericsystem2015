@@ -13,4 +13,6 @@ import org.genericsystem.common.IDifferential;
  */
 public interface AsyncIDifferential extends IDifferential<Generic> {
 	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic);
+
+	public Wrappable<Generic> getWrappableDependencies(Generic generic);
 }

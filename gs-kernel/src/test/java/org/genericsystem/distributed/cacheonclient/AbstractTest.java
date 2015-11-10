@@ -1,9 +1,12 @@
 package org.genericsystem.distributed.cacheonclient;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.Statics;
@@ -73,6 +76,19 @@ public abstract class AbstractTest {
 			return;
 		}
 		assert false : "Unable to catch any rollback exception!";
+	}
+
+	protected static void compareGraph(Generic persisted, Generic read) {
+		List<Generic> persistVisit = new ArrayList<>(persisted.getCurrentCache().computeDependencies(persisted));
+		List<Generic> readVisit = new ArrayList<>(read.getCurrentCache().computeDependencies(read));
+		assert persistVisit.size() == readVisit.size() : persistVisit + " \n " + readVisit;
+		for (int i = 0; i < persistVisit.size(); i++) {
+			assert persistVisit.get(i).genericEquals(readVisit.get(i));
+			Generic persitedGeneric = persistVisit.get(i);
+			Generic readGeneric = readVisit.get(i);
+			assert persitedGeneric.getBirthTs() == readGeneric.getBirthTs() : persistVisit.get(i).info() + " " + persitedGeneric.getBirthTs() + "  " + readGeneric.getBirthTs();
+			assert persistVisit.get(i).genericEquals(readVisit.get(i)) : persistVisit.get(i).info() + " " + readVisit.get(i).info();
+		}
 	}
 
 }

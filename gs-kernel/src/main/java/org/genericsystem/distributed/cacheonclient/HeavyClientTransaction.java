@@ -120,4 +120,19 @@ public class HeavyClientTransaction extends CheckedContext implements AsyncIDiff
 		}
 		return dependencies;
 	}
+
+	@Override
+	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
+		return new Wrappable<Generic>() {
+			@Override
+			public Generic get(int index) {
+				return dependenciesPromisesMap.get(generic).getValue().get(index);
+			}
+
+			@Override
+			public int size() {
+				return dependenciesPromisesMap.get(generic).getValue().size();
+			}
+		};
+	}
 }

@@ -22,30 +22,36 @@ public class ObservableListTest extends AbstractTest {
 		assert !dependenciesObservableList.isEmpty();
 	}
 
-	// should it work or not?
 	public void test002_ConcurrentTryFlush() throws InterruptedException, ConcurrencyControlException {
 		HeavyClientEngine engine1 = new HeavyClientEngine();
 		HeavyClientEngine engine2 = new HeavyClientEngine();
-		engine1.addInstance("car");
-		engine1.getCurrentCache().getDependenciesObservableList(engine1);
-		engine1.getCurrentCache().tryFlush();
+		engine2.addInstance("elephant");
+		engine2.getCurrentCache().getDependenciesObservableList(engine1);
+		engine2.getCurrentCache().tryFlush();
 	}
 
 	public void test003_ConcurrentShiftTs() throws InterruptedException, ConcurrencyControlException {
 		HeavyClientEngine engine1 = new HeavyClientEngine();
 		HeavyClientEngine engine2 = new HeavyClientEngine();
-		engine1.addInstance("car");
-		ObservableList<Generic> dependenciesObservableList1 = engine1.getCurrentCache().getDependenciesObservableList(engine1);
-		engine1.getCurrentCache().tryFlush();
-		assert engine2.getCurrentCache().shiftTs() >= engine1.getCurrentCache().getTs();
+		engine2.setInstance("car");
 		ObservableList<Generic> dependenciesObservableList2 = engine2.getCurrentCache().getDependenciesObservableList(engine2);
-		Thread.sleep(1000);
+		engine2.getCurrentCache().tryFlush();
+		assert engine1.getCurrentCache().shiftTs() >= engine2.getCurrentCache().getTs();
+		ObservableList<Generic> dependenciesObservableList1 = engine1.getCurrentCache().getDependenciesObservableList(engine1);
+		if (dependenciesObservableList1.isEmpty())
+			Thread.sleep(100);
 		assert dependenciesObservableList1.size() == dependenciesObservableList2.size() : dependenciesObservableList1 + "\t:\t" + dependenciesObservableList2;
-		for (int i = 0; i < dependenciesObservableList1.size(); i++) {
-			assert dependenciesObservableList1.get(i).genericEquals(dependenciesObservableList2.get(i));
-		}
+		compareGraph(engine1, engine2);
 	}
 
+	public void test002_ShiftTs() throws ConcurrencyControlException {
+		HeavyClientEngine engine = new HeavyClientEngine();
+		Generic elephant = engine.addInstance("elephant");
+		engine.getCurrentCache().shiftTs();
+		assert !engine.getCurrentCache().getDependenciesObservableList(engine).contains(elephant);
+	}
+
+	// naturally empty, engines aren't linked to one another
 	public void test003_ConcurrentShiftTsOnInstances() throws InterruptedException, ConcurrencyControlException {
 		HeavyClientEngine engine1 = new HeavyClientEngine();
 		HeavyClientEngine engine2 = new HeavyClientEngine();
@@ -71,7 +77,7 @@ public class ObservableListTest extends AbstractTest {
 
 	}
 
-	public void test003_Iterate() throws InterruptedException {
+	public void test003_Contains() throws InterruptedException {
 		HeavyClientEngine engine = new HeavyClientEngine();
 		Generic car = engine.addInstance("car");
 		List<Generic> genericCars = new ArrayList<>();
@@ -87,10 +93,8 @@ public class ObservableListTest extends AbstractTest {
 		genericCars.add(myCar5);
 		ObservableList<Generic> dependenciesObservableList1 = engine.getCurrentCache().getDependenciesObservableList(car);
 		engine.getCurrentCache().flush();
-
 		assert dependenciesObservableList1.size() == 5;
 		assert genericCars.containsAll(dependenciesObservableList1);
 		assert dependenciesObservableList1.containsAll(genericCars);
-
 	}
 }

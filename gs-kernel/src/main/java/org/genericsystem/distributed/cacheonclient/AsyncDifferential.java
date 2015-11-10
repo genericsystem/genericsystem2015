@@ -79,7 +79,36 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	protected void unplug(Generic generic) {
 		super.unplug(generic);
 		if (!addsObservableList.remove(generic))
-			removesObservableList.remove(generic);
+			removesObservableList.add(generic);
 	}
 
+	@Override
+	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
+		// TODO should adds and removes be fed somehow ? getDependenciesObservableList(generic);
+
+		return new Wrappable<Generic>() {
+			private ObservableList<Generic> filteredRemoves = removesObservableList.filtered(x -> generic.isDirectAncestorOf(x));
+			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(x -> generic.isDirectAncestorOf(x));
+
+			@Override
+			public int size() {
+				return addsObservableList.contains(generic) ? 0 : getSubCache().getWrappableDependencies(generic).size() - filteredRemoves.size() + filteredAdds.size();
+			}
+
+			@Override
+			public Generic get(int index) {
+				Wrappable<Generic> subbed = getSubCache().getWrappableDependencies(generic);
+				if (index < subbed.size() - filteredRemoves.size()) {
+					for (int i = 0; i < subbed.size(); i++) {
+						if (filteredRemoves.contains(subbed.get(i)))
+							index++;
+						if (i == index)
+							return subbed.get(index);
+					}
+				}
+				index -= subbed.size();
+				return filteredAdds.get(index);
+			}
+		};
+	}
 }
