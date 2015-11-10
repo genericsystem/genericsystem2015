@@ -14,7 +14,7 @@ import javafx.util.StringConverter;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
+import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.javafx.AbstractColumn;
 import org.genericsystem.javafx.LinksTableView.TriConsumer;
 
@@ -79,15 +79,15 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 			};
 
 			cancelConsumer = generic -> {
-				((HeavyClientEngine) generic).getCurrentCache().clear();
+				((CocClientEngine) generic).getCurrentCache().clear();
 			};
 
 			mountConsumer = generic -> {
-				((HeavyClientEngine) generic).getCurrentCache().mount();
+				((CocClientEngine) generic).getCurrentCache().mount();
 			};
 
 			unmountConsumer = generic -> {
-				((HeavyClientEngine) generic).getCurrentCache().unmount();
+				((CocClientEngine) generic).getCurrentCache().unmount();
 			};
 
 		}

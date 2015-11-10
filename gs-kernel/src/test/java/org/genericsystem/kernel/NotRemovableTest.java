@@ -6,14 +6,14 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("myBmw");
@@ -24,7 +24,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		car.addAttribute("Color");
 		car.addInstance("myBmw");
@@ -33,7 +33,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("myBmw");
@@ -43,7 +43,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine(Power.class);
+		Root root = new Root(Power.class);
 		Generic power = root.find(Power.class);
 		assert power.isPropertyConstraintEnabled();
 		catchAndCheckCause(() -> power.disablePropertyConstraint(), IllegalAccessException.class);

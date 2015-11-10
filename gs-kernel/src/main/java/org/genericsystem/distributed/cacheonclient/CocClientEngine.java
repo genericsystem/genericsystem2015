@@ -1,54 +1,56 @@
-package org.genericsystem.distributed.cacheonserver;
+package org.genericsystem.distributed.cacheonclient;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.AbstractEngine;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
-public class LightClientEngine extends AbstractEngine implements Generic {
+public class CocClientEngine extends AbstractRoot implements Generic {
 
-	protected final ServerCacheProtocole server;
+	protected final AbstractCocClient server;
 
-	public LightClientEngine(Class<?>... userClasses) {
+	public CocClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public LightClientEngine(String engineValue, Class<?>... userClasses) {
+	public CocClientEngine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public LightClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
+	public CocClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
 		this(engineValue, host, port, null, userClasses);
 	}
 
-	public LightClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+	public CocClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new WebSocketGSLightClient(host, port, "/" + engineValue);
+		server = new WebSocketCocClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
 
 	@Override
-	public LightClientEngine getRoot() {
+	public CocClientEngine getRoot() {
 		return this;
 	}
 
 	@Override
-	public LightClientCache newCache() {
-		return new LightClientCache(this);
+	public CocCache newCache() {
+		return new CocCache(this);
+	}
+
+	public CocCache newCache(ContextEventListener<Generic> listener) {
+		return new CocCache(this, listener);
 	}
 
 	@Override
-	public LightClientCache getCurrentCache() {
-		// Cache context = contextWrapper.get();
-		if (context == null)
-			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
-		return ((LightClientCache) super.getCurrentCache());
+	public CocCache getCurrentCache() {
+		return (CocCache) super.getCurrentCache();
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {
@@ -87,7 +89,7 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 		return Generic.class;
 	}
 
-	public ServerCacheProtocole getServer() {
+	public AbstractCocClient getServer() {
 		return server;
 	}
 
@@ -110,8 +112,8 @@ public class LightClientEngine extends AbstractEngine implements Generic {
 		}
 
 		@Override
-		protected LightClientEngine getRoot() {
-			return LightClientEngine.this;
+		protected CocClientEngine getRoot() {
+			return CocClientEngine.this;
 		}
 
 		@Override

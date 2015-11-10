@@ -12,28 +12,28 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.cacheonclient.ClientCacheProtocole;
+import org.genericsystem.distributed.cacheonclient.CocProtocole;
 
-public class LightServerEngine extends AbstractServer implements Generic, ClientCacheProtocole {
+public class Root extends AbstractServer implements Generic, CocProtocole {
 
 	@Override
-	public LightServerEngine getRoot() {
+	public Root getRoot() {
 		return this;
 	}
 
-	public LightServerEngine() {
+	public Root() {
 		this(new Class[] {});
 	}
 
-	public LightServerEngine(Class<?>... userClasses) {
+	public Root(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public LightServerEngine(String value, Class<?>... userClasses) {
+	public Root(String value, Class<?>... userClasses) {
 		this(value, null, userClasses);
 	}
 
-	public LightServerEngine(String value, String persistentDirectoryPath, Class<?>... userClasses) {
+	public Root(String value, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), value, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
@@ -46,7 +46,7 @@ public class LightServerEngine extends AbstractServer implements Generic, Client
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((LightServerEngine) getRoot());
+				return new Transaction((Root) getRoot());
 			}
 
 			@Override

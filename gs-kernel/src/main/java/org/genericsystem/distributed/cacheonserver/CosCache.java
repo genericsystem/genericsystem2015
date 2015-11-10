@@ -11,18 +11,18 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine.ClientEngineHandler;
+import org.genericsystem.distributed.cacheonserver.CosClientEngine.ClientEngineHandler;
 import org.genericsystem.kernel.Statics;
 
-public class LightClientCache extends AbstractCache implements DefaultCache<Generic> {
+public class CosCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private final long cacheId;
-	private LightClientTransaction transaction;
+	private CosTransaction transaction;
 
 	public void shiftTs() throws RollbackException {
 
 		long birthTs = getRoot().getServer().shiftTs(cacheId);
-		this.transaction = new LightClientTransaction(getRoot(), cacheId);
+		this.transaction = new CosTransaction(getRoot(), cacheId);
 
 		Iterator<Map.Entry<Long, Generic>> iterator = getRoot().genericsByIdIterator();
 		Map.Entry<Long, Generic> entryGeneric;
@@ -36,20 +36,20 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 		}
 	}
 
-	public LightClientTransaction getTransaction() {
+	public CosTransaction getTransaction() {
 		return transaction;
 	}
 
-	protected LightClientCache(LightClientEngine root) {
+	protected CosCache(CosClientEngine root) {
 		super(root);
 		cacheId = getRoot().getServer().newCacheId();
 		System.out.println("Create LightCache : " + cacheId);
-		this.transaction = new LightClientTransaction(root, cacheId);
+		this.transaction = new CosTransaction(root, cacheId);
 	}
 
 	@Override
-	public LightClientEngine getRoot() {
-		return (LightClientEngine) super.getRoot();
+	public CosClientEngine getRoot() {
+		return (CosClientEngine) super.getRoot();
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	public void clear() {
 		getRoot().getServer().clear(cacheId);
-		transaction = new LightClientTransaction(getRoot(), cacheId);
+		transaction = new CosTransaction(getRoot(), cacheId);
 	}
 
 	public void mount() {
@@ -98,7 +98,7 @@ public class LightClientCache extends AbstractCache implements DefaultCache<Gene
 
 	public void unmount() {
 		getRoot().getServer().unmount(cacheId);
-		transaction = new LightClientTransaction(getRoot(), cacheId);
+		transaction = new CosTransaction(getRoot(), cacheId);
 	}
 
 	@Override

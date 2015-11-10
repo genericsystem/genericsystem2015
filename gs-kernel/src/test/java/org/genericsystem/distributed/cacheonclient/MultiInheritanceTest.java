@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class MultiInheritanceTest extends AbstractTest {
 
 	public void test_multiInheritance() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehicleSizable = engine.addInstance("Sizable", vehicle);
 		Generic robot = engine.addInstance("Robot");
@@ -27,7 +27,7 @@ public class MultiInheritanceTest extends AbstractTest {
 	}
 
 	public void test_multiInheritanceWithDiamond() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic object = engine.addInstance("Object");
 		Generic objectSizable = engine.addInstance("Sizable", object);
 		Generic vehicle = engine.addInstance(Arrays.asList(object), "Vehicle");

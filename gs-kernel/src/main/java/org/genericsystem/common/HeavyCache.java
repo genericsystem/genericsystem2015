@@ -32,7 +32,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	protected abstract IDifferential<Generic> buildTransaction();
 
-	protected HeavyCache(AbstractEngine root) {
+	protected HeavyCache(AbstractRoot root) {
 		this(root, new ContextEventListener<Generic>() {
 		});
 	}
@@ -45,11 +45,11 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	// this(root, new ContextEventListener<Generic>() {});
 	// }
 
-	protected HeavyCache(AbstractEngine root, ContextEventListener<Generic> listener) {
+	protected HeavyCache(AbstractRoot root, ContextEventListener<Generic> listener) {
 		this(root, root.pickNewTs(), listener);
 	}
 
-	protected HeavyCache(AbstractEngine root, long cacheId, ContextEventListener<Generic> listener) {
+	protected HeavyCache(AbstractRoot root, long cacheId, ContextEventListener<Generic> listener) {
 		super(root);
 		this.cacheId = cacheId;
 		this.restructurator = buildRestructurator();

@@ -4,14 +4,14 @@ import java.util.Iterator;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class IteratorAndRemoveTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		car.addInstance("myFirstCar");
 		car.addInstance("mySecondCar");
@@ -31,7 +31,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic myFirstCar = car.addInstance("myFirstCar");
 		car.addInstance("mySecondCar");
@@ -45,7 +45,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		car.addInstance("myFirstCar");
 		car.addInstance("mySecondCar");
@@ -68,7 +68,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		car.addAttribute("Options");
 		car.addAttribute("Power");
@@ -80,7 +80,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Generic root = new LightServerEngine();
+		Generic root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic options = car.addAttribute("Options");
 		Generic power = car.addAttribute("Power");

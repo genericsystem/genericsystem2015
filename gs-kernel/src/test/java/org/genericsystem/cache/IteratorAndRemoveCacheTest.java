@@ -6,14 +6,14 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test
 public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		HeavyCache cache1 = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -42,7 +42,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		HeavyCache cache1 = engine.getCurrentCache();
@@ -55,7 +55,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test002_() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		HeavyCache cache = engine.getCurrentCache();
@@ -77,7 +77,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test003_IterateAndRemove() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		HeavyCache cache1 = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -143,7 +143,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	// }
 
 	public void test009_IterateAndAdd() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		HeavyCache cache1 = engine.getCurrentCache();
 
 		Generic car = engine.addInstance("Car");

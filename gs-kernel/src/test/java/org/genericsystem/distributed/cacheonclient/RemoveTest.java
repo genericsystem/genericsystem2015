@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class RemoveTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -22,7 +22,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -41,7 +41,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -57,7 +57,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -81,7 +81,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -96,7 +96,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -109,7 +109,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test007_removeConcretAndAttribut() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -124,7 +124,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test008_removeInstanceAndAttribute() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -139,7 +139,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test009_removeConcret() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

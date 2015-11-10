@@ -1,6 +1,6 @@
 package org.genericsystem.gui.context;
 
-import org.genericsystem.distributed.cacheonclient.CacheOnClient;
+import org.genericsystem.distributed.cacheonclient.CocCache;
 
 public abstract class AbstractContext implements IContext {
 
@@ -16,7 +16,7 @@ public abstract class AbstractContext implements IContext {
 	}
 
 	@Override
-	public CacheOnClient getCurrentCache() {
+	public CocCache getCurrentCache() {
 		return getParent().getCurrentCache();
 	};
 }

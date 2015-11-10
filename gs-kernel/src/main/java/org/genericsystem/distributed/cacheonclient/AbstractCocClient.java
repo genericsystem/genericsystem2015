@@ -9,7 +9,7 @@ import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
 
-public abstract class AbstractGSHeavyClient extends AbstractGSClient implements ClientCacheProtocole {
+public abstract class AbstractCocClient extends AbstractGSClient implements CocProtocole {
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {

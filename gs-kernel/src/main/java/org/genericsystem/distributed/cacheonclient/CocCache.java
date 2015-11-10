@@ -3,18 +3,16 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.common.AbstractEngine;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 
-public class CacheOnClient extends HeavyCache {
+public class CocCache extends HeavyCache {
 
 	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<Generic, ObservableList<Generic>>() {
 
@@ -48,11 +46,11 @@ public class CacheOnClient extends HeavyCache {
 		}
 	};
 
-	protected CacheOnClient(AbstractEngine root) {
+	protected CocCache(AbstractRoot root) {
 		super(root);
 	}
 
-	protected CacheOnClient(AbstractEngine root, ContextEventListener<Generic> listener) {
+	protected CocCache(AbstractRoot root, ContextEventListener<Generic> listener) {
 		super(root, listener);
 	}
 
@@ -71,16 +69,22 @@ public class CacheOnClient extends HeavyCache {
 		public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
 			return getTransaction().getDependenciesObservableList(generic);
 		}
+
+		@Override
+		public Wrappable<Generic> getWrappableDependencies(Generic generic) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 
 	@Override
-	protected HeavyClientTransaction buildTransaction() {
-		return new HeavyClientTransaction((HeavyClientEngine) (getRoot()), getRoot().pickNewTs());
+	protected CocTransaction buildTransaction() {
+		return new CocTransaction((CocClientEngine) (getRoot()), getRoot().pickNewTs());
 	}
 
 	@Override
-	public HeavyClientTransaction getTransaction() {
-		return (HeavyClientTransaction) super.getTransaction();
+	public CocTransaction getTransaction() {
+		return (CocTransaction) super.getTransaction();
 	}
 
 	@Override

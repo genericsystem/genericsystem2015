@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class WeakEquivTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -24,7 +24,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -38,7 +38,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -52,7 +52,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addAttribute("CarColor", color);
@@ -67,7 +67,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -81,7 +81,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test006() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic defaultColor = color.addInstance("Red", car);

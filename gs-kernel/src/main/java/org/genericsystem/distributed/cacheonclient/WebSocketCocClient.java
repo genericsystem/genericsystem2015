@@ -1,23 +1,26 @@
-package org.genericsystem.distributed.cacheonserver;
+package org.genericsystem.distributed.cacheonclient;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
+
 import org.genericsystem.distributed.GSVertx;
 
-public class WebSocketGSLightClient extends AbstractGSLightClient {
+public class WebSocketCocClient extends AbstractCocClient {
+
 	private final HttpClient httpClient;
 	private final WebSocket webSocket;
 
-	WebSocketGSLightClient(String host, int port, String path) {
+	WebSocketCocClient(String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
+		// /!\
 		webSocket = synchronizeTask(task -> httpClient.websocket(path, webSock -> task.handle(webSock)));
-		webSocket.handler(getHandler());
 		webSocket.exceptionHandler(e -> {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();
 		});
+		webSocket.handler(getHandler());
 	}
 
 	// TODO synchronize this method ?
@@ -31,10 +34,12 @@ public class WebSocketGSLightClient extends AbstractGSLightClient {
 		try {
 			webSocket.close();
 			System.out.println("Close socket");
-		} catch (Exception ignore) {}
+		} catch (Exception ignore) {
+		}
 		try {
 			httpClient.close();
 			System.out.println("Close httpClient");
-		} catch (Exception ignore) {}
+		} catch (Exception ignore) {
+		}
 	}
 }

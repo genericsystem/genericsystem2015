@@ -12,9 +12,9 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 
-public class LightClientTransaction {
+public class CosTransaction {
 
-	private LightClientEngine engine;
+	private CosClientEngine engine;
 	private final long cacheId;
 
 	// private final long ts;
@@ -25,7 +25,7 @@ public class LightClientTransaction {
 	// // this.ts = ts;
 	// }
 
-	protected LightClientTransaction(LightClientEngine engine, long cacheId) {
+	protected CosTransaction(CosClientEngine engine, long cacheId) {
 		this.engine = engine;
 		this.cacheId = cacheId;
 	}
@@ -34,7 +34,7 @@ public class LightClientTransaction {
 	// return ts;
 	// }
 
-	public LightClientEngine getRoot() {
+	public CosClientEngine getRoot() {
 		return engine;
 	}
 

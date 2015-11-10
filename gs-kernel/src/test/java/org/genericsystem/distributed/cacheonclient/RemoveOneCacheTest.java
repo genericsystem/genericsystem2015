@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 public class RemoveOneCacheTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -28,7 +28,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -48,7 +48,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -69,7 +69,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_multipleHolders() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -90,7 +90,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -110,7 +110,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -130,7 +130,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeAndAddAndRemove() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -150,7 +150,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -167,7 +167,7 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");

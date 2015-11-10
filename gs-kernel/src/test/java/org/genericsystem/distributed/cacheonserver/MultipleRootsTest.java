@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.distributed.cacheonserver.CosClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -18,9 +18,9 @@ public class MultipleRootsTest extends AbstractTest {
 	}
 
 	public void test001_Engine_name() {
-		LightClientEngine engine1 = new LightClientEngine();
+		CosClientEngine engine1 = new CosClientEngine();
 		String nameOfsecondEngine = "SecondEngine";
-		LightClientEngine engine2 = new LightClientEngine(nameOfsecondEngine);
+		CosClientEngine engine2 = new CosClientEngine(nameOfsecondEngine);
 		assert engine1.getMeta().equals(engine1);
 		assert engine1.getSupers().isEmpty();
 		assert engine1.getComponents().size() == 0;

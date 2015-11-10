@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 public class ClassFinderTest extends AbstractTest {
 
 	public void test1() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -20,7 +20,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test2() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("Power", vehicle);
@@ -30,7 +30,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test5() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -40,7 +40,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test6() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -52,7 +52,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test7() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -63,7 +63,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test8() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -75,7 +75,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test9() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -88,7 +88,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test10() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 
@@ -96,7 +96,7 @@ public class ClassFinderTest extends AbstractTest {
 	}
 
 	public void test11() {
-		Generic engine = new HeavyClientEngine();
+		Generic engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 

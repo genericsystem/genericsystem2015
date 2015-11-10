@@ -4,14 +4,14 @@ import java.util.Iterator;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.distributed.cacheonserver.CosClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class IteratorAndRemoveTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic car = engine.addInstance("Car");
 		car.addInstance("myCar1");
 		car.addInstance("myCar2");
@@ -31,7 +31,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test004_IterateAndRemoveInLoop_beforeFindIt() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		car.addInstance("myCar2");
@@ -69,7 +69,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	// }
 
 	public void test006_IterateAndRemoveInLoop_attributes() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic power = car.addAttribute("Power");
@@ -81,7 +81,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test007_IterateAndRemoveInLoop_attributes() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic power = car.addAttribute("Power");

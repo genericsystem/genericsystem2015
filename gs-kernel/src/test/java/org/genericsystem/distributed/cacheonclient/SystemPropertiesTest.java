@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class SystemPropertiesTest extends AbstractTest {
 
 	public void test001_enableConstraint() {
-		HeavyClientEngine Engine = new HeavyClientEngine();
+		CocClientEngine Engine = new CocClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic power = Engine.addInstance("Power", vehicle);
 		power.enablePropertyConstraint();
@@ -28,7 +28,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test002_inheritedConstraint() {
-		HeavyClientEngine Engine = new HeavyClientEngine();
+		CocClientEngine Engine = new CocClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = Engine.addInstance(vehicle, "Car");
 		Generic power = Engine.addInstance("Power", vehicle);
@@ -52,7 +52,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test003_inheritedModifiedConstraint() {
-		HeavyClientEngine Engine = new HeavyClientEngine();
+		CocClientEngine Engine = new CocClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = Engine.addInstance(vehicle, "Car");
 		Generic power = Engine.addInstance("Power", vehicle);

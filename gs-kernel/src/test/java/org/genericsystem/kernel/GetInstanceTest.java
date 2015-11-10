@@ -5,14 +5,14 @@ import java.util.Collections;
 
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 import org.testng.annotations.Test;
 
 @Test
 public class GetInstanceTest extends AbstractTest {
 
 	public void test001() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("myBmw");
@@ -22,7 +22,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test002() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -33,7 +33,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test003() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -48,7 +48,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -66,7 +66,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test005() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -79,7 +79,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test006() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -99,7 +99,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test007() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -119,7 +119,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test008() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic car = root.addInstance("Car");
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic carVehicle = root.addInstance(vehicle, "Car");
@@ -130,7 +130,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test009() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance("Car");
@@ -152,7 +152,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test010() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -165,7 +165,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test011() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -184,7 +184,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test012() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance("Car");
@@ -204,7 +204,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test013() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -219,7 +219,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test014() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -237,7 +237,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test015() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -250,7 +250,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test016() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -269,7 +269,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test017() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -288,7 +288,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test018() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -306,7 +306,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test019() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance("Car");
@@ -323,7 +323,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test020() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
 		vehicle.addInstance("myAudi");
@@ -336,7 +336,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test021() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -349,7 +349,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test022() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -368,7 +368,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test023() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -387,7 +387,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test024() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -407,7 +407,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test025() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -420,7 +420,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test026() {
-		LightServerEngine root = new LightServerEngine();
+		Root root = new Root();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");

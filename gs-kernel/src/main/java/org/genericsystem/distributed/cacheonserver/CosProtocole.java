@@ -7,7 +7,7 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 
-public interface ServerCacheProtocole extends Protocole {
+public interface CosProtocole extends Protocole {
 
 	Vertex[] getDependencies(long cacheId, long id);
 

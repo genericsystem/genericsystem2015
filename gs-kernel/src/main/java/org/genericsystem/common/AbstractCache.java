@@ -7,7 +7,7 @@ import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
 
-	protected AbstractCache(AbstractEngine root) {
+	protected AbstractCache(AbstractRoot root) {
 		super(root);
 	}
 

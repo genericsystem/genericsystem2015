@@ -30,7 +30,7 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Root;
 
 public class SystemCache {
 
@@ -38,13 +38,13 @@ public class SystemCache {
 
 	private final Map<Generic, Class<?>> reverseSystemCache = new IdentityHashMap<>();
 
-	protected final AbstractEngine root;
+	protected final AbstractRoot root;
 
 	@SuppressWarnings("unchecked")
-	public SystemCache(AbstractEngine root) {
+	public SystemCache(AbstractRoot root) {
 		this.root = root;
 		put(DefaultRoot.class, (Generic) root);
-		put(LightServerEngine.class, (Generic) root);
+		put(Root.class, (Generic) root);
 		put(root.getClass(), (Generic) root);
 	}
 

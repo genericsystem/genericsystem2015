@@ -14,7 +14,7 @@ public class ObservableListTest extends AbstractTest {
 
 	@Test(invocationCount = 5)
 	public void test001_ObservableList() throws InterruptedException {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		assert engine == engine.adjustMeta();
 		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 		if (dependenciesObservableList.isEmpty())
@@ -23,16 +23,16 @@ public class ObservableListTest extends AbstractTest {
 	}
 
 	public void test002_ConcurrentTryFlush() throws InterruptedException, ConcurrencyControlException {
-		HeavyClientEngine engine1 = new HeavyClientEngine();
-		HeavyClientEngine engine2 = new HeavyClientEngine();
+		CocClientEngine engine1 = new CocClientEngine();
+		CocClientEngine engine2 = new CocClientEngine();
 		engine2.addInstance("elephant");
 		engine2.getCurrentCache().getDependenciesObservableList(engine1);
 		engine2.getCurrentCache().tryFlush();
 	}
 
 	public void test003_ConcurrentShiftTs() throws InterruptedException, ConcurrencyControlException {
-		HeavyClientEngine engine1 = new HeavyClientEngine();
-		HeavyClientEngine engine2 = new HeavyClientEngine();
+		CocClientEngine engine1 = new CocClientEngine();
+		CocClientEngine engine2 = new CocClientEngine();
 		engine2.setInstance("car");
 		ObservableList<Generic> dependenciesObservableList2 = engine2.getCurrentCache().getDependenciesObservableList(engine2);
 		engine2.getCurrentCache().tryFlush();
@@ -45,7 +45,7 @@ public class ObservableListTest extends AbstractTest {
 	}
 
 	public void test002_ShiftTs() throws ConcurrencyControlException {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic elephant = engine.addInstance("elephant");
 		engine.getCurrentCache().shiftTs();
 		assert !engine.getCurrentCache().getDependenciesObservableList(engine).contains(elephant);
@@ -53,8 +53,8 @@ public class ObservableListTest extends AbstractTest {
 
 	// naturally empty, engines aren't linked to one another
 	public void test003_ConcurrentShiftTsOnInstances() throws InterruptedException, ConcurrencyControlException {
-		HeavyClientEngine engine1 = new HeavyClientEngine();
-		HeavyClientEngine engine2 = new HeavyClientEngine();
+		CocClientEngine engine1 = new CocClientEngine();
+		CocClientEngine engine2 = new CocClientEngine();
 		Generic car = engine1.addInstance("car");
 		List<Generic> genericCars = new ArrayList<>();
 		Generic myCar1 = car.addInstance("myCar1");
@@ -78,7 +78,7 @@ public class ObservableListTest extends AbstractTest {
 	}
 
 	public void test003_Contains() throws InterruptedException {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("car");
 		List<Generic> genericCars = new ArrayList<>();
 		Generic myCar1 = car.addInstance("myCar1");

@@ -4,14 +4,14 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.distributed.cacheonserver.CosClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class VertexTest extends AbstractTest {
 
 	public void test001_getInheritings() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -19,13 +19,13 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test001_getInstances() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test001_getMetaComponents() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -35,7 +35,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test001_getSuperComponents() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -46,7 +46,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test002_getSuperComponents() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		powerVehicle.enablePropertyConstraint();
@@ -135,7 +135,7 @@ public class VertexTest extends AbstractTest {
 
 	@Test(enabled = false)
 	public void test2() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehicle2 = engine.addInstance("Vehicle2");
 		assert vehicle == engine.setInstance("Vehicle");
@@ -143,7 +143,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test3() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -153,7 +153,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test4() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("Power", vehicle);
@@ -163,7 +163,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test5() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -173,7 +173,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test6() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -185,7 +185,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test7() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -196,7 +196,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test8() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -208,7 +208,7 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test9() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("robot");
 		Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
@@ -221,14 +221,14 @@ public class VertexTest extends AbstractTest {
 	}
 
 	public void test10() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> engine.addInstance(vehicle, "Car"), AliveConstraintViolationException.class);
 	}
 
 	public void test11() {
-		Generic engine = new LightClientEngine();
+		Generic engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> vehicle.addInstance("myVehicle"), AliveConstraintViolationException.class);

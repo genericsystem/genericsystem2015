@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -24,7 +24,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test003_aliveEx() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -38,7 +38,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test001_referenceEx() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -49,7 +49,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		HeavyCache cache3 = engine.newCache().start();
@@ -67,7 +67,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		HeavyCache cache1 = engine.getCurrentCache();
@@ -80,7 +80,7 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		HeavyCache cache = engine.getCurrentCache();

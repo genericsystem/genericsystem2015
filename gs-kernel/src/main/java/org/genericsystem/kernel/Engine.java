@@ -17,22 +17,22 @@ import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.distributed.cacheonserver.ServerCacheProtocole;
+import org.genericsystem.distributed.cacheonserver.CosProtocole;
 
-public class HeavyServerEngine extends AbstractServer implements ServerCacheProtocole {
+public class Engine extends AbstractServer implements CosProtocole {
 
 	private ThreadLocal<Long> contextIds = new ThreadLocal<>();
 	private ConcurrentHashMap<Long, AbstractCache> map;
 
-	public HeavyServerEngine(Class<?>... userClasses) {
+	public Engine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, userClasses);
 	}
 
-	public HeavyServerEngine(String engineValue, Class<?>... userClasses) {
+	public Engine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, userClasses);
 	}
 
-	public HeavyServerEngine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
+	public Engine(String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		map = new ConcurrentHashMap<>();
 		startSystemCache(userClasses);
@@ -47,7 +47,7 @@ public class HeavyServerEngine extends AbstractServer implements ServerCacheProt
 	}
 
 	@Override
-	public HeavyServerEngine getRoot() {
+	public Engine getRoot() {
 		return this;
 	}
 

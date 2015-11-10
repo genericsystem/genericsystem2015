@@ -5,7 +5,7 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 
-public interface ClientCacheProtocole extends Protocole {
+public interface CocProtocole extends Protocole {
 
 	Vertex[] getDependencies(long ts, long id);
 

@@ -18,19 +18,19 @@ import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.cacheonclient.HeavyClientEngine.ClientEngineHandler;
+import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineHandler;
 
 @SuppressWarnings("restriction")
-public class HeavyClientTransaction extends CheckedContext implements AsyncIDifferential {
+public class CocTransaction extends CheckedContext implements AsyncIDifferential {
 
 	private final long ts;
 
-	protected HeavyClientTransaction(HeavyClientEngine engine, long ts) {
+	protected CocTransaction(CocClientEngine engine, long ts) {
 		super(engine);
 		this.ts = ts;
 	}
 
-	protected HeavyClientTransaction(HeavyClientEngine engine) {
+	protected CocTransaction(CocClientEngine engine) {
 		this(engine, engine.pickNewTs());
 	}
 
@@ -73,8 +73,8 @@ public class HeavyClientTransaction extends CheckedContext implements AsyncIDiff
 	}
 
 	@Override
-	public HeavyClientEngine getRoot() {
-		return (HeavyClientEngine) super.getRoot();
+	public CocClientEngine getRoot() {
+		return (CocClientEngine) super.getRoot();
 	}
 
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();

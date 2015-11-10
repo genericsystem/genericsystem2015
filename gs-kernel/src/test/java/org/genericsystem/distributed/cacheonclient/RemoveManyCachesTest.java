@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -26,7 +26,7 @@ public class RemoveManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");

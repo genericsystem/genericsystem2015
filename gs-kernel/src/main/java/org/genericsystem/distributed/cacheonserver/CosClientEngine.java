@@ -1,56 +1,54 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.distributed.cacheonserver;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.AbstractEngine;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
-public class HeavyClientEngine extends AbstractEngine implements Generic {
+public class CosClientEngine extends AbstractRoot implements Generic {
 
-	protected final AbstractGSHeavyClient server;
+	protected final CosProtocole server;
 
-	public HeavyClientEngine(Class<?>... userClasses) {
+	public CosClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public HeavyClientEngine(String engineValue, Class<?>... userClasses) {
+	public CosClientEngine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public HeavyClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
+	public CosClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
 		this(engineValue, host, port, null, userClasses);
 	}
 
-	public HeavyClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+	public CosClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new WebSocketGSHeavyClient(host, port, "/" + engineValue);
+		server = new WebSocketCosClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
 
 	@Override
-	public HeavyClientEngine getRoot() {
+	public CosClientEngine getRoot() {
 		return this;
 	}
 
 	@Override
-	public CacheOnClient newCache() {
-		return new CacheOnClient(this);
-	}
-
-	public CacheOnClient newCache(ContextEventListener<Generic> listener) {
-		return new CacheOnClient(this, listener);
+	public CosCache newCache() {
+		return new CosCache(this);
 	}
 
 	@Override
-	public CacheOnClient getCurrentCache() {
-		return (CacheOnClient) super.getCurrentCache();
+	public CosCache getCurrentCache() {
+		// Cache context = contextWrapper.get();
+		if (context == null)
+			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
+		return ((CosCache) super.getCurrentCache());
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {
@@ -89,7 +87,7 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 		return Generic.class;
 	}
 
-	public AbstractGSHeavyClient getServer() {
+	public CosProtocole getServer() {
 		return server;
 	}
 
@@ -112,8 +110,8 @@ public class HeavyClientEngine extends AbstractEngine implements Generic {
 		}
 
 		@Override
-		protected HeavyClientEngine getRoot() {
-			return HeavyClientEngine.this;
+		protected CosClientEngine getRoot() {
+			return CosClientEngine.this;
 		}
 
 		@Override

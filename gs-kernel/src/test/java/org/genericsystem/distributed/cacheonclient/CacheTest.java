@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 @Test
 public class CacheTest extends AbstractTest {
 	public void test000() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle2");
 		assert vehicle.isAlive();
@@ -26,7 +26,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
@@ -39,7 +39,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().mount();
@@ -49,7 +49,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test003() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().mount();
@@ -60,7 +60,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001_getInheritings() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -68,14 +68,14 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001_getInstances() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		assert engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test001_getMetaComponents() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		assert vehicle.getComposites().contains(powerVehicle);
@@ -85,7 +85,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001_getSuperComponents() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -96,7 +96,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_getSuperComponents() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		powerVehicle.enablePropertyConstraint();
@@ -110,7 +110,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_flush() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.addInstance(vehicle, "Car");
 		assert vehicle.isAlive();
@@ -120,14 +120,14 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_clear() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.getCurrentCache().clear();
 		assert !engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test001_mountNewCache_nostarted() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache currentCache = engine.getCurrentCache();
 		currentCache.mount();
 		engine.newCache().start();
@@ -135,7 +135,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_mountNewCache() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache cache = engine.newCache().start();
 		HeavyCache currentCache = engine.getCurrentCache();
 		assert cache == currentCache;
@@ -145,7 +145,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test005_TwoComponentsWithSameMetaInDifferentCaches_remove() {
-		HeavyClientEngine engine = new HeavyClientEngine();
+		CocClientEngine engine = new CocClientEngine();
 		HeavyCache currentCache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = engine.addInstance("vehiclePower", vehicle);

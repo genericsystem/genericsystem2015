@@ -1,9 +1,9 @@
 package org.genericsystem.gui.context;
 
-import org.genericsystem.distributed.cacheonclient.CacheOnClient;
+import org.genericsystem.distributed.cacheonclient.CocCache;
 
 public interface IContext {
 	public IContext getParent();
 
-	public CacheOnClient getCurrentCache();
+	public CocCache getCurrentCache();
 }

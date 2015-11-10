@@ -1,33 +1,32 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.distributed.cacheonserver;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.LightServerEngine;
+import org.genericsystem.kernel.Engine;
 
-public class HttpGSLightServer extends AbstractGSLightServer {
+public class WebSocketCosServer extends AbstractCosServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
 
-	public HttpGSLightServer(GSDeploymentOptions options) {
+	public WebSocketCosServer(GSDeploymentOptions options) {
 		super(options);
 		this.port = options.getPort();
 		this.host = options.getHost();
 	}
 
 	public static void main(String[] args) {
-		new HttpGSLightServer(new GSDeploymentOptions()).start();
+		new WebSocketCosServer(new GSDeploymentOptions()).start();
 	}
 
 	@Override
@@ -35,22 +34,24 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 		Vertx vertx = GSVertx.vertx().getVertx();
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
-			httpServer.requestHandler(request -> {
-				String path = request.path();
+			httpServer.websocketHandler(webSocket -> {
+				String path = webSocket.path();
 				AbstractServer root = roots.get(path);
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
-				request.exceptionHandler(e -> {
+				webSocket.exceptionHandler(e -> {
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
-				request.handler(buffer -> {
+				webSocket.handler(buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
 					int op = gsBuffer.getInt();
-					request.response().end(getReplyBuffer(methodId, op, (LightServerEngine) root, gsBuffer));
-					request.response().close();
+					Buffer result = getReplyBuffer(methodId, op, (Engine) root, gsBuffer);
+					// System.out.println("Write result");
+					webSocket.writeBinaryMessage(result);
 				});
+
 			});
 			// /!\
 			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
@@ -69,6 +70,6 @@ public class HttpGSLightServer extends AbstractGSLightServer {
 
 	@Override
 	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new LightServerEngine(value, persistentDirectoryPath, userClasses);
+		return new Engine(value, persistentDirectoryPath, userClasses);
 	}
 }

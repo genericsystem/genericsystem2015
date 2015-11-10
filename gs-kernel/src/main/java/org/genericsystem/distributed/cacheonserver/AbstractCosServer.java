@@ -9,14 +9,14 @@ import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.Engine;
 
-public abstract class AbstractGSHeavyServer extends AbstractGSServer {
-	public AbstractGSHeavyServer(GSDeploymentOptions options) {
+public abstract class AbstractCosServer extends AbstractGSServer {
+	public AbstractCosServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, int op, HeavyServerEngine root, GSBuffer gsBuffer) {
+	Buffer getReplyBuffer(int methodId, int op, Engine root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer();
 		replyBuffer.appendInt(op);
 		switch (methodId) {

@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -25,7 +23,7 @@ import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 
-public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericProxy, ProxyObject {
+public abstract class AbstractRoot implements DefaultRoot<Generic>, GenericProxy, ProxyObject {
 
 	protected final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = new SystemCache(this);
@@ -37,7 +35,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 	}
 
 	@Override
-	public AbstractEngine getRoot() {
+	public AbstractRoot getRoot() {
 		return this;
 	}
 
@@ -165,7 +163,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 
 	protected Generic init(Generic generic, DefaultHandler handler) {
 		((ProxyObject) generic).setHandler(handler);
-		assert ((ProxyObject) generic).getHandler() instanceof AbstractEngine.DefaultHandler;
+		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.DefaultHandler;
 		Generic gresult = genericsById.putIfAbsent(handler.getTs(), generic);
 		assert gresult == null : gresult.info();
 		return generic;
@@ -224,7 +222,7 @@ public abstract class AbstractEngine implements DefaultRoot<Generic>, GenericPro
 			return ((DefaultVertex<?>) self).defaultToString();
 		}
 
-		abstract protected AbstractEngine getRoot();
+		abstract protected AbstractRoot getRoot();
 
 		public Vertex getVertex() {
 			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(Generic::getTs).collect(Collectors.toList()), getValue(), getComponents().stream().map(Generic::getTs)

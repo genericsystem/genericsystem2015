@@ -3,16 +3,16 @@ package org.genericsystem.distributed.cacheonserver;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientCache;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.distributed.cacheonserver.CosCache;
+import org.genericsystem.distributed.cacheonserver.CosClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveOneCacheTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -30,8 +30,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -50,8 +50,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -71,8 +71,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_multipleHolders() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -93,8 +93,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -114,8 +114,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -134,8 +134,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeAndAddAndRemove() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -154,8 +154,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -171,8 +171,8 @@ public class RemoveOneCacheTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		LightClientEngine engine = new LightClientEngine();
-		LightClientCache cache = engine.getCurrentCache();
+		CosClientEngine engine = new CosClientEngine();
+		CosCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

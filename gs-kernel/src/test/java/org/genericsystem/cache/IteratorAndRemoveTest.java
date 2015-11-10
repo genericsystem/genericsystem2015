@@ -3,14 +3,14 @@ package org.genericsystem.cache;
 import java.util.Iterator;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test
 public class IteratorAndRemoveTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		car.addInstance("myCar1");
 		car.addInstance("myCar2");
@@ -30,7 +30,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test004_IterateAndRemoveInLoop_beforeFindIt() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		car.addInstance("myCar2");
@@ -44,7 +44,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test005_IterateAndRemoveInLoop_beforeFindIt() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		car.addInstance("myCar1");
 		car.addInstance("myCar2");
@@ -67,7 +67,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test006_IterateAndRemoveInLoop_attributes() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic power = car.addAttribute("Power");
@@ -79,7 +79,7 @@ public class IteratorAndRemoveTest extends AbstractTest {
 	}
 
 	public void test007_IterateAndRemoveInLoop_attributes() {
-		HeavyServerEngine engine = new HeavyServerEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic power = car.addAttribute("Power");

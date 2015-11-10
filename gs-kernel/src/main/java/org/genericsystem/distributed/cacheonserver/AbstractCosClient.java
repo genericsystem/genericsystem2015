@@ -13,7 +13,7 @@ import org.genericsystem.kernel.Statics;
 
 import com.google.common.base.Supplier;
 
-public abstract class AbstractGSLightClient extends AbstractGSClient implements ServerCacheProtocole {
+public abstract class AbstractCosClient extends AbstractGSClient implements CosProtocole {
 
 	@SuppressWarnings("unchecked")
 	protected <R> R unsafeException(Supplier<Object> unsafe) {

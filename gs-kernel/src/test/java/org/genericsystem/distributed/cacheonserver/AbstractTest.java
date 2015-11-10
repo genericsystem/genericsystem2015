@@ -51,7 +51,7 @@ public abstract class AbstractTest {
 	@BeforeMethod
 	public void beforeClass() {
 		cleanDirectory(directoryPath);
-		httpGsServer = new WebSocketGSHeavyServer(getDeploymentOptions());
+		httpGsServer = new WebSocketCosServer(getDeploymentOptions());
 		httpGsServer.start();
 	}
 

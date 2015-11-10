@@ -9,11 +9,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
+import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 
 public class RootContext implements IContext {
 
-	private final HeavyClientEngine engine;
+	private final CocClientEngine engine;
 
 	public ObjectProperty<Generic> rootProperty;
 
@@ -21,7 +21,7 @@ public class RootContext implements IContext {
 
 	public Function<Generic, ObservableList<Generic>> genericSubInstances;
 
-	public RootContext(HeavyClientEngine cache) {
+	public RootContext(CocClientEngine cache) {
 		this.engine = cache;
 		rootProperty = new SimpleObjectProperty<Generic>(cache.getRoot());
 		genericSubInstances = type -> rootProperty.getValue() != null ? cache.getCurrentCache().getInstancesObservableList(rootProperty.getValue()) : FXCollections.emptyObservableList();
@@ -43,7 +43,7 @@ public class RootContext implements IContext {
 		};
 	}
 
-	public HeavyClientEngine getEngine() {
+	public CocClientEngine getEngine() {
 		return engine;
 	}
 

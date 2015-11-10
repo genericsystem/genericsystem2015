@@ -8,10 +8,10 @@ import org.genericsystem.defaults.DefaultContext;
 
 public abstract class CheckedContext implements DefaultContext<Generic> {
 
-	private final AbstractEngine root;
+	private final AbstractRoot root;
 	private final Checker checker;
 
-	protected CheckedContext(AbstractEngine root) {
+	protected CheckedContext(AbstractRoot root) {
 		assert root != null;
 		this.root = root;
 		this.checker = buildChecker();
@@ -28,7 +28,7 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 	}
 
 	@Override
-	public AbstractEngine getRoot() {
+	public AbstractRoot getRoot() {
 		return root;
 	}
 

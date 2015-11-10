@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.LightClientEngine;
+import org.genericsystem.distributed.cacheonserver.CosClientEngine;
 import org.testng.annotations.Test;
 
 @Test
@@ -19,7 +19,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test001_addInstance_NotAliveException() throws InterruptedException {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		// engine.close();
 		System.out.println("-------------------------------");
 		engine.close();
@@ -32,7 +32,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test001_addInstance_NotAliveException_withMetaRelation() {
-		final LightClientEngine Engine = new LightClientEngine();
+		final CosClientEngine Engine = new CosClientEngine();
 		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
 		Generic car = Engine.addInstance("Car");
 		Generic color = Engine.addInstance("Color");
@@ -46,7 +46,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_2composites() {
-		final LightClientEngine cache = new LightClientEngine();
+		final CosClientEngine cache = new CosClientEngine();
 		Generic car = cache.addInstance("Car");
 		Generic color = cache.addInstance("Color");
 		final Generic carColor = cache.addInstance("CarColor", car, color);
@@ -57,7 +57,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_2composites_MetaRelation() {
-		final LightClientEngine Engine = new LightClientEngine();
+		final CosClientEngine Engine = new CosClientEngine();
 		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
 		Generic car = Engine.addInstance("Car");
 		Generic color = Engine.addInstance("Color");
@@ -70,7 +70,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_reflexiveRelation() {
-		final LightClientEngine Engine = new LightClientEngine();
+		final CosClientEngine Engine = new CosClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
 		Generic caravane = vehicle.addInstance("Caravane");
@@ -83,7 +83,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_reflexiveRelation_MetaRelation() {
-		final LightClientEngine Engine = new LightClientEngine();
+		final CosClientEngine Engine = new CosClientEngine();
 		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
@@ -98,7 +98,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test004_addInheritsRelation() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -114,7 +114,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test005_addInheritsRelations_OnSameStructural() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -127,7 +127,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test006_inherits_different_than_instance() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -146,7 +146,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test007_addInstance_ofSubRelation() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -166,7 +166,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test008() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -185,7 +185,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test009() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -209,7 +209,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test010() {
-		LightClientEngine engine = new LightClientEngine();
+		CosClientEngine engine = new CosClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);

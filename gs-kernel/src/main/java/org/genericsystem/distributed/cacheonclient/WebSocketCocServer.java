@@ -1,32 +1,33 @@
-package org.genericsystem.distributed.cacheonserver;
+package org.genericsystem.distributed.cacheonclient;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.GSVertx;
 import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.HeavyServerEngine;
+import org.genericsystem.kernel.Root;
 
-public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
+public class WebSocketCocServer extends AbstractCocServer {
 
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
 
-	public WebSocketGSHeavyServer(GSDeploymentOptions options) {
+	public WebSocketCocServer(GSDeploymentOptions options) {
 		super(options);
 		this.port = options.getPort();
 		this.host = options.getHost();
 	}
 
 	public static void main(String[] args) {
-		new WebSocketGSHeavyServer(new GSDeploymentOptions()).start();
+		new WebSocketCocServer(new GSDeploymentOptions()).start();
 	}
 
 	@Override
@@ -40,6 +41,7 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 				if (root == null)
 					throw new IllegalStateException("Unable to find database :" + path);
 				webSocket.exceptionHandler(e -> {
+
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
@@ -47,9 +49,7 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
 					int op = gsBuffer.getInt();
-					Buffer result = getReplyBuffer(methodId, op, (HeavyServerEngine) root, gsBuffer);
-					// System.out.println("Write result");
-					webSocket.writeBinaryMessage(result);
+					webSocket.writeBinaryMessage(getReplyBuffer(methodId, op, (Root) root, gsBuffer));
 				});
 
 			});
@@ -70,6 +70,7 @@ public class WebSocketGSHeavyServer extends AbstractGSHeavyServer {
 
 	@Override
 	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses) {
-		return new HeavyServerEngine(value, persistentDirectoryPath, userClasses);
+		return new Root(value, persistentDirectoryPath, userClasses);
 	}
+
 }

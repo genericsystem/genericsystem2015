@@ -5,15 +5,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.CacheOnClient;
-import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
+import org.genericsystem.distributed.cacheonclient.CocCache;
+import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 
 public class RootContext extends AbstractContext {
 
-	public ObjectProperty<HeavyClientEngine> rootProperty = new SimpleObjectProperty<HeavyClientEngine>();
+	public ObjectProperty<CocClientEngine> rootProperty = new SimpleObjectProperty<CocClientEngine>();
 	public ObservableList<Generic> observableGenericList;
 
-	public RootContext(HeavyClientEngine engine) {
+	public RootContext(CocClientEngine engine) {
 		super(null);
 		rootProperty.set(engine);
 		observableGenericList = getCurrentCache().getInstancesObservableList(rootProperty.getValue());
@@ -21,7 +21,7 @@ public class RootContext extends AbstractContext {
 	}
 
 	@Override
-	public CacheOnClient getCurrentCache() {
+	public CocCache getCurrentCache() {
 		return rootProperty.getValue().getCurrentCache();
 	}
 

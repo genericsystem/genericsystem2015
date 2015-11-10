@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.AbstractEngine;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 
-public abstract class AbstractServer extends AbstractEngine implements Generic, Protocole {
+public abstract class AbstractServer extends AbstractRoot implements Generic, Protocole {
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
@@ -29,7 +29,7 @@ public abstract class AbstractServer extends AbstractEngine implements Generic, 
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((LightServerEngine) getRoot());
+				return new Transaction((Root) getRoot());
 			}
 
 			@Override
