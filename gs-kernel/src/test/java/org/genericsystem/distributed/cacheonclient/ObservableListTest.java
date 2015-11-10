@@ -66,7 +66,6 @@ public class ObservableListTest extends AbstractTest {
 		ObservableList<Generic> dependencies = engine2.getCurrentCache().getDependenciesObservableList(car);
 		if (dependencies.isEmpty())
 			Thread.sleep(100);
-		System.out.println("dependencies :: " + dependencies);
 		assert dependencies.containsAll(genericCars);
 		assert genericCars.containsAll(dependencies);
 
