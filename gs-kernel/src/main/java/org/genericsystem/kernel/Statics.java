@@ -3,6 +3,8 @@ package org.genericsystem.kernel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.common.Vertex;
 import org.genericsystem.defaults.DefaultVertex;
 import org.slf4j.Logger;
@@ -33,6 +35,9 @@ public class Statics {
 	public final static int DEFAULT_PORT = 8082;
 
 	public final static Vertex[] EMPTY = new Vertex[] {};
+	
+	public static final long SERVER_TIMEOUT = 1000;
+	public static final TimeUnit SERVER_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
 
 	public static void debugCurrentThread() {
 		threadDebugged.set(System.currentTimeMillis());
