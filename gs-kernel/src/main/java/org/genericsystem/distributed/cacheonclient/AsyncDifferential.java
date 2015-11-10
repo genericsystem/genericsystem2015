@@ -90,19 +90,21 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(x -> generic.isDirectAncestorOf(x));
 			private Wrappable<Generic> subGenerics = getSubCache().getWrappableDependencies(generic);
 			private ListChangeListener<Generic> listenerOnAdds = onChange -> {
+				// TODO begin change - end change
 				subGenerics.setAll(onChange.getList().filtered(x -> onChange.getAddedSubList().contains(x) && generic.isDirectAncestorOf(x)));
 				fireChange(onChange);
 			};
 			private ListChangeListener<Generic> listenerOnRemoves = onChange -> {
+				// TODO begin change - end change
 				subGenerics.removeAll(onChange.getList().filtered(x -> onChange.getAddedSubList().contains(x) && generic.isDirectAncestorOf(x)));
 				fireChange(onChange);
 			};
 			private ListChangeListener<Generic> listenerOnSubGenerics = onChange -> {
+				// TODO begin change - end change
 				subGenerics.setAll(onChange.getAddedSubList());
 				subGenerics.removeAll(onChange.getRemoved());
 				fireChange(onChange);
 			};
-
 			{
 				subGenerics.addListener(new WeakListChangeListener(listenerOnSubGenerics));
 				filteredAdds.addListener(new WeakListChangeListener(listenerOnAdds));
