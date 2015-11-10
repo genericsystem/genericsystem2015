@@ -8,12 +8,13 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
+import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractCocClient extends AbstractGSClient implements CocProtocole {
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {
-		return unsafe(() -> getDependenciesPromise(ts, id).get());
+		return unsafe(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 
 	}
 
@@ -25,7 +26,7 @@ public abstract class AbstractCocClient extends AbstractGSClient implements CocP
 	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() == Long.MAX_VALUE)))
 			throw new IllegalStateException("");
-		Object res = unsafe(() -> applyPromise(ts, removes, adds).get());
+		Object res = unsafe(() -> applyPromise(ts, removes, adds).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 		if (res instanceof OptimisticLockConstraintViolationException)
 			throw (OptimisticLockConstraintViolationException) res;
 		if (res instanceof ConcurrencyControlException)
