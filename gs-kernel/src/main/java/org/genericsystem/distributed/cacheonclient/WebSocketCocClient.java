@@ -23,7 +23,6 @@ public class WebSocketCocClient extends AbstractCocClient {
 		webSocket.handler(getHandler());
 	}
 
-	// TODO synchronize this method ?
 	@Override
 	protected <T> void send(Buffer buffer) {
 		webSocket.writeBinaryMessage(buffer);

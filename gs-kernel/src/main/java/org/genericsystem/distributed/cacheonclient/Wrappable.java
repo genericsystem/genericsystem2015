@@ -1,9 +1,13 @@
 package org.genericsystem.distributed.cacheonclient;
 
-public interface Wrappable<T> {
+import javafx.collections.ObservableList;
 
+public interface Wrappable<T> extends ObservableList<T> {
+
+	@Override
 	public int size();
 
+	@Override
 	public T get(int index);
 
 }

@@ -123,15 +123,15 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
-		return new Wrappable<Generic>() {
+		return new AbstractWrappable<Generic>() {
 			@Override
 			public Generic get(int index) {
-				return dependenciesPromisesMap.get(generic).getValue().get(index);
+				return getDependenciesObservableList(generic).getValue().get(index);
 			}
 
 			@Override
 			public int size() {
-				return dependenciesPromisesMap.get(generic).getValue().size();
+				return getDependenciesObservableList(generic).getValue().size();
 			}
 		};
 	}

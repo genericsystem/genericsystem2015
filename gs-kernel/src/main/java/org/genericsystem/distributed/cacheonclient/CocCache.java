@@ -3,10 +3,12 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
@@ -72,8 +74,7 @@ public class CocCache extends HeavyCache {
 
 		@Override
 		public Wrappable<Generic> getWrappableDependencies(Generic generic) {
-			// TODO Auto-generated method stub
-			return null;
+			return getTransaction().getWrappableDependencies(generic);
 		}
 	}
 
@@ -94,6 +95,10 @@ public class CocCache extends HeavyCache {
 
 	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
 		return dependenciesAsOservableListCacheMap.get(generic);
+	}
+
+	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
+		return getTransaction().getWrappableDependencies(generic);
 	}
 
 	public ObservableList<Generic> getInstancesObservableList(Generic generic) {
