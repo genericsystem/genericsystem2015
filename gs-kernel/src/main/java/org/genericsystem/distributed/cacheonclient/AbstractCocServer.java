@@ -18,11 +18,11 @@ public abstract class AbstractCocServer extends AbstractGSServer {
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
-			return replyBuffer.appendLong(root.pickNewTs());
+			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
 		case AbstractGSClient.GET_DEPENDENCIES:
-			return replyBuffer.appendGSVertexArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
+			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));/////
 		case AbstractGSClient.GET_VERTEX:
-			return replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
+			return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
 		case AbstractGSClient.APPLY:
 			// try {
 			return replyBuffer.appendLongThrowException(() -> {

@@ -282,9 +282,21 @@ public class GSBuffer implements Buffer {
 		appendGSString(clazz != null ? clazz.getName() : "");
 		return this;
 	}
+	
+	public Object getIntThrowException() {
+		return getInt() == 1 ? getInt() : getGSSerializable();
+	}
 
 	public Object getLongThrowException() {
 		return getInt() == 1 ? getLong() : getGSSerializable();
+	}
+
+	public Object getGSVertexThrowException() {
+		return getInt() == 1 ? getGSVertex() : getGSSerializable();
+	}
+
+	public Object getGSVertexArrayThrowException() {
+		return getInt() == 1 ? getGSVertexArray() : getGSSerializable();
 	}
 
 	@FunctionalInterface
@@ -292,11 +304,50 @@ public class GSBuffer implements Buffer {
 		T get() throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 	}
 
+	public GSBuffer appendIntThrowException(ConcurrentSupplier<Integer> supplier) {
+		try {
+			int result = supplier.get();
+			appendInt(1);
+			appendInt(result);
+		} catch (Throwable t) {
+			appendInt(0);
+			t.printStackTrace();
+			appendGSSerializable(t);
+		}
+		return this;
+	}
+
 	public GSBuffer appendLongThrowException(ConcurrentSupplier<Long> supplier) {
 		try {
 			long result = supplier.get();
 			appendInt(1);
 			appendLong(result);
+		} catch (Throwable t) {
+			appendInt(0);
+			t.printStackTrace();
+			appendGSSerializable(t);
+		}
+		return this;
+	}
+
+	public GSBuffer appendGSVertexThrowException(ConcurrentSupplier<Vertex> vertex) {
+		try {
+			Vertex result = vertex.get();
+			appendInt(1);
+			appendGSVertex(result);
+		} catch (Throwable t) {
+			appendInt(0);
+			t.printStackTrace();
+			appendGSSerializable(t);
+		}
+		return this;
+	}
+
+	public GSBuffer appendGSVertexArrayThrowException(ConcurrentSupplier<Vertex[]> vertexArray) {
+		try {
+			Vertex[] result = vertexArray.get();
+			appendInt(1);
+			appendGSVertexArray(result);
 		} catch (Throwable t) {
 			appendInt(0);
 			t.printStackTrace();

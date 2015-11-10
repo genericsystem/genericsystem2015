@@ -15,13 +15,7 @@ import com.google.common.base.Supplier;
 
 public abstract class AbstractCosClient extends AbstractGSClient implements CosProtocole {
 
-	@SuppressWarnings("unchecked")
-	protected <R> R unsafeException(Supplier<Object> unsafe) {
-		Object result = unsafe.get();
-		if (result instanceof RuntimeException)
-			throw (RuntimeException) result;
-		return (R) result;
-	}
+	
 	
 	@SuppressWarnings("unchecked")
 	protected <R> R unsafeConcurrencyControlException(Supplier<Object> unsafe) throws ConcurrencyControlException {
@@ -37,7 +31,7 @@ public abstract class AbstractCosClient extends AbstractGSClient implements CosP
 	}
 
 	public CompletableFuture<Object> newCacheIdPromise() {
-		return promise(NEW_CACHE, buff -> buff.getLong(), buffer -> buffer);
+		return promise(NEW_CACHE, buff -> buff.getLongThrowException(), buffer -> buffer);
 	}
 
 	@Override
@@ -54,8 +48,8 @@ public abstract class AbstractCosClient extends AbstractGSClient implements CosP
 		return unsafeException(() -> unsafe(() -> getDependenciesPromise(cacheId, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
-	public CompletableFuture<Vertex[]> getDependenciesPromise(long cacheId, long id) {
-		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArray(), buffer -> buffer.appendLong(cacheId).appendLong(id));
+	public CompletableFuture<Object> getDependenciesPromise(long cacheId, long id) {
+		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(id));
 	}
 
 	@Override
@@ -172,7 +166,7 @@ public abstract class AbstractCosClient extends AbstractGSClient implements CosP
 	}
 
 	public CompletableFuture<Object> getCacheLevelPromise(long cacheId) {
-		return promise(GET_CACHE_LEVEL, buff -> buff.getInt(), buffer -> buffer.appendLong(cacheId));
+		return promise(GET_CACHE_LEVEL, buff -> buff.getIntThrowException(), buffer -> buffer.appendLong(cacheId));
 	}
 
 }

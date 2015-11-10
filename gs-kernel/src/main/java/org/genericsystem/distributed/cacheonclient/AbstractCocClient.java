@@ -14,12 +14,12 @@ public abstract class AbstractCocClient extends AbstractGSClient implements CocP
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {
-		return unsafe(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		return (Vertex[]) unsafe(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 
 	}
 
-	public CompletableFuture<Vertex[]> getDependenciesPromise(long ts, long id) {
-		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArray(), buffer -> buffer.appendLong(ts).appendLong(id));
+	public CompletableFuture<Object> getDependenciesPromise(long ts, long id) {
+		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(ts).appendLong(id));
 	}
 
 	@Override
