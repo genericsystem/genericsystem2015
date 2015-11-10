@@ -1,14 +1,10 @@
-package org.genericsystem.admin;
+package org.genericsystem.gui.admin;
 
 import javafx.application.Application;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
-import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
 import org.genericsystem.admin.model.Color;
@@ -19,7 +15,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.HeavyClientEngine;
 import org.genericsystem.distributed.cacheonclient.WebSocketGSLightServer;
-import org.genericsystem.javafx.Crud;
+import org.genericsystem.gui.context.RootContext;
+import org.genericsystem.gui.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 
 /**
@@ -57,27 +54,32 @@ public class App extends Application {
 		Generic base2 = type.setInstance("myMercedes");
 		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
 		engine.getCurrentCache().flush();
-		class InvalidableObjectProperty extends SimpleObjectProperty<Generic> {
-			public InvalidableObjectProperty(Generic engine) {
-				super(engine);
-			}
+		// class InvalidableObjectProperty extends SimpleObjectProperty<Generic> {
+		// public InvalidableObjectProperty(Generic engine) {
+		// super(engine);
+		// }
+		//
+		// @Override
+		// protected void fireValueChangedEvent() {
+		// super.fireValueChangedEvent();
+		// }
+		// }
+		// InvalidableObjectProperty engineProperty = new InvalidableObjectProperty(engine);
+		// Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
+		// engineProperty.fireValueChangedEvent();
+		// Alert alert = new Alert(AlertType.WARNING);
+		// alert.setTitle("A problem was detected");
+		// alert.setContentText(throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage());
+		// alert.setHeaderText(throwable.getClass().getSimpleName());
+		// throwable.printStackTrace();
+		// alert.showAndWait();
+		// });
 
-			@Override
-			protected void fireValueChangedEvent() {
-				super.fireValueChangedEvent();
-			}
-		}
-		InvalidableObjectProperty engineProperty = new InvalidableObjectProperty(engine);
-		Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
-			engineProperty.fireValueChangedEvent();
-			Alert alert = new Alert(AlertType.WARNING);
-			alert.setTitle("A problem was detected");
-			alert.setContentText(throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage());
-			alert.setHeaderText(throwable.getClass().getSimpleName());
-			throwable.printStackTrace();
-			alert.showAndWait();
-		});
-		Crud<Generic> crud = new Crud<>(engineProperty, new GsUiFunctions());
+		RootContext rootContext = new RootContext(engine);
+
+		Crud crud = new Crud(rootContext);
+
+		// crud.getContext().rootProperty.set(engine);
 
 		// Crud crud = new Crud(new RootContext(engine));
 

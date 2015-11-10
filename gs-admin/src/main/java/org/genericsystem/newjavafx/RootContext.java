@@ -22,18 +22,9 @@ public class RootContext implements IContext {
 	public Function<Generic, ObservableList<Generic>> genericSubInstances;
 
 	public RootContext(HeavyClientEngine cache) {
-
 		this.engine = cache;
-
 		rootProperty = new SimpleObjectProperty<Generic>(cache.getRoot());
-
-		// cache.getCurrentCache().getInstances(generic);
-
-		// this.cache.getCurrentCache().getObservableInstances(rootProperty.getValue())
-		// FXCollections.observableArrayList(cache.getCurrentCache().getInstances(rootProperty.getValue()).toList())
-
 		genericSubInstances = type -> rootProperty.getValue() != null ? cache.getCurrentCache().getInstancesObservableList(rootProperty.getValue()) : FXCollections.emptyObservableList();
-
 		observableGenericList = new ListBinding<Generic>() {
 			{
 				super.bind(rootProperty);
