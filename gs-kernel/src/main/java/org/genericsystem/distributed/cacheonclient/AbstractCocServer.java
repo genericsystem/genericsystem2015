@@ -15,8 +15,7 @@ public abstract class AbstractCocServer extends AbstractGSServer {
 	}
 
 	Buffer getReplyBuffer(int methodId, int op, BasicEngine root, GSBuffer gsBuffer) {
-		GSBuffer replyBuffer = new GSBuffer();
-		replyBuffer.appendInt(op);
+		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLong(root.pickNewTs());
