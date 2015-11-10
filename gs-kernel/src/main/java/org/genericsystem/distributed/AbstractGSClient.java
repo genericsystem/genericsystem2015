@@ -2,16 +2,19 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
@@ -38,7 +41,7 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int GET_CACHE_LEVEL = 16;
 	public static final int NEW_CACHE = 17;
 	public static final int CLEAR = 18;
-
+	
 	protected abstract <T> void send(Buffer buffer);
 
 	private final Map<Integer, Consumer<GSBuffer>> ops = new HashMap<>();
@@ -69,13 +72,13 @@ public abstract class AbstractGSClient implements Protocole {
 
 	@FunctionalInterface
 	public interface UnsafeSupplier<R> {
-		R supply() throws InterruptedException, ExecutionException;
+		R supply() throws InterruptedException, ExecutionException, TimeoutException;
 	}
 
 	protected <T, R> R unsafe(UnsafeSupplier<R> unsafe) {
 		try {
 			return unsafe.supply();
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw new IllegalStateException(e);
 		}
 	}
