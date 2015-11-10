@@ -17,15 +17,14 @@ public abstract class AbstractCosServer extends AbstractGSServer {
 	}
 
 	Buffer getReplyBuffer(int methodId, int op, Engine root, GSBuffer gsBuffer) {
-		GSBuffer replyBuffer = new GSBuffer();
-		replyBuffer.appendInt(op);
+		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
-			return replyBuffer.appendLong(root.pickNewTs());
+			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
 		case AbstractGSClient.GET_DEPENDENCIES:
-			return replyBuffer.appendGSVertexArray(root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
+			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 		case AbstractGSClient.GET_VERTEX:
-			return replyBuffer.appendGSVertex(root.getVertex(gsBuffer.getLong()));
+			return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
 		case AbstractGSClient.SHIFT_TS:
 			return replyBuffer.appendLongThrowException(() -> root.shiftTs(gsBuffer.getLong()));
 		case AbstractGSClient.ADD_INSTANCE: {
@@ -75,9 +74,9 @@ public abstract class AbstractCosServer extends AbstractGSServer {
 		case AbstractGSClient.UNMOUNT:
 			return replyBuffer.appendLongThrowException(() -> root.unmount(gsBuffer.getLong()));
 		case AbstractGSClient.GET_CACHE_LEVEL:
-			return replyBuffer.appendInt(root.getCacheLevel(gsBuffer.getLong()));
+			return replyBuffer.appendIntThrowException(() -> root.getCacheLevel(gsBuffer.getLong()));
 		case AbstractGSClient.NEW_CACHE: {
-			return replyBuffer.appendLong(root.newCacheId());
+			return replyBuffer.appendLongThrowException(() -> root.newCacheId());
 		}
 		case AbstractGSClient.CLEAR:
 			return replyBuffer.appendLongThrowException(() -> root.clear(gsBuffer.getLong()));

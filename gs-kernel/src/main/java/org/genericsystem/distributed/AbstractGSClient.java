@@ -20,6 +20,8 @@ import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
+import com.google.common.base.Supplier;
+
 public abstract class AbstractGSClient implements Protocole {
 
 	public static final int PICK_NEW_TS = 0;
@@ -83,24 +85,32 @@ public abstract class AbstractGSClient implements Protocole {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	protected <R> R unsafeException(Supplier<Object> unsafe) {
+		Object result = unsafe.get();
+		if (result instanceof RuntimeException)
+			throw (RuntimeException) result;
+		return (R) result;
+	}
+	
 	@Override
 	public Vertex getVertex(long id) {
-		return unsafe(() -> getVertexPromise(id).get());
+		return unsafeException(() -> unsafe(() -> getVertexPromise(id).get()));
 	}
 
-	public CompletableFuture<Vertex> getVertexPromise(long id) {
-		return promise(GET_VERTEX, buff -> buff.getGSVertex(), buffer -> buffer.appendLong(id));
+	public CompletableFuture<Object> getVertexPromise(long id) {
+		return promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id));
 	}
 
 	@Override
 	public long pickNewTs() {
-		return unsafe(() -> getPickNewTsPromise().get());
+		return unsafeException(() -> unsafe(() -> getPickNewTsPromise().get()));
 	}
 
-	public CompletableFuture<Long> getPickNewTsPromise() {
-		return promise(PICK_NEW_TS, buff -> buff.getLong(), buffer -> buffer);
+	public CompletableFuture<Object> getPickNewTsPromise() {
+		return promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer);
 	}
-
+	
 	protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
 		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
 			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);

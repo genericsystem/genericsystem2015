@@ -6,11 +6,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 
 import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
@@ -54,19 +55,19 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 		};
 	}
 
-	public ObservableList<Generic> getActualObservableList(Generic generic) {
-		return new ListBinding<Generic>() {
-			{
-				super.bind(getDependenciesObservableList(generic));
-			}
-
-			@Override
-			protected ObservableList<Generic> computeValue() {
-				return FXCollections.observableArrayList(dependenciesCache.get(generic).getValue());
-			}
-
-		};
-	}
+	// public ObservableList<Generic> getActualObservableList(Generic generic) {
+	// return new ListBinding<Generic>() {
+	// {
+	// super.bind(getDependenciesObservableList(generic));
+	// }
+	//
+	// @Override
+	// protected ObservableList<Generic> computeValue() {
+	// return FXCollections.observableArrayList(dependenciesCache.get(generic).getValue());
+	// }
+	//
+	// };
+	// }
 
 	@Override
 	protected Generic plug(Generic generic) {
@@ -84,29 +85,48 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
-		// TODO should adds and removes be fed somehow ? getDependenciesObservableList(generic);
-
-		return new Wrappable<Generic>() {
+		return new AbstractWrappable<Generic>() {
 			private ObservableList<Generic> filteredRemoves = removesObservableList.filtered(x -> generic.isDirectAncestorOf(x));
 			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(x -> generic.isDirectAncestorOf(x));
+			private Wrappable<Generic> subGenerics = getSubCache().getWrappableDependencies(generic);
+			private ListChangeListener<Generic> listenerOnAdds = onChange -> {
+				// TODO begin change - end change
+				subGenerics.setAll(onChange.getList().filtered(x -> onChange.getAddedSubList().contains(x) && generic.isDirectAncestorOf(x)));
+				fireChange(onChange);
+			};
+			private ListChangeListener<Generic> listenerOnRemoves = onChange -> {
+				// TODO begin change - end change
+				subGenerics.removeAll(onChange.getList().filtered(x -> onChange.getAddedSubList().contains(x) && generic.isDirectAncestorOf(x)));
+				fireChange(onChange);
+			};
+			private ListChangeListener<Generic> listenerOnSubGenerics = onChange -> {
+				// TODO begin change - end change
+				subGenerics.setAll(onChange.getAddedSubList());
+				subGenerics.removeAll(onChange.getRemoved());
+				fireChange(onChange);
+			};
+			{
+				subGenerics.addListener(new WeakListChangeListener(listenerOnSubGenerics));
+				filteredAdds.addListener(new WeakListChangeListener(listenerOnAdds));
+				filteredRemoves.addListener(new WeakListChangeListener(listenerOnRemoves));
+			}
 
 			@Override
 			public int size() {
-				return addsObservableList.contains(generic) ? 0 : getSubCache().getWrappableDependencies(generic).size() - filteredRemoves.size() + filteredAdds.size();
+				return (addsObservableList.contains(generic) ? 0 : (subGenerics.size() - filteredRemoves.size())) + filteredAdds.size();
 			}
 
 			@Override
 			public Generic get(int index) {
-				Wrappable<Generic> subbed = getSubCache().getWrappableDependencies(generic);
-				if (index < subbed.size() - filteredRemoves.size()) {
-					for (int i = 0; i < subbed.size(); i++) {
-						if (filteredRemoves.contains(subbed.get(i)))
-							index++;
-						if (i == index)
-							return subbed.get(index);
+
+				if (index < subGenerics.size() - filteredRemoves.size()) {
+					for (int i = 0; i < subGenerics.size(); i++) {
+						if (filteredRemoves.contains(subGenerics.get(i)))
+							if (i == ++index)
+								return subGenerics.get(index);
 					}
 				}
-				index -= subbed.size();
+				index -= subGenerics.size();
 				return filteredAdds.get(index);
 			}
 		};

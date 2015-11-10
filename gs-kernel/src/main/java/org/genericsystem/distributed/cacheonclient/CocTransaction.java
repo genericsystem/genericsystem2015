@@ -92,9 +92,10 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 
 	public class CompletableObservableList extends SimpleObjectProperty<List<Generic>> implements ObservableValue<List<Generic>> {
 
-		public CompletableObservableList(CompletableFuture<Vertex[]> promise) {
+		public CompletableObservableList(CompletableFuture<Object> promise) {
 			super(new ArrayList<>());
-			promise.thenAccept(elements -> {
+			promise.thenAccept(elem -> {
+				Vertex[] elements = (Vertex[])elem;
 				setValue(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList()));
 			});
 		}
@@ -123,15 +124,15 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
-		return new Wrappable<Generic>() {
+		return new AbstractWrappable<Generic>() {
 			@Override
 			public Generic get(int index) {
-				return dependenciesPromisesMap.get(generic).getValue().get(index);
+				return getDependenciesObservableList(generic).getValue().get(index);
 			}
 
 			@Override
 			public int size() {
-				return dependenciesPromisesMap.get(generic).getValue().size();
+				return getDependenciesObservableList(generic).getValue().size();
 			}
 		};
 	}
