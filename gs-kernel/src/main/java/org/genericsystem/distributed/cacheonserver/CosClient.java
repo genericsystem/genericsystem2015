@@ -13,9 +13,12 @@ import org.genericsystem.kernel.Statics;
 
 import com.google.common.base.Supplier;
 
-public abstract class AbstractCosClient extends AbstractGSClient implements CosProtocole {
+public class CosClient extends AbstractGSClient implements CosProtocole {
 
-	
+
+	public CosClient(String host, int port, String path) {
+		super(host, port, path);
+	}
 	
 	@SuppressWarnings("unchecked")
 	protected <R> R unsafeConcurrencyControlException(Supplier<Object> unsafe) throws ConcurrencyControlException {

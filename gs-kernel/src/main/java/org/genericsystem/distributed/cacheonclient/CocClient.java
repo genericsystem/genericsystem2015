@@ -10,7 +10,13 @@ import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractCocClient extends AbstractGSClient implements CocProtocole {
+public class CocClient extends AbstractGSClient implements CocProtocole {
+
+	
+	
+	public CocClient(String host, int port, String path) {
+		super(host, port, path);
+	}
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {

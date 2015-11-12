@@ -2,6 +2,9 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.WebSocket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +47,19 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int NEW_CACHE = 17;
 	public static final int CLEAR = 18;
 	
-	protected abstract <T> void send(Buffer buffer);
+	public AbstractGSClient(String host, int port, String path){
+		webSocket = new WebSocketClient(host, port, path);		
+	}
+	
+	
+	protected <T> void send(Buffer buffer){
+		webSocket.send(buffer);
+	}
+
+	@Override
+	public void close(){
+		webSocket.close();
+	}
 
 	private final Map<Integer, Consumer<GSBuffer>> ops = new HashMap<>();
 	private final AtomicInteger atomicKey = new AtomicInteger(0);
@@ -185,7 +200,42 @@ public abstract class AbstractGSClient implements Protocole {
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
 	}
+	
+	
+	private WebSocketClient webSocket;
+	
+	
+	protected class WebSocketClient {
+		private final HttpClient httpClient;
+		private final WebSocket webSocket;
 
-	@Override
-	public abstract void close();
+		public WebSocketClient(String host, int port, String path) {
+			httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
+			// /!\
+			webSocket = synchronizeTask(task -> httpClient.websocket(path, webSock -> task.handle(webSock)));
+			webSocket.exceptionHandler(e -> {
+				System.out.println("Discard http request because of : ");
+				e.printStackTrace();
+			});
+			webSocket.handler(getHandler());
+		}
+
+		protected <T> void send(Buffer buffer) {
+			webSocket.writeBinaryMessage(buffer);
+		}
+
+		public void close() {
+			try {
+				webSocket.close();
+				System.out.println("Close socket");
+			} catch (Exception ignore) {
+			}
+			try {
+				httpClient.close();
+				System.out.println("Close httpClient");
+			} catch (Exception ignore) {
+			}
+		}
+	}
+	
 }
