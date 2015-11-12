@@ -13,7 +13,7 @@ import org.genericsystem.kernel.Statics;
 
 public class CocClientEngine extends AbstractRoot implements Generic {
 
-	protected final AbstractCocClient server;
+	protected final CocClient server;
 
 	public CocClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
@@ -29,7 +29,7 @@ public class CocClientEngine extends AbstractRoot implements Generic {
 
 	public CocClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new WebSocketCocClient(host, port, "/" + engineValue);
+		server = new CocClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
@@ -89,7 +89,7 @@ public class CocClientEngine extends AbstractRoot implements Generic {
 		return Generic.class;
 	}
 
-	public AbstractCocClient getServer() {
+	public CocClient getServer() {
 		return server;
 	}
 

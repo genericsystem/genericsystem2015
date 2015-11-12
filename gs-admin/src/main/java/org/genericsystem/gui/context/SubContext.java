@@ -8,8 +8,7 @@ public class SubContext extends AbstractContext {
 
 	public ObservableValue<Generic> observableGeneric;
 
-	public SubContext(RootContext parent, int index) {
+	public SubContext(IContext parent) {
 		super(parent);
-		// observableGeneric = Bindings.valueAt(parent.observableGenericList, index);
 	}
 }

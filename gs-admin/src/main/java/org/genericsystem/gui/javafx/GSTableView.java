@@ -1,16 +1,19 @@
 package org.genericsystem.gui.javafx;
 
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.util.Callback;
+import java.util.Objects;
 
-import org.genericsystem.common.Generic;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
 import org.genericsystem.gui.context.RootContext;
 import org.genericsystem.gui.context.SubContext;
 
-public class GSTableView extends TableView<Generic> {
+public class GSTableView extends TableView<SubContext> {
 
 	private RootContext rootContext;
+
+	// private AbstractContext rootContext;
 
 	public GSTableView(RootContext rootContext) {
 		this.rootContext = rootContext;
@@ -18,26 +21,21 @@ public class GSTableView extends TableView<Generic> {
 	}
 
 	private void initTable() {
-		super.setEditable(true);
-		// GSTableColum<Generic, String> name = new GSTableColum<Generic, String>(new SubContext(rootContext, 0));
+		final TableColumn<SubContext, ?> tabColumn = new TableColumn<>(rootContext.rootProperty.getValue().toString());
+		getColumns().add(tabColumn);
+		tabColumn.textProperty().bind(rootContext.columnTitle);
+		tabColumn.setCellValueFactory((g) -> new ReadOnlyObjectWrapper<String>(Objects.toString(g.getValue().observableGeneric.getValue())));
+		itemsProperty().set(rootContext.observableSubContextList);
 
-		setRowFactory(new Callback<TableView<Generic>, TableRow<Generic>>() {
-			@Override
-			public GSTableRow<Generic> call(TableView<Generic> param) {
-				System.out.println("ggggg");
-				return new GSTableRow<Generic>(new SubContext(rootContext, 0));
-			}
-		});
-		// name.setCellFactory(TextFieldTableCell.forTableColumn());
+		// SubContext sub = (SubContext) rootContext.observableSubContextList.get(0);
+		// TableRow<Generic> tbr = new TableRow<Generic>();
+		// name.setCellFactory(Te
 		// name.setOnEditCommit(e -> System.out.println("ediiiiit"));
-		// final TableColumn<Generic, ?> name = new TableColumn<>(rootContext.rootProperty.getValue().toString());
-		// getColumns().add(name);
 		// this.setItems(value);
-		itemsProperty().set(rootContext.getCurrentCache().getDependenciesObservableList(rootContext.rootProperty.getValue()));
-		// name.setCellValueFactory((g) -> new SimpleObjectProperty(g.getValue().toString()));
+		// itemsProperty().set(rootContext.getCurrentCache().getDependenciesObservableList(rootContext.rootProperty.getValue()));
+		// new SimpleObjectProperty(g.getValue().toString())
 		// GSEditingCell<Generic, String> cell = new GSEditingCell<Generic, String>();
 		// name.setCellValueFactory(cell.get);
 
 	}
-
 }

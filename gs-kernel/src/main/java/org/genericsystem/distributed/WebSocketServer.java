@@ -1,40 +1,63 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 
-public class WebSocketServer {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-	static Vertx vertx;
-	static HttpServer httpServer;
+import org.genericsystem.kernel.AbstractServer;
 
-	public static void main(String[] args) {
-		vertx = Vertx.vertx();
-		httpServer = vertx.createHttpServer();
-		httpServer.websocketHandler(webSocket -> {
-			webSocket.handler(buffer -> {
-				int read = buffer.getByte(0);
-				switch (read) {
-				case '0':
-					System.out.println("case 0");
-					webSocket.writeBinaryMessage(Buffer.buffer().appendInt(read).appendInt(1).appendInt(2).appendInt(3));
-					break;
-				case '1':
-					System.out.println("case 1");
-					webSocket.writeBinaryMessage(Buffer.buffer().appendInt(read).appendInt(4).appendInt(5));
-					break;
-				case '5':
-					System.out.println("case 5");
-					webSocket.writeBinaryMessage(Buffer.buffer().appendInt(read).appendInt(6));
-					break;
-				default:
-					System.out.println("case default");
-					webSocket.writeBinaryMessage(Buffer.buffer().appendInt(read));
-					break;
-				}
-			});
-		});
-		httpServer.listen(8081);
+public class WebSocketServer <T extends AbstractServer> {
+	private List<HttpServer> httpServers = new ArrayList<>();
+	private final int port;
+	private final String host;
+	private AbstractGSServer server;
+
+	public WebSocketServer(AbstractGSServer server, GSDeploymentOptions options) {
+		this.server = server;
+		this.port = options.getPort();
+		this.host = options.getHost();
 	}
+
+	@SuppressWarnings("unchecked")
+	public void start(Map<String, AbstractServer> roots) {
+		Vertx vertx = GSVertx.vertx().getVertx();
+		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
+			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
+			httpServer.websocketHandler(webSocket -> {
+				String path = webSocket.path();
+				AbstractServer root = roots.get(path);
+				if (root == null)
+					throw new IllegalStateException("Unable to find database :" + path);
+				webSocket.exceptionHandler(e -> {
+
+					e.printStackTrace();
+					throw new IllegalStateException(e);
+				});
+				webSocket.handler(buffer -> {
+					GSBuffer gsBuffer = new GSBuffer(buffer);
+					int methodId = gsBuffer.getInt();
+					int op = gsBuffer.getInt();
+					webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
+				});
+
+			});
+			// /!\
+			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
+			httpServers.add(httpServer);
+		}
+		System.out.println("Generic System server ready!");
+	}
+
+	public void stop(Map<String, AbstractServer> roots) {
+		// /!\
+		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
+		roots.values().forEach(root -> root.close());
+		roots = null;
+		System.out.println("Generic System server stopped!");
+	}
+
 }

@@ -2,6 +2,9 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.WebSocket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,8 +47,22 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int NEW_CACHE = 17;
 	public static final int CLEAR = 18;
 	
-	protected abstract <T> void send(Buffer buffer);
+	public AbstractGSClient(String host, int port, String path){
+		webSocket = new WebSocketClient(this, host, port, path);		
+	}
+	
+	
+	protected <T> void send(Buffer buffer){
+		webSocket.send(buffer);
+	}
 
+	@Override
+	public void close(){
+		webSocket.close();
+	}
+
+	protected WebSocketClient webSocket;
+	
 	private final Map<Integer, Consumer<GSBuffer>> ops = new HashMap<>();
 	private final AtomicInteger atomicKey = new AtomicInteger(0);
 
@@ -184,8 +201,6 @@ public abstract class AbstractGSClient implements Protocole {
 			System.out.println("Response failure " + Thread.currentThread());
 		}
 		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
-	}
-
-	@Override
-	public abstract void close();
+	}	
+	
 }

@@ -2,9 +2,15 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,15 +21,16 @@ import java.util.stream.Collectors;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractGSServer {
-
+public abstract class AbstractGSServer <T extends AbstractServer> {
+	
 	protected Map<String, AbstractServer> roots;
 
-	public AbstractGSServer(AbstractServer... roots) {
-		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
-	}
+	/*public AbstractGSServer(AbstractServer... roots) {
+		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));	
+	}*/
 
 	public AbstractGSServer(GSDeploymentOptions options) {
+		webSocket = new WebSocketServer(this, options);
 		this.roots = Arrays.stream(getRoots(options)).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
@@ -40,14 +47,24 @@ public abstract class AbstractGSServer {
 			}
 		return roots.toArray(new AbstractServer[roots.size()]);
 	}
+	
+	protected WebSocketServer webSocket;
+	
+	abstract protected T buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses);
 
-	protected abstract AbstractServer buildRoot(String value, String persistantDirectoryPath, Class<?>[] userClasses);
-
+	public void start(){
+		webSocket.start(roots);
+	}
+	
 	public void stop() {
+		webSocket.stop(roots);
+	}
+	/*
+	private void stop() {
 		roots.values().forEach(root -> root.close());
 		roots = null;
 	}
-
+	 */
 	protected static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
 		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
 		consumer.handle(res -> {
@@ -67,6 +84,10 @@ public abstract class AbstractGSServer {
 			throw new IllegalStateException(res.cause());
 		return res.result();
 	}
-
-	public abstract void start();
+	
+	protected abstract Buffer getReplyBuffer(int methodId, int op, T root, GSBuffer gsBuffer);
+	
+	
+	
+	
 }
