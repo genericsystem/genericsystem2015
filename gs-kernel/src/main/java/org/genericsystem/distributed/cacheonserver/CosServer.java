@@ -1,22 +1,34 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import io.vertx.core.buffer.Buffer;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Engine;
 
-public abstract class AbstractCosServer extends AbstractGSServer {
-	public AbstractCosServer(GSDeploymentOptions options) {
+public class CosServer extends AbstractGSServer {
+
+	public static void main(String[] args) {
+		new CosServer(new GSDeploymentOptions()).start();
+	}
+	
+	public CosServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, int op, Engine root, GSBuffer gsBuffer) {
+	@Override
+	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer engine, GSBuffer gsBuffer) {
+		
+		Engine root = (Engine)engine;
+		
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
@@ -83,5 +95,11 @@ public abstract class AbstractCosServer extends AbstractGSServer {
 		default:
 			throw new IllegalStateException("unable to find method : " + methodId);
 		}
+	}
+
+	@Override
+	protected Engine buildRoot(String value,
+			String persistentDirectoryPath, Class[] userClasses) {
+		return new Engine(value, persistentDirectoryPath, userClasses);
 	}
 }

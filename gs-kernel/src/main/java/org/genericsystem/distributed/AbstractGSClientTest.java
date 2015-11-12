@@ -25,7 +25,7 @@ import org.genericsystem.kernel.Statics;
 
 import com.google.common.base.Supplier;
 
-public abstract class AbstractGSClient implements Protocole {
+public abstract class AbstractGSClientTest implements Protocole {
 
 	public static final int PICK_NEW_TS = 0;
 	public static final int GET_DEPENDENCIES = 1;
@@ -47,18 +47,22 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int NEW_CACHE = 17;
 	public static final int CLEAR = 18;
 	
-	public AbstractGSClient(String host, int port, String path){
-		webSocket = new WebSocketClient(host, port, path);		
+	public AbstractGSClientTest(String host, int port, String path){
+		super();
+		//AbstractGSClient.WebSocketClient = new WebSocketClient(host, port, path);					// TODO how to ?
+		
+		
+		
 	}
 	
 	
 	protected <T> void send(Buffer buffer){
-		webSocket.send(buffer);
+		send(buffer);
 	}
 
 	@Override
 	public void close(){
-		webSocket.close();
+		close();
 	}
 
 	private final Map<Integer, Consumer<GSBuffer>> ops = new HashMap<>();
@@ -202,7 +206,7 @@ public abstract class AbstractGSClient implements Protocole {
 	}
 	
 	
-	private WebSocketClient webSocket;
+	
 	
 	
 	protected class WebSocketClient {

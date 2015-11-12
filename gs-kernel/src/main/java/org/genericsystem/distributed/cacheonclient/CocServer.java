@@ -6,15 +6,24 @@ import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.BasicEngine;
 
-public abstract class AbstractCocServer extends AbstractGSServer {
+public class CocServer extends AbstractGSServer {
 
-	public AbstractCocServer(GSDeploymentOptions options) {
+	public static void main(String[] args) {
+		new CocServer(new GSDeploymentOptions()).start();
+	}
+	
+	public CocServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
-	Buffer getReplyBuffer(int methodId, int op, BasicEngine root, GSBuffer gsBuffer) {
+	@Override
+	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer basicEngine, GSBuffer gsBuffer) {
+		
+		BasicEngine root = (BasicEngine)basicEngine;
+		
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
@@ -36,5 +45,11 @@ public abstract class AbstractCocServer extends AbstractGSServer {
 		default:
 			throw new IllegalStateException("unable to find method:" + methodId + " ");
 		}
+	}
+
+	@Override
+	protected BasicEngine buildRoot(String value,
+			String persistentDirectoryPath, Class[] userClasses) {
+		return new BasicEngine(value, persistentDirectoryPath, userClasses);
 	}
 }

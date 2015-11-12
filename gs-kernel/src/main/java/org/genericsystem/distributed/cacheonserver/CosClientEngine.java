@@ -28,7 +28,7 @@ public class CosClientEngine extends AbstractRoot implements Generic {
 
 	public CosClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new WebSocketCosClient(host, port, "/" + engineValue);
+		server = new CosClient(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}
