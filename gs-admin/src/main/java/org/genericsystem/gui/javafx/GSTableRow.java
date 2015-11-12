@@ -2,9 +2,10 @@ package org.genericsystem.gui.javafx;
 
 import javafx.scene.control.TableRow;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.gui.context.SubContext;
 
-public class GSTableRow<Generic> extends TableRow<Generic> {
+public class GSTableRow extends TableRow<Generic> {
 
 	public SubContext subContext;
 

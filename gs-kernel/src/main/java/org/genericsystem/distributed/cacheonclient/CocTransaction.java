@@ -9,7 +9,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -95,7 +97,7 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 		public CompletableObservableList(CompletableFuture<Object> promise) {
 			super(new ArrayList<>());
 			promise.thenAccept(elem -> {
-				Vertex[] elements = (Vertex[])elem;
+				Vertex[] elements = (Vertex[]) elem;
 				setValue(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList()));
 			});
 		}
@@ -125,6 +127,15 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
 		return new AbstractWrappable<Generic>() {
+			private ChangeListener<List<Generic>> listener = new WeakChangeListener<>((observableValue, oldValue, newValue) -> {
+				beginChange();
+				nextAdd(0, newValue.size());
+				endChange();
+			});
+			{
+				getDependenciesObservableList(generic).addListener(listener);
+			}
+
 			@Override
 			public Generic get(int index) {
 				return getDependenciesObservableList(generic).getValue().get(index);

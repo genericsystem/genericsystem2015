@@ -4,12 +4,13 @@ import java.util.function.Function;
 
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.CocCache;
+import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractContext implements IContext {
 
@@ -25,7 +26,7 @@ public abstract class AbstractContext implements IContext {
 	}
 
 	@Override
-	public CocCache getCurrentCache() {
+	public DefaultCache<Generic> getCurrentCache() {
 		return getParent().getCurrentCache();
 	};
 
@@ -37,7 +38,8 @@ public abstract class AbstractContext implements IContext {
 
 			@Override
 			protected ObservableList<SubContext> computeValue() {
-				return transform(getCurrentCache().getInstancesObservableList((Generic) rootProperty[0].getValue()), transfomation);
+				return transform(FXCollections.observableArrayList(getCurrentCache().getInstances((Generic) rootProperty[0].getValue()).toList()), transfomation);
+				// return transform(getCurrentCache().getInstancesObservableList(((Generic) rootProperty[0].getValue())), transfomation);
 			}
 		};
 	}

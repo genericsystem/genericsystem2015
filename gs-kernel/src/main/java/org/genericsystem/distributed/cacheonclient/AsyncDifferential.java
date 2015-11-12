@@ -3,6 +3,7 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,48 +87,100 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
 		return new AbstractWrappable<Generic>() {
-			private ObservableList<Generic> filteredRemoves = removesObservableList.filtered(x -> generic.isDirectAncestorOf(x));
-			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(x -> generic.isDirectAncestorOf(x));
-			private Wrappable<Generic> subGenerics = getSubCache().getWrappableDependencies(generic);
-			private ListChangeListener<Generic> listenerOnAdds = onChange -> {
-				// TODO begin change - end change
-				subGenerics.setAll(onChange.getList().filtered(x -> onChange.getAddedSubList().contains(x) && generic.isDirectAncestorOf(x)));
-				fireChange(onChange);
-			};
-			private ListChangeListener<Generic> listenerOnRemoves = onChange -> {
-				// TODO begin change - end change
-				subGenerics.removeAll(onChange.getList().filtered(x -> onChange.getAddedSubList().contains(x) && generic.isDirectAncestorOf(x)));
-				fireChange(onChange);
-			};
-			private ListChangeListener<Generic> listenerOnSubGenerics = onChange -> {
-				// TODO begin change - end change
-				subGenerics.setAll(onChange.getAddedSubList());
-				subGenerics.removeAll(onChange.getRemoved());
-				fireChange(onChange);
-			};
+
+			private Predicate<Generic> parent = x -> generic.isDirectAncestorOf(x);
+			private Predicate<Generic> removed = x -> removesObservableList.contains(x);
+
+			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(parent);
+			private ObservableList<Generic> subGenerics = getSubCache().getWrappableDependencies(generic).filtered(x -> !removed.test(x) && parent.test(x));
+
+			private ListChangeListener<Generic> listenerOnAdds = new WeakListChangeListener<Generic>(c -> {
+				beginChange();
+				while (c.next())
+					if (c.wasPermutated() || c.wasUpdated())
+						throw new UnsupportedOperationException();
+					else {
+						int from = c.getFrom();
+						int to = c.getTo();
+						final int fpos = from;
+						do {
+							if (c.wasAdded()) {
+								Generic tmp = c.getAddedSubList().get(from - fpos);
+								if (parent.test(tmp))
+									nextAdd(from, from + 1);
+							} else if (c.wasRemoved()) {
+								Generic tmp = c.getRemoved().get(from - fpos);
+								if (parent.test(tmp))
+									nextRemove(from, tmp);
+							}
+						} while (++from < to);
+					}
+				endChange();
+			});
+
+			private ListChangeListener<Generic> listenerOnRemoves = new WeakListChangeListener<Generic>(c -> {
+				beginChange();
+				while (c.next())
+					if (c.wasPermutated() || c.wasUpdated())
+						throw new UnsupportedOperationException();
+					else {
+						int from = c.getFrom();
+						int to = c.getTo();
+						final int fpos = from;
+						do {
+							if (c.wasAdded()) {
+								Generic tmp = c.getAddedSubList().get(from - fpos);
+								if (parent.test(tmp))
+									nextRemove(from, tmp);
+							} else if (c.wasRemoved()) { // is the if (c.wasRemoved()) necessary?
+						Generic tmp = c.getRemoved().get(from - fpos);
+						if (parent.test(tmp))
+							nextAdd(from, from + 1);
+					}
+				} while (++from < to);
+			}
+		endChange();
+	}		);
+
+			private ListChangeListener<Generic> listenerOnSubGenerics = new WeakListChangeListener<Generic>(c -> {
+				beginChange();
+				while (c.next())
+					if (c.wasPermutated() || c.wasUpdated())
+						throw new UnsupportedOperationException();
+					else {
+						int from = c.getFrom();
+						int to = c.getTo();
+						final int fpos = from;
+						do {
+							if (c.wasAdded()) {
+								Generic tmp = c.getAddedSubList().get(from - fpos);
+								if (!removed.test(tmp))
+									nextAdd(from, from + 1);
+							} else if (c.wasRemoved()) { // is the if (c.wasRemoved()) necessary?
+						Generic tmp = c.getRemoved().get(from - fpos);
+						nextRemove(from, tmp);
+					}
+				} while (++from < to);
+			}
+		endChange();
+	}		);
+
 			{
-				subGenerics.addListener(new WeakListChangeListener(listenerOnSubGenerics));
-				filteredAdds.addListener(new WeakListChangeListener(listenerOnAdds));
-				filteredRemoves.addListener(new WeakListChangeListener(listenerOnRemoves));
+				subGenerics.addListener(listenerOnSubGenerics);
+				addsObservableList.addListener(listenerOnAdds);
+				removesObservableList.addListener(listenerOnRemoves);
 			}
 
 			@Override
 			public int size() {
-				return (addsObservableList.contains(generic) ? 0 : (subGenerics.size() - filteredRemoves.size())) + filteredAdds.size();
+				return (addsObservableList.contains(generic) ? 0 : subGenerics.size()) + filteredAdds.size();
 			}
 
 			@Override
 			public Generic get(int index) {
-
-				if (index < subGenerics.size() - filteredRemoves.size()) {
-					for (int i = 0; i < subGenerics.size(); i++) {
-						if (filteredRemoves.contains(subGenerics.get(i)))
-							if (i == ++index)
-								return subGenerics.get(index);
-					}
-				}
-				index -= subGenerics.size();
-				return filteredAdds.get(index);
+				if (index < subGenerics.size())
+					return subGenerics.get(index);
+				return filteredAdds.get(index - subGenerics.size());
 			}
 		};
 	}

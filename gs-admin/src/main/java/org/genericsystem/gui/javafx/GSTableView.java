@@ -13,6 +13,8 @@ public class GSTableView extends TableView<SubContext> {
 
 	private RootContext rootContext;
 
+	// private AbstractContext rootContext;
+
 	public GSTableView(RootContext rootContext) {
 		this.rootContext = rootContext;
 		initTable();
@@ -21,6 +23,7 @@ public class GSTableView extends TableView<SubContext> {
 	private void initTable() {
 		final TableColumn<SubContext, ?> tabColumn = new TableColumn<>(rootContext.rootProperty.getValue().toString());
 		getColumns().add(tabColumn);
+		tabColumn.textProperty().bind(rootContext.columnTitle);
 		tabColumn.setCellValueFactory((g) -> new ReadOnlyObjectWrapper<String>(Objects.toString(g.getValue().observableGeneric.getValue())));
 		itemsProperty().set(rootContext.observableSubContextList);
 
