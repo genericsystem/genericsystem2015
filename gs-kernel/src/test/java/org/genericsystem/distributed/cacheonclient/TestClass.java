@@ -11,17 +11,13 @@ public class TestClass<T> extends ObservableListBase<T> {
 	public TestClass(ObservableList<T> list) {
 		this.list = list;
 		list.addListener((ListChangeListener<? super T>) (onChange -> {
-			System.out.println("before sourceChanged");
 			sourceChanged(onChange);
-			System.out.println("after sourceChanged");
 		}));
 	}
 
 	protected void sourceChanged(Change<? extends T> c) {
 		beginChange();
-		System.out.println("in sourceChanged :: begin");
 		while (c.next()) {
-			System.out.println("in sourceChanged :: change :: next");
 			if (c.wasPermutated()) {
 				throw new UnsupportedOperationException();
 			} else if (c.wasUpdated()) {
@@ -30,21 +26,17 @@ public class TestClass<T> extends ObservableListBase<T> {
 				addRemove(c);
 			}
 		}
-		System.out.println("in sourceChanged :: end");
 		endChange();
 	}
 
 	private void addRemove(Change<? extends T> c) {
-		System.out.println("in addremove");
 		if (c.wasPermutated()) {
 			throw new UnsupportedOperationException();
 		} else {
 			if (c.wasRemoved()) {
-				System.out.println("in sourceChanged :: change :: remove");
 				nextRemove(c.getFrom(), c.getRemoved());
 			}
 			if (c.wasAdded()) {
-				System.out.println("in sourceChanged :: change :: add");
 				nextAdd(c.getFrom(), c.getFrom() + c.getAddedSubList().size());
 			}
 		}

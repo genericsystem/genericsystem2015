@@ -3,6 +3,8 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -16,71 +18,84 @@ public class ObservableListTest extends AbstractTest {
 	public void test001_ObservableList() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 		assert engine == engine.adjustMeta();
-		ObservableList<Generic> dependenciesObservableList = new AbstractWrappable.WrappableImpl<Generic>(engine.getCurrentCache().getWrappableDependencies(engine));
-
-		if (dependenciesObservableList.isEmpty())
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependencies(engine);
+		if (dependenciesObservableList.size() == 0) {
 			Thread.sleep(100);
-		assert !dependenciesObservableList.isEmpty();
-		System.out.println(dependenciesObservableList);
+		}
+		assert dependenciesObservableList.size() != 0;
 	}
 
 	public void test002_ConcurrentTryFlush() throws InterruptedException, ConcurrencyControlException {
 		CocClientEngine engine1 = new CocClientEngine();
 		CocClientEngine engine2 = new CocClientEngine();
 		engine2.addInstance("elephant");
-		engine2.getCurrentCache().getWrappableDependencies(engine1);
+		Wrappable<Generic> wrap = engine2.getCurrentCache().getWrappableDependencies(engine1);
 		engine2.getCurrentCache().tryFlush();
+		if (wrap.size() == 0)
+			Thread.sleep(100);
+		assert wrap.size() != 0;
+		for (int i = 0; i < wrap.size(); i++)
+			wrap.get(i);
 	}
 
-	// public void test003_ConcurrentShiftTs() throws InterruptedException, ConcurrencyControlException {
-	// CocClientEngine engine1 = new CocClientEngine();
-	// CocClientEngine engine2 = new CocClientEngine();
-	// engine2.setInstance("car");
-	// ObservableList<Generic> dependenciesObservableList2 = engine2.getCurrentCache().getDependenciesObservableList(engine2);
-	// engine2.getCurrentCache().tryFlush();
-	// assert engine1.getCurrentCache().shiftTs() >= engine2.getCurrentCache().getTs();
-	// ObservableList<Generic> dependenciesObservableList1 = engine1.getCurrentCache().getDependenciesObservableList(engine1);
-	// if (dependenciesObservableList1.isEmpty())
-	// Thread.sleep(100);
-	// assert dependenciesObservableList1.size() == dependenciesObservableList2.size() : dependenciesObservableList1 + "\t:\t" + dependenciesObservableList2;
-	// compareGraph(engine1, engine2);
-	// }
+	public void test003_ListenerOnAddInstance() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+		Generic car = engine.setInstance("car");
 
-	// public void test002_ShiftTs() throws ConcurrencyControlException {
-	// CocClientEngine engine = new CocClientEngine();
-	// Generic elephant = engine.addInstance("elephant");
-	// engine.getCurrentCache().shiftTs();
-	// assert !engine.getCurrentCache().getDependenciesObservableList(engine).contains(elephant);
-	// }
-	//
-	// // naturally empty, engines aren't linked to one another
-	// public void test003_ConcurrentShiftTsOnInstances() throws InterruptedException, ConcurrencyControlException {
-	// CocClientEngine engine1 = new CocClientEngine();
-	// CocClientEngine engine2 = new CocClientEngine();
-	// Generic car = engine1.addInstance("car");
-	// List<Generic> genericCars = new ArrayList<>();
-	// Generic myCar1 = car.addInstance("myCar1");
-	// genericCars.add(myCar1);
-	// Generic myCar2 = car.addInstance("myCar2");
-	// genericCars.add(myCar2);
-	// Generic myCar3 = car.addInstance("myCar3");
-	// genericCars.add(myCar3);
-	// Generic myCar4 = car.addInstance("myCar4");
-	// genericCars.add(myCar4);
-	// Generic myCar5 = car.addInstance("myCar5");
-	// genericCars.add(myCar5);
-	// engine1.getCurrentCache().flush();
-	// engine2.getCurrentCache().shiftTs();
-	// ObservableList<Generic> dependencies = engine2.getCurrentCache().getDependenciesObservableList(car);
-	// if (dependencies.isEmpty())
-	// Thread.sleep(100);
-	// assert dependencies.containsAll(genericCars);
-	// assert genericCars.containsAll(dependencies);
-	//
-	// }
+		engine.getCurrentCache().asyncMount();
+
+		Wrappable<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
+		ObservableList<Generic> binding = FXCollections.observableArrayList();
+		Bindings.bindContent(binding, test);
+
+		Generic myBMW = car.addInstance("myBMW");
+		Generic myVolksWagen = car.addInstance("myVolksWagen");
+		if (test.size() == 0)
+			Thread.sleep(100);
+		assert test.size() != 0;
+		assert binding.contains(myBMW);
+		assert binding.contains(myVolksWagen);
+		assert binding.equals(test);
+
+	}
+
+	public void test004_ListenerOnRemoveInstance() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+		Generic car = engine.setInstance("car");
+
+		engine.getCurrentCache().asyncMount();
+
+		Wrappable<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
+		ObservableList<Generic> binding = FXCollections.observableArrayList();
+		Bindings.bindContent(binding, test);
+
+		Generic myBMW = car.addInstance("myBMW");
+		Generic myVolksWagen = car.addInstance("myVolksWagen");
+		if (test.size() == 0)
+			Thread.sleep(100);
+		assert test.size() != 0;
+		assert binding.contains(myBMW);
+		assert binding.contains(myVolksWagen);
+		assert binding.equals(test);
+
+		engine.getCurrentCache().remove(myBMW);
+		engine.getCurrentCache().remove(myVolksWagen);
+		if (test.size() != 0)
+			Thread.sleep(100);
+		assert test.size() == 0;
+		assert !binding.contains(myBMW);
+		assert !binding.contains(myVolksWagen);
+		assert binding.equals(test);
+		//
+		// engine.getCurrentCache().clear();
+		// if (test.size() != 0)
+		// Thread.sleep(100);
+		// assert test.size() == 0;
+		// assert binding.isEmpty();
+	}
 
 	@Test(invocationCount = 5)
-	public void test003_Contains() throws InterruptedException {
+	public void test005_Contains() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.setInstance("car");
 		List<Generic> genericCars = new ArrayList<>();
@@ -94,7 +109,7 @@ public class ObservableListTest extends AbstractTest {
 		genericCars.add(myCar4);
 		Generic myCar5 = car.setInstance("myCar5");
 		genericCars.add(myCar5);
-		ObservableList<Generic> dependenciesObservableList1 = new AbstractWrappable.WrappableImpl<Generic>(engine.getCurrentCache().getWrappableDependencies(car));
+		ObservableList<Generic> dependenciesObservableList1 = engine.getCurrentCache().getWrappableDependencies(car);
 		engine.getCurrentCache().flush();
 		if (dependenciesObservableList1.isEmpty())
 			Thread.sleep(100);

@@ -98,7 +98,7 @@ public class CocCache extends HeavyCache {
 	}
 
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
-		return getTransaction().getWrappableDependencies(generic);
+		return getDifferential().getWrappableDependencies(generic);
 	}
 
 	public ObservableList<Generic> getInstancesObservableList(Generic generic) {
