@@ -1,6 +1,7 @@
 package org.genericsystem.gui.context;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
@@ -13,33 +14,30 @@ import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 public class RootContext extends AbstractContext {
 
 	public ObjectProperty<CocClientEngine> rootProperty = new SimpleObjectProperty<CocClientEngine>();
-	public ObservableList<SubContext> observableGenericList;
-
-	// public ObservableList<Generic> observableSubContext;
+	public ObservableList<SubContext> observableSubContextList;
 
 	public RootContext(CocClientEngine engine) {
 		super(null);
 		rootProperty.set(engine);
-		observableGenericList = transform(getCurrentCache().getInstancesObservableList(rootProperty.getValue()));
-		// observableSubContext = new;
-
+		observableSubContextList = transform(getCurrentCache().getInstancesObservableList(rootProperty.getValue()));
+		for (SubContext sub : observableSubContextList) {
+			System.out.println(sub.observableGeneric.getValue());
+		}
 	}
 
 	private ObservableList<SubContext> transform(ObservableList<Generic> instancesObservableList) {
-		// TODO Auto-generated method stub
 		return new TransformationList<SubContext, Generic>(instancesObservableList) {
 			@Override
 			protected void sourceChanged(Change<? extends Generic> change) {
 				beginChange();
 				while (change.next()) {
-					if (change.wasAdded()) {
-						for (int i = change.getFrom(); i < change.getTo(); i++) {
+					for (int i = change.getFrom(); i < change.getTo(); i++) {
+						if (change.wasAdded()) {
 							add(i, get(i));
-						}
-					} else
-						for (int i = change.getFrom(); i < change.getTo(); i++) {
+						} else if (change.wasRemoved()) {
 							remove(i);
 						}
+					}
 				}
 				endChange();
 			}
@@ -51,7 +49,9 @@ public class RootContext extends AbstractContext {
 
 			@Override
 			public SubContext get(int index) {
-				return new SubContext(RootContext.this, index);
+				SubContext subContext = new SubContext(RootContext.this, index);
+				subContext.observableGeneric = new ReadOnlyObjectWrapper<Generic>(instancesObservableList.get(index));
+				return subContext;
 			}
 
 			@Override
