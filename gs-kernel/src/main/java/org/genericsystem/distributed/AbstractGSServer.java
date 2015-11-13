@@ -2,15 +2,10 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,7 +25,7 @@ public abstract class AbstractGSServer <T extends AbstractServer> {
 	}*/
 
 	public AbstractGSServer(GSDeploymentOptions options) {
-		webSocket = new WebSocketServer(this, options);
+		webSocket = new WebSocketServer<T>(this, options);
 		this.roots = Arrays.stream(getRoots(options)).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
@@ -48,7 +43,7 @@ public abstract class AbstractGSServer <T extends AbstractServer> {
 		return roots.toArray(new AbstractServer[roots.size()]);
 	}
 	
-	protected WebSocketServer webSocket;
+	protected WebSocketServer<T> webSocket;
 	
 	abstract protected T buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses);
 

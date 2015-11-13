@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.Statics;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ public abstract class AbstractTest {
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 	String ServerVerticleId;
 	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
-	private AbstractGSServer httpGsServer;
+	private CocServer httpGsServer;
 
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
