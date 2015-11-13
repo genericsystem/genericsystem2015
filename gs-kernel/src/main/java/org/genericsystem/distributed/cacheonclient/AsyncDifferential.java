@@ -73,14 +73,16 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
 		return new AbstractWrappable<Generic>() {
-
 			private Predicate<Generic> parent = x -> generic.isDirectAncestorOf(x);
 			private Predicate<Generic> removed = x -> removesObservableList.contains(x);
 			private ObservableList<Generic> filteredRemoves = removesObservableList.filtered(parent);
 			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(parent);
 			private ObservableList<Generic> subcacheGenerics = getSubCache().getWrappableDependencies(generic);
 			private ListChangeListener<Generic> listenerOnAdds = new WeakListChangeListener<Generic>(change -> {
-				// TODO check indices for all cases
+				// TODO check indices for all cases.
+				// often, the sublist pointed at by indices change.getFrom(), change.getTo() doesn't match the actual list
+				// it might be a misuse of nextAdd/nextRemove, and associated indices, or a problem of indices between addsObservableList and subcacheGenerics.
+				// change here is an instance of SingleChange, so there's no real loop involved
 					beginChange();
 					while (change.next())
 						if (change.wasPermutated() || change.wasUpdated())
