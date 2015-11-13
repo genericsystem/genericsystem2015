@@ -1,10 +1,10 @@
 package org.genericsystem.gui.context;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.common.AbstractCache;
 
 public interface IContext {
+
 	public IContext getParent();
 
-	public DefaultCache<Generic> getCurrentCache();
+	public AbstractCache getCurrentCache();
 }

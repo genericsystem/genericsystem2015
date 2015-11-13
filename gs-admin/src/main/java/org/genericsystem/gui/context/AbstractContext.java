@@ -1,16 +1,15 @@
 package org.genericsystem.gui.context;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.common.AbstractCache;
 
 public abstract class AbstractContext implements IContext {
 
@@ -26,28 +25,28 @@ public abstract class AbstractContext implements IContext {
 	}
 
 	@Override
-	public DefaultCache<Generic> getCurrentCache() {
+	public AbstractCache getCurrentCache() {
 		return getParent().getCurrentCache();
 	};
 
-	protected ObservableList<SubContext> genericToSubContext(Function<Generic, SubContext> transfomation, ObjectProperty... rootProperty) {
-		return new ListBinding<SubContext>() {
+	public <T, U extends AbstractContext> ObservableList<U> getSubContextsObservableList(Function<T, U> extractor, Supplier<ObservableList<T>> originalListSupplier, Observable... propertiesToBind) {
+		return new ListBinding<U>() {
 			{
-				super.bind(rootProperty);
+				super.bind(propertiesToBind);
 			}
 
 			@Override
-			protected ObservableList<SubContext> computeValue() {
-				return transform(FXCollections.observableArrayList(getCurrentCache().getInstances((Generic) rootProperty[0].getValue()).toList()), transfomation);
+			protected ObservableList<U> computeValue() {
+				return transform(originalListSupplier.get(), extractor);
 				// return transform(getCurrentCache().getInstancesObservableList(((Generic) rootProperty[0].getValue())), transfomation);
 			}
 		};
 	}
 
-	protected ObservableList<SubContext> transform(ObservableList<Generic> instancesObservableList, Function<Generic, SubContext> transfomation) {
-		return new TransformationList<SubContext, Generic>(instancesObservableList) {
+	protected <T, U extends AbstractContext> ObservableList<U> transform(ObservableList<T> instancesObservableList, Function<T, U> transformation) {
+		return new TransformationList<U, T>(instancesObservableList) {
 			@Override
-			protected void sourceChanged(Change<? extends Generic> change) {
+			protected void sourceChanged(Change<? extends T> change) {
 				beginChange();
 				while (change.next()) {
 					if (change.wasPermutated()) {
@@ -61,12 +60,12 @@ public abstract class AbstractContext implements IContext {
 				endChange();
 			}
 
-			private void addRemove(Change<? extends Generic> c) {
+			private void addRemove(Change<? extends T> c) {
 				if (c.wasPermutated()) {
 					throw new UnsupportedOperationException();
 				} else {
 					if (c.wasRemoved()) {
-						nextRemove(c.getFrom(), (SubContext) null);
+						nextRemove(c.getFrom(), (U) null);
 					}
 					if (c.wasAdded()) {
 						nextAdd(c.getFrom(), c.getFrom() + c.getAddedSubList().size());
@@ -81,10 +80,10 @@ public abstract class AbstractContext implements IContext {
 			}
 
 			@Override
-			public SubContext get(int index) {
+			public U get(int index) {
 				// SubContext subContext = new SubContext(AbstractContext.this);
 				// subContext.observableGeneric = new ReadOnlyObjectWrapper<Generic>(instancesObservableList.get(index));
-				return transfomation.apply(instancesObservableList.get(index));
+				return transformation.apply(instancesObservableList.get(index));
 			}
 
 			@Override

@@ -56,20 +56,6 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 		};
 	}
 
-	// public ObservableList<Generic> getActualObservableList(Generic generic) {
-	// return new ListBinding<Generic>() {
-	// {
-	// super.bind(getDependenciesObservableList(generic));
-	// }
-	//
-	// @Override
-	// protected ObservableList<Generic> computeValue() {
-	// return FXCollections.observableArrayList(dependenciesCache.get(generic).getValue());
-	// }
-	//
-	// };
-	// }
-
 	@Override
 	protected Generic plug(Generic generic) {
 		super.plug(generic);
@@ -87,100 +73,105 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	@Override
 	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
 		return new AbstractWrappable<Generic>() {
-
 			private Predicate<Generic> parent = x -> generic.isDirectAncestorOf(x);
 			private Predicate<Generic> removed = x -> removesObservableList.contains(x);
-
+			private ObservableList<Generic> filteredRemoves = removesObservableList.filtered(parent);
 			private ObservableList<Generic> filteredAdds = addsObservableList.filtered(parent);
-			private ObservableList<Generic> subGenerics = getSubCache().getWrappableDependencies(generic).filtered(x -> !removed.test(x) && parent.test(x));
-
-			private ListChangeListener<Generic> listenerOnAdds = new WeakListChangeListener<Generic>(c -> {
+			private ObservableList<Generic> subcacheGenerics = getSubCache().getWrappableDependencies(generic);
+			private ListChangeListener<Generic> listenerOnAdds = new WeakListChangeListener<Generic>(change -> {
+				// TODO check indices for all cases.
+				// often, the sublist pointed at by indices change.getFrom(), change.getTo() doesn't match the actual list
+				// it might be a misuse of nextAdd/nextRemove, and associated indices, or a problem of indices between addsObservableList and subcacheGenerics.
+				// change here is an instance of SingleChange, so there's no real loop involved
+					beginChange();
+					while (change.next())
+						if (change.wasPermutated() || change.wasUpdated())
+							throw new UnsupportedOperationException();
+						else {
+							int currentIndex = change.getFrom();
+							int changeEndIndex = change.getTo();
+							final int changeStartIndex = currentIndex;
+							do {
+								if (change.wasAdded()) {
+									Generic modifiedGeneric = change.getAddedSubList().get(currentIndex - changeStartIndex);
+									if (parent.test(modifiedGeneric))
+										nextAdd(currentIndex, currentIndex + 1);
+								} else if (change.wasRemoved()) {
+									Generic modifiedGeneric = change.getRemoved().get(currentIndex - changeStartIndex);
+									if (parent.test(modifiedGeneric))
+										nextRemove(currentIndex, modifiedGeneric);
+								}
+							} while (++currentIndex < changeEndIndex);
+							endChange();
+						}
+				});
+			private ListChangeListener<Generic> listenerOnRemoves = new WeakListChangeListener<Generic>(change -> {
 				beginChange();
-				while (c.next())
-					if (c.wasPermutated() || c.wasUpdated())
+				while (change.next())
+					if (change.wasPermutated() || change.wasUpdated())
 						throw new UnsupportedOperationException();
 					else {
-						int from = c.getFrom();
-						int to = c.getTo();
-						final int fpos = from;
+						int currentIndex = change.getFrom();
+						int changeEndIndex = change.getTo();
+						final int changeStartIndex = currentIndex;
 						do {
-							if (c.wasAdded()) {
-								Generic tmp = c.getAddedSubList().get(from - fpos);
-								if (parent.test(tmp))
-									nextAdd(from, from + 1);
-							} else if (c.wasRemoved()) {
-								Generic tmp = c.getRemoved().get(from - fpos);
-								if (parent.test(tmp))
-									nextRemove(from, tmp);
+							if (change.wasAdded()) {
+								Generic modifiedGeneric = change.getAddedSubList().get(currentIndex - changeStartIndex);
+								if (parent.test(modifiedGeneric))
+									nextRemove(currentIndex, modifiedGeneric);
+							} else if (change.wasRemoved()) {
+								Generic modifiedGeneric = change.getRemoved().get(currentIndex - changeStartIndex);
+								if (parent.test(modifiedGeneric))
+									nextAdd(currentIndex, currentIndex + 1);
 							}
-						} while (++from < to);
+						} while (++currentIndex < changeEndIndex);
 					}
 				endChange();
 			});
-
-			private ListChangeListener<Generic> listenerOnRemoves = new WeakListChangeListener<Generic>(c -> {
+			private ListChangeListener<Generic> listenerOnSubcacheGenerics = new WeakListChangeListener<Generic>(change -> {
 				beginChange();
-				while (c.next())
-					if (c.wasPermutated() || c.wasUpdated())
+				while (change.next())
+					if (change.wasPermutated() || change.wasUpdated())
 						throw new UnsupportedOperationException();
 					else {
-						int from = c.getFrom();
-						int to = c.getTo();
-						final int fpos = from;
+						int currentIndex = change.getFrom();
+						int changeEndIndex = change.getTo();
+						final int changeStartIndex = currentIndex;
 						do {
-							if (c.wasAdded()) {
-								Generic tmp = c.getAddedSubList().get(from - fpos);
-								if (parent.test(tmp))
-									nextRemove(from, tmp);
-							} else if (c.wasRemoved()) { // is the if (c.wasRemoved()) necessary?
-						Generic tmp = c.getRemoved().get(from - fpos);
-						if (parent.test(tmp))
-							nextAdd(from, from + 1);
+							if (change.wasAdded()) {
+								Generic modifiedGeneric = change.getAddedSubList().get(currentIndex);
+								if (!removed.test(modifiedGeneric) && !contains(modifiedGeneric))
+									nextAdd(currentIndex, currentIndex + 1);
+							} else if (change.wasRemoved()) {
+								Generic modifiedGeneric = change.getRemoved().get(currentIndex - changeStartIndex);
+								nextRemove(currentIndex, modifiedGeneric);
+							}
+						} while (++currentIndex < changeEndIndex);
 					}
-				} while (++from < to);
-			}
-		endChange();
-	}		);
-
-			private ListChangeListener<Generic> listenerOnSubGenerics = new WeakListChangeListener<Generic>(c -> {
-				beginChange();
-				while (c.next())
-					if (c.wasPermutated() || c.wasUpdated())
-						throw new UnsupportedOperationException();
-					else {
-						int from = c.getFrom();
-						int to = c.getTo();
-						final int fpos = from;
-						do {
-							if (c.wasAdded()) {
-								Generic tmp = c.getAddedSubList().get(from - fpos);
-								if (!removed.test(tmp))
-									nextAdd(from, from + 1);
-							} else if (c.wasRemoved()) { // is the if (c.wasRemoved()) necessary?
-						Generic tmp = c.getRemoved().get(from - fpos);
-						nextRemove(from, tmp);
-					}
-				} while (++from < to);
-			}
-		endChange();
-	}		);
-
+				endChange();
+			});
 			{
-				subGenerics.addListener(listenerOnSubGenerics);
+				subcacheGenerics.addListener(listenerOnSubcacheGenerics);
 				addsObservableList.addListener(listenerOnAdds);
 				removesObservableList.addListener(listenerOnRemoves);
 			}
 
 			@Override
 			public int size() {
-				return (addsObservableList.contains(generic) ? 0 : subGenerics.size()) + filteredAdds.size();
+				return (addsObservableList.contains(generic) ? 0 : subcacheGenerics.size() - filteredRemoves.size()) + filteredAdds.size();
 			}
 
 			@Override
 			public Generic get(int index) {
-				if (index < subGenerics.size())
-					return subGenerics.get(index);
-				return filteredAdds.get(index - subGenerics.size());
+				int subcacheGenericLength = subcacheGenerics.size(), filteredRemovesLength = filteredRemoves.size();
+				if (index < subcacheGenericLength - filteredRemovesLength)
+					for (int i = 0; i < subcacheGenericLength; i++) {
+						if (filteredRemoves.contains(subcacheGenerics.get(i)))
+							++index;
+						if (i == index)
+							return subcacheGenerics.get(i);
+					}
+				return filteredAdds.get(index - (subcacheGenericLength - filteredRemovesLength));
 			}
 		};
 	}
