@@ -17,15 +17,17 @@ public class GSTableView extends TableView<SubContext> {
 
 	public GSTableView(RootContext rootContext) {
 		this.rootContext = rootContext;
+		System.out.println(rootContext);
 		initTable();
 	}
 
 	private void initTable() {
-		final TableColumn<SubContext, ?> tabColumn = new TableColumn<>(rootContext.rootProperty.getValue().toString());
-		getColumns().add(tabColumn);
+		final TableColumn<SubContext, ?> tabColumn = new TableColumn<>();
 		tabColumn.textProperty().bind(rootContext.columnTitle);
-		tabColumn.setCellValueFactory((g) -> new ReadOnlyObjectWrapper<String>(Objects.toString(g.getValue().observableGeneric.getValue())));
-		itemsProperty().set(rootContext.observableSubContextList);
+		tabColumn.setCellValueFactory((g) -> new ReadOnlyObjectWrapper<String>(Objects.toString(g.getValue().observableGeneric.getValue().getValue())));
+
+		getColumns().add(tabColumn);
+		itemsProperty().set(rootContext.subContexObservableList);
 
 		// SubContext sub = (SubContext) rootContext.observableSubContextList.get(0);
 		// TableRow<Generic> tbr = new TableRow<Generic>();
