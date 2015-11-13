@@ -1,9 +1,16 @@
 package org.genericsystem.gui.javafx;
 
-import javafx.scene.control.Button;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import org.genericsystem.gui.context.GenericContext;
 import org.genericsystem.gui.context.RootContext;
+import org.genericsystem.gui.context.TableViewContext;
 
 /**
  * @author Nicolas Feybesse
@@ -12,27 +19,32 @@ import org.genericsystem.gui.context.RootContext;
 public class Crud extends VBox {
 
 	private RootContext rootContext;
-
-	private GSTableView tableView;
-	private GSTableView tab;
-	private RootContext rc;
+	public TableViewContext tableViewContext;
+	public TableViewContext tableViewContext2;
 
 	public Crud(RootContext rootContext) {
 		this.rootContext = rootContext;
-		// rc = rootContext;
-		tableView = new GSTableView(rootContext);
-		getChildren().add(tableView);
-		Button buttonAdd = new Button("add");
-		// buttonAdd.setOnAction(e -> {
-		// tableView.getSelectionModel().getSelectedItem().observableGeneric.getValue().remove();
-		// });
+		tableViewContext = new TableViewContext(rootContext);
+		GSTableView tableViewEngineInstances = new GSTableView(tableViewContext);
 
-		// rc = new RootContext(tableView.getItems().get(0).);
-		tableView.getSelectionModel().selectedItemProperty().addListener(observable -> {
-			// rc.rootProperty.set(tableView.getSelectionModel().getSelectedItem().observableGeneric.getValue());
-			});
+		Bindings.bindContent(getChildren(), new ListBinding<Node>() {
+			ObservableValue<GenericContext> selectedContext = tableViewEngineInstances.getSelectionModel().selectedItemProperty();
+			{
+				super.bind(selectedContext);
+			}
 
-		getChildren().add(buttonAdd);
+			@Override
+			protected ObservableList<Node> computeValue() {
+				ObservableList<Node> nodes = FXCollections.observableArrayList();
+				nodes.add(tableViewEngineInstances);
+				if (selectedContext.getValue() != null) {
+					tableViewContext2 = new TableViewContext(selectedContext.getValue());
+					GSTableView TableViewGenericInstances = new GSTableView(tableViewContext2);
+					nodes.add(TableViewGenericInstances);
+				}
+				return nodes;
+			}
+		});
 	}
 
 	public RootContext getContext() {

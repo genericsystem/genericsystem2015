@@ -3,8 +3,8 @@ package org.genericsystem.gui.context;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
-import javafx.beans.property.ObjectProperty;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
@@ -29,7 +29,7 @@ public abstract class AbstractContext implements IContext {
 		return getParent().getCurrentCache();
 	};
 
-	protected <T, U extends AbstractContext> ObservableList<U> getSubContextsObservableList(Function<T, U> extractor, Supplier<ObservableList<T>> originalListSupplier, ObjectProperty<?>... propertiesToBind) {
+	public <T, U extends AbstractContext> ObservableList<U> getSubContextsObservableList(Function<T, U> extractor, Supplier<ObservableList<T>> originalListSupplier, Observable... propertiesToBind) {
 		return new ListBinding<U>() {
 			{
 				super.bind(propertiesToBind);
