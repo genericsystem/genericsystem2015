@@ -6,10 +6,9 @@ import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.BasicEngine;
 
-public class CocServer extends AbstractGSServer {
+public class CocServer extends AbstractGSServer<BasicEngine> {
 
 	public static void main(String[] args) {
 		new CocServer(new GSDeploymentOptions()).start();
@@ -20,9 +19,7 @@ public class CocServer extends AbstractGSServer {
 	}
 
 	@Override
-	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer basicEngine, GSBuffer gsBuffer) {
-		
-		BasicEngine root = (BasicEngine)basicEngine;
+	protected Buffer getReplyBuffer(int methodId, int op, BasicEngine root, GSBuffer gsBuffer) {
 		
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		switch (methodId) {

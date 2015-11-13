@@ -8,12 +8,11 @@ import io.vertx.core.http.WebSocket;
 class WebSocketClient {
 	private final HttpClient httpClient;
 	private final WebSocket webSocket;
-	private AbstractGSClient client;
 	
 	public WebSocketClient(AbstractGSClient client, String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
 		// /!\
-		webSocket = client.synchronizeTask(task -> httpClient.websocket(path, webSock -> task.handle(webSock)));
+		webSocket = AbstractGSClient.synchronizeTask(task -> httpClient.websocket(path, webSock -> task.handle(webSock)));
 		webSocket.exceptionHandler(e -> {
 			System.out.println("Discard http request because of : ");
 			e.printStackTrace();

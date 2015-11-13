@@ -14,9 +14,9 @@ public class WebSocketServer <T extends AbstractServer> {
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
-	private AbstractGSServer server;
+	private AbstractGSServer<T> server;
 
-	public WebSocketServer(AbstractGSServer server, GSDeploymentOptions options) {
+	public WebSocketServer(AbstractGSServer<T> server, GSDeploymentOptions options) {
 		this.server = server;
 		this.port = options.getPort();
 		this.host = options.getHost();
