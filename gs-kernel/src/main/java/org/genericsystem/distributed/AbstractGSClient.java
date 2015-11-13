@@ -125,79 +125,79 @@ public abstract class AbstractGSClient implements Protocole {
 		return promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer);
 	}
 	
-	protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
-		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
-			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
-			consumer.accept(resultObject -> {
-				try {
-					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
-					blockingQueue.put(resultObject);
-					/*
-					 * globalResultContainer.put(resultObject) ; return;
-					 */
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			});
-			Object result = null;
-			try {
-				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
-				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (result != null) {
-				if (result instanceof RuntimeException)
-					throw (RuntimeException) result;
-				if (result instanceof ConcurrencyControlException)
-					throw (ConcurrencyControlException) result;
-				else
-					return (T) result;
-			}
+//	protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
+//		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
+//			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
+//			consumer.accept(resultObject -> {
+//				try {
+//					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
+//					blockingQueue.put(resultObject);
+//					/*
+//					 * globalResultContainer.put(resultObject) ; return;
+//					 */
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			});
+//			Object result = null;
+//			try {
+//				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
+//				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//			if (result != null) {
+//				if (result instanceof RuntimeException)
+//					throw (RuntimeException) result;
+//				if (result instanceof ConcurrencyControlException)
+//					throw (ConcurrencyControlException) result;
+//				else
+//					return (T) result;
+//			}
+//
+//			System.out.println("Response failure " + Thread.currentThread());
+//		}
+//		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
+//	}
 
-			System.out.println("Response failure " + Thread.currentThread());
-		}
-		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
-	}
-
-	protected static <T> T synchronizeTask(Consumer<Handler<Object>> consumer) {
-		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
-
-			CompletableFuture<T> promise = CompletableFuture.supplyAsync(() -> {
-				T result = null;
-
-				return result;
-			});
-
-			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
-			consumer.accept(resultObject -> {
-				try {
-					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
-					blockingQueue.put(resultObject);
-					/*
-					 * globalResultContainer.put(resultObject) ; return;
-					 */
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			});
-			Object result = null;
-			try {
-				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
-				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (result != null) {
-				if (result instanceof RuntimeException)
-					throw (RuntimeException) result;
-				else
-					return (T) result;
-			}
-
-			System.out.println("Response failure " + Thread.currentThread());
-		}
-		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
-	}	
+//	protected static <T> T synchronizeTask(Consumer<Handler<Object>> consumer) {
+//		for (int i = 0; i < Statics.HTTP_ATTEMPTS; i++) {
+//
+//			CompletableFuture<T> promise = CompletableFuture.supplyAsync(() -> {
+//				T result = null;
+//
+//				return result;
+//			});
+//
+//			BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<>(Statics.HTTP_ATTEMPTS);
+//			consumer.accept(resultObject -> {
+//				try {
+//					// System.out.println("Free BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread() + " " + resultObject);
+//					blockingQueue.put(resultObject);
+//					/*
+//					 * globalResultContainer.put(resultObject) ; return;
+//					 */
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			});
+//			Object result = null;
+//			try {
+//				// System.out.println("Poll BlockingQueue : " + System.identityHashCode(blockingQueue) + " " + Thread.currentThread());
+//				result = blockingQueue.poll(2000, TimeUnit.MILLISECONDS);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//			if (result != null) {
+//				if (result instanceof RuntimeException)
+//					throw (RuntimeException) result;
+//				else
+//					return (T) result;
+//			}
+//
+//			System.out.println("Response failure " + Thread.currentThread());
+//		}
+//		throw new IllegalStateException("Unable get reponse for " + Statics.HTTP_ATTEMPTS + " times");
+//	}	
 	
 }
