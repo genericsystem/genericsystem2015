@@ -14,7 +14,7 @@ import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.distributed.cacheonclient.WebSocketCocServer;
+import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.gui.context.RootContext;
 import org.genericsystem.gui.javafx.Crud;
 import org.genericsystem.kernel.Statics;
@@ -26,7 +26,7 @@ import org.genericsystem.kernel.Statics;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		WebSocketCocServer server = new WebSocketCocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		launch(args);
 		// server.stop();
