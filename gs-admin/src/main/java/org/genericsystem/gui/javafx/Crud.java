@@ -23,17 +23,16 @@ public class Crud extends VBox {
 		tableView = new GSTableView(rootContext);
 		getChildren().add(tableView);
 		Button buttonAdd = new Button("add");
-		buttonAdd.setOnAction(e -> {
-			tableView.getSelectionModel().getSelectedItem().observableGeneric.getValue().remove();
-		});
+		// buttonAdd.setOnAction(e -> {
+		// tableView.getSelectionModel().getSelectedItem().observableGeneric.getValue().remove();
+		// });
 
-		rc = new RootContext(tableView.getItems().get(0).observableGeneric.getValue());
+		// rc = new RootContext(tableView.getItems().get(0).);
 		tableView.getSelectionModel().selectedItemProperty().addListener(observable -> {
-			rc.rootProperty.set(tableView.getSelectionModel().getSelectedItem().observableGeneric.getValue());
-		});
+			// rc.rootProperty.set(tableView.getSelectionModel().getSelectedItem().observableGeneric.getValue());
+			});
 
-		tab = new GSTableView(rc);
-		getChildren().addAll(tab, buttonAdd);
+		getChildren().add(buttonAdd);
 	}
 
 	public RootContext getContext() {
