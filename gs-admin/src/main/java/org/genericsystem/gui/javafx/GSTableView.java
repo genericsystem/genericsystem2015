@@ -24,18 +24,4 @@ public class GSTableView extends TableView<GenericContext> {
 		itemsProperty().set(tableViewContext.subContexObservableList);
 
 	}
-
-	private void initTable() {
-
-		// SubContext sub = (SubContext) rootContext.observableSubContextList.get(0);
-		// TableRow<Generic> tbr = new TableRow<Generic>();
-		// name.setCellFactory(Te
-		// name.setOnEditCommit(e -> System.out.println("ediiiiit"));
-		// this.setItems(value);
-		// itemsProperty().set(rootContext.getCurrentCache().getDependenciesObservableList(rootContext.rootProperty.getValue()));
-		// new SimpleObjectProperty(g.getValue().toString())
-		// GSEditingCell<Generic, String> cell = new GSEditingCell<Generic, String>();
-		// name.setCellValueFactory(cell.get);
-
-	}
 }

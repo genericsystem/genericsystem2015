@@ -25,6 +25,7 @@ public class ObservableListTest extends AbstractTest {
 		assert dependenciesObservableList.size() != 0;
 	}
 
+	@Test(invocationCount = 5)
 	public void test002_ConcurrentTryFlush() throws InterruptedException, ConcurrencyControlException {
 		CocClientEngine engine1 = new CocClientEngine();
 		CocClientEngine engine2 = new CocClientEngine();
@@ -38,6 +39,7 @@ public class ObservableListTest extends AbstractTest {
 			wrap.get(i);
 	}
 
+	@Test(invocationCount = 5)
 	public void test003_ListenerOnAddInstance() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.setInstance("car");
@@ -59,6 +61,7 @@ public class ObservableListTest extends AbstractTest {
 
 	}
 
+	@Test(invocationCount = 5)
 	public void test004_ListenerOnRemoveInstance() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.setInstance("car");
@@ -71,7 +74,7 @@ public class ObservableListTest extends AbstractTest {
 
 		Generic myBMW = car.addInstance("myBMW");
 		Generic myVolksWagen = car.addInstance("myVolksWagen");
-		if (test.size() == 0)
+		if (test.size() <= 1)
 			Thread.sleep(100);
 		assert test.size() != 0;
 		assert binding.contains(myBMW);
@@ -95,7 +98,46 @@ public class ObservableListTest extends AbstractTest {
 	}
 
 	@Test(invocationCount = 5)
-	public void test005_Contains() throws InterruptedException {
+	public void test005_ListenerFlushAndRemove() throws InterruptedException {
+		// TODO flush with the mount, test will contain [mybmw, myvolkswagen, mybmw, myvolkswagen].
+		// flush without the mount, test will only contain [mybmw, myvolkswagen].
+		// don't mount, and binding will be empty
+		CocClientEngine engine = new CocClientEngine();
+		Generic car = engine.setInstance("car");
+
+		engine.getCurrentCache().asyncMount();
+
+		Wrappable<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
+		ObservableList<Generic> binding = FXCollections.observableArrayList();
+		Bindings.bindContent(binding, test);
+
+		Generic myBMW = car.addInstance("myBMW");
+		Generic myVolksWagen = car.addInstance("myVolksWagen");
+
+		System.out.println("flush");
+		engine.getCurrentCache().flush();
+		Thread.sleep(100);
+
+		assert test.size() == 2 : "binding::" + binding + "\ttest::" + test;
+		assert binding.equals(test) : "binding::" + binding + "\ttest::" + test;
+
+		myBMW.remove();
+		myVolksWagen.remove();
+		if (test.size() != 0)
+			Thread.sleep(100);
+
+		assert test.size() == 0 : "binding::" + binding + "\ttest::" + test;
+		assert binding.equals(test) : "binding::" + binding + "\ttest::" + test;
+		//
+		// engine.getCurrentCache().clear();
+		// if (test.size() != 0)
+		// Thread.sleep(100);
+		// assert test.size() == 0;
+		// assert binding.isEmpty();
+	}
+
+	@Test(invocationCount = 5)
+	public void test006_Contains() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 		Generic car = engine.setInstance("car");
 		List<Generic> genericCars = new ArrayList<>();
