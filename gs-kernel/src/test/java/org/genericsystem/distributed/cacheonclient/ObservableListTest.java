@@ -2,9 +2,11 @@ package org.genericsystem.distributed.cacheonclient;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
@@ -55,7 +57,7 @@ public class ObservableListTest extends AbstractTest {
 
 		engine.getCurrentCache().asyncMount();
 
-		Wrappable<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
+		ObservableList<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
 		ObservableList<Generic> binding = FXCollections.observableArrayList();
 		Bindings.bindContent(binding, test);
 
@@ -77,7 +79,7 @@ public class ObservableListTest extends AbstractTest {
 
 		engine.getCurrentCache().asyncMount();
 
-		Wrappable<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
+		ObservableList<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
 		ObservableList<Generic> binding = FXCollections.observableArrayList();
 		Bindings.bindContent(binding, test);
 
@@ -116,7 +118,7 @@ public class ObservableListTest extends AbstractTest {
 
 		engine.getCurrentCache().asyncMount();
 
-		Wrappable<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
+		ObservableList<Generic> test = engine.getCurrentCache().getWrappableDependencies(car);
 		ObservableList<Generic> binding = FXCollections.observableArrayList();
 		Bindings.bindContent(binding, test);
 
