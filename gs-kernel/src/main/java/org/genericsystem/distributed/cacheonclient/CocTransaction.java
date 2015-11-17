@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -22,7 +23,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineHandler;
 
-@SuppressWarnings("restriction")
 public class CocTransaction extends CheckedContext implements AsyncIDifferential {
 
 	private final long ts;
@@ -94,10 +94,9 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 
 	public class CompletableObservableList extends SimpleObjectProperty<List<Generic>> implements ObservableValue<List<Generic>> {
 
-		public CompletableObservableList(CompletableFuture<Object> promise) {
+		public CompletableObservableList(CompletableFuture<Vertex[]> promise) {
 			super(new ArrayList<>());
-			promise.thenAccept(elem -> {
-				Vertex[] elements = (Vertex[]) elem;
+			promise.thenAccept(elements -> {
 				setValue(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList()));
 			});
 		}
@@ -125,7 +124,7 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 	}
 
 	@Override
-	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
+	public ObservableList<Generic> getWrappableDependencies(Generic generic) {
 		return new AbstractWrappable<Generic>() {
 			private ChangeListener<List<Generic>> listener = new WeakChangeListener<>((observableValue, oldValue, newValue) -> {
 				beginChange();
