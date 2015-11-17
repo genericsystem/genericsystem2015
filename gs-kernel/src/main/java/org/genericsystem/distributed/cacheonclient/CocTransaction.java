@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
-
+import javafx.collections.ObservableList;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -125,7 +124,7 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 	}
 
 	@Override
-	public Wrappable<Generic> getWrappableDependencies(Generic generic) {
+	public ObservableList<Generic> getWrappableDependencies(Generic generic) {
 		return new AbstractWrappable<Generic>() {
 			private ChangeListener<List<Generic>> listener = new WeakChangeListener<>((observableValue, oldValue, newValue) -> {
 				beginChange();

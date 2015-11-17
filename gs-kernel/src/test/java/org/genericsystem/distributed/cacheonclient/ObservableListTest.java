@@ -2,11 +2,9 @@ package org.genericsystem.distributed.cacheonclient;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Generic;
 import org.testng.annotations.Test;
@@ -17,8 +15,19 @@ public class ObservableListTest extends AbstractTest {
 	@Test(invocationCount = 5)
 	public void test001_ObservableList() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
-		assert engine == engine.adjustMeta();
+
 		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependencies(engine);
+		if (dependenciesObservableList.size() == 0) {
+			Thread.sleep(100);
+		}
+		assert dependenciesObservableList.size() != 0;
+	}
+
+	@Test(invocationCount = 5)
+	public void test001_ObservableList2() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependencies(engine);
+		engine.addInstance("AddesType");
 		if (dependenciesObservableList.size() == 0) {
 			Thread.sleep(100);
 		}
@@ -30,7 +39,7 @@ public class ObservableListTest extends AbstractTest {
 		CocClientEngine engine1 = new CocClientEngine();
 		CocClientEngine engine2 = new CocClientEngine();
 		engine2.addInstance("elephant");
-		Wrappable<Generic> wrap = engine2.getCurrentCache().getWrappableDependencies(engine1);
+		ObservableList<Generic> wrap = engine2.getCurrentCache().getWrappableDependencies(engine1);
 		engine2.getCurrentCache().tryFlush();
 		if (wrap.size() == 0)
 			Thread.sleep(100);
