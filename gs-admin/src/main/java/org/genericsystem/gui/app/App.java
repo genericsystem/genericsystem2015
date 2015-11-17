@@ -20,10 +20,12 @@ import org.genericsystem.kernel.Statics;
 import org.genericsystem.newgui.component.IComponent;
 import org.genericsystem.newgui.metacomponent.IMetaComponent;
 import org.genericsystem.newgui.metacomponent.IMetaComponent.ButtonMetaComponent;
+import org.genericsystem.newgui.metacomponent.IMetaComponent.LabelMetaComponent;
 import org.genericsystem.newgui.metacomponent.IMetaComponent.TableViewMetaComponent;
 import org.genericsystem.newgui.metacomponent.IMetaComponent.VBoxMetaComponent;
 import org.genericsystem.newgui.metacontext.IMetaContext;
 import org.genericsystem.newgui.metacontext.IMetaContext.RootMetaContext;
+import org.genericsystem.newgui.metacontext.IMetaContext.RootMetaContext.RootContext;
 
 public class App extends Application {
 
@@ -43,16 +45,19 @@ public class App extends Application {
 		IMetaContext rootMetaContext = new RootMetaContext(null);
 		// IMetaContext tableViewMetaContext = new TableViewMetaContext(rootMetaContext);
 
+		// IMetaComponent rootMetaComponent = new VBoxMetaComponent(null);
+
 		IMetaComponent vBoxMetaComponent = new VBoxMetaComponent(null);
+
 		IMetaComponent tableViewMetaComp = new TableViewMetaComponent(vBoxMetaComponent);
 		IMetaComponent buttonMetaComp = new ButtonMetaComponent(vBoxMetaComponent);
 
-		IComponent rootComponent = vBoxMetaComponent.apply(rootMetaContext, null);
+		IMetaComponent labelComponent = new LabelMetaComponent(vBoxMetaComponent);
 
-		// vBoxMetaComponent.getChildren().forEach(metaComponent -> metaComponent.apply(rootMetaContext, rootComponent));
+		RootContext rootContext = (RootContext) rootMetaContext.buildContext(null);
+		rootContext.initProperty(initGS());
 
-		// IComponent tableViewComponent = tableViewMetaComp.apply(rootMetaContext, rootComponent);
-		// IComponent buttonComponent = buttonMetaComp.apply(rootMetaContext, rootComponent);
+		IComponent rootComponent = vBoxMetaComponent.apply(null, rootContext);
 
 		VBox root = (VBox) rootComponent.getNode();
 

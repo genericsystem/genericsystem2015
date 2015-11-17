@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 import org.genericsystem.gui.context.GenericContext;
-import org.genericsystem.gui.context.RootContext;
+import org.genericsystem.gui.context.OldRootContext;
 import org.genericsystem.gui.context.TableViewContext;
 
 /**
@@ -18,11 +18,11 @@ import org.genericsystem.gui.context.TableViewContext;
  */
 public class Crud extends VBox {
 
-	private RootContext rootContext;
+	private OldRootContext rootContext;
 	public TableViewContext tableViewContext;
 	public TableViewContext tableViewContext2;
 
-	public Crud(RootContext rootContext) {
+	public Crud(OldRootContext rootContext) {
 		this.rootContext = rootContext;
 		tableViewContext = new TableViewContext(rootContext);
 		GSTableView tableViewEngineInstances = new GSTableView(tableViewContext);
@@ -47,7 +47,7 @@ public class Crud extends VBox {
 		});
 	}
 
-	public RootContext getContext() {
+	public OldRootContext getContext() {
 		return rootContext;
 	}
 }
