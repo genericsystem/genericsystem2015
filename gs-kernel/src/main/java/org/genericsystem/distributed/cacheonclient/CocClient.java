@@ -12,20 +12,18 @@ import org.genericsystem.kernel.Statics;
 
 public class CocClient extends AbstractGSClient implements CocProtocole {
 
-	
-	
 	public CocClient(String host, int port, String path) {
 		super(host, port, path);
 	}
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {
-		return (Vertex[]) unsafe(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		return unsafe(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 
 	}
 
-	public CompletableFuture<Object> getDependenciesPromise(long ts, long id) {
-		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(ts).appendLong(id));
+	public CompletableFuture<Vertex[]> getDependenciesPromise(long ts, long id) {
+		return unsafeException(() -> promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(ts).appendLong(id)));
 	}
 
 	@Override

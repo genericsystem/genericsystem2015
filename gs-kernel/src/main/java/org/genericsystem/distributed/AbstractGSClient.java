@@ -2,6 +2,7 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -10,8 +11,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
+import org.genericsystem.kernel.Statics;
+
 import com.google.common.base.Supplier;
 
 public abstract class AbstractGSClient implements Protocole {
@@ -100,20 +104,20 @@ public abstract class AbstractGSClient implements Protocole {
 
 	@Override
 	public Vertex getVertex(long id) {
-		return unsafeException(() -> unsafe(() -> getVertexPromise(id).get()));
+		return unsafe(() -> getVertexPromise(id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 	}
 
-	public CompletableFuture<Object> getVertexPromise(long id) {
-		return promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id));
+	public CompletableFuture<Vertex> getVertexPromise(long id) {
+		return unsafeException(() -> promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id)));
 	}
 
 	@Override
 	public long pickNewTs() {
-		return unsafeException(() -> unsafe(() -> getPickNewTsPromise().get()));
+		return unsafe(() -> getPickNewTsPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 	}
 
-	public CompletableFuture<Object> getPickNewTsPromise() {
-		return promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer);
+	public CompletableFuture<Long> getPickNewTsPromise() {
+		return unsafeException(() -> promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer));
 	}
 
 	// protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
