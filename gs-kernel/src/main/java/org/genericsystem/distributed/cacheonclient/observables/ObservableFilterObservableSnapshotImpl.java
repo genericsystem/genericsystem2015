@@ -19,18 +19,30 @@ public class ObservableFilterObservableSnapshotImpl<E> extends AbstractObservabl
 		this.backingSet = set;
 		this.predicate = predicate;
 		predicate.addListener((ChangeListener<Predicate<E>>) (o, oldPredicate, newPredicate) -> {
-			filteredSize = Long.valueOf(backingSet.stream().filter(newPredicate).count()).intValue();
-
 			backingSet.stream().forEach(g -> {
-				boolean newSelected = newPredicate.test(g);
-				if (oldPredicate.test(g) != newSelected)
-					if (newSelected)
-						callObservers(new SimpleAddChange(g));
-					else
-						callObservers(new SimpleRemoveChange(g));
+				if (oldPredicate.test(g)) {
+					callObservers(new SimpleRemoveChange(g));
+				}
+
+				if (newPredicate.test(g)) {
+					callObservers(new SimpleAddChange(g));
+				}
 			});
 
-		});
+			filteredSize = Long.valueOf(backingSet.stream().filter(newPredicate).count()).intValue();
+
+			// Fastest way, but do not support less restrictive filter than previous (lose order)
+			// backingSet.stream().forEach(g -> {
+			// boolean newSelected = newPredicate.test(g);
+			// if (oldPredicate.test(g) != newSelected) {
+			// if (newSelected)
+			// callObservers(new SimpleAddChange(g));
+			// else
+			// callObservers(new SimpleRemoveChange(g));
+			// }
+			// });
+
+			});
 		this.filteredSize = Long.valueOf(backingSet.stream().filter(predicate.getValue()).count()).intValue();
 		this.backingSet.addListener(new WeakSetChangeListener<E>(c -> {
 			if (c.wasAdded() && predicate.getValue().test(c.getElementAdded())) {
