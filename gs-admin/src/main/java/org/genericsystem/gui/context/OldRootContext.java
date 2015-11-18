@@ -5,9 +5,9 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 
-public class RootContext extends GenericContext {
+public class OldRootContext extends GenericContext {
 
-	public RootContext(AbstractRoot engine) {
+	public OldRootContext(AbstractRoot engine) {
 		super(null, new ReadOnlyObjectWrapper<>(engine));
 	}
 

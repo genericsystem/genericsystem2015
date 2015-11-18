@@ -1,5 +1,16 @@
 package org.genericsystem.newgui.context;
 
-public class AbstractContext implements IContext {
+public abstract class AbstractContext implements IContext {
 
+	public IContext parent;
+
+	public AbstractContext(IContext parent) {
+		this.parent = parent;
+
+	}
+
+	@Override
+	public IContext getParent() {
+		return parent;
+	}
 }

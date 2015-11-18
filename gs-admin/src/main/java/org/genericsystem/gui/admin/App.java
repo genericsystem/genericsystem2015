@@ -15,7 +15,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
-import org.genericsystem.gui.context.RootContext;
+import org.genericsystem.gui.context.OldRootContext;
 import org.genericsystem.gui.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 
@@ -55,7 +55,7 @@ public class App extends Application {
 		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
 		engine.getCurrentCache().flush();
 
-		RootContext rootContext = new RootContext(engine);
+		OldRootContext rootContext = new OldRootContext(engine);
 
 		Crud crud = new Crud(rootContext);
 
