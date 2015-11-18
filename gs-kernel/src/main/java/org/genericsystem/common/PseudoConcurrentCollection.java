@@ -30,7 +30,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		while (iterator.hasNext())
 			if (element.equals(iterator.next())) {
 				iterator.remove();
-				map.remove(element);
+				// map.remove(element);
 				return true;
 			}
 		return false;
@@ -68,8 +68,10 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		public void remove() {
 			if (next == null)
 				throw new IllegalStateException();
+			map.remove(next);
 			if (last == null) {
 				head = next.next;
+				next = null;
 				return;
 			}
 			last.next = next.next;
