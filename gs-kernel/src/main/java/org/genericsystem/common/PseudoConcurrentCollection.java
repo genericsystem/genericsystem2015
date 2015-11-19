@@ -68,7 +68,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		public void remove() {
 			if (next == null)
 				throw new IllegalStateException();
-			map.remove(next);
+			map.remove(next.content);
 			if (last == null) {
 				head = next.next;
 				next = null;
