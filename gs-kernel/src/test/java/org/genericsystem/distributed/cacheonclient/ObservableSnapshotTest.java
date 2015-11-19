@@ -13,6 +13,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.observables.ContainerObservableSnapshot;
 import org.testng.annotations.Test;
@@ -90,7 +91,11 @@ public class ObservableSnapshotTest extends AbstractTest {
 		List<Integer> setChecker = new LinkedList<>();
 
 		containerObsSnapshot.addAll(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+		containerObsSnapshot.add(13);
+		containerObsSnapshot.add(14);
 		setChecker.addAll(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+		setChecker.add(13);
+		setChecker.add(14);
 
 		Set<Integer> filteredSetChecker = setChecker.stream().filter(predicate).collect(Collectors.toSet());
 
@@ -159,6 +164,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 		assert new ArrayList<>(containerObsSnapshot).equals(listToCheck);
 	}
 
+	@Test(invocationCount = 5)
 	public void test007_EngineDependenciesTest() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 
@@ -170,51 +176,96 @@ public class ObservableSnapshotTest extends AbstractTest {
 
 		assert dependenciesObservableList.size() != 0;
 
-		System.out.println(engine.getInstances().toList());
-		System.out.println(dependenciesObservableList);
-
-		assert engine.getInstances().toList().equals(dependenciesObservableList);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
 
-	public void test007_ObservableEngineDependenciesAddTest() throws InterruptedException {
+	@Test(invocationCount = 5)
+	public void test008_ObservableEngineDependenciesAddTest() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
-		Integer referenceSize;
 
 		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
-		referenceSize = dependenciesObservableList.size();
 
-		engine.addInstance("AddesType");
-		if (dependenciesObservableList.size() != referenceSize + 1) {
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
 			Thread.sleep(100);
 		}
-		assert dependenciesObservableList.size() == referenceSize + 1;
+
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+
+		engine.addInstance("Instance0");
+		engine.addInstance("Instance1");
+		engine.addInstance("Instance2");
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+			Thread.sleep(100);
+		}
+
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
 
-	// public void test008_ObservableEngineDependenciesRemoveTest() throws InterruptedException, ConcurrencyControlException {
+	@Test(invocationCount = 5)
+	public void test009_ObservableEngineDependenciesRemoveTest() throws InterruptedException, ConcurrencyControlException {
+		CocClientEngine engine = new CocClientEngine();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+
+		engine.addInstance("Instance0");
+		engine.addInstance("Instance1");
+		Generic g2 = engine.addInstance("Instance2");
+		engine.addInstance("Instance3");
+		engine.addInstance("Instance4");
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+			Thread.sleep(100);
+		}
+
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+
+		g2.remove();
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+			Thread.sleep(100);
+		}
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	// public void test010_ObservableEngineDependenciesDifferentialTest() throws InterruptedException, ConcurrencyControlException {
 	// CocClientEngine engine = new CocClientEngine();
-	// Integer referenceSize;
 	//
 	// ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
 	//
-	// engine.addInstance("Instance0");
-	// engine.addInstance("Instance1");
-	// Generic g2 = engine.addInstance("Instance2");
-	// engine.addInstance("Instance3");
-	// engine.addInstance("Instance4");
-	// if (dependenciesObservableList.size() == 0) {
-	// Thread.sleep(100);
-	// }
-	// referenceSize = dependenciesObservableList.size();
+	// engine.addInstance("InstanceL1_0");
+	// engine.addInstance("InstanceL1_1");
+	// Generic g2 = engine.addInstance("InstanceL1_2");
+	// engine.addInstance("InstanceL1_3");
+	// engine.addInstance("InstanceL1_4");
 	//
-	// g2.remove();
-	// if (dependenciesObservableList.size() == referenceSize) {
+	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
 	// Thread.sleep(100);
 	// }
-	// assert dependenciesObservableList.size() == referenceSize - 1;
+	//
+	// assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	//
+	// System.out.println(engine.getCurrentCache().getDependencies(engine).toList());
+	// System.out.println(dependenciesObservableList);
+	// System.out.println("_____2ND_LEVEL_____");
+	//
+	// engine.getCurrentCache().asyncMount();
+	//
+	// engine.addInstance("InstanceL2_0");
+	// engine.addInstance("InstanceL2_1");
+	// engine.addInstance("InstanceL2_2");
+	// // g2.remove();
+	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+	// Thread.sleep(100);
+	// }
+	// System.out.println(engine.getCurrentCache().getDependencies(engine).toList());
+	// System.out.println(dependenciesObservableList);
+	//
+	// assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	// }
 
 	//
-
+	//
+	//
+	//
 	// public void testultimate() throws InterruptedException {
 	//
 	// ObservableList<Object> ol0 = FXCollections.observableArrayList();

@@ -18,6 +18,7 @@ public abstract class AbstractObservableSnapshot<E> extends AbstractSet<E> imple
 		return new FilterObservableSnapshotImpl<>(this, predicate);
 	}
 
+	@Override
 	public ObservableSnapshot<E> filtered(ObservableValue<Predicate<E>> predicate) {
 		return new ObservableFilterObservableSnapshotImpl<>(this, predicate);
 	}

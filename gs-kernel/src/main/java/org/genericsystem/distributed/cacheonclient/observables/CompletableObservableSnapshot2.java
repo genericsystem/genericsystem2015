@@ -16,9 +16,11 @@ public class CompletableObservableSnapshot2<E> extends SetBinding<E> implements 
 	private final CompletableListObservableValue<E> observable;
 
 	public CompletableObservableSnapshot2(CompletableFuture<Vertex[]> promise, Function<Vertex, E> extractor) {
-		this.observable = new CompletableListObservableValue<>(extractor);
+		observable = new CompletableListObservableValue<>(extractor);
 		bind(observable);
+		get();
 		observable.launch(promise);
+
 	}
 
 	@Override
@@ -33,17 +35,17 @@ public class CompletableObservableSnapshot2<E> extends SetBinding<E> implements 
 
 	@Override
 	public ObservableSnapshot<E> filtered(Predicate<E> predicate) {
-		return ((ObservableSnapshot<E>) get()).filtered(predicate);
+		return new FilterObservableSnapshotImpl<>(this, predicate);
 	}
 
 	@Override
 	public ObservableSnapshot<E> filtered(ObservableValue<Predicate<E>> predicate) {
-		return ((ObservableSnapshot<E>) get()).filtered(predicate);
+		return new ObservableFilterObservableSnapshotImpl<>(this, predicate);
 	}
 
 	@Override
 	public ObservableSnapshot<E> concat(ObservableSnapshot<E> toConcatenate) {
-		return ((ObservableSnapshot<E>) get()).concat(toConcatenate);
+		return new ConcatObservableSnapshotImpl<>(this, toConcatenate);
 	}
 
 	@Override

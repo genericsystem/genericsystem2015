@@ -111,8 +111,6 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 							if (change.wasAdded()) {
 								Generic modifiedGeneric = change.getAddedSubList().get(currentIndex - changeStartIndex);
 								if (parent.test(modifiedGeneric)) {
-									System.out.println("Receive add with index : " + currentIndex);
-
 									nextAdd(currentIndex, currentIndex + 1);
 								}
 							} else if (change.wasRemoved()) {
