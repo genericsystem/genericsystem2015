@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.observables.ContainerObservableSnapshot;
 import org.testng.annotations.Test;
 
@@ -156,6 +158,61 @@ public class ObservableSnapshotTest extends AbstractTest {
 		assert listToCheck.size() == containerObsSnapshot.size();
 		assert new ArrayList<>(containerObsSnapshot).equals(listToCheck);
 	}
+
+	public void test007_EngineDependenciesTest() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+
+		if (dependenciesObservableList.size() == 0) {
+			Thread.sleep(100);
+		}
+
+		assert dependenciesObservableList.size() != 0;
+
+		System.out.println(engine.getInstances().toList());
+		System.out.println(dependenciesObservableList);
+
+		assert engine.getInstances().toList().equals(dependenciesObservableList);
+	}
+
+	public void test007_ObservableEngineDependenciesAddTest() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+		Integer referenceSize;
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		referenceSize = dependenciesObservableList.size();
+
+		engine.addInstance("AddesType");
+		if (dependenciesObservableList.size() != referenceSize + 1) {
+			Thread.sleep(100);
+		}
+		assert dependenciesObservableList.size() == referenceSize + 1;
+	}
+
+	// public void test008_ObservableEngineDependenciesRemoveTest() throws InterruptedException, ConcurrencyControlException {
+	// CocClientEngine engine = new CocClientEngine();
+	// Integer referenceSize;
+	//
+	// ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+	//
+	// engine.addInstance("Instance0");
+	// engine.addInstance("Instance1");
+	// Generic g2 = engine.addInstance("Instance2");
+	// engine.addInstance("Instance3");
+	// engine.addInstance("Instance4");
+	// if (dependenciesObservableList.size() == 0) {
+	// Thread.sleep(100);
+	// }
+	// referenceSize = dependenciesObservableList.size();
+	//
+	// g2.remove();
+	// if (dependenciesObservableList.size() == referenceSize) {
+	// Thread.sleep(100);
+	// }
+	// assert dependenciesObservableList.size() == referenceSize - 1;
+	// }
+
 	//
 
 	// public void testultimate() throws InterruptedException {
