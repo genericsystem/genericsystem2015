@@ -165,17 +165,13 @@ public class ObservableSnapshotTest extends AbstractTest {
 	}
 
 	@Test(invocationCount = 5)
-	public void test007_EngineDependenciesTest() throws InterruptedException {
+	public void test007_ObservableEngineDependenciesTest() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 
 		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
 
-		if (dependenciesObservableList.size() == 0) {
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);
-		}
-
-		assert dependenciesObservableList.size() != 0;
-
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
 
@@ -185,20 +181,16 @@ public class ObservableSnapshotTest extends AbstractTest {
 
 		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
 
-		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);
-		}
-
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 
 		engine.addInstance("Instance0");
 		engine.addInstance("Instance1");
 		engine.addInstance("Instance2");
 
-		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);
-		}
-
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
 
@@ -213,52 +205,189 @@ public class ObservableSnapshotTest extends AbstractTest {
 		Generic g2 = engine.addInstance("Instance2");
 		engine.addInstance("Instance3");
 		engine.addInstance("Instance4");
-		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
-			Thread.sleep(100);
-		}
 
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 
 		g2.remove();
-		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);
-		}
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
 
-	// public void test010_ObservableEngineDependenciesDifferentialTest() throws InterruptedException, ConcurrencyControlException {
+	@Test(invocationCount = 5)
+	public void test010_ObservableEngineDependenciesDifferentialTest() throws InterruptedException, ConcurrencyControlException {
+		CocClientEngine engine = new CocClientEngine();
+
+		engine.addInstance("InstanceL1_0");
+		engine.addInstance("InstanceL1_1");
+		Generic l1g2 = engine.addInstance("InstanceL1_2");
+		engine.addInstance("InstanceL1_3");
+		Generic l1g4 = engine.addInstance("InstanceL1_4");
+
+		engine.getCurrentCache().mount();
+
+		Generic l2g0 = engine.addInstance("InstanceL2_0");
+		Generic l2g1 = engine.addInstance("InstanceL2_1");
+		engine.addInstance("InstanceL2_2");
+		l2g0.remove();
+		l1g2.remove();
+
+		engine.getCurrentCache().mount();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		l2g1.remove();
+		engine.addInstance("InstanceL3_0");
+		engine.addInstance("InstanceL3_1");
+		l1g4.remove();
+		engine.addInstance("InstanceL3_2");
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	@Test(invocationCount = 5)
+	public void test011_ObservableEngineDependenciesClearTest() throws InterruptedException, ConcurrencyControlException {
+		CocClientEngine engine = new CocClientEngine();
+
+		engine.addInstance("InstanceL1_0");
+		engine.addInstance("InstanceL1_1");
+		Generic l1g2 = engine.addInstance("InstanceL1_2");
+		engine.addInstance("InstanceL1_3");
+		engine.addInstance("InstanceL1_4");
+
+		engine.getCurrentCache().mount();
+
+		ObservableList<Generic> dependenciesObservableListBeforeClearMount = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+
+		Generic l2g0 = engine.addInstance("InstanceL2_0");
+		Generic l2g1 = engine.addInstance("InstanceL2_1");
+		engine.addInstance("InstanceL2_2");
+		l2g0.remove();
+		l1g2.remove();
+
+		engine.getCurrentCache().mount();
+
+		l2g1.remove();
+		engine.addInstance("InstanceL3_0");
+		engine.addInstance("InstanceL3_1");
+		engine.addInstance("InstanceL3_2");
+
+		engine.getCurrentCache().clear();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert dependenciesObservableListBeforeClearMount.equals(dependenciesObservableList);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	// public void test002_ConcurrentTryFlush() throws InterruptedException, ConcurrencyControlException {
+	// CocClientEngine engine1 = new CocClientEngine();
+	// CocClientEngine engine2 = new CocClientEngine();
+	// engine2.addInstance("elephant");
+	// ObservableList<Generic> wrap = engine2.getCurrentCache().getWrappableDependencies(engine1);
+	// engine2.getCurrentCache().tryFlush();
+	// if (wrap.size() == 0)
+	// Thread.sleep(100);
+	// assert wrap.size() != 0;
+	// for (int i = 0; i < wrap.size(); i++)
+	// wrap.get(i);
+	// }
+
+	// @ Test(invocationCount = 5)
+	// public void test012_ObservableEngineDependenciesTryFlushAndRemoveTest() throws InterruptedException, ConcurrencyControlException {
 	// CocClientEngine engine = new CocClientEngine();
-	//
-	// ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+	// CocClientEngine engine2 = new CocClientEngine();
+	// engine2.addInstance("instance1");
+	// ObservableList<Generic> dependenciesObservableList = engine2.getCurrentCache().getWrappableDependenciesSnap(engine);
+	// engine2.getCurrentCache().tryFlush();
+	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+	// Thread.sleep(100);
+	// System.out.println(dependenciesObservableList);
+	// System.out.println(engine.getCurrentCache().getDependencies(engine));
+	// assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	// }
+
+	// @ Test(invocationCount = 5)
+	// public void test012_ObservableEngineDependenciesTryFlushAndRemoveTest() throws InterruptedException, ConcurrencyControlException {
+	// CocClientEngine engine = new CocClientEngine();
+	// CocClientEngine engine2 = new CocClientEngine();
+	// ObservableList<Generic> dependenciesObservableList = engine2.getCurrentCache().getWrappableDependenciesSnap(engine);
 	//
 	// engine.addInstance("InstanceL1_0");
 	// engine.addInstance("InstanceL1_1");
-	// Generic g2 = engine.addInstance("InstanceL1_2");
+	// Generic l1g2 = engine.addInstance("InstanceL1_2");
 	// engine.addInstance("InstanceL1_3");
-	// engine.addInstance("InstanceL1_4");
-	//
-	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
-	// Thread.sleep(100);
-	// }
-	//
-	// assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
-	//
-	// System.out.println(engine.getCurrentCache().getDependencies(engine).toList());
-	// System.out.println(dependenciesObservableList);
-	// System.out.println("_____2ND_LEVEL_____");
+	// Generic l1g4 = engine.addInstance("InstanceL1_4");
 	//
 	// engine.getCurrentCache().asyncMount();
 	//
-	// engine.addInstance("InstanceL2_0");
-	// engine.addInstance("InstanceL2_1");
+	// Generic l2g0 = engine.addInstance("InstanceL2_0");
+	// Generic l2g1 = engine.addInstance("InstanceL2_1");
 	// engine.addInstance("InstanceL2_2");
-	// // g2.remove();
-	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList)) {
-	// Thread.sleep(100);
-	// }
-	// System.out.println(engine.getCurrentCache().getDependencies(engine).toList());
-	// System.out.println(dependenciesObservableList);
+	// l2g0.remove();
+	// l1g2.remove();
 	//
+	// engine.getCurrentCache().asyncMount();
+	//
+	// l2g1.remove();
+	// engine.addInstance("InstanceL3_0");
+	// engine.addInstance("InstanceL3_1");
+	// engine.addInstance("InstanceL3_2");
+	// l1g4.remove();
+	//
+	// Thread.sleep(100);
+	// System.out.println("Before tryFlush " + dependenciesObservableList);
+	// engine.getCurrentCache().tryFlush();
+	//
+	// // if (!engine.getCurrentCache().getDependencies(engine).toList().equals(engine.getCurrentCache().getWrappableDependenciesSnap(engine)))
+	// Thread.sleep(1000);
+	//
+	// System.out.println("After  tryFlush " + engine2.getCurrentCache().getWrappableDependenciesSnap(engine));
+	//
+	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+	// Thread.sleep(100);
+	// assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	// }
+
+	// @Test(invocationCount = 5)
+	// public void test013_ObservableEngineDependenciesFlushAndRemoveTest() throws InterruptedException, ConcurrencyControlException {
+	// CocClientEngine engine = new CocClientEngine();
+	//
+	// engine.addInstance("InstanceL1_0");
+	// engine.addInstance("InstanceL1_1");
+	// Generic l1g2 = engine.addInstance("InstanceL1_2");
+	// engine.addInstance("InstanceL1_3");
+	// Generic l1g4 = engine.addInstance("InstanceL1_4");
+	//
+	// engine.getCurrentCache().asyncMount();
+	//
+	// Generic l2g0 = engine.addInstance("InstanceL2_0");
+	// Generic l2g1 = engine.addInstance("InstanceL2_1");
+	// engine.addInstance("InstanceL2_2");
+	// l2g0.remove();
+	// l1g2.remove();
+	//
+	// engine.getCurrentCache().asyncMount();
+	//
+	// l2g1.remove();
+	// engine.addInstance("InstanceL3_0");
+	// engine.addInstance("InstanceL3_1");
+	// engine.addInstance("InstanceL3_2");
+	//
+	// engine.getCurrentCache().flush();
+	//
+	// ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+	//
+	// l1g4.remove();
+	//
+	// if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+	// Thread.sleep(100);
 	// assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	// }
 

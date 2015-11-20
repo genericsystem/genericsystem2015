@@ -64,7 +64,7 @@ public class ObservableFilterObservableSnapshotImpl<E> extends AbstractObservabl
 
 	@Override
 	public int size() {
-		assert filteredSize == Long.valueOf(backingSet.stream().filter(predicate.getValue()).count()).intValue();
+		// assert filteredSize == Long.valueOf(backingSet.stream().filter(predicate.getValue()).count()).intValue();
 		return filteredSize;
 	}
 

@@ -13,7 +13,6 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.distributed.cacheonclient.AsyncDifferential;
 import org.genericsystem.kernel.Statics;
 
 public abstract class HeavyCache extends AbstractCache implements DefaultCache<Generic> {
@@ -163,13 +162,8 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		listener.triggersRefreshEvent();
 	}
 
-	public void asyncMount() {
-		// TODO make a clean method out of this
-		differential = new AsyncDifferential((AsyncDifferential) differential);
-	}
-
 	public void mount() {
-		differential = new Differential(differential);
+		differential = buildDifferential(differential);
 	}
 
 	public void unmount() {

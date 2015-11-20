@@ -109,8 +109,7 @@ public class CocCache extends HeavyCache {
 
 	public ObservableList<Generic> getWrappableDependencies(Generic generic) {
 		return getDifferential().getWrappableDependencies(generic);
-	}		
-
+	}
 
 	public ObservableList<Generic> getInstancesObservableList(Generic meta) {
 		return getDependenciesObservableList(meta).filtered(generic -> meta.equals(generic.getMeta()));
