@@ -41,15 +41,15 @@ public class TodoList {
 
 		List<IElement> content = new ArrayList<IElement>();
 		IElement elmVBox = new Element(VBox.class, "", bindingForeach, content);
-		IElement elmButton = new Element(Button.class, "button1", bindingForeach, null);
-		IElement elmButton2 = new Element(Button.class, "button2", bindingForeach, null);
+		IElement elmButton = new Element(Button.class, "button1", null, null);
+		IElement elmButton2 = new Element(Button.class, "button2", null, null);
 		content.add(elmButton);
 		content.add(elmButton2);
 
 		List<IElement> content2 = new ArrayList<IElement>();
-		IElement elmVBox2 = new Element(HBox.class, "", bindingForeach, content2);
-		IElement elmButton3 = new Element(Button.class, "button3", bindingForeach, null);
-		IElement elmButton4 = new Element(Button.class, "button4", bindingForeach, null);
+		IElement elmVBox2 = new Element(HBox.class, "", null, content2);
+		IElement elmButton3 = new Element(Button.class, "button3", null, null);
+		IElement elmButton4 = new Element(Button.class, "button4", null, null);
 		content2.add(elmButton3);
 		content2.add(elmButton4);
 

@@ -26,6 +26,7 @@ public interface Binding {
 			Object model;
 			try {
 				model = attribute.get(((AbstractModelContext) context.modelContext).model);
+
 				binder.init((ObservableValue) model, context);
 				System.out.println(model);
 			} catch (IllegalArgumentException | IllegalAccessException e) {

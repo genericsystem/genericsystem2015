@@ -68,7 +68,8 @@ public interface IViewContext {
 		public void init() {
 			System.out.println("ElementViewContext::init viewContext de::(" + node + ")");
 			BindingContext bindingContext = new BindingContext(modelContext, this);
-			template.binding.init(bindingContext);
+			if(template.binding!=null)
+				template.binding.init(bindingContext);
 			initChildren();
 		}
 
