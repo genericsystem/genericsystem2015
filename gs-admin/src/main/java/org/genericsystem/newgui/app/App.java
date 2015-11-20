@@ -1,9 +1,8 @@
-package org.genericsystem.gui.app;
+package org.genericsystem.newgui.app;
 
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import org.genericsystem.admin.model.Car;
@@ -17,15 +16,6 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.newgui.component.IComponent;
-import org.genericsystem.newgui.metacomponent.IMetaComponent;
-import org.genericsystem.newgui.metacomponent.IMetaComponent.ButtonMetaComponent;
-import org.genericsystem.newgui.metacomponent.IMetaComponent.LabelMetaComponent;
-import org.genericsystem.newgui.metacomponent.IMetaComponent.TableViewMetaComponent;
-import org.genericsystem.newgui.metacomponent.IMetaComponent.VBoxMetaComponent;
-import org.genericsystem.newgui.metacontext.IMetaContext;
-import org.genericsystem.newgui.metacontext.IMetaContext.RootMetaContext;
-import org.genericsystem.newgui.metacontext.IMetaContext.RootMetaContext.RootContext;
 
 public class App extends Application {
 
@@ -42,26 +32,26 @@ public class App extends Application {
 		stage.setTitle("Generic System JavaFx Example");
 		// RootContext rootContext = new RootContext(initGS());
 
-		IMetaContext rootMetaContext = new RootMetaContext(null);
+		// IMetaContext rootMetaContext = new RootMetaContext(null);
 		// IMetaContext tableViewMetaContext = new TableViewMetaContext(rootMetaContext);
 
 		// IMetaComponent rootMetaComponent = new VBoxMetaComponent(null);
+		//
+		// Element vBoxMetaComponent = new VBoxMetaComponent(null);
+		//
+		// Element tableViewMetaComp = new TableViewMetaComponent(vBoxMetaComponent);
+		// Element buttonMetaComp = new ButtonMetaComponent(vBoxMetaComponent);
+		//
+		// // IMetaComponent labelComponent = new LabelMetaComponent(vBoxMetaComponent);
+		//
+		// RootContext rootContext = (RootContext) rootMetaContext.buildContext(null);
+		// rootContext.initProperty(initGS());
+		//
+		// IComponent rootComponent = vBoxMetaComponent.apply(null, rootContext);
 
-		IMetaComponent vBoxMetaComponent = new VBoxMetaComponent(null);
+		// VBox root = (VBox) rootComponent.getNode();
 
-		IMetaComponent tableViewMetaComp = new TableViewMetaComponent(vBoxMetaComponent);
-		IMetaComponent buttonMetaComp = new ButtonMetaComponent(vBoxMetaComponent);
-
-		IMetaComponent labelComponent = new LabelMetaComponent(vBoxMetaComponent);
-
-		RootContext rootContext = (RootContext) rootMetaContext.buildContext(null);
-		rootContext.initProperty(initGS());
-
-		IComponent rootComponent = vBoxMetaComponent.apply(null, rootContext);
-
-		VBox root = (VBox) rootComponent.getNode();
-
-		((Group) scene.getRoot()).getChildren().add(root);
+		// ((Group) scene.getRoot()).getChildren().add(root);
 		stage.setScene(scene);
 		stage.show();
 	}
