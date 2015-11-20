@@ -3,12 +3,15 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
@@ -82,6 +85,22 @@ public class CocCache extends HeavyCache {
 		public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
 			return getTransaction().getDependenciesObservableSnapshot(generic);
 		}
+
+		@Override
+		public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
+
+			return getTransaction().getDependenciesPromise(generic).thenApply(snapshot -> new ObjectBinding<Snapshot<Generic>>() {
+				// TODO when TS will be observable
+				// {
+				// super.bind(dependencies);
+				// }
+
+				@Override
+				protected Snapshot<Generic> computeValue() {
+					return snapshot;
+				}
+			});
+		}
 	}
 
 	@Override
@@ -90,8 +109,8 @@ public class CocCache extends HeavyCache {
 	}
 
 	@Override
-	public CocTransaction getTransaction() {
-		return (CocTransaction) super.getTransaction();
+	public AsyncITransaction getTransaction() {
+		return (AsyncITransaction) super.getTransaction();
 	}
 
 	@Override
@@ -113,5 +132,9 @@ public class CocCache extends HeavyCache {
 
 	public ObservableList<Generic> getInstancesObservableList(Generic meta) {
 		return getDependenciesObservableList(meta).filtered(generic -> meta.equals(generic.getMeta()));
+	}
+
+	public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
+		return getDifferential().getDependenciesPromise(generic);
 	}
 }

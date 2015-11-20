@@ -25,7 +25,7 @@ import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineH
 import org.genericsystem.distributed.cacheonclient.observables.CompletableObservableSnapshot2;
 import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
-public class CocTransaction extends CheckedContext implements AsyncIDifferential {
+public class CocTransaction extends CheckedContext implements AsyncITransaction {
 
 	private final long ts;
 
@@ -144,5 +144,18 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 	@Override
 	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
 		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
+	}
+
+	private Map<Generic, CompletableFuture<Snapshot<Generic>>> dependenciesPromiseMap = new HashMap<>();
+
+	@Override
+	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+
+		CompletableFuture<Snapshot<Generic>> dependenciesPromise = dependenciesPromiseMap.get(generic);
+		if (dependenciesPromise == null) {
+			dependenciesPromise = getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()).thenApply(vertices -> new Container(Arrays.stream(vertices).map(vertex -> getRoot().getGenericByVertex(vertex))));
+			dependenciesPromiseMap.put(generic, dependenciesPromise);
+		}
+		return dependenciesPromise;
 	}
 }

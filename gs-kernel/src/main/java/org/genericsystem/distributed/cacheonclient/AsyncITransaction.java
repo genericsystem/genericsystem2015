@@ -11,16 +11,13 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
-/**
- * @author Nicolas Feybesse
- *
- */
-public interface AsyncIDifferential extends IDifferential<Generic> {
+public interface AsyncITransaction extends IDifferential<Generic> {
 	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic);
 
 	public ObservableList<Generic> getWrappableDependencies(Generic generic);
 
 	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic);
 
-	public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic);
+	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
+
 }

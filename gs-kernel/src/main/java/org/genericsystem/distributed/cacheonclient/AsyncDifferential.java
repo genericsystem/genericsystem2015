@@ -3,6 +3,7 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,6 +16,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
@@ -75,6 +77,39 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 
 		if (!addsSnap.remove(generic))
 			removesSnap.add(generic);
+	}
+
+	@Override
+	public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
+		CompletableFuture<ObservableValue<Snapshot<Generic>>> dependenciesPromise = getSubCache().getDependenciesPromise(generic);
+		return dependenciesPromise.thenApply(snapshotObservableValue -> new ObjectBinding<Snapshot<Generic>>() {
+
+			{
+				// TODO bind to adds, removes, sub-cache
+
+				// super.bind(adds);
+				// super.bind(removes);
+				super.bind(snapshotObservableValue);
+			}
+
+			@Override
+			protected Snapshot<Generic> computeValue() {
+				return new Snapshot<Generic>() {
+					@Override
+					public Generic get(Object o) {
+						Generic result = adds.get(o);
+						if (result != null)
+							return generic.isDirectAncestorOf(result) ? result : null;
+						return !removes.contains(o) ? snapshotObservableValue.getValue().get(o) : null;
+					}
+
+					@Override
+					public Stream<Generic> stream() {
+						return Stream.concat(adds.contains(generic) ? Stream.empty() : snapshotObservableValue.getValue().stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
+					}
+				};
+			}
+		});
 	}
 
 	@Override
