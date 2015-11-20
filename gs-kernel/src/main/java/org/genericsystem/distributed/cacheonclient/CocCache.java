@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -134,7 +135,40 @@ public class CocCache extends HeavyCache {
 		return getDependenciesObservableList(meta).filtered(generic -> meta.equals(generic.getMeta()));
 	}
 
-	public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
-		return getDifferential().getDependenciesPromise(generic);
+	public ObservableList<Generic> getDependenciesPromise(Generic generic) throws InterruptedException, ExecutionException {
+		return dependenciesPromiseAsOservableListCacheMap.get(generic);
 	}
+
+	private Map<Generic, ObservableList<Generic>> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, ObservableList<Generic>>() {
+
+		private static final long serialVersionUID = -6483309004505712513L;
+
+		@Override
+		public ObservableList<Generic> get(Object key) {
+			ObservableList<Generic> result = super.get(key);
+			if (result == null) {
+				ObservableValue<Snapshot<Generic>> dependenciesAsObservableValue = getDifferential().getDependenciesPromise((Generic) key).get();
+
+				result = new ListBinding<Generic>() {
+					{
+						bind(dependenciesAsObservableValue);
+					}
+
+					@Override
+					public void dispose() {
+						unbind(dependenciesAsObservableValue);
+					}
+
+					@Override
+					protected ObservableList<Generic> computeValue() {
+						return FXCollections.observableArrayList(dependenciesAsObservableValue.getValue().toList());
+					}
+				};
+				ObservableList<Generic> assertResult = super.put((Generic) key, result);
+				assert assertResult == null;
+			}
+			return result;
+
+		}
+	};
 }

@@ -85,10 +85,8 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 		return dependenciesPromise.thenApply(snapshotObservableValue -> new ObjectBinding<Snapshot<Generic>>() {
 
 			{
-				// TODO bind to adds, removes, sub-cache
-
-				// super.bind(adds);
-				// super.bind(removes);
+				super.bind(addsSnap);
+				super.bind(removesSnap);
 				super.bind(snapshotObservableValue);
 			}
 
@@ -97,15 +95,15 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 				return new Snapshot<Generic>() {
 					@Override
 					public Generic get(Object o) {
-						Generic result = adds.get(o);
+						Generic result = addsSnap.get(o);
 						if (result != null)
 							return generic.isDirectAncestorOf(result) ? result : null;
-						return !removes.contains(o) ? snapshotObservableValue.getValue().get(o) : null;
+						return !removesSnap.contains(o) ? snapshotObservableValue.getValue().get(o) : null;
 					}
 
 					@Override
 					public Stream<Generic> stream() {
-						return Stream.concat(adds.contains(generic) ? Stream.empty() : snapshotObservableValue.getValue().stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
+						return Stream.concat(addsSnap.contains(generic) ? Stream.empty() : snapshotObservableValue.getValue().stream().filter(x -> !removesSnap.contains(x)), addsSnap.stream().filter(x -> generic.isDirectAncestorOf(x)));
 					}
 				};
 			}
