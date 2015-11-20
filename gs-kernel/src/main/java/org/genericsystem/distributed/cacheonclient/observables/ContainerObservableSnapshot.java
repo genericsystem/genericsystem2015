@@ -13,9 +13,33 @@ public class ContainerObservableSnapshot<E> extends AbstractObservableSnapshot<E
 		return container.getByIndex(index);
 	}
 
+	public E get(Object o) {
+		return container.get(o);
+	}
+
 	@Override
 	public Iterator<E> iterator() {
-		return container.iterator();
+		Iterator<E> containerIt = container.iterator();
+		return new Iterator<E>() {
+
+			private E next;
+
+			@Override
+			public boolean hasNext() {
+				return containerIt.hasNext();
+			}
+
+			@Override
+			public E next() {
+				return next = containerIt.next();
+			}
+
+			@Override
+			public void remove() {
+				containerIt.remove();
+				callObservers(new SimpleRemoveChange(next));
+			}
+		};
 	}
 
 	@Override

@@ -6,12 +6,16 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.distributed.cacheonclient.observables.ContainerObservableSnapshot;
 
 public class Differential implements IDifferential<Generic> {
 
 	private final IDifferential<Generic> differential;
 	protected final PseudoConcurrentCollection<Generic> adds = new PseudoConcurrentCollection<>();
 	protected final PseudoConcurrentCollection<Generic> removes = new PseudoConcurrentCollection<>();
+
+	protected final ContainerObservableSnapshot<Generic> addsSnap = new ContainerObservableSnapshot<>();
+	protected final ContainerObservableSnapshot<Generic> removesSnap = new ContainerObservableSnapshot<>();
 
 	public Differential(IDifferential<Generic> subCache) {
 		this.differential = subCache;

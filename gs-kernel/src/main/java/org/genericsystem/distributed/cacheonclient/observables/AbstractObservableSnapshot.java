@@ -4,6 +4,7 @@ import java.util.AbstractSet;
 import java.util.function.Predicate;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 
@@ -15,6 +16,11 @@ public abstract class AbstractObservableSnapshot<E> extends AbstractSet<E> imple
 	@Override
 	public ObservableSnapshot<E> filtered(Predicate<E> predicate) {
 		return new FilterObservableSnapshotImpl<>(this, predicate);
+	}
+
+	@Override
+	public ObservableSnapshot<E> filtered(ObservableValue<Predicate<E>> predicate) {
+		return new ObservableFilterObservableSnapshotImpl<>(this, predicate);
 	}
 
 	@Override

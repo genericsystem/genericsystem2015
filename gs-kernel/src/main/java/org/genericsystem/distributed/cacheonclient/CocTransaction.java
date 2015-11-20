@@ -22,6 +22,8 @@ import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineHandler;
+import org.genericsystem.distributed.cacheonclient.observables.CompletableObservableSnapshot2;
+import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public class CocTransaction extends CheckedContext implements AsyncIDifferential {
 
@@ -102,14 +104,6 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 		}
 	}
 
-	// public class CompletableObservableList2 extends ObservableListWrapper<Generic> {
-	//
-	// public CompletableObservableList2(CompletableFuture<Vertex[]> promise) {
-	// super(new ArrayList<>());
-	// promise.thenApply(elements -> setAll(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList())));
-	// }
-	// }
-
 	private Map<Generic, ObservableValue<List<Generic>>> dependenciesPromisesMap = new HashMap<>();
 
 	@Override
@@ -145,5 +139,10 @@ public class CocTransaction extends CheckedContext implements AsyncIDifferential
 				return getDependenciesObservableList(generic).getValue().size();
 			}
 		};
+	}
+
+	@Override
+	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
 	}
 }

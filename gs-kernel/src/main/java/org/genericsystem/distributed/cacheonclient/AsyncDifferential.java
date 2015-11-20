@@ -6,14 +6,18 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
+
 import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public class AsyncDifferential extends Differential implements AsyncIDifferential {
 
@@ -23,6 +27,7 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 
 	public AsyncDifferential(AsyncIDifferential subCache) {
 		super(subCache);
+
 	}
 
 	@Override
@@ -58,6 +63,7 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	protected Generic plug(Generic generic) {
 		super.plug(generic);
 		addsObservableList.add(generic);
+		addsSnap.add(generic);
 		return generic;
 	}
 
@@ -66,6 +72,15 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 		super.unplug(generic);
 		if (!addsObservableList.remove(generic))
 			removesObservableList.add(generic);
+
+		if (!addsSnap.remove(generic))
+			removesSnap.add(generic);
+	}
+
+	@Override
+	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+		ObservableValue<Predicate<Generic>> removePredicate = Bindings.<Predicate<Generic>> createObjectBinding(() -> t -> !removesSnap.contains(t), removesSnap);
+		return getSubCache().getDependenciesObservableSnapshot(generic).filtered(removePredicate).concat(addsSnap.filtered(x -> generic.isDirectAncestorOf(x)));
 	}
 
 	@Override
@@ -81,34 +96,32 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 				// often, the sublist pointed at by indices change.getFrom(), change.getTo() doesn't match the actual list
 				// it might be a misuse of nextAdd/nextRemove, and associated indices, or a problem of indices between addsObservableList and subcacheGenerics.
 				// change here is an instance of SingleChange, so there's no real loop involved
-				beginChange();
-				while (change.next()) {
-					if (change.wasPermutated() || change.wasUpdated())
-						throw new UnsupportedOperationException();
-					if (change.wasAdded()) {
-						nextAdd(size() - change.getAddedSubList().size() - 1, size());
-					}
+					beginChange();
+					while (change.next()) {
+						if (change.wasPermutated() || change.wasUpdated())
+							throw new UnsupportedOperationException();
+						if (change.wasAdded()) {
+							nextAdd(size() - change.getAddedSubList().size() - 1, size());
+						}
 
 						int currentIndex = change.getFrom();
-					int changeEndIndex = change.getTo();
-					final int changeStartIndex = currentIndex;
-					do {
-						if (change.wasAdded()) {
-							Generic modifiedGeneric = change.getAddedSubList().get(currentIndex - changeStartIndex);
-							if (parent.test(modifiedGeneric)) {
-								System.out.println("Receive add with index : " + currentIndex);
-
-								nextAdd(currentIndex, currentIndex + 1);
+						int changeEndIndex = change.getTo();
+						final int changeStartIndex = currentIndex;
+						do {
+							if (change.wasAdded()) {
+								Generic modifiedGeneric = change.getAddedSubList().get(currentIndex - changeStartIndex);
+								if (parent.test(modifiedGeneric)) {
+									nextAdd(currentIndex, currentIndex + 1);
+								}
+							} else if (change.wasRemoved()) {
+								Generic modifiedGeneric = change.getRemoved().get(currentIndex - changeStartIndex);
+								if (parent.test(modifiedGeneric))
+									nextRemove(currentIndex, modifiedGeneric);
 							}
-						} else if (change.wasRemoved()) {
-							Generic modifiedGeneric = change.getRemoved().get(currentIndex - changeStartIndex);
-							if (parent.test(modifiedGeneric))
-								nextRemove(currentIndex, modifiedGeneric);
-						}
-					} while (++currentIndex < changeEndIndex);
-					endChange();
-				}
-			});
+						} while (++currentIndex < changeEndIndex);
+						endChange();
+					}
+				});
 			private ListChangeListener<Generic> listenerOnRemoves = new WeakListChangeListener<Generic>(change -> {
 				beginChange();
 				while (change.next())
