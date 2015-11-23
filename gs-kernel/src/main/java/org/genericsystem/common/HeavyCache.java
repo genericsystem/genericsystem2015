@@ -2,7 +2,8 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
-
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -18,14 +19,14 @@ import org.genericsystem.kernel.Statics;
 public abstract class HeavyCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private final Restructurator restructurator;
-	private IDifferential<Generic> transaction;
+	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
 	private Differential differential;
 	private final ContextEventListener<Generic> listener;
 	private final long cacheId;
 
 	public long shiftTs() throws RollbackException {
 
-		transaction = buildTransaction();
+		transactionProperty.set(buildTransaction());
 		listener.triggersRefreshEvent();
 		return getTs();
 	}
@@ -33,8 +34,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected HeavyCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {
-		});
+		this(root, new ContextEventListener<Generic>() {});
 	}
 
 	protected Differential getDifferential() {
@@ -54,7 +54,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		this.cacheId = cacheId;
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
-		this.transaction = buildTransaction();
+		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
 		initialize();
 	}
 
@@ -67,11 +67,11 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	public IDifferential<Generic> getTransaction() {
-		return transaction;
+		return transactionProperty.get();
 	}
 
 	public long getTs() {
-		return transaction.getTs();
+		return getTransaction().getTs();
 	}
 
 	@Override
@@ -249,34 +249,30 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 		@Override
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-			transaction.apply(removes, adds);
+			getTransaction().apply(removes, adds);
 		}
 
 		@Override
 		public Snapshot<Generic> getDependencies(Generic generic) {
-			return transaction.getDependencies(generic);
+			return getTransaction().getDependencies(generic);
 		}
 
 		@Override
 		public long getTs() {
-			return transaction.getTs();
+			return getTransaction().getTs();
 		}
 
 	}
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

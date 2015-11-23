@@ -72,8 +72,6 @@ public class CocCache extends HeavyCache {
 		return new AsyncTransactionDifferential();
 	}
 
-	private ObservableValue<AsyncITransaction> transactionInvalidator;
-
 	protected class AsyncTransactionDifferential extends TransactionDifferential implements AsyncIDifferential {
 		@Override
 		public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
@@ -92,7 +90,7 @@ public class CocCache extends HeavyCache {
 
 		@Override
 		public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
-			return Bindings.<CompletableFuture<Snapshot<Generic>>> createObjectBinding(() -> getTransaction().getDependenciesPromise(generic), transactionInvalidator);
+			return Bindings.<CompletableFuture<Snapshot<Generic>>> createObjectBinding(() -> getTransaction().getDependenciesPromise(generic), transactionProperty);
 		}
 	}
 
