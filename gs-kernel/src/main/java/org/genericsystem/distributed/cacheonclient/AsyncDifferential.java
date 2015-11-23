@@ -80,34 +80,22 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	}
 
 	@Override
-	public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
-		CompletableFuture<ObservableValue<Snapshot<Generic>>> dependenciesPromise = getSubCache().getDependenciesPromise(generic);
-		return dependenciesPromise.thenApply(snapshotObservableValue -> new ObjectBinding<Snapshot<Generic>>() {
-
-			{
-				super.bind(addsSnap);
-				super.bind(removesSnap);
-				super.bind(snapshotObservableValue);
+	public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
+		ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getSubCache().getDependenciesPromise(generic);
+		return Bindings.createObjectBinding(() -> dependenciesPromise.getValue().<Snapshot<Generic>> thenApply(snapshot -> new Snapshot<Generic>() {
+			@Override
+			public Generic get(Object o) {
+				Generic result = addsSnap.get(o);
+				if (result != null)
+					return generic.isDirectAncestorOf(result) ? result : null;
+				return !removesSnap.contains(o) ? snapshot.get(o) : null;
 			}
 
 			@Override
-			protected Snapshot<Generic> computeValue() {
-				return new Snapshot<Generic>() {
-					@Override
-					public Generic get(Object o) {
-						Generic result = addsSnap.get(o);
-						if (result != null)
-							return generic.isDirectAncestorOf(result) ? result : null;
-						return !removesSnap.contains(o) ? snapshotObservableValue.getValue().get(o) : null;
-					}
-
-					@Override
-					public Stream<Generic> stream() {
-						return Stream.concat(addsSnap.contains(generic) ? Stream.empty() : snapshotObservableValue.getValue().stream().filter(x -> !removesSnap.contains(x)), addsSnap.stream().filter(x -> generic.isDirectAncestorOf(x)));
-					}
-				};
+			public Stream<Generic> stream() {
+				return Stream.concat(addsSnap.contains(generic) ? Stream.empty() : snapshot.stream().filter(x -> !removesSnap.contains(x)), addsSnap.stream().filter(x -> generic.isDirectAncestorOf(x)));
 			}
-		});
+		}), addsSnap, removesSnap, dependenciesPromise);
 	}
 
 	@Override
