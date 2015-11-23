@@ -2,8 +2,10 @@ package org.genericsystem.common;
 
 import java.io.Serializable;
 import java.util.List;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -20,7 +22,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
-	private Differential differential;
+	private final ObjectProperty<Differential> differentialProperty;
 	private final ContextEventListener<Generic> listener;
 	private final long cacheId;
 
@@ -34,11 +36,12 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected HeavyCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {});
+		this(root, new ContextEventListener<Generic>() {
+		});
 	}
 
 	protected Differential getDifferential() {
-		return differential;
+		return differentialProperty.get();
 	}
 
 	// protected Cache(AbstractEngine root, long cacheId) {
@@ -55,6 +58,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
+		differentialProperty = new SimpleObjectProperty<Differential>();
 		initialize();
 	}
 
@@ -76,7 +80,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	@Override
 	public Snapshot<Generic> getDependencies(Generic generic) {
-		return differential.getDependencies(generic);
+		return getDifferential().getDependencies(generic);
 	}
 
 	protected Restructurator buildRestructurator() {
@@ -88,7 +92,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	// }
 
 	protected void initialize() {
-		differential = buildDifferential(differential == null ? buildTransactionDifferential() : differential.getSubCache());
+		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubCache()));
 	}
 
 	protected Differential buildDifferential(IDifferential<Generic> subCache) {
@@ -140,13 +144,13 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-		Differential originalCacheElement = this.differential;
-		if (this.differential.getSubCache() instanceof Differential)
-			this.differential = (Differential) this.differential.getSubCache();
+		Differential originalCacheElement = getDifferential();
+		if (getDifferential().getSubCache() instanceof Differential)
+			this.differentialProperty.set((Differential) getDifferential().getSubCache());
 		try {
 			synchronizedApply(originalCacheElement);
 		} finally {
-			this.differential = originalCacheElement;
+			this.differentialProperty.set(originalCacheElement);
 		}
 	}
 
@@ -163,12 +167,12 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	public void mount() {
-		differential = buildDifferential(differential);
+		differentialProperty.set(buildDifferential(getDifferential()));
 	}
 
 	public void unmount() {
-		IDifferential<Generic> subCache = differential.getSubCache();
-		differential = subCache instanceof Differential ? (Differential) subCache : new Differential(subCache);
+		IDifferential<Generic> subCache = getDifferential().getSubCache();
+		differentialProperty.set(subCache instanceof Differential ? (Differential) subCache : new Differential(subCache));
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
 	}
@@ -185,18 +189,18 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	protected Generic plug(Generic generic) {
 		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info() + generic.getBirthTs();
-		differential.plug(generic);
+		getDifferential().plug(generic);
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
 	}
 
 	protected void unplug(Generic generic) {
 		getChecker().checkAfterBuild(false, false, generic);
-		differential.unplug(generic);
+		getDifferential().unplug(generic);
 	}
 
 	protected void checkConstraints() throws RollbackException {
-		differential.checkConstraints(getChecker());
+		getDifferential().checkConstraints(getChecker());
 	}
 
 	@Override
@@ -206,7 +210,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	public int getCacheLevel() {
-		return differential.getCacheLevel();
+		return getDifferential().getCacheLevel();
 	}
 
 	@Override
@@ -266,13 +270,17 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {
+		}
 
-		default void triggersRefreshEvent() {}
+		default void triggersRefreshEvent() {
+		}
 
-		default void triggersClearEvent() {}
+		default void triggersClearEvent() {
+		}
 
-		default void triggersFlushEvent() {}
+		default void triggersFlushEvent() {
+		}
 	}
 
 }
