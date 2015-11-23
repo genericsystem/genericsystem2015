@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
@@ -146,20 +148,35 @@ public class CocCache extends HeavyCache {
 			if (result == null) {
 				put((Generic) key, result = new ListBinding<Generic>() {
 
-					private ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding = Bindings.createObjectBinding(() -> getDifferential().getDependenciesPromise((Generic) key), differentialInvalidator);
+					private ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding = new ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>() {
+
+						private ObservableValue<CompletableFuture<Snapshot<Generic>>> currentBindedDifferential;
+
+						{
+							currentBindedDifferential = getDifferential().getDependenciesPromise((Generic) key);
+							bind(differentialInvalidator);
+						}
+
+						@Override
+						protected ObservableValue<CompletableFuture<Snapshot<Generic>>> computeValue() {
+							return currentBindedDifferential;
+						}
+
+						@Override
+						protected void onInvalidating() {
+							currentBindedDifferential = getDifferential().getDependenciesPromise((Generic) key);
+						};
+					};
 
 					Collection<? extends Generic> elements = new ArrayList<>();
 					{
-						super.bind(binding);
-					}
-
-					@Override
-					protected void onInvalidating() {
-						binding.getValue().getValue().thenAccept(snapshot -> {
-							elements = snapshot.toList();
-							invalidate();
+						binding.addListener((observable, oldV, newV) -> {
+							newV.getValue().thenAccept(snapshot -> {
+								elements = snapshot.toList();
+								invalidate();
+							});
 						});
-					};
+					}
 
 					@Override
 					protected ObservableList<Generic> computeValue() {
@@ -180,4 +197,15 @@ public class CocCache extends HeavyCache {
 
 		}
 	};
+
+	private static class ListBinding2<Generic> extends ListBinding<Generic> {
+
+		@Override
+		protected ObservableList<Generic> computeValue() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+	}
+
 }
