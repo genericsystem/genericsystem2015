@@ -22,5 +22,5 @@ public interface AsyncIDifferential extends IDifferential<Generic> {
 
 	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic);
 
-	public CompletableFuture<ObservableValue<Snapshot<Generic>>> getDependenciesPromise(Generic generic);
+	public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic);
 }
