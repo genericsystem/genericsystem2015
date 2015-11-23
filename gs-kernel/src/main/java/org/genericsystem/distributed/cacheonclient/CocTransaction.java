@@ -74,6 +74,11 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		generic.getSupers().forEach(superG -> dependenciesMap.remove(superG));
 		dependenciesMap.remove(generic.getMeta());
 		dependenciesMap.remove(generic);
+
+		generic.getComponents().forEach(component -> dependenciesPromiseMap.remove(component));
+		generic.getSupers().forEach(superG -> dependenciesPromiseMap.remove(superG));
+		dependenciesPromiseMap.remove(generic.getMeta());
+		dependenciesPromiseMap.remove(generic);
 	}
 
 	@Override

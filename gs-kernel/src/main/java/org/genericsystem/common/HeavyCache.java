@@ -22,7 +22,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
-	private final ObjectProperty<Differential> differentialProperty;
+	protected final ObjectProperty<Differential> differentialProperty;
 	private final ContextEventListener<Generic> listener;
 	private final long cacheId;
 

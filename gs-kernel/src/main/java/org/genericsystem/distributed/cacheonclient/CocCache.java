@@ -7,12 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
@@ -126,25 +130,32 @@ public class CocCache extends HeavyCache {
 	}
 
 	public CompletableFuture<ObservableList<Generic>> getDependenciesPromise(Generic generic) throws InterruptedException, ExecutionException {
-		return getDifferential().getDependenciesPromise(generic).getValue().thenApply(snapshot -> {
+		ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getDifferential().getDependenciesPromise(generic);
+		return dependenciesPromise.getValue().thenApply(snapshot -> {
 			GSListBinding observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
+			if (observableList == null)
+				dependenciesPromiseAsOservableListCacheMap.put(generic, observableList = new GSListBinding(generic, dependenciesPromise));
 			observableList.push(snapshot.toList());
 			return observableList;
 		});
 	}
 
+	private Map<Generic, GSListBinding> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, GSListBinding>();
+
 	private class GSListBinding extends ListBinding<Generic> {
 		private final ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding;
 		private Collection<? extends Generic> elements = new ArrayList<>();
+		@SuppressWarnings("unused")
+		private ChangeListener<ObservableValue<CompletableFuture<Snapshot<Generic>>>> bindingListener;
 
-		private GSListBinding(Generic generic) {
+		private GSListBinding(Generic generic, ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise) {
 			this.binding = new ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>() {
 
 				private ObservableValue<CompletableFuture<Snapshot<Generic>>> currentBindedDifferential;
 
 				{
-					currentBindedDifferential = getDifferential().getDependenciesPromise(generic);
-					bind(differentialInvalidator);
+					currentBindedDifferential = dependenciesPromise;
+					bind(differentialProperty, currentBindedDifferential);
 				}
 
 				@Override
@@ -154,16 +165,18 @@ public class CocCache extends HeavyCache {
 
 				@Override
 				protected void onInvalidating() {
+					unbind(currentBindedDifferential);
 					currentBindedDifferential = getDifferential().getDependenciesPromise(generic);
+					bind(currentBindedDifferential);
 				};
 			};
 
-			binding.addListener((observable, oldV, newV) -> {
+			binding.addListener(new WeakChangeListener<>(bindingListener = ((observable, oldV, newV) -> {
 				newV.getValue().thenAccept(snapshot -> {
 					elements = snapshot.toList();
 					invalidate();
 				});
-			});
+			})));
 		}
 
 		@Override
@@ -179,21 +192,5 @@ public class CocCache extends HeavyCache {
 		};
 
 	}
-
-	private ObservableValue<AsyncITransaction> differentialInvalidator;
-	private Map<Generic, GSListBinding> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, GSListBinding>() {
-
-		private static final long serialVersionUID = -6483309004505712513L;
-
-		@Override
-		public GSListBinding get(Object key) {
-			GSListBinding result = super.get(key);
-			if (result == null) {
-				put((Generic) key, result = new GSListBinding((Generic) key));
-			}
-			return result;
-
-		}
-	};
 
 }
