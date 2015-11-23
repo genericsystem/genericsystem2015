@@ -1,17 +1,16 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
@@ -72,7 +71,6 @@ public class CocCache extends HeavyCache {
 	}
 
 	private ObservableValue<AsyncITransaction> transactionInvalidator;
-	private ObservableValue<AsyncITransaction> differentialInvalidator;
 
 	protected class AsyncTransactionDifferential extends TransactionDifferential implements AsyncIDifferential {
 		@Override
@@ -129,21 +127,43 @@ public class CocCache extends HeavyCache {
 
 	public CompletableFuture<ObservableList<Generic>> getDependenciesPromise(Generic generic) throws InterruptedException, ExecutionException {
 		return getDifferential().getDependenciesPromise(generic).getValue().thenApply(snapshot -> {
-			ObservableList<Generic> observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
+			ListBinding<Generic> observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
 			observableList.setAll(snapshot.toList());
-			return FXCollections.unmodifiableObservableList(observableList);
+			return observableList;
 		});
 	}
 
-	private Map<Generic, ObservableList<Generic>> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, ObservableList<Generic>>() {
+	private ObservableValue<AsyncITransaction> differentialInvalidator;
+	private Map<Generic, ListBinding<Generic>> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, ListBinding<Generic>>() {
 
 		private static final long serialVersionUID = -6483309004505712513L;
 
 		@Override
-		public ObservableList<Generic> get(Object key) {
-			ObservableList<Generic> result = super.get(key);
+		public ListBinding<Generic> get(Object key) {
+			ListBinding<Generic> result = super.get(key);
 			if (result == null)
-				put((Generic) key, result = FXCollections.observableArrayList());
+				put((Generic) key, result = new ListBinding<Generic>() {
+
+					Collection<? extends Generic> elements;
+
+					{
+						super.bind(differentialInvalidator, getDifferential().getDependenciesPromise((Generic) key));
+					}
+
+					@Override
+					protected ObservableList<Generic> computeValue() {
+						return FXCollections.observableArrayList(elements);
+
+					}
+
+					@Override
+					public boolean setAll(Collection<? extends Generic> elements) {
+						this.elements = elements;
+						invalidate();
+						return true;
+					};
+
+				});
 			return result;
 		}
 	};
