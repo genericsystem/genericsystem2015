@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -141,14 +143,23 @@ public class CocCache extends HeavyCache {
 		@Override
 		public ListBinding<Generic> get(Object key) {
 			ListBinding<Generic> result = super.get(key);
-			if (result == null)
+			if (result == null) {
 				put((Generic) key, result = new ListBinding<Generic>() {
 
-					Collection<? extends Generic> elements;
+					private ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding = Bindings.createObjectBinding(() -> getDifferential().getDependenciesPromise((Generic) key), differentialInvalidator);
 
+					Collection<? extends Generic> elements = new ArrayList<>();
 					{
-						super.bind(differentialInvalidator, getDifferential().getDependenciesPromise((Generic) key));
+						super.bind(binding);
 					}
+
+					@Override
+					protected void onInvalidating() {
+						binding.getValue().getValue().thenAccept(snapshot -> {
+							elements = snapshot.toList();
+							invalidate();
+						});
+					};
 
 					@Override
 					protected ObservableList<Generic> computeValue() {
@@ -164,7 +175,9 @@ public class CocCache extends HeavyCache {
 					};
 
 				});
+			}
 			return result;
+
 		}
 	};
 }
