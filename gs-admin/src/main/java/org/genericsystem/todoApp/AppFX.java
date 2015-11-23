@@ -18,8 +18,10 @@ public class AppFX extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 		TodoList todoList = new TodoList();
-		todoList.createTodo("test");
-		todoList.createTodo("test2");
+
+		todoList.createTodo("todo1");
+		todoList.createTodo("todo2");
+		todoList.createTodo("todo3");
 		((Group) scene.getRoot()).getChildren().add(todoList.init());
 		stage.setScene(scene);
 		stage.show();

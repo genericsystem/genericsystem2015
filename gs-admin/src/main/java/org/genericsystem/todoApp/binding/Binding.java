@@ -22,16 +22,18 @@ public interface Binding {
 
 		@Override
 		public void init(BindingContext context) {
-			System.out.println("Binding::bindTo::init");
 			Object model;
 			try {
-				model = attribute.get(((AbstractModelContext) context.modelContext).model);
-
+				model = resolve(attribute, context);
 				binder.init((ObservableValue) model, context);
-				System.out.println(model);
+				System.out.println("model :: " + model);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
+		}
+
+		private Object resolve(Field attribute, BindingContext context) throws IllegalArgumentException, IllegalAccessException {
+			return attribute.get(((AbstractModelContext) context.modelContext).model);
 		}
 	}
 }

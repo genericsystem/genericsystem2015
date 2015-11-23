@@ -7,7 +7,7 @@ import javafx.scene.Node;
 
 public interface IModelContext {
 
-	IModelContext createChild(Object childModel);
+	public IModelContext createChild(Object childModel);
 
 	void registre(Node node);
 
@@ -25,7 +25,7 @@ public interface IModelContext {
 
 		@Override
 		public void registre(Node node) {
-			System.out.println("ModelContextImpl::registre(" + node + ")");
+			// System.out.println("ModelContextImpl::registre(" + node + ")");
 			this.nodes.add(node);
 		}
 	}
@@ -33,12 +33,12 @@ public interface IModelContext {
 	public static class ModelContextImpl extends AbstractModelContext {
 		public ModelContextImpl(IModelContext parent, Object model) {
 			super(parent, model);
-			System.out.println("ModelContextImpl::const");
 		}
 
 		@Override
 		public ModelContextImpl createChild(Object child) {
-			System.out.println("ModelContextImpl::create child");
+			// System.out.println("ModelContextImpl::create child");
+			// System.out.println("############### :: " + child.getClass());
 			return new ModelContextImpl(this, child);
 		}
 	}

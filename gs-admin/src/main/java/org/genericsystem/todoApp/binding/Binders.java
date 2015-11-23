@@ -6,11 +6,49 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.Label;
 
 import org.genericsystem.todoApp.IModelContext;
 import org.genericsystem.todoApp.IModelContext.ModelContextImpl;
+import org.genericsystem.todoApp.IViewContext.AbstractViewContext;
 
 public abstract class Binders<Type> {
+
+	public static class RemoveBinder<T> {
+		public static <T> Binder<T> removeBind() {
+			Binder<T> imp = new Binder<T>() {
+
+				@Override
+				public void init(ObservableValue<T> val, BindingContext context) {
+
+				}
+
+				@Override
+				public Consumer<T> notifyImpl(BindingContext context) {
+					return null;
+				}
+
+			};
+			return null;
+		}
+	}
+
+	public static class TodoBinder<T> {
+		public static <T> Binder<T> todoBind() {
+			Binder<T> imp = new Binder<T>() {
+				@Override
+				public void init(ObservableValue<T> val, BindingContext context) {
+					((Label) (((AbstractViewContext) context.viewContext).node)).textProperty().set(val.getValue().toString());
+				}
+
+				@Override
+				public Consumer<T> notifyImpl(BindingContext context) {
+					return null;
+				}
+			};
+			return imp;
+		}
+	}
 
 	public static class foreachBinder<T> {
 
@@ -19,8 +57,6 @@ public abstract class Binders<Type> {
 			Binder<List<T>> impl = new Binder<List<T>>() {
 				List<IModelContext> contexts = new LinkedList<>();
 				List<T> values = new LinkedList<>();
-
-				// List<T> myList = new LinkedList<T>();// la liste passée en param (où ??)
 
 				@Override
 				public Consumer<List<T>> notifyImpl(BindingContext context) {
@@ -36,15 +72,13 @@ public abstract class Binders<Type> {
 				}
 
 				public List<T> diff(List<T> values, List<T> myList) {
-
 					List<T> diff = new ArrayList<T>();
 					return myList;
 				}
 
 				@Override
 				public void init(ObservableValue<List<T>> val, BindingContext context) {
-					System.out.println("init foreach :: val " + val.getValue());
-
+					((AbstractViewContext) context.viewContext).initContent = false;
 					Consumer<List<T>> notifyImpl = notifyImpl(context);
 					notifyImpl.accept(val.getValue());
 				}

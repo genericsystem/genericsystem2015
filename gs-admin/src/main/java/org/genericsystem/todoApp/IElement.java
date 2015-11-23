@@ -3,6 +3,8 @@ package org.genericsystem.todoApp;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 
 import org.genericsystem.todoApp.IModelContext.ModelContextImpl;
@@ -15,8 +17,9 @@ public interface IElement {
 
 	public static abstract class AbstractElement implements IElement {
 		public Class<? extends Node> classNode;
-		public String text;
+		public StringProperty text = new SimpleStringProperty();
 		public BindingImpl binding;
+
 		public List<IElement> content = new ArrayList<IElement>();
 
 		public AbstractElement(Class<? extends Node> classNode, String text, BindingImpl binding, List<IElement> content) {
@@ -24,12 +27,12 @@ public interface IElement {
 			this.classNode = classNode;
 			this.binding = binding;
 			this.content = content;
-			this.text = text;
+			this.text.set(text);
 		}
 
 		@Override
 		public AbstractViewContext apply(Object model) {
-			System.out.println("apply ::: ");
+			// System.out.println("apply ::: ");
 			Node node = null;
 			try {
 				node = createNode();
@@ -37,13 +40,13 @@ public interface IElement {
 				throw new IllegalStateException(e);
 			}
 			ModelContextImpl modelContext = new ModelContextImpl(null, model);
-			ElementViewContext viewContext = new ElementViewContext(modelContext, this, node);
+			ElementViewContext viewContext = new ElementViewContext(modelContext, this, node, null);
 			viewContext.init();
 			return viewContext;
 		}
 
 		private Node createNode() throws InstantiationException, IllegalAccessException {
-			System.out.println("AbstractElement::createNode(" + classNode + ")");
+			// System.out.println("AbstractElement::createNode(" + classNode + ")");
 			return classNode.newInstance();
 		}
 
@@ -52,7 +55,7 @@ public interface IElement {
 	public static class Element extends AbstractElement {
 		public Element(Class<? extends Node> classNode, String text, BindingImpl binding, List<IElement> content) {
 			super(classNode, text, binding, content);
-			System.out.println("Element::const");
+			// System.out.println("Element::const");
 		}
 	}
 }
