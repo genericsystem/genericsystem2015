@@ -7,14 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
@@ -131,81 +129,73 @@ public class CocCache extends HeavyCache {
 
 	public CompletableFuture<ObservableList<Generic>> getDependenciesPromise(Generic generic) throws InterruptedException, ExecutionException {
 		return getDifferential().getDependenciesPromise(generic).getValue().thenApply(snapshot -> {
-			ListBinding<Generic> observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
-			observableList.setAll(snapshot.toList());
+			GSListBinding observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
+			observableList.push(snapshot.toList());
 			return observableList;
 		});
 	}
 
+	private class GSListBinding extends ListBinding<Generic> {
+		private final ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding;
+		private Collection<? extends Generic> elements = new ArrayList<>();
+
+		private GSListBinding(Generic generic) {
+			this.binding = new ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>() {
+
+				private ObservableValue<CompletableFuture<Snapshot<Generic>>> currentBindedDifferential;
+
+				{
+					currentBindedDifferential = getDifferential().getDependenciesPromise(generic);
+					bind(differentialInvalidator);
+				}
+
+				@Override
+				protected ObservableValue<CompletableFuture<Snapshot<Generic>>> computeValue() {
+					return currentBindedDifferential;
+				}
+
+				@Override
+				protected void onInvalidating() {
+					currentBindedDifferential = getDifferential().getDependenciesPromise(generic);
+				};
+			};
+
+			binding.addListener((observable, oldV, newV) -> {
+				newV.getValue().thenAccept(snapshot -> {
+					elements = snapshot.toList();
+					invalidate();
+				});
+			});
+		}
+
+		@Override
+		protected ObservableList<Generic> computeValue() {
+			return FXCollections.observableArrayList(elements);
+
+		}
+
+		public boolean push(Collection<? extends Generic> elements) {
+			this.elements = elements;
+			invalidate();
+			return true;
+		};
+
+	}
+
 	private ObservableValue<AsyncITransaction> differentialInvalidator;
-	private Map<Generic, ListBinding<Generic>> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, ListBinding<Generic>>() {
+	private Map<Generic, GSListBinding> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, GSListBinding>() {
 
 		private static final long serialVersionUID = -6483309004505712513L;
 
 		@Override
-		public ListBinding<Generic> get(Object key) {
-			ListBinding<Generic> result = super.get(key);
+		public GSListBinding get(Object key) {
+			GSListBinding result = super.get(key);
 			if (result == null) {
-				put((Generic) key, result = new ListBinding<Generic>() {
-
-					private ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding = new ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>() {
-
-						private ObservableValue<CompletableFuture<Snapshot<Generic>>> currentBindedDifferential;
-
-						{
-							currentBindedDifferential = getDifferential().getDependenciesPromise((Generic) key);
-							bind(differentialInvalidator);
-						}
-
-						@Override
-						protected ObservableValue<CompletableFuture<Snapshot<Generic>>> computeValue() {
-							return currentBindedDifferential;
-						}
-
-						@Override
-						protected void onInvalidating() {
-							currentBindedDifferential = getDifferential().getDependenciesPromise((Generic) key);
-						};
-					};
-
-					Collection<? extends Generic> elements = new ArrayList<>();
-					{
-						binding.addListener((observable, oldV, newV) -> {
-							newV.getValue().thenAccept(snapshot -> {
-								elements = snapshot.toList();
-								invalidate();
-							});
-						});
-					}
-
-					@Override
-					protected ObservableList<Generic> computeValue() {
-						return FXCollections.observableArrayList(elements);
-
-					}
-
-					@Override
-					public boolean setAll(Collection<? extends Generic> elements) {
-						this.elements = elements;
-						invalidate();
-						return true;
-					};
-
-				});
+				put((Generic) key, result = new GSListBinding((Generic) key));
 			}
 			return result;
 
 		}
 	};
-
-	private static class ListBinding2<Generic> extends ListBinding<Generic> {
-
-		@Override
-		protected ObservableList<Generic> computeValue() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-	}
 
 }
