@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
@@ -21,6 +20,7 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
+import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public class CocCache extends HeavyCache {
 
@@ -48,6 +48,11 @@ public class CocCache extends HeavyCache {
 		public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
 			return Bindings.<CompletableFuture<Snapshot<Generic>>> createObjectBinding(() -> getTransaction().getDependenciesPromise(generic), transactionProperty);
 		}
+
+		@Override
+		public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+			return getTransaction().getDependenciesObservableSnapshot(generic);
+		}
 	}
 
 	@Override
@@ -65,7 +70,7 @@ public class CocCache extends HeavyCache {
 		return (AsyncDifferential) super.getDifferential();
 	}
 
-	public CompletableFuture<ObservableList<Generic>> getDependenciesPromise(Generic generic) throws InterruptedException, ExecutionException {
+	public CompletableFuture<ObservableList<Generic>> getDependenciesPromise(Generic generic) {
 		ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getDifferential().getDependenciesPromise(generic);
 		return dependenciesPromise.getValue().thenApply(snapshot -> {
 			GSListBinding observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
@@ -101,6 +106,7 @@ public class CocCache extends HeavyCache {
 
 				@Override
 				protected void onInvalidating() {
+					System.out.println("(CocCache - GSListBinding) Invalidation of binded differential");
 					unbind(currentBindedDifferential);
 					currentBindedDifferential = getDifferential().getDependenciesPromise(generic);
 					bind(currentBindedDifferential);
@@ -116,9 +122,13 @@ public class CocCache extends HeavyCache {
 		}
 
 		@Override
+		protected void onInvalidating() {
+			System.out.println("(CocCache - GSListBinding) Invalidation of elements' Collection");
+		}
+
+		@Override
 		protected ObservableList<Generic> computeValue() {
 			return FXCollections.observableArrayList(elements);
-
 		}
 
 		public boolean push(Collection<? extends Generic> elements) {
@@ -127,6 +137,10 @@ public class CocCache extends HeavyCache {
 			return true;
 		};
 
+	}
+
+	public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
+		return getDifferential().getDependenciesObservableSnapshot(generic).toObservableList();
 	}
 
 }

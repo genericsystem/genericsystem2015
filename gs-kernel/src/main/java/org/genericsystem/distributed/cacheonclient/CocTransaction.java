@@ -13,6 +13,8 @@ import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineHandler;
+import org.genericsystem.distributed.cacheonclient.observables.CompletableObservableSnapshot2;
+import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public class CocTransaction extends CheckedContext implements AsyncITransaction {
 
@@ -64,6 +66,7 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		dependenciesMap.remove(generic.getMeta());
 		dependenciesMap.remove(generic);
 
+		System.out.println("(CocTransaction - invalid) invalidate all");
 		generic.getComponents().forEach(component -> dependenciesPromiseMap.remove(component));
 		generic.getSupers().forEach(superG -> dependenciesPromiseMap.remove(superG));
 		dependenciesPromiseMap.remove(generic.getMeta());
@@ -99,5 +102,10 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 			dependenciesPromiseMap.put(generic, dependenciesPromise);
 		}
 		return dependenciesPromise;
+	}
+
+	@Override
+	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
 	}
 }

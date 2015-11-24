@@ -51,14 +51,17 @@ public class ContainerObservableSnapshot<E> extends AbstractObservableSnapshot<E
 	public boolean add(E element) {
 		container.add(element);
 		callObservers(new SimpleAddChange(element));
+		System.out.println("Add element in snapshot container");
 		return true;
 	}
 
 	@Override
 	public boolean remove(Object element) {
 		boolean result = container.remove((E) element);
-		if (result)
+		if (result) {
 			callObservers(new SimpleRemoveChange((E) element));
+			System.out.println("Remove element in snapshot container");
+		}
 		return result;
 	}
 

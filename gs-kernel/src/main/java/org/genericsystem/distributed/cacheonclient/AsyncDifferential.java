@@ -1,8 +1,10 @@
 package org.genericsystem.distributed.cacheonclient;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 
@@ -15,7 +17,6 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 
 	public AsyncDifferential(AsyncIDifferential subCache) {
 		super(subCache);
-
 	}
 
 	@Override
@@ -53,8 +54,14 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 			}
 
 			@Override
+			protected void onInvalidating() {
+				System.out.println("(AsyncDifferential - getDependenciesPromise) Invalidation");
+			}
+
+			@Override
 			protected CompletableFuture<Snapshot<Generic>> computeValue() {
 				return dependenciesPromise.getValue().<Snapshot<Generic>> thenApply(snapshot -> new Snapshot<Generic>() {
+
 					@Override
 					public Generic get(Object o) {
 						Generic result = addsSnap.get(o);
@@ -70,5 +77,11 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 				});
 			}
 		};
+	}
+
+	@Override
+	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+		ObservableValue<Predicate<Generic>> removePredicate = Bindings.<Predicate<Generic>> createObjectBinding(() -> t -> !removesSnap.contains(t), removesSnap);
+		return getSubCache().getDependenciesObservableSnapshot(generic).filtered(removePredicate).concat(addsSnap.filtered(x -> generic.isDirectAncestorOf(x)));
 	}
 }

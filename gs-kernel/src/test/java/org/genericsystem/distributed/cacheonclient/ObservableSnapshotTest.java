@@ -11,7 +11,10 @@ import java.util.stream.Collectors;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.observables.ContainerObservableSnapshot;
 import org.testng.annotations.Test;
 
@@ -159,5 +162,127 @@ public class ObservableSnapshotTest extends AbstractTest {
 
 		assert listToCheck.size() == containerObsSnapshot.size();
 		assert new ArrayList<>(containerObsSnapshot).equals(listToCheck);
+	}
+
+	@Test(invocationCount = 5)
+	public void test007_ObservableEngineDependenciesTest() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	@Test(invocationCount = 5)
+	public void test008_ObservableEngineDependenciesAddTest() throws InterruptedException {
+		CocClientEngine engine = new CocClientEngine();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+
+		engine.addInstance("Instance0");
+		engine.addInstance("Instance1");
+		engine.addInstance("Instance2");
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	@Test(invocationCount = 5)
+	public void test009_ObservableEngineDependenciesRemoveTest() throws InterruptedException, ConcurrencyControlException {
+		CocClientEngine engine = new CocClientEngine();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+
+		engine.addInstance("Instance0");
+		engine.addInstance("Instance1");
+		Generic g2 = engine.addInstance("Instance2");
+		engine.addInstance("Instance3");
+		engine.addInstance("Instance4");
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+
+		g2.remove();
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	@Test(invocationCount = 5)
+	public void test010_ObservableEngineDependenciesDifferentialTest() throws InterruptedException, ConcurrencyControlException {
+		CocClientEngine engine = new CocClientEngine();
+
+		engine.addInstance("InstanceL1_0");
+		engine.addInstance("InstanceL1_1");
+		Generic l1g2 = engine.addInstance("InstanceL1_2");
+		engine.addInstance("InstanceL1_3");
+		Generic l1g4 = engine.addInstance("InstanceL1_4");
+
+		engine.getCurrentCache().mount();
+
+		Generic l2g0 = engine.addInstance("InstanceL2_0");
+		Generic l2g1 = engine.addInstance("InstanceL2_1");
+		engine.addInstance("InstanceL2_2");
+		l2g0.remove();
+		l1g2.remove();
+
+		engine.getCurrentCache().mount();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+		l2g1.remove();
+		engine.addInstance("InstanceL3_0");
+		engine.addInstance("InstanceL3_1");
+		l1g4.remove();
+		engine.addInstance("InstanceL3_2");
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+	}
+
+	@Test(invocationCount = 5)
+	public void test011_ObservableEngineDependenciesClearTest() throws InterruptedException, ConcurrencyControlException {
+		CocClientEngine engine = new CocClientEngine();
+
+		engine.addInstance("InstanceL1_0");
+		engine.addInstance("InstanceL1_1");
+		Generic l1g2 = engine.addInstance("InstanceL1_2");
+		engine.addInstance("InstanceL1_3");
+		engine.addInstance("InstanceL1_4");
+
+		engine.getCurrentCache().mount();
+
+		ObservableList<Generic> dependenciesObservableListBeforeClearMount = engine.getCurrentCache().getDependenciesObservableList(engine);
+
+		Generic l2g0 = engine.addInstance("InstanceL2_0");
+		Generic l2g1 = engine.addInstance("InstanceL2_1");
+		engine.addInstance("InstanceL2_2");
+		l2g0.remove();
+		l1g2.remove();
+
+		engine.getCurrentCache().mount();
+
+		l2g1.remove();
+		engine.addInstance("InstanceL3_0");
+		engine.addInstance("InstanceL3_1");
+		engine.addInstance("InstanceL3_2");
+
+		engine.getCurrentCache().clear();
+
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+
+		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
+			Thread.sleep(100);
+		assert dependenciesObservableListBeforeClearMount.equals(dependenciesObservableList);
+		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
 }

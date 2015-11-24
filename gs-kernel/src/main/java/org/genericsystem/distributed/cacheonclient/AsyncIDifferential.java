@@ -7,6 +7,7 @@ import javafx.beans.value.ObservableValue;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
+import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 /**
  * @author Nicolas Feybesse
@@ -14,4 +15,6 @@ import org.genericsystem.common.IDifferential;
  */
 public interface AsyncIDifferential extends IDifferential<Generic> {
 	public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic);
+
+	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic);
 }
