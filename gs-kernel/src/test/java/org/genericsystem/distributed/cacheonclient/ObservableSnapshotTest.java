@@ -168,7 +168,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 	public void test007_ObservableEngineDependenciesTest() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 
 		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);
@@ -179,7 +179,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 	public void test008_ObservableEngineDependenciesAddTest() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
 
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 
 		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);
@@ -198,7 +198,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 	public void test009_ObservableEngineDependenciesRemoveTest() throws InterruptedException, ConcurrencyControlException {
 		CocClientEngine engine = new CocClientEngine();
 
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 
 		engine.addInstance("Instance0");
 		engine.addInstance("Instance1");
@@ -237,7 +237,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 
 		engine.getCurrentCache().mount();
 
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 		l2g1.remove();
 		engine.addInstance("InstanceL3_0");
 		engine.addInstance("InstanceL3_1");
@@ -261,7 +261,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 
 		engine.getCurrentCache().mount();
 
-		ObservableList<Generic> dependenciesObservableListBeforeClearMount = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		ObservableList<Generic> dependenciesObservableListBeforeClearMount = engine.getCurrentCache().getDependenciesObservableList(engine);
 
 		Generic l2g0 = engine.addInstance("InstanceL2_0");
 		Generic l2g1 = engine.addInstance("InstanceL2_1");
@@ -278,7 +278,7 @@ public class ObservableSnapshotTest extends AbstractTest {
 
 		engine.getCurrentCache().clear();
 
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getWrappableDependenciesSnap(engine);
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 
 		if (!engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList))
 			Thread.sleep(100);

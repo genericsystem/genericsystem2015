@@ -26,6 +26,17 @@ public class ObservableListPromiseTest extends AbstractTest {
 	}
 
 	@Test(invocationCount = 1)
+	public void test001_ObservableEngineDependenciesNotBloquingTest() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine engine = new CocClientEngine();
+
+		CompletableFuture<ObservableList<Generic>> dependenciesPromise = engine.getCurrentCache().getDependenciesPromise(engine);
+
+		dependenciesPromise.thenAccept((dependenciesObservableList) -> {
+			assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
+		});
+	}
+
+	@Test(invocationCount = 1)
 	public void test002_ObservableEngineDependenciesAddTest() throws InterruptedException, ExecutionException, TimeoutException, ConcurrencyControlException {
 		CocClientEngine engine = new CocClientEngine();
 

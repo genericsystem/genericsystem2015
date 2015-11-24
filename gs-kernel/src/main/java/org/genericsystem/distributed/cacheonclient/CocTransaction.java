@@ -1,18 +1,9 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
-import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -75,6 +66,7 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		dependenciesMap.remove(generic.getMeta());
 		dependenciesMap.remove(generic);
 
+		System.out.println("(CocTransaction - invalid) invalidate all");
 		generic.getComponents().forEach(component -> dependenciesPromiseMap.remove(component));
 		generic.getSupers().forEach(superG -> dependenciesPromiseMap.remove(superG));
 		dependenciesPromiseMap.remove(generic.getMeta());
@@ -99,58 +91,6 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		return dependencies;
 	}
 
-	public class CompletableObservableList extends SimpleObjectProperty<List<Generic>> implements ObservableValue<List<Generic>> {
-
-		public CompletableObservableList(CompletableFuture<Vertex[]> promise) {
-			super(new ArrayList<>());
-			promise.thenAccept(elements -> {
-				setValue(Arrays.stream(elements).map(vertex -> getRoot().getGenericByVertex(vertex)).collect(Collectors.toList()));
-			});
-		}
-	}
-
-	private Map<Generic, ObservableValue<List<Generic>>> dependenciesPromisesMap = new HashMap<>();
-
-	@Override
-	public ObservableValue<List<Generic>> getDependenciesObservableList(Generic generic) {
-		ObservableValue<List<Generic>> dependencies = dependenciesPromisesMap.get(generic);
-		if (dependencies == null) {
-			dependencies = new CompletableObservableList(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()));
-			ObservableValue<List<Generic>> result = dependenciesPromisesMap.put(generic, dependencies);
-			assert result == null;
-		}
-		return dependencies;
-	}
-
-	@Override
-	public ObservableList<Generic> getWrappableDependencies(Generic generic) {
-		return new AbstractWrappable<Generic>() {
-			private ChangeListener<List<Generic>> listener = new WeakChangeListener<>((observableValue, oldValue, newValue) -> {
-				beginChange();
-				nextAdd(0, newValue.size());
-				endChange();
-			});
-			{
-				getDependenciesObservableList(generic).addListener(listener);
-			}
-
-			@Override
-			public Generic get(int index) {
-				return getDependenciesObservableList(generic).getValue().get(index);
-			}
-
-			@Override
-			public int size() {
-				return getDependenciesObservableList(generic).getValue().size();
-			}
-		};
-	}
-
-	@Override
-	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
-		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
-	}
-
 	private Map<Generic, CompletableFuture<Snapshot<Generic>>> dependenciesPromiseMap = new HashMap<>();
 
 	@Override
@@ -162,5 +102,10 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 			dependenciesPromiseMap.put(generic, dependenciesPromise);
 		}
 		return dependenciesPromise;
+	}
+
+	@Override
+	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
 	}
 }
