@@ -1,9 +1,12 @@
 package org.genericsystem.todoApp;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 
 public interface IModelContext {
 
@@ -25,8 +28,33 @@ public interface IModelContext {
 
 		@Override
 		public void registre(Node node) {
-			// System.out.println("ModelContextImpl::registre(" + node + ")");
 			this.nodes.add(node);
+		}
+
+		@Override
+		public void destroy() {
+			nodes.forEach(e -> {
+				if (e.getParent() instanceof Pane)
+					((Pane) e.getParent()).getChildren().remove(e);
+			});
+		}
+
+		public AbstractModelContext resolve(Method method) {
+			if (method.getDeclaringClass().isAssignableFrom(this.model.getClass()))
+				return this;
+			else if (this.parent == null)
+				throw new IllegalStateException("Unable to resolve method : " + method);
+			else
+				return ((AbstractModelContext) parent).resolve(method);
+		}
+
+		public AbstractModelContext resolve(Field field) {
+			if (field.getDeclaringClass().isAssignableFrom(this.model.getClass()))
+				return this;
+			else if (this.parent == null)
+				throw new IllegalStateException("Unable to resolve field : " + field);
+			else
+				return ((AbstractModelContext) parent).resolve(field);
 		}
 	}
 
@@ -37,9 +65,9 @@ public interface IModelContext {
 
 		@Override
 		public ModelContextImpl createChild(Object child) {
-			// System.out.println("ModelContextImpl::create child");
-			// System.out.println("############### :: " + child.getClass());
 			return new ModelContextImpl(this, child);
 		}
 	}
+
+	public void destroy();
 }

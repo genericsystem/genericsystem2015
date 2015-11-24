@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 
 import org.genericsystem.todoApp.IElement.AbstractElement;
-import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.BindingContext;
 
 public interface IViewContext {
@@ -42,29 +42,32 @@ public interface IViewContext {
 			if (template.content != null)
 				template.content.forEach(element -> {
 					Node childNode = null;
-					try {
-						childNode = createNode(((AbstractElement) element).classNode);
-						registre(childNode);
-					} catch (Exception e) {
-						throw new IllegalStateException(e);
-					}
+					childNode = createNode(((AbstractElement) element).classNode);
+					registre(childNode);
+					if (childNode instanceof Button)
+						((Button) childNode).setText(((AbstractElement) element).text.get());
 
-					Element elm = new Element(((AbstractElement) element).classNode, ((AbstractElement) element).text.get(), ((AbstractElement) element).binding, ((AbstractElement) element).content);
-					ElementViewContext viewContextChild = new ElementViewContext(modelContext, elm, childNode, this);
+					ElementViewContext viewContextChild = new ElementViewContext(modelContext, ((AbstractElement) element), childNode, this);
 					addChildren(viewContextChild);
 					viewContextChild.init();
 				});
-			System.out.println();
 		}
 
-		private Node createNode(Class<? extends Node> clazz) throws InstantiationException, IllegalAccessException {
-			return clazz.newInstance();
+		private Node createNode(Class<? extends Node> clazz) {
+			try {
+				return clazz.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 
 		public void init() {
 			BindingContext bindingContext = new BindingContext(modelContext, this);
 			if (template.binding != null) {
-				template.binding.init(bindingContext);
+				for (int i = 0; i < template.binding.length; i++) {
+					template.binding[i].init(bindingContext);
+				}
+
 			}
 			if (initContent)
 				initChildren();

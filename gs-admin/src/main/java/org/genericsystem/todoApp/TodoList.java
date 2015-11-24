@@ -1,59 +1,75 @@
 package org.genericsystem.todoApp;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
 import org.genericsystem.todoApp.IElement.Element;
-import org.genericsystem.todoApp.binding.Binders;
-import org.genericsystem.todoApp.binding.Binding.BindingImpl;
+import org.genericsystem.todoApp.binding.Binders.ClickBinder;
+import org.genericsystem.todoApp.binding.Binders.EnterBinder;
+import org.genericsystem.todoApp.binding.Binders.ForeachBinder;
+import org.genericsystem.todoApp.binding.Binders.TextBinder;
+import org.genericsystem.todoApp.binding.Binding;
 
 public class TodoList {
 
-	public ObjectProperty<String> name = new SimpleObjectProperty<String>();
+	public StringProperty name = new SimpleStringProperty();
+	public ObservableList<Todo> todos = FXCollections.observableArrayList();
 
-	public ObservableValue<List<Todo>> todos = new SimpleObjectProperty<List<Todo>>(new ArrayList<>());
-
-	public void createTodo(String instance) {
-		Todo todo = new Todo(instance);
-		todos.getValue().add(todo);
+	public void create() {
+		Todo todo = new Todo(name.getValue());
+		todos.add(todo);
 	}
 
-	public void removeTodo(Todo todo) {
-		todos.getValue().remove(todo);
+	public void remove(Todo todo) {
+		this.todos.remove(todo);
+		System.out.println("kkk");
 	}
 
 	public Node init() throws IllegalArgumentException, IllegalAccessException {
 
-		// todos.getValue().forEach(t -> System.out.println(t.stringProperty.get()));
-
 		Field attributeTodos = null;
+		Field nameAttribute = null;
 		Field attributeTodo = null;
+		Method methodRemove = null;
+		Method methodCreate = null;
 		try {
+			nameAttribute = TodoList.class.getField("name");
 			attributeTodos = TodoList.class.getField("todos");
 			attributeTodo = Todo.class.getField("stringProperty");
-		} catch (NoSuchFieldException | SecurityException e) {
+			methodRemove = TodoList.class.getMethod("remove", Todo.class);
+			methodCreate = TodoList.class.getMethod("create");
+		} catch (NoSuchFieldException | SecurityException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
 
-		BindingImpl bindingForeach = new BindingImpl();
-		BindingImpl bindingTodo = new BindingImpl();
-		BindingImpl bindingRemove = new BindingImpl();
-
 		List<IElement> content = new ArrayList<IElement>();
-		IElement elmVBox = new Element(VBox.class, "", bindingForeach.bindTo(attributeTodos, Binders.foreachBinder.foreach()), content);
-		IElement elmLabel = new Element(Label.class, "", bindingTodo.bindTo(attributeTodo, Binders.TodoBinder.todoBind()), null);
+		List<IElement> contentRoot = new ArrayList<IElement>();
+		IElement elmVBoxRoot = new Element(VBox.class, "", contentRoot, null);
 
-		// IElement elmButton = new Element(Button.class, "remove", bindingRemove.bindTo(attribute, binder), null);
+		IElement elmVBox = new Element(VBox.class, "", content, Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
+		IElement elmLabel = new Element(Label.class, "", null, Binding.bindTo(attributeTodo, TextBinder.textBind()));
+		IElement elmButtonRemove = new Element(Button.class, "remove", null, Binding.bindTo(methodRemove, ClickBinder.methodBind()));
+		IElement elmButtonCreate = new Element(Button.class, "create", null, Binding.bindTo(methodCreate, ClickBinder.methodBind()));
+
+		IElement elmTextField = new Element(TextField.class, "", null, Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
+
 		content.add(elmLabel);
-
-		return elmVBox.apply(this).node;
+		content.add(elmButtonRemove);
+		contentRoot.add(elmVBox);
+		contentRoot.add(elmTextField);
+		contentRoot.add(elmButtonCreate);
+		return elmVBoxRoot.apply(this).node;
 	}
 }
