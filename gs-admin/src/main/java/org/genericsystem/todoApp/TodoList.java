@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -14,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.Binders.ClickBinder;
 import org.genericsystem.todoApp.binding.Binders.EnterBinder;
@@ -53,9 +51,10 @@ public class TodoList {
 			e.printStackTrace();
 		}
 
-		List<IElement> content = new ArrayList<IElement>();
-		List<IElement> contentRoot = new ArrayList<IElement>();
-		IElement elmVBoxRoot = new Element(VBox.class, "", contentRoot, null);
+		List<IElement> content = new ArrayList<>();
+		List<IElement> contentRoot = new ArrayList<>();
+
+		IElement elmVBoxRoot = new Element(VBox.class, "", contentRoot);
 
 		IElement elmVBox = new Element(VBox.class, "", content, Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
 		IElement elmLabel = new Element(Label.class, "", null, Binding.bindTo(attributeTodo, TextBinder.textBind()));
@@ -69,6 +68,7 @@ public class TodoList {
 		contentRoot.add(elmVBox);
 		contentRoot.add(elmTextField);
 		contentRoot.add(elmButtonCreate);
+
 		return elmVBoxRoot.apply(this).node;
 	}
 }

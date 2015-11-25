@@ -18,9 +18,9 @@ public interface IModelContext {
 
 	public IModelContext getParent();
 
-	public AbstractModelContext resolve(Method method);
+	public ModelContext resolve(Method method);
 
-	public AbstractModelContext resolve(Field field);
+	public ModelContext resolve(Field field);
 
 	public List<IModelContext> getContextChildren();
 
@@ -28,15 +28,14 @@ public interface IModelContext {
 
 	public void destroy();
 
-	public static abstract class AbstractModelContext implements IModelContext {
+	public static class ModelContext implements IModelContext {
 
-		protected List<IViewContext> viewContexts = new ArrayList<IViewContext>();
-		protected List<IModelContext> modelContextChildren = new ArrayList<IModelContext>();
+		protected List<IViewContext> viewContexts = new ArrayList<>();
+		protected List<IModelContext> modelContextChildren = new ArrayList<>();
 		protected IModelContext parent;
 		protected Object model;
 
-		public AbstractModelContext(IModelContext parent, Object model) {
-			super();
+		public ModelContext(IModelContext parent, Object model) {
 			this.parent = parent;
 			this.model = model;
 		}
@@ -49,7 +48,7 @@ public interface IModelContext {
 		}
 
 		@Override
-		public AbstractModelContext resolve(Method method) {
+		public ModelContext resolve(Method method) {
 			if (method.getDeclaringClass().isAssignableFrom(this.model.getClass()))
 				return this;
 			else if (this.parent == null)
@@ -59,7 +58,7 @@ public interface IModelContext {
 		}
 
 		@Override
-		public AbstractModelContext resolve(Field field) {
+		public ModelContext resolve(Field field) {
 			if (field.getDeclaringClass().isAssignableFrom(this.model.getClass()))
 				return this;
 			else if (this.parent == null)
@@ -104,19 +103,12 @@ public interface IModelContext {
 		public void registre(IViewContext viewContext) {
 			this.viewContexts.add(viewContext);
 		}
-	}
-
-	public static class ModelContextImpl extends AbstractModelContext {
-		public ModelContextImpl(IModelContext parent, Object model) {
-			super(parent, model);
-		}
 
 		@Override
-		public ModelContextImpl createChild(Object child) {
-			ModelContextImpl childContext = new ModelContextImpl(this, child);
+		public ModelContext createChild(Object child) {
+			ModelContext childContext = new ModelContext(this, child);
 			this.modelContextChildren.add(childContext);
 			return childContext;
 		}
-
 	}
 }

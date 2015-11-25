@@ -2,17 +2,15 @@ package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 import javafx.beans.Observable;
-
-import org.genericsystem.todoApp.IModelContext.AbstractModelContext;
+import org.genericsystem.todoApp.IModelContext.ModelContext;
 
 public interface Binding {
 
 	public abstract void init(BindingContext context);
 
 	public static <U extends Observable, T> FieldBinding<U, T> bindTo(Field attribute, Binder<U> binder) {
-		return new FieldBinding<U, T>(attribute, binder);
+		return new FieldBinding<>(attribute, binder);
 	}
 
 	public static MethodBinding bindTo(Method method, Binder<Method> binder) {
@@ -47,7 +45,7 @@ public interface Binding {
 
 		@Override
 		protected U resolve(BindingContext context) {
-			AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(attribute);
+			ModelContext resolvedContext = context.modelContext.resolve(attribute);
 			try {
 				return (U) attribute.get(resolvedContext.getModel());
 			} catch (IllegalArgumentException | IllegalAccessException e) {

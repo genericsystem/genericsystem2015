@@ -2,11 +2,9 @@ package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
-
 import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.BindingContext;
 
@@ -28,21 +26,20 @@ public interface IViewContext {
 
 	public void setInitContent(boolean initContent);
 
-	public List<AbstractViewContext> getChildren();
+	public List<ElementViewContext> getChildren();
 
 	public void destroy();
 
-	public static abstract class AbstractViewContext implements IViewContext {
+	public static class ElementViewContext implements IViewContext {
 		protected Element template;
 		protected Node node;
 		protected IModelContext modelContext;
 		protected IViewContext parent;
 		protected boolean initContent = true;
 
-		public List<AbstractViewContext> children = new ArrayList<>();
+		public List<ElementViewContext> children = new ArrayList<>();
 
-		public AbstractViewContext(IModelContext modelContext, Element template, Node node, IViewContext parent) {
-			super();
+		public ElementViewContext(IModelContext modelContext, Element template, Node node, IViewContext parent) {
 			this.template = template;
 			this.node = node;
 			this.modelContext = modelContext;
@@ -52,10 +49,6 @@ public interface IViewContext {
 		@Override
 		public Element getTemplate() {
 			return template;
-		}
-
-		public void setTemplate(Element template) {
-			this.template = template;
 		}
 
 		@Override
@@ -73,17 +66,9 @@ public interface IViewContext {
 			return modelContext;
 		}
 
-		public void setModelContext(IModelContext modelContext) {
-			this.modelContext = modelContext;
-		}
-
 		@Override
 		public IViewContext getParent() {
 			return parent;
-		}
-
-		public void setParent(IViewContext parent) {
-			this.parent = parent;
 		}
 
 		@Override
@@ -97,7 +82,7 @@ public interface IViewContext {
 		}
 
 		@Override
-		public List<AbstractViewContext> getChildren() {
+		public List<ElementViewContext> getChildren() {
 			return children;
 		}
 
@@ -105,13 +90,6 @@ public interface IViewContext {
 		public void destroy() {
 			if (node.getParent() instanceof Pane)
 				((Pane) node.getParent()).getChildren().remove(node);
-		}
-	}
-
-	public static class ElementViewContext extends AbstractViewContext {
-
-		public ElementViewContext(IModelContext modelContext, Element template, Node node, IViewContext parent) {
-			super(modelContext, template, node, parent);
 		}
 
 		public void initChildren() {
@@ -154,7 +132,7 @@ public interface IViewContext {
 			modelContext.registre(viewContext);
 		}
 
-		public void addChildren(AbstractViewContext viewContext) {
+		public void addChildren(ElementViewContext viewContext) {
 			if (node instanceof Pane)
 				((Pane) node).getChildren().add(viewContext.node);
 			children.add(viewContext);
@@ -162,9 +140,9 @@ public interface IViewContext {
 
 		@Override
 		public void bind(IModelContext modelContext) {
-			// System.out.println("ElementViewContext::BIND")
 			ElementViewContext wrapper = new ElementViewContext(modelContext, template, node, this);
 			wrapper.initChildren();
 		}
 	}
+
 }

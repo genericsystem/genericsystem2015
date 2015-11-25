@@ -4,7 +4,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class Todo {
-	public ObjectProperty<String> stringProperty = new SimpleObjectProperty<String>();
+	public ObjectProperty<String> stringProperty = new SimpleObjectProperty<>();
 
 	public Todo(ObjectProperty<String> stringProperty) {
 		this.stringProperty = stringProperty;

@@ -1,7 +1,6 @@
 package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Method;
-
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -10,9 +9,7 @@ import javafx.collections.WeakListChangeListener;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-
-import org.genericsystem.todoApp.IModelContext.AbstractModelContext;
-import org.genericsystem.todoApp.IModelContext.ModelContextImpl;
+import org.genericsystem.todoApp.IModelContext.ModelContext;
 
 public abstract class Binders<Type> {
 
@@ -28,7 +25,7 @@ public abstract class Binders<Type> {
 							if (method.getParameterCount() == 0)
 								method.invoke(context.modelContext.getModel());
 							else {
-								AbstractModelContext resolvedContext = context.modelContext.resolve(method);
+								ModelContext resolvedContext = context.modelContext.resolve(method);
 								method.invoke(resolvedContext.getModel(), context.modelContext.getModel());
 							}
 						} catch (Exception e1) {
@@ -84,7 +81,7 @@ public abstract class Binders<Type> {
 								throw new UnsupportedOperationException();
 
 							change.getAddedSubList().forEach(t -> {
-								ModelContextImpl childContext = (ModelContextImpl) context.modelContext.createChild(t);
+								ModelContext childContext = (ModelContext) context.modelContext.createChild(t);
 								context.viewContext.bind(childContext);
 							});
 
