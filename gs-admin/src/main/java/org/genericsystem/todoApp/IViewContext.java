@@ -6,7 +6,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import org.genericsystem.todoApp.IElement.Element;
-import org.genericsystem.todoApp.IViewContext.ElementViewContext;
 import org.genericsystem.todoApp.binding.BindingContext;
 
 public interface IViewContext {
@@ -119,12 +118,8 @@ public interface IViewContext {
 
 		public void init() {
 			BindingContext bindingContext = new BindingContext(modelContext, this);
-			if (template.binding != null) {
-				for (int i = 0; i < template.binding.length; i++) {
-					template.binding[i].init(bindingContext);
-				}
-
-			}
+			for (int i = 0; i < template.binding.length; i++)
+				template.binding[i].init(bindingContext);
 			if (initContent)
 				initChildren();
 		}

@@ -50,12 +50,10 @@ public class TodoList {
 		}
 
 		IElement elmVBoxRoot = new Element(VBox.class, "");
-
 		IElement elmVBox = new Element(VBox.class, "", Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
 		IElement elmLabel = new Element(Label.class, "", Binding.bindTo(attributeTodo, TextBinder.textBind()));
 		IElement elmButtonRemove = new Element(Button.class, "remove", Binding.bindTo(methodRemove, ClickBinder.methodBind()));
 		IElement elmButtonCreate = new Element(Button.class, "create", Binding.bindTo(methodCreate, ClickBinder.methodBind()));
-
 		IElement elmTextField = new Element(TextField.class, "", Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
 
 		elmVBox.getChildren().add(elmLabel);
