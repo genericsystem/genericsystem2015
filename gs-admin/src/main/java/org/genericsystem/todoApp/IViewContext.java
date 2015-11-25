@@ -2,79 +2,133 @@ package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
-
-import org.genericsystem.todoApp.IElement.AbstractElement;
-import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.BindingContext;
 
 public interface IViewContext {
 
 	void bind(IModelContext modelContext);
 
-	public static abstract class AbstractViewContext implements IViewContext {
-		public AbstractElement template;
-		public Node node;
-		public IModelContext modelContext;
-		public IViewContext parent;
-		public boolean initContent = true;
+	public Element getTemplate();
 
-		public List<AbstractViewContext> children = new ArrayList<>();
+	public Node getNode();
 
-		public AbstractViewContext(IModelContext modelContext, AbstractElement template, Node node, IViewContext parent) {
-			super();
+	public void setNode(Node node);
+
+	public IModelContext getModelContext();
+
+	public IViewContext getParent();
+
+	public boolean isInitContent();
+
+	public void setInitContent(boolean initContent);
+
+	public List<ElementViewContext> getChildren();
+
+	public void destroy();
+
+	public static class ElementViewContext implements IViewContext {
+		protected Element template;
+		protected Node node;
+		protected IModelContext modelContext;
+		protected IViewContext parent;
+		protected boolean initContent = true;
+
+		public List<ElementViewContext> children = new ArrayList<>();
+
+		public ElementViewContext(IModelContext modelContext, Element template, Node node, IViewContext parent) {
 			this.template = template;
 			this.node = node;
 			this.modelContext = modelContext;
 			this.parent = parent;
 		}
-	}
 
-	public static class ElementViewContext extends AbstractViewContext {
+		@Override
+		public Element getTemplate() {
+			return template;
+		}
 
-		public ElementViewContext(IModelContext modelContext, AbstractElement template, Node node, IViewContext parent) {
-			super(modelContext, template, node, parent);
+		@Override
+		public Node getNode() {
+			return node;
+		}
+
+		@Override
+		public void setNode(Node node) {
+			this.node = node;
+		}
+
+		@Override
+		public IModelContext getModelContext() {
+			return modelContext;
+		}
+
+		@Override
+		public IViewContext getParent() {
+			return parent;
+		}
+
+		@Override
+		public boolean isInitContent() {
+			return initContent;
+		}
+
+		@Override
+		public void setInitContent(boolean initContent) {
+			this.initContent = initContent;
+		}
+
+		@Override
+		public List<ElementViewContext> getChildren() {
+			return children;
+		}
+
+		@Override
+		public void destroy() {
+			if (node.getParent() instanceof Pane)
+				((Pane) node.getParent()).getChildren().remove(node);
 		}
 
 		public void initChildren() {
-			if (template.content != null)
-				template.content.forEach(element -> {
-					Node childNode = null;
-					try {
-						childNode = createNode(((AbstractElement) element).classNode);
-						registre(childNode);
-					} catch (Exception e) {
-						throw new IllegalStateException(e);
-					}
 
-					Element elm = new Element(((AbstractElement) element).classNode, ((AbstractElement) element).text.get(), ((AbstractElement) element).binding, ((AbstractElement) element).content);
-					ElementViewContext viewContextChild = new ElementViewContext(modelContext, elm, childNode, this);
-					addChildren(viewContextChild);
-					viewContextChild.init();
-				});
-			System.out.println();
+			template.getChildren().forEach(element -> {
+				Node childNode = null;
+				childNode = createNode(element.classNode);
+
+				if (childNode instanceof Button)
+					((Button) childNode).setText(element.text.get());
+
+				ElementViewContext viewContextChild = new ElementViewContext(modelContext, (element), childNode, this);
+				addChildren(viewContextChild);
+				registre(viewContextChild);
+				viewContextChild.init();
+			});
 		}
 
-		private Node createNode(Class<? extends Node> clazz) throws InstantiationException, IllegalAccessException {
-			return clazz.newInstance();
-		}
-
-		public void init() {
-			BindingContext bindingContext = new BindingContext(modelContext, this);
-			if (template.binding != null) {
-				template.binding.init(bindingContext);
+		private Node createNode(Class<? extends Node> clazz) {
+			try {
+				return clazz.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
 			}
+		}
+
+		public ElementViewContext init() {
+			BindingContext bindingContext = new BindingContext(modelContext, this);
+			for (int i = 0; i < template.binding.length; i++)
+				template.binding[i].init(bindingContext);
 			if (initContent)
 				initChildren();
+			return this;
 		}
 
-		public void registre(Node node) {
-			modelContext.registre(node);
+		public void registre(IViewContext viewContext) {
+			modelContext.registre(viewContext);
 		}
 
-		public void addChildren(AbstractViewContext viewContext) {
+		public void addChildren(ElementViewContext viewContext) {
 			if (node instanceof Pane)
 				((Pane) node).getChildren().add(viewContext.node);
 			children.add(viewContext);
@@ -82,9 +136,9 @@ public interface IViewContext {
 
 		@Override
 		public void bind(IModelContext modelContext) {
-			// System.out.println("ElementViewContext::BIND")
 			ElementViewContext wrapper = new ElementViewContext(modelContext, template, node, this);
 			wrapper.initChildren();
 		}
 	}
+
 }
