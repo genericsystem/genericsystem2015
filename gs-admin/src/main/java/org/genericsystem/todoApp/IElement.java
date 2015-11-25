@@ -15,14 +15,14 @@ import org.genericsystem.todoApp.binding.Binding.AbstractBinding;
 public interface IElement {
 	public AbstractViewContext apply(Object model);
 
-	public static abstract class AbstractElement implements IElement {
+	public static class Element implements IElement {
 		public Class<? extends Node> classNode;
 		public StringProperty text = new SimpleStringProperty();
 		public AbstractBinding[] binding;
 
 		public List<IElement> content = new ArrayList<IElement>();
 
-		public AbstractElement(Class<? extends Node> classNode, String text, List<IElement> content, AbstractBinding... binding) {
+		public Element(Class<? extends Node> classNode, String text, List<IElement> content, AbstractBinding... binding) {
 			super();
 			this.classNode = classNode;
 			this.binding = binding;
@@ -48,12 +48,5 @@ public interface IElement {
 			}
 		}
 
-	}
-
-	public static class Element extends AbstractElement {
-		public Element(Class<? extends Node> classNode, String text, List<IElement> content, AbstractBinding... binding) {
-			super(classNode, text, content, binding);
-			// System.out.println("Element::const");
-		}
 	}
 }

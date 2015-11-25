@@ -13,7 +13,6 @@ import javafx.scene.control.TextField;
 
 import org.genericsystem.todoApp.IModelContext.AbstractModelContext;
 import org.genericsystem.todoApp.IModelContext.ModelContextImpl;
-import org.genericsystem.todoApp.IViewContext.AbstractViewContext;
 
 public abstract class Binders<Type> {
 
@@ -24,13 +23,13 @@ public abstract class Binders<Type> {
 				@Override
 				public void init(Method val, BindingContext context) {
 					Method method = val;
-					((Button) (((AbstractViewContext) context.viewContext).node)).setOnAction(e -> {
+					((Button) (context.viewContext).getNode()).setOnAction(e -> {
 						try {
 							if (method.getParameterCount() == 0)
-								method.invoke(((AbstractModelContext) context.modelContext).model);
+								method.invoke(context.modelContext.getModel());
 							else {
-								AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(method);
-								method.invoke(resolvedContext.model, ((AbstractModelContext) context.modelContext).model);
+								AbstractModelContext resolvedContext = context.modelContext.resolve(method);
+								method.invoke(resolvedContext.getModel(), context.modelContext.getModel());
 							}
 						} catch (Exception e1) {
 							e1.printStackTrace();
@@ -46,7 +45,7 @@ public abstract class Binders<Type> {
 			Binder<StringProperty> imp = new Binder<StringProperty>() {
 				@Override
 				public void init(StringProperty val, BindingContext context) {
-					val.bindBidirectional(((TextField) (((AbstractViewContext) context.viewContext).node)).textProperty());
+					val.bindBidirectional(((TextField) (context.viewContext.getNode())).textProperty());
 				}
 			};
 			return imp;
@@ -58,8 +57,8 @@ public abstract class Binders<Type> {
 			Binder<ObservableValue<String>> imp = new Binder<ObservableValue<String>>() {
 				@Override
 				public void init(ObservableValue<String> val, BindingContext context) {
-					if ((((AbstractViewContext) context.viewContext).node) instanceof Label)
-						((Label) (((AbstractViewContext) context.viewContext).node)).textProperty().set(val.getValue());
+					if ((context.viewContext.getNode()) instanceof Label)
+						((Label) (context.viewContext.getNode())).textProperty().set(val.getValue());
 				}
 			};
 			return imp;
@@ -74,28 +73,24 @@ public abstract class Binders<Type> {
 
 				private ListChangeListener<T> changeListener;
 
-				// private final List<IModelContext> contexts = new LinkedList<>();
-				// private final List<T> values = new LinkedList<>();
+				// List<ModelContextImpl> contexts = new ArrayList<ModelContextImpl>();
 
 				@Override
 				public void init(ObservableList<T> val, BindingContext context) {
-					((AbstractViewContext) context.viewContext).initContent = false;
+					context.viewContext.setInitContent(false);
 					val.addListener(new WeakListChangeListener<T>(changeListener = change -> {
 						while (change.next()) {
 							if (change.wasPermutated() || change.wasUpdated())
 								throw new UnsupportedOperationException();
+
 							change.getAddedSubList().forEach(t -> {
 								ModelContextImpl childContext = (ModelContextImpl) context.modelContext.createChild(t);
 								context.viewContext.bind(childContext);
 							});
 
 							change.getRemoved().forEach(model -> {
-								// context(model).destroy();
-
-									// change.getList().indexOf(model);
-									// System.out.println(((AbstractModelContext) context.modelContext).model.);
-
-								});
+								context.modelContext.destroyChildrenContext(model);
+							});
 						}
 					}));
 					// Consumer<ObservableList<T>> notifyImpl = notifyImpl(context);

@@ -3,22 +3,37 @@ package org.genericsystem.todoApp;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 
 public interface IModelContext {
 
 	public IModelContext createChild(Object childModel);
 
-	void registre(Node node);
+	void registre(IViewContext viewContext);
+
+	public Object getModel();
+
+	public void setModel(Object model);
+
+	public IModelContext getParent();
+
+	public AbstractModelContext resolve(Method method);
+
+	public AbstractModelContext resolve(Field field);
+
+	public List<IModelContext> getContextChildren();
+
+	public void destroyChildrenContext(Object model);
+
+	public void destroy();
 
 	public static abstract class AbstractModelContext implements IModelContext {
 
-		List<Node> nodes = new ArrayList<>();
-		public IModelContext parent;
-		public Object model;
+		protected List<IViewContext> viewContexts = new ArrayList<IViewContext>();
+		protected List<IModelContext> modelContextChildren = new ArrayList<IModelContext>();
+		protected IModelContext parent;
+		protected Object model;
 
 		public AbstractModelContext(IModelContext parent, Object model) {
 			super();
@@ -27,34 +42,67 @@ public interface IModelContext {
 		}
 
 		@Override
-		public void registre(Node node) {
-			this.nodes.add(node);
-		}
-
-		@Override
 		public void destroy() {
-			nodes.forEach(e -> {
-				if (e.getParent() instanceof Pane)
-					((Pane) e.getParent()).getChildren().remove(e);
+			viewContexts.forEach(viewContext -> {
+				viewContext.destroy();
 			});
 		}
 
+		@Override
 		public AbstractModelContext resolve(Method method) {
 			if (method.getDeclaringClass().isAssignableFrom(this.model.getClass()))
 				return this;
 			else if (this.parent == null)
 				throw new IllegalStateException("Unable to resolve method : " + method);
 			else
-				return ((AbstractModelContext) parent).resolve(method);
+				return parent.resolve(method);
 		}
 
+		@Override
 		public AbstractModelContext resolve(Field field) {
 			if (field.getDeclaringClass().isAssignableFrom(this.model.getClass()))
 				return this;
 			else if (this.parent == null)
 				throw new IllegalStateException("Unable to resolve field : " + field);
 			else
-				return ((AbstractModelContext) parent).resolve(field);
+				return parent.resolve(field);
+		}
+
+		@Override
+		public Object getModel() {
+			return this.model;
+		}
+
+		@Override
+		public IModelContext getParent() {
+			return this.parent;
+		}
+
+		@Override
+		public void setModel(Object model) {
+			this.model = model;
+		}
+
+		@Override
+		public List<IModelContext> getContextChildren() {
+			return this.modelContextChildren;
+		}
+
+		@Override
+		public void destroyChildrenContext(Object model) {
+			Iterator<IModelContext> iterator = modelContextChildren.iterator();
+			while (iterator.hasNext()) {
+				IModelContext child = iterator.next();
+				if (child.getModel() == model) {
+					child.destroy();
+					iterator.remove();
+				}
+			}
+		}
+
+		@Override
+		public void registre(IViewContext viewContext) {
+			this.viewContexts.add(viewContext);
 		}
 	}
 
@@ -65,9 +113,10 @@ public interface IModelContext {
 
 		@Override
 		public ModelContextImpl createChild(Object child) {
-			return new ModelContextImpl(this, child);
+			ModelContextImpl childContext = new ModelContextImpl(this, child);
+			this.modelContextChildren.add(childContext);
+			return childContext;
 		}
-	}
 
-	public void destroy();
+	}
 }

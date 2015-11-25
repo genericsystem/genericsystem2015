@@ -49,7 +49,7 @@ public interface Binding {
 		protected U resolve(BindingContext context) {
 			AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(attribute);
 			try {
-				return (U) attribute.get(resolvedContext.model);
+				return (U) attribute.get(resolvedContext.getModel());
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
@@ -66,7 +66,7 @@ public interface Binding {
 
 		@Override
 		protected Method resolve(BindingContext context) {
-			AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(method);
+			// AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(method);
 			return method;
 		}
 	}

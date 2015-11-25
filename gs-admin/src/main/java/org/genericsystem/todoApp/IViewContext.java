@@ -7,34 +7,110 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 
-import org.genericsystem.todoApp.IElement.AbstractElement;
+import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.BindingContext;
 
 public interface IViewContext {
 
 	void bind(IModelContext modelContext);
 
+	public Element getTemplate();
+
+	public Node getNode();
+
+	public void setNode(Node node);
+
+	public IModelContext getModelContext();
+
+	public IViewContext getParent();
+
+	public boolean isInitContent();
+
+	public void setInitContent(boolean initContent);
+
+	public List<AbstractViewContext> getChildren();
+
+	public void destroy();
+
 	public static abstract class AbstractViewContext implements IViewContext {
-		public AbstractElement template;
-		public Node node;
-		public IModelContext modelContext;
-		public IViewContext parent;
-		public boolean initContent = true;
+		protected Element template;
+		protected Node node;
+		protected IModelContext modelContext;
+		protected IViewContext parent;
+		protected boolean initContent = true;
 
 		public List<AbstractViewContext> children = new ArrayList<>();
 
-		public AbstractViewContext(IModelContext modelContext, AbstractElement template, Node node, IViewContext parent) {
+		public AbstractViewContext(IModelContext modelContext, Element template, Node node, IViewContext parent) {
 			super();
 			this.template = template;
 			this.node = node;
 			this.modelContext = modelContext;
 			this.parent = parent;
 		}
+
+		@Override
+		public Element getTemplate() {
+			return template;
+		}
+
+		public void setTemplate(Element template) {
+			this.template = template;
+		}
+
+		@Override
+		public Node getNode() {
+			return node;
+		}
+
+		@Override
+		public void setNode(Node node) {
+			this.node = node;
+		}
+
+		@Override
+		public IModelContext getModelContext() {
+			return modelContext;
+		}
+
+		public void setModelContext(IModelContext modelContext) {
+			this.modelContext = modelContext;
+		}
+
+		@Override
+		public IViewContext getParent() {
+			return parent;
+		}
+
+		public void setParent(IViewContext parent) {
+			this.parent = parent;
+		}
+
+		@Override
+		public boolean isInitContent() {
+			return initContent;
+		}
+
+		@Override
+		public void setInitContent(boolean initContent) {
+			this.initContent = initContent;
+		}
+
+		@Override
+		public List<AbstractViewContext> getChildren() {
+			return children;
+		}
+
+		@Override
+		public void destroy() {
+			if (node.getParent() instanceof Pane)
+				((Pane) node.getParent()).getChildren().remove(node);
+		}
 	}
 
 	public static class ElementViewContext extends AbstractViewContext {
 
-		public ElementViewContext(IModelContext modelContext, AbstractElement template, Node node, IViewContext parent) {
+		public ElementViewContext(IModelContext modelContext, Element template, Node node, IViewContext parent) {
 			super(modelContext, template, node, parent);
 		}
 
@@ -42,13 +118,14 @@ public interface IViewContext {
 			if (template.content != null)
 				template.content.forEach(element -> {
 					Node childNode = null;
-					childNode = createNode(((AbstractElement) element).classNode);
-					registre(childNode);
-					if (childNode instanceof Button)
-						((Button) childNode).setText(((AbstractElement) element).text.get());
+					childNode = createNode(((Element) element).classNode);
 
-					ElementViewContext viewContextChild = new ElementViewContext(modelContext, ((AbstractElement) element), childNode, this);
+					if (childNode instanceof Button)
+						((Button) childNode).setText(((Element) element).text.get());
+
+					ElementViewContext viewContextChild = new ElementViewContext(modelContext, ((Element) element), childNode, this);
 					addChildren(viewContextChild);
+					registre(viewContextChild);
 					viewContextChild.init();
 				});
 		}
@@ -73,8 +150,8 @@ public interface IViewContext {
 				initChildren();
 		}
 
-		public void registre(Node node) {
-			modelContext.registre(node);
+		public void registre(IViewContext viewContext) {
+			modelContext.registre(viewContext);
 		}
 
 		public void addChildren(AbstractViewContext viewContext) {

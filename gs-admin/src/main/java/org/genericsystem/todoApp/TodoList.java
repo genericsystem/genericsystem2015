@@ -34,7 +34,6 @@ public class TodoList {
 
 	public void remove(Todo todo) {
 		this.todos.remove(todo);
-		System.out.println("kkk");
 	}
 
 	public Node init() throws IllegalArgumentException, IllegalAccessException {
