@@ -49,9 +49,9 @@ public interface IModelContext {
 
 		@Override
 		public ModelContext resolve(Method method) {
-			if (method.getDeclaringClass().isAssignableFrom(this.model.getClass()))
+			if (method.getDeclaringClass().isAssignableFrom(model.getClass()))
 				return this;
-			else if (this.parent == null)
+			else if (parent == null)
 				throw new IllegalStateException("Unable to resolve method : " + method);
 			else
 				return parent.resolve(method);
@@ -61,10 +61,9 @@ public interface IModelContext {
 		public ModelContext resolve(Field field) {
 			if (field.getDeclaringClass().isAssignableFrom(this.model.getClass()))
 				return this;
-			else if (this.parent == null)
-				throw new IllegalStateException("Unable to resolve field : " + field);
-			else
+			else if (parent != null)
 				return parent.resolve(field);
+			throw new IllegalStateException("Unable to resolve field : " + field);
 		}
 
 		@Override

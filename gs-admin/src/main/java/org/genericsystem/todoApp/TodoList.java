@@ -11,7 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.Binders.ClickBinder;
 import org.genericsystem.todoApp.binding.Binders.EnterBinder;
 import org.genericsystem.todoApp.binding.Binders.ForeachBinder;
@@ -49,12 +48,12 @@ public class TodoList {
 			e.printStackTrace();
 		}
 
-		IElement elmVBoxRoot = new Element(VBox.class, "");
-		IElement elmVBox = new Element(VBox.class, "", Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
-		IElement elmLabel = new Element(Label.class, "", Binding.bindTo(attributeTodo, TextBinder.textBind()));
-		IElement elmButtonRemove = new Element(Button.class, "remove", Binding.bindTo(methodRemove, ClickBinder.methodBind()));
-		IElement elmButtonCreate = new Element(Button.class, "create", Binding.bindTo(methodCreate, ClickBinder.methodBind()));
-		IElement elmTextField = new Element(TextField.class, "", Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
+		Element elmVBoxRoot = new Element(VBox.class, "");
+		Element elmVBox = new Element(VBox.class, "", Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
+		Element elmLabel = new Element(Label.class, "", Binding.bindTo(attributeTodo, TextBinder.textBind()));
+		Element elmButtonRemove = new Element(Button.class, "remove", Binding.bindTo(methodRemove, ClickBinder.methodBind()));
+		Element elmButtonCreate = new Element(Button.class, "create", Binding.bindTo(methodCreate, ClickBinder.methodBind()));
+		Element elmTextField = new Element(TextField.class, "", Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
 
 		elmVBox.getChildren().add(elmLabel);
 		elmVBox.getChildren().add(elmButtonRemove);

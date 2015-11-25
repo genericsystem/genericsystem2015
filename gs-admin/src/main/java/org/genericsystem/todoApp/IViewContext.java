@@ -5,7 +5,6 @@ import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
-import org.genericsystem.todoApp.IElement.Element;
 import org.genericsystem.todoApp.binding.BindingContext;
 
 public interface IViewContext {
@@ -96,12 +95,12 @@ public interface IViewContext {
 
 			template.getChildren().forEach(element -> {
 				Node childNode = null;
-				childNode = createNode(((Element) element).classNode);
+				childNode = createNode(element.classNode);
 
 				if (childNode instanceof Button)
-					((Button) childNode).setText(((Element) element).text.get());
+					((Button) childNode).setText(element.text.get());
 
-				ElementViewContext viewContextChild = new ElementViewContext(modelContext, ((Element) element), childNode, this);
+				ElementViewContext viewContextChild = new ElementViewContext(modelContext, (element), childNode, this);
 				addChildren(viewContextChild);
 				registre(viewContextChild);
 				viewContextChild.init();
@@ -116,12 +115,13 @@ public interface IViewContext {
 			}
 		}
 
-		public void init() {
+		public ElementViewContext init() {
 			BindingContext bindingContext = new BindingContext(modelContext, this);
 			for (int i = 0; i < template.binding.length; i++)
 				template.binding[i].init(bindingContext);
 			if (initContent)
 				initChildren();
+			return this;
 		}
 
 		public void registre(IViewContext viewContext) {
