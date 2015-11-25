@@ -10,29 +10,27 @@ import org.genericsystem.todoApp.IViewContext.ElementViewContext;
 import org.genericsystem.todoApp.binding.Binding;
 
 public interface IElement {
+
+	public List<IElement> getChildren();
+
 	public ElementViewContext apply(Object model);
 
 	public static class Element implements IElement {
 		public Class<? extends Node> classNode;
 		public StringProperty text = new SimpleStringProperty();
 		public Binding[] binding;
+		private List<IElement> children = new ArrayList<>();
 
-		public List<IElement> content = new ArrayList<>();
-
-		public Element(Class<? extends Node> classNode, String text, List<IElement> content, Binding... binding) {
+		public Element(Class<? extends Node> classNode, String text, Binding... binding) {
 			super();
 			this.classNode = classNode;
 			this.binding = binding;
-			this.content = content;
 			this.text.set(text);
 		}
 
 		@Override
 		public ElementViewContext apply(Object model) {
-			Node node = null;
-			node = createNode();
-			ModelContext modelContext = new ModelContext(null, model);
-			ElementViewContext viewContext = new ElementViewContext(modelContext, this, node, null);
+			ElementViewContext viewContext = new ElementViewContext(new ModelContext(null, model), this, createNode(), null);
 			viewContext.init();
 			return viewContext;
 		}
@@ -45,5 +43,11 @@ public interface IElement {
 			}
 		}
 
+		@Override
+		public List<IElement> getChildren() {
+			return children;
+		}
+
 	}
+
 }

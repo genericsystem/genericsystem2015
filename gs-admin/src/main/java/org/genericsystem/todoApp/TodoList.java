@@ -2,8 +2,6 @@ package org.genericsystem.todoApp;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -51,23 +49,20 @@ public class TodoList {
 			e.printStackTrace();
 		}
 
-		List<IElement> content = new ArrayList<>();
-		List<IElement> contentRoot = new ArrayList<>();
+		IElement elmVBoxRoot = new Element(VBox.class, "");
 
-		IElement elmVBoxRoot = new Element(VBox.class, "", contentRoot);
+		IElement elmVBox = new Element(VBox.class, "", Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
+		IElement elmLabel = new Element(Label.class, "", Binding.bindTo(attributeTodo, TextBinder.textBind()));
+		IElement elmButtonRemove = new Element(Button.class, "remove", Binding.bindTo(methodRemove, ClickBinder.methodBind()));
+		IElement elmButtonCreate = new Element(Button.class, "create", Binding.bindTo(methodCreate, ClickBinder.methodBind()));
 
-		IElement elmVBox = new Element(VBox.class, "", content, Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
-		IElement elmLabel = new Element(Label.class, "", null, Binding.bindTo(attributeTodo, TextBinder.textBind()));
-		IElement elmButtonRemove = new Element(Button.class, "remove", null, Binding.bindTo(methodRemove, ClickBinder.methodBind()));
-		IElement elmButtonCreate = new Element(Button.class, "create", null, Binding.bindTo(methodCreate, ClickBinder.methodBind()));
+		IElement elmTextField = new Element(TextField.class, "", Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
 
-		IElement elmTextField = new Element(TextField.class, "", null, Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
-
-		content.add(elmLabel);
-		content.add(elmButtonRemove);
-		contentRoot.add(elmVBox);
-		contentRoot.add(elmTextField);
-		contentRoot.add(elmButtonCreate);
+		elmVBox.getChildren().add(elmLabel);
+		elmVBox.getChildren().add(elmButtonRemove);
+		elmVBoxRoot.getChildren().add(elmTextField);
+		elmVBoxRoot.getChildren().add(elmButtonCreate);
+		elmVBoxRoot.getChildren().add(elmVBox);
 
 		return elmVBoxRoot.apply(this).node;
 	}

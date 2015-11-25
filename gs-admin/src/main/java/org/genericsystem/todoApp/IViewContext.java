@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import org.genericsystem.todoApp.IElement.Element;
+import org.genericsystem.todoApp.IViewContext.ElementViewContext;
 import org.genericsystem.todoApp.binding.BindingContext;
 
 public interface IViewContext {
@@ -93,19 +94,19 @@ public interface IViewContext {
 		}
 
 		public void initChildren() {
-			if (template.content != null)
-				template.content.forEach(element -> {
-					Node childNode = null;
-					childNode = createNode(((Element) element).classNode);
 
-					if (childNode instanceof Button)
-						((Button) childNode).setText(((Element) element).text.get());
+			template.getChildren().forEach(element -> {
+				Node childNode = null;
+				childNode = createNode(((Element) element).classNode);
 
-					ElementViewContext viewContextChild = new ElementViewContext(modelContext, ((Element) element), childNode, this);
-					addChildren(viewContextChild);
-					registre(viewContextChild);
-					viewContextChild.init();
-				});
+				if (childNode instanceof Button)
+					((Button) childNode).setText(((Element) element).text.get());
+
+				ElementViewContext viewContextChild = new ElementViewContext(modelContext, ((Element) element), childNode, this);
+				addChildren(viewContextChild);
+				registre(viewContextChild);
+				viewContextChild.init();
+			});
 		}
 
 		private Node createNode(Class<? extends Node> clazz) {
