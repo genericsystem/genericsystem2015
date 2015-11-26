@@ -1,37 +1,14 @@
 package org.genericsystem.distributed.cacheonclient.observables;
 
 import java.util.AbstractSet;
-import java.util.function.Predicate;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 
 import com.sun.javafx.collections.SetListenerHelper;
 
 @SuppressWarnings({ "restriction" })
 public abstract class AbstractObservableSnapshot<E> extends AbstractSet<E> implements ObservableSnapshot<E> {
-
-	@Override
-	public ObservableSnapshot<E> filtered(Predicate<E> predicate) {
-		return new FilterObservableSnapshotImpl<>(this, predicate);
-	}
-
-	@Override
-	public ObservableSnapshot<E> filtered(ObservableValue<Predicate<E>> predicate) {
-		return new ObservableFilterObservableSnapshotImpl<>(this, predicate);
-	}
-
-	@Override
-	public ObservableSnapshot<E> concat(ObservableSnapshot<E> toConcatenate) {
-		return new ConcatObservableSnapshotImpl<>(this, toConcatenate);
-	}
-
-	@Override
-	public ObservableList<E> toObservableList() {
-		return new ObservableListSnapshot<>(this);
-	}
 
 	private SetListenerHelper<E> listenerHelper;
 
