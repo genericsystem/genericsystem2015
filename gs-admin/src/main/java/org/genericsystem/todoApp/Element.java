@@ -39,11 +39,6 @@ public class Element {
 		return children;
 	}
 
-	public void removeChildNode(Node parentNode, Node node) {
-		if (parentNode instanceof Pane)
-			((Pane) parentNode).getChildren().remove(node);
-	}
-
 	public Node createChildNode(Node parentNode) {
 		Node childNode = createNode(classNode);
 		if (parentNode instanceof Pane)

@@ -1,6 +1,15 @@
 package org.genericsystem.todoApp;
 
+import java.util.Collections;
+import java.util.List;
+import javafx.beans.property.Property;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import org.genericsystem.todoApp.binding.Binding;
 import org.genericsystem.todoApp.binding.BindingContext;
 
@@ -27,8 +36,18 @@ public class ViewContext {
 		return this;
 	}
 
+	public List<Node> getChildrenNodes(Node parentNode) {
+		if (parentNode instanceof Pane)
+			return ((Pane) parentNode).getChildren();
+		return Collections.emptyList();
+	}
+
+	public void removeChildNode(Node parentNode, Node node) {
+		getChildrenNodes(parentNode).remove(node);
+	}
+
 	public void destroyChild(ViewContext childContext) {
-		template.removeChildNode(node, childContext.getNode());
+		getChildrenNodes(node).remove(childContext.getNode());
 	}
 
 	public void bind(ModelContext modelContext) {
@@ -67,5 +86,20 @@ public class ViewContext {
 
 	public void setInitContent(boolean initContent) {
 		this.initContent = initContent;
+	}
+
+	public Property<String> getTextProperty() {
+		if (node instanceof Label)
+			return ((Label) node).textProperty();
+		if (node instanceof TextField)
+			return ((TextField) node).textProperty();
+		throw new IllegalStateException();
+	}
+
+	public void setOnAction(EventHandler<ActionEvent> handler) {
+		if (node instanceof Button)
+			((Button) getNode()).setOnAction(handler);
+		else
+			throw new IllegalStateException();
 	}
 }

@@ -9,19 +9,13 @@ import java.util.List;
 public class ModelContext {
 
 	protected List<ViewContext> viewContexts = new ArrayList<>();
-	protected List<ModelContext> modelContextChildren = new ArrayList<>();
+	protected List<ModelContext> children = new ArrayList<>();
 	protected ModelContext parent;
 	protected Object model;
 
 	public ModelContext(ModelContext parent, Object model) {
 		this.parent = parent;
 		this.model = model;
-	}
-
-	public void destroy() {
-		for (ViewContext viewContext : viewContexts) {
-			viewContext.getParent().destroyChild(viewContext);
-		}
 	}
 
 	public ModelContext resolve(Class<?> clazz) {
@@ -62,16 +56,17 @@ public class ModelContext {
 		this.model = model;
 	}
 
-	public List<ModelContext> getContextChildren() {
-		return this.modelContextChildren;
+	public List<ModelContext> getChildren() {
+		return this.children;
 	}
 
 	public void destroyChildrenContext(Object model) {
-		Iterator<ModelContext> iterator = modelContextChildren.iterator();
+		Iterator<ModelContext> iterator = children.iterator();
 		while (iterator.hasNext()) {
 			ModelContext child = iterator.next();
 			if (child.getModel() == model) {
-				child.destroy();
+				for (ViewContext viewContext : child.viewContexts)
+					viewContext.getParent().destroyChild(viewContext);
 				iterator.remove();
 			}
 		}
@@ -83,7 +78,7 @@ public class ModelContext {
 
 	public ModelContext createChild(Object child) {
 		ModelContext childContext = new ModelContext(this, child);
-		this.modelContextChildren.add(childContext);
+		this.children.add(childContext);
 		return childContext;
 	}
 }
