@@ -7,7 +7,6 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
-import org.genericsystem.todoApp.IModelContext.ModelContext;
 import org.genericsystem.todoApp.binding.Binding;
 
 public class Element {

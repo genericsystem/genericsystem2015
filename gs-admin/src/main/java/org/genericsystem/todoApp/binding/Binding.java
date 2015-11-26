@@ -2,14 +2,21 @@ package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
+import java.util.function.Function;
 import javafx.beans.Observable;
-
-import org.genericsystem.todoApp.IModelContext.ModelContext;
+import org.genericsystem.todoApp.ModelContext;
 
 public interface Binding {
 
 	public abstract void init(BindingContext context);
+
+	public static <U extends Observable, V> MethodBinding2<U, V> bindToMethod(Class<?> clazz, Function<V, U> function, Binder<U> binder) {
+		try {
+			return new MethodBinding2<>(clazz, function, binder);
+		} catch (SecurityException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
 	public static <U extends Observable, T> FieldBinding<U, T> bindToField(Class<?> clazz, String fieldName, Binder<U> binder) {
 		try {
@@ -51,6 +58,23 @@ public interface Binding {
 
 		protected abstract T resolve(BindingContext context);
 
+	}
+
+	static class MethodBinding2<U extends Observable, V> extends AbstractBinding<U> {
+		private final Function<V, U> getter;
+		private final Class<?> uClass;
+
+		public MethodBinding2(Class<?> uClass, Function<V, U> getter, Binder<U> binder) {
+			super(binder);
+			this.getter = getter;
+			this.uClass = uClass;
+		}
+
+		@Override
+		protected U resolve(BindingContext context) {
+			ModelContext resolvedContext = context.getModelContext().resolve(uClass);
+			return getter.apply((V) resolvedContext.getModel());
+		}
 	}
 
 	static class FieldBinding<U extends Observable, T> extends AbstractBinding<U> {

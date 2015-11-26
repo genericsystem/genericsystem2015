@@ -7,11 +7,11 @@ import org.genericsystem.todoApp.binding.BindingContext;
 public class ViewContext {
 	private final Element template;
 	private final Node node;
-	private final IModelContext modelContext;
+	private final ModelContext modelContext;
 	private final ViewContext parent;
 	private boolean initContent = true;
 
-	public ViewContext(IModelContext modelContext, Element template, Node node, ViewContext parent) {
+	public ViewContext(ModelContext modelContext, Element template, Node node, ViewContext parent) {
 		this.template = template;
 		this.node = node;
 		this.modelContext = modelContext;
@@ -31,7 +31,7 @@ public class ViewContext {
 		template.removeChildNode(node, childContext.getNode());
 	}
 
-	public void bind(IModelContext modelContext) {
+	public void bind(ModelContext modelContext) {
 		ViewContext wrapper = new ViewContext(modelContext, template, node, this);
 		wrapper.initChildren();
 	}
@@ -53,7 +53,7 @@ public class ViewContext {
 		return node;
 	}
 
-	public IModelContext getModelContext() {
+	public ModelContext getModelContext() {
 		return modelContext;
 	}
 

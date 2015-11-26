@@ -9,7 +9,7 @@ import javafx.collections.WeakListChangeListener;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.genericsystem.todoApp.IModelContext.ModelContext;
+import org.genericsystem.todoApp.ModelContext;
 
 public abstract class Binders<Type> {
 
@@ -78,7 +78,7 @@ public abstract class Binders<Type> {
 								throw new UnsupportedOperationException();
 
 							change.getAddedSubList().forEach(t -> {
-								ModelContext childContext = (ModelContext) context.getModelContext().createChild(t);
+								ModelContext childContext = context.getModelContext().createChild(t);
 								context.getViewContext().bind(childContext);
 							});
 
