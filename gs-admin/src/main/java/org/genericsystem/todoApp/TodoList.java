@@ -1,7 +1,7 @@
 package org.genericsystem.todoApp;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
 import org.genericsystem.todoApp.binding.Binders.ClickBinder;
 import org.genericsystem.todoApp.binding.Binders.EnterBinder;
 import org.genericsystem.todoApp.binding.Binders.ForeachBinder;
@@ -23,7 +24,8 @@ public class TodoList {
 	public ObservableList<Todo> todos = FXCollections.observableArrayList();
 
 	public void create() {
-		Todo todo = new Todo(name.getValue());
+		Todo todo = new Todo();
+		todo.stringProperty.set(name.getValue());
 		todos.add(todo);
 	}
 
@@ -31,36 +33,19 @@ public class TodoList {
 		this.todos.remove(todo);
 	}
 
-	public Node init() throws IllegalArgumentException, IllegalAccessException {
+	public static class Todo {
+		public ObjectProperty<String> stringProperty = new SimpleObjectProperty<>();
+	}
 
-		Field attributeTodos = null;
-		Field nameAttribute = null;
-		Field attributeTodo = null;
-		Method methodRemove = null;
-		Method methodCreate = null;
-		try {
-			nameAttribute = TodoList.class.getField("name");
-			attributeTodos = TodoList.class.getField("todos");
-			attributeTodo = Todo.class.getField("stringProperty");
-			methodRemove = TodoList.class.getMethod("remove", Todo.class);
-			methodCreate = TodoList.class.getMethod("create");
-		} catch (NoSuchFieldException | SecurityException | NoSuchMethodException e) {
-			e.printStackTrace();
-		}
+	public Node init() {
 
-		Element elmVBoxRoot = new Element(VBox.class, "");
-		Element elmVBox = new Element(VBox.class, "", Binding.bindTo(attributeTodos, ForeachBinder.foreach()));
-		Element elmLabel = new Element(Label.class, "", Binding.bindTo(attributeTodo, TextBinder.textBind()));
-		Element elmButtonRemove = new Element(Button.class, "remove", Binding.bindTo(methodRemove, ClickBinder.methodBind()));
-		Element elmButtonCreate = new Element(Button.class, "create", Binding.bindTo(methodCreate, ClickBinder.methodBind()));
-		Element elmTextField = new Element(TextField.class, "", Binding.bindTo(nameAttribute, EnterBinder.enterBind()));
+		Element todosVBox = new Element(null, VBox.class, "");
+		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", ForeachBinder.foreach()));
+		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindToField(Todo.class, "stringProperty", TextBinder.textBind()));
+		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToMethod(TodoList.class, "remove", ClickBinder.methodBind(), Todo.class));
+		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindToField(TodoList.class, "name", EnterBinder.enterBind()));
+		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToMethod(TodoList.class, "create", ClickBinder.methodBind()));
 
-		elmVBox.getChildren().add(elmLabel);
-		elmVBox.getChildren().add(elmButtonRemove);
-		elmVBoxRoot.getChildren().add(elmTextField);
-		elmVBoxRoot.getChildren().add(elmButtonCreate);
-		elmVBoxRoot.getChildren().add(elmVBox);
-
-		return elmVBoxRoot.apply(this).node;
+		return todosVBox.apply(this).getNode();
 	}
 }
