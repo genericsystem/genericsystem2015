@@ -49,7 +49,6 @@ public class TodoList {
 	}
 
 	public Node init() {
-
 		Element todosVBox = new Element(null, VBox.class, "");
 		// Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", ForeachBinder.foreach()));
 		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, ForeachBinder.foreach()));

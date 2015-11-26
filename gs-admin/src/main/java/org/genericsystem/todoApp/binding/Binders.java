@@ -39,26 +39,24 @@ public abstract class Binders<Type> {
 
 	public static class EnterBinder {
 		public static Binder<StringProperty> enterBind() {
-			Binder<StringProperty> imp = new Binder<StringProperty>() {
+			return new Binder<StringProperty>() {
 				@Override
 				public void init(StringProperty val, BindingContext context) {
 					val.bindBidirectional(((TextField) (context.getViewContext().getNode())).textProperty());
 				}
 			};
-			return imp;
 		}
 	}
 
 	public static class TextBinder {
 		public static Binder<ObservableValue<String>> textBind() {
-			Binder<ObservableValue<String>> imp = new Binder<ObservableValue<String>>() {
+			return new Binder<ObservableValue<String>>() {
 				@Override
 				public void init(ObservableValue<String> val, BindingContext context) {
 					if ((context.getViewContext().getNode()) instanceof Label)
 						((Label) (context.getViewContext().getNode())).textProperty().set(val.getValue());
 				}
 			};
-			return imp;
 		}
 	}
 
@@ -67,6 +65,7 @@ public abstract class Binders<Type> {
 		public static <T> Binder<ObservableList<T>> foreach() {
 
 			return new Binder<ObservableList<T>>() {
+				@SuppressWarnings("unused")
 				private ListChangeListener<T> changeListener;
 
 				@Override

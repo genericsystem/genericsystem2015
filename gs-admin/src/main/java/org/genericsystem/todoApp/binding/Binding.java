@@ -6,9 +6,7 @@ import java.util.function.Function;
 import javafx.beans.Observable;
 import org.genericsystem.todoApp.ModelContext;
 
-public interface Binding {
-
-	public abstract void init(BindingContext context);
+public abstract class Binding<T> {
 
 	public static <U extends Observable, V> MethodBinding2<U, V> bindToMethod(Class<?> clazz, Function<V, U> function, Binder<U> binder) {
 		try {
@@ -42,25 +40,20 @@ public interface Binding {
 		}
 	}
 
-	public static abstract class AbstractBinding<T> implements Binding {
-		private Binder<T> binder;
+	private Binder<T> binder;
 
-		public AbstractBinding(Binder<T> binder) {
-			this.binder = binder;
-		}
-
-		@Override
-		public void init(BindingContext context) {
-			T model = resolve(context);
-			binder.init(model, context);
-
-		}
-
-		protected abstract T resolve(BindingContext context);
-
+	public Binding(Binder<T> binder) {
+		this.binder = binder;
 	}
 
-	static class MethodBinding2<U extends Observable, V> extends AbstractBinding<U> {
+	public void init(BindingContext context) {
+		T model = resolve(context);
+		binder.init(model, context);
+	}
+
+	protected abstract T resolve(BindingContext context);
+
+	static class MethodBinding2<U extends Observable, V> extends Binding<U> {
 		private final Function<V, U> getter;
 		private final Class<?> uClass;
 
@@ -77,7 +70,7 @@ public interface Binding {
 		}
 	}
 
-	static class FieldBinding<U extends Observable, T> extends AbstractBinding<U> {
+	static class FieldBinding<U extends Observable, T> extends Binding<U> {
 		private Field attribute;
 
 		public FieldBinding(Field attribute, Binder<U> binder) {
@@ -96,7 +89,7 @@ public interface Binding {
 		}
 	}
 
-	static class MethodBinding extends AbstractBinding<Method> {
+	static class MethodBinding extends Binding<Method> {
 		private Method method;
 
 		public MethodBinding(Method method, Binder<Method> binder) {

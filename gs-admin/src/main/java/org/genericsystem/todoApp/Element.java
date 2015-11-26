@@ -12,10 +12,10 @@ import org.genericsystem.todoApp.binding.Binding;
 public class Element {
 	public Class<? extends Node> classNode;
 	public StringProperty text = new SimpleStringProperty();
-	public Binding[] binding;
+	public Binding<?>[] binding;
 	private List<Element> children = new ArrayList<>();
 
-	public Element(Element parent, Class<? extends Node> classNode, String text, Binding... binding) {
+	public Element(Element parent, Class<? extends Node> classNode, String text, Binding<?>... binding) {
 		this.classNode = classNode;
 		this.binding = binding;
 		this.text.set(text);
