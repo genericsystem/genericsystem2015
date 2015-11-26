@@ -11,10 +11,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import org.genericsystem.todoApp.binding.Binders.ClickBinder;
-import org.genericsystem.todoApp.binding.Binders.EnterBinder;
-import org.genericsystem.todoApp.binding.Binders.ForeachBinder;
-import org.genericsystem.todoApp.binding.Binders.TextBinder;
+import org.genericsystem.todoApp.binding.Binder.ClickBinder;
+import org.genericsystem.todoApp.binding.Binder.EnterBinder;
+import org.genericsystem.todoApp.binding.Binder.ForeachBinder;
+import org.genericsystem.todoApp.binding.Binder.TextBinder;
 import org.genericsystem.todoApp.binding.Binding;
 
 public class TodoList {
