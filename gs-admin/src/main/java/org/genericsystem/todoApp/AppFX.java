@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 public class AppFX extends Application {
 
 	public static void main(String[] args) {
-
 		launch(args);
 	}
 
@@ -16,13 +15,10 @@ public class AppFX extends Application {
 	public void start(Stage stage) throws Exception {
 
 		Scene scene = new Scene(new Group());
-		stage.setTitle("Generic System JavaFx Example");
-		TodoList todoList = new TodoList();
+		stage.setTitle("Generic System Reactive Example");
 
-		todoList.createTodo("todo1");
-		todoList.createTodo("todo2");
-		todoList.createTodo("todo3");
-		((Group) scene.getRoot()).getChildren().add(todoList.init());
+		((Group) scene.getRoot()).getChildren().add(new TodoList().init());
+
 		stage.setScene(scene);
 		stage.show();
 	}

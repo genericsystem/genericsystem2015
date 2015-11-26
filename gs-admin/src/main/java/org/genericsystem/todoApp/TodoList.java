@@ -1,59 +1,62 @@
 package org.genericsystem.todoApp;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
-import org.genericsystem.todoApp.IElement.Element;
-import org.genericsystem.todoApp.binding.Binders;
-import org.genericsystem.todoApp.binding.Binding.BindingImpl;
+import org.genericsystem.todoApp.binding.Binder.ClickBinder;
+import org.genericsystem.todoApp.binding.Binder.EnterBinder;
+import org.genericsystem.todoApp.binding.Binder.ForeachBinder;
+import org.genericsystem.todoApp.binding.Binder.TextBinder;
+import org.genericsystem.todoApp.binding.Binding;
 
 public class TodoList {
 
-	public ObjectProperty<String> name = new SimpleObjectProperty<String>();
+	public StringProperty name = new SimpleStringProperty();
+	private ObservableList<Todo> todos = FXCollections.observableArrayList();
 
-	public ObservableValue<List<Todo>> todos = new SimpleObjectProperty<List<Todo>>(new ArrayList<>());
-
-	public void createTodo(String instance) {
-		Todo todo = new Todo(instance);
-		todos.getValue().add(todo);
+	public StringProperty getName() {
+		return name;
 	}
 
-	public void removeTodo(Todo todo) {
-		todos.getValue().remove(todo);
+	public ObservableList<Todo> getTodos() {
+		return todos;
 	}
 
-	public Node init() throws IllegalArgumentException, IllegalAccessException {
+	public void create() {
+		Todo todo = new Todo();
+		todo.stringProperty.set(name.getValue());
+		todos.add(todo);
+	}
 
-		// todos.getValue().forEach(t -> System.out.println(t.stringProperty.get()));
+	public void remove(Todo todo) {
+		this.todos.remove(todo);
+	}
 
-		Field attributeTodos = null;
-		Field attributeTodo = null;
-		try {
-			attributeTodos = TodoList.class.getField("todos");
-			attributeTodo = Todo.class.getField("stringProperty");
-		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
+	public static class Todo {
+		private ObjectProperty<String> stringProperty = new SimpleObjectProperty<>();
+
+		public ObjectProperty<String> getStringProperty() {
+			return stringProperty;
 		}
+	}
 
-		BindingImpl bindingForeach = new BindingImpl();
-		BindingImpl bindingTodo = new BindingImpl();
-		BindingImpl bindingRemove = new BindingImpl();
+	public Node init() {
+		Element todosVBox = new Element(null, VBox.class, "");
+		// Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", ForeachBinder.foreach()));
+		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, ForeachBinder.foreach()));
+		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindToMethod(Todo.class, Todo::getStringProperty, TextBinder.textBind()));
+		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToMethod(TodoList.class, "remove", ClickBinder.methodBind(), Todo.class));
+		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindToField(TodoList.class, "name", EnterBinder.enterBind()));
+		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToMethod(TodoList.class, "create", ClickBinder.methodBind()));
 
-		List<IElement> content = new ArrayList<IElement>();
-		IElement elmVBox = new Element(VBox.class, "", bindingForeach.bindTo(attributeTodos, Binders.foreachBinder.foreach()), content);
-		IElement elmLabel = new Element(Label.class, "", bindingTodo.bindTo(attributeTodo, Binders.TodoBinder.todoBind()), null);
-
-		// IElement elmButton = new Element(Button.class, "remove", bindingRemove.bindTo(attribute, binder), null);
-		content.add(elmLabel);
-
-		return elmVBox.apply(this).node;
+		return todosVBox.apply(this).getNode();
 	}
 }
