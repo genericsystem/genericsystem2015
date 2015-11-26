@@ -2,19 +2,37 @@ package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
 import javafx.beans.Observable;
+
 import org.genericsystem.todoApp.IModelContext.ModelContext;
 
 public interface Binding {
 
 	public abstract void init(BindingContext context);
 
-	public static <U extends Observable, T> FieldBinding<U, T> bindTo(Field attribute, Binder<U> binder) {
-		return new FieldBinding<>(attribute, binder);
+	public static <U extends Observable, T> FieldBinding<U, T> bindToField(Class<?> clazz, String fieldName, Binder<U> binder) {
+		try {
+			return new FieldBinding<>(clazz.getField(fieldName), binder);
+		} catch (NoSuchFieldException | SecurityException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
-	public static MethodBinding bindTo(Method method, Binder<Method> binder) {
-		return new MethodBinding(method, binder);
+	public static MethodBinding bindToMethod(Class<?> methodClass, String methodName, Binder<Method> binder) {
+		try {
+			return new MethodBinding(methodClass.getMethod(methodName), binder);
+		} catch (NoSuchMethodException | SecurityException e1) {
+			throw new IllegalStateException(e1);
+		}
+	}
+
+	public static MethodBinding bindToMethod(Class<?> methodClass, String methodName, Binder<Method> binder, Class<?> methodParameterClass) {
+		try {
+			return new MethodBinding(methodClass.getMethod(methodName, methodParameterClass), binder);
+		} catch (NoSuchMethodException | SecurityException e1) {
+			throw new IllegalStateException(e1);
+		}
 	}
 
 	public static abstract class AbstractBinding<T> implements Binding {
@@ -45,7 +63,7 @@ public interface Binding {
 
 		@Override
 		protected U resolve(BindingContext context) {
-			ModelContext resolvedContext = context.modelContext.resolve(attribute);
+			ModelContext resolvedContext = context.getModelContext().resolve(attribute);
 			try {
 				return (U) attribute.get(resolvedContext.getModel());
 			} catch (IllegalArgumentException | IllegalAccessException e) {

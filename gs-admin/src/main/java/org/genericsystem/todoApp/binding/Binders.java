@@ -20,13 +20,13 @@ public abstract class Binders<Type> {
 				@Override
 				public void init(Method val, BindingContext context) {
 					Method method = val;
-					((Button) (context.viewContext).getNode()).setOnAction(e -> {
+					((Button) (context.getViewContext()).getNode()).setOnAction(e -> {
 						try {
 							if (method.getParameterCount() == 0)
-								method.invoke(context.modelContext.getModel());
+								method.invoke(context.getModelContext().getModel());
 							else {
-								ModelContext resolvedContext = context.modelContext.resolve(method);
-								method.invoke(resolvedContext.getModel(), context.modelContext.getModel());
+								ModelContext resolvedContext = context.getModelContext().resolve(method);
+								method.invoke(resolvedContext.getModel(), context.getModelContext().getModel());
 							}
 						} catch (Exception e1) {
 							e1.printStackTrace();
@@ -42,7 +42,7 @@ public abstract class Binders<Type> {
 			Binder<StringProperty> imp = new Binder<StringProperty>() {
 				@Override
 				public void init(StringProperty val, BindingContext context) {
-					val.bindBidirectional(((TextField) (context.viewContext.getNode())).textProperty());
+					val.bindBidirectional(((TextField) (context.getViewContext().getNode())).textProperty());
 				}
 			};
 			return imp;
@@ -54,8 +54,8 @@ public abstract class Binders<Type> {
 			Binder<ObservableValue<String>> imp = new Binder<ObservableValue<String>>() {
 				@Override
 				public void init(ObservableValue<String> val, BindingContext context) {
-					if ((context.viewContext.getNode()) instanceof Label)
-						((Label) (context.viewContext.getNode())).textProperty().set(val.getValue());
+					if ((context.getViewContext().getNode()) instanceof Label)
+						((Label) (context.getViewContext().getNode())).textProperty().set(val.getValue());
 				}
 			};
 			return imp;
@@ -74,19 +74,19 @@ public abstract class Binders<Type> {
 
 				@Override
 				public void init(ObservableList<T> val, BindingContext context) {
-					context.viewContext.setInitContent(false);
+					context.getViewContext().setInitContent(false);
 					val.addListener(new WeakListChangeListener<T>(changeListener = change -> {
 						while (change.next()) {
 							if (change.wasPermutated() || change.wasUpdated())
 								throw new UnsupportedOperationException();
 
 							change.getAddedSubList().forEach(t -> {
-								ModelContext childContext = (ModelContext) context.modelContext.createChild(t);
-								context.viewContext.bind(childContext);
+								ModelContext childContext = (ModelContext) context.getModelContext().createChild(t);
+								context.getViewContext().bind(childContext);
 							});
 
 							change.getRemoved().forEach(model -> {
-								context.modelContext.destroyChildrenContext(model);
+								context.getModelContext().destroyChildrenContext(model);
 							});
 						}
 					}));

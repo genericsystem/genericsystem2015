@@ -10,7 +10,7 @@ public interface IModelContext {
 
 	public IModelContext createChild(Object childModel);
 
-	void registre(IViewContext viewContext);
+	void registre(ViewContext viewContext);
 
 	public Object getModel();
 
@@ -30,7 +30,7 @@ public interface IModelContext {
 
 	public static class ModelContext implements IModelContext {
 
-		protected List<IViewContext> viewContexts = new ArrayList<>();
+		protected List<ViewContext> viewContexts = new ArrayList<>();
 		protected List<IModelContext> modelContextChildren = new ArrayList<>();
 		protected IModelContext parent;
 		protected Object model;
@@ -99,7 +99,7 @@ public interface IModelContext {
 		}
 
 		@Override
-		public void registre(IViewContext viewContext) {
+		public void registre(ViewContext viewContext) {
 			this.viewContexts.add(viewContext);
 		}
 
