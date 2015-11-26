@@ -10,11 +10,20 @@ public interface ObservableSnapshot<T> extends ObservableSet<T> {
 
 	T get(int index);
 
-	ObservableSnapshot<T> filtered(Predicate<T> predicate);
+	default ObservableSnapshot<T> filtered(Predicate<T> predicate) {
+		return new FilterObservableSnapshotImpl<>(this, predicate);
+	}
 
-	ObservableSnapshot<T> filtered(ObservableValue<Predicate<T>> predicate);
+	default ObservableSnapshot<T> filtered(ObservableValue<Predicate<T>> predicate) {
+		return new ObservableFilterObservableSnapshotImpl<>(this, predicate);
+	}
 
-	ObservableSnapshot<T> concat(ObservableSnapshot<T> toConcatenate);
+	default ObservableSnapshot<T> concat(ObservableSnapshot<T> toConcatenate) {
+		return new ConcatObservableSnapshotImpl<>(this, toConcatenate);
+	}
 
-	ObservableList<T> toObservableList();
+	default ObservableList<T> toObservableList() {
+		return new ObservableListSnapshot<>(this);
+	}
+
 }
