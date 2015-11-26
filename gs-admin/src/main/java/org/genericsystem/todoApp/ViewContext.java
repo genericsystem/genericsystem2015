@@ -1,12 +1,6 @@
 package org.genericsystem.todoApp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.layout.Pane;
-
 import org.genericsystem.todoApp.binding.Binding;
 import org.genericsystem.todoApp.binding.BindingContext;
 
@@ -16,7 +10,6 @@ public class ViewContext {
 	private final IModelContext modelContext;
 	private final ViewContext parent;
 	private boolean initContent = true;
-	private final List<ViewContext> children = new ArrayList<>();
 
 	public ViewContext(IModelContext modelContext, Element template, Node node, ViewContext parent) {
 		this.template = template;
@@ -34,15 +27,8 @@ public class ViewContext {
 		return this;
 	}
 
-	public void destroy() {
-		if (node.getParent() instanceof Pane)
-			((Pane) node.getParent()).getChildren().remove(node);
-	}
-
-	public void addChildren(ViewContext viewContext) {
-		if (node instanceof Pane)
-			((Pane) node).getChildren().add(viewContext.node);
-		children.add(viewContext);
+	public void destroyChild(ViewContext childContext) {
+		template.removeChildNode(node, childContext.getNode());
 	}
 
 	public void bind(IModelContext modelContext) {
@@ -51,23 +37,11 @@ public class ViewContext {
 	}
 
 	private void initChildren() {
-		template.getChildren().forEach(element -> {
-			Node childNode = null;
-			childNode = createNode(element.classNode);
-			if (childNode instanceof Button)
-				((Button) childNode).setText(element.text.get());
-			ViewContext viewContextChild = new ViewContext(modelContext, (element), childNode, this);
-			addChildren(viewContextChild);
-			modelContext.registre(viewContextChild);
-			viewContextChild.init();
-		});
-	}
-
-	private Node createNode(Class<? extends Node> clazz) {
-		try {
-			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IllegalStateException(e);
+		for (Element childElement : template.getChildren()) {
+			Node childNode = childElement.createChildNode(node);
+			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
+			modelContext.register(childViewContext);
+			childViewContext.init();
 		}
 	}
 
@@ -93,9 +67,5 @@ public class ViewContext {
 
 	public void setInitContent(boolean initContent) {
 		this.initContent = initContent;
-	}
-
-	public List<ViewContext> getChildren() {
-		return children;
 	}
 }

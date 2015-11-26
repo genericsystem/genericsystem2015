@@ -10,7 +10,7 @@ public interface IModelContext {
 
 	public IModelContext createChild(Object childModel);
 
-	void registre(ViewContext viewContext);
+	void register(ViewContext viewContext);
 
 	public Object getModel();
 
@@ -42,9 +42,9 @@ public interface IModelContext {
 
 		@Override
 		public void destroy() {
-			viewContexts.forEach(viewContext -> {
-				viewContext.destroy();
-			});
+			for (ViewContext viewContext : viewContexts) {
+				viewContext.getParent().destroyChild(viewContext);
+			}
 		}
 
 		@Override
@@ -99,7 +99,7 @@ public interface IModelContext {
 		}
 
 		@Override
-		public void registre(ViewContext viewContext) {
+		public void register(ViewContext viewContext) {
 			this.viewContexts.add(viewContext);
 		}
 

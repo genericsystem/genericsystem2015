@@ -2,11 +2,11 @@ package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
-
+import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
 import org.genericsystem.todoApp.IModelContext.ModelContext;
 import org.genericsystem.todoApp.binding.Binding;
 
@@ -38,5 +38,30 @@ public class Element {
 
 	public List<Element> getChildren() {
 		return children;
+	}
+
+	public void removeChildNode(Node parentNode, Node node) {
+		if (parentNode instanceof Pane)
+			((Pane) parentNode).getChildren().remove(node);
+	}
+
+	public Node createChildNode(Node parentNode) {
+		Node childNode = createNode(classNode);
+		if (parentNode instanceof Pane)
+			((Pane) parentNode).getChildren().add(childNode);
+		return childNode;
+
+	}
+
+	private Node createNode(Class<? extends Node> clazz) {
+		Node childNode;
+		try {
+			childNode = clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		if (childNode instanceof Button)
+			((Button) childNode).setText(text.get());
+		return childNode;
 	}
 }

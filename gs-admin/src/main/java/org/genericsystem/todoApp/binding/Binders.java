@@ -67,15 +67,12 @@ public abstract class Binders<Type> {
 		public static <T> Binder<ObservableList<T>> foreach() {
 
 			return new Binder<ObservableList<T>>() {
-
 				private ListChangeListener<T> changeListener;
-
-				// List<ModelContextImpl> contexts = new ArrayList<ModelContextImpl>();
 
 				@Override
 				public void init(ObservableList<T> val, BindingContext context) {
 					context.getViewContext().setInitContent(false);
-					val.addListener(new WeakListChangeListener<T>(changeListener = change -> {
+					val.addListener(new WeakListChangeListener<>(changeListener = change -> {
 						while (change.next()) {
 							if (change.wasPermutated() || change.wasUpdated())
 								throw new UnsupportedOperationException();
@@ -90,21 +87,7 @@ public abstract class Binders<Type> {
 							});
 						}
 					}));
-					// Consumer<ObservableList<T>> notifyImpl = notifyImpl(context);
-					// notifyImpl.accept(val);
 				}
-
-				// public Consumer<ObservableList<T>> notifyImpl(BindingContext context) {
-				// return myList -> {
-				// myList.forEach(t -> {
-				// ModelContextImpl childContext = (ModelContextImpl) context.modelContext.createChild(t);
-				// context.viewContext.bind(childContext);
-				// // values.add(t);
-				// // contexts.add(childContext);
-				// });
-				// };
-				// }
-
 			};
 		}
 	}
