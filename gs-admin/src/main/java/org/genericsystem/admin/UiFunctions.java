@@ -35,7 +35,8 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 	public Consumer<G> flushConsumer;
 	public Consumer<G> mountConsumer;
 	public Consumer<G> unmountConsumer;
-	public Consumer<G> cancelConsumer;
+	public Consumer<G> clearConsumer;
+	public Consumer<G> shiftTsConsumer;
 
 	public static abstract class AttributeUiFunctions<G> extends UiFunctions<G> {
 		public BiFunction<Serializable, List<G>, G> addAction;
@@ -78,8 +79,12 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 				generic.getRoot().getCurrentCache().flush();
 			};
 
-			cancelConsumer = generic -> {
+			clearConsumer = generic -> {
 				((CocClientEngine) generic).getCurrentCache().clear();
+			};
+
+			shiftTsConsumer = generic -> {
+				((CocClientEngine) generic).getCurrentCache().shiftTs();
 			};
 
 			mountConsumer = generic -> {
