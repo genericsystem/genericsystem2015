@@ -53,10 +53,10 @@ public class TodoList {
 		// Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", Binder.foreach()));
 		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, Binder.foreach()));
 		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindToMethod(Todo.class, Todo::getStringProperty, Binder.textBind()));
-		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToMethod(TodoList.class, "remove", Binder.methodBind(), Todo.class));
+		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToTask(TodoList.class, "remove", Binder.taskBind(), Todo.class));
 
 		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindToField(TodoList.class, "name", Binder.inputTextBind()));
-		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToMethod(TodoList.class, "create", Binder.methodBind()));
+		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToTask(TodoList.class, "create", Binder.taskBind()));
 
 		return todosVBox.apply(this).getNode();
 	}

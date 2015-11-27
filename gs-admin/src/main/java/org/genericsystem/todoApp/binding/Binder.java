@@ -2,6 +2,7 @@ package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javafx.beans.property.StringProperty;
@@ -29,6 +30,15 @@ public interface Binder<T> {
 						throw new IllegalStateException(e);
 					}
 				});
+			}
+		};
+	}
+
+	public static Binder<Consumer<Object>> taskBind() {
+		return new Binder<Consumer<Object>>() {
+			@Override
+			public void init(Consumer<Object> consumer, BindingContext context) {
+				context.getViewContext().setOnAction(event -> consumer.accept(context.getModelContext().getModel()));
 			}
 		};
 	}
@@ -62,7 +72,7 @@ public interface Binder<T> {
 				context.getViewContext().disableInitChildren();
 				Function<T, ModelContext> createChildContext = t -> context.getModelContext().createChild(t, context.getViewContext());
 				List<ModelContext> children = context.getModelContext().getChildren();
-
+				children.addAll(val.stream().map(createChildContext).collect(Collectors.toList()));
 				val.addListener(new WeakListChangeListener<>(changeListener = change -> {
 					while (change.next()) {
 						if (change.wasPermutated()) {

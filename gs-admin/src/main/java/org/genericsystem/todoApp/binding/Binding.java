@@ -1,7 +1,9 @@
 package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.Observable;
 import org.genericsystem.todoApp.ModelContext;
@@ -32,6 +34,22 @@ public abstract class Binding<T> {
 		}
 	}
 
+	public static TaskBinding bindToTask(Class<?> clazz, String methodName, Binder<Consumer<Object>> binder) {
+		try {
+			return new TaskBinding(clazz.getMethod(methodName), binder);
+		} catch (SecurityException | NoSuchMethodException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public static TaskBinding bindToTask(Class<?> clazz, String methodName, Binder<Consumer<Object>> binder, Class<?> methodParameterClass) {
+		try {
+			return new TaskBinding(clazz.getMethod(methodName, methodParameterClass), binder);
+		} catch (SecurityException | NoSuchMethodException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	public static MethodBinding bindToMethod(Class<?> methodClass, String methodName, Binder<Method> binder, Class<?> methodParameterClass) {
 		try {
 			return new MethodBinding(methodClass.getMethod(methodName, methodParameterClass), binder);
@@ -47,11 +65,11 @@ public abstract class Binding<T> {
 	}
 
 	public void init(BindingContext context) {
-		T model = resolve(context);
-		binder.init(model, context);
+		T param = buildParam(context);
+		binder.init(param, context);
 	}
 
-	protected abstract T resolve(BindingContext context);
+	protected abstract T buildParam(BindingContext context);
 
 	static class MethodBinding extends Binding<Method> {
 		private Method method;
@@ -62,9 +80,38 @@ public abstract class Binding<T> {
 		}
 
 		@Override
-		protected Method resolve(BindingContext context) {
+		protected Method buildParam(BindingContext context) {
 			// AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(method);
 			return method;
+		}
+	}
+
+	public interface Task {
+		void doWork();
+	}
+
+	static class TaskBinding extends Binding<Consumer<Object>> {
+		private Method method;
+
+		public TaskBinding(Method method, Binder<Consumer<Object>> binder) {
+			super(binder);
+			this.method = method;
+		}
+
+		@Override
+		protected Consumer<Object> buildParam(BindingContext context) {
+			ModelContext resolvedContext = context.getModelContext().resolve(method.getDeclaringClass());
+			return (o) -> {
+				try {
+					if (method.getParameterCount() == 0)
+						method.invoke(resolvedContext.getModel());
+					else
+						method.invoke(resolvedContext.getModel(), o);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new IllegalStateException(e);
+				}
+			};
+
 		}
 	}
 
@@ -80,7 +127,7 @@ public abstract class Binding<T> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		protected U resolve(BindingContext context) {
+		protected U buildParam(BindingContext context) {
 			ModelContext resolvedContext = context.getModelContext().resolve(uClass);
 			return getter.apply((V) resolvedContext.getModel());
 		}
@@ -96,7 +143,7 @@ public abstract class Binding<T> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		protected U resolve(BindingContext context) {
+		protected U buildParam(BindingContext context) {
 			ModelContext resolvedContext = context.getModelContext().resolve(field.getDeclaringClass());
 			try {
 				return (U) field.get(resolvedContext.getModel());
