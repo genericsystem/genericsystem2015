@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.genericsystem.common.Generic;
 import org.genericsystem.todoApp.binding.Binder;
 import org.genericsystem.todoApp.binding.Binding;
 
@@ -39,6 +40,7 @@ public class TodoList {
 
 	public static class Todo {
 
+		private Generic gen;
 		private ObjectProperty<String> stringProperty = new SimpleObjectProperty<>();
 
 		public ObjectProperty<String> getStringProperty() {
@@ -48,8 +50,8 @@ public class TodoList {
 
 	public Node init() {
 		Element todosVBox = new Element(null, VBox.class, "");
-		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", Binder.foreach()));
-		// Element todoHBox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, ForeachBinder.foreach()));
+		// Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", Binder.foreach()));
+		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, Binder.foreach()));
 		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindToMethod(Todo.class, Todo::getStringProperty, Binder.textBind()));
 		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToMethod(TodoList.class, "remove", Binder.methodBind(), Todo.class));
 

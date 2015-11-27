@@ -74,6 +74,7 @@ public interface Binder<T> {
 							if (change.wasAdded())
 								children.addAll(change.getFrom(), change.getAddedSubList().stream().map(createChildContext).collect(Collectors.toList()));
 						}
+
 					}
 				}));
 			}

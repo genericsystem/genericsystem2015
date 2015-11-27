@@ -97,7 +97,7 @@ public abstract class Binding<T> {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected U resolve(BindingContext context) {
-			ModelContext resolvedContext = context.getModelContext().resolve(field.getClass());
+			ModelContext resolvedContext = context.getModelContext().resolve(field.getDeclaringClass());
 			try {
 				return (U) field.get(resolvedContext.getModel());
 			} catch (IllegalArgumentException | IllegalAccessException e) {
