@@ -3,6 +3,7 @@ package org.genericsystem.todoApp;
 import java.io.File;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -12,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -101,7 +103,7 @@ public class GenericList {
 		Element genericsVBox = new Element(null, VBox.class, "");
 
 		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.bindToMethod(GenericList.class, GenericList::getGenericList, Binder.foreach()));
-		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, "getString", Binder.methodBind()));
+		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, GenericWrapper::getString, Binder.textBind()));
 		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindToMethod(GenericList.class, "remove", Binder.methodBind(), GenericWrapper.class));
 
 		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindToField(GenericList.class, "name", Binder.inputTextBind()));
