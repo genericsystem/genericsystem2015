@@ -18,7 +18,7 @@ public class ViewContext {
 	private final Node node;
 	private final ModelContext modelContext;
 	private final ViewContext parent;
-	private boolean initContent = true;
+	private boolean initChildren = true;
 
 	public ViewContext(ModelContext modelContext, Element template, Node node, ViewContext parent) {
 		this.template = template;
@@ -31,7 +31,7 @@ public class ViewContext {
 		BindingContext bindingContext = new BindingContext(modelContext, this);
 		for (Binding<?> binding : template.binding)
 			binding.init(bindingContext);
-		if (initContent)
+		if (initChildren)
 			initChildren();
 		return this;
 	}
@@ -80,12 +80,8 @@ public class ViewContext {
 		return parent;
 	}
 
-	public boolean isInitContent() {
-		return initContent;
-	}
-
-	public void setInitContent(boolean initContent) {
-		this.initContent = initContent;
+	public void disableInitChildren() {
+		this.initChildren = false;;
 	}
 
 	public Property<String> getTextProperty() {

@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class ModelContext {
@@ -12,7 +11,7 @@ public class ModelContext {
 	protected List<ViewContext> viewContexts = new ArrayList<>();
 	protected List<ModelContext> children = new AbstractList<ModelContext>() {
 
-		List<ModelContext> wrappedList = new ArrayList<ModelContext>();
+		private List<ModelContext> wrappedList = new ArrayList<>();
 
 		@Override
 		public ModelContext get(int index) {
@@ -34,9 +33,17 @@ public class ModelContext {
 
 		@Override
 		public void add(int index, ModelContext element) {
+			System.out.println("Adddddddddddddddddddddd");
 			wrappedList.add(index, element);
 		};
 	};
+
+	public ModelContext createChild(Object child, ViewContext viewContext) {
+		ModelContext childContext = new ModelContext(this, child);
+		viewContext.bind(childContext);
+		return childContext;
+	}
+
 	protected ModelContext parent;
 	protected Object model;
 
@@ -87,25 +94,8 @@ public class ModelContext {
 		return this.children;
 	}
 
-	public void destroyChildrenContext(Object model) {
-		Iterator<ModelContext> iterator = children.iterator();
-		while (iterator.hasNext()) {
-			ModelContext child = iterator.next();
-			if (child.getModel() == model) {
-				for (ViewContext viewContext : child.viewContexts)
-					viewContext.getParent().destroyChild(viewContext);
-				iterator.remove();
-			}
-		}
-	}
-
 	public void register(ViewContext viewContext) {
 		this.viewContexts.add(viewContext);
 	}
 
-	public ModelContext createChild(Object child) {
-		ModelContext childContext = new ModelContext(this, child);
-		this.children.add(childContext);
-		return childContext;
-	}
 }
