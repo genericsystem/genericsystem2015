@@ -14,7 +14,7 @@ public class TableViewContext extends ForeachContext {
 	public ObservableValue<String> columnTitle;
 
 	public TableViewContext(GenericContext parent) {
-		super(parent, parent.genericProperty, generic -> ((CocCache) parent.getCurrentCache()).getInstancesObservableList(generic), generic -> new GenericContext(parent, new ReadOnlyObjectWrapper<Generic>(generic)));
+		super(parent, parent.genericProperty, generic -> ((CocCache) parent.getCurrentCache()).getDependenciesObservableList(generic), generic -> new GenericContext(parent, new ReadOnlyObjectWrapper<Generic>(generic)));
 		columnTitle = Bindings.createStringBinding(() -> Objects.toString(genericProperty.getValue()), genericProperty);
 	}
 }

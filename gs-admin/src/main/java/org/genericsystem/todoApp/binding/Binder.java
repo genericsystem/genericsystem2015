@@ -1,11 +1,15 @@
 package org.genericsystem.todoApp.binding;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
+
 import org.genericsystem.todoApp.ModelContext;
 
 public interface Binder<T> {
@@ -65,21 +69,33 @@ public interface Binder<T> {
 
 				@Override
 				public void init(ObservableList<T> val, BindingContext context) {
+
+					List<ModelContext> children = context.getModelContext().getChildren();
+
 					context.getViewContext().setInitContent(false);
 
 					val.addListener(new WeakListChangeListener<>(changeListener = change -> {
+
 						while (change.next()) {
-							if (change.wasPermutated() || change.wasUpdated())
-								throw new UnsupportedOperationException();
-
-							for (T model : change.getAddedSubList()) {
-								ModelContext childContext = context.getModelContext().createChild(model);
-								context.getViewContext().bind(childContext);
+							if (change.wasPermutated()) {
+								children.subList(change.getFrom(), change.getTo()).clear();
+								children.addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()).stream().map(t -> {
+									ModelContext childContext = context.getModelContext().createChild(t);
+									context.getViewContext().bind(childContext);
+									return childContext;
+								}).collect(Collectors.toList()));
+							} else {
+								if (change.wasRemoved()) {
+									children.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
+								}
+								if (change.wasAdded()) {
+									children.addAll(change.getFrom(), change.getAddedSubList().stream().map(t -> {
+										ModelContext childContext = context.getModelContext().createChild(t);
+										context.getViewContext().bind(childContext);
+										return childContext;
+									}).collect(Collectors.toList()));
+								}
 							}
-
-							for (T model : change.getRemoved()) {
-								context.getModelContext().destroyChildrenContext(model);
-							};
 						}
 					}));
 				}

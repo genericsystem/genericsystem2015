@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,7 +10,33 @@ import java.util.List;
 public class ModelContext {
 
 	protected List<ViewContext> viewContexts = new ArrayList<>();
-	protected List<ModelContext> children = new ArrayList<>();
+	protected List<ModelContext> children = new AbstractList<ModelContext>() {
+
+		List<ModelContext> wrappedList = new ArrayList<ModelContext>();
+
+		@Override
+		public ModelContext get(int index) {
+			return wrappedList.get(index);
+		}
+
+		@Override
+		public int size() {
+			return wrappedList.size();
+		}
+
+		@Override
+		public ModelContext remove(int index) {
+			ModelContext removed = wrappedList.remove(index);
+			for (ViewContext viewContext : removed.viewContexts)
+				viewContext.getParent().destroyChild(viewContext);
+			return removed;
+		};
+
+		@Override
+		public void add(int index, ModelContext element) {
+			wrappedList.add(index, element);
+		};
+	};
 	protected ModelContext parent;
 	protected Object model;
 
