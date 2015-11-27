@@ -8,8 +8,10 @@ import java.util.List;
 
 public class ModelContext {
 
-	protected List<ViewContext> viewContexts = new ArrayList<>();
-	protected List<ModelContext> children = new AbstractList<ModelContext>() {
+	private final ModelContext parent;
+	private final Object model;
+	private final List<ViewContext> viewContexts = new ArrayList<>();
+	private final List<ModelContext> children = new AbstractList<ModelContext>() {
 
 		private List<ModelContext> wrappedList = new ArrayList<>();
 
@@ -24,32 +26,28 @@ public class ModelContext {
 		}
 
 		@Override
+		public void add(int index, ModelContext element) {
+			wrappedList.add(index, element);
+		};
+
+		@Override
 		public ModelContext remove(int index) {
 			ModelContext removed = wrappedList.remove(index);
 			for (ViewContext viewContext : removed.viewContexts)
 				viewContext.getParent().destroyChild(viewContext);
 			return removed;
 		};
-
-		@Override
-		public void add(int index, ModelContext element) {
-			System.out.println("Adddddddddddddddddddddd");
-			wrappedList.add(index, element);
-		};
 	};
+
+	public ModelContext(ModelContext parent, Object model) {
+		this.parent = parent;
+		this.model = model;
+	}
 
 	public ModelContext createChild(Object child, ViewContext viewContext) {
 		ModelContext childContext = new ModelContext(this, child);
 		viewContext.bind(childContext);
 		return childContext;
-	}
-
-	protected ModelContext parent;
-	protected Object model;
-
-	public ModelContext(ModelContext parent, Object model) {
-		this.parent = parent;
-		this.model = model;
 	}
 
 	public ModelContext resolve(Class<?> clazz) {
@@ -84,10 +82,6 @@ public class ModelContext {
 
 	public ModelContext getParent() {
 		return this.parent;
-	}
-
-	public void setModel(Object model) {
-		this.model = model;
 	}
 
 	public List<ModelContext> getChildren() {

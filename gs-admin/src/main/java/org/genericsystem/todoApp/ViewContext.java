@@ -51,8 +51,7 @@ public class ViewContext {
 	}
 
 	public void bind(ModelContext modelContext) {
-		ViewContext wrapper = new ViewContext(modelContext, template, node, this);
-		wrapper.initChildren();
+		new ViewContext(modelContext, template, node, this).initChildren();
 	}
 
 	private void initChildren() {
@@ -62,6 +61,25 @@ public class ViewContext {
 			modelContext.register(childViewContext);
 			childViewContext.init();
 		}
+	}
+
+	public Property<String> getTextProperty() {
+		if (node instanceof Label)
+			return ((Label) node).textProperty();
+		if (node instanceof TextField)
+			return ((TextField) node).textProperty();
+		throw new IllegalStateException();
+	}
+
+	public void setOnAction(EventHandler<ActionEvent> handler) {
+		if (node instanceof Button)
+			((Button) getNode()).setOnAction(handler);
+		else
+			throw new IllegalStateException();
+	}
+
+	public void disableInitChildren() {
+		this.initChildren = false;
 	}
 
 	public Element getTemplate() {
@@ -78,24 +96,5 @@ public class ViewContext {
 
 	public ViewContext getParent() {
 		return parent;
-	}
-
-	public void disableInitChildren() {
-		this.initChildren = false;;
-	}
-
-	public Property<String> getTextProperty() {
-		if (node instanceof Label)
-			return ((Label) node).textProperty();
-		if (node instanceof TextField)
-			return ((TextField) node).textProperty();
-		throw new IllegalStateException();
-	}
-
-	public void setOnAction(EventHandler<ActionEvent> handler) {
-		if (node instanceof Button)
-			((Button) getNode()).setOnAction(handler);
-		else
-			throw new IllegalStateException();
 	}
 }
