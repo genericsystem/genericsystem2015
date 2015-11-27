@@ -1,7 +1,5 @@
 package org.genericsystem.todoApp;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,27 +51,10 @@ public class ModelContext {
 	public ModelContext resolve(Class<?> clazz) {
 		if (clazz.isAssignableFrom(model.getClass()))
 			return this;
-		else if (parent == null)
-			throw new IllegalStateException("Unable to resolve method class : " + clazz);
-		else
-			return parent.resolve(clazz);
-	}
-
-	public ModelContext resolve(Method method) {
-		if (method.getDeclaringClass().isAssignableFrom(model.getClass()))
-			return this;
-		else if (parent == null)
-			throw new IllegalStateException("Unable to resolve method : " + method);
-		else
-			return parent.resolve(method);
-	}
-
-	public ModelContext resolve(Field field) {
-		if (field.getDeclaringClass().isAssignableFrom(this.model.getClass()))
-			return this;
 		else if (parent != null)
-			return parent.resolve(field);
-		throw new IllegalStateException("Unable to resolve field : " + field);
+			return parent.resolve(clazz);
+		else
+			throw new IllegalStateException("Unable to resolve class : " + clazz);
 	}
 
 	public Object getModel() {
