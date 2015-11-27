@@ -91,25 +91,6 @@ public class CocCache extends HeavyCache {
 					}
 
 				});
-				// bind(binding = new ObjectBinding<ObservableSnapshot<Generic>>() {
-				//
-				// private ObservableSnapshot<Generic> currentBindedTransaction;
-				//
-				// {
-				// currentBindedTransaction = dependencies;
-				// bind(transactionProperty);
-				// }
-				//
-				// @Override
-				// protected ObservableSnapshot<Generic> computeValue() {
-				// return currentBindedTransaction;
-				// }
-				//
-				// @Override
-				// protected void onInvalidating() {
-				// currentBindedTransaction = getTransaction().getDependenciesObservableSnapshot(generic);
-				// };
-				// });
 			}
 
 			@Override
@@ -169,28 +150,6 @@ public class CocCache extends HeavyCache {
 		private ChangeListener<ObservableValue<CompletableFuture<Snapshot<Generic>>>> bindingListener;
 
 		PromiseListBinding(Generic generic, ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise, ObjectProperty<Differential> differentialProperty) {
-			// this.binding = new ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>() {
-			//
-			// private ObservableValue<CompletableFuture<Snapshot<Generic>>> currentBindedDifferential;
-			//
-			// {
-			// currentBindedDifferential = dependenciesPromise;
-			// bind(differentialProperty, currentBindedDifferential);
-			// }
-			//
-			// @Override
-			// protected ObservableValue<CompletableFuture<Snapshot<Generic>>> computeValue() {
-			// return currentBindedDifferential;
-			// }
-			//
-			// @Override
-			// protected void onInvalidating() {
-			// System.out.println("(CocCache - GSListBinding) Invalidation of binded differential");
-			// unbind(currentBindedDifferential);
-			// currentBindedDifferential = ((AsyncIDifferential) differentialProperty.get()).getDependenciesPromise(generic);
-			// bind(currentBindedDifferential);
-			// };
-			// };
 
 			this.binding = new GSObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>(dependenciesPromise, differentialProperty, true) {
 
