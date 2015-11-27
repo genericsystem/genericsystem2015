@@ -11,10 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import org.genericsystem.todoApp.binding.Binder.ClickBinder;
-import org.genericsystem.todoApp.binding.Binder.ForeachBinder;
-import org.genericsystem.todoApp.binding.Binder.LabelBinder;
-import org.genericsystem.todoApp.binding.Binder.TextFieldBinder;
+import org.genericsystem.todoApp.binding.Binder;
 import org.genericsystem.todoApp.binding.Binding;
 
 public class TodoList {
@@ -51,13 +48,13 @@ public class TodoList {
 
 	public Node init() {
 		Element todosVBox = new Element(null, VBox.class, "");
-		// Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", ForeachBinder.foreach()));
-		Element todoHBox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, ForeachBinder.foreach()));
-		Element todoLabel = new Element(todoHBox, Label.class, "", Binding.bindToMethod(Todo.class, Todo::getStringProperty, LabelBinder.textBind()));
-		Element todoRemoveButton = new Element(todoHBox, Button.class, "remove", Binding.bindToMethod(TodoList.class, "remove", ClickBinder.methodBind(), Todo.class));
+		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", Binder.foreach()));
+		// Element todoHBox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, ForeachBinder.foreach()));
+		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindToMethod(Todo.class, Todo::getStringProperty, Binder.textBind()));
+		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToMethod(TodoList.class, "remove", Binder.methodBind(), Todo.class));
 
-		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindToField(TodoList.class, "name", TextFieldBinder.inputTextBind()));
-		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToMethod(TodoList.class, "create", ClickBinder.methodBind()));
+		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindToField(TodoList.class, "name", Binder.inputTextBind()));
+		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToMethod(TodoList.class, "create", Binder.methodBind()));
 
 		return todosVBox.apply(this).getNode();
 	}

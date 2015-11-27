@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -15,15 +14,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.todoApp.binding.Binder.ClickBinder;
-import org.genericsystem.todoApp.binding.Binder.ForeachBinder;
-import org.genericsystem.todoApp.binding.Binder.TextFieldBinder;
+import org.genericsystem.todoApp.binding.Binder;
 import org.genericsystem.todoApp.binding.Binding;
 
 public class GenericList {
@@ -103,12 +99,12 @@ public class GenericList {
 	@SuppressWarnings("unused")
 	public Node init() {
 		Element genericsVBox = new Element(null, VBox.class, "");
-		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.bindToMethod(GenericList.class, GenericList::getGenericList, ForeachBinder.foreach()));
-		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, "getString", ClickBinder.methodBind()));
-		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindToMethod(GenericList.class, "remove", ClickBinder.methodBind(), GenericWrapper.class));
+		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.bindToMethod(GenericList.class, GenericList::getGenericList, Binder.foreach()));
+		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, "getString", Binder.methodBind()));
+		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindToMethod(GenericList.class, "remove", Binder.methodBind(), GenericWrapper.class));
 
-		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindToField(GenericList.class, "name", TextFieldBinder.inputTextBind()));
-		Element genericsCreateButton = new Element(genericsVBox, Button.class, "create", Binding.bindToMethod(GenericList.class, "create", ClickBinder.methodBind()));
+		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindToField(GenericList.class, "name", Binder.inputTextBind()));
+		Element genericsCreateButton = new Element(genericsVBox, Button.class, "create", Binding.bindToMethod(GenericList.class, "create", Binder.methodBind()));
 
 		return genericsVBox.apply(this).getNode();
 	}

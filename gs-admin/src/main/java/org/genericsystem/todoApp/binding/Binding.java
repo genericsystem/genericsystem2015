@@ -105,5 +105,4 @@ public abstract class Binding<T> {
 			}
 		}
 	}
-
 }
