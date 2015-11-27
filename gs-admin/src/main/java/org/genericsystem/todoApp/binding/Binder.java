@@ -21,12 +21,11 @@ public interface Binder<T> {
 				public void init(Method method, BindingContext context) {
 					context.getViewContext().setOnAction(event -> {
 						try {
-							ModelContext resolvedContext = context.getModelContext().resolve(method);
+							Object resolvedContextModel = context.getModelContext().resolve(method.getDeclaringClass()).getModel();
 							if (method.getParameterCount() == 0)
-								method.invoke(resolvedContext.getModel());
-							else {
-								method.invoke(resolvedContext.getModel(), context.getModelContext().getModel());
-							}
+								method.invoke(resolvedContextModel);
+							else
+								method.invoke(resolvedContextModel, context.getModelContext().getModel());
 						} catch (Exception e) {
 							throw new IllegalStateException(e);
 						}

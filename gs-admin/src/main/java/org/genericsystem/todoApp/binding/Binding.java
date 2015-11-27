@@ -53,42 +53,6 @@ public abstract class Binding<T> {
 
 	protected abstract T resolve(BindingContext context);
 
-	static class MethodBinding2<U extends Observable, V> extends Binding<U> {
-		private final Function<V, U> getter;
-		private final Class<?> uClass;
-
-		public MethodBinding2(Class<?> uClass, Function<V, U> getter, Binder<U> binder) {
-			super(binder);
-			this.getter = getter;
-			this.uClass = uClass;
-		}
-
-		@Override
-		protected U resolve(BindingContext context) {
-			ModelContext resolvedContext = context.getModelContext().resolve(uClass);
-			return getter.apply((V) resolvedContext.getModel());
-		}
-	}
-
-	static class FieldBinding<U extends Observable, T> extends Binding<U> {
-		private Field attribute;
-
-		public FieldBinding(Field attribute, Binder<U> binder) {
-			super(binder);
-			this.attribute = attribute;
-		}
-
-		@Override
-		protected U resolve(BindingContext context) {
-			ModelContext resolvedContext = context.getModelContext().resolve(attribute);
-			try {
-				return (U) attribute.get(resolvedContext.getModel());
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
-		}
-	}
-
 	static class MethodBinding extends Binding<Method> {
 		private Method method;
 
@@ -101,6 +65,44 @@ public abstract class Binding<T> {
 		protected Method resolve(BindingContext context) {
 			// AbstractModelContext resolvedContext = ((AbstractModelContext) context.modelContext).resolve(method);
 			return method;
+		}
+	}
+
+	static class MethodBinding2<U extends Observable, V> extends Binding<U> {
+		private final Function<V, U> getter;
+		private final Class<?> uClass;
+
+		public MethodBinding2(Class<?> uClass, Function<V, U> getter, Binder<U> binder) {
+			super(binder);
+			this.getter = getter;
+			this.uClass = uClass;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected U resolve(BindingContext context) {
+			ModelContext resolvedContext = context.getModelContext().resolve(uClass);
+			return getter.apply((V) resolvedContext.getModel());
+		}
+	}
+
+	static class FieldBinding<U extends Observable, T> extends Binding<U> {
+		private Field field;
+
+		public FieldBinding(Field field, Binder<U> binder) {
+			super(binder);
+			this.field = field;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected U resolve(BindingContext context) {
+			ModelContext resolvedContext = context.getModelContext().resolve(field.getClass());
+			try {
+				return (U) field.get(resolvedContext.getModel());
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 
