@@ -11,7 +11,8 @@ public class CommandsPanel<G> extends HBox {
 
 	private UiFunctions<G> gsFunctions;
 	private Button flushButton;
-	private Button cancelButton;
+	private Button clearButton;
+	private Button shiftTsButton;
 	private Button mountButton;
 	private Button unmountButton;
 
@@ -21,16 +22,18 @@ public class CommandsPanel<G> extends HBox {
 		this.gsFunctions = gsFunctions;
 
 		flushButton = new Button("Flush");
-		cancelButton = new Button("Cancel");
+		clearButton = new Button("Clear");
+		shiftTsButton = new Button("ShiftTS");
 		mountButton = new Button("Mount");
 		unmountButton = new Button("Unmount");
 
 		flushButton.setOnAction(e -> gsFunctions.flushConsumer.accept(observableType.getValue()));
-		cancelButton.setOnAction(e -> gsFunctions.cancelConsumer.accept(observableType.getValue()));
+		clearButton.setOnAction(e -> gsFunctions.clearConsumer.accept(observableType.getValue()));
+		shiftTsButton.setOnAction(e -> gsFunctions.shiftTsConsumer.accept(observableType.getValue()));
 		mountButton.setOnAction(e -> gsFunctions.mountConsumer.accept(observableType.getValue()));
 		unmountButton.setOnAction(e -> gsFunctions.unmountConsumer.accept(observableType.getValue()));
 
 		setPadding(new Insets(15, 12, 15, 12));
-		getChildren().addAll(flushButton, mountButton, unmountButton, cancelButton);
+		getChildren().addAll(flushButton, mountButton, unmountButton, clearButton, shiftTsButton);
 	}
 }
