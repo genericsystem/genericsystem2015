@@ -11,6 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
+import org.genericsystem.common.Generic;
 import org.genericsystem.todoApp.binding.Binder.ClickBinder;
 import org.genericsystem.todoApp.binding.Binder.ForeachBinder;
 import org.genericsystem.todoApp.binding.Binder.LabelBinder;
@@ -42,6 +44,7 @@ public class TodoList {
 
 	public static class Todo {
 
+		private Generic gen;
 		private ObjectProperty<String> stringProperty = new SimpleObjectProperty<>();
 
 		public ObjectProperty<String> getStringProperty() {

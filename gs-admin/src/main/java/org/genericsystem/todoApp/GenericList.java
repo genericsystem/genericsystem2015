@@ -1,11 +1,9 @@
 package org.genericsystem.todoApp;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -23,6 +21,7 @@ import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.todoApp.binding.Binder.ClickBinder;
 import org.genericsystem.todoApp.binding.Binder.ForeachBinder;
+import org.genericsystem.todoApp.binding.Binder.LabelBinder;
 import org.genericsystem.todoApp.binding.Binder.TextFieldBinder;
 import org.genericsystem.todoApp.binding.Binding;
 
@@ -58,25 +57,25 @@ public class GenericList {
 
 		dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
 
-		genericList = FXCollections.observableArrayList();
-		genericList.addAll((Collection<? extends GenericWrapper>) dependenciesObservableList.stream().peek(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
-
-		Thread.sleep(300);
+		Thread.sleep(1000);
 		System.out.println(dependenciesObservableList);
 
-		dependenciesObservableList.addListener((InvalidationListener) l -> {
-			System.out.println("dependenciesObservableList invalidation " + l);
-			genericList.clear();
-			genericList.addAll((Collection<? extends GenericWrapper>) dependenciesObservableList.stream().peek(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
-		});
+		genericList = FXCollections.observableArrayList();
+		genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
+		System.out.println(genericList);
 	}
 
 	public void create() {
 		engine.addInstance(name.getValue());
+		genericList.clear();
+		genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
 	}
 
 	public void remove(GenericWrapper genericWrapper) {
 		genericWrapper.remove();
+		genericList.clear();
+		genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
+
 	}
 
 	public ObservableList<GenericWrapper> getGenericList() {
@@ -86,17 +85,19 @@ public class GenericList {
 	protected static class GenericWrapper {
 
 		private Generic generic;
+		public StringProperty name = new SimpleStringProperty();
 
 		public GenericWrapper(Generic generic) {
 			this.generic = generic;
+			name.set(Objects.toString(this.generic.getValue()));
 		}
 
 		public void remove() {
 			generic.remove();
 		}
 
-		public String getString() {
-			return Objects.toString(generic.getValue());
+		public StringProperty getString() {
+			return name;
 		}
 	}
 
@@ -104,7 +105,7 @@ public class GenericList {
 	public Node init() {
 		Element genericsVBox = new Element(null, VBox.class, "");
 		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.bindToMethod(GenericList.class, GenericList::getGenericList, ForeachBinder.foreach()));
-		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, "getString", ClickBinder.methodBind()));
+		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, GenericWrapper::getString, LabelBinder.textBind()));
 		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindToMethod(GenericList.class, "remove", ClickBinder.methodBind(), GenericWrapper.class));
 
 		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindToField(GenericList.class, "name", TextFieldBinder.inputTextBind()));
