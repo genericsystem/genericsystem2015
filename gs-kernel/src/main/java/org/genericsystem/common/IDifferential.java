@@ -1,9 +1,5 @@
 package org.genericsystem.common;
 
-import java.util.concurrent.CompletableFuture;
-
-import javafx.beans.Observable;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -20,8 +16,4 @@ public interface IDifferential<T extends DefaultVertex<T>> {
 	Snapshot<T> getDependencies(T generic);
 
 	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
-
-	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
-
-	public Observable getInvalidator(Generic generic);
 }
