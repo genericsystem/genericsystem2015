@@ -6,11 +6,9 @@ import java.util.stream.Stream;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.ObservableValueBase;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Differential;
@@ -42,7 +40,6 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	@Override
 	protected void unplug(Generic generic) {
 		super.unplug(generic);
-
 		if (!addsSnap.remove(generic))
 			removesSnap.add(generic);
 	}
@@ -93,32 +90,11 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 		return getSubDifferential().getDependenciesObservableSnapshot(generic).filtered(removePredicate).concat(addsSnap.filtered(x -> generic.isDirectAncestorOf(x)));
 	}
 
-	private static class Invalidator<T> extends ObservableValueBase<T> implements InvalidationListener, Observable {
-
-		public static <T> Invalidator<T> createInvalidator(Observable... observables) {
-			return new Invalidator<T>(observables);
-		}
-
-		private Invalidator(Observable... observables) {
-			for (Observable observable : observables)
-				observable.addListener(new WeakInvalidationListener(this));
-		}
-
-		@Override
-		public void invalidated(Observable observable) {
-			super.fireValueChangedEvent();
-		}
-
-		@Override
-		public T getValue() {
-			return null;
-		}
-
-	}
-
 	@Override
 	public Observable getInvalidator(Generic generic) {
-		return Invalidator.createInvalidator(getSubDifferential().getInvalidator(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
+		Invalidator<Differential> i = Invalidator.createInvalidator(getSubDifferential().getInvalidator(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
+		i.addListener((InvalidationListener) l -> System.out.println("getInvalidation in AsyncDifferential"));
+		return i;
 	}
 
 	@Override

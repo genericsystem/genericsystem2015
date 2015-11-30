@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -121,7 +120,9 @@ public class CocCache extends HeavyCache {
 
 		@Override
 		public Observable getInvalidator(Generic generic) {
-			return TransitiveInvalidator.create(transactionProperty, () -> ((CocCache) transactionProperty.get()).getInvalidator(generic));
+			Observable t = TransitiveInvalidator.create(transactionProperty, () -> ((AsyncITransaction) transactionProperty.get()).getInvalidator(generic));
+			t.addListener((InvalidationListener) l -> System.out.println("Invalidation in AsyncTransactionDifferential"));
+			return t;
 		}
 
 		@Override
@@ -234,36 +235,11 @@ public class CocCache extends HeavyCache {
 		}
 	}
 
-	private static class TransitiveInvalidator<T> extends ObjectBinding<Void> {
-
-		private Observable observableSlave;
-		Supplier<Observable> slaveObservableExtractor;
-
-		public static <T> TransitiveInvalidator<T> create(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
-			return new TransitiveInvalidator<>(observableMaster, slaveObservableExtractor);
-		}
-
-		public TransitiveInvalidator(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
-			this.slaveObservableExtractor = slaveObservableExtractor;
-			super.bind(observableMaster, observableSlave = slaveObservableExtractor.get());
-		}
-
-		@Override
-		protected void onInvalidating() {
-			unbind(observableSlave);
-			observableSlave = slaveObservableExtractor.get();
-			bind(observableSlave);
-		}
-
-		@Override
-		protected Void computeValue() {
-			return null;
-		}
-
-	}
-
 	private Observable getInvalidator(Generic generic) {
-		return TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
+
+		TransitiveInvalidator<Differential> t = TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
+		t.addListener((InvalidationListener) l -> System.out.println("getInvalidation in CocCache"));
+		return t;
 		// rebind to getDifferential().getInvalidator(generic) !!!
 		// return Bindings.createObjectBinding(() -> null, differentialProperty, getDifferential().getInvalidator(generic));
 	}
@@ -282,11 +258,15 @@ public class CocCache extends HeavyCache {
 			private List<Generic> promisedList = new ArrayList<Generic>();
 			{
 				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					System.out.println("Invalidation of observabledependencies, wait promise");
 					CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
 						promisedList = snapshot.toList();
+						System.out.println("Promised is arrived : invalidate observablelist ");
 						invalidate();
 					});
 				}));
+
+				invalidator.addListener((InvalidationListener) l -> System.out.println("Invalidation in CocCache"));
 			}
 
 			@Override

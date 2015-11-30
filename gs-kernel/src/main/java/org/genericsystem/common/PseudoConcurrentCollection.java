@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 
 import org.genericsystem.api.core.IteratorSnapshot;
@@ -29,8 +28,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 			tail.next = newNode;
 		tail = newNode;
 		map.put(element, element);
-		changeProperty.set(element);
-		;
+		addProperty.set(element);
 	}
 
 	public boolean remove(T element) {
@@ -73,7 +71,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 				if (next.next == null)
 					tail = last;
 			}
-			changeProperty.set(content);
+			removeProperty.set(content);
 		}
 	}
 
@@ -96,21 +94,31 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		return map.get(o);
 	}
 
-	private SimpleObjectProperty<T> changeProperty = new SimpleObjectProperty<T>();
+	private SimpleObjectProperty<T> addProperty = new SimpleObjectProperty<T>();
+	private SimpleObjectProperty<T> removeProperty = new SimpleObjectProperty<T>();
 
-	private class FilteredInvalidator extends SimpleObjectProperty<T> implements ChangeListener<T> {
+	private class FilteredInvalidator extends SimpleObjectProperty<T> {
 		private Predicate<T> predicate;
+
+		private ChangeListener<T> listener = (o, oldT, newT) -> {
+			System.out.println("test predicate before fireValueChangedEvent");
+			if (predicate.test(newT)) {
+				System.out.println("fireValueChangedEvent");
+				super.fireValueChangedEvent();
+			}
+		};
 
 		private FilteredInvalidator(Predicate<T> predicate) {
 			this.predicate = predicate;
-			changeProperty.addListener(new WeakChangeListener<T>(this));
+			addProperty.addListener(new WeakChangeListener<T>(listener));
+			removeProperty.addListener(new WeakChangeListener<T>(listener));
 		}
 
 		@Override
-		public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
-			if (predicate.test(newValue))
-				super.fireValueChangedEvent();
+		protected void finalize() throws Throwable {
+			System.out.println("finalize AAA");
 		}
+
 	}
 
 	public Observable getFilteredInvalidator(T generic, Predicate<T> predicate) {

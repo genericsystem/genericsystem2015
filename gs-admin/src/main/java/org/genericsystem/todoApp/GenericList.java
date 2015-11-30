@@ -2,11 +2,10 @@ package org.genericsystem.todoApp;
 
 import java.io.File;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -28,15 +27,15 @@ public class GenericList {
 
 	private static CocServer server;
 	private static CocClientEngine engine;
+
 	private static ObservableList<Generic> dependenciesObservableList;
+	Transformation<GenericWrapper, Generic> genericWrapperList;
 
 	public StringProperty name = new SimpleStringProperty();
 
 	public StringProperty getName() {
 		return name;
 	}
-
-	private ObservableList<GenericWrapper> genericList;
 
 	private void cleanDirectory() {
 		File file = new File(path);
@@ -49,28 +48,32 @@ public class GenericList {
 
 	public GenericList() throws InterruptedException {
 
-		// cleanDirectory();
+		cleanDirectory();
 
 		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, Statics.DEFAULT_PORT, path));
 		server.start();
 
 		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT);
 
-		dependenciesObservableList = engine.getCurrentCache().getDependenciesObservableList(engine);
+		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
+		dependenciesObservableList.addListener((InvalidationListener) l -> System.out.println("Invalidation of dependenciesObservableList"));
 
-		Thread.sleep(1000);
-		System.out.println(dependenciesObservableList);
-		genericList = FXCollections.observableArrayList();
-		genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
+		genericWrapperList = new Transformation<GenericWrapper, Generic>(dependenciesObservableList, generic -> new GenericWrapper(generic));
+		genericWrapperList.addListener((InvalidationListener) l -> System.out.println("Invalidation of genericWrapperList"));
 
-		System.out.println(genericList);
+		//
+		// Thread.sleep(1000);
+		// System.out.println(dependenciesObservableList);
+		// genericWrapperList = FXCollections.observableArrayList();
+		// genericWrapperList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
+		// System.out.println(genericWrapperList);
 	}
 
-	private void initGenericList() {
-		genericList.clear();
-		genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
-
-	}
+	// private void initGenericList() {
+	// genericWrapperList.clear();
+	// genericWrapperList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
+	//
+	// }
 
 	public void flush() {
 		engine.getCurrentCache().flush();
@@ -78,39 +81,39 @@ public class GenericList {
 
 	public void clear() {
 		engine.getCurrentCache().clear();
-		try {
-			Thread.sleep(100);
-			initGenericList();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// try {
+		// Thread.sleep(100);
+		// initGenericList();
+		// } catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		// genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
 
 	}
 
 	public void mount() {
 		engine.getCurrentCache().mount();
-		initGenericList();
+		// initGenericList();
 	}
 
 	public void unmount() {
 		engine.getCurrentCache().unmount();
-		initGenericList();
+		// initGenericList();
 	}
 
 	public void create() {
 		engine.addInstance(name.getValue());
-		initGenericList();
+		// initGenericList();
 	}
 
 	public void remove(GenericWrapper genericWrapper) {
 		genericWrapper.remove();
-		initGenericList();
+		// initGenericList();
 	}
 
 	public ObservableList<GenericWrapper> getGenericList() {
-		return genericList;
+		return genericWrapperList;
 	}
 
 	protected static class GenericWrapper {

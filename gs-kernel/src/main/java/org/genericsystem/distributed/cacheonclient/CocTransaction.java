@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -115,8 +116,23 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
-		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<>();
-		getDependenciesPromise(generic).thenAccept(snapshot -> objectProperty.set(snapshot));
+		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>() {
+			@Override
+			protected void finalize() throws Throwable {
+				System.out.println("finalize BBB");
+			}
+		};
+		getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
+			System.out.println("Promise is coming");
+			try {
+				Thread.sleep(200);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("");
+			Platform.runLater(() -> objectProperty.set(snapshot));
+		});
 		return objectProperty;
 	}
 }
