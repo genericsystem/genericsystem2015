@@ -5,8 +5,12 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import org.genericsystem.todoApp.ModelContext;
 
@@ -20,6 +24,8 @@ public abstract class Binding<B> {
 
 	public void init(BindingContext context) {
 		B initParam = buildInitParam(context);
+		System.out.println("init :: " + initParam);
+
 		binder.init(initParam, context);
 	}
 
@@ -29,29 +35,29 @@ public abstract class Binding<B> {
 		return Binding.<U, V, ObservableList<T>> bind(function, Binder.foreachBinder());
 	}
 
-	public static <U, V> FunctionBinding<U, V, StringProperty> bindText(Function<U, StringProperty> function) {
-		return Binding.<U, V, StringProperty> bind(function, Binder.textBinder());
+	public static <R, U, V> FunctionBinding<U, V, ObservableValue<String>> bindText(Function<R, StringProperty> getTextProperty, Function<U, ObservableValue<String>> function) {
+		return Binding.<U, V, ObservableValue<String>> bind(function, Binder.textBinder(getTextProperty));
 	}
 
-	public static <U, V> FunctionBinding<U, V, StringProperty> bindInputText(Function<U, StringProperty> function) {
-		return Binding.<U, V, StringProperty> bind(function, Binder.inputTextBinder());
+	public static <R, U, V> FunctionBinding<U, V, StringProperty> bindInputText(Function<R, StringProperty> getTextProperty, Function<U, StringProperty> function) {
+		return Binding.<U, V, StringProperty> bind(function, Binder.inputTextBinder(getTextProperty));
 	}
 
-	public static <U, V, T> ConsumerBinding<U, V, T> bindAction(Consumer<U> function) {
-		return Binding.<U, V, T> bind(function, Binder.actionBinder());
+	public static <R, U, V, T> ConsumerBinding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, Consumer<U> function) {
+		return Binding.<U, V, T> bind(function, Binder.actionBinder(propAction));
 	}
 
-	public static <U, V, T> ConsumerBinding<U, V, T> bindAction(BiConsumer<U, V> function, Class<V> clazz) {
-		return Binding.<U, V, T> bind(function, clazz, Binder.actionBinder());
+	public static <R, U, V, T> ConsumerBinding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, BiConsumer<U, V> function, Class<V> clazz) {
+		return Binding.<U, V, T> bind(function, clazz, Binder.actionBinder(propAction));
 	}
 
 	private static <U, V, T> FunctionBinding<U, V, T> bind(Function<U, T> function, Binder<Function<V, T>> binder) {
 		return new FunctionBinding<U, V, T>((u, v) -> function.apply(u), binder);
 	}
 
-	private static <U, V, T> FunctionBinding<U, V, T> bind(BiFunction<U, V, T> function, Binder<Function<V, T>> binder) {
-		return new FunctionBinding<U, V, T>((u, v) -> function.apply(u, v), binder);
-	}
+	// private static <U, V, T> FunctionBinding<U, V, T> bind(BiFunction<U, V, T> function, Binder<Function<V, T>> binder) {
+	// return new FunctionBinding<U, V, T>((u, v) -> function.apply(u, v), binder);
+	// }
 
 	private static <U, V, T> ConsumerBinding<U, V, T> bind(Consumer<U> function, Binder<Consumer<V>> binder) {
 		return new ConsumerBinding<U, V, T>((u, v) -> {
@@ -89,7 +95,6 @@ public abstract class Binding<B> {
 				throw new IllegalStateException("Unable to resolve a method reference");
 			};
 		}
-
 	}
 
 	private static class ConsumerBinding<U, V, T> extends Binding<Consumer<V>> {
@@ -115,7 +120,6 @@ public abstract class Binding<B> {
 				throw new IllegalStateException("Unable to resolve a method reference");
 			};
 		}
-
 	}
 
 }
