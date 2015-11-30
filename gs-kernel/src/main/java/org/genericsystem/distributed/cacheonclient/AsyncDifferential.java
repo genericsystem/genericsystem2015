@@ -11,17 +11,21 @@ import javafx.beans.value.ObservableValue;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonclient.observables.ContainerObservableSnapshot;
 import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public class AsyncDifferential extends Differential implements AsyncIDifferential {
+
+	private final ContainerObservableSnapshot<Generic> addsSnap = new ContainerObservableSnapshot<>();
+	private final ContainerObservableSnapshot<Generic> removesSnap = new ContainerObservableSnapshot<>();
 
 	public AsyncDifferential(AsyncIDifferential subCache) {
 		super(subCache);
 	}
 
 	@Override
-	public AsyncIDifferential getSubCache() {
-		return (AsyncIDifferential) super.getSubCache();
+	public AsyncIDifferential getSubDifferential() {
+		return (AsyncIDifferential) super.getSubDifferential();
 	}
 
 	@Override
@@ -40,13 +44,13 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	}
 
 	@Override
-	public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
+	public ObservableValue<CompletableFuture<Snapshot<Generic>>> getObervableDependenciesPromise(Generic generic) {
 
 		return new ObjectBinding<CompletableFuture<Snapshot<Generic>>>() {
 
 			private ObservableSnapshot<Generic> addsSnapFilter = addsSnap.filtered(t -> generic.isDirectAncestorOf(t));
 			private ObservableSnapshot<Generic> removesSnapFilter = removesSnap.filtered(t -> generic.isDirectAncestorOf(t));
-			private ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getSubCache().getDependenciesPromise(generic);
+			private ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getSubDifferential().getObervableDependenciesPromise(generic);
 			{
 				bind(addsSnapFilter);
 				bind(removesSnapFilter);
@@ -82,6 +86,6 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 	@Override
 	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
 		ObservableValue<Predicate<Generic>> removePredicate = Bindings.<Predicate<Generic>> createObjectBinding(() -> t -> !removesSnap.contains(t), removesSnap);
-		return getSubCache().getDependenciesObservableSnapshot(generic).filtered(removePredicate).concat(addsSnap.filtered(x -> generic.isDirectAncestorOf(x)));
+		return getSubDifferential().getDependenciesObservableSnapshot(generic).filtered(removePredicate).concat(addsSnap.filtered(x -> generic.isDirectAncestorOf(x)));
 	}
 }

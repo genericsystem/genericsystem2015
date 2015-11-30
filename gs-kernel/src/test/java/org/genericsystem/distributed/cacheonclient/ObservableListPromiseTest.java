@@ -17,7 +17,7 @@ public class ObservableListPromiseTest extends AbstractTest {
 	public void test001_ObservableEngineDependenciesTest() throws InterruptedException, ExecutionException, TimeoutException {
 		CocClientEngine engine = new CocClientEngine();
 
-		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getDependenciesPromise(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		ObservableList<Generic> dependenciesObservableList = engine.getCurrentCache().getObervableDependenciesPromise(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
 
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
 	}
@@ -26,7 +26,7 @@ public class ObservableListPromiseTest extends AbstractTest {
 	public void test001_ObservableEngineDependenciesNotBloquingTest() throws InterruptedException, ExecutionException, TimeoutException {
 		CocClientEngine engine = new CocClientEngine();
 
-		CompletableFuture<ObservableList<Generic>> dependenciesPromise = engine.getCurrentCache().getDependenciesPromise(engine);
+		CompletableFuture<ObservableList<Generic>> dependenciesPromise = engine.getCurrentCache().getObervableDependenciesPromise(engine);
 
 		dependenciesPromise.thenAccept((dependenciesObservableList) -> {
 			assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList);
@@ -37,7 +37,7 @@ public class ObservableListPromiseTest extends AbstractTest {
 	public void test002_ObservableEngineDependenciesAddTest() throws InterruptedException, ExecutionException, TimeoutException, ConcurrencyControlException {
 		CocClientEngine engine = new CocClientEngine();
 
-		CompletableFuture<ObservableList<Generic>> dependenciesObservableList = engine.getCurrentCache().getDependenciesPromise(engine);
+		CompletableFuture<ObservableList<Generic>> dependenciesObservableList = engine.getCurrentCache().getObervableDependenciesPromise(engine);
 
 		assert engine.getCurrentCache().getDependencies(engine).toList().equals(dependenciesObservableList.get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 
@@ -57,7 +57,7 @@ public class ObservableListPromiseTest extends AbstractTest {
 
 		CocClientEngine engine = new CocClientEngine();
 
-		CompletableFuture<ObservableList<Generic>> dependenciesObservableList = engine.getCurrentCache().getDependenciesPromise(engine);
+		CompletableFuture<ObservableList<Generic>> dependenciesObservableList = engine.getCurrentCache().getObervableDependenciesPromise(engine);
 
 		engine.addInstance("InstanceL1_0");
 		engine.addInstance("InstanceL1_1");
@@ -94,7 +94,7 @@ public class ObservableListPromiseTest extends AbstractTest {
 
 		CocClientEngine engine = new CocClientEngine();
 
-		CompletableFuture<ObservableList<Generic>> dependenciesObservableList = engine.getCurrentCache().getDependenciesPromise(engine);
+		CompletableFuture<ObservableList<Generic>> dependenciesObservableList = engine.getCurrentCache().getObervableDependenciesPromise(engine);
 
 		engine.addInstance("InstanceL1_0");
 		engine.addInstance("InstanceL1_1");

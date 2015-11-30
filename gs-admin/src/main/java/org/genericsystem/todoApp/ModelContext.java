@@ -48,15 +48,6 @@ public class ModelContext {
 		return childContext;
 	}
 
-	public ModelContext resolve(Class<?> clazz) {
-		if (clazz.isAssignableFrom(model.getClass()))
-			return this;
-		else if (parent != null)
-			return parent.resolve(clazz);
-		else
-			throw new IllegalStateException("Unable to resolve class : " + clazz);
-	}
-
 	public Object getModel() {
 		return this.model;
 	}

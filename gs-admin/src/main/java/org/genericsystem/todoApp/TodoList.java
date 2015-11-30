@@ -1,7 +1,5 @@
 package org.genericsystem.todoApp;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -11,13 +9,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.todoApp.binding.Binder;
 import org.genericsystem.todoApp.binding.Binding;
 
 public class TodoList {
 
-	public StringProperty name = new SimpleStringProperty();
+	private StringProperty name = new SimpleStringProperty();
 	private ObservableList<Todo> todos = FXCollections.observableArrayList();
 
 	public StringProperty getName() {
@@ -41,23 +39,20 @@ public class TodoList {
 	public static class Todo {
 
 		private Generic gen;
-		private ObjectProperty<String> stringProperty = new SimpleObjectProperty<>();
+		private StringProperty stringProperty = new SimpleStringProperty();
 
-		public ObjectProperty<String> getStringProperty() {
+		public StringProperty getStringProperty() {
 			return stringProperty;
 		}
 	}
 
 	public Node init() {
 		Element todosVBox = new Element(null, VBox.class, "");
-		// Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToField(TodoList.class, "todos", Binder.foreach()));
-		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.bindToMethod(TodoList.class, TodoList::getTodos, Binder.foreach()));
-		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindToMethod(Todo.class, Todo::getStringProperty, Binder.textBind()));
-		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindToTask(TodoList.class, "remove", Binder.taskBind(), Todo.class));
-
-		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindToField(TodoList.class, "name", Binder.inputTextBind()));
-		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindToTask(TodoList.class, "create", Binder.taskBind()));
-
+		Element todoVox = new Element(todosVBox, VBox.class, "", Binding.forEach(TodoList::getTodos));
+		Element todoLabel = new Element(todoVox, Label.class, "", Binding.bindText(Todo::getStringProperty));
+		Element todoRemoveButton = new Element(todoVox, Button.class, "remove", Binding.bindAction(TodoList::remove, Todo.class));
+		Element todosCreatLabel = new Element(todosVBox, TextField.class, "", Binding.bindInputText(TodoList::getName));
+		Element todosCreateButton = new Element(todosVBox, Button.class, "create", Binding.bindAction(TodoList::create));
 		return todosVBox.apply(this).getNode();
 	}
 }

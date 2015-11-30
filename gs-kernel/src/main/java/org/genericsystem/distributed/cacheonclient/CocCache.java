@@ -47,7 +47,7 @@ public class CocCache extends HeavyCache {
 	protected class AsyncTransactionDifferential extends TransactionDifferential implements AsyncIDifferential {
 
 		@Override
-		public ObservableValue<CompletableFuture<Snapshot<Generic>>> getDependenciesPromise(Generic generic) {
+		public ObservableValue<CompletableFuture<Snapshot<Generic>>> getObervableDependenciesPromise(Generic generic) {
 
 			return new ObjectBinding<CompletableFuture<Snapshot<Generic>>>() {
 
@@ -100,7 +100,7 @@ public class CocCache extends HeavyCache {
 
 			@Override
 			public ObservableSnapshot<Generic> getValue() {
-				return (ObservableSnapshot) super.getValue();
+				return (ObservableSnapshot<Generic>) super.getValue();
 			}
 
 			@Override
@@ -132,8 +132,8 @@ public class CocCache extends HeavyCache {
 
 	private Map<Generic, PromiseListBinding> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, PromiseListBinding>();
 
-	public CompletableFuture<ObservableList<Generic>> getDependenciesPromise(Generic generic) {
-		ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getDifferential().getDependenciesPromise(generic);
+	public CompletableFuture<ObservableList<Generic>> getObervableDependenciesPromise(Generic generic) {
+		ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getDifferential().getObervableDependenciesPromise(generic);
 		return dependenciesPromise.getValue().thenApply(snapshot -> {
 			PromiseListBinding observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
 			if (observableList == null)
@@ -155,7 +155,7 @@ public class CocCache extends HeavyCache {
 
 				@Override
 				protected void onInvalidating() {
-					changeBindedObject(((AsyncIDifferential) differentialProperty.get()).getDependenciesPromise(generic));
+					changeBindedObject(((AsyncIDifferential) differentialProperty.get()).getObervableDependenciesPromise(generic));
 				}
 
 			};

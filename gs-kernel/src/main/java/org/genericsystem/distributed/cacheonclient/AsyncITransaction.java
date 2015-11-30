@@ -8,6 +8,7 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public interface AsyncITransaction extends IDifferential<Generic> {
+
 	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
 
 	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic);

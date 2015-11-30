@@ -1,10 +1,21 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
@@ -92,7 +103,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	// }
 
 	protected void initialize() {
-		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubCache()));
+		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubDifferential()));
 	}
 
 	protected Differential buildDifferential(IDifferential<Generic> subCache) {
@@ -145,8 +156,8 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		Differential originalCacheElement = getDifferential();
-		if (getDifferential().getSubCache() instanceof Differential)
-			this.differentialProperty.set((Differential) getDifferential().getSubCache());
+		if (getDifferential().getSubDifferential() instanceof Differential)
+			this.differentialProperty.set((Differential) getDifferential().getSubDifferential());
 		try {
 			synchronizedApply(originalCacheElement);
 		} finally {
@@ -171,7 +182,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	}
 
 	public void unmount() {
-		IDifferential<Generic> subCache = getDifferential().getSubCache();
+		IDifferential<Generic> subCache = getDifferential().getSubDifferential();
 		differentialProperty.set(subCache instanceof Differential ? (Differential) subCache : new Differential(subCache));
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
@@ -249,6 +260,68 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		getRestructurator().rebuildAll(generic, () -> generic, computeDependencies(generic));
 	}
 
+	private static class TransitiveInvalidator<T> extends ObjectBinding<Void> {
+
+		private Observable observableSlave;
+		Supplier<Observable> slaveObservableExtractor;
+
+		public static <T> TransitiveInvalidator<T> create(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
+			return new TransitiveInvalidator<>(observableMaster, slaveObservableExtractor);
+		}
+
+		public TransitiveInvalidator(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
+			this.slaveObservableExtractor = slaveObservableExtractor;
+			super.bind(observableMaster, observableSlave = slaveObservableExtractor.get());
+		}
+
+		@Override
+		protected void onInvalidating() {
+			unbind(observableSlave);
+			observableSlave = slaveObservableExtractor.get();
+			bind(observableSlave);
+		}
+
+		@Override
+		protected Void computeValue() {
+			return null;
+		}
+
+	}
+
+	private Observable getInvalidator(Generic generic) {
+		return TransitiveInvalidator.create(differentialProperty, () -> differentialProperty.get().getInvalidator(generic));
+		// rebind to getDifferential().getInvalidator(generic) !!!
+		// return Bindings.createObjectBinding(() -> null, differentialProperty, getDifferential().getInvalidator(generic));
+	}
+
+	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+		// Do not cache here !
+		return getDifferential().getDependenciesPromise(generic);
+	}
+
+	// TODO : create cache ?
+	// TODO : global synchonization?
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		return new ListBinding<Generic>() {
+			private final InvalidationListener listener;
+			private final Observable invalidator = getInvalidator(generic);
+			private List<Generic> promisedList = new ArrayList<Generic>();
+			{
+				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					HeavyCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
+						promisedList = snapshot.toList();
+						invalidate();
+					});
+				}));
+			}
+
+			@Override
+			protected ObservableList<Generic> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+			}
+		};
+	}
+
 	protected class TransactionDifferential implements IDifferential<Generic> {
 
 		@Override
@@ -266,6 +339,15 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 			return getTransaction().getTs();
 		}
 
+		@Override
+		public Observable getInvalidator(Generic generic) {
+			return TransitiveInvalidator.create(transactionProperty, () -> transactionProperty.get().getInvalidator(generic));
+		}
+
+		@Override
+		public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+			return getTransaction().getDependenciesPromise(generic);
+		}
 	}
 
 	public static interface ContextEventListener<X> {

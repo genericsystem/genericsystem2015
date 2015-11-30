@@ -29,7 +29,7 @@ public class ViewContext {
 
 	public ViewContext init() {
 		BindingContext bindingContext = new BindingContext(modelContext, this);
-		for (Binding<?> binding : template.binding)
+		for (Binding<?> binding : template.bindings)
 			binding.init(bindingContext);
 		if (initChildren)
 			initChildren();

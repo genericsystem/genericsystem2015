@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -107,5 +111,12 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 	@Override
 	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
 		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
+	}
+
+	@Override
+	public Observable getInvalidator(Generic generic) {
+		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<>();
+		getDependenciesPromise(generic).thenAccept(snapshot -> objectProperty.set(snapshot));
+		return objectProperty;
 	}
 }

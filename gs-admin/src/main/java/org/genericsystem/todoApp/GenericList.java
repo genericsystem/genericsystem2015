@@ -20,7 +20,6 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.todoApp.binding.Binder;
 import org.genericsystem.todoApp.binding.Binding;
 
 public class GenericList {
@@ -32,6 +31,10 @@ public class GenericList {
 	private static ObservableList<Generic> dependenciesObservableList;
 
 	public StringProperty name = new SimpleStringProperty();
+
+	public StringProperty getName() {
+		return name;
+	}
 
 	private ObservableList<GenericWrapper> genericList;
 
@@ -133,17 +136,17 @@ public class GenericList {
 	public Node init() {
 		Element genericsVBox = new Element(null, VBox.class, "");
 
-		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.bindToMethod(GenericList.class, GenericList::getGenericList, Binder.foreach()));
-		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindToMethod(GenericWrapper.class, GenericWrapper::getString, Binder.textBind()));
-		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindToMethod(GenericList.class, "remove", Binder.methodBind(), GenericWrapper.class));
-		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindToField(GenericList.class, "name", Binder.inputTextBind()));
+		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.forEach(GenericList::getGenericList));
+		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindText(GenericWrapper::getString));
+		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindAction(GenericList::remove, GenericWrapper.class));
+		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindInputText(GenericList::getName));
 
 		Element genericsHB = new Element(genericsVBox, HBox.class, "");
-		Element genericsCreateButton = new Element(genericsHB, Button.class, "create", Binding.bindToMethod(GenericList.class, "create", Binder.methodBind()));
-		Element genericsFlushButton = new Element(genericsHB, Button.class, "flush", Binding.bindToMethod(GenericList.class, "flush", Binder.methodBind()));
-		Element genericsClearButton = new Element(genericsHB, Button.class, "clear", Binding.bindToMethod(GenericList.class, "clear", Binder.methodBind()));
-		Element genericsMountButton = new Element(genericsHB, Button.class, "mount", Binding.bindToMethod(GenericList.class, "mount", Binder.methodBind()));
-		Element genericsUnmountButton = new Element(genericsHB, Button.class, "unmount", Binding.bindToMethod(GenericList.class, "unmount", Binder.methodBind()));
+		Element genericsCreateButton = new Element(genericsHB, Button.class, "create", Binding.bindAction(GenericList::create));
+		Element genericsFlushButton = new Element(genericsHB, Button.class, "flush", Binding.bindAction(GenericList::flush));
+		Element genericsClearButton = new Element(genericsHB, Button.class, "clear", Binding.bindAction(GenericList::clear));
+		Element genericsMountButton = new Element(genericsHB, Button.class, "mount", Binding.bindAction(GenericList::mount));
+		Element genericsUnmountButton = new Element(genericsHB, Button.class, "unmount", Binding.bindAction(GenericList::unmount));
 
 		return genericsVBox.apply(this).getNode();
 	}

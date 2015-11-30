@@ -3,13 +3,19 @@ package org.genericsystem.common;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
+
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 
 import org.genericsystem.api.core.IteratorSnapshot;
 
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
+	// TODO size and get(index) !!!
 	private Node<T> head = null;
 	private Node<T> tail = null;
 	final Map<T, T> map = new HashMap<>();
@@ -23,6 +29,8 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 			tail.next = newNode;
 		tail = newNode;
 		map.put(element, element);
+		changeProperty.set(element);
+		;
 	}
 
 	public boolean remove(T element) {
@@ -34,19 +42,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 				return true;
 			}
 		return false;
-	}
-
-	public boolean removeIf(Predicate<? super T> filter) {
-		Objects.requireNonNull(filter);
-		boolean removed = false;
-		final Iterator<T> each = iterator();
-		while (each.hasNext()) {
-			if (filter.test(each.next())) {
-				each.remove();
-				removed = true;
-			}
-		}
-		return removed;
 	}
 
 	public class InternalIterator extends AbstractGeneralAwareIterator<Node<T>, T> implements Iterator<T> {
@@ -66,17 +61,19 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 		@Override
 		public void remove() {
+			T content = next.content;
 			if (next == null)
 				throw new IllegalStateException();
 			map.remove(next.content);
 			if (last == null) {
 				head = next.next;
 				next = null;
-				return;
+			} else {
+				last.next = next.next;
+				if (next.next == null)
+					tail = last;
 			}
-			last.next = next.next;
-			if (next.next == null)
-				tail = last;
+			changeProperty.set(content);
 		}
 	}
 
@@ -97,5 +94,26 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 	@Override
 	public T get(Object o) {
 		return map.get(o);
+	}
+
+	private SimpleObjectProperty<T> changeProperty = new SimpleObjectProperty<T>();
+
+	private class FilteredInvalidator extends SimpleObjectProperty<T> implements ChangeListener<T> {
+		private Predicate<T> predicate;
+
+		private FilteredInvalidator(Predicate<T> predicate) {
+			this.predicate = predicate;
+			changeProperty.addListener(new WeakChangeListener<T>(this));
+		}
+
+		@Override
+		public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
+			if (predicate.test(newValue))
+				super.fireValueChangedEvent();
+		}
+	}
+
+	public Observable getFilteredInvalidator(T generic, Predicate<T> predicate) {
+		return new FilteredInvalidator(predicate);
 	}
 }

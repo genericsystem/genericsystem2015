@@ -1,13 +1,11 @@
 package org.genericsystem.todoApp.binding;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
@@ -17,60 +15,42 @@ import org.genericsystem.todoApp.ModelContext;
 public interface Binder<T> {
 	public void init(T val, BindingContext context);
 
-	public static Binder<Method> methodBind() {
-		return new Binder<Method>() {
+	public static <V, T> Binder<Consumer<V>> actionBinder() {
+		return new Binder<Consumer<V>>() {
 			@Override
-			public void init(Method method, BindingContext context) {
-				context.getViewContext().setOnAction(event -> {
-					try {
-						Object resolvedContextModel = context.getModelContext().resolve(method.getDeclaringClass()).getModel();
-						if (method.getParameterCount() == 0)
-							method.invoke(resolvedContextModel);
-						else
-							method.invoke(resolvedContextModel, context.getModelContext().getModel());
-					} catch (Exception e) {
-						throw new IllegalStateException(e);
-					}
-				});
+			public void init(Consumer<V> consumer, BindingContext context) {
+				context.getViewContext().setOnAction(event -> consumer.accept((V) context.getModelContext().getModel()));
 			}
 		};
 	}
 
-	public static Binder<Consumer<Object>> taskBind() {
-		return new Binder<Consumer<Object>>() {
+	public static <V> Binder<Function<V, StringProperty>> textBinder() {
+		return new Binder<Function<V, StringProperty>>() {
 			@Override
-			public void init(Consumer<Object> consumer, BindingContext context) {
-				context.getViewContext().setOnAction(event -> consumer.accept(context.getModelContext().getModel()));
+			public void init(Function<V, StringProperty> function, BindingContext context) {
+				context.getViewContext().getTextProperty().bind(function.apply((V) context.getModelContext().getModel()));
 			}
 		};
 	}
 
-	public static Binder<StringProperty> inputTextBind() {
-		return new Binder<StringProperty>() {
+	public static <V> Binder<Function<V, StringProperty>> inputTextBinder() {
+		return new Binder<Function<V, StringProperty>>() {
 			@Override
-			public void init(StringProperty val, BindingContext context) {
-				context.getViewContext().getTextProperty().bindBidirectional(val);
+			public void init(Function<V, StringProperty> function, BindingContext context) {
+				context.getViewContext().getTextProperty().bindBidirectional(function.apply((V) context.getModelContext().getModel()));
 			}
 		};
 	}
 
-	public static Binder<ObservableValue<String>> textBind() {
-		return new Binder<ObservableValue<String>>() {
-			@Override
-			public void init(ObservableValue<String> val, BindingContext context) {
-				context.getViewContext().getTextProperty().bind(val);
-			}
-		};
-	}
+	public static <V, T> Binder<Function<V, ObservableList<T>>> foreachBinder() {
 
-	public static <T> Binder<ObservableList<T>> foreach() {
-
-		return new Binder<ObservableList<T>>() {
+		return new Binder<Function<V, ObservableList<T>>>() {
 			@SuppressWarnings("unused")
 			private ListChangeListener<T> changeListener;
 
 			@Override
-			public void init(ObservableList<T> val, BindingContext context) {
+			public void init(Function<V, ObservableList<T>> function, BindingContext context) {
+				ObservableList<T> val = function.apply((V) context.getModelContext().getModel());
 				context.getViewContext().disableInitChildren();
 				Function<T, ModelContext> createChildContext = t -> context.getModelContext().createChild(t, context.getViewContext());
 				List<ModelContext> children = context.getModelContext().getChildren();
@@ -86,7 +66,6 @@ public interface Binder<T> {
 							if (change.wasAdded())
 								children.addAll(change.getFrom(), change.getAddedSubList().stream().map(createChildContext).collect(Collectors.toList()));
 						}
-
 					}
 				}));
 			}

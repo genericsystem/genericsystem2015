@@ -4,7 +4,11 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleObjectProperty;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -157,5 +161,15 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 				lifeManager.writeUnlock();
 			lockedLifeManagers = new HashSet<>();
 		}
+	}
+
+	@Override
+	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+		throw new IllegalStateException();
+	}
+
+	@Override
+	public Observable getInvalidator(Generic generic) {
+		return new SimpleObjectProperty<>();// TODO
 	}
 }
