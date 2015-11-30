@@ -121,7 +121,7 @@ public class CocCache extends HeavyCache {
 
 		@Override
 		public Observable getInvalidator(Generic generic) {
-			return TransitiveInvalidator.create(transactionProperty, () -> ((Differential) transactionProperty.get()).getInvalidator(generic));
+			return TransitiveInvalidator.create(transactionProperty, () -> ((CocCache) transactionProperty.get()).getInvalidator(generic));
 		}
 
 		@Override
@@ -263,7 +263,7 @@ public class CocCache extends HeavyCache {
 	}
 
 	private Observable getInvalidator(Generic generic) {
-		return TransitiveInvalidator.create(differentialProperty, () -> differentialProperty.get().getInvalidator(generic));
+		return TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
 		// rebind to getDifferential().getInvalidator(generic) !!!
 		// return Bindings.createObjectBinding(() -> null, differentialProperty, getDifferential().getInvalidator(generic));
 	}
