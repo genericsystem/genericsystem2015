@@ -5,39 +5,43 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import org.genericsystem.todoApp.ModelContext;
 
 public interface Binder<T> {
 	public void init(T val, BindingContext context);
 
-	public static <V, T> Binder<Consumer<V>> actionBinder() {
+	public static <R, V, T> Binder<Consumer<V>> actionBinder(Function<R, ObjectProperty<EventHandler<ActionEvent>>> prop) {
 		return new Binder<Consumer<V>>() {
 			@Override
 			public void init(Consumer<V> consumer, BindingContext context) {
-				context.getViewContext().setOnAction(event -> consumer.accept((V) context.getModelContext().getModel()));
+				prop.apply((R) context.getViewContext().getNode()).set(event -> consumer.accept((V) context.getModelContext().getModel()));
 			}
 		};
 	}
 
-	public static <V> Binder<Function<V, StringProperty>> textBinder() {
-		return new Binder<Function<V, StringProperty>>() {
+	public static <S, V> Binder<Function<V, ObservableValue<String>>> textBinder(Function<S, StringProperty> getTextProperty) {
+		return new Binder<Function<V, ObservableValue<String>>>() {
 			@Override
-			public void init(Function<V, StringProperty> function, BindingContext context) {
-				context.getViewContext().getTextProperty().bind(function.apply((V) context.getModelContext().getModel()));
+			public void init(Function<V, ObservableValue<String>> function, BindingContext context) {
+				getTextProperty.apply((S) context.getViewContext().getNode()).bind(function.apply((V) context.getModelContext().getModel()));
 			}
 		};
 	}
 
-	public static <V> Binder<Function<V, StringProperty>> inputTextBinder() {
+	public static <S, V> Binder<Function<V, StringProperty>> inputTextBinder(Function<S, StringProperty> getTextProperty) {
 		return new Binder<Function<V, StringProperty>>() {
 			@Override
 			public void init(Function<V, StringProperty> function, BindingContext context) {
-				context.getViewContext().getTextProperty().bindBidirectional(function.apply((V) context.getModelContext().getModel()));
+				getTextProperty.apply((S) context.getViewContext().getNode()).bindBidirectional(function.apply((V) context.getModelContext().getModel()));
 			}
 		};
 	}

@@ -6,6 +6,7 @@ import java.util.Objects;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -61,19 +62,7 @@ public class GenericList {
 		genericWrapperList = new Transformation<GenericWrapper, Generic>(dependenciesObservableList, generic -> new GenericWrapper(generic));
 		genericWrapperList.addListener((InvalidationListener) l -> System.out.println("Invalidation of genericWrapperList"));
 
-		//
-		// Thread.sleep(1000);
-		// System.out.println(dependenciesObservableList);
-		// genericWrapperList = FXCollections.observableArrayList();
-		// genericWrapperList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
-		// System.out.println(genericWrapperList);
 	}
-
-	// private void initGenericList() {
-	// genericWrapperList.clear();
-	// genericWrapperList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
-	//
-	// }
 
 	public void flush() {
 		engine.getCurrentCache().flush();
@@ -81,14 +70,6 @@ public class GenericList {
 
 	public void clear() {
 		engine.getCurrentCache().clear();
-		// try {
-		// Thread.sleep(100);
-		// initGenericList();
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// genericList.addAll(dependenciesObservableList.stream().map(dep -> new GenericWrapper(dep)).collect(Collectors.toList()));
 
 	}
 
@@ -130,7 +111,7 @@ public class GenericList {
 			generic.remove();
 		}
 
-		public StringProperty getString() {
+		public ObservableValue<String> getString() {
 			return name;
 		}
 	}
@@ -138,18 +119,17 @@ public class GenericList {
 	@SuppressWarnings("unused")
 	public Node init() {
 		Element genericsVBox = new Element(null, VBox.class, "");
-
 		Element genericsHBox = new Element(genericsVBox, VBox.class, "", Binding.forEach(GenericList::getGenericList));
-		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindText(GenericWrapper::getString));
-		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindAction(GenericList::remove, GenericWrapper.class));
-		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindInputText(GenericList::getName));
+		Element genericsLabel = new Element(genericsHBox, Label.class, "", Binding.bindText(Label::textProperty, GenericWrapper::getString));
+		Element genericsRemoveButton = new Element(genericsHBox, Button.class, "remove", Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class));
+		Element genericsCreatLabel = new Element(genericsVBox, TextField.class, "", Binding.bindInputText(TextField::textProperty, GenericList::getName));
 
 		Element genericsHB = new Element(genericsVBox, HBox.class, "");
-		Element genericsCreateButton = new Element(genericsHB, Button.class, "create", Binding.bindAction(GenericList::create));
-		Element genericsFlushButton = new Element(genericsHB, Button.class, "flush", Binding.bindAction(GenericList::flush));
-		Element genericsClearButton = new Element(genericsHB, Button.class, "clear", Binding.bindAction(GenericList::clear));
-		Element genericsMountButton = new Element(genericsHB, Button.class, "mount", Binding.bindAction(GenericList::mount));
-		Element genericsUnmountButton = new Element(genericsHB, Button.class, "unmount", Binding.bindAction(GenericList::unmount));
+		Element genericsCreateButton = new Element(genericsHB, Button.class, "create", Binding.bindAction(Button::onActionProperty, GenericList::create));
+		Element genericsFlushButton = new Element(genericsHB, Button.class, "flush", Binding.bindAction(Button::onActionProperty, GenericList::flush));
+		Element genericsClearButton = new Element(genericsHB, Button.class, "clear", Binding.bindAction(Button::onActionProperty, GenericList::clear));
+		Element genericsMountButton = new Element(genericsHB, Button.class, "mount", Binding.bindAction(Button::onActionProperty, GenericList::mount));
+		Element genericsUnmountButton = new Element(genericsHB, Button.class, "unmount", Binding.bindAction(Button::onActionProperty, GenericList::unmount));
 
 		return genericsVBox.apply(this).getNode();
 	}

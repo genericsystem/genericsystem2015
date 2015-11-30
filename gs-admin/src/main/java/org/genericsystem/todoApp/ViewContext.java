@@ -2,14 +2,10 @@ package org.genericsystem.todoApp;
 
 import java.util.Collections;
 import java.util.List;
-import javafx.beans.property.Property;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+
 import org.genericsystem.todoApp.binding.Binding;
 import org.genericsystem.todoApp.binding.BindingContext;
 
@@ -57,25 +53,11 @@ public class ViewContext {
 	private void initChildren() {
 		for (Element childElement : template.getChildren()) {
 			Node childNode = childElement.createChildNode(node);
+
 			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
 			modelContext.register(childViewContext);
 			childViewContext.init();
 		}
-	}
-
-	public Property<String> getTextProperty() {
-		if (node instanceof Label)
-			return ((Label) node).textProperty();
-		if (node instanceof TextField)
-			return ((TextField) node).textProperty();
-		throw new IllegalStateException();
-	}
-
-	public void setOnAction(EventHandler<ActionEvent> handler) {
-		if (node instanceof Button)
-			((Button) getNode()).setOnAction(handler);
-		else
-			throw new IllegalStateException();
 	}
 
 	public void disableInitChildren() {
