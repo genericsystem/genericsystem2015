@@ -1,6 +1,7 @@
 package org.genericsystem.todoApp;
 
 import javafx.scene.Node;
+
 import org.genericsystem.todoApp.binding.Binding;
 import org.genericsystem.todoApp.binding.BindingContext;
 
@@ -50,7 +51,12 @@ public class ViewContext {
 	}
 
 	public void bind(ModelContext modelContext) {
-		new ViewContext(modelContext, template, node, this).initChildren();
+		// System.out.println(node);
+		// System.out.println(getParent().getNode());
+		if (getParent() == null) {
+			new ViewContext(modelContext, template, node, this).initChildren();
+		} else
+			new ViewContext(modelContext, template, node, this).initChildren2();
 	}
 
 	private static Node createNode(Class<? extends Node> clazz) {
@@ -59,6 +65,25 @@ public class ViewContext {
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	private void initChildren2() {
+		System.out.println(getParent().template.classNode);
+		Node parentNode = createNode(getParent().template.classNode);
+		for (Element childElement : getParent().template.getChildren()) {
+			System.out.println(childElement.classNode);
+			// ViewContext childViewContext = new ViewContext(modelContext, getParent().template, parentNode, this);
+			// modelContext.register(childViewContext);
+			// getParent().getParent().template.getGraphicChildren(getParent().getParent().getNode()).add(parentNode);
+
+			Node childNode = createNode(childElement.classNode);
+			childElement.getGraphicChildren(parentNode).add(childNode);
+			// getParent().getParent().getTemplate().getGraphicChildren(graphicParent)
+			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
+			modelContext.register(childViewContext);
+			childViewContext.init();
+		}
+		getParent().getParent().template.getGraphicChildren(getParent().getParent().getNode()).add(parentNode);
 	}
 
 	private void initChildren() {
