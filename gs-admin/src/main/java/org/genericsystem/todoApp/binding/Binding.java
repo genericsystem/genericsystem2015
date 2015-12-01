@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -35,12 +35,12 @@ public abstract class Binding<B> {
 		return Binding.<U, V, ObservableList<T>> bind(function, Binder.foreachBinder());
 	}
 
-	public static <R, U, V> FunctionBinding<U, V, ObservableValue<String>> bindText(Function<R, StringProperty> getTextProperty, Function<U, ObservableValue<String>> function) {
-		return Binding.<U, V, ObservableValue<String>> bind(function, Binder.textBinder(getTextProperty));
+	public static <R, U, V, W> FunctionBinding<U, V, ObservableValue<W>> bindProperty(Function<R, Property<W>> getTextProperty, Function<U, ObservableValue<W>> function) {
+		return Binding.<U, V, ObservableValue<W>> bind(function, Binder.propertyBinder(getTextProperty));
 	}
 
-	public static <R, U, V> FunctionBinding<U, V, StringProperty> bindInputText(Function<R, StringProperty> getTextProperty, Function<U, StringProperty> function) {
-		return Binding.<U, V, StringProperty> bind(function, Binder.inputTextBinder(getTextProperty));
+	public static <R, U, V> FunctionBinding<U, V, Property<String>> bindInputText(Function<R, Property<String>> getTextProperty, Function<U, Property<String>> function) {
+		return Binding.<U, V, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
 	}
 
 	public static <R, U, V, T> ConsumerBinding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, Consumer<U> function) {

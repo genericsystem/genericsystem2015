@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -28,19 +28,19 @@ public interface Binder<T> {
 		};
 	}
 
-	public static <S, V> Binder<Function<V, ObservableValue<String>>> textBinder(Function<S, StringProperty> getTextProperty) {
-		return new Binder<Function<V, ObservableValue<String>>>() {
+	public static <S, V, W> Binder<Function<V, ObservableValue<W>>> propertyBinder(Function<S, Property<W>> getProperty) {
+		return new Binder<Function<V, ObservableValue<W>>>() {
 			@Override
-			public void init(Function<V, ObservableValue<String>> function, BindingContext context) {
-				getTextProperty.apply((S) context.getViewContext().getNode()).bind(function.apply((V) context.getModelContext().getModel()));
+			public void init(Function<V, ObservableValue<W>> function, BindingContext context) {
+				getProperty.apply((S) context.getViewContext().getNode()).bind(function.apply((V) context.getModelContext().getModel()));
 			}
 		};
 	}
 
-	public static <S, V> Binder<Function<V, StringProperty>> inputTextBinder(Function<S, StringProperty> getTextProperty) {
-		return new Binder<Function<V, StringProperty>>() {
+	public static <S, V> Binder<Function<V, Property<String>>> inputTextBinder(Function<S, Property<String>> getTextProperty) {
+		return new Binder<Function<V, Property<String>>>() {
 			@Override
-			public void init(Function<V, StringProperty> function, BindingContext context) {
+			public void init(Function<V, Property<String>> function, BindingContext context) {
 				getTextProperty.apply((S) context.getViewContext().getNode()).bindBidirectional(function.apply((V) context.getModelContext().getModel()));
 			}
 		};
