@@ -71,7 +71,6 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		dependenciesMap.remove(generic.getMeta());
 		dependenciesMap.remove(generic);
 
-		System.out.println("(CocTransaction - invalid) invalidate all");
 		generic.getComponents().forEach(component -> dependenciesPromiseMap.remove(component));
 		generic.getSupers().forEach(superG -> dependenciesPromiseMap.remove(superG));
 		dependenciesPromiseMap.remove(generic.getMeta());
@@ -116,21 +115,14 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
-		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>() {
-			@Override
-			protected void finalize() throws Throwable {
-				System.out.println("finalize BBB");
-			}
-		};
+		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
 		getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
-			System.out.println("Promise is coming");
 			try {
 				Thread.sleep(200);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("");
 			Platform.runLater(() -> objectProperty.set(snapshot));
 		});
 		return objectProperty;

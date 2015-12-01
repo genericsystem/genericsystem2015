@@ -41,6 +41,20 @@ public class GenericList {
 	private ObservableValue<String> unmountButtonTextProperty = new SimpleStringProperty("Unmount");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
 
+	public GenericList() throws InterruptedException {
+
+		// cleanDirectory();
+
+		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, Statics.DEFAULT_PORT, path));
+		server.start();
+
+		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT);
+
+		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
+
+		genericWrapperList = new Transformation<GenericWrapper, Generic>(dependenciesObservableList, generic -> new GenericWrapper(generic));
+	}
+
 	public StringProperty getName() {
 		return name;
 	}
@@ -80,20 +94,6 @@ public class GenericList {
 				if (!".lock".equals(f.getName()))
 					f.delete();
 			}
-	}
-
-	public GenericList() throws InterruptedException {
-
-		cleanDirectory();
-
-		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, Statics.DEFAULT_PORT, path));
-		server.start();
-
-		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT);
-
-		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
-
-		genericWrapperList = new Transformation<GenericWrapper, Generic>(dependenciesObservableList, generic -> new GenericWrapper(generic));
 	}
 
 	public void flush() {

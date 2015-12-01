@@ -8,7 +8,6 @@ import javafx.beans.value.ObservableValueBase;
 class Invalidator<T> extends ObservableValueBase<T> {
 
 	private InvalidationListener listener = o -> {
-		System.out.println("Invidation in concate invalidator");
 		super.fireValueChangedEvent();
 	};
 
@@ -29,11 +28,6 @@ class Invalidator<T> extends ObservableValueBase<T> {
 	// System.out.println("Invidation in concatinvalidator");
 	// super.fireValueChangedEvent();
 	// }
-
-	@Override
-	protected void finalize() throws Throwable {
-		System.out.println("finalize concat invalidator ");
-	}
 
 	@Override
 	public T getValue() {

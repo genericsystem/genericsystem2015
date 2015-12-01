@@ -120,9 +120,7 @@ public class CocCache extends HeavyCache {
 
 		@Override
 		public Observable getInvalidator(Generic generic) {
-			Observable t = TransitiveInvalidator.create(transactionProperty, () -> ((AsyncITransaction) transactionProperty.get()).getInvalidator(generic));
-			t.addListener((InvalidationListener) l -> System.out.println("Invalidation in AsyncTransactionDifferential"));
-			return t;
+			return TransitiveInvalidator.create(transactionProperty, () -> ((AsyncITransaction) transactionProperty.get()).getInvalidator(generic));
 		}
 
 		@Override
@@ -185,11 +183,6 @@ public class CocCache extends HeavyCache {
 		}
 
 		@Override
-		protected void onInvalidating() {
-			System.out.println("(CocCache - GSListBinding) Invalidation of elements' Collection");
-		}
-
-		@Override
 		protected ObservableList<Generic> computeValue() {
 			return FXCollections.observableArrayList(elements);
 		}
@@ -237,9 +230,7 @@ public class CocCache extends HeavyCache {
 
 	private Observable getInvalidator(Generic generic) {
 
-		TransitiveInvalidator<Differential> t = TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
-		t.addListener((InvalidationListener) l -> System.out.println("getInvalidation in CocCache"));
-		return t;
+		return TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
 		// rebind to getDifferential().getInvalidator(generic) !!!
 		// return Bindings.createObjectBinding(() -> null, differentialProperty, getDifferential().getInvalidator(generic));
 	}
@@ -258,15 +249,11 @@ public class CocCache extends HeavyCache {
 			private List<Generic> promisedList = new ArrayList<Generic>();
 			{
 				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
-					System.out.println("Invalidation of observabledependencies, wait promise");
 					CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
 						promisedList = snapshot.toList();
-						System.out.println("Promised is arrived : invalidate observablelist ");
 						invalidate();
 					});
 				}));
-
-				invalidator.addListener((InvalidationListener) l -> System.out.println("Invalidation in CocCache"));
 			}
 
 			@Override

@@ -22,7 +22,6 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 
 	@Override
 	protected void sourceChanged(Change<? extends F> change) {
-		System.out.println("Change detected in transmormation");
 		while (change.next()) {
 			beginChange();
 

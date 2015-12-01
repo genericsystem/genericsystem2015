@@ -101,9 +101,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		private Predicate<T> predicate;
 
 		private ChangeListener<T> listener = (o, oldT, newT) -> {
-			System.out.println("test predicate before fireValueChangedEvent");
 			if (predicate.test(newT)) {
-				System.out.println("fireValueChangedEvent");
 				super.fireValueChangedEvent();
 			}
 		};
@@ -112,11 +110,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 			this.predicate = predicate;
 			addProperty.addListener(new WeakChangeListener<T>(listener));
 			removeProperty.addListener(new WeakChangeListener<T>(listener));
-		}
-
-		@Override
-		protected void finalize() throws Throwable {
-			System.out.println("finalize AAA");
 		}
 
 	}

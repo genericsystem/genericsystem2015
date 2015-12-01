@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -59,11 +58,6 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 			}
 
 			@Override
-			protected void onInvalidating() {
-				System.out.println("(AsyncDifferential - getDependenciesPromise) Invalidation");
-			}
-
-			@Override
 			protected CompletableFuture<Snapshot<Generic>> computeValue() {
 				return dependenciesPromise.getValue().<Snapshot<Generic>> thenApply(snapshot -> new Snapshot<Generic>() {
 
@@ -92,9 +86,7 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
-		Invalidator<Differential> i = Invalidator.createInvalidator(getSubDifferential().getInvalidator(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
-		i.addListener((InvalidationListener) l -> System.out.println("getInvalidation in AsyncDifferential"));
-		return i;
+		return Invalidator.createInvalidator(getSubDifferential().getInvalidator(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
 	}
 
 	@Override

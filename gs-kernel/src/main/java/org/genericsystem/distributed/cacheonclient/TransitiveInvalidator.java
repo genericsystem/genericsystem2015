@@ -20,12 +20,10 @@ class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 	}
 
 	private InvalidationListener slaveInvalidationListener = o -> {
-		System.out.println("transitive slave invalidation");
 		fireValueChangedEvent();
 	};
 
 	private InvalidationListener masterInvalidationListener = o -> {
-		System.out.println("transitive master invalidation");
 		observableSlave.removeListener(slaveInvalidationListener);
 		observableSlave = slaveObservableExtractor.get();
 		observableSlave.addListener(slaveInvalidationListener);
@@ -39,11 +37,6 @@ class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 		observableMaster.addListener(new WeakInvalidationListener(masterInvalidationListener));
 		observableSlave = slaveObservableExtractor.get();
 		observableSlave.addListener(new WeakInvalidationListener(slaveInvalidationListener));
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		System.out.println("finalize CCC");
 	}
 
 	@Override
