@@ -39,7 +39,7 @@ public class GenericList {
 	private ObservableValue<String> clearButtonTextProperty = new SimpleStringProperty("Clear");
 	private ObservableValue<String> mountButtonTextProperty = new SimpleStringProperty("Mount");
 	private ObservableValue<String> unmountButtonTextProperty = new SimpleStringProperty("Unmount");
-	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
+	private ObservableValue<Number> height = new SimpleDoubleProperty(700);
 
 	public GenericList() throws InterruptedException {
 
