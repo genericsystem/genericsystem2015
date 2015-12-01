@@ -10,19 +10,9 @@ import javafx.beans.value.ObservableValueBase;
 
 class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 
-	private Observable observableMaster;
-
 	private Observable observableSlave;
-	Supplier<Observable> slaveObservableExtractor;
-
-	public static <T> TransitiveInvalidator<T> create(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
-		return new TransitiveInvalidator<>(observableMaster, slaveObservableExtractor);
-	}
-
-	private InvalidationListener slaveInvalidationListener = o -> {
-		fireValueChangedEvent();
-	};
-
+	private Supplier<Observable> slaveObservableExtractor;
+	private InvalidationListener slaveInvalidationListener = o -> fireValueChangedEvent();
 	private InvalidationListener masterInvalidationListener = o -> {
 		observableSlave.removeListener(slaveInvalidationListener);
 		observableSlave = slaveObservableExtractor.get();
@@ -30,8 +20,11 @@ class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 		fireValueChangedEvent();
 	};
 
-	public TransitiveInvalidator(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
-		this.observableMaster = observableMaster;
+	public static <T> TransitiveInvalidator<T> create(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
+		return new TransitiveInvalidator<>(observableMaster, slaveObservableExtractor);
+	}
+
+	private TransitiveInvalidator(ObservableValue<T> observableMaster, Supplier<Observable> slaveObservableExtractor) {
 		this.slaveObservableExtractor = slaveObservableExtractor;
 
 		observableMaster.addListener(new WeakInvalidationListener(masterInvalidationListener));

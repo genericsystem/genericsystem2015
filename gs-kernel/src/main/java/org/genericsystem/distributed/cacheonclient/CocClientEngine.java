@@ -73,7 +73,6 @@ public class CocClientEngine extends AbstractRoot implements Generic {
 
 	@Override
 	protected void finalize() throws Throwable {
-		// System.out.println("FINALIZE CLIENT ENGINE !!!!!!!!");
 		server.close();
 		super.finalize();
 	}

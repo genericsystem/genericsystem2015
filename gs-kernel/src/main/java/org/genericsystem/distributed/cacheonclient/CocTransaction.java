@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -18,8 +17,6 @@ import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineHandler;
-import org.genericsystem.distributed.cacheonclient.observables.CompletableObservableSnapshot2;
-import org.genericsystem.distributed.cacheonclient.observables.ObservableSnapshot;
 
 public class CocTransaction extends CheckedContext implements AsyncITransaction {
 
@@ -38,18 +35,6 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 	public long getTs() {
 		return ts;
 	}
-
-	// @Override
-	// protected Checker<Generic> buildChecker() {
-	// return new Checker<Generic>(Transaction.this) {
-	// @Override
-	// public void checkAfterBuild(boolean isOnAdd, boolean isFlushTime, Generic
-	// vertex) throws RollbackException {
-	// checkSystemConstraintsAfterBuild(isOnAdd, isFlushTime, vertex);// Check
-	// only system constraints on transactions
-	// }
-	// };
-	// }
 
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
@@ -99,7 +84,6 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 
 	@Override
 	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-
 		CompletableFuture<Snapshot<Generic>> dependenciesPromise = dependenciesPromiseMap.get(generic);
 		if (dependenciesPromise == null) {
 			dependenciesPromise = getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()).thenApply(vertices -> new Container(Arrays.stream(vertices).map(vertex -> getRoot().getGenericByVertex(vertex))));
@@ -108,10 +92,10 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		return dependenciesPromise;
 	}
 
-	@Override
-	public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
-		return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
-	}
+	// @Override
+	// public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+	// return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
+	// }
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
@@ -120,10 +104,9 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 			try {
 				Thread.sleep(200);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Platform.runLater(() -> objectProperty.set(snapshot));
+			objectProperty.set(snapshot);
 		});
 		return objectProperty;
 	}
