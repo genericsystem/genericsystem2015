@@ -2,26 +2,37 @@ package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.Function;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-
 import org.genericsystem.todoApp.binding.Binding;
 
 public class Element {
 	public Class<? extends Node> classNode;
 	public Binding<?>[] bindings;
 	private List<Element> children = new ArrayList<>();
+	private Function<Object, ObservableList<Object>> getGraphicChildren;
 
-	public Element(Element parent, Class<? extends Node> classNode, Binding<?>... binding) {
+	public <V> Element(Element parent, Class<? extends Node> classNode, Binding<?>... binding) {
+		this(parent, classNode, Pane::getChildren, binding);
+	}
+
+	public <V extends Node> Element(Element parent, Class<? extends Node> classNode, Function<V, ObservableList<?>> getGraphicChildren, Binding<?>... binding) {
 		this.classNode = classNode;
 		this.bindings = binding;
+		this.getGraphicChildren = (Function) getGraphicChildren;
 		if (parent != null)
 			parent.getChildren().add(this);
 	}
 
+	public ObservableList<Object> getGraphicChildren(Object graphicParent) {
+		return getGraphicChildren.apply(graphicParent);
+	}
+
 	public ViewContext apply(Object model) {
-		return new ViewContext(new ModelContext(null, model), this, createNode(), null).init();
+		Pane node = (Pane) createNode();
+		return new ViewContext(new ModelContext(null, model), this, node, null).init();
 	}
 
 	private Node createNode() {
@@ -36,19 +47,4 @@ public class Element {
 		return children;
 	}
 
-	public Node createChildNode(Node parentNode) {
-		Node childNode = createNode(classNode);
-		if (parentNode instanceof Pane)
-			((Pane) parentNode).getChildren().add(childNode);
-		return childNode;
-
-	}
-
-	private Node createNode(Class<? extends Node> clazz) {
-		try {
-			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 }

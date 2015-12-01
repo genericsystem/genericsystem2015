@@ -4,14 +4,12 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import org.genericsystem.todoApp.ModelContext;
 
 public abstract class Binding<B> {
@@ -88,8 +86,7 @@ public abstract class Binding<B> {
 				while (modelContext != null) {
 					try {
 						return method.apply((U) modelContext.getModel(), v);
-					} catch (ClassCastException ignore) {
-					}
+					} catch (ClassCastException ignore) {}
 					modelContext = modelContext.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference");
@@ -113,8 +110,7 @@ public abstract class Binding<B> {
 					try {
 						method.apply((U) modelContext.getModel(), v);
 						return;
-					} catch (ClassCastException ignore) {
-					}
+					} catch (ClassCastException ignore) {}
 					modelContext = modelContext.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference");

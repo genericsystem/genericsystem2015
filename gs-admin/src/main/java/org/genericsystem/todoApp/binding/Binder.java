@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -13,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import org.genericsystem.todoApp.ModelContext;
 
 public interface Binder<T> {
@@ -54,9 +52,12 @@ public interface Binder<T> {
 
 			@Override
 			public void init(Function<V, ObservableList<T>> function, BindingContext context) {
+
 				ObservableList<T> val = function.apply((V) context.getModelContext().getModel());
 				context.getViewContext().disableInitChildren();
+
 				Function<T, ModelContext> createChildContext = t -> context.getModelContext().createChild(t, context.getViewContext());
+
 				List<ModelContext> children = context.getModelContext().getChildren();
 				children.addAll(val.stream().map(createChildContext).collect(Collectors.toList()));
 				val.addListener(new WeakListChangeListener<>(changeListener = change -> {

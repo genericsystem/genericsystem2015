@@ -13,7 +13,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.todoApp.binding.Binding;
 
 public class TodoList {
@@ -69,7 +68,7 @@ public class TodoList {
 		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoList::getName));
 		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, TodoList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, TodoList::create));
 
-		Element todoVBox = new Element(mainVBox, VBox.class, Binding.forEach(TodoList::getTodos));
+		Element todoVBox = new Element(mainVBox, VBox.class, VBox::getChildren, Binding.forEach(TodoList::getTodos));
 		Element todoHBox = new Element(todoVBox, HBox.class);
 		Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getObservable));
 		Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));

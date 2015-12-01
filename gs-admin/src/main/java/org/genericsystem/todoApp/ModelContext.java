@@ -32,7 +32,7 @@ public class ModelContext {
 		public ModelContext remove(int index) {
 			ModelContext removed = wrappedList.remove(index);
 			for (ViewContext viewContext : removed.viewContexts)
-				viewContext.getParent().destroyChild(viewContext);
+				viewContext.destroyChild();
 			return removed;
 		};
 	};
