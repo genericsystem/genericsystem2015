@@ -28,30 +28,20 @@ public class ViewContext {
 
 	public ModelContext createChild(Object childModel, ModelContext parentContext) {
 		ModelContext childContext = new ModelContext(parentContext, childModel);
-		new ViewContext(childContext, template, node, this).initChildren();
+		new ViewContext(childContext, template, createNode(template.classNode), getParent()).initChildren();
 		return childContext;
 	}
 
 	private void initChildren() {
 		for (Element childElement : template.getChildren()) {
 			Node childNode = createNode(childElement.classNode);
-			childElement.getGraphicChildren(node).add(childNode);
 			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
 			modelContext.register(childViewContext);
 			childViewContext.init();
 		}
-	}
+		if (getParent() != null)
+			template.getGraphicChildren(getParent().getNode()).add(node);
 
-	private void initChildren2() {
-		Node parentNode = createNode(getParent().template.classNode);
-		for (Element childElement : getParent().template.getChildren()) {
-			Node childNode = createNode(childElement.classNode);
-			childElement.getGraphicChildren(parentNode).add(childNode);
-			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
-			modelContext.register(childViewContext);
-			childViewContext.init();
-		}
-		getParent().getParent().template.getGraphicChildren(getParent().getParent().getNode()).add(parentNode);
 	}
 
 	public void destroyChild() {
