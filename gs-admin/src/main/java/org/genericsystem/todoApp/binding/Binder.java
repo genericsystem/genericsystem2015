@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -12,16 +13,18 @@ import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
 import org.genericsystem.todoApp.ModelContext;
+import org.genericsystem.todoApp.ViewContext;
 
 public interface Binder<T> {
-	public void init(T val, BindingContext context);
+	public void init(T val, ModelContext modelContext, ViewContext viewContext);
 
 	public static <R, V, T> Binder<Consumer<V>> actionBinder(Function<R, ObjectProperty<EventHandler<ActionEvent>>> prop) {
 		return new Binder<Consumer<V>>() {
 			@Override
-			public void init(Consumer<V> consumer, BindingContext context) {
-				prop.apply((R) context.getViewContext().getNode()).set(event -> consumer.accept((V) context.getModelContext().getModel()));
+			public void init(Consumer<V> consumer, ModelContext modelContext, ViewContext viewContext) {
+				prop.apply((R) viewContext.getNode()).set(event -> consumer.accept((V) modelContext.getModel()));
 			}
 		};
 	}
@@ -29,8 +32,8 @@ public interface Binder<T> {
 	public static <S, V, W> Binder<Function<V, ObservableValue<W>>> propertyBinder(Function<S, Property<W>> getProperty) {
 		return new Binder<Function<V, ObservableValue<W>>>() {
 			@Override
-			public void init(Function<V, ObservableValue<W>> function, BindingContext context) {
-				getProperty.apply((S) context.getViewContext().getNode()).bind(function.apply((V) context.getModelContext().getModel()));
+			public void init(Function<V, ObservableValue<W>> function, ModelContext modelContext, ViewContext viewContext) {
+				getProperty.apply((S) viewContext.getNode()).bind(function.apply((V) modelContext.getModel()));
 			}
 		};
 	}
@@ -38,8 +41,8 @@ public interface Binder<T> {
 	public static <S, V> Binder<Function<V, Property<String>>> inputTextBinder(Function<S, Property<String>> getTextProperty) {
 		return new Binder<Function<V, Property<String>>>() {
 			@Override
-			public void init(Function<V, Property<String>> function, BindingContext context) {
-				getTextProperty.apply((S) context.getViewContext().getNode()).bindBidirectional(function.apply((V) context.getModelContext().getModel()));
+			public void init(Function<V, Property<String>> function, ModelContext modelContext, ViewContext viewContext) {
+				getTextProperty.apply((S) viewContext.getNode()).bindBidirectional(function.apply((V) modelContext.getModel()));
 			}
 		};
 	}
@@ -51,14 +54,14 @@ public interface Binder<T> {
 			private ListChangeListener<T> changeListener;
 
 			@Override
-			public void init(Function<V, ObservableList<T>> function, BindingContext context) {
+			public void init(Function<V, ObservableList<T>> function, ModelContext modelContext, ViewContext viewContext) {
 
-				ObservableList<T> val = function.apply((V) context.getModelContext().getModel());
-				context.getViewContext().disableInitChildren();
+				ObservableList<T> val = function.apply((V) modelContext.getModel());
+				viewContext.disableInitChildren();
 
-				Function<T, ModelContext> createChildContext = t -> context.getModelContext().createChild(t, context.getViewContext());
+				Function<T, ModelContext> createChildContext = t -> viewContext.createChild(t, modelContext);
 
-				List<ModelContext> children = context.getModelContext().getChildren();
+				List<ModelContext> children = modelContext.getChildren();
 				children.addAll(val.stream().map(createChildContext).collect(Collectors.toList()));
 				val.addListener(new WeakListChangeListener<>(changeListener = change -> {
 					while (change.next()) {

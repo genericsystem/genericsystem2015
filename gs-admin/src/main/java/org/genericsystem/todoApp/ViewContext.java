@@ -1,8 +1,8 @@
 package org.genericsystem.todoApp;
 
 import javafx.scene.Node;
+
 import org.genericsystem.todoApp.binding.Binding;
-import org.genericsystem.todoApp.binding.BindingContext;
 
 public class ViewContext {
 	private final Element template;
@@ -19,38 +19,33 @@ public class ViewContext {
 	}
 
 	public ViewContext init() {
-		BindingContext bindingContext = new BindingContext(modelContext, this);
 		for (Binding<?> binding : template.bindings)
-			binding.init(bindingContext);
+			binding.init(modelContext, this);
 		if (initChildren)
 			initChildren();
 		return this;
 	}
 
-	// unction<Node,List<Node>> function;
-	// public List<Node> getChildrenNodes(Node parentNode) {
-	// if (parentNode instanceof Pane)
-	// return ((Pane) parentNode).getChildren();
-	// return Collections.emptyList();
-	// }
+	public ModelContext createChild(Object childModel, ModelContext parentContext) {
+		ModelContext childContext = new ModelContext(parentContext, childModel);
+		new ViewContext(childContext, template, createNode(template.classNode), getParent()).initChildren();
+		return childContext;
+	}
 
-	// public void removeChildNode(Node parentNode, Node node, Function<Node, List<Node>> function) {
-	// function.apply(parentNode).remove(node);
-	// }
+	private void initChildren() {
+		for (Element childElement : template.getChildren()) {
+			Node childNode = createNode(childElement.classNode);
+			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
+			modelContext.register(childViewContext);
+			childViewContext.init();
+		}
+		if (getParent() != null)
+			template.getGraphicChildren(getParent().getNode()).add(node);
 
-	// public static Node createChildNode(Node parentNode, Element childElement) {
-	// Node childNode = createNode(childElement.classNode);
-	// childElement.getGraphicChildren(parentNode).add(childNode);
-	// return childNode;
-	//
-	// }
+	}
 
 	public void destroyChild() {
 		template.getGraphicChildren(getParent().getNode()).remove(getNode());
-	}
-
-	public void bind(ModelContext modelContext) {
-		new ViewContext(modelContext, template, node, this).initChildren();
 	}
 
 	private static Node createNode(Class<? extends Node> clazz) {
@@ -58,16 +53,6 @@ public class ViewContext {
 			return clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
-		}
-	}
-
-	private void initChildren() {
-		for (Element childElement : template.getChildren()) {
-			Node childNode = createNode(childElement.classNode);
-			childElement.getGraphicChildren(node).add(childNode);
-			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
-			modelContext.register(childViewContext);
-			childViewContext.init();
 		}
 	}
 
