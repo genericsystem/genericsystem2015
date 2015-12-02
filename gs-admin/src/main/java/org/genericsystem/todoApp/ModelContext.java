@@ -42,12 +42,6 @@ public class ModelContext {
 		this.model = model;
 	}
 
-	public ModelContext createChild(Object child, ViewContext viewContext) {
-		ModelContext childContext = new ModelContext(this, child);
-		viewContext.bind(childContext);
-		return childContext;
-	}
-
 	public Object getModel() {
 		return this.model;
 	}

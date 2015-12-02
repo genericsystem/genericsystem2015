@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 import org.genericsystem.todoApp.ModelContext;
+import org.genericsystem.todoApp.ViewContext;
 
 public abstract class Binding<B> {
 
@@ -22,12 +23,12 @@ public abstract class Binding<B> {
 		this.binder = binder;
 	}
 
-	public void init(BindingContext context) {
-		B initParam = buildInitParam(context);
-		binder.init(initParam, context);
+	public void init(ModelContext modelContext, ViewContext viewContext) {
+		B initParam = buildInitParam(modelContext, viewContext);
+		binder.init(initParam, modelContext, viewContext);
 	}
 
-	protected abstract B buildInitParam(BindingContext context);
+	protected abstract B buildInitParam(ModelContext context, ViewContext viewContext);
 
 	public static <U, V, T> FunctionBinding<U, V, ObservableList<T>> forEach(Function<U, ObservableList<T>> function) {
 		return Binding.<U, V, ObservableList<T>> bind(function, Binder.foreachBinder());
@@ -80,15 +81,15 @@ public abstract class Binding<B> {
 		}
 
 		@Override
-		protected Function<V, T> buildInitParam(BindingContext context) {
+		protected Function<V, T> buildInitParam(ModelContext modelContext, ViewContext viewContext) {
 			return (v) -> {
-				ModelContext modelContext = context.getModelContext();
+				ModelContext modelContext_ = modelContext;
 				while (modelContext != null) {
 					try {
-						return method.apply((U) modelContext.getModel(), v);
+						return method.apply((U) modelContext_.getModel(), v);
 					} catch (ClassCastException ignore) {
 					}
-					modelContext = modelContext.getParent();
+					modelContext_ = modelContext.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference");
 			};
@@ -104,16 +105,16 @@ public abstract class Binding<B> {
 		}
 
 		@Override
-		protected Consumer<V> buildInitParam(BindingContext context) {
+		protected Consumer<V> buildInitParam(ModelContext modelContext, ViewContext viewContext) {
 			return (v) -> {
-				ModelContext modelContext = context.getModelContext();
+				ModelContext modelContext_ = modelContext;
 				while (modelContext != null) {
 					try {
-						method.apply((U) modelContext.getModel(), v);
+						method.apply((U) modelContext_.getModel(), v);
 						return;
 					} catch (ClassCastException ignore) {
 					}
-					modelContext = modelContext.getParent();
+					modelContext_ = modelContext.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference");
 			};
