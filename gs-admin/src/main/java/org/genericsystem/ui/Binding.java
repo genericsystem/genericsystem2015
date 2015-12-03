@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -43,7 +44,7 @@ public abstract class Binding<B> {
 	}
 
 	public static <R, U, V, T> ConsumerBinding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, BiConsumer<U, V> function, Class<V> clazz) {
-		return Binding.<U, V, T> bind(function, clazz, Binder.actionBinder(propAction));
+		return Binding.<U, V, T> bind(function, Binder.actionBinder(propAction));
 	}
 
 	private static <U, V, T> FunctionBinding<U, V, T> bind(Function<U, T> function, Binder<Function<V, T>> binder) {
@@ -61,7 +62,7 @@ public abstract class Binding<B> {
 		}, binder);
 	}
 
-	private static <U, V, T> ConsumerBinding<U, V, T> bind(BiConsumer<U, V> function, Class<V> clazz2, Binder<Consumer<V>> binder) {
+	private static <U, V, T> ConsumerBinding<U, V, T> bind(BiConsumer<U, V> function, Binder<Consumer<V>> binder) {
 		return new ConsumerBinding<U, V, T>((u, v) -> {
 			function.accept(u, v);
 			return null;
@@ -83,7 +84,8 @@ public abstract class Binding<B> {
 				while (modelContext_ != null) {
 					try {
 						return method.apply((U) modelContext_.getModel(), v);
-					} catch (ClassCastException ignore) {}
+					} catch (ClassCastException ignore) {
+					}
 					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -107,7 +109,8 @@ public abstract class Binding<B> {
 					try {
 						method.apply((U) modelContext_.getModel(), v);
 						return;
-					} catch (ClassCastException ignore) {}
+					} catch (ClassCastException ignore) {
+					}
 					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
