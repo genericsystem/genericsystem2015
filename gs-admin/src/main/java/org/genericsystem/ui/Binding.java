@@ -70,7 +70,7 @@ public abstract class Binding<B> {
 	}
 
 	public static <R, U, V, T> ConsumerBinding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, BiConsumer<U, V> function, Class<V> clazz) {
-		return Binding.<U, V, T> bind(function, clazz, Binder.actionBinder(propAction));
+		return Binding.<U, V, T> bind(function, Binder.actionBinder(propAction));
 	}
 
 	private static <U, V, T> FunctionBinding<U, V, T> bind(Function<U, T> function, Binder<Function<V, T>> binder) {
@@ -88,7 +88,7 @@ public abstract class Binding<B> {
 		}, binder);
 	}
 
-	private static <U, V, T> ConsumerBinding<U, V, T> bind(BiConsumer<U, V> function, Class<V> clazz2, Binder<Consumer<V>> binder) {
+	private static <U, V, T> ConsumerBinding<U, V, T> bind(BiConsumer<U, V> function, Binder<Consumer<V>> binder) {
 		return new ConsumerBinding<U, V, T>((u, v) -> {
 			function.accept(u, v);
 			return null;
