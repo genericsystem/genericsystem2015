@@ -1,12 +1,13 @@
 package org.genericsystem.ui;
 
+import java.util.AbstractList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -45,11 +46,12 @@ public interface Binder<T> {
 
 		return new Binder<Function<V, ObservableList<T>>>() {
 
-			private ObservableList<T> modifiableObservableListBase;
+			private List<T> list;
 
 			@Override
 			public void init(Function<V, ObservableList<T>> function, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				modifiableObservableListBase = new ModifiableObservableListBase<T>() {
+
+				list = new AbstractList<T>() {
 
 					@Override
 					public T get(int index) {
@@ -62,24 +64,24 @@ public interface Binder<T> {
 					}
 
 					@Override
-					protected void doAdd(int index, T element) {
+					public void add(int index, T element) {
 						modelContext.createSubContext(viewContext, index, element, childElement);
 					}
 
 					@Override
-					protected T doSet(int index, T element) {
-						T remove = doRemove(index);
-						doAdd(index, element);
+					public T set(int index, T element) {
+						T remove = remove(index);
+						add(index, element);
 						return remove;
 					}
 
 					@Override
-					protected T doRemove(int index) {
+					public T remove(int index) {
 						return (T) modelContext.removeSubContext(index).getModel();
 					}
 
 				};
-				Bindings.bindContent(modifiableObservableListBase, function.apply((V) modelContext.getModel()));
+				Bindings.bindContent(list, function.apply((V) modelContext.getModel()));
 			}
 		};
 	}

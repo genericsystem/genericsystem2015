@@ -23,6 +23,14 @@ public class ModelContext {
 		return removed;
 	};
 
+	ModelContext get(int index) {
+		return children.get(index);
+	}
+
+	int size() {
+		return children.size();
+	}
+
 	public ModelContext(ModelContext parent, Object model) {
 		this.parent = parent;
 		this.model = model;
@@ -42,14 +50,6 @@ public class ModelContext {
 
 	public void register(ViewContext viewContext) {
 		this.viewContexts.add(viewContext);
-	}
-
-	ModelContext get(int index) {
-		return children.get(index);
-	}
-
-	int size() {
-		return children.size();
 	}
 
 }
