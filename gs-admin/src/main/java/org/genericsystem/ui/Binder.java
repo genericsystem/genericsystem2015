@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -54,7 +53,7 @@ public interface Binder<T> {
 			public void init(Function<V, ObservableList<T>> function, ModelContext modelContext, ViewContext viewContext, Element childElement) {
 				assert childElement != null;
 				ObservableList<T> val = function.apply((V) modelContext.getModel());
-				Function<T, ModelContext> createChildContext = childModel -> viewContext.createChild(childElement.classNode.isAssignableFrom(childModel.getClass()) ? childModel : (T) childElement.createNode(), modelContext, childElement);
+				Function<T, ModelContext> createChildContext = childModel -> viewContext.createChild(childModel, modelContext, childElement);
 
 				List<ModelContext> children = modelContext.getChildren();
 				children.addAll(val.stream().map(createChildContext).collect(Collectors.toList()));
