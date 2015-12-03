@@ -4,7 +4,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -84,9 +83,8 @@ public abstract class Binding<B> {
 				while (modelContext_ != null) {
 					try {
 						return method.apply((U) modelContext_.getModel(), v);
-					} catch (ClassCastException ignore) {
-					}
-					modelContext_ = modelContext.getParent();
+					} catch (ClassCastException ignore) {}
+					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
 			};
@@ -105,15 +103,14 @@ public abstract class Binding<B> {
 		protected Consumer<V> buildInitParam(ModelContext modelContext, ViewContext viewContext) {
 			return (v) -> {
 				ModelContext modelContext_ = modelContext;
-				while (modelContext != null) {
+				while (modelContext_ != null) {
 					try {
 						method.apply((U) modelContext_.getModel(), v);
 						return;
-					} catch (ClassCastException ignore) {
-					}
-					modelContext_ = modelContext.getParent();
+					} catch (ClassCastException ignore) {}
+					modelContext_ = modelContext_.getParent();
 				}
-				throw new IllegalStateException("Unable to resolve a method reference");
+				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
 			};
 		}
 	}

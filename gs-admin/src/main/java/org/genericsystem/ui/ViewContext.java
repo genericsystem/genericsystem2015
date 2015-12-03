@@ -17,19 +17,14 @@ public class ViewContext {
 		for (Element childElement : template.getChildren()) {
 			for (Binding<?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, this, childElement);
-			if (childElement.metaBindings.isEmpty())
+			if (childElement.metaBindings.isEmpty()) {
 				new ViewContext(modelContext, childElement, childElement.createNode(), this);
+			}
 		}
 		if (getParent() != null) {
 			System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
 			template.getGraphicChildren(getParent().getNode()).add(node);
 		}
-	}
-
-	ModelContext createChild(Object childModel, ModelContext parentContext, Element childElement) {
-		ModelContext childContext = new ModelContext(parentContext, childModel);
-		new ViewContext(childContext, childElement, childModel, this);
-		return childContext;
 	}
 
 	void destroyChild() {
