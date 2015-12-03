@@ -4,6 +4,7 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -14,6 +15,25 @@ import javafx.event.EventHandler;
 
 public interface Binder<T> {
 	public void init(T val, ModelContext modelContext, ViewContext viewContext, Element childElement);
+
+	public static <T> Binder<Property<T>> setValueProperty(T value) {
+		return new Binder<Property<T>>() {
+			@Override
+			public void init(Property<T> property, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+				property.setValue(value);
+			}
+
+		};
+	}
+
+	public static <T> Binder<Consumer<T>> methodBinder() {
+		return new Binder<Consumer<T>>() {
+			@Override
+			public void init(Consumer<T> val, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+				val.accept((T) viewContext.getNode());
+			}
+		};
+	}
 
 	public static <R, V, T> Binder<Consumer<V>> actionBinder(Function<R, ObjectProperty<EventHandler<ActionEvent>>> prop) {
 		return new Binder<Consumer<V>>() {

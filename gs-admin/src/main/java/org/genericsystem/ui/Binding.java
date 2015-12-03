@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -25,6 +26,32 @@ public abstract class Binding<B> {
 	}
 
 	protected abstract B buildInitParam(ModelContext context, ViewContext viewContext);
+
+	public static <R, T> Binding<Property<T>> setValueProperty(Function<R, Property<T>> property, T value) {
+		return Binding.setValue(property, Binder.setValueProperty(value));
+	}
+
+	public static <R, T> Binding<Property<T>> setValue(Function<R, Property<T>> prop, Binder<Property<T>> binder) {
+		return new Binding<Property<T>>(binder) {
+			@Override
+			protected Property<T> buildInitParam(ModelContext context, ViewContext viewContext) {
+				return prop.apply((R) viewContext.getNode());
+			}
+		};
+	}
+
+	public static <T> Binding<Consumer<T>> executeMethod(Consumer<T> action) {
+		return Binding.<T> bindMethod(action, Binder.methodBinder());
+	}
+
+	private static <T> Binding<Consumer<T>> bindMethod(Consumer<T> action, Binder<Consumer<T>> binder) {
+		return new Binding<Consumer<T>>(binder) {
+			@Override
+			protected Consumer<T> buildInitParam(ModelContext context, ViewContext viewContext) {
+				return action;
+			}
+		};
+	}
 
 	public static <U, V, T> Binding<Function<V, ObservableList<T>>> forEach(Function<U, ObservableList<T>> function) {
 		return Binding.<U, V, ObservableList<T>> bind(function, Binder.foreachBinder());
@@ -83,7 +110,8 @@ public abstract class Binding<B> {
 				while (modelContext_ != null) {
 					try {
 						return method.apply((U) modelContext_.getModel(), v);
-					} catch (ClassCastException ignore) {}
+					} catch (ClassCastException ignore) {
+					}
 					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -107,7 +135,8 @@ public abstract class Binding<B> {
 					try {
 						method.apply((U) modelContext_.getModel(), v);
 						return;
-					} catch (ClassCastException ignore) {}
+					} catch (ClassCastException ignore) {
+					}
 					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());

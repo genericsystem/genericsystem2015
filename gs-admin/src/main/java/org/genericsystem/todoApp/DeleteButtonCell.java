@@ -6,15 +6,16 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.Alert.AlertType;
 
 public class DeleteButtonCell<T> extends TableCell<T, String> {
 	private final Button cellButton = new Button();
 
 	public DeleteButtonCell() {
+
 		cellButton.setMaxWidth(200);
 		cellButton.setAlignment(Pos.BASELINE_CENTER);
 	}
