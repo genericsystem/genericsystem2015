@@ -21,7 +21,8 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.todoApp.binding.Binding;
+import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Element;
 
 public class GenericList {
 
@@ -164,6 +165,6 @@ public class GenericList {
 		Element genericLabel = new Element(genericHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
 		Element genericRemoveButton = new Element(genericHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
 
-		return mainVBox.apply(this).getNode();
+		return (Node) mainVBox.apply(this).getNode();
 	}
 }
