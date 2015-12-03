@@ -102,6 +102,8 @@ public class TodoTableList {
 	}
 
 	public Node init() {
+		// pour le binding setValueProperty il ne marche que pour setCellValueFactory, et pas pour
+		// setCellFactory (?_?)
 
 		Callback<CellDataFeatures<Todo, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<String>(features.getValue().getObservable().getValue());
 		// Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = column -> new DeleteButtonCell<>();
