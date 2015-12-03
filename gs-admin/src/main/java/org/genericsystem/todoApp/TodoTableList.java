@@ -1,10 +1,7 @@
 package org.genericsystem.todoApp;
 
 import java.util.Arrays;
-<<<<<<< HEAD
 import java.util.function.Function;
-=======
->>>>>>> branch 'master' of https://github.com/genericsystem/genericsystem2015.git
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -22,10 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-<<<<<<< HEAD
 import javafx.util.Callback;
-=======
->>>>>>> branch 'master' of https://github.com/genericsystem/genericsystem2015.git
 
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Element;
@@ -120,7 +114,7 @@ public class TodoTableList {
 		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, TodoTableList::create));
 
 		Element todoTableView = new Element(mainVBox, TableView.class);
-		
+
 		Function<TableView<Todo>, ObservableList<?>> getItems = TableView::getItems;
 		Element todoTableItems = new Element(todoTableView, Todo.class, getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)), Binding.executeMethod(Todo::action));
 		Function<TableView, ObservableList<?>> getColumns = TableView::getColumns;
