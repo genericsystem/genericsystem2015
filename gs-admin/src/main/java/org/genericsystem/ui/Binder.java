@@ -1,15 +1,13 @@
 package org.genericsystem.ui;
 
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
-import javafx.collections.WeakListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -46,30 +44,42 @@ public interface Binder<T> {
 	public static <V, T> Binder<Function<V, ObservableList<T>>> foreachBinder() {
 
 		return new Binder<Function<V, ObservableList<T>>>() {
-			@SuppressWarnings("unused")
-			private ListChangeListener<T> changeListener;
+
+			private ObservableList<T> modifiableObservableListBase;
 
 			@Override
 			public void init(Function<V, ObservableList<T>> function, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				assert childElement != null;
-				ObservableList<T> val = function.apply((V) modelContext.getModel());
-				Function<T, ModelContext> createChildContext = childModel -> viewContext.createChild(childModel, modelContext, childElement);
+				modifiableObservableListBase = new ModifiableObservableListBase<T>() {
 
-				List<ModelContext> children = modelContext.getChildren();
-				children.addAll(val.stream().map(createChildContext).collect(Collectors.toList()));
-				val.addListener(new WeakListChangeListener<>(changeListener = change -> {
-					while (change.next()) {
-						if (change.wasPermutated()) {
-							children.subList(change.getFrom(), change.getTo()).clear();
-							children.addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()).stream().map(createChildContext).collect(Collectors.toList()));
-						} else {
-							if (change.wasRemoved())
-								children.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-							if (change.wasAdded())
-								children.addAll(change.getFrom(), change.getAddedSubList().stream().map(createChildContext).collect(Collectors.toList()));
-						}
+					@Override
+					public T get(int index) {
+						return (T) modelContext.get(index).getModel();
 					}
-				}));
+
+					@Override
+					public int size() {
+						return modelContext.size();
+					}
+
+					@Override
+					protected void doAdd(int index, T element) {
+						modelContext.createSubContext(viewContext, index, element, childElement);
+					}
+
+					@Override
+					protected T doSet(int index, T element) {
+						T remove = doRemove(index);
+						doAdd(index, element);
+						return remove;
+					}
+
+					@Override
+					protected T doRemove(int index) {
+						return (T) modelContext.removeSubContext(index).getModel();
+					}
+
+				};
+				Bindings.bindContent(modifiableObservableListBase, function.apply((V) modelContext.getModel()));
 			}
 		};
 	}

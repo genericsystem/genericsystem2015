@@ -1,6 +1,5 @@
 package org.genericsystem.ui;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,33 +7,20 @@ public class ModelContext {
 
 	private final ModelContext parent;
 	private final Object model;
+	private final List<ModelContext> children = new ArrayList<>();
 	private final List<ViewContext> viewContexts = new ArrayList<>();
-	private final List<ModelContext> children = new AbstractList<ModelContext>() {
 
-		private List<ModelContext> wrappedList = new ArrayList<>();
+	void createSubContext(ViewContext viewContext, int index, Object model, Element childElement) {
+		ModelContext childContext = new ModelContext(this, model);
+		new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
+		children.add(index, childContext);
+	}
 
-		@Override
-		public ModelContext get(int index) {
-			return wrappedList.get(index);
-		}
-
-		@Override
-		public int size() {
-			return wrappedList.size();
-		}
-
-		@Override
-		public void add(int index, ModelContext element) {
-			wrappedList.add(index, element);
-		};
-
-		@Override
-		public ModelContext remove(int index) {
-			ModelContext removed = wrappedList.remove(index);
-			for (ViewContext viewContext : removed.viewContexts)
-				viewContext.destroyChild();
-			return removed;
-		};
+	public ModelContext removeSubContext(int index) {
+		ModelContext removed = children.remove(index);
+		for (ViewContext viewContext : removed.viewContexts)
+			viewContext.destroyChild();
+		return removed;
 	};
 
 	public ModelContext(ModelContext parent, Object model) {
@@ -56,6 +42,14 @@ public class ModelContext {
 
 	public void register(ViewContext viewContext) {
 		this.viewContexts.add(viewContext);
+	}
+
+	ModelContext get(int index) {
+		return children.get(index);
+	}
+
+	int size() {
+		return children.size();
 	}
 
 }

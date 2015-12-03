@@ -27,12 +27,6 @@ public class ViewContext {
 		}
 	}
 
-	ModelContext createChild(Object childModel, ModelContext parentContext, Element childElement) {
-		ModelContext childContext = new ModelContext(parentContext, childModel);
-		new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(childModel.getClass()) ? childModel : childElement.createNode(), this);
-		return childContext;
-	}
-
 	void destroyChild() {
 		template.getGraphicChildren(getParent().getNode()).remove(getNode());
 	}
