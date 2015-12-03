@@ -1,4 +1,4 @@
-package org.genericsystem.todoApp;
+package org.genericsystem.ui;
 
 import java.util.AbstractList;
 import java.util.ArrayList;

@@ -21,7 +21,8 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.todoApp.binding.Binding;
+import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Element;
 
 public class GenericList {
 

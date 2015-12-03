@@ -1,5 +1,7 @@
 package org.genericsystem.todoApp;
 
+import java.util.Arrays;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -14,7 +16,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import org.genericsystem.todoApp.binding.Binding;
+import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Element;
 
 public class TodoList {
 
@@ -69,7 +72,7 @@ public class TodoList {
 		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoList::getName));
 		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, TodoList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, TodoList::create));
 
-		Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Binding.forEach(TodoList::getTodos));
+		Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
 		Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getObservable));
 		Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 
