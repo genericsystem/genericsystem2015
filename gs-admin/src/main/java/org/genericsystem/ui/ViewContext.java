@@ -12,10 +12,10 @@ public class ViewContext {
 		this.modelContext = modelContext;
 		this.parent = parent;
 		modelContext.register(this);
-		for (Binding<?> binding : template.bindings)
+		for (Binding<?, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
 		for (Element childElement : template.getChildren()) {
-			for (Binding<?> metaBinding : childElement.metaBindings)
+			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, this, childElement);
 			if (childElement.metaBindings.isEmpty()) {
 				new ViewContext(modelContext, childElement, childElement.createNode(), this);

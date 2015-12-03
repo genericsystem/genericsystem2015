@@ -10,20 +10,20 @@ import javafx.scene.layout.Pane;
 
 public class Element {
 	public final Class<?> classNode;
-	public final List<? extends Binding<?>> metaBindings;
-	public final Binding<?>[] bindings;
+	public final List<? extends Binding<?, ?, ?>> metaBindings;
+	public final Binding<?, ?, ?>[] bindings;
 	private final List<Element> children = new ArrayList<>();
 	private final Function<Object, ObservableList<Object>> getGraphicChildren;
 
-	public <V extends Pane> Element(Element parent, Class<?> classNode, Binding<?>... binding) {
+	public <V extends Pane> Element(Element parent, Class<?> classNode, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
-	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, Binding<?>... binding) {
+	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
-	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, List<? extends Binding<?>> metaBindings, Binding<?>... binding) {
+	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
 		this.bindings = binding;

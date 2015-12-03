@@ -2,8 +2,8 @@ package org.genericsystem.ui;
 
 import java.util.AbstractList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -15,11 +15,11 @@ import javafx.event.EventHandler;
 public interface Binder<T> {
 	public void init(T val, ModelContext modelContext, ViewContext viewContext, Element childElement);
 
-	public static <R, V, T> Binder<Consumer<V>> actionBinder(Function<R, ObjectProperty<EventHandler<ActionEvent>>> prop) {
-		return new Binder<Consumer<V>>() {
+	public static <R, V, T> Binder<Function<V, T>> actionBinder(Function<R, ObjectProperty<EventHandler<ActionEvent>>> prop) {
+		return new Binder<Function<V, T>>() {
 			@Override
-			public void init(Consumer<V> consumer, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				prop.apply((R) viewContext.getNode()).set(event -> consumer.accept((V) modelContext.getModel()));
+			public void init(Function<V, T> consumer, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+				prop.apply((R) viewContext.getNode()).set(event -> consumer.apply((V) modelContext.getModel()));
 			}
 		};
 	}
