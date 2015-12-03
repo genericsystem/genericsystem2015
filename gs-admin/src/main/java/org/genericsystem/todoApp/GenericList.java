@@ -164,6 +164,6 @@ public class GenericList {
 		Element genericLabel = new Element(genericHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
 		Element genericRemoveButton = new Element(genericHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
 
-		return mainVBox.apply(this).getNode();
+		return (Node) mainVBox.apply(this).getNode();
 	}
 }

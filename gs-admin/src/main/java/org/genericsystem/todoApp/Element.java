@@ -3,22 +3,23 @@ package org.genericsystem.todoApp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+
 import org.genericsystem.todoApp.binding.Binding;
 
 public class Element {
-	public Class<? extends Node> classNode;
+	public Class<?> classNode;
 	public Binding<?>[] bindings;
 	private List<Element> children = new ArrayList<>();
 	private Function<Object, ObservableList<Object>> getGraphicChildren;
 
-	public <V> Element(Element parent, Class<? extends Node> classNode, Binding<?>... binding) {
+	public <V extends Pane> Element(Element parent, Class<?> classNode, Binding<?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
-	public <V extends Node> Element(Element parent, Class<? extends Node> classNode, Function<V, ObservableList<?>> getGraphicChildren, Binding<?>... binding) {
+	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, Binding<?>... binding) {
 		this.classNode = classNode;
 		this.bindings = binding;
 		this.getGraphicChildren = (Function) getGraphicChildren;
@@ -35,7 +36,7 @@ public class Element {
 		return new ViewContext(new ModelContext(null, model), this, node, null).init();
 	}
 
-	private Node createNode() {
+	Object createNode() {
 		try {
 			return classNode.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {

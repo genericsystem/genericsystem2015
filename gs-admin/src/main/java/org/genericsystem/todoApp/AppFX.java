@@ -17,7 +17,7 @@ public class AppFX extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
 
-		((Group) scene.getRoot()).getChildren().add(new TodoList().init());
+		((Group) scene.getRoot()).getChildren().add(new TodoTableList().init());
 
 		stage.setScene(scene);
 		stage.show();

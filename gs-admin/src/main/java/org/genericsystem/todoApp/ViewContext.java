@@ -1,17 +1,15 @@
 package org.genericsystem.todoApp;
 
-import javafx.scene.Node;
-
 import org.genericsystem.todoApp.binding.Binding;
 
 public class ViewContext {
 	private final Element template;
-	private final Node node;
+	private final Object node;
 	private final ModelContext modelContext;
 	private final ViewContext parent;
 	private boolean initChildren = true;
 
-	public ViewContext(ModelContext modelContext, Element template, Node node, ViewContext parent) {
+	public ViewContext(ModelContext modelContext, Element template, Object node, ViewContext parent) {
 		this.template = template;
 		this.node = node;
 		this.modelContext = modelContext;
@@ -28,19 +26,22 @@ public class ViewContext {
 
 	public ModelContext createChild(Object childModel, ModelContext parentContext) {
 		ModelContext childContext = new ModelContext(parentContext, childModel);
-		new ViewContext(childContext, template, createNode(template.classNode), getParent()).initChildren();
+		Object childNode = template.classNode.isAssignableFrom(childModel.getClass()) ? childModel : template.createNode();
+		new ViewContext(childContext, template, childNode, getParent()).initChildren();
 		return childContext;
 	}
 
 	private void initChildren() {
 		for (Element childElement : template.getChildren()) {
-			Node childNode = createNode(childElement.classNode);
+			Object childNode = childElement.createNode();
 			ViewContext childViewContext = new ViewContext(modelContext, childElement, childNode, this);
 			modelContext.register(childViewContext);
 			childViewContext.init();
 		}
-		if (getParent() != null)
+		if (getParent() != null) {
+			System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
 			template.getGraphicChildren(getParent().getNode()).add(node);
+		}
 
 	}
 
@@ -48,7 +49,7 @@ public class ViewContext {
 		template.getGraphicChildren(getParent().getNode()).remove(getNode());
 	}
 
-	private static Node createNode(Class<? extends Node> clazz) {
+	private static Object createNode(Class<?> clazz) {
 		try {
 			return clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -64,7 +65,7 @@ public class ViewContext {
 		return template;
 	}
 
-	public Node getNode() {
+	public Object getNode() {
 		return node;
 	}
 
