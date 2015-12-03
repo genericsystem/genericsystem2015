@@ -12,50 +12,50 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-public interface Binder<T> {
-	public void init(T val, ModelContext modelContext, ViewContext viewContext, Element childElement);
+public interface Binder<MODEL, T> {
+	public void init(Function<MODEL, T> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement);
 
-	public static <R, V, T> Binder<Function<V, T>> actionBinder(Function<R, ObjectProperty<EventHandler<ActionEvent>>> prop) {
-		return new Binder<Function<V, T>>() {
+	public static <NODE, MODEL, T> Binder<MODEL, T> actionBinder(Function<NODE, ObjectProperty<EventHandler<ActionEvent>>> applyOnNode) {
+		return new Binder<MODEL, T>() {
 			@Override
-			public void init(Function<V, T> consumer, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				prop.apply((R) viewContext.getNode()).set(event -> consumer.apply((V) modelContext.getModel()));
+			public void init(Function<MODEL, T> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+				applyOnNode.apply((NODE) viewContext.getNode()).set(event -> applyOnModel.apply((MODEL) modelContext.getModel()));
 			}
 		};
 	}
 
-	public static <S, V, W> Binder<Function<V, ObservableValue<W>>> propertyBinder(Function<S, Property<W>> getProperty) {
-		return new Binder<Function<V, ObservableValue<W>>>() {
+	public static <NODE, MODEL, W> Binder<MODEL, ObservableValue<W>> propertyBinder(Function<NODE, Property<W>> applyOnNode) {
+		return new Binder<MODEL, ObservableValue<W>>() {
 			@Override
-			public void init(Function<V, ObservableValue<W>> function, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				getProperty.apply((S) viewContext.getNode()).bind(function.apply((V) modelContext.getModel()));
+			public void init(Function<MODEL, ObservableValue<W>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+				applyOnNode.apply((NODE) viewContext.getNode()).bind(applyOnModel.apply((MODEL) modelContext.getModel()));
 			}
 		};
 	}
 
-	public static <S, V> Binder<Function<V, Property<String>>> inputTextBinder(Function<S, Property<String>> getTextProperty) {
-		return new Binder<Function<V, Property<String>>>() {
+	public static <NODE, MODEL> Binder<MODEL, Property<String>> inputTextBinder(Function<NODE, Property<String>> applyOnNode) {
+		return new Binder<MODEL, Property<String>>() {
 			@Override
-			public void init(Function<V, Property<String>> function, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				getTextProperty.apply((S) viewContext.getNode()).bindBidirectional(function.apply((V) modelContext.getModel()));
+			public void init(Function<MODEL, Property<String>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+				applyOnNode.apply((NODE) viewContext.getNode()).bindBidirectional(applyOnModel.apply((MODEL) modelContext.getModel()));
 			}
 		};
 	}
 
-	public static <V, T> Binder<Function<V, ObservableList<T>>> foreachBinder() {
+	public static <MODEL, SUBMODEL> Binder<MODEL, ObservableList<SUBMODEL>> foreachBinder() {
 
-		return new Binder<Function<V, ObservableList<T>>>() {
+		return new Binder<MODEL, ObservableList<SUBMODEL>>() {
 
-			private List<T> list;
+			private List<SUBMODEL> list;
 
 			@Override
-			public void init(Function<V, ObservableList<T>> function, ModelContext modelContext, ViewContext viewContext, Element childElement) {
+			public void init(Function<MODEL, ObservableList<SUBMODEL>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
 
-				list = new AbstractList<T>() {
+				list = new AbstractList<SUBMODEL>() {
 
 					@Override
-					public T get(int index) {
-						return (T) modelContext.get(index).getModel();
+					public SUBMODEL get(int index) {
+						return (SUBMODEL) modelContext.get(index).getModel();
 					}
 
 					@Override
@@ -64,24 +64,24 @@ public interface Binder<T> {
 					}
 
 					@Override
-					public void add(int index, T element) {
+					public void add(int index, SUBMODEL element) {
 						modelContext.createSubContext(viewContext, index, element, childElement);
 					}
 
 					@Override
-					public T set(int index, T element) {
-						T remove = remove(index);
+					public SUBMODEL set(int index, SUBMODEL element) {
+						SUBMODEL remove = remove(index);
 						add(index, element);
 						return remove;
 					}
 
 					@Override
-					public T remove(int index) {
-						return (T) modelContext.removeSubContext(index).getModel();
+					public SUBMODEL remove(int index) {
+						return (SUBMODEL) modelContext.removeSubContext(index).getModel();
 					}
 
 				};
-				Bindings.bindContent(list, function.apply((V) modelContext.getModel()));
+				Bindings.bindContent(list, applyOnModel.apply((MODEL) modelContext.getModel()));
 			}
 		};
 	}

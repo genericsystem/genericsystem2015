@@ -41,7 +41,7 @@ public class Element {
 		return new ViewContext(new ModelContext(null, model), this, node, null);
 	}
 
-	public Object createNode() {
+	Object createNode() {
 		try {
 			return classNode.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {

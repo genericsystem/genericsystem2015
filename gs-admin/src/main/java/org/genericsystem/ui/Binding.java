@@ -12,84 +12,74 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-public abstract class Binding<U, V, T> {
+public class Binding<MODEL, SUBMODEL, T> {
 
-	private final Binder<Function<V, T>> binder;
+	private final BiFunction<MODEL, SUBMODEL, T> method;
+	private final Binder<SUBMODEL, T> binder;
 
-	public Binding(Binder<Function<V, T>> binder) {
+	public Binding(BiFunction<MODEL, SUBMODEL, T> method, Binder<SUBMODEL, T> binder) {
 		this.binder = binder;
+		this.method = method;
 	}
 
 	public void init(ModelContext modelContext, ViewContext viewContext, Element childElement) {
-		Function<V, T> initParam = buildInitParam(modelContext, viewContext);
+		Function<SUBMODEL, T> initParam = buildInitParam(modelContext);
 		binder.init(initParam, modelContext, viewContext, childElement);
 	}
 
-	protected abstract Function<V, T> buildInitParam(ModelContext context, ViewContext viewContext);
-
-	public static <U, V, T> Binding<U, V, ObservableList<T>> forEach(Function<U, ObservableList<T>> function) {
-		return Binding.<U, V, ObservableList<T>> bind(function, Binder.foreachBinder());
+	protected Function<SUBMODEL, T> buildInitParam(ModelContext modelContext) {
+		return (SUBMODEL) -> {
+			ModelContext modelContext_ = modelContext;
+			while (modelContext_ != null) {
+				try {
+					return method.apply((MODEL) modelContext_.getModel(), SUBMODEL);
+				} catch (ClassCastException ignore) {
+				}
+				modelContext_ = modelContext_.getParent();
+			}
+			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
+		};
 	}
 
-	public static <R, U, V, W> Binding<U, V, ObservableValue<W>> bindProperty(Function<R, Property<W>> getTextProperty, Function<U, ObservableValue<W>> function) {
-		return Binding.<U, V, ObservableValue<W>> bind(function, Binder.propertyBinder(getTextProperty));
+	private static <MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, T> bind(Function<MODEL, T> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<MODEL, SUBMODEL, T>((u, v) -> function.apply(u), binder);
 	}
 
-	public static <R, U, V> Binding<U, V, Property<String>> bindInputText(Function<R, Property<String>> getTextProperty, Function<U, Property<String>> function) {
-		return Binding.<U, V, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
+	private static <MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, T> bind(BiFunction<MODEL, SUBMODEL, T> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<MODEL, SUBMODEL, T>((u, v) -> function.apply(u, v), binder);
 	}
 
-	public static <R, U, V, T> Binding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, Consumer<U> function) {
-		return Binding.<U, V, T> bind(function, Binder.actionBinder(propAction));
-	}
-
-	public static <R, U, V, T> Binding<U, V, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, BiConsumer<U, V> function, Class<V> clazz) {
-		return Binding.<U, V, T> bind(function, Binder.actionBinder(propAction));
-	}
-
-	private static <U, V, T> Binding<U, V, T> bind(Function<U, T> function, Binder<Function<V, T>> binder) {
-		return new FunctionBinding<U, V, T>((u, v) -> function.apply(u), binder);
-	}
-
-	private static <U, V, T> Binding<U, V, T> bind(BiFunction<U, V, T> function, Binder<Function<V, T>> binder) {
-		return new FunctionBinding<U, V, T>((u, v) -> function.apply(u, v), binder);
-	}
-
-	private static <U, V, T> FunctionBinding<U, V, T> bind(Consumer<U> function, Binder<Function<V, T>> binder) {
-		return new FunctionBinding<U, V, T>((u, v) -> {
+	private static <MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, T> bind(Consumer<MODEL> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<MODEL, SUBMODEL, T>((u, v) -> {
 			function.accept(u);
 			return null;
 		}, binder);
 	}
 
-	private static <U, V, T> FunctionBinding<U, V, T> bind(BiConsumer<U, V> function, Binder<Function<V, T>> binder) {
-		return new FunctionBinding<U, V, T>((u, v) -> {
+	private static <MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, T> bind(BiConsumer<MODEL, SUBMODEL> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<MODEL, SUBMODEL, T>((u, v) -> {
 			function.accept(u, v);
 			return null;
 		}, binder);
 	}
 
-	private static class FunctionBinding<U, V, T> extends Binding<U, V, T> {
-		private final BiFunction<U, V, T> method;
+	public static <MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, ObservableList<T>> forEach(Function<MODEL, ObservableList<T>> function) {
+		return Binding.<MODEL, SUBMODEL, ObservableList<T>> bind(function, Binder.foreachBinder());
+	}
 
-		public FunctionBinding(BiFunction<U, V, T> method, Binder<Function<V, T>> binder) {
-			super(binder);
-			this.method = method;
-		}
+	public static <R, MODEL, V, W> Binding<MODEL, V, ObservableValue<W>> bindProperty(Function<R, Property<W>> getTextProperty, Function<MODEL, ObservableValue<W>> function) {
+		return Binding.<MODEL, V, ObservableValue<W>> bind(function, Binder.propertyBinder(getTextProperty));
+	}
 
-		@Override
-		protected Function<V, T> buildInitParam(ModelContext modelContext, ViewContext viewContext) {
-			return (v) -> {
-				ModelContext modelContext_ = modelContext;
-				while (modelContext_ != null) {
-					try {
-						return method.apply((U) modelContext_.getModel(), v);
-					} catch (ClassCastException ignore) {
-					}
-					modelContext_ = modelContext_.getParent();
-				}
-				throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
-			};
-		}
+	public static <R, MODEL, SUBMODEL> Binding<MODEL, SUBMODEL, Property<String>> bindInputText(Function<R, Property<String>> getTextProperty, Function<MODEL, Property<String>> function) {
+		return Binding.<MODEL, SUBMODEL, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
+	}
+
+	public static <R, MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, Consumer<MODEL> function) {
+		return Binding.<MODEL, SUBMODEL, T> bind(function, Binder.actionBinder(propAction));
+	}
+
+	public static <R, MODEL, SUBMODEL, T> Binding<MODEL, SUBMODEL, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, BiConsumer<MODEL, SUBMODEL> function, Class<SUBMODEL> clazz) {
+		return Binding.<MODEL, SUBMODEL, T> bind(function, Binder.actionBinder(propAction));
 	}
 }
