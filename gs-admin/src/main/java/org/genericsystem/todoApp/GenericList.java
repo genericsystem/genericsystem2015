@@ -2,7 +2,6 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.Objects;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -19,14 +18,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Binding;
-import org.genericsystem.ui.Boot;
+import org.genericsystem.ui.Boot.BootProperty;
 import org.genericsystem.ui.Element;
 
 public class GenericList {
@@ -194,20 +192,20 @@ public class GenericList {
 
 	public Node initTable() {
 
-		Element mainVBox = new Element(null, VBox.class);
+		Element<VBox> mainVBox = new Element<>(null, VBox.class);
 		mainVBox.addBinding(Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
-		Element todoCreateHBox = new Element(mainVBox, HBox.class);
+		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 
-		Element textField = new Element(todoCreateHBox, TextField.class);
+		Element<TextField> textField = new Element<>(todoCreateHBox, TextField.class);
 		textField.addBinding(Binding.bindInputText(TextField::textProperty, GenericList::getName));
 
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class);
-		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create generic"));
+		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
+		todosCreateButton.addBoots(BootProperty.setProperty(Button::textProperty, "Create generic"));
 		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, GenericList::create));
 
-		Element todoTableView = new Element(mainVBox, TableView.class);
-		Element todoTableItems = new Element(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
-		Element columnsTableItems = new Element(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
+		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
+		Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
+		Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
 
 		return (Node) mainVBox.apply(this).getNode();
 	}

@@ -12,7 +12,6 @@ public class ModelContext {
 
 	void createSubContext(ViewContext viewContext, int index, Object model, Element childElement) {
 		ModelContext childContext = new ModelContext(this, model);
-		System.out.println(childElement + "________" + model);
 		new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
 		children.add(index, childContext);
 	}
