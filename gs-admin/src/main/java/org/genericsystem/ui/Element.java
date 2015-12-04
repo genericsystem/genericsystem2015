@@ -60,9 +60,9 @@ public class Element<NODE> {
 		return new ViewContext(new ModelContext(null, model), this, createNode(), null);
 	}
 
-	Object createNode() {
+	NODE createNode() {
 		try {
-			Object node = classNode.newInstance();
+			NODE node = classNode.newInstance();
 			boots.forEach(boot -> boot.init(node));
 			return node;
 		} catch (InstantiationException | IllegalAccessException e) {
