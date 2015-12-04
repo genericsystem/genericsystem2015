@@ -23,15 +23,6 @@ public interface Binder<MODEL, T> {
 		};
 	}
 
-	public static <NODE, MODEL, W> Binder<MODEL, W> setter(Function<NODE, Property<W>> applyOnNode, W value) {
-		return new Binder<MODEL, W>() {
-			@Override
-			public void init(Function<MODEL, W> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply((NODE) viewContext.getNode()).setValue(value);
-			}
-		};
-	}
-
 	public static <NODE, MODEL, W> Binder<MODEL, ObservableValue<W>> propertySetter(Function<NODE, Property<W>> applyOnNode) {
 		return new Binder<MODEL, ObservableValue<W>>() {
 			@Override

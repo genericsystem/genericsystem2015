@@ -2,7 +2,6 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -16,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
@@ -82,7 +80,7 @@ public class TodoList {
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 
-		return mainVBox.apply(this).getNode();
+		return mainVBox.apply(this);
 
 		// Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, TodoList::getHeight));
 		// Element todoCreateHBox = new Element(mainVBox, HBox.class);

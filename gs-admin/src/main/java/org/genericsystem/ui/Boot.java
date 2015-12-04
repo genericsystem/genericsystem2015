@@ -24,7 +24,7 @@ public class Boot {
 		});
 	}
 
-	public static <T> Boot executeMethod(Consumer<T> method) {
+	public static <T> Boot apply(Consumer<T> method) {
 		return new Boot(object -> {
 			method.accept((T) object);
 			return null;

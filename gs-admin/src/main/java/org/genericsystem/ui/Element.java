@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
@@ -58,8 +57,10 @@ public class Element<NODE> {
 		return ((Function<PARENTNODE, ObservableList<NODE>>) (Function) getGraphicChildren).apply(graphicParent);
 	}
 
-	public ViewContext<NODE> apply(Object model) {
-		return new ViewContext<>(new ModelContext(null, model), this, createNode(), null);
+	public NODE apply(Object model) {
+		NODE node = createNode();
+		new ViewContext<>(new ModelContext(null, model), this, node, null);
+		return node;
 	}
 
 	NODE createNode() {
