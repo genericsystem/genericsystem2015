@@ -2,31 +2,30 @@ package org.genericsystem.ui;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 
-public class Boot {
+public class Boot<NODE> {
 
-	protected Function<Object, Property<Object>> method;
+	private final Function<NODE, Property<?>> method;
 
-	public void init(Object node) {
-		method.apply(node);
-	}
-
-	private Boot(Function<Object, Property<Object>> method) {
+	private Boot(Function<NODE, Property<?>> method) {
 		this.method = method;
 	}
 
-	public static <T, S> Boot setProperty(Function<T, Property<S>> getProperty, S value) {
-		return new Boot(node -> {
-			getProperty.apply((T) node).setValue(value);
+	public void init(NODE node) {
+		method.apply(node);
+	}
+
+	public static <NODE, VALUE> Boot<NODE> setProperty(Function<NODE, Property<VALUE>> getProperty, VALUE value) {
+		return new Boot<>(node -> {
+			getProperty.apply(node).setValue(value);
 			return null;
 		});
 	}
 
-	public static <T> Boot apply(Consumer<T> method) {
-		return new Boot(object -> {
-			method.accept((T) object);
+	public static <NODE> Boot<NODE> apply(Consumer<NODE> method) {
+		return new Boot<>(object -> {
+			method.accept(object);
 			return null;
 		});
 	}
