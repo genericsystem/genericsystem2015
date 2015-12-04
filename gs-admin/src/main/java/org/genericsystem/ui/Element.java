@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
@@ -62,9 +63,7 @@ public class Element<NODE> {
 
 	NODE createNode() {
 		try {
-			NODE node = classNode.newInstance();
-			boots.forEach(boot -> boot.init(node));
-			return node;
+			return classNode.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}

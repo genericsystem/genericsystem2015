@@ -14,13 +14,14 @@ public class ViewContext<NODE> {
 		this.modelContext = modelContext;
 		this.parent = parent;
 		modelContext.register(this);
+		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<?, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
 		for (Element<CHILDNODE> childElement : template.<CHILDNODE> getChildren()) {
 			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, this, childElement);
 			if (childElement.metaBindings.isEmpty()) {
-				new ViewContext<CHILDNODE>(modelContext, childElement, (CHILDNODE) childElement.createNode(), this);
+				new ViewContext<CHILDNODE>(modelContext, childElement, childElement.createNode(), this);
 			}
 		}
 		if (getParent() != null) {
