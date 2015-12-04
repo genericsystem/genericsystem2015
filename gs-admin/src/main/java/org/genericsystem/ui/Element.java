@@ -5,30 +5,29 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
-public class Element {
-	public final Class<?> classNode;
+public class Element<NODE> {
+	public final Class<NODE> classNode;
 	public List<? extends Binding<?, ?, ?>> metaBindings = new ArrayList<>();
 	public List<Binding<?, ?, ?>> bindings = new ArrayList<>();
-	private final List<Element> children = new ArrayList<>();
-	private final Function<Object, ObservableList<Object>> getGraphicChildren;
+	private final List<Element<?>> children = new ArrayList<>();
+	private final Function<?, ObservableList<?>> getGraphicChildren;
 
-	public <V extends Pane> Element(Element parent, Class<?> classNode, Binding<?, ?, ?>... binding) {
+	public Element(Element<?> parent, Class<NODE> classNode, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
-	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
+	public <W> Element(Element<?> parent, Class<NODE> classNode, Function<W, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
-	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
+	public <W> Element(Element<?> parent, Class<NODE> classNode, Function<W, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
 		this.bindings.addAll(Arrays.asList(binding));
-		this.getGraphicChildren = (Function) getGraphicChildren;
+		this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
 			parent.getChildren().add(this);
 	}
@@ -41,8 +40,8 @@ public class Element {
 		bindings.addAll(Arrays.asList(binding));
 	}
 
-	public ObservableList<Object> getGraphicChildren(Object graphicParent) {
-		return getGraphicChildren.apply(graphicParent);
+	public ObservableList<?> getGraphicChildren(NODE graphicParent) {
+		return ((Function<NODE, ObservableList<?>>) getGraphicChildren).apply(graphicParent);
 	}
 
 	public ViewContext apply(Object model) {
@@ -57,7 +56,7 @@ public class Element {
 		}
 	}
 
-	public List<Element> getChildren() {
+	public List<Element<?>> getChildren() {
 		return children;
 	}
 

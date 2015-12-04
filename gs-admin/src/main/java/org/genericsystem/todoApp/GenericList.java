@@ -3,7 +3,6 @@ package org.genericsystem.todoApp;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -21,7 +20,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -182,14 +180,14 @@ public class GenericList {
 	}
 
 	public Node init() {
-		Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
-		Element todoCreateHBox = new Element(mainVBox, HBox.class);
-		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
+		Element mainVBox = new Element<>(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
+		Element todoCreateHBox = new Element<HBox>(mainVBox, HBox.class);
+		Element todosCreatLabel = new Element<>(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
+		Element todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
 
-		Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
-		Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
-		Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
+		Element todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
+		Element todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
+		Element todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
 
 		return (Node) mainVBox.apply(this).getNode();
 	}

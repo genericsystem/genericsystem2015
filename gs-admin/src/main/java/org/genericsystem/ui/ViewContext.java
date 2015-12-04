@@ -1,12 +1,12 @@
 package org.genericsystem.ui;
 
-public class ViewContext {
-	private final Element template;
+public class ViewContext<NODE> {
+	private final Element<NODE> template;
 	private final Object node;
 	private final ModelContext modelContext;
-	private final ViewContext parent;
+	private final ViewContext<?> parent;
 
-	public ViewContext(ModelContext modelContext, Element template, Object node, ViewContext parent) {
+	public ViewContext(ModelContext modelContext, Element<NODE> template, Object node, ViewContext<?> parent) {
 		this.template = template;
 		this.node = node;
 		this.modelContext = modelContext;
@@ -14,11 +14,11 @@ public class ViewContext {
 		modelContext.register(this);
 		for (Binding<?, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
-		for (Element childElement : template.getChildren()) {
+		for (Element<?> childElement : template.getChildren()) {
 			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, this, childElement);
 			if (childElement.metaBindings.isEmpty()) {
-				new ViewContext(modelContext, childElement, childElement.createNode(), this);
+				new ViewContext<>(modelContext, childElement, childElement.createNode(), this);
 			}
 		}
 		if (getParent() != null) {
@@ -31,12 +31,12 @@ public class ViewContext {
 		template.getGraphicChildren(getParent().getNode()).remove(getNode());
 	}
 
-	public Element getTemplate() {
+	public Element<NODE> getTemplate() {
 		return template;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <NODE> NODE getNode() {
+	public NODE getNode() {
 		return (NODE) node;
 	}
 
@@ -44,7 +44,7 @@ public class ViewContext {
 		return modelContext;
 	}
 
-	public ViewContext getParent() {
+	public ViewContext<?> getParent() {
 		return parent;
 	}
 }
