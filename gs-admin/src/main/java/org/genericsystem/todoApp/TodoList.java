@@ -78,7 +78,7 @@ public class TodoList {
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
 		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create Todo"));
 
-		Element<HBox> todoHBox = new Element<HBox>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
+		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 

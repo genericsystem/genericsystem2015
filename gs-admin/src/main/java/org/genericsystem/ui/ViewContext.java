@@ -18,9 +18,8 @@ public class ViewContext<NODE> {
 		for (Element<CHILDNODE> childElement : template.<CHILDNODE> getChildren()) {
 			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, this, childElement);
-			if (childElement.metaBindings.isEmpty()) {
+			if (childElement.metaBindings.isEmpty())
 				new ViewContext<>(modelContext, childElement, childElement.createNode(), this);
-			}
 		}
 		if (getParent() != null) {
 			// System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
