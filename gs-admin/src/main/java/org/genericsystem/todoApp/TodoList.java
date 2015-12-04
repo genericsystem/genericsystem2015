@@ -69,11 +69,11 @@ public class TodoList {
 
 		Consumer<VBox> c = VBox::autosize;
 
-		Element mainVBox = new Element(null, VBox.class);// , Binding.bindProperty(VBox::prefHeightProperty, TodoList::getHeight));
+		Element<VBox> mainVBox = new Element<>(null, VBox.class);// , Binding.bindProperty(VBox::prefHeightProperty, TodoList::getHeight));
 		mainVBox.addBoots(BootProperty.setProperty(VBox::prefHeightProperty, 600));
-		Element todoCreateHBox = new Element(mainVBox, HBox.class);
-		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoList::getName));
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
+		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
+		Element<TextField> todosCreatLabel = new Element<>(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoList::getName));
+		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
 		todosCreateButton.addBoots(BootProperty.setProperty(Button::textProperty, "Create Todo"));
 
 		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
@@ -94,5 +94,4 @@ public class TodoList {
 		//
 		// return (Node) mainVBox.apply(this).getNode();
 	}
-
 }

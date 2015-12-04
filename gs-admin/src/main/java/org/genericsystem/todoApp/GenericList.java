@@ -192,18 +192,18 @@ public class GenericList {
 
 	public Node initTable() {
 
-		Element mainVBox = new Element(null, VBox.class);
+		Element<VBox> mainVBox = new Element<>(null, VBox.class);
 		mainVBox.addBinding(Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
-		Element todoCreateHBox = new Element(mainVBox, HBox.class);
+		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 
-		Element textField = new Element(todoCreateHBox, TextField.class);
+		Element<TextField> textField = new Element<>(todoCreateHBox, TextField.class);
 		textField.addBinding(Binding.bindInputText(TextField::textProperty, GenericList::getName));
 
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class);
+		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
 		todosCreateButton.addBoots(BootProperty.setProperty(Button::textProperty, "Create generic"));
 		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, GenericList::create));
 
-		Element todoTableView = new Element(mainVBox, TableView.class);
+		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
 		Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
 		Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
 
