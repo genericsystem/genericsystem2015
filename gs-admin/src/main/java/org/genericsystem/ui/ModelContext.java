@@ -16,7 +16,7 @@ public class ModelContext {
 		children.add(index, childContext);
 	}
 
-	public ModelContext removeSubContext(int index) {
+	ModelContext removeSubContext(int index) {
 		ModelContext removed = children.remove(index);
 		for (ViewContext viewContext : removed.viewContexts)
 			viewContext.destroyChild();
@@ -36,8 +36,9 @@ public class ModelContext {
 		this.model = model;
 	}
 
-	public Object getModel() {
-		return this.model;
+	@SuppressWarnings("unchecked")
+	public <MODEL> MODEL getModel() {
+		return (MODEL) model;
 	}
 
 	public ModelContext getParent() {

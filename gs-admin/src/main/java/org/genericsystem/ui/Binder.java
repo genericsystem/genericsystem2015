@@ -19,7 +19,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, T>() {
 			@Override
 			public void init(Function<MODEL, T> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply((NODE) viewContext.getNode()).set(event -> applyOnModel.apply((MODEL) modelContext.getModel()));
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
@@ -28,7 +28,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, ObservableValue<W>>() {
 			@Override
 			public void init(Function<MODEL, ObservableValue<W>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply((NODE) viewContext.getNode()).bind(applyOnModel.apply((MODEL) modelContext.getModel()));
+				applyOnNode.apply(viewContext.getNode()).bind(applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
@@ -37,7 +37,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, Property<String>>() {
 			@Override
 			public void init(Function<MODEL, Property<String>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply((NODE) viewContext.getNode()).bindBidirectional(applyOnModel.apply((MODEL) modelContext.getModel()));
+				applyOnNode.apply(viewContext.getNode()).bindBidirectional(applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
@@ -55,7 +55,7 @@ public interface Binder<MODEL, T> {
 
 					@Override
 					public SUBMODEL get(int index) {
-						return (SUBMODEL) modelContext.get(index).getModel();
+						return modelContext.get(index).getModel();
 					}
 
 					@Override
@@ -77,11 +77,11 @@ public interface Binder<MODEL, T> {
 
 					@Override
 					public SUBMODEL remove(int index) {
-						return (SUBMODEL) modelContext.removeSubContext(index).getModel();
+						return modelContext.removeSubContext(index).getModel();
 					}
 
 				};
-				Bindings.bindContent(list, applyOnModel.apply((MODEL) modelContext.getModel()));
+				Bindings.bindContent(list, applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}

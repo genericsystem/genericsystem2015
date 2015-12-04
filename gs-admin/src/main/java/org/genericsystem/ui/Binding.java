@@ -14,7 +14,7 @@ import javafx.event.EventHandler;
 
 public class Binding<MODEL, SUBMODEL, T> {
 
-	private final BiFunction<MODEL, SUBMODEL, T> method;
+	private final BiFunction<?, SUBMODEL, T> method;
 	private final Binder<SUBMODEL, T> binder;
 
 	public Binding(BiFunction<MODEL, SUBMODEL, T> method, Binder<SUBMODEL, T> binder) {
@@ -23,16 +23,16 @@ public class Binding<MODEL, SUBMODEL, T> {
 	}
 
 	public void init(ModelContext modelContext, ViewContext viewContext, Element childElement) {
-		Function<SUBMODEL, T> initParam = buildInitParam(modelContext);
-		binder.init(initParam, modelContext, viewContext, childElement);
+		Function<SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
+		binder.init(applyOnModel, modelContext, viewContext, childElement);
 	}
 
-	protected Function<SUBMODEL, T> buildInitParam(ModelContext modelContext) {
+	protected Function<SUBMODEL, T> applyOnModel(ModelContext modelContext) {
 		return (SUBMODEL) -> {
 			ModelContext modelContext_ = modelContext;
 			while (modelContext_ != null) {
 				try {
-					return method.apply((MODEL) modelContext_.getModel(), SUBMODEL);
+					return method.apply(modelContext_.getModel(), SUBMODEL);
 				} catch (ClassCastException ignore) {
 				}
 				modelContext_ = modelContext_.getParent();

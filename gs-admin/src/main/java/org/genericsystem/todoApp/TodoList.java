@@ -10,6 +10,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -65,7 +66,7 @@ public class TodoList {
 		}
 	}
 
-	public Node init() {
+	public Node init(Parent parent) {
 
 		Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, TodoList::getHeight));
 		Element todoCreateHBox = new Element(mainVBox, HBox.class);

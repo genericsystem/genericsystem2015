@@ -3,7 +3,6 @@ package org.genericsystem.todoApp;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Function;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -202,10 +201,8 @@ public class GenericList {
 		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
 		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
 		Element todoTableView = new Element(mainVBox, TableView.class);
-		Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
-		Element todoTableItems = new Element(todoTableView, GenericWrapper.class, getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
-		Function<TableView, ObservableList<?>> getColumns = TableView::getColumns;
-		Element columnsTableItems = new Element(todoTableView, Column.class, getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
+		Element todoTableItems = new Element(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
+		Element columnsTableItems = new Element(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
 
 		return (Node) mainVBox.apply(this).getNode();
 	}

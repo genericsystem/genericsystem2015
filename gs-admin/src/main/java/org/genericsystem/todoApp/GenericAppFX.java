@@ -13,12 +13,9 @@ public class GenericAppFX extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
-
 		((Group) scene.getRoot()).getChildren().add(new GenericList().init());
-
 		stage.setScene(scene);
 		stage.show();
 	}

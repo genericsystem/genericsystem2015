@@ -37,8 +37,7 @@ public class Element {
 	}
 
 	public ViewContext apply(Object model) {
-		Pane node = (Pane) createNode();
-		return new ViewContext(new ModelContext(null, model), this, node, null);
+		return new ViewContext(new ModelContext(null, model), this, createNode(), null);
 	}
 
 	Object createNode() {

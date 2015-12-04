@@ -98,6 +98,6 @@ public class TodoTableList {
 		Element todoTableItems = new Element(todoTableView, Todo.class, TableView<Todo>::getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)));
 		Element columnsTableItems = new Element(todoTableView, Column.class, TableView<Column>::getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)));
 
-		return (Node) mainVBox.apply(this).getNode();
+		return mainVBox.apply(this).getNode();
 	}
 }

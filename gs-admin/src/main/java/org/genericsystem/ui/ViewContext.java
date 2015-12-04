@@ -35,8 +35,9 @@ public class ViewContext {
 		return template;
 	}
 
-	public Object getNode() {
-		return node;
+	@SuppressWarnings("unchecked")
+	public <NODE> NODE getNode() {
+		return (NODE) node;
 	}
 
 	public ModelContext getModelContext() {
