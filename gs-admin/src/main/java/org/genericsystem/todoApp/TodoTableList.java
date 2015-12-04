@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -28,7 +29,7 @@ public class TodoTableList {
 
 	private Property<String> name = new SimpleStringProperty();
 	private ObservableList<Todo> todos = FXCollections.observableArrayList();
-	private ObservableList<Column> columns = FXCollections.observableArrayList(new Column(), new DeleteColumn());
+	// private ObservableList<Column> columns = FXCollections.observableArrayList(new Column(), new DeleteColumn());
 	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
 
@@ -40,9 +41,9 @@ public class TodoTableList {
 		return todos;
 	}
 
-	public ObservableList<Column> getColumns() {
-		return columns;
-	}
+	// public ObservableList<Column> getColumns() {
+	// return columns;
+	// }
 
 	public ObservableValue<String> getCreateButtonTextProperty() {
 		return createButtonTextProperty;
@@ -79,52 +80,64 @@ public class TodoTableList {
 		}
 	}
 
-	public static class Column extends TableColumn<Todo, String> {
-		public Column() {
-			super("Todos");
-			setMinWidth(130);
-			// cellValueFactoryProperty();
-			// setCellValueFactory(features -> new ReadOnlyObjectWrapper<String>(features.getValue().getObservable().getValue()));
-		}
-
-	}
-
-	public static class DeleteColumn extends Column {
-		public DeleteColumn() {
-			setText("Delete");
-			setMinWidth(130);
-			setCellFactory(column -> new DeleteButtonCell<>());
-		}
-	}
+	// public static class Column extends TableColumn<Todo, String> {
+	// public Column() {
+	// super("Todos");
+	// setMinWidth(130);
+	// cellValueFactoryProperty();
+	// setCellValueFactory(features -> new ReadOnlyObjectWrapper<String>(features.getValue().getObservable().getValue()));
+	// }
+	//
+	// }
+	//
+	// public static class DeleteColumn extends Column {
+	// public DeleteColumn() {
+	// setText("Delete");
+	// setMinWidth(130);
+	// setCellFactory(column -> new DeleteButtonCell<>());
+	// }
+	// }
 
 	public void action() {
 		System.out.println("VBox Create");
 	}
 
 	public Node init() {
-		// pour le binding setValueProperty il ne marche que pour setCellValueFactory, et pas pour
-		// setCellFactory (?_?)
 
 		Callback<CellDataFeatures<Todo, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<String>(features.getValue().getObservable().getValue());
-		// Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = column -> new DeleteButtonCell<>();
+		Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = column -> new DeleteButtonCell<>();
 
-		Element mainVBox = new Element(null, VBox.class, Binding.setProperty(VBox::prefHeightProperty, 200));
+		Element mainVBox = new Element(null, VBox.class);
+		mainVBox.addBinding(Binding.setProperty(VBox::prefHeightProperty, 400));
+
 		Element todoCreateHBox = new Element(mainVBox, HBox.class);
-		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoTableList::getName));
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, TodoTableList::create));
+		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class);
+		todosCreatLabel.addBinding(Binding.bindInputText(TextField::textProperty, TodoTableList::getName));
+
+		Element todosCreateButton = new Element(todoCreateHBox, Button.class);
+		todosCreateButton.addBinding(Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty));
+		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, TodoTableList::create));
 
 		Element todoTableView = new Element(mainVBox, TableView.class);
 
 		Function<TableView<Todo>, ObservableList<?>> getItems = TableView::getItems;
+
 		Element todoTableItems = new Element(todoTableView, Todo.class, getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)));
 		Function<TableView, ObservableList<?>> getColumns = TableView::getColumns;
-		Element columnsTableItems = new Element(todoTableView, TableColumn.class, getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)), Binding.setProperty(Column::prefWidthProperty, 100), Binding.setProperty(
-				TableColumn<Todo, String>::cellValueFactoryProperty, callback));
 
-		// Element columnTodo = new Element(todoTableView, TableColumn.class, getColumns, Binding.setValueProperty(TableColumn<Todo, String>::prefWidthProperty, 100), Binding.setValueProperty(TableColumn<Todo, String>::textProperty, "Todo"),
-		// Binding.setValueProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback));
-		// Element columnDeleteTodo = new Element(todoTableView, TableColumn.class, getColumns, Binding.setValueProperty(TableColumn<Todo, String>::prefWidthProperty, 150), Binding.setValueProperty(TableColumn<Todo, String>::textProperty, "Delete"),
-		// Binding.setValueProperty(TableColumn<Todo, String>::cellFactoryProperty, callbackDelete));
+		// Element columnsTableItems = new Element(todoTableView, TableColumn.class, getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)), Binding.setProperty(Column::prefWidthProperty, 100), Binding.setProperty(
+		// TableColumn<Todo, String>::cellValueFactoryProperty, callback));
+
+		Element columnTodo = new Element(todoTableView, TableColumn.class, getColumns);
+		columnTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::prefWidthProperty, 100));
+		columnTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::textProperty, "Todo"));
+		columnTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback));
+
+		Element columnDeleteTodo = new Element(todoTableView, TableColumn.class, getColumns);
+		columnDeleteTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::prefWidthProperty, 150));
+		columnDeleteTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::textProperty, "Delete todo"));
+		columnDeleteTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback), Binding.setProperty(TableColumn<Todo, String>::cellFactoryProperty, callbackDelete));
+
 		return (Node) mainVBox.apply(this).getNode();
 	}
 }

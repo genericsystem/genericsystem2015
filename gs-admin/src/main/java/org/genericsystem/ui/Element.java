@@ -1,6 +1,7 @@
 package org.genericsystem.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -10,8 +11,8 @@ import javafx.scene.layout.Pane;
 
 public class Element {
 	public final Class<?> classNode;
-	public final List<? extends Binding<?, ?, ?>> metaBindings;
-	public final Binding<?, ?, ?>[] bindings;
+	public List<? extends Binding<?, ?, ?>> metaBindings = new ArrayList<>();
+	public List<Binding<?, ?, ?>> bindings = new ArrayList<>();
 	private final List<Element> children = new ArrayList<>();
 	private final Function<Object, ObservableList<Object>> getGraphicChildren;
 
@@ -26,10 +27,18 @@ public class Element {
 	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
-		this.bindings = binding;
+		this.bindings.addAll(Arrays.asList(binding));
 		this.getGraphicChildren = (Function) getGraphicChildren;
 		if (parent != null)
 			parent.getChildren().add(this);
+	}
+
+	public void addMetaBinding(Binding<?, ?, ?> metaBinding) {
+		((List<Binding>) metaBindings).add(metaBinding);
+	}
+
+	public void addBinding(Binding<?, ?, ?>... binding) {
+		bindings.addAll(Arrays.asList(binding));
 	}
 
 	public ObservableList<Object> getGraphicChildren(Object graphicParent) {

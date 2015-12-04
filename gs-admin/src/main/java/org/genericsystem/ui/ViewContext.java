@@ -22,7 +22,7 @@ public class ViewContext {
 			}
 		}
 		if (getParent() != null) {
-			System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
+			// System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
 			template.getGraphicChildren(getParent().getNode()).add(node);
 		}
 	}

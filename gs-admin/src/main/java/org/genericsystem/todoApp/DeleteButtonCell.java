@@ -15,7 +15,7 @@ public class DeleteButtonCell<T> extends TableCell<T, String> {
 	private final Button cellButton = new Button();
 
 	public DeleteButtonCell() {
-
+		setEditable(true);
 		cellButton.setMaxWidth(200);
 		cellButton.setAlignment(Pos.BASELINE_CENTER);
 	}
@@ -23,6 +23,7 @@ public class DeleteButtonCell<T> extends TableCell<T, String> {
 	@Override
 	protected void updateItem(String t, boolean empty) {
 		super.updateItem(t, empty);
+		System.out.println("DeleteButtonCell_updateItem_String :: " + t + " ___ boolean :: " + empty);
 		if (empty || t == null) {
 			cellButton.setText(null);
 			setGraphic(null);
