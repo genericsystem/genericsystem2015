@@ -12,6 +12,9 @@ public class ViewContext {
 		this.modelContext = modelContext;
 		this.parent = parent;
 		modelContext.register(this);
+
+		this.template.getBootList().forEach(boot -> boot.init(node));
+
 		for (Binding<?, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
 		for (Element childElement : template.getChildren()) {

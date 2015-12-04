@@ -26,7 +26,7 @@ import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Binding;
-import org.genericsystem.ui.Boot.BootProperty;
+import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
 
 public class GenericList {
@@ -202,7 +202,7 @@ public class GenericList {
 		textField.addBinding(Binding.bindInputText(TextField::textProperty, GenericList::getName));
 
 		Element todosCreateButton = new Element(todoCreateHBox, Button.class);
-		todosCreateButton.addBoots(BootProperty.setProperty(Button::textProperty, "Create generic"));
+		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create generic"));
 		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, GenericList::create));
 
 		Element todoTableView = new Element(mainVBox, TableView.class);

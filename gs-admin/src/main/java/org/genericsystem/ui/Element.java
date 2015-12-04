@@ -62,9 +62,8 @@ public class Element {
 
 	Object createNode() {
 		try {
-			Object node = classNode.newInstance();
-			boots.forEach(boot -> boot.init(node));
-			return node;
+
+			return classNode.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
