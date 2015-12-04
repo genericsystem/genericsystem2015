@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
@@ -22,11 +23,11 @@ public class Element<NODE> {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
-	public <W> Element(Element<?> parent, Class<NODE> classNode, Function<W, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
+	public <PARENTNODE> Element(Element<?> parent, Class<NODE> classNode, Function<PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
-	public <W> Element(Element<?> parent, Class<NODE> classNode, Function<W, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
+	public <PARENTNODE> Element(Element<?> parent, Class<NODE> classNode, Function<PARENTNODE, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
 		this.bindings.addAll(Arrays.asList(binding));
@@ -52,19 +53,18 @@ public class Element<NODE> {
 		bindings.addAll(Arrays.asList(binding));
 	}
 
-	public <PARENTNODE> ObservableList<?> getGraphicChildren(PARENTNODE graphicParent) {
-		return ((Function<PARENTNODE, ObservableList<?>>) getGraphicChildren).apply(graphicParent);
+	@SuppressWarnings("unchecked")
+	public <PARENTNODE> ObservableList<NODE> getGraphicChildren(PARENTNODE graphicParent) {
+		return ((Function<PARENTNODE, ObservableList<NODE>>) (Function) getGraphicChildren).apply(graphicParent);
 	}
 
-	public ViewContext<?> apply(Object model) {
-		return new ViewContext(new ModelContext(null, model), this, createNode(), null);
+	public ViewContext<NODE> apply(Object model) {
+		return new ViewContext<>(new ModelContext(null, model), this, createNode(), null);
 	}
 
 	NODE createNode() {
 		try {
-			NODE node = classNode.newInstance();
-			boots.forEach(boot -> boot.init(node));
-			return node;
+			return classNode.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}

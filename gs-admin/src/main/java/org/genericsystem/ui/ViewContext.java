@@ -1,7 +1,5 @@
 package org.genericsystem.ui;
 
-import javafx.collections.ObservableList;
-
 public class ViewContext<NODE> {
 	private final Element<NODE> template;
 	private final NODE node;
@@ -14,30 +12,30 @@ public class ViewContext<NODE> {
 		this.modelContext = modelContext;
 		this.parent = parent;
 		modelContext.register(this);
+		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<?, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
 		for (Element<CHILDNODE> childElement : template.<CHILDNODE> getChildren()) {
 			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, this, childElement);
 			if (childElement.metaBindings.isEmpty()) {
-				new ViewContext<CHILDNODE>(modelContext, childElement, (CHILDNODE) childElement.createNode(), this);
+				new ViewContext<>(modelContext, childElement, childElement.createNode(), this);
 			}
 		}
 		if (getParent() != null) {
 			// System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
-			((ObservableList<NODE>) (template.getGraphicChildren((PARENTNODE) getParent().getNode()))).add(node);
+			template.getGraphicChildren(getParent().getNode()).add(node);
 		}
 	}
 
 	<PARENTNODE> void destroyChild() {
-		template.getGraphicChildren((PARENTNODE) getParent().getNode()).remove(getNode());
+		template.getGraphicChildren(getParent().getNode()).remove(getNode());
 	}
 
 	public Element<NODE> getTemplate() {
 		return template;
 	}
 
-	@SuppressWarnings("unchecked")
 	public NODE getNode() {
 		return node;
 	}
@@ -46,7 +44,8 @@ public class ViewContext<NODE> {
 		return modelContext;
 	}
 
-	public ViewContext<?> getParent() {
-		return parent;
+	@SuppressWarnings("unchecked")
+	public <PARENTNODE> ViewContext<PARENTNODE> getParent() {
+		return (ViewContext<PARENTNODE>) parent;
 	}
 }
