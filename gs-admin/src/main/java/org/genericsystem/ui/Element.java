@@ -14,6 +14,7 @@ public class Element<NODE> {
 	public List<Binding<?, ?, ?>> bindings = new ArrayList<>();
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
+	private List<Boot> boots = new ArrayList<>();
 
 	public Element(Element<?> parent, Class<NODE> classNode, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
@@ -32,6 +33,15 @@ public class Element<NODE> {
 			parent.getChildren().add(this);
 	}
 
+	public void addBoots(Boot... boot) {
+		this.boots.addAll(Arrays.asList(boot));
+	}
+
+	public List<Boot> getBootList() {
+		return boots;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void addMetaBinding(Binding<?, ?, ?> metaBinding) {
 		((List<Binding>) metaBindings).add(metaBinding);
 	}
@@ -50,7 +60,9 @@ public class Element<NODE> {
 
 	Object createNode() {
 		try {
-			return classNode.newInstance();
+			Object node = classNode.newInstance();
+			boots.forEach(boot -> boot.init(node));
+			return node;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
