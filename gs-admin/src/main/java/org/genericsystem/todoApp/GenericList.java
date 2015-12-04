@@ -1,6 +1,5 @@
 package org.genericsystem.todoApp;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -15,7 +14,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -28,6 +26,7 @@ import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Boot.BootProperty;
 import org.genericsystem.ui.Element;
 
 public class GenericList {
@@ -43,7 +42,6 @@ public class GenericList {
 	private Property<String> name = new SimpleStringProperty();
 	// private ObservableList<GenericWrapper> todos = FXCollections.observableArrayList();
 	private ObservableList<Column> columns = FXCollections.observableArrayList(new Column(), new DeleteColumn());
-	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(400);
 
 	// private StringProperty name = new SimpleStringProperty();
@@ -99,14 +97,18 @@ public class GenericList {
 		return height;
 	}
 
-	private void cleanDirectory() {
-		File file = new File(path);
-		if (file.exists())
-			for (File f : file.listFiles()) {
-				if (!".lock".equals(f.getName()))
-					f.delete();
-			}
-	}
+	// private void cleanDirectory() {
+	// File file = new File(path);
+	// if (file.exists())
+	// public ObservableValue<String> getCreateButtonTextProperty() {
+	// return createButtonTextProperty;
+	// }
+	//
+	// for (File f : file.listFiles()) {
+	// if (!".lock".equals(f.getName()))
+	// f.delete();
+	// }
+	// }
 
 	public void flush() {
 		engine.getCurrentCache().flush();
@@ -157,10 +159,6 @@ public class GenericList {
 		}
 	}
 
-	public ObservableValue<String> getCreateButtonTextProperty() {
-		return createButtonTextProperty;
-	}
-
 	public static class Column extends TableColumn<GenericWrapper, String> {
 		public Column() {
 			super("Todos");
@@ -181,25 +179,32 @@ public class GenericList {
 		return columns;
 	}
 
-	public Node init() {
-		Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
-		Element todoCreateHBox = new Element(mainVBox, HBox.class);
-		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
-
-		Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
-		Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
-		Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
-
-		return (Node) mainVBox.apply(this).getNode();
-	}
+	// public Node init() {
+	// Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
+	// Element todoCreateHBox = new Element(mainVBox, HBox.class);
+	// Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
+	// Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
+	//
+	// Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
+	// Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
+	// Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
+	//
+	// return (Node) mainVBox.apply(this).getNode();
+	// }
 
 	public Node initTable() {
 
-		Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
+		Element mainVBox = new Element(null, VBox.class);
+		mainVBox.addBinding(Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
 		Element todoCreateHBox = new Element(mainVBox, HBox.class);
-		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
-		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
+
+		Element textField = new Element(todoCreateHBox, TextField.class);
+		textField.addBinding(Binding.bindInputText(TextField::textProperty, GenericList::getName));
+
+		Element todosCreateButton = new Element(todoCreateHBox, Button.class);
+		todosCreateButton.addBoots(BootProperty.setProperty(Button::textProperty, "Create generic"));
+		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, GenericList::create));
+
 		Element todoTableView = new Element(mainVBox, TableView.class);
 		Element todoTableItems = new Element(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
 		Element columnsTableItems = new Element(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));

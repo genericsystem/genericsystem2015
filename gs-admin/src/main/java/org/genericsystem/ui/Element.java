@@ -15,6 +15,7 @@ public class Element {
 	public List<Binding<?, ?, ?>> bindings = new ArrayList<>();
 	private final List<Element> children = new ArrayList<>();
 	private final Function<Object, ObservableList<Object>> getGraphicChildren;
+	private List<Boot> boots = new ArrayList<>();
 
 	public <V extends Pane> Element(Element parent, Class<?> classNode, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
@@ -24,6 +25,7 @@ public class Element {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <V> Element(Element parent, Class<?> classNode, Function<V, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
@@ -33,6 +35,15 @@ public class Element {
 			parent.getChildren().add(this);
 	}
 
+	public void addBoots(Boot... boot) {
+		this.boots.addAll(Arrays.asList(boot));
+	}
+
+	public List<Boot> getBootList() {
+		return boots;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void addMetaBinding(Binding<?, ?, ?> metaBinding) {
 		((List<Binding>) metaBindings).add(metaBinding);
 	}
@@ -51,7 +62,9 @@ public class Element {
 
 	Object createNode() {
 		try {
-			return classNode.newInstance();
+			Object node = classNode.newInstance();
+			boots.forEach(boot -> boot.init(node));
+			return node;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
