@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -67,8 +68,17 @@ public class Binding<MODEL, SUBMODEL, T> {
 		return Binding.<MODEL, SUBMODEL, ObservableList<T>> bind(function, Binder.foreachBinder());
 	}
 
-	public static <R, MODEL, V, W> Binding<MODEL, V, ObservableValue<W>> bindProperty(Function<R, Property<W>> getTextProperty, Function<MODEL, ObservableValue<W>> function) {
-		return Binding.<MODEL, V, ObservableValue<W>> bind(function, Binder.propertyBinder(getTextProperty));
+	public static <R, MODEL, V, W> Binding<MODEL, V, ObservableValue<W>> bindProperty(Function<R, Property<W>> getProperty, Function<MODEL, ObservableValue<W>> function) {
+		return Binding.<MODEL, V, ObservableValue<W>> bind(function, Binder.propertyBinder(getProperty));
+	}
+
+	public static <R, MODEL, V, W> Binding<MODEL, V, ObservableValue<W>> setProperty(Function<R, Property<W>> getTextProperty, Function<MODEL, ObservableValue<W>> function) {
+		return Binding.<MODEL, V, ObservableValue<W>> bind(function, Binder.propertySetter(getTextProperty));
+	}
+
+	public static <R, MODEL, V, W> Binding<MODEL, V, W> setProperty(Function<V, Property<R>> getProperty, R value) {
+		Function<MODEL, ObservableValue<R>> function = (u) -> new SimpleObjectProperty<R>(value);
+		return (Binding<MODEL, V, W>) Binding.bind(function, Binder.propertySetter(getProperty));
 	}
 
 	public static <R, MODEL, SUBMODEL> Binding<MODEL, SUBMODEL, Property<String>> bindInputText(Function<R, Property<String>> getTextProperty, Function<MODEL, Property<String>> function) {
