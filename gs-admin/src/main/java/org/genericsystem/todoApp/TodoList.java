@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Boot.BootProperty;
 import org.genericsystem.ui.Element;
 
 public class TodoList {
@@ -68,11 +69,12 @@ public class TodoList {
 
 		Consumer<VBox> c = VBox::autosize;
 
-		Element<VBox> mainVBox = new Element<>(null, VBox.class, Binding.setProperty(VBox::prefHeightProperty, 600));// , Binding.bindProperty(VBox::prefHeightProperty, TodoList::getHeight));
-		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
-		Element<TextField> todosCreatLabel = new Element<>(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoList::getName));
-		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.setProperty(Button::textProperty, "Create Todo"), Binding.bindAction(Button::onActionProperty, TodoList::create));
-		// Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren);
+		Element mainVBox = new Element(null, VBox.class);// , Binding.bindProperty(VBox::prefHeightProperty, TodoList::getHeight));
+		mainVBox.addBoots(BootProperty.setProperty(VBox::prefHeightProperty, 600));
+		Element todoCreateHBox = new Element(mainVBox, HBox.class);
+		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, TodoList::getName));
+		Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
+		todosCreateButton.addBoots(BootProperty.setProperty(Button::textProperty, "Create Todo"));
 
 		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));

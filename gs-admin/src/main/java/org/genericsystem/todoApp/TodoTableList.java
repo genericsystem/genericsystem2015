@@ -1,6 +1,7 @@
 package org.genericsystem.todoApp;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.binding.Bindings;
@@ -23,6 +24,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Boot.BootMethod;
+import org.genericsystem.ui.Boot.BootProperty;
 import org.genericsystem.ui.Element;
 
 public class TodoTableList {
@@ -108,7 +111,8 @@ public class TodoTableList {
 		Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = column -> new DeleteButtonCell<>();
 
 		Element mainVBox = new Element(null, VBox.class);
-		mainVBox.addBinding(Binding.setProperty(VBox::prefHeightProperty, 400));
+		mainVBox.addBoots(BootProperty.setProperty(VBox::prefHeightProperty, 600));
+		// mainVBox.addBinding(Binding.setProperty(VBox::prefHeightProperty, 400));
 
 		Element todoCreateHBox = new Element(mainVBox, HBox.class);
 		Element todosCreatLabel = new Element(todoCreateHBox, TextField.class);
@@ -122,21 +126,25 @@ public class TodoTableList {
 
 		Function<TableView<Todo>, ObservableList<?>> getItems = TableView::getItems;
 
+		Consumer<Todo> s = Todo::action;
+
 		Element todoTableItems = new Element(todoTableView, Todo.class, getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)));
+		todoTableItems.addBoots(BootMethod.executeMethod(Todo::action));
 		Function<TableView, ObservableList<?>> getColumns = TableView::getColumns;
 
 		// Element columnsTableItems = new Element(todoTableView, TableColumn.class, getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)), Binding.setProperty(Column::prefWidthProperty, 100), Binding.setProperty(
 		// TableColumn<Todo, String>::cellValueFactoryProperty, callback));
 
 		Element columnTodo = new Element(todoTableView, TableColumn.class, getColumns);
-		columnTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::prefWidthProperty, 100));
-		columnTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::textProperty, "Todo"));
-		columnTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback));
+		columnTodo.addBoots(BootProperty.setProperty(TableColumn<Todo, String>::prefWidthProperty, 100));
+		columnTodo.addBoots(BootProperty.setProperty(TableColumn<Todo, String>::textProperty, "Todo"));
+		columnTodo.addBoots(BootProperty.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback));
 
 		Element columnDeleteTodo = new Element(todoTableView, TableColumn.class, getColumns);
-		columnDeleteTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::prefWidthProperty, 150));
-		columnDeleteTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::textProperty, "Delete todo"));
-		columnDeleteTodo.addBinding(Binding.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback), Binding.setProperty(TableColumn<Todo, String>::cellFactoryProperty, callbackDelete));
+
+		columnDeleteTodo.addBoots(BootProperty.setProperty(TableColumn<Todo, String>::prefWidthProperty, 150));
+		columnDeleteTodo.addBoots(BootProperty.setProperty(TableColumn<Todo, String>::textProperty, "Delete todo"));
+		columnDeleteTodo.addBoots(BootProperty.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback), BootProperty.setProperty(TableColumn<Todo, String>::cellFactoryProperty, callbackDelete));
 
 		return (Node) mainVBox.apply(this).getNode();
 	}

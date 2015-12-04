@@ -12,8 +12,10 @@ public class Element<NODE> {
 	public final Class<NODE> classNode;
 	public List<? extends Binding<?, ?, ?>> metaBindings = new ArrayList<>();
 	public List<Binding<?, ?, ?>> bindings = new ArrayList<>();
+
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
+
 	private List<Boot> boots = new ArrayList<>();
 
 	public Element(Element<?> parent, Class<NODE> classNode, Binding<?, ?, ?>... binding) {
@@ -30,7 +32,7 @@ public class Element<NODE> {
 		this.bindings.addAll(Arrays.asList(binding));
 		this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
-			parent.getChildren().add(this);
+			parent.<NODE> getChildren().add(this);
 	}
 
 	public void addBoots(Boot... boot) {
@@ -50,11 +52,11 @@ public class Element<NODE> {
 		bindings.addAll(Arrays.asList(binding));
 	}
 
-	public ObservableList<?> getGraphicChildren(NODE graphicParent) {
-		return ((Function<NODE, ObservableList<?>>) getGraphicChildren).apply(graphicParent);
+	public <PARENTNODE> ObservableList<?> getGraphicChildren(PARENTNODE graphicParent) {
+		return ((Function<PARENTNODE, ObservableList<?>>) getGraphicChildren).apply(graphicParent);
 	}
 
-	public ViewContext apply(Object model) {
+	public ViewContext<?> apply(Object model) {
 		return new ViewContext(new ModelContext(null, model), this, createNode(), null);
 	}
 
@@ -68,8 +70,8 @@ public class Element<NODE> {
 		}
 	}
 
-	public List<Element<?>> getChildren() {
-		return children;
+	public <CHILDNODE> List<Element<CHILDNODE>> getChildren() {
+		return (List) children;
 	}
 
 }
