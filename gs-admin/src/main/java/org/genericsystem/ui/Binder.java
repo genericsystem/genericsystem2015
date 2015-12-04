@@ -3,7 +3,6 @@ package org.genericsystem.ui;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -19,7 +18,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, T>() {
 			@Override
 			public void init(Function<MODEL, T> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+				applyOnNode.apply((NODE) viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
@@ -28,7 +27,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, W>() {
 			@Override
 			public void init(Function<MODEL, W> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply(viewContext.getNode()).setValue(value);
+				applyOnNode.apply((NODE) viewContext.getNode()).setValue(value);
 			}
 		};
 	}
@@ -37,7 +36,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, ObservableValue<W>>() {
 			@Override
 			public void init(Function<MODEL, ObservableValue<W>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply(viewContext.getNode()).setValue(applyOnModel.apply(modelContext.getModel()).getValue());
+				applyOnNode.apply((NODE) viewContext.getNode()).setValue(applyOnModel.apply(modelContext.getModel()).getValue());
 			}
 		};
 	}
@@ -46,7 +45,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, ObservableValue<W>>() {
 			@Override
 			public void init(Function<MODEL, ObservableValue<W>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply(viewContext.getNode()).bind(applyOnModel.apply(modelContext.getModel()));
+				applyOnNode.apply((NODE) viewContext.getNode()).bind(applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
@@ -55,7 +54,7 @@ public interface Binder<MODEL, T> {
 		return new Binder<MODEL, Property<String>>() {
 			@Override
 			public void init(Function<MODEL, Property<String>> applyOnModel, ModelContext modelContext, ViewContext viewContext, Element childElement) {
-				applyOnNode.apply(viewContext.getNode()).bindBidirectional(applyOnModel.apply(modelContext.getModel()));
+				applyOnNode.apply((NODE) viewContext.getNode()).bindBidirectional(applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
