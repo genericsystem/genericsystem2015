@@ -1,23 +1,23 @@
 package org.genericsystem.ui;
 
-public class ViewContext<NODE> {
-	private final Element<NODE> template;
-	private final NODE node;
+public class ViewContext<N> {
+	private final Element<N> template;
+	private final N node;
 	// private final ModelContext modelContext;
 	private final ViewContext<?> parent;
 
-	public <PARENTNODE, CHILDNODE> ViewContext(ModelContext modelContext, Element<NODE> template, NODE node, ViewContext<?> parent) {
+	public <PARENTNODE, CHILDNODE> ViewContext(ModelContext modelContext, Element<N> template, N node, ViewContext<?> parent) {
 		this.template = template;
 		this.node = node;
-		// this.modelContext = modelContext;
 		this.parent = parent;
+		// this.modelContext = modelContext;
 		modelContext.register(this);
 		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<?, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
 		for (Element<CHILDNODE> childElement : template.<CHILDNODE> getChildren()) {
 			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
-				metaBinding.init(modelContext, this, childElement);
+				metaBinding.init(modelContext, this, (Element) childElement);
 			if (childElement.metaBindings.isEmpty())
 				new ViewContext<>(modelContext, childElement, childElement.createNode(), this);
 		}
@@ -27,6 +27,10 @@ public class ViewContext<NODE> {
 		}
 	}
 
+	public N getNode() {
+		return node;
+	}
+
 	<PARENTNODE> void destroyChild() {
 		template.getGraphicChildren(parent.getNode()).remove(getNode());
 	}
@@ -34,10 +38,6 @@ public class ViewContext<NODE> {
 	// public Element<NODE> getTemplate() {
 	// return template;
 	// }
-
-	public NODE getNode() {
-		return node;
-	}
 
 	// public ModelContext getModelContext() {
 	// return modelContext;

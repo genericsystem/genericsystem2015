@@ -37,8 +37,8 @@ public class ModelContext {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <MODEL> MODEL getModel() {
-		return (MODEL) model;
+	public <M> M getModel() {
+		return (M) model;
 	}
 
 	public ModelContext getParent() {
