@@ -3,7 +3,6 @@ package org.genericsystem.ui;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Function;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -11,7 +10,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import org.genericsystem.todoApp.TodoList.Todo;
 
 public interface Binder<M, SUBMODEL, WRAPPER> {
 
@@ -58,67 +56,8 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 		};
 	}
 
-	//
-	// public static <N, M, SUBMODEL, W> Binder<M, SUBMODEL, ObservableList<W>> foreachBinder() {
-	// return new Binder<M, SUBMODEL, ObservableList<W>>() {
-	// private List<W> list;
-	//
-	// @Override
-	// public void init(Function<? super M, ObservableList<W>> applyOnModel, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
-	// applyOnModel.apply(modelContext.getModel()).add((W) new Todo());
-	//
-	// list = new AbstractList<W>() {
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public W get(int index) {
-	// return (W) modelContext.get(index).getModel();
-	// }
-	//
-	// @Override
-	// public int size() {
-	// return modelContext.size();
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public void add(int index, W element) {
-	// System.out.println("ADD CALLED");
-	// modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
-	// }
-	//
-	// @Override
-	// public W set(int index, W element) {
-	// W remove = remove(index);
-	// add(index, element);
-	// return remove;
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public W remove(int index) {
-	// return (W) modelContext.removeSubContext(index).getModel();
-	// }
-	//
-	// };
-	// Bindings.bindContent(list, applyOnModel.apply(modelContext.getModel()));
-	// }
-	//
-	// @Override
-	// public void init(ObservableList<W> wrapper, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
-	// throw new IllegalStateException();
-	//
-	// }
-	// };
-	// }
-
 	public static <N, M, SUBMODEL, W> Binder<M, SUBMODEL, ObservableList<W>> foreachBinder() {
 		return new Binder<M, SUBMODEL, ObservableList<W>>() {
-
-			@Override
-			protected void finalize() throws Throwable {
-				System.out.println("FINALIZEEEEEEEEEEEE BINDER");
-			}
 
 			private List<W> list;
 
@@ -126,10 +65,6 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 			public void init(ObservableList<W> wrapper, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 
 				list = new AbstractList<W>() {
-					@Override
-					protected void finalize() throws Throwable {
-						System.out.println("FINALIZEEEEEEEEEEEE");
-					}
 
 					@SuppressWarnings("unchecked")
 					@Override
@@ -145,7 +80,6 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void add(int index, W element) {
-						System.out.println("ADD CALLED");
 						modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
 					}
 
@@ -163,12 +97,35 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 					}
 
 				};
-				wrapper.addListener((ListChangeListener) change -> System.out.println("ADDDDDDDDDDDDDDD"));
-				System.out.println(wrapper.getClass());
-				Bindings.bindContent(list, wrapper);
-				wrapper.add((W) new Todo());
-
+				wrapper.addListener(new ListContentBinding<>(list));
+				// Bindings.bindContent(list, wrapper);
 			}
 		};
+	}
+
+	public static class ListContentBinding<E> implements ListChangeListener<E> {
+
+		private final List<E> list;
+
+		public ListContentBinding(List<E> list) {
+			this.list = list;
+		}
+
+		@Override
+		public void onChanged(Change<? extends E> change) {
+			while (change.next()) {
+				if (change.wasPermutated()) {
+					list.subList(change.getFrom(), change.getTo()).clear();
+					list.addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
+				} else {
+					if (change.wasRemoved()) {
+						list.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
+					}
+					if (change.wasAdded()) {
+						list.addAll(change.getFrom(), change.getAddedSubList());
+					}
+				}
+			}
+		}
 	}
 }
