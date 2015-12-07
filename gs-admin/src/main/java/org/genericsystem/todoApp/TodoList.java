@@ -2,7 +2,6 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -16,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
@@ -27,6 +25,11 @@ public class TodoList {
 	private ObservableList<Todo> todos = FXCollections.observableArrayList();
 	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
+
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALIZE TODOLIST");
+	};
 
 	public Property<String> getName() {
 		return name;
@@ -45,14 +48,19 @@ public class TodoList {
 	}
 
 	public void create() {
+		System.out.println("Create called");
 		Todo todo = new Todo();
 		todo.stringProperty.setValue(name.getValue());
 		todos.add(todo);
 	}
 
-	public void remove(Todo todo) {
-		this.todos.remove(todo);
+	public void remove() {
+		System.out.println("remove");
 	}
+
+	// public void remove(Todo todo) {
+	// this.todos.remove(todo);
+	// }
 
 	public static class Todo {
 		private Property<String> stringProperty = new SimpleStringProperty();
@@ -81,7 +89,7 @@ public class TodoList {
 
 		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
-		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
+		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 
 		return mainVBox.apply(this);
 

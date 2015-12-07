@@ -108,7 +108,6 @@ public class TodoTableList {
 
 		Element<VBox> mainVBox = new Element<>(null, VBox.class);
 		mainVBox.addBoots(Boot.setProperty(VBox::prefHeightProperty, 600));
-		// mainVBox.addBinding(Binding.setProperty(VBox::prefHeightProperty, 400));
 
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 		Element<TextField> todosCreatLabel = new Element<>(todoCreateHBox, TextField.class);

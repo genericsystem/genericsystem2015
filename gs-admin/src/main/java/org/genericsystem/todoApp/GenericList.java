@@ -71,42 +71,9 @@ public class GenericList {
 		return genericWrapperList;
 	}
 
-	// public ObservableValue<String> getCreateButtonTextProperty() {
-	// return createButtonTextProperty;
-	// }
-	//
-	// public ObservableValue<String> getFlushButtonTextProperty() {
-	// return flushButtonTextProperty;
-	// }
-	//
-	// public ObservableValue<String> getClearButtonTextProperty() {
-	// return clearButtonTextProperty;
-	// }
-	//
-	// public ObservableValue<String> getMountButtonTextProperty() {
-	// return mountButtonTextProperty;
-	// }
-	//
-	// public ObservableValue<String> getUnmountButtonTextProperty() {
-	// return unmountButtonTextProperty;
-	// }
-
 	public ObservableValue<Number> getHeight() {
 		return height;
 	}
-
-	// private void cleanDirectory() {
-	// File file = new File(path);
-	// if (file.exists())
-	// public ObservableValue<String> getCreateButtonTextProperty() {
-	// return createButtonTextProperty;
-	// }
-	//
-	// for (File f : file.listFiles()) {
-	// if (!".lock".equals(f.getName()))
-	// f.delete();
-	// }
-	// }
 
 	public void flush() {
 		engine.getCurrentCache().flush();
@@ -129,9 +96,10 @@ public class GenericList {
 		engine.addInstance(name.getValue());
 	}
 
-	public void remove(GenericWrapper genericWrapper) {
-		genericWrapper.remove();
-	}
+	// public void remove(GenericWrapper genericWrapper) {
+	//
+	// genericWrapper.remove();
+	// }
 
 	protected static class GenericWrapper {
 
@@ -177,19 +145,6 @@ public class GenericList {
 		return columns;
 	}
 
-	// public Node init() {
-	// Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
-	// Element todoCreateHBox = new Element(mainVBox, HBox.class);
-	// Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
-	// Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
-	//
-	// Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
-	// Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
-	// Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
-	//
-	// return (Node) mainVBox.apply(this).getNode();
-	// }
-
 	public Node initTable() {
 
 		Element<VBox> mainVBox = new Element<>(null, VBox.class);
@@ -204,9 +159,44 @@ public class GenericList {
 		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, GenericList::create));
 
 		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
+
+		// TableView tab = new TableView<>();
+		// tab.getSelectionModel().getSelectedCells()
+
+		// Function<TableView, TableViewSelectionModel> ob = TableView::getSelectionModel;
+		// ob.apply(t)
+		//
+		// todoTableView.addBinding(Binding.forEach());
 		Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
 		Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
 
+		Element<HBox> hboxElement = new Element<HBox>(mainVBox, HBox.class);
+		hboxElement.addBoots(Boot.setProperty(HBox::spacingProperty, 5));
+		Element<Button> buttonFlush = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::flush));
+		buttonFlush.addBoots(Boot.setProperty(Button::textProperty, "Flush"));
+
+		Element<Button> buttonClear = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::clear));
+		buttonClear.addBoots(Boot.setProperty(Button::textProperty, "Clear"));
+
+		Element<Button> buttonMount = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::mount));
+		buttonMount.addBoots(Boot.setProperty(Button::textProperty, "Mount"));
+
+		Element<Button> buttonUnmount = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::unmount));
+		buttonUnmount.addBoots(Boot.setProperty(Button::textProperty, "Unmount"));
+
 		return mainVBox.apply(this);
 	}
+
+	// public Node init() {
+	// Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
+	// Element todoCreateHBox = new Element(mainVBox, HBox.class);
+	// Element todosCreatLabel = new Element(todoCreateHBox, TextField.class, Binding.bindInputText(TextField::textProperty, GenericList::getName));
+	// Element todosCreateButton = new Element(todoCreateHBox, Button.class, Binding.bindProperty(Button::textProperty, GenericList::getCreateButtonTextProperty), Binding.bindAction(Button::onActionProperty, GenericList::create));
+	//
+	// Element todoHBox = new Element(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
+	// Element todoLabel = new Element(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, GenericWrapper::getObservable));
+	// Element todoRemoveButton = new Element(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::remove, GenericWrapper.class), Binding.bindProperty(Button::textProperty, GenericWrapper::getRemoveButtonTextProperty));
+	//
+	// return (Node) mainVBox.apply(this).getNode();
+	// }
 }

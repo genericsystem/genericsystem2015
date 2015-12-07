@@ -26,7 +26,7 @@ public class CocServer extends AbstractGSServer<BasicEngine> {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
 		case AbstractGSClient.GET_DEPENDENCIES:
-			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));// ///
+			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 		case AbstractGSClient.GET_VERTEX:
 			return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
 		case AbstractGSClient.APPLY:
@@ -35,7 +35,9 @@ public class CocServer extends AbstractGSServer<BasicEngine> {
 				return 0L;
 			});
 		default:
-			throw new IllegalStateException("unable to find method:" + methodId + " ");
+			return replyBuffer.appendLongThrowException(() -> {
+				throw new IllegalStateException("unable to find method:" + methodId + " ");
+			});
 		}
 	}
 
