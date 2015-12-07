@@ -10,6 +10,11 @@ public class ModelContext<M> {
 	private final List<ModelContext<M>> children = new ArrayList<>();
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
 
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALIZE ModelContext");
+	};
+
 	<SUBMODEL> void createSubContext(ViewContext<?> viewContext, int index, SUBMODEL model, Element<SUBMODEL> childElement) {
 		ModelContext<M> childContext = new ModelContext<M>(this, (M) model);
 		new ViewContext<>(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
