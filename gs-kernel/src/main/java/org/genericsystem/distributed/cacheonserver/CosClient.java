@@ -29,7 +29,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long newCacheId() {
-		return unsafeException(() -> unsafe(() -> newCacheIdPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> newCacheIdPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> newCacheIdPromise() {
@@ -38,7 +38,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long shiftTs(long cacheId) {
-		return unsafeException(() -> unsafe(() -> newShiftTsPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> newShiftTsPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> newShiftTsPromise(long cacheId) {
@@ -47,7 +47,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public Vertex[] getDependencies(long cacheId, long id) {
-		return unsafeException(() -> unsafe(() -> getDependenciesPromise(cacheId, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> getDependenciesPromise(cacheId, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> getDependenciesPromise(long cacheId, long id) {
@@ -56,7 +56,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return unsafeException(() -> unsafe(() -> addInstancePromise(cacheId, meta, overrides, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> addInstancePromise(cacheId, meta, overrides, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
@@ -65,7 +65,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return unsafeException(() -> unsafe(() -> updatePromise(cacheId, update, overrides, value, newComponents).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> updatePromise(cacheId, update, overrides, value, newComponents).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
@@ -74,7 +74,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return unsafeException(() -> unsafe(() -> mergePromise(cacheId, update, overrides, value, newComponents).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> mergePromise(cacheId, update, overrides, value, newComponents).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> mergePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
@@ -83,7 +83,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return unsafeException(() -> unsafe(() -> setInstancePromise(cacheId, meta, overrides, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> setInstancePromise(cacheId, meta, overrides, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> setInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
@@ -92,7 +92,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long forceRemove(long cacheId, long generic) {
-		return unsafeException(() -> unsafe(() -> forceRemovePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> forceRemovePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> forceRemovePromise(long cacheId, long generic) {
@@ -101,7 +101,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long remove(long cacheId, long generic) {
-		return unsafeException(() -> unsafe(() -> removePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> removePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> removePromise(long cacheId, long generic) {
@@ -110,7 +110,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
-		return unsafeException(() -> unsafe(() -> conserveRemovePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> conserveRemovePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> conserveRemovePromise(long cacheId, long generic) {
@@ -119,7 +119,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long flush(long cacheId) {
-		return unsafeException(() -> unsafe(() -> flushPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> flushPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> flushPromise(long cacheId) {
@@ -128,7 +128,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long tryFlush(long cacheId) throws ConcurrencyControlException {
-		return unsafeConcurrencyControlException(() -> unsafeException(() -> unsafe(() -> tryFlushPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT))));
+		return unsafeConcurrencyControlException(() -> extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> tryFlushPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT))));
 	}
 
 	public CompletableFuture<Object> tryFlushPromise(long cacheId) {
@@ -137,7 +137,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long clear(long cacheId) {
-		return unsafeException(() -> unsafe(() -> clearPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> clearPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> clearPromise(long cacheId) {
@@ -146,7 +146,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long mount(long cacheId) {
-		return unsafeException(() -> unsafe(() -> mountPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> mountPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> mountPromise(long cacheId) {
@@ -155,7 +155,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public long unmount(long cacheId) {
-		return unsafeException(() -> unsafe(() -> unmountPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> unmountPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> unmountPromise(long cacheId) {
@@ -164,7 +164,7 @@ public class CosClient extends AbstractGSClient implements CosProtocole {
 
 	@Override
 	public int getCacheLevel(long cacheId) {
-		return unsafeException(() -> unsafe(() -> getCacheLevelPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> getCacheLevelPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
 	}
 
 	public CompletableFuture<Object> getCacheLevelPromise(long cacheId) {

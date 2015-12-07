@@ -18,19 +18,19 @@ public class CocClient extends AbstractGSClient implements CocProtocole {
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {
-		return unsafe(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		return extractRuntimeException(() -> getDependenciesPromise(ts, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 
 	}
 
 	public CompletableFuture<Vertex[]> getDependenciesPromise(long ts, long id) {
-		return unsafeException(() -> promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(ts).appendLong(id)));
+		return extractRuntimeExceptionPromise(() -> promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(ts).appendLong(id)));
 	}
 
 	@Override
 	public void apply(long ts, long[] removes, Vertex[] adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		if (!Arrays.stream(adds).allMatch(v -> (v.getBirthTs() == Long.MAX_VALUE)))
 			throw new IllegalStateException("");
-		Object res = unsafe(() -> applyPromise(ts, removes, adds).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		Object res = extractRuntimeException(() -> applyPromise(ts, removes, adds).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 		if (res instanceof OptimisticLockConstraintViolationException)
 			throw (OptimisticLockConstraintViolationException) res;
 		if (res instanceof ConcurrencyControlException)

@@ -78,7 +78,7 @@ public abstract class AbstractGSClient implements Protocole {
 		CompletableFuture<T> promise = new CompletableFuture<>();
 		int key = indexCallback(buff -> promise.complete(receiveReturn.apply(buff)));
 		send(sendParams.apply(Buffer.buffer().appendInt(method).appendInt(key)));
-		return promise;
+		return promise.thenApplyAsync(p -> p);
 	}
 
 	@FunctionalInterface
@@ -86,7 +86,7 @@ public abstract class AbstractGSClient implements Protocole {
 		R supply() throws InterruptedException, ExecutionException, TimeoutException;
 	}
 
-	protected <T, R> R unsafe(UnsafeSupplier<R> unsafe) {
+	protected <T, R> R extractRuntimeException(UnsafeSupplier<R> unsafe) {
 		try {
 			return unsafe.supply();
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -95,7 +95,9 @@ public abstract class AbstractGSClient implements Protocole {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <R> R unsafeException(Supplier<Object> unsafe) {
+	protected <R> R extractRuntimeExceptionPromise(Supplier<Object> unsafe) {
+		assert !Thread.currentThread().toString().subSequence(0, 13).equals("Thread[vert.x");
+
 		Object result = unsafe.get();
 		if (result instanceof RuntimeException)
 			throw (RuntimeException) result;
@@ -104,20 +106,21 @@ public abstract class AbstractGSClient implements Protocole {
 
 	@Override
 	public Vertex getVertex(long id) {
-		return unsafe(() -> getVertexPromise(id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		System.out.println("client ask vertex");
+		return extractRuntimeException(() -> getVertexPromise(id).get(/* Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT */));
 	}
 
 	public CompletableFuture<Vertex> getVertexPromise(long id) {
-		return unsafeException(() -> promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id)));
+		return extractRuntimeExceptionPromise(() -> promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id)));
 	}
 
 	@Override
 	public long pickNewTs() {
-		return unsafe(() -> getPickNewTsPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		return extractRuntimeException(() -> getPickNewTsPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 	}
 
 	public CompletableFuture<Long> getPickNewTsPromise() {
-		return unsafeException(() -> promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer));
+		return extractRuntimeExceptionPromise(() -> promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer));
 	}
 
 	// protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
