@@ -12,57 +12,57 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-public interface Binder<SUBMODEL, WRAPPER> {
+public interface Binder<N, SUBMODEL, WRAPPER> {
 
-	default void init(Function<? super SUBMODEL, WRAPPER> applyOnModel, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
+	default void init(Function<? super SUBMODEL, WRAPPER> applyOnModel, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 		init(applyOnModel.apply((SUBMODEL) modelContext.getModel()), modelContext, viewContext, childElement);
 	}
 
-	void init(WRAPPER wrapper, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement);
+	void init(WRAPPER wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement);
 
-	public static <N, SUBMODEL, T extends Event> Binder<SUBMODEL, T> actionBinder(Function<N, ObjectProperty<EventHandler<T>>> applyOnNode) {
-		return new Binder<SUBMODEL, T>() {
+	public static <N, SUBMODEL, T extends Event> Binder<N, SUBMODEL, T> actionBinder(Function<N, ObjectProperty<EventHandler<T>>> applyOnNode) {
+		return new Binder<N, SUBMODEL, T>() {
 			@Override
-			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply((N) viewContext.getNode()).set(event -> {
+			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> {
 					System.out.println("zzz");
 					applyOnModel.apply((SUBMODEL) modelContext.getModel());
 				});
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
+			public void init(T wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 			}
 		};
 
 	}
 
-	public static <N, SUBMODEL, W> Binder<SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
-		return new Binder<SUBMODEL, ObservableValue<W>>() {
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, SUBMODEL, ObservableValue<W>>() {
 			@Override
-			public void init(ObservableValue<W> wrapper, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply((N) viewContext.getNode()).bind(wrapper);
+			public void init(ObservableValue<W> wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).bind(wrapper);
 			}
 		};
 	}
 
-	public static <N, SUBMODEL> Binder<SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
-		return new Binder<SUBMODEL, Property<String>>() {
+	public static <N, SUBMODEL> Binder<N, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
+		return new Binder<N, SUBMODEL, Property<String>>() {
 
 			@Override
-			public void init(Property<String> wrapper, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply((N) viewContext.getNode()).bindBidirectional(wrapper);
+			public void init(Property<String> wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
 			}
 		};
 	}
 
-	public static <N, SUBMODEL, W> Binder<SUBMODEL, ObservableList<W>> foreachBinder() {
-		return new Binder<SUBMODEL, ObservableList<W>>() {
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableList<W>> foreachBinder() {
+		return new Binder<N, SUBMODEL, ObservableList<W>>() {
 
 			private List<W> list;
 
 			@Override
-			public void init(ObservableList<W> wrapper, ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
+			public void init(ObservableList<W> wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 
 				list = new AbstractList<W>() {
 
@@ -95,14 +95,8 @@ public interface Binder<SUBMODEL, WRAPPER> {
 					public W remove(int index) {
 						return (W) modelContext.removeSubContext(index).getModel();
 					}
-
-					@Override
-					protected void finalize() throws Throwable {
-						System.out.println("FINALIZE");
-					}
 				};
 				wrapper.addListener(new ListContentBinding<>(list));
-				// Bindings.bindContent(list, wrapper);
 			}
 		};
 	}

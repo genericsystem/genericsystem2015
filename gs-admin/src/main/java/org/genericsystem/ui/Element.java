@@ -5,28 +5,29 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
 public class Element<N> {
 	public final Class<N> classNode;
-	public List<? extends Binding<?, ?>> metaBindings = new ArrayList<>();
-	public List<Binding<?, ?>> bindings = new ArrayList<>();
+	public List<? extends Binding<N, ?, ?>> metaBindings = new ArrayList<>();
+	public List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
 
 	private List<Boot> boots = new ArrayList<>();
 
-	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, Binding<?, ?>... binding) {
+	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, Binding<N, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<?, ?>... binding) {
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?>> metaBindings, Binding<?, ?>... binding) {
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<? extends Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
 		this.bindings.addAll(Arrays.asList(binding));
@@ -44,11 +45,11 @@ public class Element<N> {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void addMetaBinding(Binding<?, ?> metaBinding) {
+	public void addMetaBinding(Binding<N, ?, ?> metaBinding) {
 		((List<Binding>) metaBindings).add(metaBinding);
 	}
 
-	public void addBinding(Binding<?, ?>... binding) {
+	public void addBinding(Binding<N, ?, ?>... binding) {
 		bindings.addAll(Arrays.asList(binding));
 	}
 
