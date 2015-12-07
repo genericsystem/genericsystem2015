@@ -1,6 +1,7 @@
 package org.genericsystem.todoApp;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -13,11 +14,21 @@ import javafx.scene.control.TableCell;
 
 public class DeleteButtonCell<T> extends TableCell<T, String> {
 	private final Button cellButton = new Button();
+	Consumer<T> consumer;
+
+	public DeleteButtonCell(Consumer<T> consumer) {
+		setEditable(true);
+		cellButton.setMaxWidth(200);
+		cellButton.setAlignment(Pos.BASELINE_CENTER);
+		this.consumer = consumer;
+	}
 
 	public DeleteButtonCell() {
 		setEditable(true);
 		cellButton.setMaxWidth(200);
 		cellButton.setAlignment(Pos.BASELINE_CENTER);
+		this.consumer = t -> {
+		};
 	}
 
 	@Override
@@ -39,7 +50,9 @@ public class DeleteButtonCell<T> extends TableCell<T, String> {
 
 					Optional<ButtonType> result = alert.showAndWait();
 					if (result.get() == ButtonType.OK) {
+						consumer.accept((T) getTableRow().getItem());
 						getTableView().getItems().remove(getTableRow().getItem());
+
 					}
 				}
 			});
