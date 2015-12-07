@@ -1,6 +1,7 @@
 package org.genericsystem.defaults.async;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
@@ -8,16 +9,18 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IContext;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 
 public interface AsyncDefaultContext<T extends DefaultVertex<T>> extends IContext<T> {
 
-	DefaultRoot<T> getRoot();
+	DefaultRoot<T> getAsyncRoot();
 
 	default CompletableFuture<Boolean> isAsyncAlive(T vertex) {
 		assert vertex != null;
@@ -173,13 +176,20 @@ public interface AsyncDefaultContext<T extends DefaultVertex<T>> extends IContex
 		return new OrderedRemoveDependencies().traverse(node);
 	}
 
-	// TODO when supersComputer async will be create
-	// default List<T> computeAsyncAndCheckOverridesAreReached(T adjustedMeta, List<T> overrides, Serializable value, List<T> components) {
-	// List<T> supers = new ArrayList<>(new SupersComputer<>(adjustedMeta, overrides, value, components));
-	// if (!ApiStatics.areOverridesReached(supers, overrides))
-	// discardWithException(new UnreachableOverridesException("Unable to reach overrides : " + overrides + " with computed supers : " + supers));
-	// return supers;
-	// }
+	default CompletableFuture<List<T>> computeAsyncAndCheckOverridesAreReached(T adjustedMeta, List<T> overrides, Serializable value, List<T> components) {
+		CompletableFuture<List<T>> promise = new AsyncSupersComputer(adjustedMeta, overrides, value, components);
+		CompletableFuture<List<T>> cf = new CompletableFuture<>();
+
+		promise.thenApply(list -> {
+			List<T> supers = new ArrayList<>(list);
+			if (!ApiStatics.areOverridesReached(supers, overrides))
+				cf.completeExceptionally(discardWithExceptionPromise(new UnreachableOverridesException("Unable to reach overrides : " + overrides + " with computed supers : " + supers)));
+			cf.complete(supers);
+			return list;
+		});
+
+		return cf;
+	}
 
 	CompletableFuture<Snapshot<T>> getDependenciesPromise(T vertex);
 
