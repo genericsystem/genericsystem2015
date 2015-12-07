@@ -4,9 +4,9 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -22,11 +22,9 @@ public class Binding<SUBMODEL, T> {
 		this.method = method;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void init(ModelContext<?> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 		Function<? super SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
-		T wrapper = applyOnModel.apply((SUBMODEL) modelContext.getModel());
-		binder.init(wrapper, modelContext, viewContext, childElement);
+		binder.init(applyOnModel, modelContext, viewContext, childElement);
 	}
 
 	protected Function<? super SUBMODEL, T> applyOnModel(ModelContext<?> modelContext) {
@@ -35,19 +33,34 @@ public class Binding<SUBMODEL, T> {
 			while (modelContext_ != null) {
 				try {
 					return (T) ((BiFunction) method).apply(modelContext_.getModel(), SUBMODEL);
-				} catch (ClassCastException ignore) {}
+				} catch (ClassCastException ignore) {
+				}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
 		};
 	}
 
-	private static <SUBMODEL, T> Binding<SUBMODEL, T> bind(Function<?, T> function, Binder<SUBMODEL, T> binder) {
-		return new Binding<>((u, v) -> (T) ((Function) function).apply(u), binder);
+	private static <M, SUBMODEL, T> Binding<SUBMODEL, T> bind(Function<M, T> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<>((u, v) -> function.apply((M) u), binder);
 	}
 
 	private static <M, SUBMODEL, T> Binding<SUBMODEL, T> bind(BiFunction<M, SUBMODEL, T> function, Binder<SUBMODEL, T> binder) {
 		return new Binding<>((u, v) -> function.apply((M) u, v), binder);
+	}
+
+	private static <M, SUBMODEL, T> Binding<SUBMODEL, T> bind(Consumer<M> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<>((u, v) -> {
+			function.accept((M) u);
+			return null;
+		}, binder);
+	}
+
+	private static <M, SUBMODEL, T> Binding<SUBMODEL, T> bind(BiConsumer<M, SUBMODEL> function, Binder<SUBMODEL, T> binder) {
+		return new Binding<>((u, v) -> {
+			function.accept((M) u, v);
+			return null;
+		}, binder);
 	}
 
 	public static <M, SUBMODEL, T> Binding<SUBMODEL, ObservableList<T>> forEach(Function<M, ObservableList<T>> function) {
@@ -59,16 +72,14 @@ public class Binding<SUBMODEL, T> {
 	}
 
 	public static <R, M, SUBMODEL> Binding<SUBMODEL, Property<String>> bindInputText(Function<R, Property<String>> getTextProperty, Function<M, Property<String>> function) {
-		return Binding.<SUBMODEL, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
+		return Binding.<M, SUBMODEL, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
 	}
 
-	public static <R, M, SUBMODEL, T extends Event> Binding<SUBMODEL, ObjectProperty<EventHandler<T>>> bindAction(Function<R, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
-		return Binding.<SUBMODEL, ObjectProperty<EventHandler<T>>> bind(m -> new SimpleObjectProperty<>(t -> ((Consumer) consumer).accept(m)), Binder.actionBinder(propAction));
+	public static <R, M, SUBMODEL, T extends Event> Binding<SUBMODEL, T> bindAction(Function<R, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
+		return Binding.<M, SUBMODEL, T> bind(consumer, Binder.actionBinder(propAction));
 	}
 
-	public static <R, M, SUBMODEL, T extends Event> Binding<SUBMODEL, ObjectProperty<EventHandler<T>>> bindAction(Function<R, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<M, SUBMODEL> biConsumer, Class<SUBMODEL> clazz) {
-		return Binding.<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bind((m, sm) -> {
-			return new SimpleObjectProperty<>(t -> biConsumer.accept(m, sm));
-		}, Binder.actionBinder(propAction));
+	public static <R, M, SUBMODEL, T extends Event> Binding<SUBMODEL, T> bindAction(Function<R, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<M, SUBMODEL> biConsumer, Class<SUBMODEL> clazz) {
+		return Binding.<M, SUBMODEL, T> bind(biConsumer, Binder.actionBinder(propAction));
 	}
 }
