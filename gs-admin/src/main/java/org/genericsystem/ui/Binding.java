@@ -4,18 +4,23 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 
 public class Binding<M, SUBMODEL, T> {
 
 	private final BiFunction<M, SUBMODEL, T> method;
 	private final Binder<M, SUBMODEL, T> binder;
+
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALZE BINDING");
+	}
 
 	public Binding(BiFunction<M, SUBMODEL, T> method, Binder<M, SUBMODEL, T> binder) {
 		this.binder = binder;
@@ -34,8 +39,7 @@ public class Binding<M, SUBMODEL, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel(), SUBMODEL);
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -51,19 +55,19 @@ public class Binding<M, SUBMODEL, T> {
 		return new Binding<M, SUBMODEL, T>((u, v) -> function.apply(u, v), binder);
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Consumer<M> function, Binder<M, SUBMODEL, T> binder) {
-		return new Binding<M, SUBMODEL, T>((u, v) -> {
-			function.accept(u);
-			return null;
-		}, binder);
-	}
-
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiConsumer<M, SUBMODEL> function, Binder<M, SUBMODEL, T> binder) {
-		return new Binding<M, SUBMODEL, T>((u, v) -> {
-			function.accept(u, v);
-			return null;
-		}, binder);
-	}
+	// private static <M, SUBMODEL, T extends Event> Binding<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bind(Consumer<M> function, Binder<M, SUBMODEL, ObjectProperty<EventHandler<T>>> binder) {
+	// return new Binding<M, SUBMODEL, ObjectProperty<EventHandler<T>>>((u, v) -> {
+	// function.accept(u);
+	// return null;
+	// }, binder);
+	// }
+	//
+	// private static <M, SUBMODEL, T extends Event> Binding<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bind(BiConsumer<M, SUBMODEL> function, Binder<M, SUBMODEL, ObjectProperty<EventHandler<T>>> binder) {
+	// return new Binding<M, SUBMODEL, ObjectProperty<EventHandler<T>>>((u, v) -> {
+	// function.accept(u, v);
+	// return null;
+	// }, binder);
+	// }
 
 	public static <M, SUBMODEL, T> Binding<M, SUBMODEL, ObservableList<T>> forEach(Function<M, ObservableList<T>> function) {
 		return Binding.<M, SUBMODEL, ObservableList<T>> bind(function, Binder.foreachBinder());
@@ -77,11 +81,15 @@ public class Binding<M, SUBMODEL, T> {
 		return Binding.<M, SUBMODEL, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
 	}
 
-	public static <R, M, SUBMODEL, T> Binding<M, SUBMODEL, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, Consumer<M> function) {
-		return Binding.<M, SUBMODEL, T> bind(function, Binder.actionBinder(propAction));
+	public static <R, M, SUBMODEL, T extends Event> Binding<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bindAction(Function<R, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
+		return Binding.<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bind(m -> {
+			return new SimpleObjectProperty<>(t -> consumer.accept(m));
+		}, Binder.actionBinder(propAction));
 	}
 
-	public static <R, M, SUBMODEL, T> Binding<M, SUBMODEL, T> bindAction(Function<R, ObjectProperty<EventHandler<ActionEvent>>> propAction, BiConsumer<M, SUBMODEL> function, Class<SUBMODEL> clazz) {
-		return Binding.<M, SUBMODEL, T> bind(function, Binder.actionBinder(propAction));
+	public static <R, M, SUBMODEL, T extends Event> Binding<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bindAction(Function<R, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<M, SUBMODEL> biConsumer, Class<SUBMODEL> clazz) {
+		return Binding.<M, SUBMODEL, ObjectProperty<EventHandler<T>>> bind((m, sm) -> {
+			return new SimpleObjectProperty<>(t -> biConsumer.accept(m, sm));
+		}, Binder.actionBinder(propAction));
 	}
 }

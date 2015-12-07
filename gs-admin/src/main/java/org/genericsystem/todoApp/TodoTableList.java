@@ -60,9 +60,9 @@ public class TodoTableList {
 		todos.add(todo);
 	}
 
-	// public void remove(Todo todo) {
-	// this.todos.remove(todo);
-	// }
+	public void remove(Todo todo) {
+		this.todos.remove(todo);
+	}
 
 	public static class Todo {
 		private Property<String> stringProperty = new SimpleStringProperty();
