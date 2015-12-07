@@ -2,6 +2,7 @@ package org.genericsystem.ui;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 
 public class Boot<NODE> {

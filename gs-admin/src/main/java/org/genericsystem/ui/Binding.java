@@ -22,6 +22,7 @@ public class Binding<M, SUBMODEL, T> {
 		this.method = method;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void init(ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 		Function<? super SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
 		binder.init((Function<? super M, T>) applyOnModel, modelContext, viewContext, childElement);
@@ -29,10 +30,10 @@ public class Binding<M, SUBMODEL, T> {
 
 	protected Function<? super SUBMODEL, T> applyOnModel(ModelContext<M> modelContext) {
 		return (SUBMODEL) -> {
-			ModelContext modelContext_ = modelContext;
+			ModelContext<M> modelContext_ = modelContext;
 			while (modelContext_ != null) {
 				try {
-					return method.apply((M) modelContext_.getModel(), SUBMODEL);
+					return method.apply(modelContext_.getModel(), SUBMODEL);
 				} catch (ClassCastException ignore) {
 				}
 				modelContext_ = modelContext_.getParent();
@@ -45,6 +46,7 @@ public class Binding<M, SUBMODEL, T> {
 		return new Binding<M, SUBMODEL, T>((u, v) -> function.apply(u), binder);
 	}
 
+	@SuppressWarnings("unused")
 	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiFunction<M, SUBMODEL, T> function, Binder<M, SUBMODEL, T> binder) {
 		return new Binding<M, SUBMODEL, T>((u, v) -> function.apply(u, v), binder);
 	}

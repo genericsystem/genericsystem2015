@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -20,6 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;

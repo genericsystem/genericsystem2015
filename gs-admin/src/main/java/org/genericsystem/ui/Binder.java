@@ -14,30 +14,32 @@ import javafx.event.EventHandler;
 
 public interface Binder<M, SUBMODEL, WRAPPER> {
 
-	public void init(Function<? super M, WRAPPER> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement);
+	public void init(Function<? super M, WRAPPER> applyOnModel, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement);
 
 	public static <N, M, SUBMODEL, X> Binder<M, SUBMODEL, X> actionBinder(Function<N, ObjectProperty<EventHandler<ActionEvent>>> applyOnNode) {
 		return new Binder<M, SUBMODEL, X>() {
+			@SuppressWarnings("unchecked")
 			@Override
-			public void init(Function<? super M, X> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement) {
+			public void init(Function<? super M, X> applyOnModel, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply((N) viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
 			}
 		};
 	}
 
-	public static <N, M, SUBMODEL, X> Binder<M, SUBMODEL, ObservableValue<X>> propertySetter(Function<N, Property<X>> applyOnNode) {
-		return new Binder<M, SUBMODEL, ObservableValue<X>>() {
-			@Override
-			public void init(Function<? super M, ObservableValue<X>> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply((N) viewContext.getNode()).setValue(applyOnModel.apply(modelContext.getModel()).getValue());
-			}
-		};
-	}
+	// public static <N, M, SUBMODEL, X> Binder<M, SUBMODEL, ObservableValue<X>> propertySetter(Function<N, Property<X>> applyOnNode) {
+	// return new Binder<M, SUBMODEL, ObservableValue<X>>() {
+	// @Override
+	// public void init(Function<? super M, ObservableValue<X>> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement) {
+	// applyOnNode.apply((N) viewContext.getNode()).setValue(applyOnModel.apply(modelContext.getModel()).getValue());
+	// }
+	// };
+	// }
 
 	public static <N, M, SUBMODEL, W> Binder<M, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<M, SUBMODEL, ObservableValue<W>>() {
+			@SuppressWarnings("unchecked")
 			@Override
-			public void init(Function<? super M, ObservableValue<W>> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement) {
+			public void init(Function<? super M, ObservableValue<W>> applyOnModel, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply((N) viewContext.getNode()).bind(applyOnModel.apply(modelContext.getModel()));
 			}
 		};
@@ -45,8 +47,9 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 
 	public static <N, M, SUBMODEL> Binder<M, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
 		return new Binder<M, SUBMODEL, Property<String>>() {
+			@SuppressWarnings("unchecked")
 			@Override
-			public void init(Function<? super M, Property<String>> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement) {
+			public void init(Function<? super M, Property<String>> applyOnModel, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply((N) viewContext.getNode()).bindBidirectional(applyOnModel.apply(modelContext.getModel()));
 			}
 		};
@@ -57,9 +60,10 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 			private List<W> list;
 
 			@Override
-			public void init(Function<? super M, ObservableList<W>> applyOnModel, ModelContext<M> modelContext, ViewContext viewContext, Element<SUBMODEL> childElement) {
+			public void init(Function<? super M, ObservableList<W>> applyOnModel, ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 				list = new AbstractList<W>() {
 
+					@SuppressWarnings("unchecked")
 					@Override
 					public W get(int index) {
 						return (W) modelContext.get(index).getModel();
@@ -70,6 +74,7 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 						return modelContext.size();
 					}
 
+					@SuppressWarnings("unchecked")
 					@Override
 					public void add(int index, W element) {
 						modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
@@ -82,6 +87,7 @@ public interface Binder<M, SUBMODEL, WRAPPER> {
 						return remove;
 					}
 
+					@SuppressWarnings("unchecked")
 					@Override
 					public W remove(int index) {
 						return (W) modelContext.removeSubContext(index).getModel();

@@ -55,12 +55,12 @@ public class Element<N> {
 
 	@SuppressWarnings("unchecked")
 	public <PARENTNODE> ObservableList<N> getGraphicChildren(PARENTNODE graphicParent) {
-		return ((Function<PARENTNODE, ObservableList<N>>) (Function) getGraphicChildren).apply(graphicParent);
+		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(graphicParent);
 	}
 
 	public N apply(Object model) {
 		N node = createNode();
-		new ViewContext<>(new ModelContext(null, model), this, node, null);
+		new ViewContext<>(new ModelContext<Object>(null, model), this, node, null);
 		return node;
 	}
 
@@ -72,6 +72,7 @@ public class Element<N> {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <CHILDNODE> List<Element<CHILDNODE>> getChildren() {
 		return (List) children;
 	}
