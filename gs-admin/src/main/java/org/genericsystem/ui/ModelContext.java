@@ -5,13 +5,18 @@ import java.util.List;
 
 public class ModelContext<M> {
 
-	private final ModelContext<M> parent;
+	private final ModelContext<?> parent;
 	private final M model;
-	private final List<ModelContext<M>> children = new ArrayList<>();
+	private final List<ModelContext<?>> children = new ArrayList<>();
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
 
+	public ModelContext(ModelContext<?> parent, M model) {
+		this.parent = parent;
+		this.model = model;
+	}
+
 	<SUBMODEL> void createSubContext(ViewContext<?> viewContext, int index, SUBMODEL model, Element<SUBMODEL> childElement) {
-		ModelContext<M> childContext = new ModelContext<M>(this, (M) model);
+		ModelContext<SUBMODEL> childContext = new ModelContext<>(this, model);
 		new ViewContext<>(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
 		children.add(index, childContext);
 	}
@@ -23,7 +28,7 @@ public class ModelContext<M> {
 		return removed;
 	};
 
-	ModelContext<M> get(int index) {
+	ModelContext<?> get(int index) {
 		return children.get(index);
 	}
 
@@ -31,20 +36,15 @@ public class ModelContext<M> {
 		return children.size();
 	}
 
-	public ModelContext(ModelContext<M> parent, M model) {
-		this.parent = parent;
-		this.model = model;
-	}
-
 	public M getModel() {
 		return model;
 	}
 
-	public ModelContext<M> getParent() {
+	public ModelContext<?> getParent() {
 		return this.parent;
 	}
 
-	public List<ModelContext<M>> getChildren() {
+	public List<ModelContext<?>> getChildren() {
 		return this.children;
 	}
 
