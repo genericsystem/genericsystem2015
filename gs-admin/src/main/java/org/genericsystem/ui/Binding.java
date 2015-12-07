@@ -15,24 +15,24 @@ import javafx.event.EventHandler;
 public class Binding<M, SUBMODEL, T> {
 
 	private final BiFunction<M, SUBMODEL, T> method;
-	private final Binder<SUBMODEL, T> binder;
+	private final Binder<M, SUBMODEL, T> binder;
 
-	public Binding(BiFunction<M, SUBMODEL, T> method, Binder<SUBMODEL, T> binder) {
+	public Binding(BiFunction<M, SUBMODEL, T> method, Binder<M, SUBMODEL, T> binder) {
 		this.binder = binder;
 		this.method = method;
 	}
 
-	public void init(ModelContext modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
-		Function<SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
-		binder.init(applyOnModel, modelContext, viewContext, childElement);
+	public void init(ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
+		Function<? super SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
+		binder.init((Function<? super M, T>) applyOnModel, modelContext, viewContext, childElement);
 	}
 
-	protected Function<SUBMODEL, T> applyOnModel(ModelContext modelContext) {
+	protected Function<? super SUBMODEL, T> applyOnModel(ModelContext<M> modelContext) {
 		return (SUBMODEL) -> {
 			ModelContext modelContext_ = modelContext;
 			while (modelContext_ != null) {
 				try {
-					return method.apply(modelContext_.getModel(), SUBMODEL);
+					return method.apply((M) modelContext_.getModel(), SUBMODEL);
 				} catch (ClassCastException ignore) {
 				}
 				modelContext_ = modelContext_.getParent();
@@ -41,22 +41,22 @@ public class Binding<M, SUBMODEL, T> {
 		};
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Function<M, T> function, Binder<SUBMODEL, T> binder) {
+	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Function<M, T> function, Binder<M, SUBMODEL, T> binder) {
 		return new Binding<M, SUBMODEL, T>((u, v) -> function.apply(u), binder);
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiFunction<M, SUBMODEL, T> function, Binder<SUBMODEL, T> binder) {
+	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiFunction<M, SUBMODEL, T> function, Binder<M, SUBMODEL, T> binder) {
 		return new Binding<M, SUBMODEL, T>((u, v) -> function.apply(u, v), binder);
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Consumer<M> function, Binder<SUBMODEL, T> binder) {
+	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Consumer<M> function, Binder<M, SUBMODEL, T> binder) {
 		return new Binding<M, SUBMODEL, T>((u, v) -> {
 			function.accept(u);
 			return null;
 		}, binder);
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiConsumer<M, SUBMODEL> function, Binder<SUBMODEL, T> binder) {
+	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiConsumer<M, SUBMODEL> function, Binder<M, SUBMODEL, T> binder) {
 		return new Binding<M, SUBMODEL, T>((u, v) -> {
 			function.accept(u, v);
 			return null;

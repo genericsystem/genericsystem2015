@@ -3,21 +3,21 @@ package org.genericsystem.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModelContext {
+public class ModelContext<M> {
 
 	private final ModelContext parent;
-	private final Object model;
+	private final M model;
 	private final List<ModelContext> children = new ArrayList<>();
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
 
-	<SUBNODE> void createSubContext(ViewContext<?> viewContext, int index, SUBNODE model, Element<SUBNODE> childElement) {
+	<SUBMODEL> void createSubContext(ViewContext<?> viewContext, int index, SUBMODEL model, Element<SUBMODEL> childElement) {
 		ModelContext childContext = new ModelContext(this, model);
 		new ViewContext<>(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
 		children.add(index, childContext);
 	}
 
 	ModelContext removeSubContext(int index) {
-		ModelContext removed = children.remove(index);
+		ModelContext<?> removed = children.remove(index);
 		for (ViewContext<?> viewContext : removed.viewContexts)
 			viewContext.destroyChild();
 		return removed;
@@ -31,14 +31,13 @@ public class ModelContext {
 		return children.size();
 	}
 
-	public ModelContext(ModelContext parent, Object model) {
+	public ModelContext(ModelContext parent, M model) {
 		this.parent = parent;
 		this.model = model;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <M> M getModel() {
-		return (M) model;
+	public M getModel() {
+		return model;
 	}
 
 	public ModelContext getParent() {
