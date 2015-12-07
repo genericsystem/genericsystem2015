@@ -15,9 +15,9 @@ import javafx.event.EventHandler;
 public class Binding<M, SUBMODEL, T> {
 
 	private final BiFunction<M, SUBMODEL, T> method;
-	private final Binder<M, SUBMODEL, T> binder;
+	private final Binder<SUBMODEL, T> binder;
 
-	public Binding(BiFunction<M, SUBMODEL, T> method, Binder<M, SUBMODEL, T> binder) {
+	public Binding(BiFunction<M, SUBMODEL, T> method, Binder<SUBMODEL, T> binder) {
 		this.binder = binder;
 		this.method = method;
 	}
@@ -25,7 +25,8 @@ public class Binding<M, SUBMODEL, T> {
 	@SuppressWarnings("unchecked")
 	public void init(ModelContext<M> modelContext, ViewContext<?> viewContext, Element<SUBMODEL> childElement) {
 		Function<? super SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
-		binder.init((Function<? super M, T>) applyOnModel, modelContext, viewContext, childElement);
+		T wrapper = applyOnModel.apply((SUBMODEL) modelContext.getModel());
+		binder.init(wrapper, modelContext, viewContext, childElement);
 	}
 
 	protected Function<? super SUBMODEL, T> applyOnModel(ModelContext<M> modelContext) {
@@ -41,11 +42,11 @@ public class Binding<M, SUBMODEL, T> {
 		};
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Function<M, T> function, Binder<M, SUBMODEL, T> binder) {
+	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(Function<M, T> function, Binder<SUBMODEL, T> binder) {
 		return new Binding<>((u, v) -> function.apply(u), binder);
 	}
 
-	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiFunction<M, SUBMODEL, T> function, Binder<M, SUBMODEL, T> binder) {
+	private static <M, SUBMODEL, T> Binding<M, SUBMODEL, T> bind(BiFunction<M, SUBMODEL, T> function, Binder<SUBMODEL, T> binder) {
 		return new Binding<>((u, v) -> function.apply(u, v), binder);
 	}
 
