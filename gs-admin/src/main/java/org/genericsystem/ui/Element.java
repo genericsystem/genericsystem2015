@@ -5,11 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
-public class Element<NODE> {
-	public final Class<NODE> classNode;
+public class Element<N> {
+	public final Class<N> classNode;
 	public List<? extends Binding<?, ?, ?>> metaBindings = new ArrayList<>();
 	public List<Binding<?, ?, ?>> bindings = new ArrayList<>();
 
@@ -18,21 +19,21 @@ public class Element<NODE> {
 
 	private List<Boot> boots = new ArrayList<>();
 
-	public Element(Element<?> parent, Class<NODE> classNode, Binding<?, ?, ?>... binding) {
+	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
-	public <PARENTNODE> Element(Element<?> parent, Class<NODE> classNode, Function<PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<?, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
-	public <PARENTNODE> Element(Element<?> parent, Class<NODE> classNode, Function<PARENTNODE, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<? extends Binding<?, ?, ?>> metaBindings, Binding<?, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
 		this.bindings.addAll(Arrays.asList(binding));
 		this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
-			parent.<NODE> getChildren().add(this);
+			parent.<N> getChildren().add(this);
 	}
 
 	public void addBoots(Boot... boot) {
@@ -53,17 +54,17 @@ public class Element<NODE> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <PARENTNODE> ObservableList<NODE> getGraphicChildren(PARENTNODE graphicParent) {
-		return ((Function<PARENTNODE, ObservableList<NODE>>) (Function) getGraphicChildren).apply(graphicParent);
+	public <PARENTNODE> ObservableList<N> getGraphicChildren(PARENTNODE graphicParent) {
+		return ((Function<PARENTNODE, ObservableList<N>>) (Function) getGraphicChildren).apply(graphicParent);
 	}
 
-	public NODE apply(Object model) {
-		NODE node = createNode();
+	public N apply(Object model) {
+		N node = createNode();
 		new ViewContext<>(new ModelContext(null, model), this, node, null);
 		return node;
 	}
 
-	NODE createNode() {
+	N createNode() {
 		try {
 			return classNode.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
