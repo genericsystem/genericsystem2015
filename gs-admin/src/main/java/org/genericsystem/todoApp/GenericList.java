@@ -142,7 +142,7 @@ public class GenericList {
 		public DeleteColumn() {
 			setText("Delete");
 			setMinWidth(130);
-			setCellFactory(column -> new DeleteButtonCell<>());
+			setCellFactory(column -> new DeleteButtonCell<>(GenericWrapper::remove));
 		}
 	}
 
