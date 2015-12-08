@@ -5,7 +5,8 @@ public class ViewContext<N> {
 	private final N node;
 	private final ViewContext<?> parent;
 
-	public <CHILDNODE> ViewContext(ModelContext modelContext, Element<N> template, N node, ViewContext<?> parent) {
+	@SuppressWarnings("unchecked")
+	public ViewContext(ModelContext modelContext, Element<N> template, N node, ViewContext<?> parent) {
 		this.template = template;
 		this.node = node;
 		this.parent = parent;
@@ -13,11 +14,11 @@ public class ViewContext<N> {
 		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<N, ?, ?> binding : template.bindings)
 			binding.init(modelContext, this, null);
-		for (Element<CHILDNODE> childElement : template.<CHILDNODE> getChildren()) {
-			for (Binding<CHILDNODE, ?, ?> metaBinding : childElement.metaBindings)
-				metaBinding.init(modelContext, (ViewContext<CHILDNODE>) this, (Element) childElement);
+		for (Element<?> childElement : template.getChildren()) {
+			for (Binding<?, ?, ?> metaBinding : childElement.metaBindings)
+				metaBinding.init(modelContext, (ViewContext) this, (Element) childElement);
 			if (childElement.metaBindings.isEmpty())
-				new ViewContext<>(modelContext, childElement, childElement.createNode(), this);
+				new ViewContext(modelContext, childElement, childElement.createNode(), this);
 		}
 		if (parent != null) {
 			// System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));

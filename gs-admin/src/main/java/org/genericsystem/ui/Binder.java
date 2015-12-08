@@ -81,9 +81,8 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 					@Override
 					public void add(int index, W model) {
 						ModelContext childContext = new ModelContext(modelContext, model);
-						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
+						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? (N) model : childElement.createNode(), viewContext);
 						children.add(index, childContext);
-						// modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
 					}
 
 					@Override
