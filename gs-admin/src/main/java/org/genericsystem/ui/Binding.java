@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -75,6 +76,24 @@ public class Binding<N, SUBMODEL, T> {
 
 	public static <N, M, SUBMODEL> Binding<N, SUBMODEL, Property<String>> bindInputText(Function<N, Property<String>> getTextProperty, Function<M, Property<String>> function) {
 		return Binding.<N, M, SUBMODEL, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
+	}
+
+	static <N, T> Function<N, ObjectProperty<Consumer<Event>>> toObjectPropertyConsumer(Function<N, ObjectProperty<T>> f) {
+		return label -> new SimpleObjectProperty<Consumer<Event>>() {
+			@Override
+			public void set(Consumer<Event> consumer) {
+				f.apply(label).set((T) (EventHandler) consumer::accept);
+			}
+		};
+	}
+
+	public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bindGenericAction(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
+		Function<N, ObjectProperty<Consumer<Event>>> objectPropertyConsumer = toObjectPropertyConsumer(propAction);
+		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(objectPropertyConsumer));
+	}
+
+	public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bindAction2(Function<N, ObjectProperty<Consumer<Event>>> propAction, Consumer<M> consumer) {
+		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(propAction));
 	}
 
 	public static <N, M, SUBMODEL, T extends Event> Binding<N, SUBMODEL, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {

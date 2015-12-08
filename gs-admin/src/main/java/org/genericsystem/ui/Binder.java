@@ -2,6 +2,7 @@ package org.genericsystem.ui;
 
 import java.util.AbstractList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -24,6 +25,20 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 			@Override
 			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+			}
+
+			@Override
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
+		};
+
+	}
+
+	public static <N, SUBMODEL, T> Binder<N, SUBMODEL, T> genericActionBinder(Function<N, ObjectProperty<Consumer<Event>>> applyOnNode) {
+		return new Binder<N, SUBMODEL, T>() {
+			@Override
+			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+
 			}
 
 			@Override

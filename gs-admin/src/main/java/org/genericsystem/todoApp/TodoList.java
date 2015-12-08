@@ -12,9 +12,11 @@ import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -28,7 +30,8 @@ public class TodoList {
 	private Property<String> name = new SimpleStringProperty();
 	private Property<Mode> mode = new SimpleObjectProperty<>(Mode.ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList();
-	private ObservableList<Todo> filtered = todos.filtered(mode.getValue().predicate());
+	private ObservableValue<Predicate<Todo>> observablePredicate = Bindings.createObjectBinding(() -> mode.getValue().predicate(), mode);
+	private FilteredList<Todo> filtered = new FilteredList<>(todos);
 
 	private ObservableNumberValue completedCount = Bindings.size(todos.filtered(Mode.COMPLETE.predicate()));
 	private ObservableValue<Boolean> hasCompleted = Bindings.lessThan(0, completedCount);
@@ -37,12 +40,32 @@ public class TodoList {
 	private ObservableValue<Boolean> activeMode = Bindings.equal((ObservableObjectValue) mode, Mode.ACTIVE);
 	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue) mode, Mode.COMPLETE);
 
+	public TodoList() {
+		filtered.predicateProperty().bind(observablePredicate);
+	}
+
 	public Property<String> getName() {
 		return name;
 	}
 
-	public ObservableList<Todo> getTodos() {
-		return todos;
+	public ObservableValue<Boolean> getAllMode() {
+		return allMode;
+	}
+
+	public ObservableValue<Boolean> getActiveMode() {
+		return activeMode;
+	}
+
+	public ObservableValue<Boolean> getCompletedMode() {
+		return completedMode;
+	}
+
+	public ObservableNumberValue getCompletedCount() {
+		return completedCount;
+	}
+
+	public ObservableList<Todo> getFiltered() {
+		return filtered;
 	}
 
 	public void create() {
@@ -96,12 +119,20 @@ public class TodoList {
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
 		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create Todo"), Boot.setProperty(Button::prefWidthProperty, 160));
 
-		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getTodos)));
+		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getFiltered)));
 		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class, Binding.bindReversedProperty(CheckBox::selectedProperty, Todo::getCompleted));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
 		todoLabel.addBoots(Boot.setProperty(Label::prefWidthProperty, 160));
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 		todoRemoveButton.addBoots(Boot.setProperty(Button::prefWidthProperty, 160));
+
+		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
+		Element<Hyperlink> allCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
+		allCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "All"));
+		Element<Label> activeCheckBox = new Element<>(footer, Label.class, Binding.bindGenericAction(Label::onMousePressedProperty, TodoList::showActive));
+		activeCheckBox.addBoots(Boot.setProperty(Label::textProperty, "Actives"));
+		Element<Label> completeCheckBox = new Element<>(footer, Label.class, Binding.bindGenericAction(Label::onMousePressedProperty, TodoList::showCompleted));
+		completeCheckBox.addBoots(Boot.setProperty(Label::textProperty, "Completes"));
 		return mainVBox.apply(this);
 	}
 
