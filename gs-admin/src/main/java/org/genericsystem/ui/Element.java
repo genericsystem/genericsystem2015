@@ -11,23 +11,26 @@ import javafx.scene.layout.Pane;
 
 public class Element<N> {
 	public final Class<N> classNode;
-	public List<? extends Binding<N, ?, ?>> metaBindings = new ArrayList<>();
+	public List<Binding<N, ?, ?>> metaBindings = new ArrayList<>();
 	public List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
 
-	private List<Boot> boots = new ArrayList<>();
+	private List<Boot<N>> boots = new ArrayList<>();
 
+	@SafeVarargs
 	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, Binding<N, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
 	}
 
+	@SafeVarargs
 	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<? extends Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
+	@SafeVarargs
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
 		this.classNode = classNode;
 		this.metaBindings = metaBindings;
 		this.bindings.addAll(Arrays.asList(binding));
@@ -36,20 +39,21 @@ public class Element<N> {
 			parent.<N> getChildren().add(this);
 	}
 
-	public void addBoots(Boot... boot) {
+	@SafeVarargs
+	public final void addBoots(Boot<N>... boot) {
 		this.boots.addAll(Arrays.asList(boot));
 	}
 
-	public List<Boot> getBootList() {
+	public List<Boot<N>> getBootList() {
 		return boots;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void addMetaBinding(Binding<N, ?, ?> metaBinding) {
-		((List<Binding>) metaBindings).add(metaBinding);
+		metaBindings.add(metaBinding);
 	}
 
-	public void addBinding(Binding<N, ?, ?>... binding) {
+	@SafeVarargs
+	public final void addBinding(Binding<N, ?, ?>... binding) {
 		bindings.addAll(Arrays.asList(binding));
 	}
 
@@ -60,7 +64,7 @@ public class Element<N> {
 
 	public N apply(Object model) {
 		N node = createNode();
-		new ViewContext<>(new ModelContext<Object>(null, model), this, node, null);
+		new ViewContext<>(new ModelContext(null, model), this, node, null);
 		return node;
 	}
 

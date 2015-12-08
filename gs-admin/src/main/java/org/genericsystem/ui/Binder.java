@@ -14,24 +14,24 @@ import javafx.event.EventHandler;
 
 public interface Binder<N, SUBMODEL, WRAPPER> {
 
-	default void init(Function<? super SUBMODEL, WRAPPER> applyOnModel, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-		init(applyOnModel.apply((SUBMODEL) modelContext.getModel()), modelContext, viewContext, childElement);
+	default void init(Function<? super SUBMODEL, WRAPPER> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+		init(applyOnModel.apply(modelContext.getModel()), modelContext, viewContext, childElement);
 	}
 
-	void init(WRAPPER wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement);
+	void init(WRAPPER wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement);
 
 	public static <N, SUBMODEL, T extends Event> Binder<N, SUBMODEL, T> actionBinder(Function<N, ObjectProperty<EventHandler<T>>> applyOnNode) {
 		return new Binder<N, SUBMODEL, T>() {
 			@Override
-			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply(viewContext.getNode()).set(event -> {
 					System.out.println("zzz");
-					applyOnModel.apply((SUBMODEL) modelContext.getModel());
+					applyOnModel.apply(modelContext.getModel());
 				});
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 			}
 		};
 
@@ -40,7 +40,7 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, SUBMODEL, ObservableValue<W>>() {
 			@Override
-			public void init(ObservableValue<W> wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply(viewContext.getNode()).bind(wrapper);
 			}
 		};
@@ -50,7 +50,7 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		return new Binder<N, SUBMODEL, Property<String>>() {
 
 			@Override
-			public void init(Property<String> wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(Property<String> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
 			}
 		};
@@ -59,28 +59,31 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableList<W>> foreachBinder() {
 		return new Binder<N, SUBMODEL, ObservableList<W>>() {
 
-			private List<W> list;
-
 			@Override
-			public void init(ObservableList<W> wrapper, ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 
-				list = new AbstractList<W>() {
+				List<ModelContext> children = modelContext.getChildren();
+
+				class ForEachList extends AbstractList<W> implements ListChangeListener<W> {
 
 					@SuppressWarnings("unchecked")
 					@Override
 					public W get(int index) {
-						return (W) modelContext.get(index).getModel();
+						return (W) children.get(index).getModel();
 					}
 
 					@Override
 					public int size() {
-						return modelContext.size();
+						return children.size();
 					}
 
 					@SuppressWarnings("unchecked")
 					@Override
-					public void add(int index, W element) {
-						modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
+					public void add(int index, W model) {
+						ModelContext childContext = new ModelContext(modelContext, model);
+						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
+						children.add(index, childContext);
+						// modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
 					}
 
 					@Override
@@ -90,40 +93,33 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 						return remove;
 					}
 
-					@SuppressWarnings("unchecked")
 					@Override
 					public W remove(int index) {
-						return (W) modelContext.removeSubContext(index).getModel();
+						ModelContext removed = children.remove(index);
+						for (ViewContext<?> viewContext : removed.getViewContexts())
+							viewContext.destroyChild();
+						return removed.getModel();
 					}
-				};
-				wrapper.addListener(new ListContentBinding<>(list));
-			}
-		};
-	}
 
-	public static class ListContentBinding<E> implements ListChangeListener<E> {
-
-		private final List<E> list;
-
-		public ListContentBinding(List<E> list) {
-			this.list = list;
-		}
-
-		@Override
-		public void onChanged(Change<? extends E> change) {
-			while (change.next()) {
-				if (change.wasPermutated()) {
-					list.subList(change.getFrom(), change.getTo()).clear();
-					list.addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
-				} else {
-					if (change.wasRemoved()) {
-						list.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-					}
-					if (change.wasAdded()) {
-						list.addAll(change.getFrom(), change.getAddedSubList());
+					@Override
+					public void onChanged(Change<? extends W> change) {
+						while (change.next()) {
+							if (change.wasPermutated()) {
+								subList(change.getFrom(), change.getTo()).clear();
+								addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
+							} else {
+								if (change.wasRemoved()) {
+									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
+								}
+								if (change.wasAdded()) {
+									addAll(change.getFrom(), change.getAddedSubList());
+								}
+							}
+						}
 					}
 				}
+				wrapper.addListener(new ForEachList());
 			}
-		}
+		};
 	}
 }

@@ -22,17 +22,17 @@ public class Binding<N, SUBMODEL, T> {
 		this.method = method;
 	}
 
-	public void init(ModelContext<?> modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+	public void init(ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 		Function<? super SUBMODEL, T> applyOnModel = applyOnModel(modelContext);
 		binder.init(applyOnModel, modelContext, viewContext, childElement);
 	}
 
-	protected Function<? super SUBMODEL, T> applyOnModel(ModelContext<?> modelContext) {
+	protected Function<? super SUBMODEL, T> applyOnModel(ModelContext modelContext) {
 		return (SUBMODEL) -> {
-			ModelContext<?> modelContext_ = modelContext;
+			ModelContext modelContext_ = modelContext;
 			while (modelContext_ != null) {
 				try {
-					return (T) ((BiFunction) method).apply(modelContext_.getModel(), SUBMODEL);
+					return method.apply(modelContext_.getModel(), SUBMODEL);
 				} catch (ClassCastException ignore) {
 				}
 				modelContext_ = modelContext_.getParent();

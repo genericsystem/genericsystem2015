@@ -3,14 +3,12 @@ package org.genericsystem.ui;
 public class ViewContext<N> {
 	private final Element<N> template;
 	private final N node;
-	// private final ModelContext modelContext;
 	private final ViewContext<?> parent;
 
-	public <PARENTNODE, CHILDNODE> ViewContext(ModelContext modelContext, Element<N> template, N node, ViewContext<?> parent) {
+	public <CHILDNODE> ViewContext(ModelContext modelContext, Element<N> template, N node, ViewContext<?> parent) {
 		this.template = template;
 		this.node = node;
 		this.parent = parent;
-		// this.modelContext = modelContext;
 		modelContext.register(this);
 		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<N, ?, ?> binding : template.bindings)
@@ -31,20 +29,7 @@ public class ViewContext<N> {
 		return node;
 	}
 
-	<PARENTNODE> void destroyChild() {
+	void destroyChild() {
 		template.getGraphicChildren(parent.getNode()).remove(getNode());
 	}
-
-	// public Element<NODE> getTemplate() {
-	// return template;
-	// }
-
-	// public ModelContext getModelContext() {
-	// return modelContext;
-	// }
-
-	// @SuppressWarnings("unchecked")
-	// public <PARENTNODE> ViewContext<PARENTNODE> getParent() {
-	// return (ViewContext<PARENTNODE>) parent;
-	// }
 }
