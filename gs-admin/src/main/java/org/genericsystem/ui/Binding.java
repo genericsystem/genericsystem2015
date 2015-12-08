@@ -4,7 +4,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -33,8 +32,7 @@ public class Binding<N, SUBMODEL, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel(), SUBMODEL);
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -69,6 +67,10 @@ public class Binding<N, SUBMODEL, T> {
 
 	public static <N, M, V, W> Binding<N, V, ObservableValue<W>> bindProperty(Function<N, Property<W>> getProperty, Function<M, ObservableValue<W>> function) {
 		return Binding.bind(function, Binder.propertyBinder(getProperty));
+	}
+
+	public static <N, M, V, W> Binding<N, V, Property<W>> bindReversedProperty(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
+		return Binding.bind(function, Binder.propertyReverseBinder(getProperty));
 	}
 
 	public static <N, M, SUBMODEL> Binding<N, SUBMODEL, Property<String>> bindInputText(Function<N, Property<String>> getTextProperty, Function<M, Property<String>> function) {

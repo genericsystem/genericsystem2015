@@ -3,7 +3,6 @@ package org.genericsystem.ui;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -24,15 +23,11 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		return new Binder<N, SUBMODEL, T>() {
 			@Override
 			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> {
-					System.out.println("zzz");
-					applyOnModel.apply(modelContext.getModel());
-				});
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-			}
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
 		};
 
 	}
@@ -42,6 +37,15 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 			@Override
 			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply(viewContext.getNode()).bind(wrapper);
+			}
+		};
+	}
+
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, SUBMODEL, Property<W>>() {
+			@Override
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				wrapper.bind(applyOnNode.apply(viewContext.getNode()));
 			}
 		};
 	}
@@ -65,11 +69,8 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 				List<ModelContext> children = modelContext.getChildren();
 
 				class ForEachList extends AbstractList<W> implements ListChangeListener<W> {
-
 					{
-						for (W w : wrapper) {
-							add(w);
-						}
+						addAll(wrapper);
 					}
 
 					@SuppressWarnings("unchecked")
@@ -89,8 +90,6 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 						ModelContext childContext = new ModelContext(modelContext, model);
 						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
 						children.add(index, childContext);
-
-						// modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
 					}
 
 					@Override
