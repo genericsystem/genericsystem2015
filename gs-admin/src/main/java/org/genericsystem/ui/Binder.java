@@ -66,6 +66,12 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 
 				class ForEachList extends AbstractList<W> implements ListChangeListener<W> {
 
+					{
+						for (W w : wrapper) {
+							add(w);
+						}
+					}
+
 					@SuppressWarnings("unchecked")
 					@Override
 					public W get(int index) {
@@ -83,6 +89,7 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 						ModelContext childContext = new ModelContext(modelContext, model);
 						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
 						children.add(index, childContext);
+
 						// modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
 					}
 
@@ -109,16 +116,20 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 								addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
 							} else {
 								if (change.wasRemoved()) {
+									System.out.println(size());
 									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
 								}
 								if (change.wasAdded()) {
+									System.out.println("addall");
 									addAll(change.getFrom(), change.getAddedSubList());
 								}
 							}
 						}
 					}
 				}
+
 				wrapper.addListener(new ForEachList());
+
 			}
 		};
 	}
