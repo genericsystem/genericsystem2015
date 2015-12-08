@@ -248,4 +248,59 @@ public class CocCache extends HeavyCache {
 			}
 		};
 	}
+
+	//
+	// @Override
+	// public boolean isAlive(Generic vertex) {
+	// try {
+	// return isAsyncAlive(vertex).get();
+	// } catch (InterruptedException | ExecutionException e) {
+	// e.printStackTrace();
+	// throw new RuntimeException();
+	// }
+	// }
+	//
+	// @Override
+	// public NavigableSet<Generic> computeDependencies(Generic node) {
+	// try {
+	// return computeAsyncDependencies(node).get();
+	// } catch (InterruptedException | ExecutionException e) {
+	// e.printStackTrace();
+	// throw new RuntimeException();
+	// }
+	// }
+	//
+	// @Override
+	// public NavigableSet<Generic> computePotentialDependencies(Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
+	// try {
+	// return computeAsyncPotentialDependencies(meta, supers, value, components).get();
+	// } catch (InterruptedException | ExecutionException e) {
+	// e.printStackTrace();
+	// throw new RuntimeException();
+	// }
+	//
+	// }
+	//
+	// @Override
+	// public NavigableSet<Generic> computeRemoveDependencies(Generic node) throws RollbackException {
+	// CompletableFuture<NavigableSet<Generic>> removeDependenciesPromise = computeAsyncRemoveDependencies(node);
+	//
+	// try {
+	//
+	// return removeDependenciesPromise.get();
+	// } catch (InterruptedException | ExecutionException e) {
+	// if (e.getCause() instanceof RollbackException) {
+	// throw new RollbackException(e.getCause().getCause());
+	// }
+	//
+	// e.printStackTrace();
+	// throw new RuntimeException();
+	// }
+	// }
+	//
+	// @Override
+	// public DefaultRoot<Generic> getAsyncRoot() {
+	// return super.getRoot();
+	// }
+
 }

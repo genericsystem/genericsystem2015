@@ -20,7 +20,7 @@ public class AsyncSupersComputer<T extends DefaultVertex<T>> extends Completable
 	//
 	// private final Map<T, boolean[]> alreadyComputed = new HashMap<>();
 
-	AsyncSupersComputer(T meta, List<T> overrides, Serializable value, List<T> components) {
+	public AsyncSupersComputer(T meta, List<T> overrides, Serializable value, List<T> components) {
 
 		throw new UnsupportedOperationException("AsyncSupersComputer");
 

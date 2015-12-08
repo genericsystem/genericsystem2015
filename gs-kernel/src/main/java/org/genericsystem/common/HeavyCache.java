@@ -281,5 +281,4 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		default void triggersFlushEvent() {
 		}
 	}
-
 }

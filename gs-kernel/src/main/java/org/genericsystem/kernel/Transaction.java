@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Snapshot;
@@ -157,5 +158,10 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 				lifeManager.writeUnlock();
 			lockedLifeManagers = new HashSet<>();
 		}
+	}
+
+	@Override
+	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic vertex) {
+		throw new UnsupportedOperationException();
 	}
 }
