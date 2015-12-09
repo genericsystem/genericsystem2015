@@ -40,7 +40,7 @@ public class Binding<N, SUBMODEL, T> {
 		};
 	}
 
-	private static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bind(Function<M, T> function, Binder<N, SUBMODEL, T> binder) {
+	private static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bind(Binder<N, SUBMODEL, T> binder, Function<M, T> function) {
 		return new Binding<>((u, v) -> function.apply((M) u), binder);
 	}
 
@@ -63,19 +63,19 @@ public class Binding<N, SUBMODEL, T> {
 	}
 
 	public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, ObservableList<T>> forEach(Function<M, ObservableList<T>> function) {
-		return Binding.bind(function, Binder.foreachBinder());
+		return Binding.bind(Binder.foreachBinder(), function);
 	}
 
 	public static <N, M, V, W> Binding<N, V, ObservableValue<W>> bindProperty(Function<N, Property<W>> getProperty, Function<M, ObservableValue<W>> function) {
-		return Binding.bind(function, Binder.propertyBinder(getProperty));
+		return Binding.bind(Binder.propertyBinder(getProperty), function);
 	}
 
-	public static <N, M, V, W> Binding<N, V, Property<W>> bindReversedProperty(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
-		return Binding.bind(function, Binder.propertyReverseBinder(getProperty));
+	public static <N, M, V, W> Binding<N, V, Property<W>> bindBiDirectionalProperty(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
+		return Binding.bind(Binder.propertyBiDirectionalBinder(getProperty), function);
 	}
 
 	public static <N, M, SUBMODEL> Binding<N, SUBMODEL, Property<String>> bindInputText(Function<N, Property<String>> getTextProperty, Function<M, Property<String>> function) {
-		return Binding.<N, M, SUBMODEL, Property<String>> bind(function, Binder.inputTextBinder(getTextProperty));
+		return Binding.<N, M, SUBMODEL, Property<String>> bind(Binder.inputTextBinder(getTextProperty), function);
 	}
 
 	static <N, T> Function<N, ObjectProperty<Consumer<Event>>> toObjectPropertyConsumer(Function<N, ObjectProperty<T>> f) {
@@ -92,9 +92,9 @@ public class Binding<N, SUBMODEL, T> {
 		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(objectPropertyConsumer));
 	}
 
-	public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bindAction2(Function<N, ObjectProperty<Consumer<Event>>> propAction, Consumer<M> consumer) {
-		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(propAction));
-	}
+	// public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bindAction2(Function<N, ObjectProperty<Consumer<Event>>> propAction, Consumer<M> consumer) {
+	// return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(propAction));
+	// }
 
 	public static <N, M, SUBMODEL, T extends Event> Binding<N, SUBMODEL, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
 		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.actionBinder(propAction));

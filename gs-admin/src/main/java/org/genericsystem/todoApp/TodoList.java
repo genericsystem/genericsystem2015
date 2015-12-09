@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -29,7 +30,7 @@ public class TodoList {
 
 	private Property<String> name = new SimpleStringProperty();
 	private Property<Mode> mode = new SimpleObjectProperty<>(Mode.ALL);
-	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList();
+	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
 	private ObservableValue<Predicate<Todo>> observablePredicate = Bindings.createObjectBinding(() -> mode.getValue().predicate(), mode);
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
 
@@ -120,20 +121,30 @@ public class TodoList {
 		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create Todo"), Boot.setProperty(Button::prefWidthProperty, 160));
 
 		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getFiltered)));
-		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class, Binding.bindReversedProperty(CheckBox::selectedProperty, Todo::getCompleted));
+		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class, Binding.bindBiDirectionalProperty(CheckBox::selectedProperty, Todo::getCompleted));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
-		todoLabel.addBoots(Boot.setProperty(Label::prefWidthProperty, 160));
+		todoLabel.addBoots(Boot.setProperty(Label::prefWidthProperty, 136));
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 		todoRemoveButton.addBoots(Boot.setProperty(Button::prefWidthProperty, 160));
+
+		// new HBox().setStyle
 
 		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
 		Element<Hyperlink> allCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
 		allCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "All"));
-		Element<Label> activeCheckBox = new Element<>(footer, Label.class, Binding.bindGenericAction(Label::onMousePressedProperty, TodoList::showActive));
-		activeCheckBox.addBoots(Boot.setProperty(Label::textProperty, "Actives"));
-		Element<Label> completeCheckBox = new Element<>(footer, Label.class, Binding.bindGenericAction(Label::onMousePressedProperty, TodoList::showCompleted));
-		completeCheckBox.addBoots(Boot.setProperty(Label::textProperty, "Completes"));
+		Element<Hyperlink> activeCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showActive));
+		activeCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "Actives"));
+		Element<Hyperlink> completeCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showCompleted));
+		completeCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "Completes"));
 		return mainVBox.apply(this);
+		// Element<HBox> footer2 = new Element<>(mainVBox, HBox.class);
+		// Element<Hyperlink> allCheckBox2 = new Element<>(footer2, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
+		// allCheckBox2.addBoots(Boot.setProperty(Hyperlink::textProperty, "All"));
+		// Element<Label> activeCheckBox2 = new Element<>(footer2, Label.class, Binding.bindGenericAction(Label::onMousePressedProperty, TodoList::showActive));
+		// activeCheckBox2.addBoots(Boot.setProperty(Label::textProperty, "Actives"));
+		// Element<Label> completeCheckBox2 = new Element<>(footer2, Label.class, Binding.bindGenericAction(Label::onMousePressedProperty, TodoList::showCompleted));
+		// completeCheckBox2.addBoots(Boot.setProperty(Label::textProperty, "Completes"));
+
 	}
 
 	private interface Mode {

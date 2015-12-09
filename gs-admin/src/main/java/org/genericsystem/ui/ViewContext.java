@@ -1,5 +1,7 @@
 package org.genericsystem.ui;
 
+import java.util.List;
+
 public class ViewContext<N> {
 	private final Element<N> template;
 	private final N node;
@@ -25,7 +27,11 @@ public class ViewContext<N> {
 		}
 		if (parent != null) {
 			// System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
-			template.getGraphicChildren(parent.getNode()).add(node);
+
+			List<N> graphicChildren = template.getGraphicChildren(parent.getNode());
+			int indexInChildren = template.getParent().computeIndex(graphicChildren, template);
+			template.getParent().incrementSize(graphicChildren, template);
+			graphicChildren.add(indexInChildren, node);
 		}
 	}
 
@@ -34,7 +40,9 @@ public class ViewContext<N> {
 	}
 
 	void destroyChild() {
-		template.getGraphicChildren(parent.getNode()).remove(getNode());
+		List<N> graphicChildren = template.getGraphicChildren(parent.getNode());
+		template.getParent().decrementSize(graphicChildren, template);
+		graphicChildren.remove(getNode());
 	}
 
 }

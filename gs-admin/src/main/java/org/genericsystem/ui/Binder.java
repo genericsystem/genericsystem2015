@@ -56,15 +56,16 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		};
 	}
 
-	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, SUBMODEL, Property<W>>() {
 			@Override
 			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				wrapper.bind(applyOnNode.apply(viewContext.getNode()));
+				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
 			}
 		};
 	}
 
+	// TODO remove this, call method above
 	public static <N, SUBMODEL> Binder<N, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
 		return new Binder<N, SUBMODEL, Property<String>>() {
 
@@ -129,14 +130,11 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 								subList(change.getFrom(), change.getTo()).clear();
 								addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
 							} else {
-								if (change.wasRemoved()) {
-									System.out.println(size());
+								if (change.wasRemoved())
 									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-								}
-								if (change.wasAdded()) {
-									System.out.println("addall");
+
+								if (change.wasAdded())
 									addAll(change.getFrom(), change.getAddedSubList());
-								}
 							}
 						}
 					}
