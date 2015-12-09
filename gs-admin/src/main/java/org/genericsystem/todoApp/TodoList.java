@@ -61,9 +61,9 @@ public class TodoList {
 		return completedMode;
 	}
 
-	public ObservableNumberValue getCompletedCount() {
-		return completedCount;
-	}
+	// public ObservableNumberValue getCompletedCount() {
+	// return completedCount;
+	// }
 
 	public ObservableList<Todo> getFiltered() {
 		return filtered;
