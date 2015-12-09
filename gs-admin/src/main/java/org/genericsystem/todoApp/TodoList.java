@@ -1,5 +1,6 @@
 package org.genericsystem.todoApp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Predicate;
 import javafx.beans.Observable;
@@ -35,6 +36,7 @@ public class TodoList {
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
 
 	private ObservableNumberValue completedCount = Bindings.size(todos.filtered(Mode.COMPLETE.predicate()));
+	private ObservableValue<String> clearButtonText = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue() + ")", completedCount);
 	private ObservableValue<Boolean> hasCompleted = Bindings.lessThan(0, completedCount);
 	private ObservableValue<Boolean> hasTodo = Bindings.lessThan(0, Bindings.size(todos));
 	private ObservableValue<Boolean> allMode = Bindings.equal((ObservableObjectValue) mode, Mode.ALL);
@@ -61,9 +63,9 @@ public class TodoList {
 		return completedMode;
 	}
 
-	// public ObservableNumberValue getCompletedCount() {
-	// return completedCount;
-	// }
+	public ObservableValue<String> getClearButtonText() {
+		return clearButtonText;
+	}
 
 	public ObservableList<Todo> getFiltered() {
 		return filtered;
@@ -89,6 +91,11 @@ public class TodoList {
 
 	public void showCompleted() {
 		mode.setValue(Mode.COMPLETE);
+	}
+
+	public void removeCompleted() {
+		for (Todo todo : new ArrayList<>(todos.filtered(Mode.COMPLETE.predicate())))
+			todos.remove(todo);
 	}
 
 	public static class Todo {
@@ -136,6 +143,10 @@ public class TodoList {
 		activeLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "Actives"));
 		Element<Hyperlink> completeLink = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showCompleted));
 		completeLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "Completes"));
+
+		Element<Button> clearButton = new Element<>(footer, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::removeCompleted));
+		clearButton.addBinding(Binding.bindProperty(Button::textProperty, TodoList::getClearButtonText));
+
 		return mainVBox.apply(this);
 		// Element<HBox> footer2 = new Element<>(mainVBox, HBox.class);
 		// Element<Hyperlink> allCheckBox2 = new Element<>(footer2, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
