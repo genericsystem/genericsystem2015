@@ -59,6 +59,15 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		};
 	}
 
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, SUBMODEL, Property<W>>() {
+			@Override
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				wrapper.bind(applyOnNode.apply(viewContext.getNode()));
+			}
+		};
+	}
+
 	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, SUBMODEL, ObservableValue<W>>() {
 			@Override
