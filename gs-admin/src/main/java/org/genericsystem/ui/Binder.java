@@ -4,6 +4,7 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -15,8 +16,8 @@ import javafx.event.EventHandler;
 
 public interface Binder<N, SUBMODEL, WRAPPER> {
 
-	default void init(Function<? super SUBMODEL, WRAPPER> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-		init(applyOnModel.apply(modelContext.getModel()), modelContext, viewContext, childElement);
+	default void init(Supplier<WRAPPER> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+		init(applyOnModel.get(), modelContext, viewContext, childElement);
 	}
 
 	void init(WRAPPER wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement);
@@ -24,8 +25,8 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 	public static <N, SUBMODEL, T extends Event> Binder<N, SUBMODEL, T> actionBinder(Function<N, ObjectProperty<EventHandler<T>>> applyOnNode) {
 		return new Binder<N, SUBMODEL, T>() {
 			@Override
-			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+			public void init(Supplier<T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.get());
 			}
 
 			@Override
@@ -38,8 +39,8 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 	public static <N, SUBMODEL, T> Binder<N, SUBMODEL, T> genericActionBinder(Function<N, ObjectProperty<Consumer<Event>>> applyOnNode) {
 		return new Binder<N, SUBMODEL, T>() {
 			@Override
-			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+			public void init(Supplier<T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.get());
 
 			}
 
