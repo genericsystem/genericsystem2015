@@ -123,10 +123,9 @@ public class TodoTableList {
 		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
 
 		Function<TableView<Todo>, ObservableList<?>> getItems = TableView::getItems;
-
+		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 		Element<Todo> todoTableItems = new Element<>(todoTableView, Todo.class, getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)));
 		todoTableItems.addBoots(Boot.apply(Todo::action));
-		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 
 		// Element columnsTableItems = new Element(todoTableView, TableColumn.class, getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)), Binding.setProperty(Column::prefWidthProperty, 100), Binding.setProperty(
 		// TableColumn<Todo, String>::cellValueFactoryProperty, callback));

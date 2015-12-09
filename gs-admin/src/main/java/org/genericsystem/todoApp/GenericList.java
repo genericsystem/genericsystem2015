@@ -2,23 +2,30 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -37,12 +44,17 @@ public class GenericList {
 	private static CocClientEngine engine;
 
 	private static ObservableList<Generic> dependenciesObservableList;
+	private static ObservableList<Generic> dependenciesObservableListFilterd = FXCollections.observableArrayList();
 	Transformation<GenericWrapper, Generic> genericWrapperList;
+	Transformation<GenericWrapper, Generic> genericWrapperListInstances;
 
 	private Property<String> name = new SimpleStringProperty();
 	// private ObservableList<GenericWrapper> todos = FXCollections.observableArrayList();
 	private ObservableList<Column> columns = FXCollections.observableArrayList(new Column(), new DeleteColumn());
 	private ObservableValue<Number> height = new SimpleDoubleProperty(400);
+
+	private Property<GenericWrapper> property = new SimpleObjectProperty<>();
+	private Property<String> columnTitle = new SimpleStringProperty();
 
 	// private StringProperty name = new SimpleStringProperty();
 	// private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Generic");
@@ -61,11 +73,21 @@ public class GenericList {
 		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT);
 
 		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
-		System.out.println(dependenciesObservableList.size());
 
 		genericWrapperList = new Transformation<GenericWrapper, Generic>(dependenciesObservableList, generic -> new GenericWrapper(generic));
+		genericWrapperListInstances = new Transformation<GenericWrapper, Generic>(dependenciesObservableListFilterd, generic -> new GenericWrapper(generic));
 
-		System.out.println(genericWrapperList.size());
+		property.addListener(new ChangeListener<GenericWrapper>() {
+			@Override
+			public void changed(ObservableValue<? extends GenericWrapper> observable, GenericWrapper oldValue, GenericWrapper newValue) {
+				System.out.println("change");
+				GenericWrapper g = newValue != null ? newValue : oldValue;
+				dependenciesObservableListFilterd = FXCollections.observableArrayList(g.generic.getInstances().toList());// dependenciesObservableList.filtered(generic -> generic.getMeta() == (newValue != null ? newValue : oldValue));
+				genericWrapperListInstances = new Transformation<GenericWrapper, Generic>(dependenciesObservableListFilterd, generic -> new GenericWrapper(generic));
+
+				System.out.println(genericWrapperListInstances.size());
+			}
+		});
 	}
 
 	public Property getName() {
@@ -150,6 +172,14 @@ public class GenericList {
 		return columns;
 	}
 
+	public Transformation<GenericWrapper, Generic> getGenericWrapperListInstances() {
+		return genericWrapperListInstances;
+	}
+
+	public Property<GenericWrapper> getProperty() {
+		return property;
+	}
+
 	public Node initTable() {
 
 		Element<VBox> mainVBox = new Element<>(null, VBox.class);
@@ -172,26 +202,47 @@ public class GenericList {
 		// ob.apply(t)
 		//
 		// todoTableView.addBinding(Binding.forEach());
+		Function<TableView, ReadOnlyObjectProperty> function = t -> t.getSelectionModel().selectedItemProperty();
+		todoTableView.addBinding(Binding.bindReversedProperty((Function) function, GenericList::getProperty));
 		Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
 		Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
 
-		Element<HBox> hboxElement = new Element<HBox>(mainVBox, HBox.class);
-		hboxElement.addBoots(Boot.setProperty(HBox::spacingProperty, 5));
-		Element<Button> buttonFlush = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::flush));
-		buttonFlush.addBoots(Boot.setProperty(Button::textProperty, "Flush"));
+		// Element<HBox> hboxElement = new Element<HBox>(mainVBox, HBox.class);
+		// hboxElement.addBoots(Boot.setProperty(HBox::spacingProperty, 5));
+		// Element<Button> buttonFlush = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::flush));
+		// buttonFlush.addBoots(Boot.setProperty(Button::textProperty, "Flush"));
+		//
+		// Element<Button> buttonClear = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::clear));
+		// buttonClear.addBoots(Boot.setProperty(Button::textProperty, "Clear"));
+		//
+		// Element<Button> buttonMount = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::mount));
+		// buttonMount.addBoots(Boot.setProperty(Button::textProperty, "Mount"));
+		//
+		// Element<Button> buttonUnmount = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::unmount));
+		// buttonUnmount.addBoots(Boot.setProperty(Button::textProperty, "Unmount"));
 
-		Element<Button> buttonClear = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::clear));
-		buttonClear.addBoots(Boot.setProperty(Button::textProperty, "Clear"));
+		Callback<CellDataFeatures<GenericWrapper, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
+		Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>();
 
-		Element<Button> buttonMount = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::mount));
-		buttonMount.addBoots(Boot.setProperty(Button::textProperty, "Mount"));
+		Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
+		Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenericWrapperListInstances)));
 
-		Element<Button> buttonUnmount = new Element<Button>(hboxElement, Button.class, Binding.bindAction(Button::onActionProperty, GenericList::unmount));
-		buttonUnmount.addBoots(Boot.setProperty(Button::textProperty, "Unmount"));
+		Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
+		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
+
+		Element<TableColumn> columnTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
+		columnTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::prefWidthProperty, 100));
+		columnTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::textProperty, "instance"));
+		columnTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback));
+
+		Element<TableColumn> columnDeleteTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
+
+		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::prefWidthProperty, 150));
+		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::textProperty, "Delete todo"));
+		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback), Boot.setProperty(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete));
 
 		return mainVBox.apply(this);
 	}
-
 	// public Node init() {
 	// Element mainVBox = new Element(null, VBox.class, Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
 	// Element todoCreateHBox = new Element(mainVBox, HBox.class);
