@@ -6,11 +6,9 @@ import java.util.function.Function;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -56,7 +54,6 @@ public class GenericList {
 
 	private Property<GenericWrapper> property = new SimpleObjectProperty<>();
 	private Property<String> columnTitle = new SimpleStringProperty();
-	private BooleanProperty visible = new SimpleBooleanProperty(false);
 
 	public GenericList() throws InterruptedException {
 
@@ -82,12 +79,6 @@ public class GenericList {
 					columnTitle.setValue(property.getValue().generic.getValue().toString());
 					dependenciesObservableListFilterd = FXCollections.observableArrayList(property.getValue().generic.getInstances().toList());
 					dependenciesObservableListFilterd.forEach(gen -> list.add(new GenericWrapper(gen)));
-
-					if (list.size() > 0)
-						visible.set(true);
-					else
-						visible.set(false);
-
 				}
 				return list;
 			}
@@ -181,10 +172,6 @@ public class GenericList {
 
 	public Property<String> getColumnTitle() {
 		return columnTitle;
-	}
-
-	public BooleanProperty getVisible() {
-		return visible;
 	}
 
 	public Node initTable() {
