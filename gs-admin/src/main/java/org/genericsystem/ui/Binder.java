@@ -4,7 +4,6 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -29,8 +28,7 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-			}
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
 		};
 
 	}
@@ -44,19 +42,9 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-			}
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
 		};
 
-	}
-
-	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
-		return new Binder<N, SUBMODEL, Property<W>>() {
-			@Override
-			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				wrapper.bind(applyOnNode.apply(viewContext.getNode()));
-			}
-		};
 	}
 
 	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
