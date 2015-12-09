@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -68,7 +67,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// user computeAsyncAndCheckOverridesAreReached
+	// use computeAsyncAndCheckOverridesAreReached
 	default CompletableFuture<T> getAsyncInstance(T override, Serializable value, T... components) {
 		CompletableFuture<Snapshot<T>> snapshotPromise = getAsyncInstances(override, value, components);
 		return snapshotPromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
@@ -95,9 +94,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncInstances(Serializable value, T... components) {
-		return getAsyncInstances(components).thenApply(instances -> {
-			return instances.filter(valueFilter(value));
-		});
+		return getAsyncInstances(components).thenApply(instances -> instances.filter(valueFilter(value)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -118,7 +115,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInstances(T... components) {
+	default CompletableFuture<Snapshot<T>> getAsyncInstances(T... components) {// **//
 		return getAsyncInstances().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
 	}
 
@@ -177,14 +174,12 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return () -> getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream());
 	}
 
-	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncSubInstances() {
 		return getAsyncSubInheritings().thenCompose(snapshot -> {
-			CompletableFuture<Stream<T>> internal = CompletableFuture.completedFuture(Stream.of());
-			for (Iterator<T> i = snapshot.iterator(); i.hasNext();) {
-				internal = internal.thenCompose(stream -> i.next().getAsyncInstances().thenApply(instances -> Stream.concat(stream, instances.stream())));
-			}
-			return internal.thenApply(stream -> (Snapshot<T>) stream);
+			CompletableFuture<Snapshot<T>> internal = CompletableFuture.completedFuture(() -> Stream.empty());
+			for (T generic : snapshot)
+				internal = internal.thenCompose(internalSnapshot -> generic.getAsyncInstances().thenApply(instances -> () -> Stream.concat(internalSnapshot.stream(), instances.stream())));
+			return internal;
 		});
 	}
 
@@ -195,7 +190,6 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// //////////////////////////////////////
 	default CompletableFuture<T> getAsyncSubInstance(T... components) {
 		CompletableFuture<Snapshot<T>> subInstancePromise = getAsyncSubInstances(components);
 		return subInstancePromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
@@ -369,16 +363,12 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncSubInheritings() {
-		assert false;
 		return getAsyncInheritings().thenCompose(snapshot -> {
-			CompletableFuture<Stream<T>> internal = CompletableFuture.completedFuture(Stream.of());
-			for (Iterator<T> i = snapshot.iterator(); i.hasNext();) {
-				internal = internal.thenCompose(stream -> i.next().getAsyncInstances().thenApply(instances -> Stream.concat(stream, instances.stream())));
-			}
-			return internal.thenApply(stream -> (Snapshot<T>) Stream.concat(Stream.of((T) this), stream));
+			CompletableFuture<Snapshot<T>> internal = CompletableFuture.completedFuture(() -> Stream.empty());
+			for (T generic : snapshot)
+				internal = internal.thenCompose(internalSnapshot -> generic.getAsyncSubInheritings().thenApply(inheritings -> () -> Stream.concat(internalSnapshot.stream(), inheritings.stream())));
+			return internal.thenApply(internalSnapshot -> () -> Stream.concat(Stream.of((T) this), internalSnapshot.stream()).distinct());
 		});
-		// TODO no distinct...
-		// return () -> Stream.concat(Stream.of((T) this), getInheritings().stream().flatMap(inheriting -> inheriting.getSubInheritings().stream())).distinct();
 	}
 
 	@Override

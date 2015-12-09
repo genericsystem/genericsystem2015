@@ -47,19 +47,13 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 					return CompletableFuture.completedFuture(vertex);
 				if (vertex.isMeta()) {
 					CompletableFuture<T> aliveSuperPromise = new AliveFinder().find(vertex.getSupers().get(0));
-
-					return aliveSuperPromise.thenCompose(aliveSuper -> {
-						return aliveSuper != null ? getAsyncInheritings(aliveSuper).thenApply(inherintings -> inherintings.get(vertex)) : CompletableFuture.completedFuture(null);
-					});
+					return aliveSuperPromise.thenCompose(aliveSuper -> aliveSuper != null ? getAsyncInheritings(aliveSuper).thenApply(inherintings -> inherintings.get(vertex)) : CompletableFuture.completedFuture(null));
 				}
 				CompletableFuture<T> aliveMetaPromise = new AliveFinder().find(vertex.getMeta());
 
-				return aliveMetaPromise.thenCompose(aliveMeta -> {
-					return aliveMeta != null ? getAsyncInstances(aliveMeta).thenApply(x -> x.get(vertex)) : CompletableFuture.completedFuture(null);
-				});
+				return aliveMetaPromise.thenCompose(aliveMeta -> aliveMeta != null ? getAsyncInstances(aliveMeta).thenApply(x -> x.get(vertex)) : CompletableFuture.completedFuture(null));
 			}
 		}
-
 		return new AliveFinder().find(vertex).thenApply(x -> /* vertex != null && */vertex.equals(x));
 	}
 
@@ -169,7 +163,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 						alreadyVisited.add(node);
 						getDependenciesPromise(node).thenAccept(snapshot -> {
 							CompletableFuture<NavigableSet<T>> internal = CompletableFuture.completedFuture(this);
-
 							for (T element : snapshot)
 								internal = internal.thenCompose((a) -> traverse(element));
 							internal.thenRun(() -> cf.complete(this));
@@ -220,7 +213,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 			private static final long serialVersionUID = -5970021419012502402L;
 
 			CompletableFuture<NavigableSet<T>> traverse(T node) {
-
 				CompletableFuture<NavigableSet<T>> cf = new CompletableFuture<NavigableSet<T>>();
 				if (contains(node))
 					cf.complete(this);
@@ -228,13 +220,13 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 					CompletableFuture<NavigableSet<T>> status;
 					status = getAsyncInheritings(node).thenCompose(inheritingsDependencies -> {
 						CompletableFuture<NavigableSet<T>> internal = CompletableFuture.completedFuture(this);
-						if (!inheritingsDependencies.isEmpty())
+						if (!inheritingsDependencies.isEmpty()) {
 							cf.completeExceptionally(discardWithExceptionPromise(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a inheriting dependencies : " + inheritingsDependencies.info())));
+						}
 						for (T element : inheritingsDependencies)
 							internal = internal.thenCompose((a) -> traverse(element));
 						return internal;
 					});
-
 					status = status.thenCompose((a) -> getAsyncInstances(node).thenCompose(instancesDependencies -> {
 						CompletableFuture<NavigableSet<T>> internal = CompletableFuture.completedFuture(this);
 						System.out.println("size " + instancesDependencies.size());
@@ -254,15 +246,11 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 						}
 						return internal;
 					}));
-
 					add(node);
-
 					for (int axe = 0; axe < node.getComponents().size(); axe++) {
 						if (node.isCascadeRemoveEnabled(axe)) {
 							int axeFix = axe;
-							status = status.thenCompose((a) -> {
-								return traverse(node.getComponents().get(axeFix));
-							});
+							status = status.thenCompose((a) -> traverse(node.getComponents().get(axeFix)));
 						}
 					}
 					status.thenRun(() -> cf.complete(this));
