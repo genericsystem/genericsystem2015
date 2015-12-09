@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -33,7 +34,8 @@ public class Binding<N, SUBMODEL, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel(), SUBMODEL);
-				} catch (ClassCastException ignore) {}
+				} catch (ClassCastException ignore) {
+				}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -66,6 +68,10 @@ public class Binding<N, SUBMODEL, T> {
 		return Binding.bind(Binder.foreachBinder(), function);
 	}
 
+	public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, ObservableValue<T>> selector(Function<M, ObservableValue<T>> function) {
+		return Binding.bind(Binder.selectorBinder(), function);
+	}
+
 	private static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bind(Function<M, T> function, Binder<N, SUBMODEL, T> binder) {
 		return new Binding<>((u, v) -> function.apply((M) u), binder);
 	}
@@ -82,12 +88,8 @@ public class Binding<N, SUBMODEL, T> {
 		return Binding.bind(Binder.propertyBiDirectionalBinder(getProperty), function);
 	}
 
-	// public static <N, M, SUBMODEL> Binding<N, SUBMODEL, Property<String>> bindInputText(Function<N, Property<String>> getTextProperty, Function<M, Property<String>> function) {
-	// return Binding.<N, M, SUBMODEL, Property<String>> bind(Binder.propertyBiDirectionalBinder(getTextProperty), function);
-	// }
-
 	public static <N, M, SUBMODEL, W> Binding<N, SUBMODEL, Property<Boolean>> bindObservableList(Function<N, ObservableList<W>> getObservable, Function<M, Property<Boolean>> function, W styleClass) {
-		return Binding.bind(Binder.propertyBiDirectionalBinder(getObservable, styleClass), function);
+		return Binding.bind(Binder.observableListBinder(getObservable, styleClass), function);
 	}
 
 	static <N, T> Function<N, ObjectProperty<Consumer<Event>>> toObjectPropertyConsumer(Function<N, ObjectProperty<T>> f) {
@@ -104,16 +106,12 @@ public class Binding<N, SUBMODEL, T> {
 		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(objectPropertyConsumer));
 	}
 
-	// public static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bindAction2(Function<N, ObjectProperty<Consumer<Event>>> propAction, Consumer<M> consumer) {
-	// return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.genericActionBinder(propAction));
-	// }
-
 	public static <N, M, SUBMODEL, T extends Event> Binding<N, SUBMODEL, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
 		return Binding.<N, M, SUBMODEL, T> bind(consumer, Binder.actionBinder(propAction));
 	}
 
-	public static <N, M, SUBMODEL, T extends Event> Binding<N, SUBMODEL, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<M, SUBMODEL> biConsumer, Class<SUBMODEL> clazz) {
-		return Binding.<N, M, SUBMODEL, T> bind(biConsumer, Binder.actionBinder(propAction));
-	}
+	// public static <N, M, SUBMODEL, T extends Event> Binding<N, SUBMODEL, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<M, SUBMODEL> biConsumer, Class<SUBMODEL> clazz) {
+	// return Binding.<N, M, SUBMODEL, T> bind(biConsumer, Binder.actionBinder(propAction));
+	// }
 
 }
