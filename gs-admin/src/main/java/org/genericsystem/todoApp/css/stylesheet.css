@@ -1,0 +1,4 @@
+.completed  .text {
+	/*-fx-underline: true;*/
+	-fx-strikethrough: true;
+}

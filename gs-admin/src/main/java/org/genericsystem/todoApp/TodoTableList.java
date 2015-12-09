@@ -2,7 +2,6 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -21,7 +20,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
@@ -114,7 +112,7 @@ public class TodoTableList {
 
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 		Element<TextField> todosCreatLabel = new Element<>(todoCreateHBox, TextField.class);
-		todosCreatLabel.addBinding(Binding.bindInputText(TextField::textProperty, TodoTableList::getName));
+		todosCreatLabel.addBinding(Binding.bindBiDirectionalProperty(TextField::textProperty, TodoTableList::getName));
 
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
 		todosCreateButton.addBinding(Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty));
@@ -123,10 +121,9 @@ public class TodoTableList {
 		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
 
 		Function<TableView<Todo>, ObservableList<?>> getItems = TableView::getItems;
-
+		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 		Element<Todo> todoTableItems = new Element<>(todoTableView, Todo.class, getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)));
 		todoTableItems.addBoots(Boot.apply(Todo::action));
-		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 
 		// Element columnsTableItems = new Element(todoTableView, TableColumn.class, getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)), Binding.setProperty(Column::prefWidthProperty, 100), Binding.setProperty(
 		// TableColumn<Todo, String>::cellValueFactoryProperty, callback));
