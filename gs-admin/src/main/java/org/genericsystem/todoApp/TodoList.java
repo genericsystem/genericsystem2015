@@ -124,18 +124,17 @@ public class TodoList {
 		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class, Binding.bindBiDirectionalProperty(CheckBox::selectedProperty, Todo::getCompleted));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
 		todoLabel.addBoots(Boot.setProperty(Label::prefWidthProperty, 136));
+		todoLabel.addBoots(Boot.addProperty(Label::getStyleClass, "completed"));
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 		todoRemoveButton.addBoots(Boot.setProperty(Button::prefWidthProperty, 160));
 
-		// new HBox().setStyle(value);
-
 		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
-		Element<Hyperlink> allCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
-		allCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "All"));
-		Element<Hyperlink> activeCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showActive));
-		activeCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "Actives"));
-		Element<Hyperlink> completeCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showCompleted));
-		completeCheckBox.addBoots(Boot.setProperty(Hyperlink::textProperty, "Completes"));
+		Element<Hyperlink> allLink = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
+		allLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "All"));
+		Element<Hyperlink> activeLink = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showActive));
+		activeLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "Actives"));
+		Element<Hyperlink> completeLink = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showCompleted));
+		completeLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "Completes"));
 		return mainVBox.apply(this);
 		// Element<HBox> footer2 = new Element<>(mainVBox, HBox.class);
 		// Element<Hyperlink> allCheckBox2 = new Element<>(footer2, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
