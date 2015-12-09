@@ -3,25 +3,36 @@ package org.genericsystem.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
 public class Element<N> {
 	public final Class<N> classNode;
-	public List<Binding<N, ?, ?>> metaBindings = new ArrayList<>();
-	public List<Binding<N, ?, ?>> bindings = new ArrayList<>();
-
+	public final List<Binding<N, ?, ?>> metaBindings = new ArrayList<>();
+	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
+	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
 
 	private List<Boot<N>> boots = new ArrayList<>();
 
+	@Override
+	public String toString() {
+		return "Element<" + classNode.getSimpleName() + ">";
+	}
+
 	@SafeVarargs
 	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, Binding<N, ?, ?>... binding) {
 		this(parent, classNode, Pane::getChildren, binding);
+	}
+
+	@SafeVarargs
+	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, List<Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
+		this(parent, classNode, Pane::getChildren, metaBindings, binding);
 	}
 
 	@SafeVarargs
@@ -32,7 +43,8 @@ public class Element<N> {
 	@SafeVarargs
 	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
 		this.classNode = classNode;
-		this.metaBindings = metaBindings;
+		this.parent = parent;
+		this.metaBindings.addAll(metaBindings);
 		this.bindings.addAll(Arrays.asList(binding));
 		this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
@@ -81,4 +93,50 @@ public class Element<N> {
 		return (List) children;
 	}
 
+	public Element<?> getParent() {
+		return parent;
+	}
+
+	private Map<List, Map<Element, Integer>> map = new IdentityHashMap<List, Map<Element, Integer>>() {
+		@Override
+		public Map<Element, Integer> get(Object key) {
+			Map<Element, Integer> internal = super.get(key);
+			if (internal == null)
+				put((List) key, internal = new IdentityHashMap<Element, Integer>() {
+					@Override
+					public Integer get(Object key) {
+						Integer size = super.get(key);
+						if (size == null)
+							put((Element) key, size = 0);
+						return size;
+					};
+				});
+			return internal;
+		};
+	};
+
+	void incrementSize(List graphicChildren, Element child) {
+		Map<Element, Integer> internal = map.get(graphicChildren);
+		internal.put(child, internal.get(child) + 1);
+	}
+
+	void decrementSize(List graphicChildren, Element child) {
+		Map<Element, Integer> internal = map.get(graphicChildren);
+		int size = internal.get(child) - 1;
+		assert size >= 0;
+		if (size == 0)
+			internal.remove(child);// remove map if 0 for avoid heap pollution
+		else
+			internal.put(child, size);
+	}
+
+	int computeIndex(List graphicChildren, Element childElement) {
+		int indexInChildren = 0;
+		for (Element child : getChildren()) {
+			indexInChildren += map.get(graphicChildren).get(child);
+			if (child == childElement)
+				break;
+		}
+		return indexInChildren;
+	}
 }

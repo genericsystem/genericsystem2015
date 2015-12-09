@@ -2,8 +2,8 @@ package org.genericsystem.ui;
 
 import java.util.AbstractList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -24,15 +24,25 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		return new Binder<N, SUBMODEL, T>() {
 			@Override
 			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> {
-					System.out.println("zzz");
-					applyOnModel.apply(modelContext.getModel());
-				});
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
+		};
+
+	}
+
+	public static <N, SUBMODEL, T> Binder<N, SUBMODEL, T> genericActionBinder(Function<N, ObjectProperty<Consumer<Event>>> applyOnNode) {
+		return new Binder<N, SUBMODEL, T>() {
+			@Override
+			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+
 			}
+
+			@Override
+			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
 		};
 
 	}
@@ -46,6 +56,16 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		};
 	}
 
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, SUBMODEL, Property<W>>() {
+			@Override
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
+			}
+		};
+	}
+
+	// TODO remove this, call method above
 	public static <N, SUBMODEL> Binder<N, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
 		return new Binder<N, SUBMODEL, Property<String>>() {
 
@@ -65,11 +85,8 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 				List<ModelContext> children = modelContext.getChildren();
 
 				class ForEachList extends AbstractList<W> implements ListChangeListener<W> {
-
 					{
-						for (W w : wrapper) {
-							add(w);
-						}
+						addAll(wrapper);
 					}
 
 					@SuppressWarnings("unchecked")
@@ -89,8 +106,6 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 						ModelContext childContext = new ModelContext(modelContext, model);
 						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
 						children.add(index, childContext);
-
-						// modelContext.createSubContext(viewContext, index, element, (Element<W>) childElement);
 					}
 
 					@Override
@@ -115,14 +130,11 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 								subList(change.getFrom(), change.getTo()).clear();
 								addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
 							} else {
-								if (change.wasRemoved()) {
-									System.out.println(size());
+								if (change.wasRemoved())
 									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-								}
-								if (change.wasAdded()) {
-									System.out.println("addall");
+
+								if (change.wasAdded())
 									addAll(change.getFrom(), change.getAddedSubList());
-								}
 							}
 						}
 					}
