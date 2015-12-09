@@ -120,14 +120,14 @@ public class TodoList {
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
 		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create Todo"), Boot.setProperty(Button::prefWidthProperty, 160));
 
-		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class, VBox::getChildren, Arrays.asList(Binding.forEach(TodoList::getFiltered)));
+		Element<HBox> todoHBox = new Element<HBox>(mainVBox, HBox.class, Arrays.asList(Binding.forEach(TodoList::getFiltered)));
 		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class, Binding.bindBiDirectionalProperty(CheckBox::selectedProperty, Todo::getCompleted));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
 		todoLabel.addBoots(Boot.setProperty(Label::prefWidthProperty, 136));
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::remove, Todo.class), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
 		todoRemoveButton.addBoots(Boot.setProperty(Button::prefWidthProperty, 160));
 
-		// new HBox().setStyle
+		// new HBox().setStyle(value);
 
 		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
 		Element<Hyperlink> allCheckBox = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));

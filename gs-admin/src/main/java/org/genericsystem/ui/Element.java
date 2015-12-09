@@ -31,6 +31,11 @@ public class Element<N> {
 	}
 
 	@SafeVarargs
+	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> classNode, List<Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
+		this(parent, classNode, Pane::getChildren, metaBindings, binding);
+	}
+
+	@SafeVarargs
 	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> classNode, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?, ?>... binding) {
 		this(parent, classNode, getGraphicChildren, Collections.emptyList(), binding);
 	}
