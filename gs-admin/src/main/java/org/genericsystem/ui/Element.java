@@ -15,8 +15,8 @@ import javafx.scene.layout.Pane;
 
 public class Element<N> {
 	public final Class<N> nodeClass;
-	public final List<Binding<N, ?, ?>> metaBindings = new ArrayList<>();
-	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
+	public final List<Binding<N, ?>> metaBindings = new ArrayList<>();
+	public final List<Binding<N, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
@@ -29,22 +29,22 @@ public class Element<N> {
 	}
 
 	@SafeVarargs
-	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Binding<N, ?, ?>... binding) {
+	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Binding<N, ?>... binding) {
 		this(parent, nodeClass, Pane::getChildren, binding);
 	}
 
 	@SafeVarargs
-	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, List<Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
+	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
 		this(parent, nodeClass, Pane::getChildren, metaBindings, binding);
 	}
 
 	@SafeVarargs
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?, ?>... binding) {
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?>... binding) {
 		this(parent, nodeClass, getGraphicChildren, Collections.emptyList(), binding);
 	}
 
 	@SafeVarargs
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?, ?>> metaBindings, Binding<N, ?, ?>... binding) {
+	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
 		this.metaBindings.addAll(metaBindings);
@@ -63,12 +63,12 @@ public class Element<N> {
 		return boots;
 	}
 
-	public void addMetaBinding(Binding<N, ?, ?> metaBinding) {
+	public void addMetaBinding(Binding<N, ?> metaBinding) {
 		metaBindings.add(metaBinding);
 	}
 
 	@SafeVarargs
-	public final void addBinding(Binding<N, ?, ?>... binding) {
+	public final void addBinding(Binding<N, ?>... binding) {
 		bindings.addAll(Arrays.asList(binding));
 	}
 
