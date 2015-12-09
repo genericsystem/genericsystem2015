@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
@@ -30,7 +32,7 @@ public class TodoList {
 	private Property<String> name = new SimpleStringProperty();
 	private Property<Mode> mode = new SimpleObjectProperty<>(Mode.ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList();
-	private ObservableValue<Predicate<Todo>> observablePredicate = Bindings.createObjectBinding(() -> mode.getValue().predicate(), mode);
+	// private ObservableValue<Predicate<Todo>> observablePredicate = Bindings.createObjectBinding(() -> mode.getValue().predicate(), mode);
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
 
 	private ObservableNumberValue completedCount = Bindings.size(todos.filtered(Mode.COMPLETE.predicate()));
@@ -41,7 +43,7 @@ public class TodoList {
 	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue) mode, Mode.COMPLETE);
 
 	public TodoList() {
-		filtered.predicateProperty().bind(observablePredicate);
+		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue().predicate(), mode));
 	}
 
 	public Property<String> getName() {

@@ -6,7 +6,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -47,15 +49,6 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 
 	}
 
-	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
-		return new Binder<N, SUBMODEL, ObservableValue<W>>() {
-			@Override
-			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).bind(wrapper);
-			}
-		};
-	}
-
 	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, SUBMODEL, Property<W>>() {
 			@Override
@@ -65,15 +58,56 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 		};
 	}
 
-	public static <N, SUBMODEL> Binder<N, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
-		return new Binder<N, SUBMODEL, Property<String>>() {
-
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, SUBMODEL, ObservableValue<W>>() {
 			@Override
-			public void init(Property<String> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				applyOnNode.apply(viewContext.getNode()).bind(wrapper);
+			}
+		};
+	}
+
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, SUBMODEL, Property<W>>() {
+			@Override
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
 				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
 			}
 		};
 	}
+
+	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<Boolean>> propertyBiDirectionalBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
+		return new Binder<N, SUBMODEL, Property<Boolean>>() {
+			@Override
+			public void init(Property<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+				ObservableList<W> styleClasses = applyOnNode.apply(viewContext.getNode());
+				if (wrapper.getValue())
+					styleClasses.add(styleClass);
+				else
+					styleClasses.remove(styleClass);
+				wrapper.addListener(new WeakChangeListener<>(new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+						if (newValue)
+							styleClasses.add(styleClass);
+						else
+							styleClasses.remove(styleClass);
+					}
+				}));
+			}
+		};
+	}
+
+	// // TODO remove this, call method above
+	// public static <N, SUBMODEL> Binder<N, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
+	// return new Binder<N, SUBMODEL, Property<String>>() {
+	//
+	// @Override
+	// public void init(Property<String> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+	// applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
+	// }
+	// };
+	// }
 
 	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableList<W>> foreachBinder() {
 		return new Binder<N, SUBMODEL, ObservableList<W>>() {
@@ -129,14 +163,11 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 								subList(change.getFrom(), change.getTo()).clear();
 								addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
 							} else {
-								if (change.wasRemoved()) {
-									System.out.println(size());
+								if (change.wasRemoved())
 									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-								}
-								if (change.wasAdded()) {
-									System.out.println("addall");
+
+								if (change.wasAdded())
 									addAll(change.getFrom(), change.getAddedSubList());
-								}
 							}
 						}
 					}
