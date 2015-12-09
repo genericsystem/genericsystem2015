@@ -3,7 +3,6 @@ package org.genericsystem.todoApp;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
@@ -26,7 +25,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -181,7 +179,7 @@ public class GenericList {
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 
 		Element<TextField> textField = new Element<>(todoCreateHBox, TextField.class);
-		textField.addBinding(Binding.bindInputText(TextField::textProperty, GenericList::getName));
+		textField.addBinding(Binding.bindBiDirectionalProperty(TextField::textProperty, GenericList::getName));
 
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
 		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create generic"));
