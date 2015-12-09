@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -33,7 +34,8 @@ public class Binding<N, SUBMODEL, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel(), SUBMODEL);
-				} catch (ClassCastException ignore) {}
+				} catch (ClassCastException ignore) {
+				}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -66,6 +68,14 @@ public class Binding<N, SUBMODEL, T> {
 		return Binding.bind(Binder.foreachBinder(), function);
 	}
 
+	private static <N, M, SUBMODEL, T> Binding<N, SUBMODEL, T> bind(Function<M, T> function, Binder<N, SUBMODEL, T> binder) {
+		return new Binding<>((u, v) -> function.apply((M) u), binder);
+	}
+
+	public static <N, M, V, W> Binding<N, V, Property<W>> bindReversedProperty(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
+		return Binding.bind(function, Binder.propertyReverseBinder(getProperty));
+	}
+
 	public static <N, M, V, W> Binding<N, V, ObservableValue<W>> bindProperty(Function<N, Property<W>> getProperty, Function<M, ObservableValue<W>> function) {
 		return Binding.bind(Binder.propertyBinder(getProperty), function);
 	}
@@ -75,7 +85,7 @@ public class Binding<N, SUBMODEL, T> {
 	}
 
 	public static <N, M, SUBMODEL> Binding<N, SUBMODEL, Property<String>> bindInputText(Function<N, Property<String>> getTextProperty, Function<M, Property<String>> function) {
-		return Binding.<N, M, SUBMODEL, Property<String>> bind(Binder.inputTextBinder(getTextProperty), function);
+		return Binding.<N, M, SUBMODEL, Property<String>> bind(Binder.propertyBiDirectionalBinder(getTextProperty), function);
 	}
 
 	static <N, T> Function<N, ObjectProperty<Consumer<Event>>> toObjectPropertyConsumer(Function<N, ObjectProperty<T>> f) {
