@@ -4,6 +4,8 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -12,75 +14,91 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-public interface Binder<N, SUBMODEL, WRAPPER> {
+public interface Binder<N, W> {
 
-	default void init(Function<? super SUBMODEL, WRAPPER> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-		init(applyOnModel.apply(modelContext.getModel()), modelContext, viewContext, childElement);
+	default void init(Supplier<W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+		init(applyOnModel.get(), modelContext, viewContext, childElement);
 	}
 
-	void init(WRAPPER wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement);
+	void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement);
 
-	public static <N, SUBMODEL, T extends Event> Binder<N, SUBMODEL, T> actionBinder(Function<N, ObjectProperty<EventHandler<T>>> applyOnNode) {
-		return new Binder<N, SUBMODEL, T>() {
+	public static <N, W extends Event> Binder<N, W> actionBinder(Function<N, ObjectProperty<EventHandler<W>>> applyOnNode) {
+		return new Binder<N, W>() {
 			@Override
-			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
+			public void init(Supplier<W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.get());
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 
 	}
 
-	public static <N, SUBMODEL, T> Binder<N, SUBMODEL, T> genericActionBinder(Function<N, ObjectProperty<Consumer<Event>>> applyOnNode) {
-		return new Binder<N, SUBMODEL, T>() {
+	public static <N, W> Binder<N, W> genericActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
+		return new Binder<N, W>() {
 			@Override
-			public void init(Function<? super SUBMODEL, T> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.apply(modelContext.getModel()));
-
+			public void init(Supplier<W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set((W) (EventHandler) event -> applyOnModel.get());
 			}
 
 			@Override
-			public void init(T wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 
 	}
 
-	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
-		return new Binder<N, SUBMODEL, ObservableValue<W>>() {
+	public static <N, W> Binder<N, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, Property<W>>() {
 			@Override
-			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				wrapper.bind(applyOnNode.apply(viewContext.getNode()));
+			}
+		};
+	}
+
+	public static <N, W> Binder<N, ObservableValue<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, ObservableValue<W>>() {
+			@Override
+			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				applyOnNode.apply(viewContext.getNode()).bind(wrapper);
 			}
 		};
 	}
 
-	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
-		return new Binder<N, SUBMODEL, Property<W>>() {
+	public static <N, W> Binder<N, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
+		return new Binder<N, Property<W>>() {
 			@Override
-			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
 			}
 		};
 	}
 
-	// TODO remove this, call method above
-	public static <N, SUBMODEL> Binder<N, SUBMODEL, Property<String>> inputTextBinder(Function<N, Property<String>> applyOnNode) {
-		return new Binder<N, SUBMODEL, Property<String>>() {
-
+	public static <N, W> Binder<N, Property<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
+		return new Binder<N, Property<Boolean>>() {
 			@Override
-			public void init(Property<String> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
-				applyOnNode.apply(viewContext.getNode()).bindBidirectional(wrapper);
+			public void init(Property<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				ObservableList<W> styleClasses = applyOnNode.apply(viewContext.getNode());
+				Consumer<Boolean> consumer = bool -> {
+					if (bool)
+						styleClasses.add(styleClass);
+					else
+						styleClasses.remove(styleClass);
+				};
+				consumer.accept(wrapper.getValue());
+				wrapper.addListener((o, ov, nv) -> consumer.accept(nv));
 			}
 		};
 	}
 
-	public static <N, SUBMODEL, W> Binder<N, SUBMODEL, ObservableList<W>> foreachBinder() {
-		return new Binder<N, SUBMODEL, ObservableList<W>>() {
+	public static <N, W> Binder<N, ObservableList<W>> foreachBinder() {
+		return new Binder<N, ObservableList<W>>() {
 
 			@Override
-			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<SUBMODEL> childElement) {
+			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 
 				List<ModelContext> children = modelContext.getChildren();
 
@@ -104,7 +122,7 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 					@Override
 					public void add(int index, W model) {
 						ModelContext childContext = new ModelContext(modelContext, model);
-						new ViewContext(childContext, childElement, childElement.classNode.isAssignableFrom(model.getClass()) ? model : childElement.createNode(), viewContext);
+						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(model.getClass()) ? model : childElement.createNode(viewContext.getNode()));
 						children.add(index, childContext);
 					}
 
@@ -118,8 +136,8 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 					@Override
 					public W remove(int index) {
 						ModelContext removed = children.remove(index);
-						for (ViewContext<?> viewContext : removed.getViewContexts())
-							viewContext.destroyChild();
+						for (ViewContext<?> internalViewContext : removed.getViewContexts())
+							internalViewContext.destroyChild();
 						return removed.getModel();
 					}
 
@@ -132,16 +150,41 @@ public interface Binder<N, SUBMODEL, WRAPPER> {
 							} else {
 								if (change.wasRemoved())
 									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-
 								if (change.wasAdded())
 									addAll(change.getFrom(), change.getAddedSubList());
 							}
 						}
 					}
 				}
-
 				wrapper.addListener(new ForEachList());
+			}
+		};
+	}
 
+	public static <N, W> Binder<N, ObservableValue<W>> selectorBinder() {
+		return new Binder<N, ObservableValue<W>>() {
+			@Override
+			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				List<ModelContext> children = modelContext.getChildren();
+				Consumer<W> consumer = (newModel) -> {
+					if (newModel != null) {
+						ModelContext childContext = new ModelContext(modelContext, newModel);
+						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
+						children.add(childContext);
+						assert children.size() == 1;
+					}
+				};
+				wrapper.addListener((o, oldModel, newModel) -> {
+					if (oldModel == newModel)
+						return;
+					if (oldModel != null) {
+						ModelContext removed = children.remove(0);
+						for (ViewContext<?> internalViewContext : removed.getViewContexts())
+							internalViewContext.destroyChild();
+					}
+					consumer.accept(newModel);
+				});
+				consumer.accept(wrapper.getValue());
 			}
 		};
 	}

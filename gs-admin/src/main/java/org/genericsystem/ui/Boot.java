@@ -3,6 +3,7 @@ package org.genericsystem.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.Property;
+import javafx.collections.ObservableList;
 
 public class Boot<NODE> {
 
@@ -18,6 +19,10 @@ public class Boot<NODE> {
 
 	public static <NODE, VALUE> Boot<NODE> setProperty(Function<NODE, Property<VALUE>> getProperty, VALUE value) {
 		return new Boot<>(node -> getProperty.apply(node).setValue(value));
+	}
+
+	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableList<VALUE>> getProperty, VALUE value) {
+		return new Boot<>(node -> getProperty.apply(node).add(value));
 	}
 
 	public static <NODE> Boot<NODE> apply(Consumer<NODE> method) {
