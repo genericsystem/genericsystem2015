@@ -153,7 +153,7 @@ public class Element<N> {
 
 	public N apply(Object model) {
 		N node = createNode(null);
-		new ViewContext<>(null, new ModelContext(null, model), this, node);
+		new ViewContext<>(null, new ModelContext(null, this, model), this, node);
 		return node;
 	}
 

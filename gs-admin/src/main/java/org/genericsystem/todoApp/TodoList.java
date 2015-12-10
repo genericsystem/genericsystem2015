@@ -109,7 +109,7 @@ public class TodoList {
 		todosCreateButton.addBoot(Button::textProperty, "Create Todo");
 		todosCreateButton.addBoot(Button::prefWidthProperty, 160);
 
-		Element<HBox> todoHBox = new Element<HBox>(mainVBox, HBox.class);
+		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class);
 		// Element<HBox> todoHBox = Elt.createHbox(mainVBox);new Element<HBox>(mainVBox, HBox.class);
 		todoHBox.addForEachMetaBinding(m -> filtered);
 		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class);

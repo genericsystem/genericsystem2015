@@ -97,7 +97,7 @@ public interface Binder<N, W> {
 			@Override
 			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 
-				List<ModelContext> children = modelContext.getChildren();
+				List<ModelContext> children = modelContext.getChildren(childElement);
 
 				class ForEachList extends AbstractList<W> implements ListChangeListener<W> {
 					{
@@ -118,7 +118,7 @@ public interface Binder<N, W> {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void add(int index, W model) {
-						ModelContext childContext = new ModelContext(modelContext, model);
+						ModelContext childContext = new ModelContext(modelContext, childElement, model);
 						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(model.getClass()) ? model : childElement.createNode(viewContext.getNode()));
 						children.add(index, childContext);
 					}
@@ -162,13 +162,13 @@ public interface Binder<N, W> {
 		return new Binder<N, ObservableValue<W>>() {
 			@Override
 			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-				List<ModelContext> children = modelContext.getChildren();
+				List<ModelContext> children = modelContext.getChildren(childElement);
 				Consumer<W> consumer = (newModel) -> {
 					if (newModel != null) {
-						ModelContext childContext = new ModelContext(modelContext, newModel);
+						ModelContext childContext = new ModelContext(modelContext, childElement, newModel);
 						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
 						children.add(childContext);
-						// assert children.size() == 1;
+						assert children.size() == 1;
 					}
 				};
 				wrapper.addListener((o, oldModel, newModel) -> {
@@ -179,7 +179,8 @@ public interface Binder<N, W> {
 						for (ViewContext<?> internalViewContext : removed.getViewContexts())
 							internalViewContext.destroyChild();
 					}
-					consumer.accept(newModel);
+					if (newModel != null)
+						consumer.accept(newModel);
 				});
 				consumer.accept(wrapper.getValue());
 			}

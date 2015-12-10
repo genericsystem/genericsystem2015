@@ -35,6 +35,10 @@ public class ViewContext<N> {
 		}
 	}
 
+	public Element<N> getTemplate() {
+		return template;
+	}
+
 	public N getNode() {
 		return node;
 	}
