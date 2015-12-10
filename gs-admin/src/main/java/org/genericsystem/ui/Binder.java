@@ -168,7 +168,7 @@ public interface Binder<N, W> {
 						ModelContext childContext = new ModelContext(modelContext, newModel);
 						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
 						children.add(childContext);
-						assert children.size() == 1;
+						// assert children.size() == 1;
 					}
 				};
 				wrapper.addListener((o, oldModel, newModel) -> {

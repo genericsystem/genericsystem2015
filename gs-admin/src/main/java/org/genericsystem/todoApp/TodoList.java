@@ -39,6 +39,7 @@ public class TodoList {
 	private ObservableValue<Boolean> allMode = Bindings.equal((ObservableObjectValue) mode, Mode.ALL);
 	private ObservableValue<Boolean> activeMode = Bindings.equal((ObservableObjectValue) mode, Mode.ACTIVE);
 	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue) mode, Mode.COMPLETE);
+	private Property<Todo> selection = new SimpleObjectProperty<>();
 
 	public TodoList() {
 		filtered.predicateProperty().bind(observablePredicate);
@@ -84,6 +85,10 @@ public class TodoList {
 			return completed;
 		}
 
+		public void select() {
+			selection.setValue(this);
+		}
+
 		public void remove() {
 			todos.remove(this);
 		}
@@ -113,12 +118,17 @@ public class TodoList {
 		todoLabel.addBinding(Label::textProperty, Todo::getTodoString);
 		todoLabel.addBoot(Label::prefWidthProperty, 141);
 		todoLabel.addObservableListBinding(Label::getStyleClass, Todo::getCompleted, "completed");
+		Element<Button> todoSelectButton = new Element<>(todoHBox, Button.class);
+		todoSelectButton.addActionBinding(Button::onActionProperty, Todo::select);
+		todoSelectButton.addBoot(Button::textProperty, "select");
+		todoSelectButton.addBoot(Button::prefWidthProperty, 90);
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class);
 		todoRemoveButton.addActionBinding(Button::onActionProperty, Todo::remove);
-		todoRemoveButton.addBinding(Button::textProperty, Todo::getRemoveButtonTextProperty);
-		todoRemoveButton.addBoot(Button::prefWidthProperty, 160);
+		todoRemoveButton.addBoot(Button::textProperty, "remove");
+		todoRemoveButton.addBoot(Button::prefWidthProperty, 90);
 
 		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
+		footer.addBinding(HBox::visibleProperty, (m) -> hasTodo);
 		Element<Hyperlink> allLink = new Element<>(footer, Hyperlink.class);
 		allLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showAll);
 		allLink.addBoot(Hyperlink::textProperty, "All");
@@ -132,9 +142,15 @@ public class TodoList {
 		completeLink.addBoot(Hyperlink::textProperty, "Completes");
 		completeLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> completedMode, "overrun");
 		Element<Button> clearButton = new Element<>(footer, Button.class);
+		clearButton.addBinding(Button::visibleProperty, (m) -> hasCompleted);
 		clearButton.addActionBinding(Button::onActionProperty, TodoList::removeCompleted);
 		clearButton.addBinding(Button::textProperty, m -> clearButtonText);
 		clearButton.addBoot(Button::prefWidthProperty, 160);
+
+		Element<HBox> selectionHBox = new Element<>(mainVBox, HBox.class);
+		selectionHBox.addSelectorMetaBinding((m) -> selection);
+		Element<Label> selectedTodoInputText = new Element<>(selectionHBox, Label.class);
+		selectedTodoInputText.addBinding(Label::textProperty, Todo::getTodoString);
 
 		return mainVBox.apply(this);
 	}
