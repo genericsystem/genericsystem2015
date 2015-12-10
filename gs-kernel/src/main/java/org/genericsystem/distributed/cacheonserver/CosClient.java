@@ -8,167 +8,154 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.kernel.Statics;
-
-import com.google.common.base.Supplier;
 
 public class CosClient extends AbstractGSClient implements CosProtocole {
-
 
 	public CosClient(String host, int port, String path) {
 		super(host, port, path);
 	}
-	
-	@SuppressWarnings("unchecked")
-	protected <R> R unsafeConcurrencyControlException(Supplier<Object> unsafe) throws ConcurrencyControlException {
-		Object result = unsafe.get();
-		if (result instanceof ConcurrencyControlException)
-			throw (ConcurrencyControlException) result;
-		return (R) result;
-	}
 
 	@Override
 	public long newCacheId() {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> newCacheIdPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(newCacheIdPromise());
 	}
 
-	public CompletableFuture<Object> newCacheIdPromise() {
-		return promise(NEW_CACHE, buff -> buff.getLongThrowException(), buffer -> buffer);
+	public CompletableFuture<Long> newCacheIdPromise() {
+		return unsafeExceptionPromise(promise(NEW_CACHE, buff -> buff.getLongThrowException(), buffer -> buffer));
 	}
 
 	@Override
 	public long shiftTs(long cacheId) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> newShiftTsPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(newShiftTsPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> newShiftTsPromise(long cacheId) {
-		return promise(SHIFT_TS, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Long> newShiftTsPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(SHIFT_TS, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
 
 	@Override
 	public Vertex[] getDependencies(long cacheId, long id) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> getDependenciesPromise(cacheId, id).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(getDependenciesPromise(cacheId, id));
 	}
 
-	public CompletableFuture<Object> getDependenciesPromise(long cacheId, long id) {
-		return promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(id));
+	public CompletableFuture<Vertex[]> getDependenciesPromise(long cacheId, long id) {
+		return unsafeExceptionPromise(promise(GET_DEPENDENCIES, buff -> buff.getGSVertexArrayThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(id)));
 	}
 
 	@Override
 	public long addInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> addInstancePromise(cacheId, meta, overrides, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(addInstancePromise(cacheId, meta, overrides, value, components));
 	}
 
-	public CompletableFuture<Object> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return promise(ADD_INSTANCE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(meta, overrides, value, components));
+	public CompletableFuture<Long> addInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return unsafeExceptionPromise(promise(ADD_INSTANCE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(meta, overrides, value, components)));
 	}
 
 	@Override
 	public long update(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> updatePromise(cacheId, update, overrides, value, newComponents).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(updatePromise(cacheId, update, overrides, value, newComponents));
 	}
 
-	public CompletableFuture<Object> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return promise(UPDATE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents));
+	public CompletableFuture<Long> updatePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
+		return unsafeExceptionPromise(promise(UPDATE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents)));
 	}
 
 	@Override
 	public long merge(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> mergePromise(cacheId, update, overrides, value, newComponents).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(mergePromise(cacheId, update, overrides, value, newComponents));
 	}
 
-	public CompletableFuture<Object> mergePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
-		return promise(MERGE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents));
+	public CompletableFuture<Long> mergePromise(long cacheId, long update, List<Long> overrides, Serializable value, List<Long> newComponents) {
+		return unsafeExceptionPromise(promise(MERGE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(update, overrides, value, newComponents)));
 	}
 
 	@Override
 	public long setInstance(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> setInstancePromise(cacheId, meta, overrides, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(setInstancePromise(cacheId, meta, overrides, value, components));
 	}
 
-	public CompletableFuture<Object> setInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
-		return promise(SET_INSTANCE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(meta, overrides, value, components));
+	public CompletableFuture<Long> setInstancePromise(long cacheId, long meta, List<Long> overrides, Serializable value, List<Long> components) {
+		return unsafeExceptionPromise(promise(SET_INSTANCE, buff -> buff.getLongThrowException(), buffer -> new GSBuffer(buffer).appendLong(cacheId).appendGSSignature(meta, overrides, value, components)));
 	}
 
 	@Override
 	public long forceRemove(long cacheId, long generic) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> forceRemovePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(forceRemovePromise(cacheId, generic));
 	}
 
-	public CompletableFuture<Object> forceRemovePromise(long cacheId, long generic) {
-		return promise(FORCE_REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic));
+	public CompletableFuture<Long> forceRemovePromise(long cacheId, long generic) {
+		return unsafeExceptionPromise(promise(FORCE_REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic)));
 	}
 
 	@Override
 	public long remove(long cacheId, long generic) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> removePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(removePromise(cacheId, generic));
 	}
 
-	public CompletableFuture<Object> removePromise(long cacheId, long generic) {
-		return promise(REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic));
+	public CompletableFuture<Long> removePromise(long cacheId, long generic) {
+		return unsafeExceptionPromise(promise(REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic)));
 	}
 
 	@Override
 	public long conserveRemove(long cacheId, long generic) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> conserveRemovePromise(cacheId, generic).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(conserveRemovePromise(cacheId, generic));
 	}
 
-	public CompletableFuture<Object> conserveRemovePromise(long cacheId, long generic) {
-		return promise(CONSERVE_REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic));
+	public CompletableFuture<Long> conserveRemovePromise(long cacheId, long generic) {
+		return unsafeExceptionPromise(promise(CONSERVE_REMOVE, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId).appendLong(generic)));
 	}
 
 	@Override
 	public long flush(long cacheId) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> flushPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(flushPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> flushPromise(long cacheId) {
-		return promise(FLUSH, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Long> flushPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(FLUSH, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
 
 	@Override
 	public long tryFlush(long cacheId) throws ConcurrencyControlException {
-		return unsafeConcurrencyControlException(() -> extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> tryFlushPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT))));
+		return unsafeRollbackAndConcurrencyControlExceptionManaged(tryFlushPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> tryFlushPromise(long cacheId) {
-		return promise(TRY_FLUSH, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Long> tryFlushPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(TRY_FLUSH, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
 
 	@Override
 	public long clear(long cacheId) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> clearPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(clearPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> clearPromise(long cacheId) {
-		return promise(CLEAR, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Long> clearPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(CLEAR, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
 
 	@Override
 	public long mount(long cacheId) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> mountPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(mountPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> mountPromise(long cacheId) {
-		return promise(MOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Long> mountPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(MOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
 
 	@Override
 	public long unmount(long cacheId) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> unmountPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(unmountPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> unmountPromise(long cacheId) {
-		return promise(UNMOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Long> unmountPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(UNMOUNT, buff -> buff.getLongThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
 
 	@Override
 	public int getCacheLevel(long cacheId) {
-		return extractRuntimeExceptionPromise(() -> extractRuntimeException(() -> getCacheLevelPromise(cacheId).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT)));
+		return unsafeRollbackManaged(getCacheLevelPromise(cacheId));
 	}
 
-	public CompletableFuture<Object> getCacheLevelPromise(long cacheId) {
-		return promise(GET_CACHE_LEVEL, buff -> buff.getIntThrowException(), buffer -> buffer.appendLong(cacheId));
+	public CompletableFuture<Integer> getCacheLevelPromise(long cacheId) {
+		return unsafeExceptionPromise(promise(GET_CACHE_LEVEL, buff -> buff.getIntThrowException(), buffer -> buffer.appendLong(cacheId)));
 	}
-
 }

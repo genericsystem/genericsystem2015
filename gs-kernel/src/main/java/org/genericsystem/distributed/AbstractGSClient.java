@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
-
-import com.google.common.base.Supplier;
 
 public abstract class AbstractGSClient implements Protocole {
 
@@ -81,46 +81,58 @@ public abstract class AbstractGSClient implements Protocole {
 		return promise.thenApplyAsync(p -> p);
 	}
 
-	@FunctionalInterface
-	public interface UnsafeSupplier<R> {
-		R supply() throws InterruptedException, ExecutionException, TimeoutException;
+	protected <T, R> R unsafeRollbackManaged(CompletableFuture<R> unsafe) {
+		try {
+			return unsafe.get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			if (ExecutionException.class.isAssignableFrom(e.getClass()) && e.getCause() != null && RollbackException.class.isAssignableFrom(e.getCause().getClass()))
+				throw (RollbackException) e.getCause();
+			throw new IllegalStateException(e);
+		}
 	}
 
-	protected <T, R> R extractRuntimeException(UnsafeSupplier<R> unsafe) {
+	protected <T, R> R unsafeRollbackAndConcurrencyControlExceptionManaged(CompletableFuture<R> unsafe) throws ConcurrencyControlException {
 		try {
-			return unsafe.supply();
+			return unsafe.get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			if (ExecutionException.class.isAssignableFrom(e.getClass()) && e.getCause() != null)
+				if (RollbackException.class.isAssignableFrom(e.getCause().getClass()))
+					throw (RollbackException) e.getCause();
+			if (ConcurrencyControlException.class.isAssignableFrom(e.getCause().getClass()))
+				throw (ConcurrencyControlException) e.getCause();
 			throw new IllegalStateException(e);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <R> R extractRuntimeExceptionPromise(Supplier<Object> unsafe) {
+	protected <R> CompletableFuture<R> unsafeExceptionPromise(CompletableFuture<Object> unsafe) {
 		assert !Thread.currentThread().toString().subSequence(0, 13).equals("Thread[vert.x");
 
-		Object result = unsafe.get();
-		if (result instanceof RuntimeException)
-			throw (RuntimeException) result;
-		return (R) result;
+		CompletableFuture<R> cf = new CompletableFuture<>();
+		((CompletableFuture<R>) unsafe).thenApply(res -> {
+			if (Exception.class.isAssignableFrom(res.getClass()))
+				return cf.completeExceptionally((Exception) res);
+			return cf.complete(res);
+		});
+		return cf;
 	}
 
 	@Override
 	public Vertex getVertex(long id) {
-		System.out.println("client ask vertex");
-		return extractRuntimeException(() -> getVertexPromise(id).get(/* Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT */));
+		return unsafeRollbackManaged(getVertexPromise(id));
 	}
 
 	public CompletableFuture<Vertex> getVertexPromise(long id) {
-		return extractRuntimeExceptionPromise(() -> promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id)));
+		return unsafeExceptionPromise(promise(GET_VERTEX, buff -> buff.getGSVertexThrowException(), buffer -> buffer.appendLong(id)));
 	}
 
 	@Override
 	public long pickNewTs() {
-		return extractRuntimeException(() -> getPickNewTsPromise().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+		return unsafeRollbackManaged(getPickNewTsPromise());
 	}
 
 	public CompletableFuture<Long> getPickNewTsPromise() {
-		return extractRuntimeExceptionPromise(() -> promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer));
+		return unsafeExceptionPromise(promise(PICK_NEW_TS, buff -> buff.getLongThrowException(), buffer -> buffer));
 	}
 
 	// protected static <T> T synchronizeTaskWithException(Consumer<Handler<Object>> consumer) throws ConcurrencyControlException {
