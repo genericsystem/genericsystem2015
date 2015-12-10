@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -132,7 +131,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> getObservable, Function<M, Property<Boolean>> function, T styleClass) {
+	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> getObservable, Function<M, ObservableValue<Boolean>> function, T styleClass) {
 		bindings.add(Binding.bindObservableList(getObservable, function, styleClass));
 		return this;
 	}

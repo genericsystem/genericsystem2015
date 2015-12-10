@@ -122,12 +122,15 @@ public class TodoList {
 		Element<Hyperlink> allLink = new Element<>(footer, Hyperlink.class);
 		allLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showAll);
 		allLink.addBoot(Hyperlink::textProperty, "All");
+		allLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> allMode, "overrun");
 		Element<Hyperlink> activeLink = new Element<>(footer, Hyperlink.class);
 		activeLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showActive);
 		activeLink.addBoot(Hyperlink::textProperty, "Actives");
+		activeLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> activeMode, "overrun");
 		Element<Hyperlink> completeLink = new Element<>(footer, Hyperlink.class);
 		completeLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showCompleted);
 		completeLink.addBoot(Hyperlink::textProperty, "Completes");
+		completeLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> completedMode, "overrun");
 		Element<Button> clearButton = new Element<>(footer, Button.class);
 		clearButton.addActionBinding(Button::onActionProperty, TodoList::removeCompleted);
 		clearButton.addBinding(Button::textProperty, m -> clearButtonText);

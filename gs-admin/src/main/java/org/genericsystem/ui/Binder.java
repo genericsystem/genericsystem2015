@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -30,8 +29,7 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-			}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
 		};
 
 	}
@@ -44,8 +42,7 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-			}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
 		};
 
 	}
@@ -77,10 +74,10 @@ public interface Binder<N, W> {
 		};
 	}
 
-	public static <N, W> Binder<N, Property<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
-		return new Binder<N, Property<Boolean>>() {
+	public static <N, W> Binder<N, ObservableValue<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
+		return new Binder<N, ObservableValue<Boolean>>() {
 			@Override
-			public void init(Property<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			public void init(ObservableValue<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				ObservableList<W> styleClasses = applyOnNode.apply(viewContext.getNode());
 				Consumer<Boolean> consumer = bool -> {
 					if (bool)
