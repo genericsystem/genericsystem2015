@@ -3,6 +3,7 @@ package org.genericsystem.todoApp;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
@@ -25,6 +26,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -175,20 +177,20 @@ public class GenericList {
 	public Node initTable() {
 
 		Element<VBox> mainVBox = new Element<>(null, VBox.class);
-		mainVBox.addBinding(Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
+		mainVBox.addBindings(Binding.bindProperty(VBox::prefHeightProperty, GenericList::getHeight));
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 
 		Element<TextField> textField = new Element<>(todoCreateHBox, TextField.class);
-		textField.addBinding(Binding.bindBiDirectionalProperty(TextField::textProperty, GenericList::getName));
+		textField.addBindings(Binding.bindBiDirectionalProperty(TextField::textProperty, GenericList::getName));
 
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
 		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create generic"));
-		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, GenericList::create));
+		todosCreateButton.addBindings(Binding.bindAction(Button::onActionProperty, GenericList::create));
 
 		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
 		Function<TableView, ReadOnlyObjectProperty> function = t -> t.getSelectionModel().selectedItemProperty();
 
-		todoTableView.addBinding(Binding.bindReversedProperty((Function) function, GenericList::getProperty));
+		todoTableView.addBindings(Binding.bindReversedProperty((Function) function, GenericList::getProperty));
 		Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems, Arrays.asList(Binding.forEach(GenericList::getGenerics)));
 		Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns, Arrays.asList(Binding.forEach(GenericList::getColumns)));
 
@@ -216,7 +218,7 @@ public class GenericList {
 		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 
 		Element<TableColumn> columnTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
-		columnTodo.addBinding(Binding.bindProperty(TableColumn::textProperty, GenericList::getColumnTitle));
+		columnTodo.addBindings(Binding.bindProperty(TableColumn::textProperty, GenericList::getColumnTitle));
 		columnTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::prefWidthProperty, 100));
 		columnTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::textProperty, "instance"));
 		columnTodo.addBoots(Boot.setProperty(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback));

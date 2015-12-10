@@ -36,11 +36,11 @@ public interface Binder<N, W> {
 
 	}
 
-	public static <N, W> Binder<N, W> genericActionBinder(Function<N, Consumer<Consumer<Event>>> applyOnNode) {
+	public static <N, W> Binder<N, W> genericActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
 		return new Binder<N, W>() {
 			@Override
 			public void init(Supplier<W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-				applyOnNode.apply(viewContext.getNode()).accept(event -> applyOnModel.get());
+				applyOnNode.apply(viewContext.getNode()).set((W) (EventHandler) event -> applyOnModel.get());
 			}
 
 			@Override
@@ -79,7 +79,6 @@ public interface Binder<N, W> {
 
 	public static <N, W> Binder<N, Property<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
 		return new Binder<N, Property<Boolean>>() {
-
 			@Override
 			public void init(Property<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				ObservableList<W> styleClasses = applyOnNode.apply(viewContext.getNode());
@@ -151,7 +150,6 @@ public interface Binder<N, W> {
 							} else {
 								if (change.wasRemoved())
 									subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-
 								if (change.wasAdded())
 									addAll(change.getFrom(), change.getAddedSubList());
 							}
@@ -165,10 +163,17 @@ public interface Binder<N, W> {
 
 	public static <N, W> Binder<N, ObservableValue<W>> selectorBinder() {
 		return new Binder<N, ObservableValue<W>>() {
-
 			@Override
 			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				List<ModelContext> children = modelContext.getChildren();
+				Consumer<W> consumer = (newModel) -> {
+					if (newModel != null) {
+						ModelContext childContext = new ModelContext(modelContext, newModel);
+						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
+						children.add(childContext);
+						assert children.size() == 1;
+					}
+				};
 				wrapper.addListener((o, oldModel, newModel) -> {
 					if (oldModel == newModel)
 						return;
@@ -177,13 +182,9 @@ public interface Binder<N, W> {
 						for (ViewContext<?> internalViewContext : removed.getViewContexts())
 							internalViewContext.destroyChild();
 					}
-					if (newModel != null) {
-						ModelContext childContext = new ModelContext(modelContext, newModel);
-						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
-						children.add(childContext);
-						assert children.size() == 1;
-					}
+					consumer.accept(newModel);
 				});
+				consumer.accept(wrapper.getValue());
 			}
 		};
 	}

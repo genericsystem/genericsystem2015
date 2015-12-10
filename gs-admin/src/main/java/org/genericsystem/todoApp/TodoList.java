@@ -1,7 +1,6 @@
 package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.function.Predicate;
 
 import javafx.beans.Observable;
@@ -121,22 +120,24 @@ public class TodoList {
 	public Node init() {
 
 		Element<VBox> mainVBox = new Element<>(null, VBox.class);
-		mainVBox.addBoots(Boot.setProperty(VBox::prefHeightProperty, 600));
+		mainVBox.addBoot(VBox::prefHeightProperty, 600);
 
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
-		Element<TextField> todoInputText = new Element<>(todoCreateHBox, TextField.class, Binding.bindBiDirectionalProperty(TextField::textProperty, TodoList::getName));
-		todoInputText.addBoots(Boot.setProperty(TextField::prefWidthProperty, 160));
+		Element<TextField> todoInputText = new Element<>(todoCreateHBox, TextField.class);
+		todoInputText.addBidirectionalBinding(TextField::textProperty, TodoList::getName);
+		todoInputText.addBoot(TextField::prefWidthProperty, 166);
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::create));
-		todosCreateButton.addBoots(Boot.setProperty(Button::textProperty, "Create Todo"), Boot.setProperty(Button::prefWidthProperty, 160));
+		todosCreateButton.addBoot(Button::textProperty, "Create Todo");
+		todosCreateButton.addBoot(Button::prefWidthProperty, 160);
 
-		Element<HBox> todoHBox = new Element<HBox>(mainVBox, HBox.class, Arrays.asList(Binding.forEach(TodoList::getFiltered)));
+		Element<HBox> todoHBox = new Element<HBox>(mainVBox, HBox.class);
+		todoHBox.addForEachMetaBinding(TodoList::getFiltered);
 		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class, Binding.bindBiDirectionalProperty(CheckBox::selectedProperty, Todo::getCompleted));
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class, Binding.bindProperty(Label::textProperty, Todo::getTodoString));
-		todoLabel.addBoots(Boot.setProperty(Label::prefWidthProperty, 136));
-		// todoLabel.addBoots(Boot.addProperty(Label::getStyleClass, "completed"));
-		todoLabel.addBinding(Binding.bindObservableList(Label::getStyleClass, Todo::getCompleted, "completed"));
+		todoLabel.addBoot(Label::prefWidthProperty, 141);
+		todoLabel.addObservableListBinding(Label::getStyleClass, Todo::getCompleted, "completed");
 		Element<Button> todoRemoveButton = new Element<>(todoHBox, Button.class, Binding.bindAction(Button::onActionProperty, Todo::remove), Binding.bindProperty(Button::textProperty, Todo::getRemoveButtonTextProperty));
-		todoRemoveButton.addBoots(Boot.setProperty(Button::prefWidthProperty, 160));
+		todoRemoveButton.addBoot(Button::prefWidthProperty, 160);
 
 		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
 		Element<Hyperlink> allLink = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showAll));
@@ -145,9 +146,9 @@ public class TodoList {
 		activeLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "Actives"));
 		Element<Hyperlink> completeLink = new Element<>(footer, Hyperlink.class, Binding.bindAction(Hyperlink::onActionProperty, TodoList::showCompleted));
 		completeLink.addBoots(Boot.setProperty(Hyperlink::textProperty, "Completes"));
-
 		Element<Button> clearButton = new Element<>(footer, Button.class, Binding.bindAction(Button::onActionProperty, TodoList::removeCompleted));
-		clearButton.addBinding(Binding.bindProperty(Button::textProperty, TodoList::getClearButtonText));
+		clearButton.addBindings(Binding.bindProperty(Button::textProperty, TodoList::getClearButtonText));
+		clearButton.addBoot(Button::prefWidthProperty, 160);
 
 		return mainVBox.apply(this);
 		// Element<HBox> footer2 = new Element<>(mainVBox, HBox.class);

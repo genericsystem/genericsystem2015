@@ -112,11 +112,11 @@ public class TodoTableList {
 
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 		Element<TextField> todosCreatLabel = new Element<>(todoCreateHBox, TextField.class);
-		todosCreatLabel.addBinding(Binding.bindBiDirectionalProperty(TextField::textProperty, TodoTableList::getName));
+		todosCreatLabel.addBindings(Binding.bindBiDirectionalProperty(TextField::textProperty, TodoTableList::getName));
 
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
-		todosCreateButton.addBinding(Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty));
-		todosCreateButton.addBinding(Binding.bindAction(Button::onActionProperty, TodoTableList::create));
+		todosCreateButton.addBindings(Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty));
+		todosCreateButton.addBindings(Binding.bindAction(Button::onActionProperty, TodoTableList::create));
 
 		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
 

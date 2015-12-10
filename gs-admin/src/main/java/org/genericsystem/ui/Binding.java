@@ -80,8 +80,7 @@ public class Binding<N, T> {
 	}
 
 	public static <N, M, T> Binding<N, T> bindGenericAction(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
-		Function<N, Consumer<Consumer<Event>>> objectPropertyConsumer = label -> cons -> propAction.apply(label).set((T) (EventHandler) cons::accept);
-		return Binding.<N, M, T> bind(consumer, Binder.genericActionBinder(objectPropertyConsumer));
+		return Binding.<N, M, T> bind(consumer, Binder.genericActionBinder(propAction));
 	}
 
 	public static <N, M, T extends Event> Binding<N, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
