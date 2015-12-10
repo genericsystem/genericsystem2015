@@ -26,11 +26,11 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 			beginChange();
 
 			if (change.wasPermutated()) {
-				nextRemove(change.getFrom(), IntStream.range(change.getFrom(), change.getTo()).mapToObj(this::get).collect(Collectors.toList()));
+				nextRemove(change.getFrom(), IntStream.range(change.getFrom(), change.getTo()).mapToObj(this::remove).collect(Collectors.toList()));
 				nextAdd(change.getFrom(), change.getTo());
 			} else {
 				if (change.wasRemoved())
-					nextRemove(change.getFrom(), change.getRemoved().stream().map(cache::get).collect(Collectors.toList()));
+					nextRemove(change.getFrom(), change.getRemoved().stream().map(cache::remove).collect(Collectors.toList()));
 				if (change.wasAdded())
 					nextAdd(change.getFrom(), change.getAddedSize());
 			}
