@@ -5,6 +5,8 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.genericsystem.todoApp.AbstractGenericList.GenericList;
+
 public class GenericAppFX extends Application {
 
 	public static void main(String[] args) {

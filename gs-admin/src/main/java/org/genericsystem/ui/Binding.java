@@ -3,7 +3,6 @@ package org.genericsystem.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -32,8 +31,7 @@ public class Binding<N, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -75,7 +73,7 @@ public class Binding<N, T> {
 		return Binding.bind(Binder.propertyBiDirectionalBinder(getProperty), function);
 	}
 
-	public static <N, M, W> Binding<N, Property<Boolean>> bindObservableList(Function<N, ObservableList<W>> getObservable, Function<M, Property<Boolean>> function, W styleClass) {
+	public static <N, M, W> Binding<N, ObservableValue<Boolean>> bindObservableList(Function<N, ObservableList<W>> getObservable, Function<M, ObservableValue<Boolean>> function, W styleClass) {
 		return Binding.bind(Binder.observableListBinder(getObservable, styleClass), function);
 	}
 

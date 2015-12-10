@@ -1,18 +1,39 @@
 package org.genericsystem.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ModelContext {
 
 	private final ModelContext parent;
 	private final Object model;
-	private List<ModelContext> children = new ArrayList<>();
+	private Map<Element<?>, List<ModelContext>> children = new HashMap<Element<?>, List<ModelContext>>() {
+		@Override
+		public List<ModelContext> get(Object element) {
+			List<ModelContext> list = super.get(element);
+			if (list == null)
+				put((Element<?>) element, list = new ArrayList<>());
+			return list;
+		}
+	};
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
+	private final Element<?> element;
 
-	public ModelContext(ModelContext parent, Object model) {
+	public ModelContext(ModelContext parent, Element<?> element, Object model) {
 		this.parent = parent;
 		this.model = model;
+		this.element = element;
+	}
+
+	public Element<?> getElement() {
+		return element;
+	}
+
+	@Override
+	public String toString() {
+		return "ModelContext : " + model;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -24,8 +45,8 @@ public class ModelContext {
 		return this.parent;
 	}
 
-	public List<ModelContext> getChildren() {
-		return this.children;
+	public List<ModelContext> getChildren(Element<?> childElement) {
+		return children.get(childElement);
 	}
 
 	public void register(ViewContext<?> viewContext) {
