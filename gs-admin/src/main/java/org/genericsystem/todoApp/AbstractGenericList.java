@@ -35,6 +35,11 @@ import org.genericsystem.ui.Element;
 public abstract class AbstractGenericList {
 	protected Transformation<GenericWrapper, Generic> genericWrapperList;
 	protected ObservableList<Generic> dependenciesObservableList;
+	protected Property<GenericWrapper> property = new SimpleObjectProperty<>();
+
+	protected Property<GenericWrapper> getProperty() {
+		return property;
+	}
 
 	public static class GenericWrapper extends AbstractGenericList {
 
@@ -67,12 +72,6 @@ public abstract class AbstractGenericList {
 			return removeButtonTextProperty;
 		}
 	}
-
-	protected Property<GenericWrapper> getProperty() {
-		return property;
-	}
-
-	protected Property<GenericWrapper> property = new SimpleObjectProperty<>();
 
 	public static class GenericList extends AbstractGenericList {
 
