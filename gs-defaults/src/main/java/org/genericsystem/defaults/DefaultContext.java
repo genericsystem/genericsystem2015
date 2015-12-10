@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -229,7 +230,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 					});
 					status = status.thenCompose((a) -> getAsyncInstances(node).thenCompose(instancesDependencies -> {
 						CompletableFuture<NavigableSet<T>> internal = CompletableFuture.completedFuture(this);
-						System.out.println("size " + instancesDependencies.size());
 						if (!instancesDependencies.isEmpty())
 							cf.completeExceptionally(discardWithExceptionPromise(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a instance dependencies : " + instancesDependencies.info())));
 						for (T element : instancesDependencies)
@@ -271,7 +271,7 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 
 	default CompletableFuture<List<T>> computeAsyncAndCheckOverridesAreReached(T adjustedMeta, List<T> overrides, Serializable value, List<T> components) {
 		assert false; // AsyncSupersComputer in not implemented
-		CompletableFuture<List<T>> promise = new AsyncSupersComputer(adjustedMeta, overrides, value, components);
+		CompletableFuture<LinkedHashSet<T>> promise = new AsyncSupersComputer<T>(adjustedMeta, overrides, value, components);
 		CompletableFuture<List<T>> cf = new CompletableFuture<>();
 
 		promise.thenApply(list -> {

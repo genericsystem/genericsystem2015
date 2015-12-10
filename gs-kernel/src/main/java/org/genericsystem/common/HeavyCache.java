@@ -209,6 +209,12 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		throw new RollbackException(exception);
 	}
 
+	@Override
+	public Exception discardWithExceptionPromise(Throwable exception) {
+		clear();
+		return new RollbackException(exception);
+	}
+
 	public int getCacheLevel() {
 		return getDifferential().getCacheLevel();
 	}

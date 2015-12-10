@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
@@ -56,29 +57,23 @@ public class AsyncDefaultTest extends AbstractTest {
 		assert cpt == 3;
 	}
 
-	// public void test_getInstanceTest9() throws InterruptedException, ExecutionException, TimeoutException {
-	// CocClientEngine root = new CocClientEngine();
-	// Generic vehicle = root.addInstance("Vehicle");
-	// Generic vehiclePower = vehicle.addAttribute("power");
-	// Generic car = root.addInstance("Car");
-	// Generic carVehicle = root.addInstance(vehicle, "Car");
-	//
-	// Generic carPower = car.addAttribute("power");
-	// Generic carVehiclePower = carVehicle.addAttribute("power");
-	//
-	// assert !carPower.inheritsFrom(vehiclePower);
-	// assert carVehiclePower.inheritsFrom(vehiclePower);
-	//
-	// catchAndCheckCause(() -> root.getRoot().getMetaAttribute().getInstance("power"), AmbiguousSelectionException.class); // TODO /!\
-	// assert root.getRoot().getMetaAttribute().getAsyncInstances("power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 3;
-	// assert root.getRoot().getMetaAttribute().getAsyncInstances("power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).containsAll(Arrays.asList(vehiclePower, carPower, carVehiclePower));
-	// catchAndCheckCause(() -> root.getRoot().getMetaAttribute().getInstance(Collections.emptyList(), "power"), AmbiguousSelectionException.class);
-	//
-	// // computeAsyncAndCheckOverridesAreReached unimplemented
-	// // assert root.getRoot().getMetaAttribute().getAsyncInstances(Collections.emptyList(), "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 2;
-	// // assert root.getRoot().getMetaAttribute().getAsyncInstances(Collections.emptyList(), "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).containsAll(Arrays.asList(vehiclePower, carPower));
-	// // assert root.getRoot().getMetaAttribute().getAsyncInstance(vehiclePower, "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT) == carVehiclePower;
-	// }
+	public void test_getInstanceTest9() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("Vehicle");
+		Generic vehiclePower = vehicle.addAttribute("power");
+		Generic car = root.addInstance("Car");
+		Generic carVehicle = root.addInstance(vehicle, "Car");
+
+		Generic carPower = car.addAttribute("power");
+		Generic carVehiclePower = carVehicle.addAttribute("power");
+
+		assert !carPower.inheritsFrom(vehiclePower);
+		assert carVehiclePower.inheritsFrom(vehiclePower);
+
+		catchAndCheckCausePromise(root.getRoot().getMetaAttribute().getAsyncInstance("power"), AmbiguousSelectionException.class);
+		// computeAsyncAndCheckOverridesAreReached unimplemented
+		// catchAndCheckCausePromise(root.getRoot().getMetaAttribute().getAsyncInstance(Collections.emptyList(), "power"), AmbiguousSelectionException.class);
+	}
 
 	public void test_getInstanceTest13() throws InterruptedException, ExecutionException, TimeoutException {
 		CocClientEngine root = new CocClientEngine();
@@ -616,5 +611,4 @@ public class AsyncDefaultTest extends AbstractTest {
 		assert myBmw.getAsyncComposites().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1;
 		assert myBmw455.getValue().equals(455);
 	}
-
 }
