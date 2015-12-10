@@ -152,9 +152,7 @@ public class Element<N> {
 	}
 
 	public N apply(Object model) {
-		N node = createNode(null);
-		new ViewContext<>(null, new ModelContext(null, this, model), this, node);
-		return node;
+		return new ViewContext<>(null, new ModelContext(null, this, model), this, null).getNode();
 	}
 
 	N createNode(Object parent) {

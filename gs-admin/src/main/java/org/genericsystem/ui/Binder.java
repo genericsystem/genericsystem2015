@@ -119,7 +119,7 @@ public interface Binder<N, W> {
 					@Override
 					public void add(int index, W model) {
 						ModelContext childContext = new ModelContext(modelContext, childElement, model);
-						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(model.getClass()) ? model : childElement.createNode(viewContext.getNode()));
+						new ViewContext(viewContext, childContext,childElement, model);
 						children.add(index, childContext);
 					}
 
@@ -166,7 +166,7 @@ public interface Binder<N, W> {
 				Consumer<W> consumer = (newModel) -> {
 					if (newModel != null) {
 						ModelContext childContext = new ModelContext(modelContext, childElement, newModel);
-						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
+						new ViewContext(viewContext, childContext,childElement, newModel);
 						children.add(childContext);
 						assert children.size() == 1;
 					}
