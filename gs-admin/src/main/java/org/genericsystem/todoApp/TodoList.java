@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -14,6 +15,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -22,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 import org.genericsystem.ui.Element;
 
 public class TodoList {
@@ -68,6 +71,58 @@ public class TodoList {
 			todos.remove(todo);
 	}
 
+	public Property<String> getName() {
+		return name;
+	}
+
+	public Property<Mode> getMode() {
+		return mode;
+	}
+
+	public ObservableList<Todo> getTodos() {
+		return todos;
+	}
+
+	public ObservableValue<Predicate<Todo>> getObservablePredicate() {
+		return observablePredicate;
+	}
+
+	public FilteredList<Todo> getFiltered() {
+		return filtered;
+	}
+
+	public ObservableNumberValue getCompletedCount() {
+		return completedCount;
+	}
+
+	public ObservableValue<String> getClearButtonText() {
+		return clearButtonText;
+	}
+
+	public ObservableValue<Boolean> getHasCompleted() {
+		return hasCompleted;
+	}
+
+	public ObservableValue<Boolean> getHasTodo() {
+		return hasTodo;
+	}
+
+	public ObservableValue<Boolean> getAllMode() {
+		return allMode;
+	}
+
+	public ObservableValue<Boolean> getActiveMode() {
+		return activeMode;
+	}
+
+	public ObservableValue<Boolean> getCompletedMode() {
+		return completedMode;
+	}
+
+	public Property<Todo> getSelection() {
+		return selection;
+	}
+
 	public class Todo {
 		private Property<String> stringProperty = new SimpleStringProperty();
 		private ObservableValue<String> removeButtonTextProperty = Bindings.concat("Remove : ", stringProperty);
@@ -95,14 +150,14 @@ public class TodoList {
 
 	}
 
-	public Node init() {
-
-		Element<VBox> mainVBox = new Element<>(null, VBox.class);
+	public Node init(Group scene) {
+		Element<Group> sceneElt = new Element<>(Group.class);
+		Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
 		mainVBox.addBoot(VBox::prefHeightProperty, 600);
 
 		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
 		Element<TextField> todoInputText = new Element<>(todoCreateHBox, TextField.class);
-		todoInputText.addBidirectionalBinding(TextField::textProperty, m -> name);
+		todoInputText.addBidirectionalBinding(TextField::textProperty, TodoList::getName);
 		todoInputText.addBoot(TextField::prefWidthProperty, 166);
 		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
 		todosCreateButton.addActionBinding(Button::onActionProperty, TodoList::create);
@@ -110,8 +165,7 @@ public class TodoList {
 		todosCreateButton.addBoot(Button::prefWidthProperty, 160);
 
 		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class);
-		// Element<HBox> todoHBox = Elt.createHbox(mainVBox);new Element<HBox>(mainVBox, HBox.class);
-		todoHBox.addForEachMetaBinding(m -> filtered);
+		todoHBox.addForEachMetaBinding(TodoList::getFiltered);
 		Element<CheckBox> todoCheckBox = new Element<>(todoHBox, CheckBox.class);
 		todoCheckBox.addBidirectionalBinding(CheckBox::selectedProperty, Todo::getCompleted);
 		Element<Label> todoLabel = new Element<>(todoHBox, Label.class);
@@ -128,31 +182,31 @@ public class TodoList {
 		todoRemoveButton.addBoot(Button::prefWidthProperty, 90);
 
 		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
-		footer.addBinding(HBox::visibleProperty, (m) -> hasTodo);
+		footer.addBinding(HBox::visibleProperty, TodoList::getHasTodo);
 		Element<Hyperlink> allLink = new Element<>(footer, Hyperlink.class);
 		allLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showAll);
 		allLink.addBoot(Hyperlink::textProperty, "All");
-		allLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> allMode, "overrun");
+		allLink.addObservableListBinding(Hyperlink::getStyleClass, TodoList::getAllMode, "overrun");
 		Element<Hyperlink> activeLink = new Element<>(footer, Hyperlink.class);
 		activeLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showActive);
 		activeLink.addBoot(Hyperlink::textProperty, "Actives");
-		activeLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> activeMode, "overrun");
+		activeLink.addObservableListBinding(Hyperlink::getStyleClass, TodoList::getActiveMode, "overrun");
 		Element<Hyperlink> completeLink = new Element<>(footer, Hyperlink.class);
 		completeLink.addActionBinding(Hyperlink::onActionProperty, TodoList::showCompleted);
 		completeLink.addBoot(Hyperlink::textProperty, "Completes");
-		completeLink.addObservableListBinding(Hyperlink::getStyleClass, (m) -> completedMode, "overrun");
+		completeLink.addObservableListBinding(Hyperlink::getStyleClass, TodoList::getCompletedMode, "overrun");
 		Element<Button> clearButton = new Element<>(footer, Button.class);
-		clearButton.addBinding(Button::visibleProperty, (m) -> hasCompleted);
+		clearButton.addBinding(Button::visibleProperty, TodoList::getHasCompleted);
 		clearButton.addActionBinding(Button::onActionProperty, TodoList::removeCompleted);
-		clearButton.addBinding(Button::textProperty, m -> clearButtonText);
+		clearButton.addBinding(Button::textProperty, TodoList::getClearButtonText);
 		clearButton.addBoot(Button::prefWidthProperty, 160);
 
 		Element<HBox> selectionHBox = new Element<>(mainVBox, HBox.class);
-		selectionHBox.addSelectorMetaBinding((m) -> selection);
+		selectionHBox.addSelectorMetaBinding(TodoList::getSelection);
 		Element<Label> selectedTodoInputText = new Element<>(selectionHBox, Label.class);
 		selectedTodoInputText.addBinding(Label::textProperty, Todo::getTodoString);
 
-		return mainVBox.apply(this);
+		return sceneElt.apply(this, scene);
 	}
 
 	private interface Mode {

@@ -17,7 +17,11 @@ public class GenericAppFX extends Application {
 	public void start(Stage stage) throws Exception {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
+<<<<<<< HEAD
 		((Group) scene.getRoot()).getChildren().add(new GenericList().init());
+=======
+		new GenericList().initTable(((Group) scene.getRoot()));
+>>>>>>> branch 'master' of https://github.com/genericsystem/genericsystem2015.git
 		stage.setScene(scene);
 		stage.show();
 	}

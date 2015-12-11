@@ -157,8 +157,8 @@ public class Element<N> {
 		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(graphicParent);
 	}
 
-	public N apply(Object model) {
-		return new ViewContext<>(null, new ModelContext(null, this, model), this, null).getNode();
+	public N apply(Object model, Object parentNode) {
+		return new ViewContext<>(null, new ModelContext(null, this, model), this, (N) parentNode).getNode();
 	}
 
 	N createNode(Object parent) {
