@@ -3,6 +3,7 @@ package org.genericsystem.defaults;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -12,6 +13,13 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 
 public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extends IVertex<T> {
+
+	// Remove
+	CompletableFuture<Snapshot<T>> getAsyncComposites();
+
+	CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos);
+
+	//
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -30,7 +38,7 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	default Snapshot<T> getAttributes(Serializable value, T... targets) {
 		return getAttributes(targets).filter(DefaultDependencies.valueFilter(value));
 	}
-	
+
 	@Override
 	default Snapshot<T> getAttributes() {
 		return getAttributes(getRoot().getMetaAttribute());
@@ -56,6 +64,17 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 			return () -> new InheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStream();
 		return () -> this.getComposites().stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
 	}
+
+	// @SuppressWarnings("unchecked")
+	// default CompletableFuture<Snapshot<T>> getAsyncAttributes(T attribute) {
+	//
+	// CompletableFuture<T> nonHeritablePropertyPromise = getAsyncKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+	// return nonHeritablePropertyPromise.thenCompose(nonHeritableProperty -> {
+	// if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+	// return new AsyncInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStreamAsync();
+	// return getAsyncComposites().thenApply(composites -> composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL));
+	// }).thenApply(stream -> () -> stream);
+	// }
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -172,14 +191,14 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	@Override
 	default Serializable getValue(T attribute, Serializable value, T... targets) {
 		T holder = getHolder(attribute, value, targets);
-		return holder!=null ? holder.getValue() : null;
+		return holder != null ? holder.getValue() : null;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Serializable getValue(T attribute, T... targets) {
 		T holder = getHolder(attribute, targets);
-		return holder!=null ? holder.getValue() : null;
+		return holder != null ? holder.getValue() : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -219,12 +238,12 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	@SuppressWarnings("unchecked")
 	default T getLinkTargetComponent(T relation, T... targets) {
 		T link = getLink(relation, targets);
-		return link!=null ? link.getTargetComponent() : null;
+		return link != null ? link.getTargetComponent() : null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	default T getLinkTargetComponent(T relation,Serializable value, T... targets) {
+	default T getLinkTargetComponent(T relation, Serializable value, T... targets) {
 		T link = getLink(relation, value, targets);
-		return link!=null ? link.getTargetComponent() : null;
+		return link != null ? link.getTargetComponent() : null;
 	}
 }

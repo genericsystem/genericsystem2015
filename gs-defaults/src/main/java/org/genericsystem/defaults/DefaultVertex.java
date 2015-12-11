@@ -7,15 +7,30 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
 public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
+
+	// Remove
+	@Override
+	default CompletableFuture<Snapshot<T>> getAsyncComposites() {
+		return DefaultDependencies.super.getAsyncComposites();
+	}
+
+	@Override
+	default CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos) {
+		return DefaultSystemProperties.super.getAsyncKey(propertyClass, pos);
+	}
+
+	//
 
 	@Override
 	default DefaultCache<T> getCurrentCache() {

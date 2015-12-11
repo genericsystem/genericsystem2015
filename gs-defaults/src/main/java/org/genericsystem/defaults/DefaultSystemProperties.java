@@ -2,6 +2,7 @@ package org.genericsystem.defaults;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -36,6 +37,12 @@ public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVe
 		T property = getRoot().find(propertyClass);
 		Stream<T> keys = property != null ? property.getInheritings().stream() : Stream.empty();
 		return keys.filter(x -> Objects.equals(x.getValue(), new AxedPropertyClass(propertyClass, pos))).findFirst().orElse(null);
+	}
+
+	default CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos) {
+		T property = getRoot().find(propertyClass);
+		CompletableFuture<Stream<T>> keysPromise = property != null ? property.getAsyncInheritings().thenApply(snap -> snap.stream()) : CompletableFuture.completedFuture(Stream.empty());
+		return keysPromise.thenApply(keys -> keys.filter(x -> Objects.equals(x.getValue(), new AxedPropertyClass(propertyClass, pos))).findFirst().orElse(null));
 	}
 
 	@SuppressWarnings("unchecked")

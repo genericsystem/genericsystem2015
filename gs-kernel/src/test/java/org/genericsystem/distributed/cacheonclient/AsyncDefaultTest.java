@@ -611,4 +611,59 @@ public class AsyncDefaultTest extends AbstractTest {
 		assert myBmw.getAsyncComposites().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1;
 		assert myBmw455.getValue().equals(455);
 	}
+
+	// public void test_multiInheritance() throws InterruptedException, ExecutionException, TimeoutException {
+	// CocClientEngine engine = new CocClientEngine();
+	// Generic vehicle = engine.addInstance("Vehicle");
+	// Generic vehicleSizable = engine.addInstance("Sizable", vehicle);
+	// Generic robot = engine.addInstance("Robot");
+	// Generic robotSizable = engine.addInstance("Sizable", robot);
+	// Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+	// // assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 2;
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(vehicleSizable);
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(robotSizable);
+	// Generic transformerSizable = engine.addInstance("Sizable", transformer);
+	// // assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1 : transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(transformerSizable);
+	// assert !transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(robotSizable);
+	// assert !transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(vehicleSizable);
+	//
+	// }
+	//
+	// public void test_multiInheritanceWithDiamond() throws InterruptedException, ExecutionException, TimeoutException {
+	// CocClientEngine engine = new CocClientEngine();
+	// Generic object = engine.addInstance("Object");
+	// Generic objectSizable = engine.addInstance("Sizable", object);
+	// Generic vehicle = engine.addInstance(Arrays.asList(object), "Vehicle");
+	// assert vehicle.inheritsFrom(object);
+	// Generic vehicleSizable = engine.addInstance("Sizable", vehicle);
+	// assert vehicleSizable.inheritsFrom(objectSizable);
+	// Generic robot = engine.addInstance(Arrays.asList(object), "Robot");
+	// assert robot.inheritsFrom(object);
+	// Generic robotSizable = engine.addInstance("Sizable", robot);
+	// assert robotSizable.inheritsFrom(objectSizable);
+	// Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+	// assert transformer.inheritsFrom(vehicle);
+	// assert transformer.inheritsFrom(robot);
+	// // assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 2;
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(vehicleSizable);
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(robotSizable);
+	// Generic transformerSizable = engine.addInstance("Sizable", transformer);
+	// // assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1;
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(transformerSizable);
+	// assert !transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(robotSizable);
+	// assert !transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(vehicleSizable);
+	//
+	// }
+	//
+	// public void test_ClassFinderTest5() throws InterruptedException, ExecutionException, TimeoutException {
+	// Generic engine = new CocClientEngine();
+	// Generic vehicle = engine.addInstance("Vehicle");
+	// Generic robot = engine.addInstance("robot");
+	// Generic transformer = engine.addInstance(Arrays.asList(vehicle, robot), "Transformer");
+	// Generic vehiclePower = engine.addInstance("Power", vehicle);
+	// Generic robotPower = engine.addInstance("Power", robot);
+	// assert transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).containsAll(Arrays.asList(robotPower, vehiclePower)) : transformer.getAsyncAttributes(engine).get(Statics.SERVER_TIMEOUT,
+	// Statics.SERVER_TIMEOUT_UNIT);
+	// }
 }
