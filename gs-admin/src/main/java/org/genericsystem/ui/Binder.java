@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -29,7 +30,8 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 
 	}
@@ -38,11 +40,13 @@ public interface Binder<N, W> {
 		return new Binder<N, W>() {
 			@Override
 			public void init(Supplier<W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+
 				applyOnNode.apply(viewContext.getNode()).set((W) (EventHandler) event -> applyOnModel.get());
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 
 	}
@@ -119,7 +123,7 @@ public interface Binder<N, W> {
 					@Override
 					public void add(int index, W model) {
 						ModelContext childContext = new ModelContext(modelContext, childElement, model);
-						new ViewContext(viewContext, childContext,childElement, model);
+						new ViewContext(viewContext, childContext, childElement, model);
 						children.add(index, childContext);
 					}
 
@@ -166,7 +170,7 @@ public interface Binder<N, W> {
 				Consumer<W> consumer = (newModel) -> {
 					if (newModel != null) {
 						ModelContext childContext = new ModelContext(modelContext, childElement, newModel);
-						new ViewContext(viewContext, childContext,childElement, newModel);
+						new ViewContext(viewContext, childContext, childElement, newModel);
 						children.add(childContext);
 						assert children.size() == 1;
 					}

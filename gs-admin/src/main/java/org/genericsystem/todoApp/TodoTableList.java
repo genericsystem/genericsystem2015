@@ -31,7 +31,6 @@ public class TodoTableList {
 
 	private Property<String> name = new SimpleStringProperty();
 	private ObservableList<Todo> todos = FXCollections.observableArrayList();
-	// private ObservableList<Column> columns = FXCollections.observableArrayList(new Column(), new DeleteColumn());
 	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
 
@@ -42,10 +41,6 @@ public class TodoTableList {
 	public ObservableList<Todo> getTodos() {
 		return todos;
 	}
-
-	// public ObservableList<Column> getColumns() {
-	// return columns;
-	// }
 
 	public ObservableValue<String> getCreateButtonTextProperty() {
 		return createButtonTextProperty;
@@ -81,24 +76,6 @@ public class TodoTableList {
 			System.out.println("ça marche");
 		}
 	}
-
-	// public static class Column extends TableColumn<Todo, String> {
-	// public Column() {
-	// super("Todos");
-	// setMinWidth(130);
-	// cellValueFactoryProperty();
-	// setCellValueFactory(features -> new ReadOnlyObjectWrapper<String>(features.getValue().getObservable().getValue()));
-	// }
-	//
-	// }
-	//
-	// public static class DeleteColumn extends Column {
-	// public DeleteColumn() {
-	// setText("Delete");
-	// setMinWidth(130);
-	// setCellFactory(column -> new DeleteButtonCell<>());
-	// }
-	// }
 
 	public void action() {
 		System.out.println("VBox Create");
