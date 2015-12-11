@@ -13,6 +13,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
@@ -146,9 +147,9 @@ public abstract class AbstractGenericList {
 			return columns;
 		}
 
-		public Node initTable() {
-
-			Element<VBox> mainVBox = new Element<>(null, VBox.class);
+		public Node initTable(Group scene) {
+			Element<Group> sceneElt = new Element<>(Group.class);
+			Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
 			mainVBox.addBoot(VBox::prefHeightProperty, 600);
 
 			Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
@@ -211,7 +212,7 @@ public abstract class AbstractGenericList {
 			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
 			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete);
 
-			return mainVBox.apply(this);
+			return sceneElt.apply(this, scene);
 		}
 	}
 

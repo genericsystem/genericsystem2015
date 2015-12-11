@@ -17,7 +17,7 @@ public class AppFX extends Application {
 		Scene scene = new Scene(new Group());
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		stage.setTitle("Generic System Reactive Example");
-		((Group) scene.getRoot()).getChildren().add(new TodoList().init());
+		new TodoList().init(((Group) scene.getRoot()));
 		stage.setScene(scene);
 		stage.show();
 	}

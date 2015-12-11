@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 
 public class Element<N> {
@@ -31,6 +33,10 @@ public class Element<N> {
 	@Override
 	public String toString() {
 		return "Element<" + nodeClass.getSimpleName() + ">";
+	}
+
+	public <PARENTNODE extends Group> Element(Class<N> nodeClass) {
+		this(null, nodeClass, Group::getChildren);
 	}
 
 	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
@@ -151,8 +157,8 @@ public class Element<N> {
 		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(graphicParent);
 	}
 
-	public N apply(Object model) {
-		return new ViewContext<>(null, new ModelContext(null, this, model), this, null).getNode();
+	public N apply(Object model, Object parentNode) {
+		return new ViewContext<>(null, new ModelContext(null, this, model), this, (N) parentNode).getNode();
 	}
 
 	N createNode(Object parent) {
@@ -217,4 +223,5 @@ public class Element<N> {
 		}
 		return indexInChildren;
 	}
+
 }
