@@ -142,13 +142,31 @@ public class Element<N> {
 		return this;
 	}
 
+	// @Deprecated
+	// public <T, SUPERNODE> Element<N> inject(Function<SUPERNODE, Property<T>> parentProperty, Class<T> parentClass) {
+	// bindings.add(Binding.bind(Binder.injectBinder(), parentProperty));
+	// return this;
+	// }
+
 	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function) {
 		metaBindings.add(Binding.forEach(function));
 		return this;
 	}
 
+	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
+		metaBindings.add(Binding.forEach(function));
+		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		return this;
+	}
+
 	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function) {
 		metaBindings.add(Binding.selector(function));
+		return this;
+	}
+
+	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
+		metaBindings.add(Binding.selector(function));
+		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
 		return this;
 	}
 
