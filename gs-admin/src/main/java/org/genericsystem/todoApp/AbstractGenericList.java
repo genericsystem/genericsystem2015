@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.util.Objects;
 import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -15,7 +16,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -23,6 +23,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -165,7 +166,7 @@ public abstract class AbstractGenericList {
 			public DeleteColumn() {
 				setText("Delete");
 				setMinWidth(130);
-				setCellFactory(column -> new DeleteButtonCell<>(GenericWrapper::remove));
+				// setCellFactory(column -> new DeleteButtonCell<>(GenericWrapper::remove));
 			}
 		}
 
@@ -216,7 +217,7 @@ public abstract class AbstractGenericList {
 			buttonUnmount.addBoot(Button::textProperty, "Unmount");
 
 			Callback<CellDataFeatures<GenericWrapper, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
-			Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
+			// Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
 
 			Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
 			todoTableView2.addSelectorMetaBinding(GenericList::getProperty);
@@ -237,7 +238,7 @@ public abstract class AbstractGenericList {
 			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 150);
 			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "Delete todo");
 			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
-			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete);
+			// columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete);
 
 			return sceneElt.apply(this, scene);
 		}
