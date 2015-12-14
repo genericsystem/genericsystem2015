@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -30,8 +29,7 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-			}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
 		};
 	}
 
@@ -51,6 +49,19 @@ public interface Binder<N, W> {
 				// throw new IllegalStateException("Can't inject : " + parentModelClass);
 			}
 		};
+
+	}
+
+	public static <N, SUPERMODEL, W extends Event> Binder<N, Function<SUPERMODEL, W>> metaActionBinder(Function<N, ObjectProperty<EventHandler<W>>> applyOnNode) {
+		return new Binder<N, Function<SUPERMODEL, W>>() {
+			@Override
+			public void init(Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null));
+			}
+
+			@Override
+			public void init(Function<SUPERMODEL, W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+		};
 	}
 
 	public static <N, W> Binder<N, W> genericActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
@@ -61,8 +72,7 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-			}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
 		};
 
 	}
