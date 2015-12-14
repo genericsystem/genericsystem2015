@@ -85,6 +85,15 @@ public interface Binder<N, W> {
 		};
 	}
 
+	public static <N, W> Binder<N, ObservableList<W>> observableListPropertyBinder(Function<N, Property<ObservableList<W>>> applyOnNode) {
+		return new Binder<N, ObservableList<W>>() {
+			@Override
+			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).setValue(wrapper);
+			}
+		};
+	}
+
 	public static <N, W> Binder<N, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, Property<W>>() {
 			@Override

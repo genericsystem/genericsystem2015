@@ -71,6 +71,10 @@ public class Binding<N, T> {
 		return Binding.bind(Binder.propertyBinder(getProperty), function);
 	}
 
+	public static <N, M, W> Binding<N, ObservableList<W>> bindObservableList(Function<N, Property<ObservableList<W>>> getProperty, Function<M, ObservableList<W>> function) {
+		return Binding.bind(Binder.observableListPropertyBinder(getProperty), function);
+	}
+
 	public static <N, M, W> Binding<N, Property<W>> bindBiDirectionalProperty(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
 		return Binding.bind(Binder.propertyBiDirectionalBinder(getProperty), function);
 	}

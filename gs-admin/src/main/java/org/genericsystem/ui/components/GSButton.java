@@ -12,22 +12,22 @@ import org.genericsystem.ui.Element;
 
 public class GSButton extends GSRegion<GSButton, Button> {
 
-	public GSButton(Element parent, String text) {
+	public GSButton(Element<?> parent, String text) {
 		super(parent, Button.class);
 		setText(text);
 	}
 
-	public <M> GSButton(Element parent, Function<M, ObservableValue<String>> observableText) {
+	public <M> GSButton(Element<?> parent, Function<M, ObservableValue<String>> observableText) {
 		super(parent, Button.class);
 		setObservableTextProperty(observableText);
 	}
 
-	public <M> GSButton(Element parent, String text, Consumer<M> action) {
+	public <M> GSButton(Element<?> parent, String text, Consumer<M> action) {
 		this(parent, text);
 		setAction(action);
 	}
 
-	public <M> GSButton(Element parent, Function<M, ObservableValue<String>> observableText, Consumer<M> action) {
+	public <M> GSButton(Element<?> parent, Function<M, ObservableValue<String>> observableText, Consumer<M> action) {
 		this(parent, observableText);
 		setAction(action);
 	}

@@ -9,12 +9,12 @@ import org.genericsystem.ui.Element;
 
 public class GSTextField extends GSRegion<GSTextField, TextField> {
 
-	public <M> GSTextField(Element parent, Function<M, Property<String>> observableText) {
+	public <M> GSTextField(Element<?> parent, Function<M, Property<String>> observableText) {
 		super(parent, TextField.class);
 		bindTextProperty(observableText);
 	}
 
-	public <M> GSTextField(Element parent) {
+	public <M> GSTextField(Element<?> parent) {
 		super(parent, TextField.class);
 	}
 

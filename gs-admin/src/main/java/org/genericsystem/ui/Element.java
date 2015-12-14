@@ -122,6 +122,11 @@ public class Element<N> {
 		return this;
 	}
 
+	public <M, T> Element<N> addObservableListBinding(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
+		bindings.add(Binding.bindObservableList(getProperty, function));
+		return this;
+	}
+
 	public <M, T extends Event> Element<N> addActionBinding(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
 		bindings.add(Binding.bindAction(propAction, consumer));
 		return this;

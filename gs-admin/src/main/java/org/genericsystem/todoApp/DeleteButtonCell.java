@@ -52,7 +52,6 @@ public class DeleteButtonCell<T> extends TableCell<T, String> {
 					Optional<ButtonType> result = alert.showAndWait();
 					if (result.get() == ButtonType.OK) {
 						consumer.accept((T) getTableRow().getItem());
-						getTableView().getItems().remove(getTableRow().getItem());
 					}
 				}
 			});

@@ -10,11 +10,11 @@ import org.genericsystem.ui.Element;
 
 public class GSCheckBox extends GSRegion<GSCheckBox, CheckBox> {
 
-	public GSCheckBox(Element parent) {
+	public GSCheckBox(Element<?> parent) {
 		super(parent, CheckBox.class);
 	}
 
-	public <M> GSCheckBox(Element parent, Function<M, Property<Boolean>> function) {
+	public <M> GSCheckBox(Element<?> parent, Function<M, Property<Boolean>> function) {
 		super(parent, CheckBox.class);
 		setSelectedProperty(function);
 	}

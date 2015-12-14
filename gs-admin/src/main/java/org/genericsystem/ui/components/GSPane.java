@@ -12,11 +12,11 @@ import org.genericsystem.ui.Element;
 
 public class GSPane<Component extends GSPane<Component, N>, N extends Pane> extends GSRegion<Component, N> {
 
-	public GSPane(Element parent, Class<N> paneClass) {
+	public GSPane(Element<?> parent, Class<N> paneClass) {
 		super(parent, paneClass);
 	}
 
-	public <PARENTNODE> GSPane(Element parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	public <PARENTNODE> GSPane(Element<?> parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		super(parent, paneClass, getGraphicChildren);
 	}
 
