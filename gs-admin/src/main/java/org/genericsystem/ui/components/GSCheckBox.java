@@ -16,15 +16,20 @@ public class GSCheckBox extends GSRegion<GSCheckBox, CheckBox> {
 
 	public <M> GSCheckBox(Element parent, Function<M, Property<Boolean>> function) {
 		super(parent, CheckBox.class);
-		bindSelectedProperty(function);
+		setSelectedProperty(function);
 	}
 
-	public <M> GSCheckBox setText(Function<M, ObservableValue<String>> function) {
+	public <M> GSCheckBox setObservableTextProperty(Function<M, ObservableValue<String>> function) {
 		addBinding(CheckBox::textProperty, function);
 		return this;
 	}
 
-	public <M> GSCheckBox bindSelectedProperty(Function<M, Property<Boolean>> function) {
+	public GSCheckBox setText(String text) {
+		addBoot(CheckBox::textProperty, text);
+		return this;
+	}
+
+	public <M> GSCheckBox setSelectedProperty(Function<M, Property<Boolean>> function) {
 		addBidirectionalBinding(CheckBox::selectedProperty, function);
 		return this;
 	}

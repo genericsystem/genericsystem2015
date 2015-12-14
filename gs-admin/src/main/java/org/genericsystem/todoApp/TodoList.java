@@ -67,8 +67,7 @@ public class TodoList {
 		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
-		GSTextField textField = new GSTextField(todoCreateHBox);
-		textField.bindTextProperty(TodoList::getName);
+		GSTextField textField = new GSTextField(todoCreateHBox).bindTextProperty(TodoList::getName);
 		textField.setPrefWidth(200);
 
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
@@ -84,8 +83,7 @@ public class TodoList {
 		clearButton.setOptionalVisibility(TodoList::getHasCompleted);
 		clearButton.setPrefWidth(160);
 
-		GSHBox selectionHBox = new GSHBox(mainVBox);
-		selectionHBox.addSelectorMetaBinding(TodoList::getSelection);
+		GSHBox selectionHBox = new GSHBox(mainVBox).addSelectorMetaBinding(TodoList::getSelection);
 		GSLabel selectedTodoInputText = new GSLabel(selectionHBox, Todo::getTodoString);
 	}
 
