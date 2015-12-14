@@ -2,22 +2,25 @@ package org.genericsystem.ui.components;
 
 import java.util.function.Function;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 
 import org.genericsystem.ui.Element;
 
-public class GSTableColumn extends Element<TableColumn> {
+public class GSTableColumn<T> extends Element<TableColumn> {
 
 	private static Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 
-	// Callback<CellDataFeatures<T, String>, ObservableValue<String>> callback;
+	Callback<CellDataFeatures<T, String>, ObservableValue<String>> callback;
 
 	public GSTableColumn(Element parent) {
 		super(parent, TableColumn.class, getColumns);
-		// callback = features -> new SimpleObjectProperty<>(features.getValue().toString());
+		callback = features -> new SimpleObjectProperty<>(features.getValue().toString());
 	}
 
 	public GSTableColumn setWidth(Number width) {
@@ -25,8 +28,8 @@ public class GSTableColumn extends Element<TableColumn> {
 		return this;
 	}
 
-	public <T> GSTableColumn setCellValueFactoryProperty(T value) {
-		super.addBoot(TableColumn::cellValueFactoryProperty, value);
+	public GSTableColumn setCellValueFactoryProperty() {
+		super.addBoot(TableColumn::cellValueFactoryProperty, callback);
 		return this;
 	}
 

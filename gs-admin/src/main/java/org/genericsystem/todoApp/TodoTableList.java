@@ -3,7 +3,6 @@ package org.genericsystem.todoApp;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -11,13 +10,12 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
-import org.genericsystem.ui.components.GSTableItem;
 import org.genericsystem.ui.components.GSTableColumn;
 import org.genericsystem.ui.components.GSTableView;
 import org.genericsystem.ui.components.GSTextField;
@@ -82,6 +80,11 @@ public class TodoTableList {
 		public void remove() {
 			list.todos.remove(this);
 		}
+
+		@Override
+		public String toString() {
+			return stringProperty.getValue();
+		}
 	}
 
 	public void action() {
@@ -97,15 +100,13 @@ public class TodoTableList {
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoTableList::create).setPrefWidth(170);
 
 		GSTableView tableView = new GSTableView(mainVBox);
-		GSTableItem<Todo> items = new GSTableItem<>(tableView, Todo.class);
-		items.addForEachMetaBinding(TodoTableList::getTodos);
+		tableView.addObservableListBinding(TableView::itemsProperty, TodoTableList::getTodos);
 
-		Callback<CellDataFeatures<Todo, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
-		GSTableColumn column = new GSTableColumn(tableView).setText("Todo").setWidth(150);
-		column.setCellValueFactoryProperty(callback);
+		GSTableColumn<Todo> column = new GSTableColumn(tableView).setText("Todo").setWidth(150);
+		column.setCellValueFactoryProperty();
 
 		Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = col -> new DeleteButtonCell<>(Todo::remove);
-		GSTableColumn columnDelete = new GSTableColumn(tableView).setText("Delete").setWidth(150);
-		columnDelete.setCellFactoryProperty(callbackDelete).setCellValueFactoryProperty(callback);
+		GSTableColumn<Todo> columnDelete = new GSTableColumn(tableView).setText("Delete").setWidth(150);
+		columnDelete.setCellFactoryProperty(callbackDelete).setCellValueFactoryProperty();
 	}
 }
