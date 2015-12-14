@@ -2,7 +2,6 @@ package org.genericsystem.todoApp;
 
 import java.util.Objects;
 import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -24,13 +23,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Element;
 
 public abstract class AbstractGenericList {
@@ -193,7 +190,7 @@ public abstract class AbstractGenericList {
 			Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
 			Function<TableView, ObservableValue<GenericWrapper>> function = t -> t.getSelectionModel().selectedItemProperty();
 
-			todoTableView.addBindings(Binding.bindReversedProperty((Function) function, GenericList::getProperty));
+			todoTableView.addReversedBinding((Function) function, GenericList::getProperty);
 
 			Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems);
 			todoTableItems.addForEachMetaBinding(GenericList::getGenerics);
