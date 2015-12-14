@@ -68,9 +68,9 @@ public class TodoList {
 
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
 		GSTextField textField = new GSTextField(todoCreateHBox).bindTextProperty(TodoList::getName);
-		textField.setPrefWidth(200);
+		textField.setPrefWidth(170);
 
-		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
+		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(170);
 
 		GSHBox todoHBox = new GSHBox(mainVBox).addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
 

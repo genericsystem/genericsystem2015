@@ -9,11 +9,11 @@ import org.genericsystem.ui.Element;
 
 public class GSVBox extends GSPane<GSVBox, VBox> {
 
-	public GSVBox(Element parent) {
+	public GSVBox(Element<?> parent) {
 		super(parent, VBox.class);
 	}
 
-	public <PARENTNODE> GSVBox(Element parent, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	public <PARENTNODE> GSVBox(Element<?> parent, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		super(parent, VBox.class, getGraphicChildren);
 	}
 }

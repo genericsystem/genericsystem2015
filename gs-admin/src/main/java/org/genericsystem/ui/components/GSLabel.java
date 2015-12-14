@@ -8,12 +8,12 @@ import javafx.scene.control.Label;
 import org.genericsystem.ui.Element;
 
 public class GSLabel extends GSRegion<GSLabel, Label> {
-	public GSLabel(Element parent, String text) {
+	public GSLabel(Element<?> parent, String text) {
 		super(parent, Label.class);
 		setText(text);
 	}
 
-	public <M> GSLabel(Element parent, Function<M, ObservableValue<String>> observableText) {
+	public <M> GSLabel(Element<?> parent, Function<M, ObservableValue<String>> observableText) {
 		super(parent, Label.class);
 		setObservableTextProperty(observableText);
 	}

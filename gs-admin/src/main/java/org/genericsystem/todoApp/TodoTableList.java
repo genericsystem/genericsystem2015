@@ -1,8 +1,5 @@
 package org.genericsystem.todoApp;
 
-import java.util.Arrays;
-import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -12,20 +9,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
-import org.genericsystem.ui.Binding;
-import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.components.GSButton;
+import org.genericsystem.ui.components.GSHBox;
+import org.genericsystem.ui.components.GSTableItem;
+import org.genericsystem.ui.components.GSTableColumn;
+import org.genericsystem.ui.components.GSTableView;
+import org.genericsystem.ui.components.GSTextField;
+import org.genericsystem.ui.components.GSVBox;
 
 public class TodoTableList {
 
@@ -43,10 +39,6 @@ public class TodoTableList {
 		return todos;
 	}
 
-	// public ObservableList<Column> getColumns() {
-	// return columns;
-	// }
-
 	public ObservableValue<String> getCreateButtonTextProperty() {
 		return createButtonTextProperty;
 	}
@@ -56,8 +48,9 @@ public class TodoTableList {
 	}
 
 	public void create() {
-		Todo todo = new Todo();
+		Todo todo = new Todo(this);
 		todo.stringProperty.setValue(name.getValue());
+
 		todos.add(todo);
 	}
 
@@ -68,6 +61,11 @@ public class TodoTableList {
 	public static class Todo {
 		private Property<String> stringProperty = new SimpleStringProperty();
 		private ObservableValue<String> removeButtonTextProperty = Bindings.concat("Remove : ", stringProperty);
+		private TodoTableList list;
+
+		public Todo(TodoTableList list) {
+			this.list = list;
+		}
 
 		public ObservableValue<String> getObservable() {
 			return stringProperty;
@@ -80,68 +78,34 @@ public class TodoTableList {
 		public void action() {
 			System.out.println("ça marche");
 		}
-	}
 
-	// public static class Column extends TableColumn<Todo, String> {
-	// public Column() {
-	// super("Todos");
-	// setMinWidth(130);
-	// cellValueFactoryProperty();
-	// setCellValueFactory(features -> new ReadOnlyObjectWrapper<String>(features.getValue().getObservable().getValue()));
-	// }
-	//
-	// }
-	//
-	// public static class DeleteColumn extends Column {
-	// public DeleteColumn() {
-	// setText("Delete");
-	// setMinWidth(130);
-	// setCellFactory(column -> new DeleteButtonCell<>());
-	// }
-	// }
+		public void remove() {
+			list.todos.remove(this);
+		}
+	}
 
 	public void action() {
 		System.out.println("VBox Create");
 	}
 
-	public Node init(Group scene) {
+	public static void init(Element<Group> sceneElt) {
+		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
+		GSHBox todoCreateHBox = new GSHBox(mainVBox);
+		GSTextField textField = new GSTextField(todoCreateHBox).bindTextProperty(TodoTableList::getName);
+		textField.setPrefWidth(170);
+
+		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoTableList::create).setPrefWidth(170);
+
+		GSTableView tableView = new GSTableView(mainVBox);
+		GSTableItem<Todo> items = new GSTableItem<>(tableView, Todo.class);
+		items.addForEachMetaBinding(TodoTableList::getTodos);
 
 		Callback<CellDataFeatures<Todo, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
-		Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = column -> new DeleteButtonCell<>();
-		Element<Group> sceneElt = new Element<>(Group.class);
-		Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
-		mainVBox.addBoots(Boot.setProperty(VBox::prefHeightProperty, 600));
-		// mainVBox.addBinding(Binding.setProperty(VBox::prefHeightProperty, 400));
+		GSTableColumn column = new GSTableColumn(tableView).setText("Todo").setWidth(150);
+		column.setCellValueFactoryProperty(callback);
 
-		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
-		Element<TextField> todosCreatLabel = new Element<>(todoCreateHBox, TextField.class);
-		todosCreatLabel.addBindings(Binding.bindBiDirectionalProperty(TextField::textProperty, TodoTableList::getName));
-
-		Element<Button> todosCreateButton = new Element<>(todoCreateHBox, Button.class);
-		todosCreateButton.addBindings(Binding.bindProperty(Button::textProperty, TodoTableList::getCreateButtonTextProperty));
-		todosCreateButton.addBindings(Binding.bindAction(Button::onActionProperty, TodoTableList::create));
-
-		Element<TableView> todoTableView = new Element<>(mainVBox, TableView.class);
-
-		Function<TableView<Todo>, ObservableList<?>> getItems = TableView::getItems;
-		Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
-		Element<Todo> todoTableItems = new Element<>(todoTableView, Todo.class, getItems, Arrays.asList(Binding.forEach(TodoTableList::getTodos)));
-		todoTableItems.addBoots(Boot.apply(Todo::action));
-
-		// Element columnsTableItems = new Element(todoTableView, TableColumn.class, getColumns, Arrays.asList(Binding.forEach(TodoTableList::getColumns)), Binding.setProperty(Column::prefWidthProperty, 100), Binding.setProperty(
-		// TableColumn<Todo, String>::cellValueFactoryProperty, callback));
-
-		Element<TableColumn> columnTodo = new Element<>(todoTableView, TableColumn.class, getColumns);
-		columnTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::prefWidthProperty, 100));
-		columnTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::textProperty, "Todo"));
-		columnTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback));
-
-		Element<TableColumn> columnDeleteTodo = new Element<>(todoTableView, TableColumn.class, getColumns);
-
-		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::prefWidthProperty, 150));
-		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::textProperty, "Delete todo"));
-		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback), Boot.setProperty(TableColumn<Todo, String>::cellFactoryProperty, callbackDelete));
-
-		return sceneElt.apply(this, scene);
+		Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = col -> new DeleteButtonCell<>(Todo::remove);
+		GSTableColumn columnDelete = new GSTableColumn(tableView).setText("Delete").setWidth(150);
+		columnDelete.setCellFactoryProperty(callbackDelete).setCellValueFactoryProperty(callback);
 	}
 }

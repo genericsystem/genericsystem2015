@@ -9,12 +9,12 @@ import org.genericsystem.ui.Element;
 
 public class GSHyperLink extends GSRegion<GSHyperLink, Hyperlink> {
 
-	public <M> GSHyperLink(Element parent, String text) {
+	public <M> GSHyperLink(Element<?> parent, String text) {
 		super(parent, Hyperlink.class);
 		setText(text);
 	}
 
-	public <M> GSHyperLink(Element parent, String text, Consumer<M> action) {
+	public <M> GSHyperLink(Element<?> parent, String text, Consumer<M> action) {
 		this(parent, text);
 		setAction(action);
 	}

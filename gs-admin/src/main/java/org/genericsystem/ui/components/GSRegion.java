@@ -10,8 +10,8 @@ import org.genericsystem.ui.Element;
 
 public abstract class GSRegion<Component extends GSNode<Component, N>, N extends Region> extends GSNode<Component, N> {
 
-	public GSRegion(Element parent, Class<N> regionClass) {
-		super(parent, regionClass);
+	public GSRegion(Element parent, Class<N> class1) {
+		super(parent, class1);
 	}
 
 	public <PARENTNODE> GSRegion(Element parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
