@@ -14,22 +14,12 @@ public class GSTextField extends GSRegion<GSTextField, TextField> {
 		bindTextProperty(observableText);
 	}
 
-	public <M> GSTextField(Element parent, Function<M, Property<String>> observableText, Number size) {
-		super(parent, TextField.class);
-		bindTextProperty(observableText);
-		setPrefWidth(size);
-	}
-
-	public <M> GSTextField(Element parent, Number size) {
-		super(parent, TextField.class);
-		setPrefWidth(size);
-	}
-
 	public <M> GSTextField(Element parent) {
 		super(parent, TextField.class);
 	}
 
-	public <M> void bindTextProperty(Function<M, Property<String>> observableText) {
+	public <M> GSTextField bindTextProperty(Function<M, Property<String>> observableText) {
 		addBidirectionalBinding(TextField::textProperty, observableText);
+		return this;
 	}
 }
