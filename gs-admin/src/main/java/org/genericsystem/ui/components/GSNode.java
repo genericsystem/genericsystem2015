@@ -3,6 +3,7 @@ package org.genericsystem.ui.components;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
 import org.genericsystem.ui.Element;
@@ -11,6 +12,10 @@ public abstract class GSNode<Component extends GSNode<Component, N>, N extends N
 
 	public GSNode(Element parent, Class<N> nodeClass) {
 		super(parent, nodeClass);
+	}
+
+	public <PARENTNODE> GSNode(Element parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+		super(parent, paneClass, getGraphicChildren);
 	}
 
 	public <M> Component setStyleClass(String text) {

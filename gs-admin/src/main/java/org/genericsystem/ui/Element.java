@@ -142,20 +142,26 @@ public class Element<N> {
 		return this;
 	}
 
-	// @Deprecated
-	// public <T, SUPERNODE> Element<N> inject(Function<SUPERNODE, Property<T>> parentProperty, Class<T> parentClass) {
-	// bindings.add(Binding.bind(Binder.injectBinder(), parentProperty));
-	// return this;
-	// }
-
 	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function) {
 		metaBindings.add(Binding.forEach(function));
 		return this;
 	}
 
 	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
-		metaBindings.add(Binding.forEach(function));
+		addForEachMetaBinding(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		return this;
+	}
+
+	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+		addForEachMetaBinding(function, injectedProperty);
+		subModelInit.accept(this);
+		return this;
+	}
+
+	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
+		addForEachMetaBinding(function);
+		subModelInit.accept(this);
 		return this;
 	}
 
@@ -165,8 +171,20 @@ public class Element<N> {
 	}
 
 	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
-		metaBindings.add(Binding.selector(function));
+		addSelectorMetaBinding(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		return this;
+	}
+
+	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Consumer<Element<N>> subModelInit) {
+		addSelectorMetaBinding(function);
+		subModelInit.accept(this);
+		return this;
+	}
+
+	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+		addSelectorMetaBinding(function, injectedProperty);
+		subModelInit.accept(this);
 		return this;
 	}
 

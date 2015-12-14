@@ -16,12 +16,12 @@ import javafx.collections.transformation.FilteredList;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
+import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSHyperLink;
+import org.genericsystem.ui.components.GSVBox;
 
 public class TodoList {
 
@@ -64,22 +64,18 @@ public class TodoList {
 	}
 
 	public static void init(Element<Group> sceneElt) {
-		Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
-		mainVBox.addBoot(VBox::prefHeightProperty, 600);
+		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 
-		Element<HBox> todoCreateHBox = new Element<>(mainVBox, HBox.class);
+		GSHBox todoCreateHBox = new GSHBox(mainVBox);
 		Element<TextField> todoInputText = new Element<>(todoCreateHBox, TextField.class);
 		todoInputText.addBidirectionalBinding(TextField::textProperty, TodoList::getName);
 		todoInputText.addBoot(TextField::prefWidthProperty, 166);
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
 
-		Element<HBox> todoHBox = new Element<>(mainVBox, HBox.class);
-		todoHBox.addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty);
-		Todo.init(todoHBox);
+		GSHBox todoHBox = new GSHBox(mainVBox);
+		todoHBox.addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
 
-		Element<HBox> footer = new Element<>(mainVBox, HBox.class);
-		footer.addBinding(HBox::visibleProperty, TodoList::getHasTodo);
-
+		GSHBox footer = new GSHBox(mainVBox).setOptionalVisibility(TodoList::getHasTodo);
 		GSHyperLink allLink = new GSHyperLink(footer, "All", TodoList::showAll).setOptionalStyleClass(TodoList::getAllMode, "overrun");
 		GSHyperLink activeLink = new GSHyperLink(footer, "Actives", TodoList::showActive).setOptionalStyleClass(TodoList::getActiveMode, "overrun");
 		GSHyperLink completeLink = new GSHyperLink(footer, "Completes", TodoList::showCompleted).setOptionalStyleClass(TodoList::getCompletedMode, "overrun");
@@ -88,7 +84,7 @@ public class TodoList {
 		clearButton.setOptionalVisibility(TodoList::getHasCompleted);
 		clearButton.setPrefWidth(160);
 
-		Element<HBox> selectionHBox = new Element<>(mainVBox, HBox.class);
+		GSHBox selectionHBox = new GSHBox(mainVBox);
 		selectionHBox.addSelectorMetaBinding(TodoList::getSelection);
 		Element<Label> selectedTodoInputText = new Element<>(selectionHBox, Label.class);
 		selectedTodoInputText.addBinding(Label::textProperty, Todo::getTodoString);
