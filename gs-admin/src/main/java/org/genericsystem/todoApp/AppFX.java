@@ -5,6 +5,8 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.genericsystem.ui.Element;
+
 public class AppFX extends Application {
 
 	public static void main(String[] args) {
@@ -17,7 +19,9 @@ public class AppFX extends Application {
 		Scene scene = new Scene(new Group());
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		stage.setTitle("Generic System Reactive Example");
-		((Group) scene.getRoot()).getChildren().add(new TodoList().init());
+		Element<Group> elt = new Element<>(Group.class);
+		TodoList.init(elt);
+		elt.apply(new TodoList(), scene.getRoot());
 		stage.setScene(scene);
 		stage.show();
 	}

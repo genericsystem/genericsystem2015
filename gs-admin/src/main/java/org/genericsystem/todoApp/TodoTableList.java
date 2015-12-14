@@ -2,6 +2,7 @@ package org.genericsystem.todoApp;
 
 import java.util.Arrays;
 import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -10,6 +11,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
@@ -20,6 +22,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Boot;
 import org.genericsystem.ui.Element;
@@ -101,12 +104,12 @@ public class TodoTableList {
 		System.out.println("VBox Create");
 	}
 
-	public Node init() {
+	public Node init(Group scene) {
 
 		Callback<CellDataFeatures<Todo, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
 		Callback<TableColumn<Todo, String>, TableCell<Todo, String>> callbackDelete = column -> new DeleteButtonCell<>();
-
-		Element<VBox> mainVBox = new Element<>(null, VBox.class);
+		Element<Group> sceneElt = new Element<>(Group.class);
+		Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
 		mainVBox.addBoots(Boot.setProperty(VBox::prefHeightProperty, 600));
 		// mainVBox.addBinding(Binding.setProperty(VBox::prefHeightProperty, 400));
 
@@ -139,6 +142,6 @@ public class TodoTableList {
 		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::textProperty, "Delete todo"));
 		columnDeleteTodo.addBoots(Boot.setProperty(TableColumn<Todo, String>::cellValueFactoryProperty, callback), Boot.setProperty(TableColumn<Todo, String>::cellFactoryProperty, callbackDelete));
 
-		return mainVBox.apply(this);
+		return sceneElt.apply(this, scene);
 	}
 }

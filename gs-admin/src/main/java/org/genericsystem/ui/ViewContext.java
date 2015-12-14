@@ -7,7 +7,7 @@ public class ViewContext<N> {
 	private final Element<N> template;
 	private final N node;
 
-	public <CHILDNODE> ViewContext(ViewContext<?> parent, ModelContext modelContext,Element<N> template,  N model) {
+	public <CHILDNODE> ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N model) {
 		this.parent = parent;
 		this.template = template;
 		this.node = model != null && template.nodeClass.isAssignableFrom(model.getClass()) ? model : (N) template.createNode(parent != null ? parent.getNode() : null);
@@ -23,11 +23,9 @@ public class ViewContext<N> {
 			for (Binding<CHILDNODE, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, (ViewContext<CHILDNODE>) this, (Element) childElement);
 			if (childElement.metaBindings.isEmpty())
-				new ViewContext<>(this, modelContext,childElement, null);
+				new ViewContext<>(this, modelContext, childElement, null);
 		}
 		if (parent != null) {
-			// System.out.println("add node : " + node + " to parent : " + getParent().getNode() + " list = " + template.getGraphicChildren(getParent().getNode()));
-
 			List<N> graphicChildren = template.getGraphicChildren(parent.getNode());
 			int indexInChildren = template.getParent().computeIndex(graphicChildren, template);
 			template.getParent().incrementSize(graphicChildren, template);
