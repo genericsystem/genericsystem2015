@@ -1,8 +1,5 @@
 package org.genericsystem.ui.components;
 
-<<<<<<< HEAD
-public class GSLabel {
-=======
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
@@ -30,6 +27,5 @@ public class GSLabel extends GSRegion<GSLabel, Label> {
 		addBinding(Label::textProperty, observableText);
 		return this;
 	}
->>>>>>> branch 'master' of https://github.com/genericsystem/genericsystem2015.git
 
 }

@@ -73,31 +73,31 @@ public abstract class AbstractGenericList {
 			return removeButtonTextProperty;
 		}
 
-		public static void initialize() {
-			Callback<CellDataFeatures<GenericWrapper, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
-			Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
-
-			Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
-			todoTableView2.addSelectorMetaBinding(GenericList::getProperty);
-
-			Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems);
-			todoTableItems2.addForEachMetaBinding(GenericWrapper::getGenericWrapperListInstances);
-			Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
-			Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
-
-			Element<TableColumn> columnTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
-
-			columnTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 100);
-			columnTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "instance");
-			columnTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
-
-			Element<TableColumn> columnDeleteTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
-
-			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 150);
-			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "Delete todo");
-			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
-			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete);
-		}
+		// public static void initialize() {
+		// Callback<CellDataFeatures<GenericWrapper, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
+		// Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
+		//
+		// Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
+		// todoTableView2.addSelectorMetaBinding(GenericList::getProperty);
+		//
+		// Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems);
+		// todoTableItems2.addForEachMetaBinding(GenericWrapper::getGenericWrapperListInstances);
+		// Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
+		// Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
+		//
+		// Element<TableColumn> columnTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
+		//
+		// columnTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 100);
+		// columnTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "instance");
+		// columnTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
+		//
+		// Element<TableColumn> columnDeleteTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
+		//
+		// columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 150);
+		// columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "Delete todo");
+		// columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
+		// columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete);
+		// }
 
 	}
 
@@ -218,7 +218,29 @@ public abstract class AbstractGenericList {
 			buttonUnmount.addActionBinding(Button::onActionProperty, GenericList::unmount);
 			buttonUnmount.addBoot(Button::textProperty, "Unmount");
 
-			GenericWrapper.initialize();
+			Callback<CellDataFeatures<GenericWrapper, String>, ObservableValue<String>> callback = features -> new SimpleObjectProperty<>(features.getValue().getObservable().getValue());
+			Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
+
+			Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
+			todoTableView2.addSelectorMetaBinding(GenericList::getProperty);
+
+			Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems);
+			todoTableItems2.addForEachMetaBinding(GenericWrapper::getGenericWrapperListInstances);
+			Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
+			Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
+
+			Element<TableColumn> columnTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
+
+			columnTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 100);
+			columnTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "instance");
+			columnTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
+
+			Element<TableColumn> columnDeleteTodo = new Element<>(todoTableView2, TableColumn.class, getColumns);
+
+			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::prefWidthProperty, 150);
+			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::textProperty, "Delete todo");
+			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellValueFactoryProperty, callback);
+			columnDeleteTodo.addBoot(TableColumn<GenericWrapper, String>::cellFactoryProperty, callbackDelete);
 
 			return sceneElt.apply(this, scene);
 		}

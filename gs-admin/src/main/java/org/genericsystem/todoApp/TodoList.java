@@ -14,13 +14,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Group;
-import javafx.scene.control.TextField;
 
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSHyperLink;
 import org.genericsystem.ui.components.GSLabel;
+import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 
 public class TodoList {
@@ -67,9 +67,10 @@ public class TodoList {
 		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
-		Element<TextField> todoInputText = new Element<>(todoCreateHBox, TextField.class);
-		todoInputText.addBidirectionalBinding(TextField::textProperty, TodoList::getName);
-		todoInputText.addBoot(TextField::prefWidthProperty, 166);
+		GSTextField textField = new GSTextField(todoCreateHBox);
+		textField.bindTextProperty(TodoList::getName);
+		textField.setSize(200);
+
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
 
 		GSHBox todoHBox = new GSHBox(mainVBox);
