@@ -1,6 +1,5 @@
 package org.genericsystem.defaults.async;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Snapshot;
@@ -18,8 +16,7 @@ public class AsyncInheritanceComputer<T extends DefaultVertex<T>> extends HashSe
 
 	private static final long serialVersionUID = 1877502935577170921L;
 
-	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
-	private final Map<T, CompletableFuture<Collection<T>>> inheritingsPromiseCache = new HashMap<>();
+	private final Map<T, CompletableFuture<Snapshot<T>>> inheritingsPromiseCache = new HashMap<>();
 
 	private final T base;
 	private final T origin;
@@ -31,15 +28,13 @@ public class AsyncInheritanceComputer<T extends DefaultVertex<T>> extends HashSe
 		this.level = level;
 	}
 
-	public CompletableFuture<Stream<T>> inheritanceStreamAsync() {
-		return getInheringsStreamAsync(base).thenApply(inherings -> {
-			return inherings.filter(holder -> !contains(holder) && !holder.equals(origin) && holder.getLevel() == level);
-		});
+	public CompletableFuture<Snapshot<T>> inheritanceStreamAsync() {
+		return getInheringsStreamAsync(base).thenApply(inherings -> inherings.filter(holder -> !contains(holder) && !holder.equals(origin) && holder.getLevel() == level));
 	}
 
 	public Stream<T> inheritanceStreamSync() {
 		try {
-			return inheritanceStreamAsync().get(1000, TimeUnit.MILLISECONDS);
+			return inheritanceStreamAsync().get(1000, TimeUnit.MILLISECONDS).stream();
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			e.printStackTrace();
 			throw new IllegalStateException(e);
@@ -50,11 +45,11 @@ public class AsyncInheritanceComputer<T extends DefaultVertex<T>> extends HashSe
 		return inheritanceStreamSync();
 	}
 
-	private CompletableFuture<Stream<T>> getInheringsStreamAsync(T superVertex) {
-		CompletableFuture<Collection<T>> result = inheritingsPromiseCache.get(superVertex);
+	private CompletableFuture<Snapshot<T>> getInheringsStreamAsync(T superVertex) {
+		CompletableFuture<Snapshot<T>> result = inheritingsPromiseCache.get(superVertex);
 		if (result == null)
-			inheritingsPromiseCache.put(superVertex, result = new Inheritings(superVertex).inheritanceStreamAsync().thenApply(stream -> stream.collect(Collectors.toList())));
-		return result.thenApply(collection -> collection.stream());
+			inheritingsPromiseCache.put(superVertex, result = new Inheritings(superVertex).inheritanceStreamAsync());
+		return result.thenApply(collection -> collection);
 	}
 
 	private class Inheritings {
@@ -65,12 +60,12 @@ public class AsyncInheritanceComputer<T extends DefaultVertex<T>> extends HashSe
 			this.localBase = localBase;
 		}
 
-		private CompletableFuture<Stream<T>> inheritanceStreamAsync() {
-			return fromAboveStreamAsync().thenCompose(stream -> {
-				CompletableFuture<Stream<T>> internal = CompletableFuture.completedFuture(Stream.empty());
-				for (T holder : (Snapshot<T>) () -> stream)
-					internal = internal.thenCompose(internalStream -> getStreamAsync(holder).thenApply(s -> Stream.concat(internalStream, s)));
-				return internal.thenApply(s -> s.distinct());
+		private CompletableFuture<Snapshot<T>> inheritanceStreamAsync() {
+			return fromAboveStreamAsync().thenCompose(snapshot -> {
+				CompletableFuture<Snapshot<T>> internal = CompletableFuture.completedFuture(() -> Stream.empty());
+				for (T holder : snapshot)
+					internal = internal.thenCompose(internalSnapshot -> getStreamAsync(holder).thenApply(s -> () -> Stream.concat(internalSnapshot.stream(), s.stream())));
+				return internal.thenApply(s -> () -> s.stream().distinct());
 			});
 		}
 
@@ -78,48 +73,48 @@ public class AsyncInheritanceComputer<T extends DefaultVertex<T>> extends HashSe
 			return localBase.isMeta() || localBase.getSupers().stream().filter(next -> localBase.getMeta().equals(next.getMeta())).count() != 0;
 		}
 
-		private Stream<T> metaAndSupersStream() {
-			return Stream.concat(hasIntermediateSuperOrIsMeta() ? Stream.empty() : Stream.of(localBase.getMeta()), localBase.getSupers().stream()).distinct();
+		private Snapshot<T> metaAndSupersStream() {
+			return () -> Stream.concat(hasIntermediateSuperOrIsMeta() ? Stream.empty() : Stream.of(localBase.getMeta()), localBase.getSupers().stream()).distinct();
 		}
 
 		// TODO InheritanceComputer.this not used
 
-		private CompletableFuture<Stream<T>> fromAboveStreamAsync() {
-			CompletableFuture<Stream<T>> streamPromise = new CompletableFuture<>();
+		private CompletableFuture<Snapshot<T>> fromAboveStreamAsync() {
+			CompletableFuture<Snapshot<T>> streamPromise = new CompletableFuture<>();
 			if (localBase.isRoot())
-				streamPromise = CompletableFuture.completedFuture(Stream.of(origin));
+				streamPromise = CompletableFuture.completedFuture(() -> Stream.of(origin));
 			else {
-				CompletableFuture<Stream<T>> internal = CompletableFuture.completedFuture(Stream.empty());
-				for (T t : (Snapshot<T>) () -> metaAndSupersStream())
-					internal = internal.thenCompose(stream -> getInheringsStreamAsync(t).thenApply(inherings -> Stream.concat(stream, inherings)));
-				streamPromise = internal.thenApply(stream -> stream.distinct());
+				CompletableFuture<Snapshot<T>> internal = CompletableFuture.completedFuture(() -> Stream.empty());
+				for (T t : metaAndSupersStream())
+					internal = internal.thenCompose(snapshot -> getInheringsStreamAsync(t).thenApply(inherings -> () -> Stream.concat(snapshot.stream(), inherings.stream())));
+				streamPromise = internal.thenApply(snapshot -> () -> snapshot.stream().distinct());
 			}
 			return streamPromise;
 		}
 
-		private CompletableFuture<Stream<T>> getStreamAsync(final T holder) {
+		private CompletableFuture<Snapshot<T>> getStreamAsync(final T holder) {
 
-			CompletableFuture<Stream<T>> internal = compositesBySuperAsync(localBase, holder).thenApply(compositesBySuper -> {
+			CompletableFuture<Snapshot<T>> internal = compositesBySuperAsync(localBase, holder).thenApply(compositesBySuper -> {
 				if (compositesBySuper.count() != 0)
 					add(holder);
-				return Stream.empty();
+				return () -> Stream.empty();
 			});
 
 			internal = internal.thenCompose(unused -> {
 				return compositesBySuperAsync(localBase, holder).thenCompose(compositesBySuper -> {
-					CompletableFuture<Stream<T>> compositesByMetaPromise = holder.getLevel() < level ? compositesByMetaAsync(localBase, holder) : CompletableFuture.completedFuture(Stream.empty());
-					return compositesByMetaPromise.thenApply(compositesByMeta -> Stream.concat(compositesByMeta, compositesBySuper));
+					CompletableFuture<Snapshot<T>> compositesByMetaPromise = holder.getLevel() < level ? compositesByMetaAsync(localBase, holder).thenApply(s -> () -> s) : CompletableFuture.completedFuture(() -> Stream.empty());
+					return compositesByMetaPromise.thenApply(compositesByMeta -> () -> Stream.concat(compositesByMeta.stream(), compositesBySuper));
 				});
 			});
 
-			internal = internal.thenCompose(indexStream -> {
-				CompletableFuture<Stream<T>> internalBis = CompletableFuture.completedFuture(Stream.empty());
-				for (T t : (Snapshot<T>) () -> indexStream)
-					internalBis = internalBis.thenCompose(stream -> getStreamAsync(t).thenApply(nextStream -> Stream.concat(stream, nextStream)));
+			internal = internal.thenCompose(indexSnapshot -> {
+				CompletableFuture<Snapshot<T>> internalBis = CompletableFuture.completedFuture(() -> Stream.empty());
+				for (T t : indexSnapshot)
+					internalBis = internalBis.thenCompose(snapshot -> getStreamAsync(t).thenApply(nextStream -> () -> Stream.concat(snapshot.stream(), nextStream.stream())));
 				return internalBis;
 			});
 
-			return internal.thenApply(stream -> Stream.concat(Stream.of(holder), stream).distinct());
+			return internal.thenApply(snapshot -> () -> Stream.concat(Stream.of(holder), snapshot.stream()).distinct());
 		}
 
 	}

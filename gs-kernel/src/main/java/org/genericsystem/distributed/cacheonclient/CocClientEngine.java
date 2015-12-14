@@ -501,14 +501,13 @@ public class CocClientEngine extends AbstractRoot implements Generic {
 		}
 	}
 
-	// @Override
-	// public Snapshot<Generic> getAttributes(Generic attribute) {
-	// try {
-	// System.out.println("'''''''");
-	// return getAsyncAttributes(attribute).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
-	// } catch (InterruptedException | ExecutionException | TimeoutException e) {
-	// e.printStackTrace();
-	// throw new IllegalStateException(e);
-	// }
-	// }
+	@Override
+	public Snapshot<Generic> getAttributes(Generic attribute) {
+		try {
+			return getAsyncAttributes(attribute).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			e.printStackTrace();
+			throw new IllegalStateException(e);
+		}
+	}
 }

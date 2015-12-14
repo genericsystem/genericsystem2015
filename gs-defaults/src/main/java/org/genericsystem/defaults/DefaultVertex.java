@@ -290,6 +290,25 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return result;
 	}
 
+	default CompletableFuture<T> getAsyncNonAmbiguousResult(CompletableFuture<Stream<T>> streamPromise) {
+		CompletableFuture<T> cf = new CompletableFuture<T>();
+		streamPromise.thenAccept(stream -> {
+			Iterator<T> iterator = stream.iterator();
+			if (!iterator.hasNext()) {
+				cf.complete(null);
+				return;
+			}
+			T result = iterator.next();
+			if (iterator.hasNext()) {
+				cf.completeExceptionally(getCurrentCache().discardWithExceptionPromise(new AmbiguousSelectionException(result.info() + " " + iterator.next().info())));
+				return;
+			}
+			cf.complete(result);
+			return;
+		});
+		return cf;
+	}
+
 	@Override
 	long getBirthTs();
 
