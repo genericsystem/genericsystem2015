@@ -1,7 +1,6 @@
 package org.genericsystem.todoApp;
 
 import java.util.ArrayList;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -14,7 +13,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Group;
-
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -44,6 +42,15 @@ public class TodoList {
 
 	public void create() {
 		todos.add(new Todo());
+
+	}
+
+	public void remove(Todo todo) {
+		todos.remove(todo);
+	}
+
+	public void select(Todo todo) {
+		selection.setValue(todo);
 	}
 
 	public void showAll() {
@@ -67,12 +74,14 @@ public class TodoList {
 		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
-		GSTextField textField = new GSTextField(todoCreateHBox).bindTextProperty(TodoList::getName);
-		textField.setPrefWidth(170);
+		GSTextField textField = new GSTextField(todoCreateHBox, TodoList::getName);
+		textField.bindTextProperty(TodoList::getName);
+		textField.setPrefWidth(200);
 
-		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(170);
+		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
 
-		GSHBox todoHBox = new GSHBox(mainVBox).addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
+		GSHBox todoHBox = new GSHBox(mainVBox);
+		todoHBox.addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
 
 		GSHBox footer = new GSHBox(mainVBox).setOptionalVisibility(TodoList::getHasTodo);
 		GSHyperLink allLink = new GSHyperLink(footer, "All", TodoList::showAll).setOptionalStyleClass(TodoList::getAllMode, "overrun");
@@ -83,7 +92,8 @@ public class TodoList {
 		clearButton.setOptionalVisibility(TodoList::getHasCompleted);
 		clearButton.setPrefWidth(160);
 
-		GSHBox selectionHBox = new GSHBox(mainVBox).addSelectorMetaBinding(TodoList::getSelection);
+		GSHBox selectionHBox = new GSHBox(mainVBox);
+		selectionHBox.addSelectorMetaBinding(TodoList::getSelection);
 		GSLabel selectedTodoInputText = new GSLabel(selectionHBox, Todo::getTodoString);
 	}
 
