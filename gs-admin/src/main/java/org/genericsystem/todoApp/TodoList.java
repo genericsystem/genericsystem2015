@@ -42,6 +42,7 @@ public class TodoList {
 
 	public void create() {
 		todos.add(new Todo());
+
 	}
 
 	public void remove(Todo todo) {
