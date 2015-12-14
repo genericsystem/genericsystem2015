@@ -14,13 +14,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSHyperLink;
+import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
 
 public class TodoList {
@@ -86,8 +86,7 @@ public class TodoList {
 
 		GSHBox selectionHBox = new GSHBox(mainVBox);
 		selectionHBox.addSelectorMetaBinding(TodoList::getSelection);
-		Element<Label> selectedTodoInputText = new Element<>(selectionHBox, Label.class);
-		selectedTodoInputText.addBinding(Label::textProperty, Todo::getTodoString);
+		GSLabel selectedTodoInputText = new GSLabel(selectionHBox, Todo::getTodoString);
 	}
 
 	public Property<String> getName() {
