@@ -69,7 +69,7 @@ public class TodoList {
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
 		GSTextField textField = new GSTextField(todoCreateHBox);
 		textField.bindTextProperty(TodoList::getName);
-		textField.setSize(200);
+		textField.setPrefWidth(200);
 
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
 
