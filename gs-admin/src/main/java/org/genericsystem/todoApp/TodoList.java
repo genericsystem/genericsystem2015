@@ -73,8 +73,7 @@ public class TodoList {
 
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoList::create).setPrefWidth(160);
 
-		GSHBox todoHBox = new GSHBox(mainVBox);
-		todoHBox.addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
+		GSHBox todoHBox = new GSHBox(mainVBox).addForEachMetaBinding(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
 
 		GSHBox footer = new GSHBox(mainVBox).setOptionalVisibility(TodoList::getHasTodo);
 		GSHyperLink allLink = new GSHyperLink(footer, "All", TodoList::showAll).setOptionalStyleClass(TodoList::getAllMode, "overrun");
