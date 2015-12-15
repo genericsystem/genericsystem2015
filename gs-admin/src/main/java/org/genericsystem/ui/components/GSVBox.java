@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.VBox;
 
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 
 public class GSVBox extends GSPane<GSVBox, VBox> {
 

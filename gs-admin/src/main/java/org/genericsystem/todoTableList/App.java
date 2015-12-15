@@ -1,14 +1,13 @@
-package org.genericsystem.todoCommun;
+package org.genericsystem.todoTableList;
 
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import org.genericsystem.todoApp.TodoTableList;
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 
-public class AppFX extends Application {
+public class App extends Application {
 
 	public static void main(String[] args) {
 		launch(args);

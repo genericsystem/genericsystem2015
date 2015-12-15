@@ -1,4 +1,4 @@
-package org.genericsystem.todoApp;
+package org.genericsystem.todoTableList;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,7 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.control.TableView;
 
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSTableColumn;

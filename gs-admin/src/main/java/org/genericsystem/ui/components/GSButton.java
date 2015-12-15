@@ -8,8 +8,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.scene.control.Button;
 
-import org.genericsystem.todoKernel.Binding;
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Binding;
+import org.genericsystem.ui.Element;
 
 public class GSButton extends GSRegion<GSButton, Button> {
 

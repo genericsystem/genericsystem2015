@@ -1,4 +1,4 @@
-package org.genericsystem.todoCommun;
+package org.genericsystem.ui.utils;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.genericsystem.todoKernel;
+package org.genericsystem.ui;
 
 import java.util.AbstractList;
 import java.util.List;

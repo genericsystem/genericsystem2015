@@ -1,4 +1,4 @@
-package org.genericsystem.todoApp;
+package org.genericsystem.genericApp;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -29,8 +29,8 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.todoCommun.Transformation;
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
+import org.genericsystem.ui.utils.Transformation;
 
 public abstract class AbstractGenericList {
 	protected Transformation<GenericWrapper, Generic> genericWrapperList;

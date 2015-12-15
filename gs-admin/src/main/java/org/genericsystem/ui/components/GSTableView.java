@@ -2,7 +2,7 @@ package org.genericsystem.ui.components;
 
 import javafx.scene.control.TableView;
 
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 
 public class GSTableView extends GSRegion<GSTableView, TableView> {
 

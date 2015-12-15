@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.HBox;
 
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 
 public class GSHBox extends GSPane<GSHBox, HBox> {
 

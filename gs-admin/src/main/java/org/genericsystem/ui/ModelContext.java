@@ -1,4 +1,4 @@
-package org.genericsystem.todoKernel;
+package org.genericsystem.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;

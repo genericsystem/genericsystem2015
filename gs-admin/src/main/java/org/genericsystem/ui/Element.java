@@ -1,4 +1,4 @@
-package org.genericsystem.todoKernel;
+package org.genericsystem.ui;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;

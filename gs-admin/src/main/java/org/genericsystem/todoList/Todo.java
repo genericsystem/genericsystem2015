@@ -1,4 +1,4 @@
-package org.genericsystem.todoCommun;
+package org.genericsystem.todoList;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -6,8 +6,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 
-import org.genericsystem.todoKernel.Element;
-import org.genericsystem.todoList.TodoList;
+import org.genericsystem.ui.Element;
 import org.genericsystem.ui.bindings.OneShotBindings;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSCheckBox;

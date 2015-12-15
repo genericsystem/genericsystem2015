@@ -2,8 +2,6 @@ package org.genericsystem.todoList;
 
 import java.util.function.Predicate;
 
-import org.genericsystem.todoCommun.Todo;
-
 interface Mode {
 	Predicate<Todo> predicate();
 

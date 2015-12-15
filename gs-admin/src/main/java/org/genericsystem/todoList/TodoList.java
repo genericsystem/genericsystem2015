@@ -15,8 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Group;
 
-import org.genericsystem.todoCommun.Todo;
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSHyperLink;

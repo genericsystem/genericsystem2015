@@ -8,7 +8,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
-import org.genericsystem.todoKernel.Element;
+import org.genericsystem.ui.Element;
 
 public class GSPane<Component extends GSPane<Component, N>, N extends Pane> extends GSRegion<Component, N> {
 
