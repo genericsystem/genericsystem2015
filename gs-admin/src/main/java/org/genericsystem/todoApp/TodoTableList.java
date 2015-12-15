@@ -12,7 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.control.TableView;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSTableColumn;

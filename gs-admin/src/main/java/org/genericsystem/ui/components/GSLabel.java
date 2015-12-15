@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
 
 public class GSLabel extends GSRegion<GSLabel, Label> {
 	public GSLabel(Element<?> parent, String text) {

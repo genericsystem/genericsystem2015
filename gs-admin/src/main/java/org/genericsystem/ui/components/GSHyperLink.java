@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import javafx.event.Event;
 import javafx.scene.control.Hyperlink;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
 
 public class GSHyperLink extends GSRegion<GSHyperLink, Hyperlink> {
 

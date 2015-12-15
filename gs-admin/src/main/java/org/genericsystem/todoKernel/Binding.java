@@ -1,4 +1,4 @@
-package org.genericsystem.ui;
+package org.genericsystem.todoKernel;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

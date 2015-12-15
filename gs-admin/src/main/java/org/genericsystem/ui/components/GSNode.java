@@ -6,7 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
 
 public abstract class GSNode<Component extends GSNode<Component, N>, N extends Node> extends Element<N> {
 

@@ -6,7 +6,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
 
 public class GSCheckBox extends GSRegion<GSCheckBox, CheckBox> {
 

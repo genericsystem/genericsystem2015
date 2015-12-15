@@ -1,4 +1,4 @@
-package org.genericsystem.todoApp;
+package org.genericsystem.todoCommun;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,7 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 	private final Map<F, E> cache = new HashMap<>();
 	private final Function<F, E> function;
 
-	protected Transformation(ObservableList<? extends F> source, Function<F, E> function) {
+	public Transformation(ObservableList<? extends F> source, Function<F, E> function) {
 		super(source);
 		this.function = function;
 	}

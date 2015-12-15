@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.beans.property.Property;
 import javafx.scene.control.TextField;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
 
 public class GSTextField extends GSRegion<GSTextField, TextField> {
 

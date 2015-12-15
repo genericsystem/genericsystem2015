@@ -3,11 +3,13 @@ package org.genericsystem.ui.components;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.scene.control.Button;
-import org.genericsystem.ui.Binding;
-import org.genericsystem.ui.Element;
+
+import org.genericsystem.todoKernel.Binding;
+import org.genericsystem.todoKernel.Element;
 
 public class GSButton extends GSRegion<GSButton, Button> {
 

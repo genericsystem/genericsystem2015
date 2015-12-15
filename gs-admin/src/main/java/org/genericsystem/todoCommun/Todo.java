@@ -1,4 +1,4 @@
-package org.genericsystem.todoApp;
+package org.genericsystem.todoCommun;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -6,7 +6,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoKernel.Element;
+import org.genericsystem.todoList.TodoList;
 import org.genericsystem.ui.bindings.OneShotBindings;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSCheckBox;
@@ -26,7 +27,7 @@ public class Todo {
 
 	Property<TodoList> parentProperty = new SimpleObjectProperty<TodoList>();
 	ObservableValue<String> todoString = OneShotBindings.createInitializer(parentProperty, todolist -> todolist.getName().getValue());
-	Property<Boolean> completed = new SimpleBooleanProperty(false);
+	public Property<Boolean> completed = new SimpleBooleanProperty(false);
 
 	/*********************************************************************************************************************************/
 

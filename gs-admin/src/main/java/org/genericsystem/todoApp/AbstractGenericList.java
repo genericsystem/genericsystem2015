@@ -29,7 +29,8 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.ui.Element;
+import org.genericsystem.todoCommun.Transformation;
+import org.genericsystem.todoKernel.Element;
 
 public abstract class AbstractGenericList {
 	protected Transformation<GenericWrapper, Generic> genericWrapperList;
