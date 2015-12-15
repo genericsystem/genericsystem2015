@@ -14,6 +14,7 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSTableColumn;
+import org.genericsystem.ui.components.GSTableColumn.GSTableColumnAction;
 import org.genericsystem.ui.components.GSTableView;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
@@ -108,6 +109,6 @@ public class TodoTableList {
 		GSTableColumn<AttributeColumn> columns = new GSTableColumn<>(tableView, AttributeColumn::getTitle, converter).setPrefWidth(150);
 
 		columns.addForEachMetaBinding(TodoTableList::getColumns);
-		// GSTableColumnAction<TodoTableList, Todo> columnDelete = new GSTableColumnAction<>(tableView, "Delete", converter, TodoTableList::remove).setPrefWidth(150);
+		GSTableColumnAction<TodoTableList, Todo> columnDelete = new GSTableColumnAction<>(tableView, "Delete", converter, TodoTableList::remove).setPrefWidth(150);
 	}
 }
