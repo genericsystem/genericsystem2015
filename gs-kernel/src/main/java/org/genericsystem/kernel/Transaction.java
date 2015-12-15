@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -169,6 +170,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
 		throw new UnsupportedOperationException();
 	}
 }

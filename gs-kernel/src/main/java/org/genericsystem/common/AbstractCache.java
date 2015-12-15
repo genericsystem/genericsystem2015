@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultCache;
@@ -38,4 +39,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		throw new UnsupportedOperationException();
+	}
 }

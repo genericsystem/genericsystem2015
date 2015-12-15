@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
@@ -1137,4 +1139,119 @@ public class AsyncDefaultTest extends AbstractTest {
 	// power.enableInheritance();
 	// assert myCar.getAsyncHolder(power).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).equals(defaultPower);
 	// }
+
+	// // // //
+
+	// // // //
+
+	// // // //
+
+	// // // //
+	public void test_getCompositeTest2_Obs() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("Vehicle");
+		Generic car = root.addInstance(vehicle, "Car");
+		ObservableList<Generic> composites = car.getObservableComposites();
+		vehicle.addAttribute("power");
+		Generic carPower = car.addAttribute("power");
+		vehicle.addAttribute("option");
+
+		Thread.sleep(500);
+		assert composites.size() == 1;
+		assert composites.get(0) == carPower;
+
+		Generic carOption = car.addAttribute("option");
+
+		Thread.sleep(500);
+		assert composites.size() == 2;
+		assert composites.get(1) == carOption;
+	}
+
+	public void test_relationTest9_Obs() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine engine = new CocClientEngine();
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic color = engine.addInstance("Color");
+		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
+
+		Generic car = engine.addInstance(vehicle, "Car");
+		Generic colorMat = engine.addInstance(color, "ColorMat");
+		Generic carColorMat = car.addAttribute(vehicleColor, "carColorMat", colorMat);
+
+		Generic myCar = car.addInstance("myCar");
+		Generic redMat = colorMat.addInstance("redMat");
+		Generic myCarRedMat = myCar.addHolder(carColorMat, "myCarRedMat", redMat);
+
+		Generic myVehicle = vehicle.addInstance("myVehicle");
+		Generic red = color.addInstance("red");
+		Generic myVehicleRed = myVehicle.addHolder(vehicleColor, "myVehicleRed", red);
+
+		Generic vehicleColorIsCold = vehicleColor.addAttribute("vehicleColorIsCold");
+
+		ObservableList<Generic> attributes = carColorMat.getObservableAttributes();
+
+		Thread.sleep(1000);
+		System.out.println(attributes.size());
+		System.out.println("obs  " + attributes);
+		System.out.println("sync " + carColorMat.getAttributes().toList());
+		System.out.println("async" + carColorMat.getAsyncAttributes().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).toList());
+		assert attributes.contains(vehicleColorIsCold);
+		assert vehicleColor.getAsyncAttributes().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).contains(vehicleColorIsCold);
+	}
+
+	public void test_holderTestHolderOverrideWithDifferentValue2ChainedAttributsWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild_Obs() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine engine = new CocClientEngine();
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic power1 = engine.addInstance("Power", vehicle);
+		Generic unit = engine.addInstance("Unit", power1);
+		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
+		Generic power2 = engine.addInstance("Power", car);
+
+		// same value for power1 and power2
+		int powerValue = 1;
+		String unitValue1 = "Watt";
+		String unitValue2 = "KWatt";
+
+		Generic v1 = power1.addInstance(powerValue, vehicle);
+		Generic v2 = power2.addInstance(Arrays.asList(v1), powerValue, car);
+
+		Generic vUnit1 = unit.addInstance(unitValue1, power1);
+		Generic vUnit2 = unit.addInstance(Arrays.asList(vUnit1), unitValue2, power2);
+
+		ObservableList<Generic> vehicleHolders = vehicle.getObservableHolders(power1);
+		ObservableList<Generic> power1Holders = power1.getObservableHolders(unit);
+		ObservableList<Generic> power2Holders = power2.getObservableHolders(unit);
+
+		Thread.sleep(1000);
+		vehicleHolders.size();
+		power1Holders.size();
+		power2Holders.size();
+
+		assert !power1.equals(power2);
+		assert v1.isInstanceOf(power1);
+		assert v2.isInstanceOf(power1);
+
+		assert !v1.isInstanceOf(power2);
+		assert v2.isInstanceOf(power2);
+		assert vUnit1.isInstanceOf(unit);
+		assert vUnit2.isInstanceOf(unit);
+
+		assert vehicleHolders != null;
+		assert vehicleHolders.size() == 1 : vehicle.getHolders(power1);
+		assert vehicleHolders.contains(v1) : vehicle.getHolders(power1);
+
+		assert power1Holders != null;
+		assert power1Holders.size() == 1 : power1.getHolders(unit);
+		assert power1Holders.contains(vUnit1) : power1.getHolders(unit);
+
+		assert power2Holders != null;
+		assert power2Holders.size() == 1 : power2.getHolders(unit);
+		assert power2Holders.contains(vUnit2) : power2.getHolders(unit);
+
+		// ...
+
+		assert power1.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		assert power2.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		assert v1.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		assert v2.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+	}
 }

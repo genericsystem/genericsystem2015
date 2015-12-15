@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.Snapshot;
@@ -28,6 +30,11 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 	@Override
 	default CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos) {
 		return DefaultSystemProperties.super.getAsyncKey(propertyClass, pos);
+	}
+
+	@Override
+	default ObservableList<T> getObservableComposites() {
+		return DefaultDependencies.super.getObservableComposites();
 	}
 
 	//

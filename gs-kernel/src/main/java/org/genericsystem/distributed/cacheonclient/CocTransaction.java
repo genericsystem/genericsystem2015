@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -90,6 +91,11 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 			dependenciesPromiseMap.put(generic, dependenciesPromise);
 		}
 		return dependenciesPromise;
+	}
+
+	@Override
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		throw new UnsupportedOperationException();
 	}
 
 	// @Override

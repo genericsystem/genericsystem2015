@@ -11,7 +11,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IContext;
@@ -76,12 +81,64 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return getDependenciesPromise(vertex).thenApply(f -> f.filter(x -> x.getSupers().contains(vertex)));
 	}
 
+	default ObservableList<T> getObservableInheritings(T vertex) {
+		return new ListBinding<T>() {
+			@SuppressWarnings("unused")
+			private final InvalidationListener listener;
+			private final Observable invalidator = getInvalidator(vertex);
+			private List<T> promisedList = new ArrayList<T>();
+
+			{
+				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					getAsyncInheritings(vertex).thenAccept(snapshot -> {
+						List<T> newPromisedList = snapshot.toList();
+						if (!promisedList.equals(newPromisedList)) {
+							promisedList = newPromisedList;
+							invalidate();
+						}
+					});
+				}));
+			}
+
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+			}
+		};
+	}
+
 	default Snapshot<T> getComposites(T vertex) {
 		return getDependencies(vertex).filter(x -> x.getComponents().contains(vertex));
 	}
 
 	default CompletableFuture<Snapshot<T>> getAsyncComposites(T vertex) {
 		return getDependenciesPromise(vertex).thenApply(f -> f.filter(x -> x.getComponents().contains(vertex)));
+	}
+
+	default ObservableList<T> getObservableComposites(T vertex) {
+		return new ListBinding<T>() {
+			@SuppressWarnings("unused")
+			private final InvalidationListener listener;
+			private final Observable invalidator = getInvalidator(vertex);
+			private List<T> promisedList = new ArrayList<T>();
+
+			{
+				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					getAsyncComposites(vertex).thenAccept(snapshot -> {
+						List<T> newPromisedList = snapshot.toList();
+						if (!promisedList.equals(newPromisedList)) {
+							promisedList = newPromisedList;
+							invalidate();
+						}
+					});
+				}));
+			}
+
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+			}
+		};
 	}
 
 	default Observable getCompositesInvalidator(T vertex) {
@@ -294,6 +351,8 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 	Snapshot<T> getDependencies(T vertex);
 
 	CompletableFuture<Snapshot<T>> getDependenciesPromise(T vertex);
+
+	ObservableList<T> getObservableDependencies(T generic);
 
 	Observable getInvalidator(T generic);
 

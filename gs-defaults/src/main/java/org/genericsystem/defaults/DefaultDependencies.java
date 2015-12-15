@@ -10,7 +10,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
@@ -303,6 +308,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableInheritings() {
+		return getCurrentCache().getObservableInheritings((T) this);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getInheritings(T... components) {
 		return getInheritings().filter(componentsFilter(components));
@@ -400,6 +410,31 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncComposites() {
 		return getCurrentCache().getAsyncComposites((T) this);
+	}
+
+	default ObservableList<T> getObservableComposites() {
+		return new ListBinding<T>() {
+			@SuppressWarnings("unused")
+			private final InvalidationListener listener;
+			private final Observable invalidator = getCompositesInvalidator();
+			private List<T> promisedList = new ArrayList<T>();
+
+			{
+				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					getAsyncComposites().thenAccept(snapshot -> {
+						promisedList = snapshot.toList();
+						System.out.println("promisedList" + promisedList);
+						invalidate();
+					});
+				}));
+			}
+
+			@Override
+			protected ObservableList<T> computeValue() {
+				System.out.println("unmodifiableObservableList " + promisedList);
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")

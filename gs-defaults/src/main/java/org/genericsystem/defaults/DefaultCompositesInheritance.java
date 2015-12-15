@@ -7,6 +7,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
@@ -19,6 +26,8 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	CompletableFuture<Snapshot<T>> getAsyncComposites();
 
 	CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos);
+
+	ObservableList<T> getObservableComposites();
 
 	//
 
@@ -64,6 +73,10 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 		return getAsyncAttributes(getRoot().getMetaAttribute());
 	}
 
+	default ObservableList<T> getObservableAttributes() {
+		return getObservableAttributes(getRoot().getMetaAttribute());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(T... targets) {
@@ -103,6 +116,32 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 				return new AsyncInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).inheritanceStreamAsync();
 			return getAsyncComposites().thenApply(composites -> composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL)).thenApply(s -> () -> s);
 		});
+	}
+
+	default ObservableList<T> getObservableAttributes(T attribute) {
+		return new ListBinding<T>() {
+			@SuppressWarnings("unused")
+			private final InvalidationListener listener;
+			private final Observable invalidator = getObservableComposites();// TODO temporary
+			private List<T> promisedList = new ArrayList<T>();
+
+			{
+				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					getAsyncAttributes(attribute).thenAccept(snapshot -> {
+						List<T> newPromisedList = snapshot.toList();
+						if (!promisedList.equals(newPromisedList)) {
+							promisedList = newPromisedList;
+							invalidate();
+						}
+					});
+				}));
+			}
+
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -176,6 +215,32 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 				return new AsyncInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).inheritanceStreamAsync();
 			return this.getAsyncComposites().thenApply(composites -> () -> composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE));
 		});
+	}
+
+	default ObservableList<T> getObservableHolders(T attribute) {
+		return new ListBinding<T>() {
+			@SuppressWarnings("unused")
+			private final InvalidationListener listener;
+			private final Observable invalidator = getObservableComposites();// TODO temporary
+			private List<T> promisedList = new ArrayList<T>();
+
+			{
+				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+					getAsyncHolders(attribute).thenAccept(snapshot -> {
+						List<T> newPromisedList = snapshot.toList();
+						if (!promisedList.equals(newPromisedList)) {
+							promisedList = newPromisedList;
+							invalidate();
+						}
+					});
+				}));
+			}
+
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
