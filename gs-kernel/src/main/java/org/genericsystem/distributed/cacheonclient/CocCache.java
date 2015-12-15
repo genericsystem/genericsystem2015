@@ -1,12 +1,8 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -17,12 +13,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
-import org.genericsystem.kernel.Statics;
 
 public class CocCache extends HeavyCache {
 
@@ -234,6 +228,7 @@ public class CocCache extends HeavyCache {
 		return getDifferential().getDependenciesPromise(generic);
 	}
 
+	@Override
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
 		return new ListBinding<Generic>() {
 			@SuppressWarnings("unused")
@@ -255,55 +250,5 @@ public class CocCache extends HeavyCache {
 				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
 			}
 		};
-	}
-
-	// ____/Use async gs-default methods\_____________
-
-	@Override
-	public boolean isAlive(Generic vertex) {
-		try {
-			return isAsyncAlive(vertex).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
-
-	@Override
-	public NavigableSet<Generic> computeDependencies(Generic node) {
-		try {
-			return computeAsyncDependencies(node).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
-
-	@Override
-	public NavigableSet<Generic> computePotentialDependencies(Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
-		try {
-			return computeAsyncPotentialDependencies(meta, supers, value, components).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
-
-	}
-
-	@Override
-	public NavigableSet<Generic> computeRemoveDependencies(Generic node) throws RollbackException {
-		CompletableFuture<NavigableSet<Generic>> removeDependenciesPromise = computeAsyncRemoveDependencies(node);
-
-		try {
-
-			return removeDependenciesPromise.get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			if (e.getCause() instanceof RollbackException) {
-				throw new RollbackException(e.getCause().getCause());
-			}
-
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
 	}
 }
