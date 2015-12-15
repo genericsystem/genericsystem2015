@@ -109,7 +109,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
 		addForEachMetaBinding(function, injectedProperty);
 		subModelInit.accept(this);
 		return this;
@@ -121,19 +121,19 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function) {
+	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function) {
 		metaBindings.add(Binding.selector(function));
 		return this;
 	}
 
 	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
-		addSelectorMetaBinding(function);
+		select(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
 		return this;
 	}
 
 	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Consumer<Element<N>> subModelInit) {
-		addSelectorMetaBinding(function);
+		select(function);
 		subModelInit.accept(this);
 		return this;
 	}

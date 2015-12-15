@@ -1,4 +1,4 @@
-package org.genericsystem.ui.bindings;
+package org.genericsystem.ui.utils;
 
 import java.util.function.Function;
 

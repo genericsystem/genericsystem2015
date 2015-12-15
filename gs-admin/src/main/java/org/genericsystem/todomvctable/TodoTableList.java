@@ -4,7 +4,6 @@ import java.util.function.Function;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -23,6 +22,14 @@ import org.genericsystem.ui.components.GSVBox;
 
 public class TodoTableList {
 
+	private Property<String> name = new SimpleStringProperty();
+	private ObservableList<Todo> todos = FXCollections.observableArrayList();
+	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
+	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
+	private ObservableList<TodoColumn> columns = FXCollections.observableArrayList();
+
+	/*********************************************************************************************************************************/
+
 	public static void init(Element<Group> sceneElt) {
 		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 		{
@@ -38,17 +45,13 @@ public class TodoTableList {
 			{
 				Function<Todo, String> converter = todo -> todo.stringProperty.getValue();
 				new GSTableColumn<Todo>(tableView, "Todo", converter).setPrefWidth(150);
-				new GSTableColumn<>(tableView, AttributeColumn::getTitle, converter).setPrefWidth(150).addForEachMetaBinding(TodoTableList::getColumns);
+				new GSTableColumn<>(tableView, TodoColumn::getTitle, converter).setPrefWidth(150).addForEachMetaBinding(TodoTableList::getColumns);
 				new GSTableButtonColumn<>(tableView, "Delete", converter, TodoTableList::remove).setPrefWidth(150);
 			}
 		}
 	}
 
-	private Property<String> name = new SimpleStringProperty();
-	private ObservableList<Todo> todos = FXCollections.observableArrayList();
-	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
-	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
-	private ObservableList<AttributeColumn> columns = FXCollections.observableArrayList();
+	/*********************************************************************************************************************************/
 
 	public void create() {
 		Todo todo = new Todo();
@@ -61,32 +64,15 @@ public class TodoTableList {
 	}
 
 	public void createColumn() {
-		AttributeColumn ac = new AttributeColumn();
+		TodoColumn ac = new TodoColumn();
 		columns.add(ac);
 		ac.title.setValue("Col : " + columns.indexOf(ac));
 	}
 
-	public static class Todo {
-
-		private Property<String> stringProperty = new SimpleStringProperty();
-
-		public ObservableValue<String> getStringProperty() {
-			return stringProperty;
-		}
-	}
-
 	/*********************************************************************************************************************************/
 
-	public ObservableList<AttributeColumn> getColumns() {
+	public ObservableList<TodoColumn> getColumns() {
 		return columns;
-	}
-
-	public static class AttributeColumn {
-		Property<String> title = new SimpleObjectProperty<String>();
-
-		public ObservableValue<String> getTitle() {
-			return title;
-		}
 	}
 
 	public Property<String> getName() {

@@ -19,14 +19,14 @@ interface Mode {
 	static class Active implements Mode {
 		@Override
 		public Predicate<Todo> predicate() {
-			return todo -> !todo.completed.getValue();
+			return todo -> !todo.getCompleted().getValue();
 		}
 	}
 
 	static class Complete implements Mode {
 		@Override
 		public Predicate<Todo> predicate() {
-			return todo -> todo.completed.getValue();
+			return todo -> todo.getCompleted().getValue();
 		}
 	}
 }

@@ -20,15 +20,17 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 		super(parent, paneClass, getGraphicChildren);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
-		super.addForEachMetaBinding(function, injectedProperty, subModelInit);
+	public <M, T> Component forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+		super.forEach(function, injectedProperty, subModelInit);
 		return (Component) this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component addSelectorMetaBinding(Function<M, ObservableValue<T>> function) {
-		super.addSelectorMetaBinding(function);
+	public <M, T> Component select(Function<M, ObservableValue<T>> function) {
+		super.select(function);
 		return (Component) this;
 	}
 

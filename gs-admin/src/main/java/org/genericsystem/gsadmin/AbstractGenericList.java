@@ -221,7 +221,7 @@ public abstract class AbstractGenericList {
 			// Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
 
 			Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
-			todoTableView2.addSelectorMetaBinding(GenericList::getProperty);
+			todoTableView2.select(GenericList::getProperty);
 
 			Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems);
 			todoTableItems2.addForEachMetaBinding(GenericWrapper::getGenericWrapperListInstances);
