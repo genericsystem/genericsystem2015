@@ -1,9 +1,9 @@
 package org.genericsystem.ui;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -16,7 +16,7 @@ public class Binding<N, T> {
 	private final Function<?, T> method;
 	private final Binder<N, T> binder;
 
-	public Binding(Function<?, T> method, Binder<N, T> binder) {
+	public Binding(Binder<N, T> binder, Function<?, T> method) {
 		this.binder = binder;
 		this.method = method;
 	}
@@ -32,27 +32,33 @@ public class Binding<N, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
 		};
 	}
 
-	private static <N, M, T> Binding<N, T> bind(Binder<N, T> binder, Function<M, T> function) {
-		return new Binding<>((u) -> function.apply((M) u), binder);
+	static <N, M, T> Binding<N, T> bind(Binder<N, T> binder, Function<M, T> function) {
+		return new Binding<>(binder, (u) -> function.apply((M) u));
 	}
 
 	private static <N, M, T> Binding<N, T> bind(Consumer<M> function, Binder<N, T> binder) {
-		return new Binding<>((u) -> {
+		return new Binding<>(binder, (u) -> {
 			function.accept((M) u);
 			return null;
-		}, binder);
+		});
+	}
+
+	private static <SUPERMODEL, N, M, T> Binding<N, Function<SUPERMODEL, T>> bind(BiConsumer<SUPERMODEL, M> function, Binder<N, Function<SUPERMODEL, T>> binder) {
+		return new Binding<>(binder, (m) -> (sm -> {
+			function.accept(sm, (M) m);
+			return null;
+		}));
 	}
 
 	private static <N, M, T> Binding<N, T> bind(Function<M, T> function, Binder<N, T> binder) {
-		return new Binding<>((u) -> function.apply((M) u), binder);
+		return new Binding<>(binder, (u) -> function.apply((M) u));
 	}
 
 	public static <N, M, T> Binding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> function) {
@@ -75,7 +81,7 @@ public class Binding<N, T> {
 		return Binding.bind(Binder.propertyBiDirectionalBinder(getProperty), function);
 	}
 
-	public static <N, M, W> Binding<N, Property<Boolean>> bindObservableList(Function<N, ObservableList<W>> getObservable, Function<M, Property<Boolean>> function, W styleClass) {
+	public static <N, M, W> Binding<N, ObservableValue<Boolean>> bindObservableList(Function<N, ObservableList<W>> getObservable, Function<M, ObservableValue<Boolean>> function, W styleClass) {
 		return Binding.bind(Binder.observableListBinder(getObservable, styleClass), function);
 	}
 
@@ -85,5 +91,13 @@ public class Binding<N, T> {
 
 	public static <N, M, T extends Event> Binding<N, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
 		return Binding.<N, M, T> bind(consumer, Binder.actionBinder(propAction));
+	}
+
+	public static <SUPERMODEL, N, M, T extends Event> Binding<N, Function<SUPERMODEL, T>> bindMetaAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<SUPERMODEL, M> biconsumer) {
+		return Binding.<SUPERMODEL, N, M, T> bind(biconsumer, Binder.metaActionBinder(propAction));
+	}
+
+	public static <N, M, W> Binding<N, ObservableList<W>> bindObservableList(Function<N, Property<ObservableList<W>>> getProperty, Function<M, ObservableList<W>> function) {
+		return Binding.bind(Binder.observableListPropertyBinder(getProperty), function);
 	}
 }

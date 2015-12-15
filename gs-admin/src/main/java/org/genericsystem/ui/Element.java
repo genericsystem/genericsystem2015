@@ -3,20 +3,18 @@ package org.genericsystem.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 
 public class Element<N> {
@@ -34,53 +32,57 @@ public class Element<N> {
 		return "Element<" + nodeClass.getSimpleName() + ">";
 	}
 
+	public <PARENTNODE extends Group> Element(Class<N> nodeClass) {
+		this(null, nodeClass, Group::getChildren);
+	}
+
 	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
 		this(parent, nodeClass, Pane::getChildren);
 	}
 
-	public <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<W>> getGraphicChildren) {
+	public <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
-		this.getGraphicChildren = (Function) getGraphicChildren;
-		if (parent != null)
-			parent.<N> getChildren().add(this);
-	}
-
-	@Deprecated
-	@SafeVarargs
-	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Binding<N, ?>... binding) {
-		this(parent, nodeClass, Pane::getChildren, binding);
-	}
-
-	@SafeVarargs
-	@Deprecated
-	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
-		this(parent, nodeClass, Pane::getChildren, metaBindings, binding);
-	}
-
-	@SafeVarargs
-	@Deprecated
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?>... binding) {
-		this(parent, nodeClass, getGraphicChildren, Collections.emptyList(), binding);
-	}
-
-	@SafeVarargs
-	@Deprecated
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
-		this.nodeClass = nodeClass;
-		this.parent = parent;
-		this.metaBindings.addAll(metaBindings);
-		this.bindings.addAll(Arrays.asList(binding));
 		this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
 			parent.<N> getChildren().add(this);
 	}
 
-	@SafeVarargs
-	@Deprecated
-	public final void addBoots(Boot<N>... boot) {
-		this.boots.addAll(Arrays.asList(boot));
-	}
+	// @Deprecated
+	// @SafeVarargs
+	// public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Binding<N, ?>... binding) {
+	// this(parent, nodeClass, Pane::getChildren, binding);
+	// }
+
+	// @SafeVarargs
+	// @Deprecated
+	// public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
+	// this(parent, nodeClass, Pane::getChildren, metaBindings, binding);
+	// }
+
+	// @SafeVarargs
+	// @Deprecated
+	// public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?>... binding) {
+	// this(parent, nodeClass, getGraphicChildren, Collections.emptyList(), binding);
+	// }
+
+	// @SafeVarargs
+	// @Deprecated
+	// public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
+	// this.nodeClass = nodeClass;
+	// this.parent = parent;
+	// this.metaBindings.addAll(metaBindings);
+	// this.bindings.addAll(Arrays.asList(binding));
+	// this.getGraphicChildren = getGraphicChildren;
+	// if (parent != null)
+	// parent.<N> getChildren().add(this);
+	// }
+
+	// @SafeVarargs
+	// @Deprecated
+	// public final void addBoots(Boot<N>... boot) {
+	// this.boots.addAll(Arrays.asList(boot));
+	// }
 
 	public <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> getProperty, VALUE value) {
 		this.boots.add(Boot.setProperty(getProperty, value));
@@ -96,16 +98,16 @@ public class Element<N> {
 		return boots;
 	}
 
-	@Deprecated
-	public void addMetaBindings(Binding<N, ?> metaBinding) {
-		metaBindings.add(metaBinding);
-	}
+	// @Deprecated
+	// public void addMetaBindings(Binding<N, ?> metaBinding) {
+	// metaBindings.add(metaBinding);
+	// }
 
-	@SafeVarargs
-	@Deprecated
-	public final void addBindings(Binding<N, ?>... binding) {
-		bindings.addAll(Arrays.asList(binding));
-	}
+	// @SafeVarargs
+	// @Deprecated
+	// public final void addBindings(Binding<N, ?>... binding) {
+	// bindings.addAll(Arrays.asList(binding));
+	// }
 
 	public <M, W> Element<N> addBidirectionalBinding(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
 		bindings.add(Binding.bindBiDirectionalProperty(getProperty, function));
@@ -114,6 +116,11 @@ public class Element<N> {
 
 	public <M, T> Element<N> addBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
 		bindings.add(Binding.bindProperty(getProperty, function));
+		return this;
+	}
+
+	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
+		bindings.add(Binding.bindObservableList(getProperty, function));
 		return this;
 	}
 
@@ -132,7 +139,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> getObservable, Function<M, Property<Boolean>> function, T styleClass) {
+	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> getObservable, Function<M, ObservableValue<Boolean>> function, T styleClass) {
 		bindings.add(Binding.bindObservableList(getObservable, function, styleClass));
 		return this;
 	}
@@ -142,8 +149,44 @@ public class Element<N> {
 		return this;
 	}
 
+	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
+		addForEachMetaBinding(function);
+		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		return this;
+	}
+
+	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+		addForEachMetaBinding(function, injectedProperty);
+		subModelInit.accept(this);
+		return this;
+	}
+
+	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
+		addForEachMetaBinding(function);
+		subModelInit.accept(this);
+		return this;
+	}
+
 	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function) {
 		metaBindings.add(Binding.selector(function));
+		return this;
+	}
+
+	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
+		addSelectorMetaBinding(function);
+		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		return this;
+	}
+
+	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Consumer<Element<N>> subModelInit) {
+		addSelectorMetaBinding(function);
+		subModelInit.accept(this);
+		return this;
+	}
+
+	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+		addSelectorMetaBinding(function, injectedProperty);
+		subModelInit.accept(this);
 		return this;
 	}
 
@@ -152,10 +195,8 @@ public class Element<N> {
 		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(graphicParent);
 	}
 
-	public N apply(Object model) {
-		N node = createNode(null);
-		new ViewContext<>(null, new ModelContext(null, model), this, node);
-		return node;
+	public N apply(Object model, Object parentNode) {
+		return new ViewContext<>(null, new ModelContext(null, this, model), this, (N) parentNode).getNode();
 	}
 
 	N createNode(Object parent) {
@@ -220,4 +261,5 @@ public class Element<N> {
 		}
 		return indexInChildren;
 	}
+
 }

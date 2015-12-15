@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -30,10 +29,39 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+		};
+	}
+
+	public static <N, W> Binder<N, Property<W>> injectBinder() {
+		return new Binder<N, Property<W>>() {
+			@Override
+			public void init(Property<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				wrapper.setValue(modelContext.getParent().getModel());
+				// ModelContext modelContext_ = modelContext;
+				// while (modelContext_ != null) {
+				// if (parentModelClass.isInstance(modelContext_.getModel())) {
+				// wrapper.setValue(modelContext_.getModel());
+				// return;
+				// }
+				// modelContext_ = modelContext_.getParent();
+				// }
+				// throw new IllegalStateException("Can't inject : " + parentModelClass);
 			}
 		};
 
+	}
+
+	public static <N, SUPERMODEL, W extends Event> Binder<N, Function<SUPERMODEL, W>> metaActionBinder(Function<N, ObjectProperty<EventHandler<W>>> applyOnNode) {
+		return new Binder<N, Function<SUPERMODEL, W>>() {
+			@Override
+			public void init(Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null));
+			}
+
+			@Override
+			public void init(Function<SUPERMODEL, W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+		};
 	}
 
 	public static <N, W> Binder<N, W> genericActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
@@ -44,8 +72,7 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-			}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
 		};
 
 	}
@@ -68,6 +95,15 @@ public interface Binder<N, W> {
 		};
 	}
 
+	public static <N, W> Binder<N, ObservableList<W>> observableListPropertyBinder(Function<N, Property<ObservableList<W>>> applyOnNode) {
+		return new Binder<N, ObservableList<W>>() {
+			@Override
+			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).setValue(wrapper);
+			}
+		};
+	}
+
 	public static <N, W> Binder<N, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, Property<W>>() {
 			@Override
@@ -77,10 +113,10 @@ public interface Binder<N, W> {
 		};
 	}
 
-	public static <N, W> Binder<N, Property<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
-		return new Binder<N, Property<Boolean>>() {
+	public static <N, W> Binder<N, ObservableValue<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
+		return new Binder<N, ObservableValue<Boolean>>() {
 			@Override
-			public void init(Property<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			public void init(ObservableValue<Boolean> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				ObservableList<W> styleClasses = applyOnNode.apply(viewContext.getNode());
 				Consumer<Boolean> consumer = bool -> {
 					if (bool)
@@ -100,7 +136,7 @@ public interface Binder<N, W> {
 			@Override
 			public void init(ObservableList<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 
-				List<ModelContext> children = modelContext.getChildren();
+				List<ModelContext> children = modelContext.getChildren(childElement);
 
 				class ForEachList extends AbstractList<W> implements ListChangeListener<W> {
 					{
@@ -121,8 +157,8 @@ public interface Binder<N, W> {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void add(int index, W model) {
-						ModelContext childContext = new ModelContext(modelContext, model);
-						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(model.getClass()) ? model : childElement.createNode(viewContext.getNode()));
+						ModelContext childContext = new ModelContext(modelContext, childElement, model);
+						new ViewContext(viewContext, childContext, childElement, model);
 						children.add(index, childContext);
 					}
 
@@ -165,11 +201,11 @@ public interface Binder<N, W> {
 		return new Binder<N, ObservableValue<W>>() {
 			@Override
 			public void init(ObservableValue<W> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-				List<ModelContext> children = modelContext.getChildren();
+				List<ModelContext> children = modelContext.getChildren(childElement);
 				Consumer<W> consumer = (newModel) -> {
 					if (newModel != null) {
-						ModelContext childContext = new ModelContext(modelContext, newModel);
-						new ViewContext(viewContext, childContext, childElement, childElement.nodeClass.isAssignableFrom(newModel.getClass()) ? newModel : childElement.createNode(viewContext.getNode()));
+						ModelContext childContext = new ModelContext(modelContext, childElement, newModel);
+						new ViewContext(viewContext, childContext, childElement, newModel);
 						children.add(childContext);
 						assert children.size() == 1;
 					}
@@ -182,7 +218,8 @@ public interface Binder<N, W> {
 						for (ViewContext<?> internalViewContext : removed.getViewContexts())
 							internalViewContext.destroyChild();
 					}
-					consumer.accept(newModel);
+					if (newModel != null)
+						consumer.accept(newModel);
 				});
 				consumer.accept(wrapper.getValue());
 			}
