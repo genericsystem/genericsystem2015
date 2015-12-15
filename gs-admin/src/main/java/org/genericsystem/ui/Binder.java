@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -29,7 +30,8 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 	}
 
@@ -60,7 +62,8 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(Function<SUPERMODEL, W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(Function<SUPERMODEL, W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 	}
 
@@ -72,7 +75,8 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 
 	}
@@ -157,6 +161,7 @@ public interface Binder<N, W> {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void add(int index, W model) {
+						System.out.println("foreachBinder modelContext :: " + childElement);
 						ModelContext childContext = new ModelContext(modelContext, childElement, model);
 						new ViewContext(viewContext, childContext, childElement, model);
 						children.add(index, childContext);

@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -26,11 +27,13 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 
 	protected static Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 	private Callback<CellDataFeatures<T, String>, ObservableValue<String>> callback;
+	private Property<String> textTitle = new SimpleObjectProperty<String>();
 
 	public GSTableColumn(Element parent, Function<T, String> function) {
 		super(parent, TableColumn.class, getColumns);
 		callback = features -> new SimpleObjectProperty<>(function.apply(features.getValue()));
 		super.addBoot(TableColumn::cellValueFactoryProperty, callback);
+		// addBinding(TableColumn::textProperty, GSTableColumn<T>::getTextTitle);
 	}
 
 	public GSTableColumn setWidth(Number width) {
@@ -38,16 +41,22 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 		return this;
 	}
 
-	public <T> GSTableColumn setObservableTextProperty(Function<T, ObservableValue<String>> function) {
-		addBinding(TableColumn::textProperty, function);
+	public <T> GSTableColumn activeBindingTextProperty() {
+		addBinding(TableColumn::textProperty, GSTableColumn<T>::getTextTitle);
 		return this;
 	}
 
+	public ObservableValue<String> getTextTitle() {
+		return textTitle;
+	}
+
 	public <T> GSTableColumn setText(String value) {
+		textTitle.setValue(value);
 		addBoot(TableColumn::textProperty, value);
 		return this;
 	}
 
+	// ***************************************************************************************************
 	public static class GSTableColumnAction<T> extends GSTableColumn<T> {
 		private Callback<TableColumn<T, String>, TableCell<T, String>> callbackDelete;
 
@@ -57,6 +66,7 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 			super.addBoot(TableColumn::cellFactoryProperty, callbackDelete);
 		}
 
+		// ------------------------------------------------------------
 		public class DeleteButtonCell<T> extends TableCell<T, String> {
 			private final Button cellButton = new Button();
 

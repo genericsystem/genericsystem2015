@@ -10,7 +10,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.control.TableView;
 
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
@@ -29,6 +28,7 @@ public class TodoTableList {
 	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
 	private static Function<Todo, String> converter = todo -> todo.stringProperty.getValue();
+	private static Function<Todo, String> converter2 = todo -> todo.toString();
 
 	public Property<String> getName() {
 		return name;
@@ -66,6 +66,10 @@ public class TodoTableList {
 			this.list = list;
 		}
 
+		public Todo(String s) {
+			stringProperty.setValue(s);
+		}
+
 		public ObservableValue<String> getObservable() {
 			return stringProperty;
 		}
@@ -80,17 +84,36 @@ public class TodoTableList {
 
 	}
 
+	ObservableList<GSTableColumn<Todo>> listCol = FXCollections.observableArrayList();
+
+	public ObservableList<GSTableColumn<Todo>> getListCol() {
+		return listCol;
+	}
+
+	int i = 0;
+
+	public void createCol() {
+		listCol.add(new GSTableColumn<Todo>(null, converter).setText("col_" + i));
+		i++;
+	}
+
 	public static void init(Element<Group> sceneElt) {
+
 		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
 		GSTextField textField = new GSTextField(todoCreateHBox).bindTextProperty(TodoTableList::getName);
 		textField.setPrefWidth(170);
 
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoTableList::create).setPrefWidth(170);
+		GSButton todosCreateCol = new GSButton(todoCreateHBox, "Create Colomn", TodoTableList::createCol).setPrefWidth(170);
 
-		GSTableView tableView = new GSTableView(mainVBox);
-		tableView.setObservableList(TableView::itemsProperty, TodoTableList::getTodos);
+		GSTableView tableView = new GSTableView(mainVBox).setItemsObservableList(TodoTableList::getTodos);
+
 		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, converter).setText("Todo").setWidth(150);
+
+		GSTableColumn<Todo> columnForeach = new GSTableColumn<>(tableView, converter).activeBindingTextProperty();
+		columnForeach.addForEachMetaBinding(TodoTableList::getListCol);// .activeBindingTextProperty();
+
 		GSTableColumnAction<Todo> columnDelete = new GSTableColumnAction<>(tableView, converter, (Consumer<Todo>) Todo::remove);
 		columnDelete.setText("Delete").setWidth(150);
 	}
