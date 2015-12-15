@@ -3,7 +3,6 @@ package org.genericsystem.todoApp;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -61,7 +60,6 @@ public class TodoTableList {
 	public static class Todo {
 
 		private Property<String> stringProperty = new SimpleStringProperty();
-		private ObservableValue<String> removeButtonTextProperty = Bindings.concat("Remove : ", stringProperty);
 		private TodoTableList list;
 
 		public Todo(TodoTableList list) {
@@ -70,10 +68,6 @@ public class TodoTableList {
 
 		public ObservableValue<String> getObservable() {
 			return stringProperty;
-		}
-
-		public ObservableValue<String> getRemoveButtonTextProperty() {
-			return removeButtonTextProperty;
 		}
 
 		public void action() {
@@ -95,7 +89,7 @@ public class TodoTableList {
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoTableList::create).setPrefWidth(170);
 
 		GSTableView tableView = new GSTableView(mainVBox);
-		tableView.addObservableListBinding(TableView::itemsProperty, TodoTableList::getTodos);
+		tableView.setObservableList(TableView::itemsProperty, TodoTableList::getTodos);
 		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, converter).setText("Todo").setWidth(150);
 		GSTableColumnAction<Todo> columnDelete = new GSTableColumnAction<>(tableView, converter, (Consumer<Todo>) Todo::remove);
 		columnDelete.setText("Delete").setWidth(150);

@@ -119,7 +119,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addObservableListBinding(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
+	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
 		bindings.add(Binding.bindObservableList(getProperty, function));
 		return this;
 	}
