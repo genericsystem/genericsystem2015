@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -32,7 +33,8 @@ public class Binding<N, T> {
 			while (modelContext_ != null) {
 				try {
 					return method.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {}
+				} catch (ClassCastException ignore) {
+				}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
@@ -53,6 +55,13 @@ public class Binding<N, T> {
 	private static <SUPERMODEL, N, M, T> Binding<N, Function<SUPERMODEL, T>> bind(BiConsumer<SUPERMODEL, M> function, Binder<N, Function<SUPERMODEL, T>> binder) {
 		return new Binding<>(binder, (m) -> (sm -> {
 			function.accept(sm, (M) m);
+			return null;
+		}));
+	}
+
+	private static <SUPERMODEL, N, T> Binding<N, Function<T, SUPERMODEL>> pushBinding(BiConsumer<SUPERMODEL, T> function, Binder<N, Function<T, SUPERMODEL>> binder) {
+		return new Binding<N, Function<T, SUPERMODEL>>(binder, (sm) -> (m -> {
+			function.accept((SUPERMODEL) sm, m);
 			return null;
 		}));
 	}
@@ -95,6 +104,10 @@ public class Binding<N, T> {
 
 	public static <SUPERMODEL, N, M, T extends Event> Binding<N, Function<SUPERMODEL, T>> bindMetaAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<SUPERMODEL, M> biconsumer) {
 		return Binding.<SUPERMODEL, N, M, T> bind(biconsumer, Binder.metaActionBinder(propAction));
+	}
+
+	public static <SUPERMODEL, N, T> Binding<N, Function<T, SUPERMODEL>> pushModelActionOnSuperModel(Function<N, ObjectProperty<Consumer<T>>> propAction, BiConsumer<SUPERMODEL, T> biconsumer) {
+		return Binding.<SUPERMODEL, N, T> pushBinding(biconsumer, Binder.pushModelActionOnSuperModel(propAction));
 	}
 
 	public static <N, M, W> Binding<N, ObservableList<W>> bindObservableList(Function<N, Property<ObservableList<W>>> getProperty, Function<M, ObservableList<W>> function) {
