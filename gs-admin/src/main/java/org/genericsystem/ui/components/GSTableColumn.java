@@ -2,6 +2,7 @@ package org.genericsystem.ui.components;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -68,7 +69,7 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 			super(parent, TableColumn.class, TableView<T>::getColumns);
 			setText(columnTitle);
 			setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply(features.getValue())));
-			Callback<TableColumn<T, String>, TableCell<T, String>> callbackDelete = col -> new DeleteButtonCell<>(action);
+			Callback<TableColumn<T, String>, TableCell<T, String>> callbackDelete = col -> new DeleteButtonCell<>(u -> action.accept(superModel, u));
 			super.addBoot(TableColumn::cellFactoryProperty, callbackDelete);
 		}
 
@@ -95,9 +96,9 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 		public class DeleteButtonCell<U extends Event> extends TableCell<T, String> {
 			private final Button cellButton = new Button();
 
-			private final BiConsumer<SUPERMODEL, T> action;
+			private final Consumer<T> action;
 
-			public DeleteButtonCell(BiConsumer<SUPERMODEL, T> action) {
+			public DeleteButtonCell(Consumer<T> action) {
 				setEditable(true);
 				cellButton.setMaxWidth(200);
 				cellButton.setAlignment(Pos.BASELINE_CENTER);
@@ -123,7 +124,7 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 
 							Optional<ButtonType> result = alert.showAndWait();
 							if (result.get() == ButtonType.OK) {
-								action.accept(supermodel, getTableRow().getItem());
+								action.accept((T) getTableRow().getItem());
 							}
 						}
 					});
