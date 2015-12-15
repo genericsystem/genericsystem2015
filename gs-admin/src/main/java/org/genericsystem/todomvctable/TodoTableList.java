@@ -90,8 +90,8 @@ public class TodoTableList {
 
 		GSTableView tableView = new GSTableView(mainVBox);
 		tableView.setObservableList(TableView::itemsProperty, TodoTableList::getTodos);
-		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, converter).setText("Todo").setWidth(150);
+		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, converter).setText("Todo").setPrefWidth(150);
 		GSTableColumnAction<Todo> columnDelete = new GSTableColumnAction<>(tableView, converter, (Consumer<Todo>) Todo::remove);
-		columnDelete.setText("Delete").setWidth(150);
+		columnDelete.setText("Delete").setPrefWidth(150);
 	}
 }

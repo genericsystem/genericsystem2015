@@ -3,10 +3,8 @@ package org.genericsystem.ui.components;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -19,31 +17,31 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-
 import org.genericsystem.ui.Element;
 
 public class GSTableColumn<T> extends Element<TableColumn> {
 
-	protected static Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
-	private Callback<CellDataFeatures<T, String>, ObservableValue<String>> callback;
-
 	public GSTableColumn(Element parent, Function<T, String> function) {
-		super(parent, TableColumn.class, getColumns);
-		callback = features -> new SimpleObjectProperty<>(function.apply(features.getValue()));
-		super.addBoot(TableColumn::cellValueFactoryProperty, callback);
+		super(parent, TableColumn.class, TableView<T>::getColumns);
+		setCellValueFactory(features -> new SimpleObjectProperty<>(function.apply(features.getValue())));
 	}
 
-	public GSTableColumn setWidth(Number width) {
-		super.addBoot(TableColumn::prefWidthProperty, width);
+	public GSTableColumn<T> setCellValueFactory(Callback<CellDataFeatures<T, String>, ObservableValue<String>> valueFactory) {
+		super.addBoot(TableColumn::cellValueFactoryProperty, valueFactory);
 		return this;
 	}
 
-	public <T> GSTableColumn setObservableTextProperty(Function<T, ObservableValue<String>> function) {
+	public GSTableColumn<T> setPrefWidth(Number prefWidth) {
+		super.addBoot(TableColumn::prefWidthProperty, prefWidth);
+		return this;
+	}
+
+	public GSTableColumn<T> setObservableText(Function<T, ObservableValue<String>> function) {
 		addBinding(TableColumn::textProperty, function);
 		return this;
 	}
 
-	public <T> GSTableColumn setText(String value) {
+	public GSTableColumn<T> setText(String value) {
 		addBoot(TableColumn::textProperty, value);
 		return this;
 	}
@@ -73,8 +71,7 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 				setEditable(true);
 				cellButton.setMaxWidth(200);
 				cellButton.setAlignment(Pos.BASELINE_CENTER);
-				this.consumer = e -> {
-				};
+				this.consumer = e -> {};
 			}
 
 			@Override
