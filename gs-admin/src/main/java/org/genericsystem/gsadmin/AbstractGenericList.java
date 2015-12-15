@@ -1,4 +1,4 @@
-package org.genericsystem.genericApp;
+package org.genericsystem.gsadmin;
 
 import java.util.Objects;
 import java.util.function.Function;

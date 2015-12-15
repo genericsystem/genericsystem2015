@@ -1,4 +1,4 @@
-package org.genericsystem.javafx;
+package org.genericsystem.admin.javafx;
 
 import java.io.Serializable;
 import java.util.ArrayList;

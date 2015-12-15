@@ -1,4 +1,4 @@
-package org.genericsystem.javafx;
+package org.genericsystem.admin.javafx;
 
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;

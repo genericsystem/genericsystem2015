@@ -1,4 +1,4 @@
-package org.genericsystem.todoTableList;
+package org.genericsystem.todomvctable;
 
 import javafx.application.Application;
 import javafx.scene.Group;

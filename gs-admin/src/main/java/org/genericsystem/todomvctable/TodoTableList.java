@@ -1,4 +1,4 @@
-package org.genericsystem.todoTableList;
+package org.genericsystem.todomvctable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

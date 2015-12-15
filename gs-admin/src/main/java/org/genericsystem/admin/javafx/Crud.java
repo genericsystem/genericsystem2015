@@ -1,4 +1,4 @@
-package org.genericsystem.javafx;
+package org.genericsystem.admin.javafx;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

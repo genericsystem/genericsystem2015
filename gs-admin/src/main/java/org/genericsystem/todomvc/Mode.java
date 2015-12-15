@@ -1,4 +1,4 @@
-package org.genericsystem.todoList;
+package org.genericsystem.todomvc;
 
 import java.util.function.Predicate;
 

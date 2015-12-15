@@ -1,4 +1,4 @@
-package org.genericsystem.javafx;
+package org.genericsystem.admin.javafx;
 
 import java.util.function.BiConsumer;
 import javafx.beans.value.ChangeListener;
@@ -6,8 +6,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
+import org.genericsystem.admin.javafx.AbstractColumn.TargetComponentColumn;
 import org.genericsystem.common.Generic;
-import org.genericsystem.javafx.AbstractColumn.TargetComponentColumn;
 
 /**
  * @author Nicolas Feybesse
