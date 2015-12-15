@@ -224,7 +224,8 @@ public class CocCache extends HeavyCache {
 	// }
 	// }
 
-	private Observable getInvalidator(Generic generic) {
+	@Override
+	public Observable getInvalidator(Generic generic) {
 		return TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
 	}
 

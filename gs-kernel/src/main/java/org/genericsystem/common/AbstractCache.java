@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
+import javafx.beans.Observable;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultCache;
 
@@ -28,6 +30,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic vertex) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable getInvalidator(Generic generic) {
 		throw new UnsupportedOperationException();
 	}
 

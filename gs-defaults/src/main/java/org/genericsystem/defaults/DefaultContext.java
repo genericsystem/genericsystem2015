@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 
+import javafx.beans.Observable;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IContext;
 import org.genericsystem.api.core.Snapshot;
@@ -80,6 +82,10 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 
 	default CompletableFuture<Snapshot<T>> getAsyncComposites(T vertex) {
 		return getDependenciesPromise(vertex).thenApply(f -> f.filter(x -> x.getComponents().contains(vertex)));
+	}
+
+	default Observable getCompositesInvalidator(T vertex) {
+		return getInvalidator(vertex);
 	}
 
 	default void discardWithException(Throwable exception) throws RollbackException {
@@ -288,6 +294,8 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 	Snapshot<T> getDependencies(T vertex);
 
 	CompletableFuture<Snapshot<T>> getDependenciesPromise(T vertex);
+
+	Observable getInvalidator(T generic);
 
 	default T getMeta(int dim) {
 		T adjustedMeta = getRoot().adjustMeta(rootComponents(dim));

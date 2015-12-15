@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import javafx.beans.Observable;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -162,6 +164,11 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 
 	@Override
 	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic vertex) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Observable getInvalidator(Generic generic) {
 		throw new UnsupportedOperationException();
 	}
 }

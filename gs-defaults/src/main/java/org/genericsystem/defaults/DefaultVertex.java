@@ -290,6 +290,7 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return result;
 	}
 
+	@Override
 	default CompletableFuture<T> getAsyncNonAmbiguousResult(CompletableFuture<Stream<T>> streamPromise) {
 		CompletableFuture<T> cf = new CompletableFuture<T>();
 		streamPromise.thenAccept(stream -> {

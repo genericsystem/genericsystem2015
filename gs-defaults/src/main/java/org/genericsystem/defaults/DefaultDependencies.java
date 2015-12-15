@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javafx.beans.Observable;
+
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
 
@@ -398,6 +400,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncComposites() {
 		return getCurrentCache().getAsyncComposites((T) this);
+	}
+
+	@SuppressWarnings("unchecked")
+	default Observable getCompositesInvalidator() {
+		return getCurrentCache().getInvalidator((T) this);
 	}
 
 	static <T extends DefaultVertex<T>> Predicate<T> valueFilter(Serializable value) {
