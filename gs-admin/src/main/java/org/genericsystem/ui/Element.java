@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -48,42 +49,6 @@ public class Element<N> {
 			parent.<N> getChildren().add(this);
 	}
 
-	// @Deprecated
-	// @SafeVarargs
-	// public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Binding<N, ?>... binding) {
-	// this(parent, nodeClass, Pane::getChildren, binding);
-	// }
-
-	// @SafeVarargs
-	// @Deprecated
-	// public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
-	// this(parent, nodeClass, Pane::getChildren, metaBindings, binding);
-	// }
-
-	// @SafeVarargs
-	// @Deprecated
-	// public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, Binding<N, ?>... binding) {
-	// this(parent, nodeClass, getGraphicChildren, Collections.emptyList(), binding);
-	// }
-
-	// @SafeVarargs
-	// @Deprecated
-	// public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren, List<Binding<N, ?>> metaBindings, Binding<N, ?>... binding) {
-	// this.nodeClass = nodeClass;
-	// this.parent = parent;
-	// this.metaBindings.addAll(metaBindings);
-	// this.bindings.addAll(Arrays.asList(binding));
-	// this.getGraphicChildren = getGraphicChildren;
-	// if (parent != null)
-	// parent.<N> getChildren().add(this);
-	// }
-
-	// @SafeVarargs
-	// @Deprecated
-	// public final void addBoots(Boot<N>... boot) {
-	// this.boots.addAll(Arrays.asList(boot));
-	// }
-
 	public <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> getProperty, VALUE value) {
 		this.boots.add(Boot.setProperty(getProperty, value));
 		return this;
@@ -97,17 +62,6 @@ public class Element<N> {
 	public List<Boot<N>> getBootList() {
 		return boots;
 	}
-
-	// @Deprecated
-	// public void addMetaBindings(Binding<N, ?> metaBinding) {
-	// metaBindings.add(metaBinding);
-	// }
-
-	// @SafeVarargs
-	// @Deprecated
-	// public final void addBindings(Binding<N, ?>... binding) {
-	// bindings.addAll(Arrays.asList(binding));
-	// }
 
 	public <M, W> Element<N> addBidirectionalBinding(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
 		bindings.add(Binding.bindBiDirectionalProperty(getProperty, function));

@@ -60,7 +60,7 @@ public class Binding<N, T> {
 	}
 
 	private static <SUPERMODEL, N, T> Binding<N, Function<T, SUPERMODEL>> pushBinding(BiConsumer<SUPERMODEL, T> function, Binder<N, Function<T, SUPERMODEL>> binder) {
-		return new Binding<N, Function<T, SUPERMODEL>>(binder, (sm) -> (m -> {
+		return new Binding<>(binder, (sm) -> (m -> {
 			function.accept((SUPERMODEL) sm, m);
 			return null;
 		}));
