@@ -1,16 +1,15 @@
 package org.genericsystem.todomvctable;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-
+import javafx.scene.control.TableView;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -27,8 +26,20 @@ public class TodoTableList {
 	// private ObservableList<Column> columns = FXCollections.observableArrayList(new Column(), new DeleteColumn());
 	private ObservableValue<String> createButtonTextProperty = new SimpleStringProperty("Create Todo");
 	private ObservableValue<Number> height = new SimpleDoubleProperty(200);
-	private static Function<Todo, String> converter = todo -> todo.stringProperty.getValue();
-	private static Function<Todo, String> converter2 = todo -> todo.toString();
+
+	private ObservableList<AttributeColumn> columns = FXCollections.observableArrayList();
+
+	public ObservableList<AttributeColumn> getColumns() {
+		return columns;
+	}
+
+	public static class AttributeColumn {
+		Property<String> title = new SimpleObjectProperty<String>();
+
+		public ObservableValue<String> getTitle() {
+			return title;
+		}
+	}
 
 	public Property<String> getName() {
 		return name;
@@ -49,8 +60,10 @@ public class TodoTableList {
 	public void create() {
 		Todo todo = new Todo(this);
 		todo.stringProperty.setValue(name.getValue());
-
 		todos.add(todo);
+		AttributeColumn ac = new AttributeColumn();
+		columns.add(ac);
+		ac.title.setValue("Col : " + columns.indexOf(ac));
 	}
 
 	public void remove(Todo todo) {
@@ -64,10 +77,6 @@ public class TodoTableList {
 
 		public Todo(TodoTableList list) {
 			this.list = list;
-		}
-
-		public Todo(String s) {
-			stringProperty.setValue(s);
 		}
 
 		public ObservableValue<String> getObservable() {
@@ -84,37 +93,22 @@ public class TodoTableList {
 
 	}
 
-	ObservableList<GSTableColumn<Todo>> listCol = FXCollections.observableArrayList();
-
-	public ObservableList<GSTableColumn<Todo>> getListCol() {
-		return listCol;
-	}
-
-	int i = 0;
-
-	public void createCol() {
-		listCol.add(new GSTableColumn<Todo>(null, converter).setText("col_" + i));
-		i++;
-	}
-
 	public static void init(Element<Group> sceneElt) {
-
 		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
 		GSHBox todoCreateHBox = new GSHBox(mainVBox);
 		GSTextField textField = new GSTextField(todoCreateHBox).bindTextProperty(TodoTableList::getName);
 		textField.setPrefWidth(170);
 
 		GSButton todosCreateButton = new GSButton(todoCreateHBox, "Create Todo", TodoTableList::create).setPrefWidth(170);
-		GSButton todosCreateCol = new GSButton(todoCreateHBox, "Create Colomn", TodoTableList::createCol).setPrefWidth(170);
 
-		GSTableView tableView = new GSTableView(mainVBox).setItemsObservableList(TodoTableList::getTodos);
+		GSTableView tableView = new GSTableView(mainVBox);
+		tableView.setObservableList(TableView::itemsProperty, TodoTableList::getTodos);
+		Function<Todo, String> converter = todo -> todo.stringProperty.getValue();
+		GSTableColumn<Todo> column = new GSTableColumn<Todo>(tableView, "Todo", converter).setPrefWidth(150);
+		// Function<AttributeColumn, String> converter2 = attributeColumn -> attributeColumn.title.getValue();
+		GSTableColumn<AttributeColumn> columns = new GSTableColumn<>(tableView, AttributeColumn::getTitle, converter).setPrefWidth(150);
 
-		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, converter).setText("Todo").setWidth(150);
-
-		GSTableColumn<Todo> columnForeach = new GSTableColumn<>(tableView, converter).activeBindingTextProperty();
-		columnForeach.addForEachMetaBinding(TodoTableList::getListCol);// .activeBindingTextProperty();
-
-		GSTableColumnAction<Todo> columnDelete = new GSTableColumnAction<>(tableView, converter, (Consumer<Todo>) Todo::remove);
-		columnDelete.setText("Delete").setWidth(150);
+		columns.addForEachMetaBinding(TodoTableList::getColumns);
+		GSTableColumnAction<TodoTableList, Todo> columnDelete = new GSTableColumnAction<>(tableView, "Delete", converter, TodoTableList::remove).setPrefWidth(150);
 	}
 }

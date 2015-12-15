@@ -10,7 +10,6 @@ public class ViewContext<N> {
 	public <CHILDNODE> ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N model) {
 		this.parent = parent;
 		this.template = template;
-		System.out.println("ViewContext model :: " + template);
 		this.node = model != null && template.nodeClass.isAssignableFrom(model.getClass()) ? model : (N) template.createNode(parent != null ? parent.getNode() : null);
 		init(modelContext);
 	}

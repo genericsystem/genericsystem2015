@@ -1,14 +1,13 @@
 package org.genericsystem.ui.components;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -20,71 +19,90 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-
 import org.genericsystem.ui.Element;
 
 public class GSTableColumn<T> extends Element<TableColumn> {
 
-	protected static Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
-	private Callback<CellDataFeatures<T, String>, ObservableValue<String>> callback;
-	private Property<String> textTitle = new SimpleObjectProperty<String>();
-
-	public GSTableColumn(Element parent, Function<T, String> function) {
-		super(parent, TableColumn.class, getColumns);
-		callback = features -> new SimpleObjectProperty<>(function.apply(features.getValue()));
-		super.addBoot(TableColumn::cellValueFactoryProperty, callback);
-		// addBinding(TableColumn::textProperty, GSTableColumn<T>::getTextTitle);
+	public <M> GSTableColumn(Element parent, String columnTitle, Function<M, String> stringConverter) {
+		super(parent, TableColumn.class, TableView<M>::getColumns);
+		setText(columnTitle);
+		setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply((M) features.getValue())));
 	}
 
-	public GSTableColumn setWidth(Number width) {
-		super.addBoot(TableColumn::prefWidthProperty, width);
+	public <M> GSTableColumn(Element parent, Function<T, ObservableValue<String>> columnTitleObservable, Function<M, String> stringConverter) {
+		super(parent, TableColumn.class, TableView<M>::getColumns);
+		setObservableText(columnTitleObservable);
+		setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply((M) features.getValue())));
+	}
+
+	public GSTableColumn<T> setCellValueFactory(Callback<CellDataFeatures<T, String>, ObservableValue<String>> valueFactory) {
+		super.addBoot(TableColumn::cellValueFactoryProperty, valueFactory);
 		return this;
 	}
 
-	public <T> GSTableColumn activeBindingTextProperty() {
-		addBinding(TableColumn::textProperty, GSTableColumn<T>::getTextTitle);
+	public GSTableColumn<T> setPrefWidth(Number prefWidth) {
+		super.addBoot(TableColumn::prefWidthProperty, prefWidth);
 		return this;
 	}
 
-	public ObservableValue<String> getTextTitle() {
-		return textTitle;
-	}
-
-	public <T> GSTableColumn setText(String value) {
-		textTitle.setValue(value);
-		addBoot(TableColumn::textProperty, value);
+	public GSTableColumn<T> setObservableText(Function<T, ObservableValue<String>> columnTitleObservable) {
+		addBinding(TableColumn::textProperty, columnTitleObservable);
 		return this;
 	}
 
-	// ***************************************************************************************************
-	public static class GSTableColumnAction<T> extends GSTableColumn<T> {
-		private Callback<TableColumn<T, String>, TableCell<T, String>> callbackDelete;
+	public GSTableColumn<T> setText(String columnTitle) {
+		addBoot(TableColumn::textProperty, columnTitle);
+		return this;
+	}
 
-		public GSTableColumnAction(Element parent, Function<T, String> function, Consumer<T> consumer) {
-			super(parent, function);
-			callbackDelete = col -> new DeleteButtonCell<>(consumer);
+	// public static class ActionTableColumn<U extends Event> extends TableColumn {
+	// ObjectProperty<EventHandler<U>> onActionProperty = new SimpleObjectProperty<EventHandler<U>>();
+	//
+	// public ObjectProperty<EventHandler<U>> getOnActionProperty() {
+	// return onActionProperty;
+	// }
+	// }
+
+	public static class GSTableColumnAction<SUPERMODEL, T> extends Element<TableColumn> {
+
+		public GSTableColumnAction(Element parent, String columnTitle, Function<T, String> stringConverter, BiConsumer<SUPERMODEL, T> action) {
+			super(parent, TableColumn.class, TableView<T>::getColumns);
+			setText(columnTitle);
+			setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply(features.getValue())));
+			Callback<TableColumn<T, String>, TableCell<T, String>> callbackDelete = col -> new DeleteButtonCell<>(u -> action.accept(superModel, u));
 			super.addBoot(TableColumn::cellFactoryProperty, callbackDelete);
 		}
 
-		// ------------------------------------------------------------
-		public class DeleteButtonCell<T> extends TableCell<T, String> {
+		public GSTableColumnAction<SUPERMODEL, T> setCellValueFactory(Callback<CellDataFeatures<T, String>, ObservableValue<String>> valueFactory) {
+			super.addBoot(TableColumn::cellValueFactoryProperty, valueFactory);
+			return this;
+		}
+
+		public GSTableColumnAction<SUPERMODEL, T> setPrefWidth(Number prefWidth) {
+			super.addBoot(TableColumn::prefWidthProperty, prefWidth);
+			return this;
+		}
+
+		public GSTableColumnAction<SUPERMODEL, T> setObservableText(Function<T, ObservableValue<String>> columnTitleObservable) {
+			addBinding(TableColumn::textProperty, columnTitleObservable);
+			return this;
+		}
+
+		public GSTableColumnAction<SUPERMODEL, T> setText(String columnTitle) {
+			addBoot(TableColumn::textProperty, columnTitle);
+			return this;
+		}
+
+		public class DeleteButtonCell<U extends Event> extends TableCell<T, String> {
 			private final Button cellButton = new Button();
 
-			private final Consumer<T> consumer;
+			private final Consumer<T> action;
 
-			public DeleteButtonCell(Consumer<T> consumer) {
+			public DeleteButtonCell(Consumer<T> action) {
 				setEditable(true);
 				cellButton.setMaxWidth(200);
 				cellButton.setAlignment(Pos.BASELINE_CENTER);
-				this.consumer = consumer;
-			}
-
-			public DeleteButtonCell() {
-				setEditable(true);
-				cellButton.setMaxWidth(200);
-				cellButton.setAlignment(Pos.BASELINE_CENTER);
-				this.consumer = e -> {
-				};
+				this.action = action;
 			}
 
 			@Override
@@ -106,7 +124,7 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 
 							Optional<ButtonType> result = alert.showAndWait();
 							if (result.get() == ButtonType.OK) {
-								consumer.accept((T) getTableRow().getItem());
+								action.accept((T) getTableRow().getItem());
 							}
 						}
 					});
