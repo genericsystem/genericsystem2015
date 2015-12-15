@@ -2,7 +2,6 @@ package org.genericsystem.todomvctable;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -11,7 +10,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.control.TableView;
-
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -90,8 +88,7 @@ public class TodoTableList {
 
 		GSTableView tableView = new GSTableView(mainVBox);
 		tableView.setObservableList(TableView::itemsProperty, TodoTableList::getTodos);
-		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, converter).setText("Todo").setPrefWidth(150);
-		GSTableColumnAction<Todo> columnDelete = new GSTableColumnAction<>(tableView, converter, (Consumer<Todo>) Todo::remove);
-		columnDelete.setText("Delete").setPrefWidth(150);
+		GSTableColumn<Todo> column = new GSTableColumn<>(tableView, "Todo", converter).setPrefWidth(150);
+		GSTableColumnAction<Todo> columnDelete = new GSTableColumnAction<>(tableView, "Delete", converter, (Consumer<Todo>) Todo::remove).setPrefWidth(150);
 	}
 }
