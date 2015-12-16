@@ -61,6 +61,12 @@ public class GenericList {
 				new GSButton(hboxCommand, "Unmount").setAction(GenericList::unmount);
 			}
 
+			GSHBox attributesColumn = new GSHBox(vbox).select(GenericList::getSelection);
+			{
+				GSLabel lab = new GSLabel(attributesColumn, GenericWrapper::getObservable).forEach(GenericWrapper::getGenericListAttributes);
+
+			}
+
 			GSVBox selectionContext = new GSVBox(vbox).select(GenericList::getSelection);
 			{
 				new GSLabel(selectionContext, GenericWrapper::getObservable).forEach(GenericWrapper::getGenericList);
