@@ -42,7 +42,7 @@ public class GenericList {
 				new GSTextField(hboxCreate).bindTextProperty(GenericList::getName).setPrefWidth(250);
 				new GSButton(hboxCreate, "Create Todo", GenericList::create).setPrefWidth(100);
 			}
-			new GSHBox(vbox).forEach(GenericList::getGenerics, GenericWrapper::init);
+			new GSHBox(vbox).forEach(GenericList::getGenerics).include(GenericWrapper::init);
 
 			GSHBox hboxCommand = (GSHBox) new GSHBox(vbox).addBoot(HBox::spacingProperty, 10);
 			{
