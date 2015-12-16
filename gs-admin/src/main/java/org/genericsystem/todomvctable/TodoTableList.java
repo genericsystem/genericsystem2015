@@ -9,7 +9,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.control.TableView;
 
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
@@ -41,7 +40,7 @@ public class TodoTableList {
 			}
 
 			GSTableView tableView = new GSTableView(mainVBox);
-			tableView.setObservableList(TableView::itemsProperty, TodoTableList::getTodos);
+			tableView.setObservableListItems(TodoTableList::getTodos);
 			{
 				Function<Todo, String> converter = todo -> todo.stringProperty.getValue();
 				new GSTableColumn<Todo>(tableView, "Todo", converter).setPrefWidth(150);

@@ -4,7 +4,8 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.genericsystem.gsadmin.AbstractGenericList.GenericList;
+
+import org.genericsystem.ui.Element;
 
 public class App extends Application {
 
@@ -16,7 +17,9 @@ public class App extends Application {
 	public void start(Stage stage) throws Exception {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
-		new GenericList().init(((Group) scene.getRoot()));
+		Element<Group> elt = new Element<>(Group.class);
+		GenericList.init(elt);
+		elt.apply(new GenericList(), scene.getRoot());
 		stage.setScene(scene);
 		stage.show();
 	}
