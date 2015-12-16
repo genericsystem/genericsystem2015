@@ -17,4 +17,9 @@ public class GSHBox extends GSPane<GSHBox, HBox> {
 		super(parent, HBox.class, getGraphicChildren);
 	}
 
+	public GSHBox setSpacing(Number value) {
+		addBoot(HBox::spacingProperty, value);
+		return this;
+	}
+
 }

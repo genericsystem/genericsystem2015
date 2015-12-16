@@ -40,10 +40,10 @@ public class GenericWrapper {
 	public GenericWrapper(Generic generic) {
 		this.generic = generic;
 		stringProperty.set(Objects.toString(this.generic.getValue()));
+
 		AttributesObservableList.add(generic);
 		AttributesObservableList.addAll(FXCollections.observableArrayList(this.generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(this.generic)).toList()));
-
-		genericListAttributes = new Transformation<GenericWrapper, Generic>(AttributesObservableList, gen -> new GenericWrapper(gen));
+		genericListAttributes = new Transformation<GenericWrapper, Generic>(AttributesObservableList, attribute -> new GenericWrapper(attribute));
 
 		dependenciesObservableList = FXCollections.observableArrayList(this.generic.getInstances().toList());
 		genericList = new Transformation<GenericWrapper, Generic>(dependenciesObservableList, gen -> new GenericWrapper(gen));

@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.layout.HBox;
 
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
@@ -53,7 +52,7 @@ public class GenericList {
 			}
 			new GSHBox(vbox).forEach(GenericList::getGenerics).include(GenericWrapper::init);
 
-			GSHBox hboxCommand = (GSHBox) new GSHBox(vbox).addBoot(HBox::spacingProperty, 10);
+			GSHBox hboxCommand = new GSHBox(vbox).setSpacing(10);
 			{
 				new GSButton(hboxCommand, "Flush").setAction(GenericList::flush);
 				new GSButton(hboxCommand, "Clear").setAction(GenericList::clear);
@@ -61,7 +60,7 @@ public class GenericList {
 				new GSButton(hboxCommand, "Unmount").setAction(GenericList::unmount);
 			}
 
-			GSHBox attributesColumn = new GSHBox(vbox).select(GenericList::getSelection);
+			GSHBox attributesColumn = new GSHBox(vbox).select(GenericList::getSelection).setSpacing(100);
 			{
 				GSLabel lab = new GSLabel(attributesColumn, GenericWrapper::getObservable).forEach(GenericWrapper::getGenericListAttributes);
 
