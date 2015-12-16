@@ -175,7 +175,7 @@ public abstract class AbstractGenericList {
 			return columns;
 		}
 
-		public Node initTable(Group scene) {
+		public Node init(Group scene) {
 			Element<Group> sceneElt = new Element<>(Group.class);
 			Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
 
@@ -195,9 +195,9 @@ public abstract class AbstractGenericList {
 			todoTableView.addReversedBinding((Function) function, GenericList::getProperty);
 
 			Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems);
-			todoTableItems.addForEachMetaBinding(GenericList::getGenerics);
+			todoTableItems.forEach(GenericList::getGenerics);
 			Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns);
-			columnsTableItems.addForEachMetaBinding(GenericList::getColumns);
+			columnsTableItems.forEach(GenericList::getColumns);
 
 			Element<HBox> hboxElement = new Element<HBox>(mainVBox, HBox.class);
 			hboxElement.addBoot(HBox::spacingProperty, 5);
@@ -221,10 +221,10 @@ public abstract class AbstractGenericList {
 			// Callback<TableColumn<GenericWrapper, String>, TableCell<GenericWrapper, String>> callbackDelete = column -> new DeleteButtonCell<>(GenericWrapper::remove);
 
 			Element<TableView> todoTableView2 = new Element<>(mainVBox, TableView.class);
-			todoTableView2.addSelectorMetaBinding(GenericList::getProperty);
+			todoTableView2.select(GenericList::getProperty);
 
 			Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems);
-			todoTableItems2.addForEachMetaBinding(GenericWrapper::getGenericWrapperListInstances);
+			todoTableItems2.forEach(GenericWrapper::getGenericWrapperListInstances);
 			Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
 			Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 

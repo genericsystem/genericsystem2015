@@ -15,7 +15,6 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
 		Scene scene = new Scene(new Group());
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		stage.setTitle("Generic System Reactive Example");
