@@ -2,12 +2,10 @@ package org.genericsystem.ui.components;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
-
 import org.genericsystem.ui.Element;
 
 public class GSPane<Component extends GSPane<Component, N>, N extends Pane> extends GSRegion<Component, N> {
@@ -22,15 +20,15 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
-		super.forEach(function, injectedProperty, subModelInit);
+	public <M, T> Component forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
+		super.forEach(function, injectedProperty);
 		return (Component) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component forEach(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
-		super.forEach(function, subModelInit);
+	public <M, T> Component forEach(Function<M, ObservableList<T>> function) {
+		super.forEach(function);
 		return (Component) this;
 	}
 
@@ -38,6 +36,12 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 	@Override
 	public <M, T> Component select(Function<M, ObservableValue<T>> function) {
 		super.select(function);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Component include(Consumer<Element<N>> subModelInit) {
+		subModelInit.accept(this);
 		return (Component) this;
 	}
 

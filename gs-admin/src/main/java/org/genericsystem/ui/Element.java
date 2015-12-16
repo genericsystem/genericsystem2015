@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -100,26 +99,14 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function) {
+	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> function) {
 		metaBindings.add(Binding.forEach(function));
 		return this;
 	}
 
-	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
+	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
 		forEach(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
-		return this;
-	}
-
-	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
-		forEach(function, injectedProperty);
-		subModelInit.accept(this);
-		return this;
-	}
-
-	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
-		forEach(function);
-		subModelInit.accept(this);
 		return this;
 	}
 
@@ -131,18 +118,6 @@ public class Element<N> {
 	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
 		select(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
-		return this;
-	}
-
-	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Consumer<Element<N>> subModelInit) {
-		select(function);
-		subModelInit.accept(this);
-		return this;
-	}
-
-	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
-		select(function, injectedProperty);
-		subModelInit.accept(this);
 		return this;
 	}
 
