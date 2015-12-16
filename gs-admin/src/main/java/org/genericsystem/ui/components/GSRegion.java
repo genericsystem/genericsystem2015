@@ -2,6 +2,7 @@ package org.genericsystem.ui.components;
 
 import java.util.function.Function;
 
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Region;
@@ -35,6 +36,20 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 
 	public <M> Component setOptionalPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight, Number prefWidth) {
 		addBinding(N::prefHeightProperty, observablePrefHeight);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <M, T> Component forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
+		super.forEach(function, injectedProperty);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <M, T> Component forEach(Function<M, ObservableList<T>> function) {
+		super.forEach(function);
 		return (Component) this;
 	}
 }

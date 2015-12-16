@@ -2,6 +2,7 @@ package org.genericsystem.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -14,6 +15,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Group;
+
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -48,7 +50,7 @@ public class TodoList {
 				new GSButton(todosCreation, "Create Todo", TodoList::create).setPrefWidth(160);
 			}
 
-			new GSHBox(mainVBox).include(Todo::init).forEach(TodoList::getFiltered/* , Todo::getParentProperty */);
+			new GSHBox(mainVBox).include(Todo::init).forEach(TodoList::getFiltered);
 
 			GSHBox todosFiltrage = new GSHBox(mainVBox).setOptionalVisibility(TodoList::getHasTodo);
 			{
