@@ -37,11 +37,13 @@ public class Element<N> {
 		this(null, nodeClass, Group::getChildren);
 	}
 
-	public <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
+	// must be protected
+	protected <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
 		this(parent, nodeClass, Pane::getChildren);
 	}
 
-	public <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	// must be protected
+	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
 		this.getGraphicChildren = getGraphicChildren;

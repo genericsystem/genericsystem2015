@@ -16,7 +16,7 @@ public class App extends Application {
 	public void start(Stage stage) throws Exception {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
-		new GenericList().initTable(((Group) scene.getRoot()));
+		new GenericList().init(((Group) scene.getRoot()));
 		stage.setScene(scene);
 		stage.show();
 	}

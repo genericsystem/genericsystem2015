@@ -175,7 +175,7 @@ public abstract class AbstractGenericList {
 			return columns;
 		}
 
-		public Node initTable(Group scene) {
+		public Node init(Group scene) {
 			Element<Group> sceneElt = new Element<>(Group.class);
 			Element<VBox> mainVBox = new Element<>(sceneElt, VBox.class, Group::getChildren);
 
