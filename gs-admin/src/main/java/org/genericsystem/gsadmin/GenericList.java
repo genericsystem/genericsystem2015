@@ -6,6 +6,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
+import javafx.scene.layout.HBox;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -36,12 +37,20 @@ public class GenericList {
 
 		GSVBox vbox = new GSVBox(scene, Group::getChildren).setPrefHeight(600);
 		{
-			GSHBox hbox = new GSHBox(vbox);
+			GSHBox hboxCreate = new GSHBox(vbox);
 			{
-				new GSTextField(hbox).bindTextProperty(GenericList::getName).setPrefWidth(250);
-				new GSButton(hbox, "Create Todo", GenericList::create).setPrefWidth(100);
+				new GSTextField(hboxCreate).bindTextProperty(GenericList::getName).setPrefWidth(250);
+				new GSButton(hboxCreate, "Create Todo", GenericList::create).setPrefWidth(100);
 			}
-			new GSHBox(vbox).forEach(GenericList::getGenerics,/* Todo::getParentProperty, */GenericWrapper::init);
+			new GSHBox(vbox).forEach(GenericList::getGenerics, GenericWrapper::init);
+
+			GSHBox hboxCommand = (GSHBox) new GSHBox(vbox).addBoot(HBox::spacingProperty, 10);
+			{
+				new GSButton(hboxCommand, "Flush").setAction(GenericList::flush);
+				new GSButton(hboxCommand, "Clear").setAction(GenericList::clear);
+				new GSButton(hboxCommand, "Mount").setAction(GenericList::mount);
+				new GSButton(hboxCommand, "Unmount").setAction(GenericList::unmount);
+			}
 		}
 	}
 
