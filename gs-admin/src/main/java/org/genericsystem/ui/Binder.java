@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -29,7 +30,8 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 	}
 
@@ -56,11 +58,29 @@ public interface Binder<N, W> {
 		return new Binder<N, Function<SUPERMODEL, W>>() {
 			@Override
 			public void init(Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-				applyOnNode.apply(viewContext.getNode()).set(event -> applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null));
+				applyOnNode.apply(viewContext.getNode()).set(event -> {
+					applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null);
+				});
 			}
 
 			@Override
-			public void init(Function<SUPERMODEL, W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(Function<SUPERMODEL, W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
+		};
+	}
+
+	public static <N, SUPERMODEL, W> Binder<N, Function<W, SUPERMODEL>> pushModelActionOnSuperModel(Function<N, ObjectProperty<Consumer<W>>> applyOnNode) {
+		return new Binder<N, Function<W, SUPERMODEL>>() {
+			@Override
+			public void init(Supplier<Function<W, SUPERMODEL>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).set(w -> {
+					applyOnModel.get().apply(w);
+				});
+			}
+
+			@Override
+			public void init(Function<W, SUPERMODEL> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 	}
 
@@ -72,7 +92,8 @@ public interface Binder<N, W> {
 			}
 
 			@Override
-			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {}
+			public void init(W wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+			}
 		};
 
 	}
