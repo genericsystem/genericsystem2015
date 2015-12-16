@@ -29,6 +29,13 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public <M, T> Component forEach(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
+		super.forEach(function, subModelInit);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public <M, T> Component select(Function<M, ObservableValue<T>> function) {
 		super.select(function);
 		return (Component) this;

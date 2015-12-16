@@ -39,8 +39,7 @@ public class GSTableButtonColumn<SUPERMODEL, T> extends Element<ActionTableColum
 		super(parent, ActionTableColumn.class, TableView<T>::getColumns);
 		setText(columnTitle);
 		setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply(features.getValue())));
-		Callback<ActionTableColumn<T>, TableCell<T, String>> callbackDelete = col -> new DeleteButtonCell<>((Consumer<T>) model -> col.getOnActionProperty().getValue().accept(model));
-		super.addBoot(TableColumn::cellFactoryProperty, callbackDelete);
+		super.addBoot(TableColumn::cellFactoryProperty, (Callback<ActionTableColumn<T>, TableCell<T, String>>) col -> new DeleteButtonCell<T>(model -> col.getOnActionProperty().getValue().accept(model)));
 		pushModelActionOnSupermodel(action);
 
 	}

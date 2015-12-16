@@ -1,6 +1,7 @@
 package org.genericsystem.todomvc;
 
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -26,16 +27,16 @@ import org.genericsystem.ui.components.GSVBox;
 public class TodoList {
 
 	private Property<String> name = new SimpleStringProperty();
-	private Property<Mode> mode = new SimpleObjectProperty<>(Mode.ALL);
+	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
-	private ObservableNumberValue completedCount = Bindings.size(todos.filtered(Mode.COMPLETE.predicate()));
+	private ObservableNumberValue completedCount = Bindings.size(todos.filtered(COMPLETE));
 	private ObservableValue<String> clearButtonText = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue() + ")", completedCount);
 	private ObservableValue<Boolean> hasCompleted = Bindings.lessThan(0, completedCount);
 	private ObservableValue<Boolean> hasTodo = Bindings.lessThan(0, Bindings.size(todos));
-	private ObservableValue<Boolean> allMode = Bindings.equal((ObservableObjectValue<Mode>) mode, Mode.ALL);
-	private ObservableValue<Boolean> activeMode = Bindings.equal((ObservableObjectValue<Mode>) mode, Mode.ACTIVE);
-	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Mode>) mode, Mode.COMPLETE);
+	private ObservableValue<Boolean> allMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, ALL);
+	private ObservableValue<Boolean> activeMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, ACTIVE);
+	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, COMPLETE);
 	private Property<Todo> selection = new SimpleObjectProperty<>();
 
 	/*********************************************************************************************************************************/
@@ -49,7 +50,7 @@ public class TodoList {
 				new GSButton(todosCreation, "Create Todo", TodoList::create).setPrefWidth(160);
 			}
 
-			new GSHBox(mainVBox).forEach(TodoList::getFiltered, Todo::getParentProperty, Todo::init);
+			new GSHBox(mainVBox).forEach(TodoList::getFiltered,/* Todo::getParentProperty, */Todo::init);
 
 			GSHBox todosFiltrage = new GSHBox(mainVBox).setOptionalVisibility(TodoList::getHasTodo);
 			{
@@ -69,37 +70,33 @@ public class TodoList {
 	/*********************************************************************************************************************************/
 
 	public TodoList() {
-		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue().predicate(), mode));
+		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 	}
 
 	public void create() {
-		todos.add(new Todo());
-	}
-
-	public void remove(Todo todo) {
-		todos.remove(todo);
-	}
-
-	public void select(Todo todo) {
-		selection.setValue(todo);
+		todos.add(new Todo(getName().getValue()));
 	}
 
 	public void showAll() {
-		mode.setValue(Mode.ALL);
+		mode.setValue(ALL);
 	}
 
 	public void showActive() {
-		mode.setValue(Mode.ACTIVE);
+		mode.setValue(ACTIVE);
 	}
 
 	public void showCompleted() {
-		mode.setValue(Mode.COMPLETE);
+		mode.setValue(COMPLETE);
 	}
 
 	public void removeCompleted() {
-		for (Todo todo : new ArrayList<>(todos.filtered(Mode.COMPLETE.predicate())))
+		for (Todo todo : new ArrayList<>(todos.filtered(COMPLETE)))
 			todos.remove(todo);
 	}
+
+	static Predicate<Todo> ALL = todo -> true;
+	static Predicate<Todo> ACTIVE = todo -> !todo.getCompleted().getValue();
+	static Predicate<Todo> COMPLETE = todo -> todo.getCompleted().getValue();
 
 	/*********************************************************************************************************************************/
 
@@ -107,7 +104,7 @@ public class TodoList {
 		return name;
 	}
 
-	public Property<Mode> getMode() {
+	public Property<Predicate<Todo>> getMode() {
 		return mode;
 	}
 

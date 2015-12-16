@@ -45,7 +45,7 @@ public class TodoTableList {
 			{
 				Function<Todo, String> converter = todo -> todo.stringProperty.getValue();
 				new GSTableColumn<Todo>(tableView, "Todo", converter).setPrefWidth(150);
-				new GSTableColumn<>(tableView, TodoColumn::getTitle, converter).setPrefWidth(150).addForEachMetaBinding(TodoTableList::getColumns);
+				new GSTableColumn<>(tableView, TodoColumn::getTitle, converter).setPrefWidth(150).forEach(TodoTableList::getColumns);
 				new GSTableButtonColumn<>(tableView, "Delete", converter, TodoTableList::remove).setPrefWidth(150);
 			}
 		}

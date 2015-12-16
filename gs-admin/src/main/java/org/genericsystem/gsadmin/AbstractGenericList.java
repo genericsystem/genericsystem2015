@@ -195,9 +195,9 @@ public abstract class AbstractGenericList {
 			todoTableView.addReversedBinding((Function) function, GenericList::getProperty);
 
 			Element<GenericWrapper> todoTableItems = new Element<>(todoTableView, GenericWrapper.class, TableView<GenericWrapper>::getItems);
-			todoTableItems.addForEachMetaBinding(GenericList::getGenerics);
+			todoTableItems.forEach(GenericList::getGenerics);
 			Element<Column> columnsTableItems = new Element<>(todoTableView, Column.class, TableView<GenericWrapper>::getColumns);
-			columnsTableItems.addForEachMetaBinding(GenericList::getColumns);
+			columnsTableItems.forEach(GenericList::getColumns);
 
 			Element<HBox> hboxElement = new Element<HBox>(mainVBox, HBox.class);
 			hboxElement.addBoot(HBox::spacingProperty, 5);
@@ -224,7 +224,7 @@ public abstract class AbstractGenericList {
 			todoTableView2.select(GenericList::getProperty);
 
 			Element<GenericWrapper> todoTableItems2 = new Element<>(todoTableView2, GenericWrapper.class, TableView<GenericWrapper>::getItems);
-			todoTableItems2.addForEachMetaBinding(GenericWrapper::getGenericWrapperListInstances);
+			todoTableItems2.forEach(GenericWrapper::getGenericWrapperListInstances);
 			Function<TableView<GenericWrapper>, ObservableList<?>> getItems = TableView::getItems;
 			Function<TableView<?>, ObservableList<?>> getColumns = TableView::getColumns;
 

@@ -98,25 +98,25 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function) {
+	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function) {
 		metaBindings.add(Binding.forEach(function));
 		return this;
 	}
 
-	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
-		addForEachMetaBinding(function);
+	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
+		forEach(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
 		return this;
 	}
 
 	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
-		addForEachMetaBinding(function, injectedProperty);
+		forEach(function, injectedProperty);
 		subModelInit.accept(this);
 		return this;
 	}
 
-	public <M, T> Element<N> addForEachMetaBinding(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
-		addForEachMetaBinding(function);
+	public <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Consumer<Element<N>> subModelInit) {
+		forEach(function);
 		subModelInit.accept(this);
 		return this;
 	}
@@ -126,27 +126,27 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
+	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
 		select(function);
 		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
 		return this;
 	}
 
-	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Consumer<Element<N>> subModelInit) {
+	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Consumer<Element<N>> subModelInit) {
 		select(function);
 		subModelInit.accept(this);
 		return this;
 	}
 
-	public <M, T> Element<N> addSelectorMetaBinding(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
-		addSelectorMetaBinding(function, injectedProperty);
+	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty, Consumer<Element<N>> subModelInit) {
+		select(function, injectedProperty);
 		subModelInit.accept(this);
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <PARENTNODE> ObservableList<N> getGraphicChildren(PARENTNODE graphicParent) {
-		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(graphicParent);
+	public <PARENTNODE> ObservableList<N> uiChildren(PARENTNODE uiParent) {
+		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(uiParent);
 	}
 
 	public N apply(Object model, Object parentNode) {
@@ -191,13 +191,13 @@ public class Element<N> {
 		};
 	};
 
-	void incrementSize(List graphicChildren, Element child) {
-		Map<Element, Integer> internal = map.get(graphicChildren);
+	void incrementSize(List uiChildren, Element child) {
+		Map<Element, Integer> internal = map.get(uiChildren);
 		internal.put(child, internal.get(child) + 1);
 	}
 
-	void decrementSize(List graphicChildren, Element child) {
-		Map<Element, Integer> internal = map.get(graphicChildren);
+	void decrementSize(List uiChildren, Element child) {
+		Map<Element, Integer> internal = map.get(uiChildren);
 		int size = internal.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
@@ -206,10 +206,10 @@ public class Element<N> {
 			internal.put(child, size);
 	}
 
-	int computeIndex(List graphicChildren, Element childElement) {
+	int computeIndex(List uiChildren, Element childElement) {
 		int indexInChildren = 0;
 		for (Element child : getChildren()) {
-			indexInChildren += map.get(graphicChildren).get(child);
+			indexInChildren += map.get(uiChildren).get(child);
 			if (child == childElement)
 				break;
 		}
