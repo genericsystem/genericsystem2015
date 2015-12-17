@@ -16,7 +16,6 @@ public class AttributeWrapper {
 	public AttributeWrapper(Generic att, Generic generic) {
 		this.attribute = att;
 		stringProperty.set(attribute.getValue().toString());
-		// System.out.println(stringProperty.get());
 		holdersValue = new Transformation<HolderWrapper, Generic>(FXCollections.observableArrayList(generic.getHolders(attribute).toList()), holder -> new HolderWrapper(holder));
 	}
 

@@ -25,8 +25,10 @@ public class TypeWrapper {
 		this.generic = g;
 		this.stringProperty.setValue(generic.getValue().toString());
 		instanceWrapperList = new Transformation<InstanceWrapper, Generic>(FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> new InstanceWrapper(gen, this.generic));
+
 		ObservableList<Generic> atts = FXCollections.observableArrayList();
 		atts.add(generic);
+
 		atts.addAll(generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(generic)).toList());
 		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic));
 	}

@@ -111,6 +111,9 @@ public class GenericList {
 		attEngine.add(engine);
 		attEngine.addAll(engine.getAttributes().toList());
 		attributes = new Transformation<AttributeWrapper, Generic>(attEngine, att -> new AttributeWrapper(att, engine));
+		attributes.forEach(e -> {
+			engine.getHolders(e.attribute).forEach(e2 -> System.out.println(e2.getValue()));
+		});
 	}
 
 	/*********************************************************************************/
