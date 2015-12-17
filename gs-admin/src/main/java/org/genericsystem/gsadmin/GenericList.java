@@ -3,6 +3,7 @@ package org.genericsystem.gsadmin;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 
@@ -45,6 +46,12 @@ public class GenericList {
 				new GSTextField(hboxCreate).bindTextProperty(GenericList::getName).setPrefWidth(350);
 				new GSButton(hboxCreate, "Create Todo", GenericList::create).setPrefWidth(200);
 			}
+
+			GSHBox hbCol = new GSHBox(vbox).setSpacing(300);
+			{
+				new GSLabel(hbCol, AttributeWrapper::getObservable).setPrefWidth(100).forEach(GenericList::getAttributes);
+			}
+
 			new GSHBox(vbox).forEach(GenericList::getGenerics).include(TypeWrapper::init);
 
 			GSHBox hboxCommand = new GSHBox(vbox).setSpacing(10);
@@ -74,6 +81,8 @@ public class GenericList {
 	}
 
 	/***********************************************************************************/
+	Transformation<AttributeWrapper, Generic> attributes;
+
 	public GenericList() throws InterruptedException {
 		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8083, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
@@ -95,8 +104,13 @@ public class GenericList {
 		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
 		engine.getCurrentCache().flush();
 
-		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
+		dependenciesObservableList = FXCollections.observableArrayList(engine.getSubInstances().toList());
 		genericWrapperList = new Transformation<TypeWrapper, Generic>(dependenciesObservableList, generic -> new TypeWrapper(generic));
+
+		ObservableList<Generic> attEngine = FXCollections.observableArrayList();
+		attEngine.add(engine);
+		attEngine.addAll(engine.getAttributes().toList());
+		attributes = new Transformation<AttributeWrapper, Generic>(attEngine, att -> new AttributeWrapper(att, engine));
 	}
 
 	/*********************************************************************************/
@@ -126,6 +140,10 @@ public class GenericList {
 	}
 
 	/************************************************************************************/
+	public ObservableList<AttributeWrapper> getAttributes() {
+		return attributes;
+	}
+
 	public Property getName() {
 		return name;
 	}
