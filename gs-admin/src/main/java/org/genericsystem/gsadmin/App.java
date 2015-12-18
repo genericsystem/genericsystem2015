@@ -20,17 +20,14 @@ import org.genericsystem.ui.Element;
 
 public class App extends Application {
 
-	private CocServer server;
-	private CocClientEngine engine;
-
 	public static void main(String[] args) {
 		launch(args);
 	}
 
-	private void initGS() {
-		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8083, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+	private CocClientEngine initGS() {
+		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8083, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8083, Car.class, Power.class, CarColor.class, Color.class);
+		CocClientEngine engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8083, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.setInstance("myBmw");
@@ -47,18 +44,17 @@ public class App extends Application {
 		base2.setHolder(attribute, 333);
 		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
 		engine.getCurrentCache().flush();
+		return engine;
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		initGS();
-
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
 		GenericList.init(elt);
-		elt.apply(new GenericList(engine), scene.getRoot());
+		elt.apply(new GenericList(initGS()), scene.getRoot());
 		stage.setScene(scene);
 		stage.show();
 	}
