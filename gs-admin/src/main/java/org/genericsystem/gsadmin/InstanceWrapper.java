@@ -11,6 +11,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;
+import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
 
 public class InstanceWrapper {
@@ -34,17 +35,14 @@ public class InstanceWrapper {
 
 	public static void init(Element<HBox> parent) {
 
-		GSHBox hb = new GSHBox(parent).setSpacing(100);
+		GSVBox mainPanel = new GSVBox(parent).include(AttributeWrapper::init);
 		{
-			new GSLabel(hb, AttributeWrapper::getObservable).forEach(TypeWrapper::getAttributeTitle).setPrefWidth(80);
-		}
+			GSHBox rowPanel = new GSHBox(mainPanel).setPrefWidth(100).forEach(TypeWrapper::getInstanceWrapperList).setStyleClass("rowgs");
+			{
+				new GSLabel(rowPanel, InstanceWrapper::getObservable).setPrefWidth(100);
+				new GSVBox(rowPanel).forEach(InstanceWrapper::getAttributeObservableList).include(HolderWrapper::init).setStyleClass("rowgs");
+			}
 
-		// GSHBox hb = new GSHBox(parent).forEach(TypeWrapper::getInstanceWrapperList).setSpacing(100);
-		// {
-		// GSHBox hb2 = new GSHBox(hb).forEach(InstanceWrapper::getAttributeObservableList);
-		// {
-		// new GSLabel(hb2, AttributeWrapper::getObservable).setPrefWidth(80);
-		// }
-		// }
+		}
 	}
 }

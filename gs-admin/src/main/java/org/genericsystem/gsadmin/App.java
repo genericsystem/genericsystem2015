@@ -17,6 +17,8 @@ public class App extends Application {
 	public void start(Stage stage) throws Exception {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
+		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
+		System.out.println(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
 		GenericList.init(elt);
 		elt.apply(new GenericList(), scene.getRoot());
