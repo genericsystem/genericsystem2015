@@ -34,6 +34,7 @@ public class AttributeWrapper {
 	public static void init(Element<VBox> parent) {
 		GSHBox titleColumnPanel = new GSHBox(parent).setStyleClass("header");
 		{
+			new GSLabel(titleColumnPanel, TypeWrapper::getObservableText).setPrefWidth(100);
 			new GSLabel(titleColumnPanel, AttributeWrapper::getObservable).setPrefWidth(100).forEach(TypeWrapper::getAttributeTitle);
 		}
 	}

@@ -25,10 +25,7 @@ public class TypeWrapper {
 		this.generic = g;
 		this.stringProperty.setValue(generic.getValue().toString());
 		instanceWrapperList = new Transformation<InstanceWrapper, Generic>(FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> new InstanceWrapper(gen, this.generic));
-
 		ObservableList<Generic> atts = FXCollections.observableArrayList();
-		atts.add(generic);
-
 		atts.addAll(generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(generic)).toList());
 		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic));
 	}
@@ -41,7 +38,7 @@ public class TypeWrapper {
 		return attributeTitle;
 	}
 
-	public ObservableValue<String> getObservable() {
+	public ObservableValue<String> getObservableText() {
 		return stringProperty;
 	}
 
@@ -54,7 +51,7 @@ public class TypeWrapper {
 	}
 
 	public static void init(Element<HBox> parent) {
-		new GSLabel(parent, TypeWrapper::getObservable).setPrefWidth(100);
+		new GSLabel(parent, TypeWrapper::getObservableText).setPrefWidth(100);
 		new GSButton(parent, "remove").setAction(TypeWrapper::remove).setPrefWidth(100);
 		new GSButton(parent, "select").setMetaAction((gl, gw) -> ((GenericList) gl).getSelection().setValue((TypeWrapper) gw)).setPrefWidth(90);
 	}
