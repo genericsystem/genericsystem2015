@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
+import javafx.scene.layout.HBox;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -33,23 +34,23 @@ public class GenericList {
 				new GSTextField(creationPanel).bindTextProperty(GenericList::getName).setPrefWidth(350);
 				new GSButton(creationPanel, "Create Todo", GenericList::create).setPrefWidth(200);
 			}
-
 			new GSHBox(mainPanel).forEach(GenericList::getGenerics).include(TypeWrapper::init);
-
-			GSHBox commandPanel = new GSHBox(mainPanel).setSpacing(10);
-			{
-				new GSButton(commandPanel, "Flush").setAction(GenericList::flush);
-				new GSButton(commandPanel, "Clear").setAction(GenericList::clear);
-				new GSButton(commandPanel, "Mount").setAction(GenericList::mount);
-				new GSButton(commandPanel, "Unmount").setAction(GenericList::unmount);
-			}
-
+			new GSHBox(mainPanel).setSpacing(10).include(CommandPanel::init);
 			new GSHBox(mainPanel).select(GenericList::getSelection).include(InstanceWrapper::init);
 		}
 	}
 
+	public static class CommandPanel {
+		public static void init(Element<HBox> parent) {
+			new GSButton(parent, "Flush").setAction(GenericList::flush);
+			new GSButton(parent, "Clear").setAction(GenericList::clear);
+			new GSButton(parent, "Mount").setAction(GenericList::mount);
+			new GSButton(parent, "Unmount").setAction(GenericList::unmount);
+		}
+	}
+
 	/***********************************************************************************/
-	public GenericList(CocClientEngine engine) throws InterruptedException {
+	public GenericList(CocClientEngine engine) {
 		this.engine = engine;
 		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
 		genericWrapperList = new Transformation<TypeWrapper, Generic>(dependenciesObservableList, generic -> new TypeWrapper(generic));
