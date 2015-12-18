@@ -18,11 +18,11 @@ public class HolderWrapper {
 		stringProperty.set(hold.getValue().toString());
 	}
 
-	public ObservableValue<String> getObservable() {
+	public ObservableValue<String> getObservableText() {
 		return stringProperty;
 	}
 
 	public static void init(Element<VBox> parent) {
-		new GSLabel(parent, HolderWrapper::getObservable).setPrefWidth(100).forEach(AttributeWrapper::getHoldersObservableList);
+		new GSLabel(parent, HolderWrapper::getObservableText).setPrefWidth(100).forEach(AttributeWrapper::getHoldersObservableList);
 	}
 }
