@@ -34,15 +34,13 @@ public class InstanceWrapper {
 	}
 
 	public static void init(Element<HBox> parent) {
-
 		GSVBox mainPanel = new GSVBox(parent).include(AttributeWrapper::init);
 		{
-			GSHBox rowPanel = new GSHBox(mainPanel).setPrefWidth(100).forEach(TypeWrapper::getInstanceWrapperList);
+			GSHBox rowPanel = new GSHBox(mainPanel).forEach(TypeWrapper::getInstanceWrapperList);
 			{
 				new GSLabel(rowPanel, InstanceWrapper::getObservable).setPrefWidth(100).setStyleClass("columnInstance");
-				new GSVBox(rowPanel).forEach(InstanceWrapper::getAttributeObservableList).setPrefWidth(100).include(HolderWrapper::init).setStyleClass("cell");
+				new GSVBox(rowPanel).forEach(InstanceWrapper::getAttributeObservableList).setPrefWidth(100).setStyleClass("cell").include(HolderWrapper::init);
 			}
-
 		}
 	}
 }
