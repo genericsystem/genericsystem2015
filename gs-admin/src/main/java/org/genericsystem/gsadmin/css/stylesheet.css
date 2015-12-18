@@ -1,0 +1,12 @@
+
+.cell {
+	-fx-background-color: #32f988;
+}
+
+.header {
+	-fx-background-color: #ff0000;
+}
+
+.columnInstance{
+	-fx-background-color: #ff00b2;
+}

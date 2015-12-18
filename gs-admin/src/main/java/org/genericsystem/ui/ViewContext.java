@@ -26,7 +26,7 @@ public class ViewContext<N> {
 				new ViewContext<>(this, modelContext, childElement, null);
 		}
 		if (parent != null) {
-			List<N> graphicChildren = template.getGraphicChildren(parent.getNode());
+			List<N> graphicChildren = template.uiChildren(parent.getNode());
 			int indexInChildren = template.getParent().computeIndex(graphicChildren, template);
 			template.getParent().incrementSize(graphicChildren, template);
 			graphicChildren.add(indexInChildren, node);
@@ -38,9 +38,9 @@ public class ViewContext<N> {
 	}
 
 	void destroyChild() {
-		List<N> graphicChildren = template.getGraphicChildren(parent.getNode());
-		template.getParent().decrementSize(graphicChildren, template);
-		graphicChildren.remove(getNode());
+		List<N> uiChildren = template.uiChildren(parent.getNode());
+		template.getParent().decrementSize(uiChildren, template);
+		uiChildren.remove(getNode());
 	}
 
 }

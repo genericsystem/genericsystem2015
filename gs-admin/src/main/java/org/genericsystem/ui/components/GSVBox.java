@@ -16,4 +16,9 @@ public class GSVBox extends GSPane<GSVBox, VBox> {
 	public <PARENTNODE> GSVBox(Element<?> parent, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		super(parent, VBox.class, getGraphicChildren);
 	}
+
+	public GSVBox setSpacing(Number value) {
+		addBoot(VBox::spacingProperty, value);
+		return this;
+	}
 }
