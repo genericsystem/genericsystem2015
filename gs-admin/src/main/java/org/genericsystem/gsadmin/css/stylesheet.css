@@ -1,12 +1,12 @@
-.completed  .text {
-	-fx-strikethrough: true;
+
+.cell {
+	-fx-background-color: #32f988;
 }
 
-
-.overrun  .text {
-	-fx-font-weight: bold;
+.header {
+	-fx-background-color: #ff0000;
 }
 
-.rowgs {
-	fx-background-color: red;
+.columnInstance{
+	-fx-background-color: #ff00b2;
 }
