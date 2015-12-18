@@ -1,6 +1,5 @@
 package org.genericsystem.gsadmin;
 
-import javafx.collections.FXCollections;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.common.Generic;
@@ -12,7 +11,7 @@ import org.genericsystem.ui.components.GSVBox;
 public class InstanceWrapper extends AbstractGenericWrapper {
 
 	public InstanceWrapper(Generic instance, Generic type) {
-		super(instance, gen -> FXCollections.observableArrayList(type.getAttributes().filter(attribute -> attribute.isCompositeForInstances(type)).toList()), att -> new AttributeWrapper(att, instance));
+		super(instance, gen -> type.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(type)), att -> new AttributeWrapper(att, instance));
 	}
 
 	public static void init(Element<HBox> parent) {

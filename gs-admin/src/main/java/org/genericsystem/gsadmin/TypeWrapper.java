@@ -2,7 +2,6 @@ package org.genericsystem.gsadmin;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.HBox;
 
@@ -18,9 +17,9 @@ public class TypeWrapper extends AbstractGenericWrapper {
 	private Transformation<AttributeWrapper, Generic> attributeTitle;
 
 	public TypeWrapper(Generic generic) {
-		super(generic, g -> FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> new InstanceWrapper(gen, generic));
+		super(generic, g -> generic.getObservableSubInstances(), gen -> new InstanceWrapper(gen, generic));
 
-		ObservableList<Generic> atts = FXCollections.observableArrayList(generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(generic)).toList());
+		ObservableList<Generic> atts = generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic));
 		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic));
 	}
 

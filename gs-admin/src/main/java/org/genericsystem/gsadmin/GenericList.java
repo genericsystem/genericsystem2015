@@ -52,7 +52,8 @@ public class GenericList {
 	/***********************************************************************************/
 	public GenericList(CocClientEngine engine) {
 		this.engine = engine;
-		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
+
+		dependenciesObservableList = engine.getObservableInstances();
 		genericWrapperList = new Transformation<TypeWrapper, Generic>(dependenciesObservableList, generic -> new TypeWrapper(generic));
 	}
 

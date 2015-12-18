@@ -1,6 +1,5 @@
 package org.genericsystem.gsadmin;
 
-import javafx.collections.FXCollections;
 import javafx.scene.layout.VBox;
 
 import org.genericsystem.common.Generic;
@@ -10,7 +9,7 @@ import org.genericsystem.ui.components.GSLabel;
 
 public class AttributeWrapper extends AbstractGenericWrapper {
 	public AttributeWrapper(Generic attribute, Generic generic) {
-		super(attribute, gene -> FXCollections.observableArrayList(generic.getHolders(attribute).toList()), holder -> new HolderWrapper(holder));
+		super(attribute, gene -> generic.getObservableHolders(attribute), holder -> new HolderWrapper(holder));
 	}
 
 	public static void init(Element<VBox> parent) {
