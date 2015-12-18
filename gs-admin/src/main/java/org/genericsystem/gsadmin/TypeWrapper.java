@@ -1,8 +1,6 @@
 package org.genericsystem.gsadmin;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,32 +12,20 @@ import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.utils.Transformation;
 
-public class TypeWrapper {
-	private Generic generic;
-	private StringProperty stringProperty = new SimpleStringProperty();
-	private ObservableValue<String> removeButtonTextProperty = Bindings.concat("Remove : ", stringProperty);
-	private Transformation<InstanceWrapper, Generic> instanceWrapperList;
+public class TypeWrapper extends AbstractGenericWrapper {
+
+	private ObservableValue<String> removeButtonTextProperty = Bindings.concat("Remove : ", getObservableText());
 	private Transformation<AttributeWrapper, Generic> attributeTitle;
 
-	public TypeWrapper(Generic g) {
-		this.generic = g;
-		this.stringProperty.setValue(generic.getValue().toString());
-		instanceWrapperList = new Transformation<InstanceWrapper, Generic>(FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> new InstanceWrapper(gen, this.generic));
-		ObservableList<Generic> atts = FXCollections.observableArrayList();
-		atts.addAll(generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(generic)).toList());
-		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic));
-	}
+	public TypeWrapper(Generic generic) {
+		super(generic, g -> FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> new InstanceWrapper(gen, generic));
 
-	public ObservableList<InstanceWrapper> getInstanceWrapperList() {
-		return instanceWrapperList;
+		ObservableList<Generic> atts = FXCollections.observableArrayList(generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(generic)).toList());
+		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic));
 	}
 
 	public ObservableList<AttributeWrapper> getAttributeTitle() {
 		return attributeTitle;
-	}
-
-	public ObservableValue<String> getObservableText() {
-		return stringProperty;
 	}
 
 	public ObservableValue<String> getRemoveButtonTextProperty() {
