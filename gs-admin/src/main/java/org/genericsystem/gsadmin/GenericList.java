@@ -3,21 +3,12 @@ package org.genericsystem.gsadmin;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
+import javafx.scene.layout.HBox;
 
-import org.genericsystem.admin.model.Car;
-import org.genericsystem.admin.model.CarColor;
-import org.genericsystem.admin.model.Color;
-import org.genericsystem.admin.model.Color.Red;
-import org.genericsystem.admin.model.Color.Yellow;
-import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.distributed.cacheonclient.CocServer;
-import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -28,92 +19,51 @@ import org.genericsystem.ui.utils.Transformation;
 
 public class GenericList {
 
-	private final String path = System.getenv("HOME") + "/test/ObservableListChain";
-	private CocServer server;
 	private CocClientEngine engine;
 	private Transformation<TypeWrapper, Generic> genericWrapperList;
 	private ObservableList<Generic> dependenciesObservableList;
 	private Property<String> name = new SimpleStringProperty();
 	private Property<TypeWrapper> selection = new SimpleObjectProperty<>();
+	private Property<TypeWrapper> engineProp = new SimpleObjectProperty<TypeWrapper>();
+	private TypeWrapper engineWrapper;
 
 	/********************************************************************************/
 	public static void init(Element<Group> scene) {
 
-		GSVBox vbox = new GSVBox(scene, Group::getChildren).setPrefHeight(600);
+		GSVBox mainPanel = new GSVBox(scene, Group::getChildren).setPrefHeight(600);
 		{
-			GSHBox hboxCreate = new GSHBox(vbox);
+			GSHBox creationPanel = new GSHBox(mainPanel);
 			{
-				new GSTextField(hboxCreate).bindTextProperty(GenericList::getName).setPrefWidth(350);
-				new GSButton(hboxCreate, "Create Todo", GenericList::create).setPrefWidth(200);
+				new GSTextField(creationPanel).bindTextProperty(GenericList::getName).setPrefWidth(350);
+				new GSButton(creationPanel, "Create Todo", GenericList::create).setPrefWidth(200);
 			}
 
-			GSHBox hbCol = new GSHBox(vbox).setSpacing(300);
+			GSHBox hbox = new GSHBox(mainPanel).setStyleClass("header").select(GenericList::getEngineProp);
 			{
-				new GSLabel(hbCol, AttributeWrapper::getObservable).setPrefWidth(100).forEach(GenericList::getAttributes);
+				new GSLabel(hbox, TypeWrapper::getObservableText).setPrefWidth(300);
+				new GSLabel(hbox, AttributeWrapper::getObservableText).setPrefWidth(200).forEach(TypeWrapper::getAttributeTitle);
 			}
+			GSHBox hb = new GSHBox(mainPanel).forEach(GenericList::getGenerics).include(TypeWrapper::init);
+			new GSHBox(mainPanel).select(GenericList::getSelection).include(InstanceWrapper::init);
+			new GSHBox(mainPanel).setSpacing(10).include(CommandPanel::init);
+		}
+	}
 
-			new GSHBox(vbox).forEach(GenericList::getGenerics).include(TypeWrapper::init);
-
-			GSHBox hboxCommand = new GSHBox(vbox).setSpacing(10);
-			{
-				new GSButton(hboxCommand, "Flush").setAction(GenericList::flush);
-				new GSButton(hboxCommand, "Clear").setAction(GenericList::clear);
-				new GSButton(hboxCommand, "Mount").setAction(GenericList::mount);
-				new GSButton(hboxCommand, "Unmount").setAction(GenericList::unmount);
-			}
-
-			GSHBox selectionContext = new GSHBox(vbox).select(GenericList::getSelection).include(InstanceWrapper::init);
-
-			GSVBox selectionContext2 = new GSVBox(vbox).select(GenericList::getSelection);
-
-			GSHBox box = new GSHBox(selectionContext2).forEach(TypeWrapper::getInstanceWrapperList).setSpacing(100);
-			{
-				new GSLabel(box, InstanceWrapper::getObservable).setPrefWidth(80);
-				GSVBox vb = new GSVBox(box).setSpacing(0).forEach(InstanceWrapper::getAttributeObservableList).setPrefWidth(80);
-				{
-					GSVBox vbHolder = new GSVBox(vb).setSpacing(0).forEach(AttributeWrapper::getHoldersObservableList);
-					{
-						new GSLabel(vbHolder, HolderWrapper::getObservable);
-					}
-				}
-			}
+	public static class CommandPanel {
+		public static void init(Element<HBox> parent) {
+			new GSButton(parent, "Flush").setAction(GenericList::flush);
+			new GSButton(parent, "Clear").setAction(GenericList::clear);
+			new GSButton(parent, "Mount").setAction(GenericList::mount);
+			new GSButton(parent, "Unmount").setAction(GenericList::unmount);
 		}
 	}
 
 	/***********************************************************************************/
-	Transformation<AttributeWrapper, Generic> attributes;
 
-	public GenericList() throws InterruptedException {
-		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8083, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
-		server.start();
-		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8083, Car.class, Power.class, CarColor.class, Color.class);
-
-		Generic type = engine.find(Car.class);
-		Generic base = type.setInstance("myBmw");
-		assert base.isAlive();
-		type.setInstance("myAudi");
-		type.setInstance("myMercedes");
-
-		Generic attribute = engine.find(Power.class);
-		Generic relation = engine.find(CarColor.class);
-		base.setHolder(attribute, 333);
-		base.setLink(relation, "myBmwRed", engine.find(Red.class));
-		base.setLink(relation, "myBmwYellow", engine.find(Yellow.class));
-		Generic base2 = type.setInstance("myMercedes");
-		base2.setHolder(attribute, 333);
-		base2.setLink(relation, "myMercedesYellow", engine.find(Yellow.class));
-		engine.getCurrentCache().flush();
-
-		dependenciesObservableList = FXCollections.observableArrayList(engine.getSubInstances().toList());
-		genericWrapperList = new Transformation<TypeWrapper, Generic>(dependenciesObservableList, generic -> new TypeWrapper(generic));
-
-		ObservableList<Generic> attEngine = FXCollections.observableArrayList();
-		attEngine.add(engine);
-		attEngine.addAll(engine.getAttributes().toList());
-		attributes = new Transformation<AttributeWrapper, Generic>(attEngine, att -> new AttributeWrapper(att, engine));
-		attributes.forEach(e -> {
-			engine.getHolders(e.attribute).forEach(e2 -> System.out.println(e2.getValue()));
-		});
+	public GenericList(CocClientEngine engine) {
+		this.engine = engine;
+		engineWrapper = new TypeWrapper(engine, true);
+		engineProp.setValue(engineWrapper); // pour injecter
 	}
 
 	/*********************************************************************************/
@@ -143,16 +93,17 @@ public class GenericList {
 	}
 
 	/************************************************************************************/
-	public ObservableList<AttributeWrapper> getAttributes() {
-		return attributes;
+
+	public Property getEngineProp() {
+		return engineProp;
 	}
 
 	public Property getName() {
 		return name;
 	}
 
-	public ObservableList<TypeWrapper> getGenerics() {
-		return genericWrapperList;
+	public ObservableList<AbstractGenericWrapper> getGenerics() {
+		return engineWrapper.getObservableListWrapper();
 	}
 
 	public Property<TypeWrapper> getSelection() {
