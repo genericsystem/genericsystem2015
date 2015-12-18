@@ -4,8 +4,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.layout.VBox;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.ui.Element;
+import org.genericsystem.ui.components.GSHBox;
+import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.utils.Transformation;
 
 public class AttributeWrapper {
@@ -25,5 +29,12 @@ public class AttributeWrapper {
 
 	public ObservableList<HolderWrapper> getHoldersObservableList() {
 		return holdersValue;
+	}
+
+	public static void init(Element<VBox> parent) {
+		GSHBox titleColumnPanel = new GSHBox(parent).setStyleClass("header");
+		{
+			new GSLabel(titleColumnPanel, AttributeWrapper::getObservable).setPrefWidth(100).forEach(TypeWrapper::getAttributeTitle);
+		}
 	}
 }

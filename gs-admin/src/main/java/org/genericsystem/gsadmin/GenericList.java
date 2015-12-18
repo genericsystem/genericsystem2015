@@ -21,7 +21,6 @@ import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
-import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
@@ -39,44 +38,25 @@ public class GenericList {
 	/********************************************************************************/
 	public static void init(Element<Group> scene) {
 
-		GSVBox vbox = new GSVBox(scene, Group::getChildren).setPrefHeight(600);
+		GSVBox mainPanel = new GSVBox(scene, Group::getChildren).setPrefHeight(600);
 		{
-			GSHBox hboxCreate = new GSHBox(vbox);
+			GSHBox creationPanel = new GSHBox(mainPanel);
 			{
-				new GSTextField(hboxCreate).bindTextProperty(GenericList::getName).setPrefWidth(350);
-				new GSButton(hboxCreate, "Create Todo", GenericList::create).setPrefWidth(200);
+				new GSTextField(creationPanel).bindTextProperty(GenericList::getName).setPrefWidth(350);
+				new GSButton(creationPanel, "Create Todo", GenericList::create).setPrefWidth(200);
 			}
 
-			GSHBox hbCol = new GSHBox(vbox).setSpacing(300);
+			new GSHBox(mainPanel).forEach(GenericList::getGenerics).include(TypeWrapper::init);
+
+			GSHBox commandPanel = new GSHBox(mainPanel).setSpacing(10);
 			{
-				new GSLabel(hbCol, AttributeWrapper::getObservable).setPrefWidth(100).forEach(GenericList::getAttributes);
+				new GSButton(commandPanel, "Flush").setAction(GenericList::flush);
+				new GSButton(commandPanel, "Clear").setAction(GenericList::clear);
+				new GSButton(commandPanel, "Mount").setAction(GenericList::mount);
+				new GSButton(commandPanel, "Unmount").setAction(GenericList::unmount);
 			}
 
-			new GSHBox(vbox).forEach(GenericList::getGenerics).include(TypeWrapper::init);
-
-			GSHBox hboxCommand = new GSHBox(vbox).setSpacing(10);
-			{
-				new GSButton(hboxCommand, "Flush").setAction(GenericList::flush);
-				new GSButton(hboxCommand, "Clear").setAction(GenericList::clear);
-				new GSButton(hboxCommand, "Mount").setAction(GenericList::mount);
-				new GSButton(hboxCommand, "Unmount").setAction(GenericList::unmount);
-			}
-
-			GSHBox selectionContext = new GSHBox(vbox).select(GenericList::getSelection).include(InstanceWrapper::init);
-
-			GSVBox selectionContext2 = new GSVBox(vbox).select(GenericList::getSelection);
-
-			GSHBox box = new GSHBox(selectionContext2).forEach(TypeWrapper::getInstanceWrapperList).setSpacing(100);
-			{
-				new GSLabel(box, InstanceWrapper::getObservable).setPrefWidth(80);
-				GSVBox vb = new GSVBox(box).setSpacing(0).forEach(InstanceWrapper::getAttributeObservableList).setPrefWidth(80);
-				{
-					GSVBox vbHolder = new GSVBox(vb).setSpacing(0).forEach(AttributeWrapper::getHoldersObservableList);
-					{
-						new GSLabel(vbHolder, HolderWrapper::getObservable);
-					}
-				}
-			}
+			new GSHBox(mainPanel).select(GenericList::getSelection).include(InstanceWrapper::init);
 		}
 	}
 
@@ -111,8 +91,10 @@ public class GenericList {
 		attEngine.add(engine);
 		attEngine.addAll(engine.getAttributes().toList());
 		attributes = new Transformation<AttributeWrapper, Generic>(attEngine, att -> new AttributeWrapper(att, engine));
+		System.out.println(attributes.size());
+
 		attributes.forEach(e -> {
-			engine.getHolders(e.attribute).forEach(e2 -> System.out.println(e2.getValue()));
+			e.attribute.getRelations(1).forEach(e2 -> System.out.println(e2.getValue()));
 		});
 	}
 
