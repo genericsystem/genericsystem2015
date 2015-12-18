@@ -102,10 +102,29 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 	// return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
 	// }
 
+	// @Override
+	// public Observable getInvalidator(Generic generic) {
+	// ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
+	// getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
+	// try {
+	// Thread.sleep(200);
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// objectProperty.set(snapshot);
+	// });
+	// return objectProperty;
+	// }
+
 	@Override
 	public Observable getInvalidator(Generic generic) {
 		GSObservable observable = new GSObservable();
 		getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
+			try {
+				Thread.sleep(200);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			observable.fireValueChangedEvent();
 		});
 		return observable;

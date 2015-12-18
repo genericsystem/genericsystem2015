@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
@@ -242,12 +243,10 @@ public class CocCache extends HeavyCache {
 				private List<Generic> promisedList = new ArrayList<Generic>();
 
 				{
-					invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
-						CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
-							promisedList = snapshot.toList();
-							invalidate();
-						});
-					}));
+					invalidator.addListener(new WeakInvalidationListener(listener = (o) -> CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
+						promisedList = snapshot.toList();
+						Platform.runLater(() -> invalidate());
+					})));
 				}
 
 				@Override
