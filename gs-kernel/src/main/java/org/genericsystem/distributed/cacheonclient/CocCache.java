@@ -1,10 +1,11 @@
 package org.genericsystem.distributed.cacheonclient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
@@ -17,6 +18,7 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
+import org.genericsystem.defaults.tools.TransitiveInvalidator;
 
 public class CocCache extends HeavyCache {
 
@@ -228,27 +230,33 @@ public class CocCache extends HeavyCache {
 		return getDifferential().getDependenciesPromise(generic);
 	}
 
+	private Map<Generic, ObservableList<Generic>> dependenciesPromiseAsOservableListCacheMap = new HashMap<>();
+
 	@Override
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		return new ListBinding<Generic>() {
-			@SuppressWarnings("unused")
-			private final InvalidationListener listener;
-			private final Observable invalidator = getInvalidator(generic);
-			private List<Generic> promisedList = new ArrayList<Generic>();
+		ObservableList<Generic> result = dependenciesPromiseAsOservableListCacheMap.get(generic);
+		if (result == null) {
+			result = new ListBinding<Generic>() {
+				private final InvalidationListener listener;
+				private final Observable invalidator = getInvalidator(generic);
+				private List<Generic> promisedList = new ArrayList<Generic>();
 
-			{
-				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
-					CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
-						promisedList = snapshot.toList();
-						Platform.runLater(() -> invalidate());// resolve Not FX thread
+				{
+					invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+						CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
+							promisedList = snapshot.toList();
+							invalidate();
 						});
-				}));
-			}
+					}));
+				}
 
-			@Override
-			protected ObservableList<Generic> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
-			}
-		};
+				@Override
+				protected ObservableList<Generic> computeValue() {
+					return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+				}
+			};
+			dependenciesPromiseAsOservableListCacheMap.put(generic, result);
+		}
+		return result;
 	}
 }

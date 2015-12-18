@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
@@ -18,6 +16,7 @@ import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine.ClientEngineHandler;
+import org.genericsystem.distributed.cacheonclient.InvalidationTools.GSObservable;
 
 public class CocTransaction extends CheckedContext implements AsyncITransaction {
 
@@ -105,15 +104,10 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
-		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
+		GSObservable observable = new GSObservable();
 		getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
-			try {
-				Thread.sleep(200);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			objectProperty.set(snapshot);
+			observable.fireValueChangedEvent();
 		});
-		return objectProperty;
+		return observable;
 	}
 }

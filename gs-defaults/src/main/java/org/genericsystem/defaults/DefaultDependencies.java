@@ -10,11 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
-import javafx.beans.binding.ListBinding;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.IVertex;
@@ -413,28 +409,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	default ObservableList<T> getObservableComposites() {
-		return new ListBinding<T>() {
-			@SuppressWarnings("unused")
-			private final InvalidationListener listener;
-			private final Observable invalidator = getCompositesInvalidator();
-			private List<T> promisedList = new ArrayList<T>();
-
-			{
-				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
-					getAsyncComposites().thenAccept(snapshot -> {
-						promisedList = snapshot.toList();
-						System.out.println("promisedList" + promisedList);
-						invalidate();
-					});
-				}));
-			}
-
-			@Override
-			protected ObservableList<T> computeValue() {
-				System.out.println("unmodifiableObservableList " + promisedList);
-				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
-			}
-		};
+		return getCurrentCache().getObservableComposites((T) this);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -8,6 +8,7 @@ import javafx.beans.Observable;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Invalidator;
 
 public class AsyncDifferential extends Differential implements AsyncIDifferential {
 

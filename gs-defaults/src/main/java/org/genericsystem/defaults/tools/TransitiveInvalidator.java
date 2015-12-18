@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.defaults.tools;
 
 import java.util.function.Supplier;
 
@@ -8,7 +8,7 @@ import javafx.beans.WeakInvalidationListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
 
-class TransitiveInvalidator<T> extends ObservableValueBase<T> {
+public class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 
 	private Observable observableSlave;
 	private Supplier<Observable> slaveObservableExtractor;

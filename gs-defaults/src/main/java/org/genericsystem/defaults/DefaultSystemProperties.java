@@ -5,6 +5,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.IVertex;
@@ -19,6 +22,7 @@ import org.genericsystem.defaults.constraints.PropertyConstraint;
 import org.genericsystem.defaults.constraints.RequiredConstraint;
 import org.genericsystem.defaults.constraints.SingularConstraint;
 import org.genericsystem.defaults.constraints.UniqueValueConstraint;
+import org.genericsystem.defaults.tools.GSSimpleObjectProperty;
 
 public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVertex<T> {
 
@@ -43,6 +47,24 @@ public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVe
 		T property = getRoot().find(propertyClass);
 		CompletableFuture<Stream<T>> keysPromise = property != null ? property.getAsyncInheritings().thenApply(snap -> snap.stream()) : CompletableFuture.completedFuture(Stream.empty());
 		return keysPromise.thenApply(keys -> keys.filter(x -> Objects.equals(x.getValue(), new AxedPropertyClass(propertyClass, pos))).findFirst().orElse(null));
+	}
+
+	default ObservableValue<T> getObservableKey(Class<? extends SystemProperty> propertyClass, int pos) {
+
+		return new ObjectBinding<T>() {
+			CompletableFuture<T> keyPromise = getAsyncKey(propertyClass, pos);
+			private final GSSimpleObjectProperty<T> internal = new GSSimpleObjectProperty<>();
+
+			{
+				bind(internal);
+				keyPromise.thenAccept(t -> internal.set(t));
+			}
+
+			@Override
+			protected T computeValue() {
+				return internal.get();
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")

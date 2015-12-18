@@ -1,11 +1,11 @@
-package org.genericsystem.defaults.async;
+package org.genericsystem.defaults.tools;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.value.ObservableValueBase;
 
-class Invalidator<T> extends ObservableValueBase<T> {
+public class Invalidator<T> extends ObservableValueBase<T> {
 
 	@SuppressWarnings("unused")
 	private final Observable[] observables;

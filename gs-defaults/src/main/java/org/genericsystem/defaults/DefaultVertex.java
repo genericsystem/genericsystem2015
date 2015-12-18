@@ -10,6 +10,10 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -30,6 +34,11 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 	@Override
 	default CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos) {
 		return DefaultSystemProperties.super.getAsyncKey(propertyClass, pos);
+	}
+
+	@Override
+	default ObservableValue<T> getObservableKey(Class<? extends SystemProperty> propertyClass, int pos) {
+		return DefaultSystemProperties.super.getObservableKey(propertyClass, pos);
 	}
 
 	@Override
@@ -315,6 +324,28 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 			return;
 		});
 		return cf;
+	}
+
+	@Override
+	default ObservableValue<T> getObservableNonAmbiguousResult(ObservableList<T> list) {
+
+		SimpleObjectProperty<T> internal = new SimpleObjectProperty<>();
+
+		@SuppressWarnings("unused")
+		InvalidationListener listener;
+
+		list.addListener(new WeakInvalidationListener(listener = l -> {
+			Iterator<T> iterator = list.iterator();
+			if (!iterator.hasNext()) {
+				internal.set(null);
+				return;
+			}
+			T result = iterator.next();
+			if (iterator.hasNext())
+				getCurrentCache().discardWithException(new AmbiguousSelectionException(result.info() + " " + iterator.next().info()));
+			internal.set(result);
+		}));
+		return internal;
 	}
 
 	@Override
