@@ -12,6 +12,7 @@ import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
+import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
@@ -23,6 +24,8 @@ public class GenericList {
 	private ObservableList<Generic> dependenciesObservableList;
 	private Property<String> name = new SimpleStringProperty();
 	private Property<TypeWrapper> selection = new SimpleObjectProperty<>();
+	private Property<TypeWrapper> engineProp = new SimpleObjectProperty<TypeWrapper>();
+	private TypeWrapper engineWrapper;
 
 	/********************************************************************************/
 	public static void init(Element<Group> scene) {
@@ -34,9 +37,15 @@ public class GenericList {
 				new GSTextField(creationPanel).bindTextProperty(GenericList::getName).setPrefWidth(350);
 				new GSButton(creationPanel, "Create Todo", GenericList::create).setPrefWidth(200);
 			}
-			new GSHBox(mainPanel).forEach(GenericList::getGenerics).include(TypeWrapper::init);
-			new GSHBox(mainPanel).setSpacing(10).include(CommandPanel::init);
+
+			GSHBox hbox = new GSHBox(mainPanel).setStyleClass("header").select(GenericList::getEngineProp);
+			{
+				new GSLabel(hbox, TypeWrapper::getObservableText).setPrefWidth(300);
+				new GSLabel(hbox, AttributeWrapper::getObservableText).setPrefWidth(200).forEach(TypeWrapper::getAttributeTitle);
+			}
+			GSHBox hb = new GSHBox(mainPanel).forEach(GenericList::getGenerics).include(TypeWrapper::init);
 			new GSHBox(mainPanel).select(GenericList::getSelection).include(InstanceWrapper::init);
+			new GSHBox(mainPanel).setSpacing(10).include(CommandPanel::init);
 		}
 	}
 
@@ -50,10 +59,11 @@ public class GenericList {
 	}
 
 	/***********************************************************************************/
+
 	public GenericList(CocClientEngine engine) {
 		this.engine = engine;
-		dependenciesObservableList = engine.getCurrentCache().getObservableDependencies(engine);
-		genericWrapperList = new Transformation<TypeWrapper, Generic>(dependenciesObservableList, generic -> new TypeWrapper(generic));
+		engineWrapper = new TypeWrapper(engine, true);
+		engineProp.setValue(engineWrapper); // pour injecter
 	}
 
 	/*********************************************************************************/
@@ -84,12 +94,16 @@ public class GenericList {
 
 	/************************************************************************************/
 
+	public Property getEngineProp() {
+		return engineProp;
+	}
+
 	public Property getName() {
 		return name;
 	}
 
-	public ObservableList<TypeWrapper> getGenerics() {
-		return genericWrapperList;
+	public ObservableList<AbstractGenericWrapper> getGenerics() {
+		return engineWrapper.getObservableListWrapper();
 	}
 
 	public Property<TypeWrapper> getSelection() {

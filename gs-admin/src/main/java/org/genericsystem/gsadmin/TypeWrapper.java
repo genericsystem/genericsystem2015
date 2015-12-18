@@ -17,11 +17,11 @@ public class TypeWrapper extends AbstractGenericWrapper {
 	private ObservableValue<String> removeButtonTextProperty = Bindings.concat("Remove : ", getObservableText());
 	private Transformation<AttributeWrapper, Generic> attributeTitle;
 
-	public TypeWrapper(Generic generic) {
-		super(generic, g -> FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> new InstanceWrapper(gen, generic));
-
+	public TypeWrapper(Generic generic, Boolean isEngine) {
+		super(generic, g -> FXCollections.observableArrayList(generic.getSubInstances().toList()), gen -> isEngine ? new TypeWrapper(gen, false) : new InstanceWrapper(gen, generic));
+		// problème de récupération des type à ce niveau
 		ObservableList<Generic> atts = FXCollections.observableArrayList(generic.getAttributes().filter(attribute -> attribute.isCompositeForInstances(generic)).toList());
-		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic));
+		attributeTitle = new Transformation<AttributeWrapper, Generic>(atts, att -> new AttributeWrapper(att, generic, isEngine));
 	}
 
 	public ObservableList<AttributeWrapper> getAttributeTitle() {
@@ -37,6 +37,7 @@ public class TypeWrapper extends AbstractGenericWrapper {
 	}
 
 	public static void init(Element<HBox> parent) {
+
 		new GSLabel(parent, TypeWrapper::getObservableText).setPrefWidth(100);
 		new GSButton(parent, "remove").setAction(TypeWrapper::remove).setPrefWidth(100);
 		new GSButton(parent, "select").setMetaAction((gl, gw) -> ((GenericList) gl).getSelection().setValue((TypeWrapper) gw)).setPrefWidth(90);

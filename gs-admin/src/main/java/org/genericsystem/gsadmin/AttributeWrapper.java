@@ -9,8 +9,13 @@ import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;
 
 public class AttributeWrapper extends AbstractGenericWrapper {
-	public AttributeWrapper(Generic attribute, Generic generic) {
-		super(attribute, gene -> FXCollections.observableArrayList(generic.getHolders(attribute).toList()), holder -> new HolderWrapper(holder));
+	public AttributeWrapper(Generic attribute, Generic generic, Boolean isEngine) {
+		super(attribute, gene -> FXCollections.observableArrayList(generic.getHolders(attribute).toList()), holder -> new HolderWrapper(holder, isEngine));
+
+		System.out.println(generic.getValue());
+		if (isEngine) {
+			System.out.println(generic.getHolders(attribute).size());
+		}
 	}
 
 	public static void init(Element<VBox> parent) {

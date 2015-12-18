@@ -8,7 +8,7 @@ import org.genericsystem.ui.components.GSLabel;
 
 public class HolderWrapper extends AbstractGenericWrapper {
 
-	public HolderWrapper(Generic holder) {
+	public HolderWrapper(Generic holder, Boolean isEngine) {
 		super(holder);
 	}
 

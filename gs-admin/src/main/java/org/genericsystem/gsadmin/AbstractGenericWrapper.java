@@ -32,4 +32,5 @@ public abstract class AbstractGenericWrapper {
 	protected ObservableList<AbstractGenericWrapper> getObservableListWrapper() {
 		return transformationGeneric;
 	}
+
 }

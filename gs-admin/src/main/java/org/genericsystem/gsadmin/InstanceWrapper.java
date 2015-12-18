@@ -12,7 +12,7 @@ import org.genericsystem.ui.components.GSVBox;
 public class InstanceWrapper extends AbstractGenericWrapper {
 
 	public InstanceWrapper(Generic instance, Generic type) {
-		super(instance, gen -> FXCollections.observableArrayList(type.getAttributes().filter(attribute -> attribute.isCompositeForInstances(type)).toList()), att -> new AttributeWrapper(att, instance));
+		super(instance, gen -> FXCollections.observableArrayList(type.getAttributes().filter(attribute -> attribute.isCompositeForInstances(type)).toList()), att -> new AttributeWrapper(att, instance, false));
 	}
 
 	public static void init(Element<HBox> parent) {
