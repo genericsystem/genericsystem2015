@@ -1,28 +1,18 @@
 package org.genericsystem.gsadmin;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.VBox;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSLabel;
 
-public class HolderWrapper {
-	Generic holder;
-	private StringProperty stringProperty = new SimpleStringProperty();
+public class HolderWrapper extends AbstractGenericWrapper {
 
-	public HolderWrapper(Generic hold) {
-		this.holder = hold;
-		stringProperty.set(hold.getValue().toString());
-	}
-
-	public ObservableValue<String> getObservableText() {
-		return stringProperty;
+	public HolderWrapper(Generic holder) {
+		super(holder);
 	}
 
 	public static void init(Element<VBox> parent) {
-		new GSLabel(parent, HolderWrapper::getObservableText).setPrefWidth(100).forEach(AttributeWrapper::getHoldersObservableList);
+		new GSLabel(parent, HolderWrapper::getObservableText).setPrefWidth(100).forEach(AttributeWrapper::getObservableListWrapper);
 	}
 }
