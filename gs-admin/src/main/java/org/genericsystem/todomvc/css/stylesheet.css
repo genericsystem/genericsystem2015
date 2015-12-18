@@ -2,6 +2,9 @@
 	-fx-strikethrough: true;
 }
 
+.overrun {
+	  -fx-background-color: #CCFF99;
+}
 
 .overrun  .text {
 	-fx-font-weight: bold;

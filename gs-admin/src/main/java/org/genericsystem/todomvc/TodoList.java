@@ -42,7 +42,7 @@ public class TodoList {
 	/*********************************************************************************************************************************/
 
 	public static void init(Element<Group> sceneElt) {
-		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);
+		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);// .setStyleClass("overrun");
 		{
 			GSHBox todosCreation = new GSHBox(mainVBox);
 			{
