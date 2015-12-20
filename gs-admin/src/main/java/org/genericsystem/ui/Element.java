@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -91,6 +92,11 @@ public class Element<N> {
 
 	public <M, T> Element<N> addReversedBinding(Function<N, Property<T>> getProperty, Function<M, Property<T>> function) {
 		bindings.add(Binding.bindReversedProperty(getProperty, function));
+		return this;
+	}
+
+	public <M> Element<N> addObservableListBinding(Function<N, ObservableList<String>> getObservable, Function<M, ObservableValue<String>> function) {
+		bindings.add(Binding.bindObservableListToObservableValue(getObservable, function));
 		return this;
 	}
 

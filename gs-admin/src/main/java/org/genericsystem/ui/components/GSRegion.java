@@ -19,23 +19,75 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		super(parent, paneClass, getGraphicChildren);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Component setPrefWidth(Number prefWidth) {
 		addBoot(N::prefWidthProperty, prefWidth);
 		return (Component) this;
 	}
 
-	public <M> Component setOptionalPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth, Number prefWidth) {
+	@SuppressWarnings("unchecked")
+	public <M> Component setOptionalPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth) {
 		addBinding(N::prefWidthProperty, observablePrefWidth);
 		return (Component) this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Component setPrefHeight(Number prefHeight) {
 		addBoot(N::prefHeightProperty, prefHeight);
 		return (Component) this;
 	}
 
-	public <M> Component setOptionalPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight, Number prefWidth) {
+	@SuppressWarnings("unchecked")
+	public <M> Component setOptionalPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight) {
 		addBinding(N::prefHeightProperty, observablePrefHeight);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Component setMinWidth(Number minWidth) {
+		addBoot(N::minWidthProperty, minWidth);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <M> Component setOptionalMinWidth(Function<M, ObservableValue<Number>> observableMinWidth) {
+		addBinding(N::minWidthProperty, observableMinWidth);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Component setMinHeight(Number minHeight) {
+		addBoot(N::minHeightProperty, minHeight);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <M> Component setOptionalMinHeight(Function<M, ObservableValue<Number>> observableMinHeight) {
+		addBinding(N::minHeightProperty, observableMinHeight);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Component setMaxWidth(Number maxWidth) {
+		addBoot(N::maxWidthProperty, maxWidth);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <M> Component setOptionalMaxWidth(Function<M, ObservableValue<Number>> observableMaxWidth) {
+		addBinding(N::maxWidthProperty, observableMaxWidth);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Component setMaxHeight(Number maxHeight) {
+		addBoot(N::maxHeightProperty, maxHeight);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <M> Component setOptionalMaxHeight(Function<M, ObservableValue<Number>> observableMaxHeight) {
+		addBinding(N::maxHeightProperty, observableMaxHeight);
 		return (Component) this;
 	}
 

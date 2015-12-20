@@ -94,6 +94,10 @@ public class Binding<N, T> {
 		return Binding.bind(Binder.observableListBinder(getObservable, styleClass), function);
 	}
 
+	public static <N, M> Binding<N, ObservableValue<String>> bindObservableListToObservableValue(Function<N, ObservableList<String>> getObservable, Function<M, ObservableValue<String>> function) {
+		return Binding.bind(Binder.observableListBinder(getObservable), function);
+	}
+
 	public static <N, M, T> Binding<N, T> bindGenericAction(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
 		return Binding.<N, M, T> bind(consumer, Binder.genericActionBinder(propAction));
 	}

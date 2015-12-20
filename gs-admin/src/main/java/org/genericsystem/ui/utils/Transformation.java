@@ -13,11 +13,11 @@ import javafx.collections.transformation.TransformationList;
 public class Transformation<E, F> extends TransformationList<E, F> {
 
 	private final Map<F, E> cache = new HashMap<>();
-	private final Function<F, E> function;
+	private final Function<F, E> extractor;
 
-	public Transformation(ObservableList<? extends F> source, Function<F, E> function) {
+	public Transformation(ObservableList<? extends F> source, Function<F, E> extractor) {
 		super(source);
-		this.function = function;
+		this.extractor = extractor;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 		F f = getSource().get(index);
 		E e = cache.get(f);
 		if (e == null)
-			cache.put(f, e = function.apply(f));
+			cache.put(f, e = extractor.apply(f));
 
 		return e;
 	}

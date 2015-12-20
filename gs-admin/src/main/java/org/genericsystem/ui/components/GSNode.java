@@ -23,6 +23,11 @@ public abstract class GSNode<Component extends GSNode<Component, N>, N extends N
 		return (Component) this;
 	}
 
+	public <M> Component setStyleClass(Function<M, ObservableValue<String>> function) {
+		addObservableListBinding(N::getStyleClass, function);
+		return (Component) this;
+	}
+
 	public <M> Component setOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
 		addObservableListBinding(N::getStyleClass, function, text);
 		return (Component) this;

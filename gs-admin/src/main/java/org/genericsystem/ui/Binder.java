@@ -134,6 +134,20 @@ public interface Binder<N, W> {
 		};
 	}
 
+	public static <N> Binder<N, ObservableValue<String>> observableListBinder(Function<N, ObservableList<String>> applyOnNode) {
+		return new Binder<N, ObservableValue<String>>() {
+			@Override
+			public void init(ObservableValue<String> wrapper, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				ObservableList<String> styleClasses = applyOnNode.apply(viewContext.getNode());
+				styleClasses.add(wrapper.getValue());
+				wrapper.addListener((o, ov, nv) -> {
+					styleClasses.remove(ov);
+					styleClasses.remove(nv);
+				});
+			}
+		};
+	}
+
 	public static <N, W> Binder<N, ObservableValue<Boolean>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
 		return new Binder<N, ObservableValue<Boolean>>() {
 			@Override

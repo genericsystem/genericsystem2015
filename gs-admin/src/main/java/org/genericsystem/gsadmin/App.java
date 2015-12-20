@@ -1,6 +1,7 @@
 package org.genericsystem.gsadmin;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -54,8 +55,8 @@ public class App extends Application {
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
-		GenericList.init(elt);
-		elt.apply(new GenericList(initGS()), scene.getRoot());
+		TableList.init(elt);
+		elt.apply(TableList.create(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2, 3, 4, 5)), scene.getRoot());
 		stage.setScene(scene);
 		stage.show();
 	}
