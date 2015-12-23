@@ -3,20 +3,11 @@ package org.genericsystem.gsadmin;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 
-import org.genericsystem.gsadmin.CellCreation.ExtendedCellCreation;
-import org.genericsystem.gsadmin.CellCreation.TextCellCreation;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
 
 public abstract class Cell<T> extends Stylable {
-
-	static {
-		Func.put(TextCell.class, CellCreation.class, new TextCellCreation() {
-		});
-		Func.put(ExtendedCell.class, CellCreation.class, new ExtendedCellCreation() {
-		});
-	}
 
 	private final ObservableValue<T> observableModel;
 

@@ -7,7 +7,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Stylable.TableStyle;
-import org.genericsystem.gsadmin.Table.ExtendedTable;
+import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 
 /****************************************************************************************************************/
 
@@ -82,6 +82,7 @@ public class TableModel<ITEM, COL> {
 	}
 
 	public Table createTableList() {
-		return Func.get(ExtendedTable.class, TableCreation.class).create(this);
+		return new TableCellTableBuilder() {
+		}.build(this);
 	}
 }

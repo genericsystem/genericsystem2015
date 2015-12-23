@@ -5,21 +5,11 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Cell.ExtendedCell;
 import org.genericsystem.gsadmin.Cell.TextCell;
-import org.genericsystem.gsadmin.RowCreation.ExtendedRowCreation;
-import org.genericsystem.gsadmin.RowCreation.FirstRowCreation;
 import org.genericsystem.gsadmin.Stylable.Listable;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 
 public class Row extends Listable<Cell> {
-	static {
-		Func.put(Row.class, RowCreation.class, new RowCreation() {
-		});
-		Func.put(FirstRow.class, RowCreation.class, new FirstRowCreation() {
-		});
-		Func.put(ExtendedRow.class, RowCreation.class, new ExtendedRowCreation() {
-		});
-	}
 
 	public static void init(Element<?> rowPanel) {
 		new GSHBox(rowPanel).select(Row::getFirstElement).include(TextCell::init).setPrefWidth(200).setMinHeight(80).setStyleClass(TextCell::getStyleClass);

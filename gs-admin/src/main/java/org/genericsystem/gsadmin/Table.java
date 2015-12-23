@@ -7,16 +7,11 @@ import javafx.scene.layout.Pane;
 
 import org.genericsystem.gsadmin.Row.ExtendedRow;
 import org.genericsystem.gsadmin.Stylable.Listable;
-import org.genericsystem.gsadmin.TableCreation.ExtendedTableCreation;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSVBox;
 
 public class Table extends Listable<Row> {
-	static {
-		Func.put(Table.class, TableCreation.class, new TableCreation() {
-		});
-	}
 
 	public static void init(Element<?> parent) {
 		GSVBox tablePanel = new GSVBox(parent, Pane::getChildren).setPrefWidth(800).setPrefHeight(600).setStyleClass(Table::getStyleClass);
@@ -43,11 +38,5 @@ public class Table extends Listable<Row> {
 				new GSHBox(tablePanel).forEach(Table::getElements).include(ExtendedRow::init).setStyleClass(Row::getStyleClass);
 			}
 		}
-
-		static {
-			Func.put(ExtendedTable.class, TableCreation.class, new ExtendedTableCreation() {
-			});
-		}
-
 	}
 }
