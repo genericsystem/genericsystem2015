@@ -16,8 +16,6 @@ public class Table extends Listable<Row> {
 	static {
 		Func.put(Table.class, TableCreation.class, new TableCreation() {
 		});
-		Func.put(ExtendedTable.class, TableCreation.class, new ExtendedTableCreation() {
-		});
 	}
 
 	public static void init(Element<?> parent) {
@@ -45,5 +43,11 @@ public class Table extends Listable<Row> {
 				new GSHBox(tablePanel).forEach(Table::getElements).include(ExtendedRow::init).setStyleClass(Row::getStyleClass);
 			}
 		}
+
+		static {
+			Func.put(ExtendedTable.class, TableCreation.class, new ExtendedTableCreation() {
+			});
+		}
+
 	}
 }

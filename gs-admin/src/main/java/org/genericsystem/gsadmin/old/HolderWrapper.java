@@ -3,6 +3,7 @@ package org.genericsystem.gsadmin.old;
 import javafx.scene.layout.VBox;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.gsadmin.AbstractGenericWrapper;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSLabel;
 

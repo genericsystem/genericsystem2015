@@ -16,5 +16,7 @@ public class GSSCrollPane extends Element<ScrollPane> {
 	public <PARENTNODE> GSSCrollPane(Element<?> parent, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		super(parent, ScrollPane.class, getGraphicChildren);
 	}
+	
+	
 
 }

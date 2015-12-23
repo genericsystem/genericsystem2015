@@ -33,7 +33,7 @@ public interface CellCreation {
 
 	public static interface ExtendedCellCreation extends CellCreation {
 		@Override
-		default Cell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel subTableModel) {
+		default ExtendedCell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel subTableModel) {
 			return new ExtendedCell(observableString, styleClass, subTableModel);
 		}
 	}

@@ -32,7 +32,7 @@ public class Func extends HashMap<Class<?>, Map<Class<?>, Object>> {
 		throw new IllegalStateException("Unnable to find a lamda for model class : " + modelClass + " for functional interface : " + functionalInterface);
 	}
 
-	public static <T> void put(Class<?> modelClass, Class<T> functionalInterface, T lamda) {
+	public static <T> void put(Class<?> modelClass, Class<? extends T> functionalInterface, T lamda) {
 		instance().putInternal(modelClass, functionalInterface, lamda);
 	}
 

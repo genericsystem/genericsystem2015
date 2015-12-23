@@ -13,6 +13,7 @@ import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
 
 public class Cell extends Stylable {
+
 	static {
 		Func.put(Cell.class, CellCreation.class, new CellCreation() {
 		});
@@ -25,6 +26,7 @@ public class Cell extends Stylable {
 		Func.put(ExtendedCell.class, CellCreation.class, new ExtendedCellCreation() {
 		});
 	}
+
 	private final ObservableValue<String> observableString;
 
 	public static void init(Element<HBox> cellPanels) {
