@@ -9,7 +9,6 @@ import javafx.scene.layout.HBox;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.AbstractGenericWrapper;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;

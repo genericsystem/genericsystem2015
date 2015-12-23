@@ -3,38 +3,22 @@ package org.genericsystem.gsadmin;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.gsadmin.Cell.ExtendedCell;
-import org.genericsystem.gsadmin.Cell.FirstRowFirstCell;
+import org.genericsystem.gsadmin.Cell.TextCell;
 
-public interface CellCreation {
-	default Cell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel tableModel) {
-		return new Cell(observableString, styleClass);
-	}
+public interface CellCreation<T> {
+	Cell<T> create(ObservableValue<T> observableString, ObservableValue<String> styleClass);
 
-	public static interface FirstRowFirstCellCreation extends CellCreation {
+	public static interface TextCellCreation extends CellCreation<String> {
 		@Override
-		default Cell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel subTableModel) {
-			return observableString != null ? new FirstRowFirstCell(observableString, styleClass) : null;
+		default TextCell create(ObservableValue<String> observableString, ObservableValue<String> styleClass) {
+			return observableString != null ? new TextCell(observableString, styleClass) : null;
 		}
 	}
 
-	public static interface RowFirstCellCreation extends CellCreation {
+	public static interface ExtendedCellCreation extends CellCreation<Table> {
 		@Override
-		default Cell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel subTableModel) {
-			return observableString != null ? new Cell(observableString, styleClass) : null;
-		}
-	}
-
-	public static interface FirstCellCreation extends CellCreation {
-		@Override
-		default Cell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel subTableModel) {
-			return new Cell(observableString, styleClass);
-		}
-	}
-
-	public static interface ExtendedCellCreation extends CellCreation {
-		@Override
-		default ExtendedCell create(ObservableValue<String> observableString, ObservableValue<String> styleClass, TableModel subTableModel) {
-			return new ExtendedCell(observableString, styleClass, subTableModel);
+		default ExtendedCell create(ObservableValue<Table> observableTable, ObservableValue<String> styleClass) {
+			return new ExtendedCell(observableTable, styleClass);
 		}
 	}
 

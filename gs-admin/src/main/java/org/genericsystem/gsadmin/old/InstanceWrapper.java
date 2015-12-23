@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.gsadmin.AbstractGenericWrapper;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;

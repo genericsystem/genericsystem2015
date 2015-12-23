@@ -21,7 +21,7 @@ public class Func extends HashMap<Class<?>, Map<Class<?>, Object>> {
 
 	private <T> T getInternal(Class<?> modelClass, Class<T> functionalInterface) {
 		for (Class<?> internalModelClass = modelClass; internalModelClass != null; internalModelClass = internalModelClass.getSuperclass()) {
-			System.out.println("find : " + internalModelClass);
+			// System.out.println("find : " + internalModelClass);
 			Map<Class<?>, Object> map = super.get(modelClass);
 			if (map != null) {
 				Object lambda = map.get(functionalInterface);
