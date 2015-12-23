@@ -16,6 +16,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
+import org.genericsystem.gsadmin.Table.ExtendedTable;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Element;
 
@@ -55,8 +56,9 @@ public class App extends Application {
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
-		TableList.init(elt);
-		elt.apply(TableList.create(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2, 3, 4, 5)), scene.getRoot());
+		ExtendedTable.init(elt);
+		TableModel<Integer, Integer> tableModel = new TableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2));
+		elt.apply(tableModel.createTableList(), scene.getRoot());
 		stage.setScene(scene);
 		stage.show();
 	}

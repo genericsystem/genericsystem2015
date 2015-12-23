@@ -30,14 +30,16 @@ public class Binding<N, T> {
 	protected Supplier<T> applyOnModel(ModelContext modelContext) {
 		return () -> {
 			ModelContext modelContext_ = modelContext;
+			String s = "/";
 			while (modelContext_ != null) {
+				s += modelContext_.getModel() + "/";
 				try {
 					return method.apply(modelContext_.getModel());
 				} catch (ClassCastException ignore) {
 				}
 				modelContext_ = modelContext_.getParent();
 			}
-			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on : " + modelContext.getModel());
+			throw new IllegalStateException("Unable to resolve a method reference : " + method + " on stack : " + s);
 		};
 	}
 

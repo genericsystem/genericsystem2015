@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.old;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;

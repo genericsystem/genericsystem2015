@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.old;
 
 import javafx.collections.FXCollections;
 import javafx.scene.layout.HBox;

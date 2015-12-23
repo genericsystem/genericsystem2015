@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.old;
 
 import javafx.collections.FXCollections;
 import javafx.scene.layout.VBox;
@@ -25,4 +25,5 @@ public class AttributeWrapper extends AbstractGenericWrapper {
 			new GSLabel(titleColumnPanel, AttributeWrapper::getObservableText).setPrefWidth(100).forEach(TypeWrapper::getAttributeTitle);
 		}
 	}
+
 }
