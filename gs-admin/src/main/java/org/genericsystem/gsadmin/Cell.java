@@ -21,7 +21,6 @@ public abstract class Cell<T> extends Stylable {
 	}
 
 	public static class TextCell extends Cell<String> {
-
 		public static void init(Element<HBox> cellPanels) {
 			new GSLabel(cellPanels, TextCell::getObservableString).setPrefWidth(200);
 		}
@@ -32,7 +31,6 @@ public abstract class Cell<T> extends Stylable {
 	}
 
 	public static class ExtendedCell extends Cell<Table> {
-
 		public static void init(Element<HBox> cellPanels) {
 			new GSVBox(cellPanels).select(ExtendedCell::getObservableString).include(Table::init);
 		}

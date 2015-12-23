@@ -20,14 +20,6 @@ public class Row extends Listable<Cell> {
 		super(styleClass, firstCell, cells);
 	}
 
-	public static class FirstRow extends Row {
-
-		public FirstRow(ObservableValue<Cell> firstCell, ObservableList<Cell> cells, ObservableValue<String> styleClass) {
-			super(firstCell, cells, styleClass);
-		}
-
-	}
-
 	public static class ExtendedRow extends Row {
 
 		public static void init(Element<?> rowPanel) {

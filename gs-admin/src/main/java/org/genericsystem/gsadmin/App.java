@@ -17,6 +17,7 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.gsadmin.Table.ExtendedTable;
+import org.genericsystem.gsadmin.TableModel.TableCellTableModel;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.Element;
 
@@ -57,7 +58,7 @@ public class App extends Application {
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
 		ExtendedTable.init(elt);
-		TableModel<Integer, Integer> tableModel = new TableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2));
+		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2));
 		elt.apply(tableModel.createTableList(), scene.getRoot());
 		stage.setScene(scene);
 		stage.show();

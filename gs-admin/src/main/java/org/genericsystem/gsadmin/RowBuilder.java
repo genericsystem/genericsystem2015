@@ -11,17 +11,13 @@ import org.genericsystem.gsadmin.CellBuilder.TextCellBuilder;
 import org.genericsystem.gsadmin.Stylable.TableStyle;
 import org.genericsystem.ui.utils.Transformation;
 
-public interface RowBuilder<COL> {
-	default Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, TableStyle tableStyle, TableModel tabledModel) {
+public interface RowBuilder<T, COL> {
+
+	default Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
 		ObservableValue<Cell> firstCell = new ReadOnlyObjectWrapper<>(new TextCellBuilder() {
 		}.build(firstColumnString, getFirstCellStyle(tableStyle)));
 		ObservableList<Cell> cells = new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), getCellStyle(tableStyle)));
 		return new Row(firstCell, cells, tableStyle.row);
-	}
-
-	default CellBuilder getCellBuilder() {
-		return new TextCellBuilder() {
-		};
 	}
 
 	default ObservableValue<String> getFirstCellStyle(TableStyle tableStyle) {
@@ -32,7 +28,17 @@ public interface RowBuilder<COL> {
 		return tableStyle.cell;
 	}
 
-	static interface FirstRowBuilder<COL> extends RowBuilder<COL> {
+	CellBuilder<T> getCellBuilder();
+
+	static interface TextRowBuilder<COL> extends RowBuilder<String, COL> {
+		@Override
+		default CellBuilder<String> getCellBuilder() {
+			return new TextCellBuilder() {
+			};
+		}
+	}
+
+	static interface FirstRowBuilder<COL> extends TextRowBuilder<COL> {
 
 		@Override
 		default ObservableValue<String> getFirstCellStyle(TableStyle tableStyle) {
@@ -43,22 +49,11 @@ public interface RowBuilder<COL> {
 		default ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowCell;
 		}
-
 	}
 
-	static interface TableRowBuilder<COL> extends RowBuilder<COL> {
-
+	static interface TableRowBuilder<COL> extends RowBuilder<Table, COL> {
 		@Override
-		default Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, TableStyle tableStyle, TableModel subTableModel) {
-			ObservableValue<Cell> firstCell = new ReadOnlyObjectWrapper<>(new TextCellBuilder() {
-			}.build(firstColumnString, getFirstCellStyle(tableStyle)));
-			ObservableList<Cell> cells = new Transformation<>(columns, column -> getCellBuilder().build(new ReadOnlyObjectWrapper<>(new TableBuilder() {
-			}.build(subTableModel)), getCellStyle(tableStyle)));
-			return new Row(firstCell, cells, tableStyle.row);
-		};
-
-		@Override
-		default CellBuilder getCellBuilder() {
+		default CellBuilder<Table> getCellBuilder() {
 			return new TableCellBuilder() {
 			};
 		}
