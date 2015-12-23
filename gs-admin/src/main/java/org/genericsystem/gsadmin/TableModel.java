@@ -9,7 +9,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Stylable.TableStyle;
-import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 
 /****************************************************************************************************************/
 
@@ -83,6 +82,11 @@ public abstract class TableModel<ITEM, COL, T> {
 		this.tableStyle = tableStyle;
 	}
 
+	public Table createTable() {
+		return new TableBuilder<ITEM, COL>() {
+		}.build(this);
+	}
+
 	public static class TextTableModel<ITEM, COL> extends TableModel<ITEM, COL, String> {
 		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
 			super(items, columns);
@@ -99,12 +103,6 @@ public abstract class TableModel<ITEM, COL, T> {
 			super(items, columns);
 			rowColumnExtractor = item -> columnExtractor;
 		}
-
-		public Table createTableList() {
-			return new TableCellTableBuilder() {
-			}.build(this);
-		}
-
 	}
 
 }

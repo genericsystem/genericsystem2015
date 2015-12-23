@@ -1,24 +1,27 @@
 package org.genericsystem.gsadmin;
 
 import javafx.beans.value.ObservableValue;
+import javafx.scene.layout.HBox;
 
-import org.genericsystem.gsadmin.Cell.ExtendedCell;
-import org.genericsystem.gsadmin.Cell.TextCell;
+import org.genericsystem.ui.Element;
+import org.genericsystem.ui.components.GSLabel;
+import org.genericsystem.ui.components.GSVBox;
 
 public interface CellBuilder<T> {
-	Cell<T> build(ObservableValue<T> observableString, ObservableValue<String> styleClass);
+	default Cell<T> build(ObservableValue<T> observableString, ObservableValue<String> styleClass) {
+		return observableString != null ? new Cell(observableString, styleClass) : null;
+	}
 
 	public static interface TextCellBuilder extends CellBuilder<String> {
-		@Override
-		default TextCell build(ObservableValue<String> observableString, ObservableValue<String> styleClass) {
-			return observableString != null ? new TextCell(observableString, styleClass) : null;
+		public default void init(Element<HBox> cellPanels) {
+			new GSLabel(cellPanels, Cell<String>::getObservableString).setPrefWidth(200);
 		}
 	}
 
 	public static interface TableCellBuilder extends CellBuilder<Table> {
-		@Override
-		default ExtendedCell build(ObservableValue<Table> observableTable, ObservableValue<String> styleClass) {
-			return observableTable != null ? new ExtendedCell(observableTable, styleClass) : null;
+		public default void init(Element<HBox> cellPanels) {
+			new GSVBox(cellPanels).select(Cell<Table>::getObservableString).include(new TableBuilder() {
+			}::init);
 		}
 	}
 

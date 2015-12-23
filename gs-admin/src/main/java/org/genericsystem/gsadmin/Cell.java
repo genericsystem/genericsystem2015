@@ -1,13 +1,8 @@
 package org.genericsystem.gsadmin;
 
 import javafx.beans.value.ObservableValue;
-import javafx.scene.layout.HBox;
 
-import org.genericsystem.ui.Element;
-import org.genericsystem.ui.components.GSLabel;
-import org.genericsystem.ui.components.GSVBox;
-
-public abstract class Cell<T> extends Stylable {
+public class Cell<T> extends Stylable {
 
 	private final ObservableValue<T> observableModel;
 
@@ -18,25 +13,5 @@ public abstract class Cell<T> extends Stylable {
 
 	public ObservableValue<T> getObservableString() {
 		return observableModel;
-	}
-
-	public static class TextCell extends Cell<String> {
-		public static void init(Element<HBox> cellPanels) {
-			new GSLabel(cellPanels, TextCell::getObservableString).setPrefWidth(200);
-		}
-
-		public TextCell(ObservableValue<String> observableString, ObservableValue<String> styleClass) {
-			super(observableString, styleClass);
-		}
-	}
-
-	public static class ExtendedCell extends Cell<Table> {
-		public static void init(Element<HBox> cellPanels) {
-			new GSVBox(cellPanels).select(ExtendedCell::getObservableString).include(Table::init);
-		}
-
-		public ExtendedCell(ObservableValue<Table> observableTable, ObservableValue<String> styleClass) {
-			super(observableTable, styleClass);
-		}
 	}
 }
