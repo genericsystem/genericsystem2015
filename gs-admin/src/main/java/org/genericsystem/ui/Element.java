@@ -12,14 +12,12 @@ import java.util.function.Function;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
+
+import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
 	public final Class<N> nodeClass;
@@ -42,58 +40,7 @@ public class Element<N> {
 
 	// must be protected
 	protected <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
-		this(parent, nodeClass, getClassChildren(parent));
-	}
-
-	// // must be protected
-	// protected <PARENTNODE extends ScrollPane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
-	// this(parent, nodeClass, PARENTNODE::getContent);
-	// }
-
-	static <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
-		Function<Pane, ObservableList<?>> paneChildren = Pane::getChildren;
-		Function<Group, ObservableList<?>> groupChildren = Group::getChildren;
-		Function<ScrollPane, ObservableList<?>> scrollChildren = scrollPane -> new ModifiableObservableListBase<Node>() {
-
-			@Override
-			public Node get(int index) {
-				return scrollPane.getContent();
-			}
-
-			@Override
-			public int size() {
-				return scrollPane.getContent() == null ? 0 : 1;
-			}
-
-			@Override
-			protected void doAdd(int index, Node element) {
-				if (size() != 0)
-					throw new IllegalStateException("Only one element is supported in a GSScrollPane !");
-				scrollPane.setContent(element);
-			}
-
-			@Override
-			protected Node doSet(int index, Node element) {
-				Node result = doRemove(index);
-				doAdd(index, element);
-				return result;
-			}
-
-			@Override
-			protected Node doRemove(int index) {
-				Node result = scrollPane.getContent();
-				scrollPane.setContent(null);
-				return result;
-			}
-		};
-		if (Pane.class.isAssignableFrom(parent.nodeClass))
-			return (Function) paneChildren;
-		if (Group.class.isAssignableFrom(parent.nodeClass))
-			return (Function) groupChildren;
-		if (ScrollPane.class.isAssignableFrom(parent.nodeClass))
-			return (Function) scrollChildren;
-		throw new IllegalStateException("Not a supported JavaFX container : " + parent.nodeClass);
-
+		this(parent, nodeClass, Utils.getClassChildren(parent));
 	}
 
 	// must be protected

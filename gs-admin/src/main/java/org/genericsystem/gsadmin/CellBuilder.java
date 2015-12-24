@@ -5,7 +5,6 @@ import javafx.beans.value.ObservableValue;
 import org.genericsystem.gsadmin.TableBuilder.TextCellTableBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSLabel;
-import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 
 public abstract class CellBuilder<T> implements Builder {
@@ -23,11 +22,7 @@ public abstract class CellBuilder<T> implements Builder {
 	public static class TableCellBuilder extends CellBuilder<Table> {
 		@Override
 		public void init(Element<?> cellPanels) {
-			GSSCrollPane scrollPane = new GSSCrollPane(cellPanels);
-			{
-				new GSVBox(scrollPane).select(Cell<Table>::getObservableString).include(new TextCellTableBuilder<>()::init);
-			}
+			new GSVBox(cellPanels).select(Cell<Table>::getObservableString).include(new TextCellTableBuilder<>()::init);
 		}
 	}
-
 }
