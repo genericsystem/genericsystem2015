@@ -9,6 +9,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Stylable.TableStyle;
+import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
+import org.genericsystem.gsadmin.TableBuilder.TextCellTableBuilder;
 
 /****************************************************************************************************************/
 
@@ -83,23 +85,34 @@ public abstract class TableModel<ITEM, COL, T> {
 	}
 
 	public Table createTable() {
-		return new TableBuilder<ITEM, COL>() {
-		}.build(this);
+		return getTableBuilder().build(this);
 	}
+
+	abstract TableBuilder<ITEM, COL, T> getTableBuilder();
 
 	public static class TextTableModel<ITEM, COL> extends TableModel<ITEM, COL, String> {
 		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
 			super(items, columns);
 			rowColumnExtractor = item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column);
 		}
+
+		@Override
+		TableBuilder<ITEM, COL, String> getTableBuilder() {
+			return new TextCellTableBuilder<>();
+		}
 	}
 
 	public static class TableCellTableModel<ITEM, COL> extends TableModel<ITEM, COL, Table> {
-		Function<COL, ObservableValue<Table>> columnExtractor = column -> new ReadOnlyObjectWrapper<Table>(new TableBuilder<>().build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6))));
+		Function<COL, ObservableValue<Table>> columnExtractor = column -> new ReadOnlyObjectWrapper<Table>(new TextCellTableBuilder<>().build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6))));
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
 			super(items, columns);
 			rowColumnExtractor = item -> columnExtractor;
+		}
+
+		@Override
+		TableBuilder<ITEM, COL, Table> getTableBuilder() {
+			return new TableCellTableBuilder<>();
 		}
 	}
 

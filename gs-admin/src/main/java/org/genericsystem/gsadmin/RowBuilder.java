@@ -13,19 +13,25 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public class RowBuilder<T, COL> {
+public abstract class RowBuilder<T, COL> implements Builder {
+	@Override
+	public void init(Element<?> rowPanel) {
+		new GSHBox(rowPanel).select(Row::getFirstElement).include(new TextCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<T>::getStyleClass);
+		new GSHBox(rowPanel).forEach(Row::getElements).include(getCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<T>::getStyleClass);
+	}
 
 	Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
 		if (firstColumnString == null)
 			return null;
-		ObservableValue<Cell<?>> firstCell = new ReadOnlyObjectWrapper<>(new CellBuilder<String>().build(firstColumnString, getFirstCellStyle(tableStyle)));
+		ObservableValue<Cell<?>> firstCell = new ReadOnlyObjectWrapper<>(new TextCellBuilder().build(firstColumnString, getFirstCellStyle(tableStyle)));
 		ObservableList<Cell<?>> cells = new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), getCellStyle(tableStyle)));
-		return new Row(firstCell, cells, tableStyle.row);
+		return new Row(firstCell, cells, getRowStyle(tableStyle));
 	}
 
-	public void init(Element<?> rowPanel) {
-		new GSHBox(rowPanel).select(Row::getFirstElement).include(new TextCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<Object>::getStyleClass);
-		new GSHBox(rowPanel).forEach(Row::getElements).include(new TextCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<Object>::getStyleClass);
+	abstract CellBuilder<T> getCellBuilder();
+
+	public ObservableValue<String> getRowStyle(TableStyle tableStyle) {
+		return tableStyle.row;
 	}
 
 	ObservableValue<String> getFirstCellStyle(TableStyle tableStyle) {
@@ -36,11 +42,14 @@ public class RowBuilder<T, COL> {
 		return tableStyle.cell;
 	}
 
-	CellBuilder<T> getCellBuilder() {
-		return new CellBuilder<T>();
+	static class TextCellRowBuilder<COL> extends RowBuilder<String, COL> {
+		@Override
+		CellBuilder<String> getCellBuilder() {
+			return new TextCellBuilder();
+		}
 	}
 
-	static final class FirstRowBuilder<COL> extends RowBuilder<String, COL> {
+	static class TextCellFirstRowBuilder<COL> extends TextCellRowBuilder<COL> {
 		@Override
 		ObservableValue<String> getFirstCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowFirstCell;
@@ -50,13 +59,18 @@ public class RowBuilder<T, COL> {
 		ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowCell;
 		}
+
+		@Override
+		public ObservableValue<String> getRowStyle(TableStyle tableStyle) {
+			return tableStyle.firstRow;
+		}
 	}
 
-	static final class ExtendedRowBuilder<COL> extends RowBuilder<String, COL> {
+	static final class TableCellRowBuilder<COL> extends RowBuilder<Table, COL> {
+
 		@Override
-		public void init(Element<?> rowPanel) {
-			new GSHBox(rowPanel).select(Row::getFirstElement).include(new TextCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<Object>::getStyleClass);
-			new GSHBox(rowPanel).forEach(Row::getElements).include(new TableCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<Object>::getStyleClass);
+		CellBuilder<Table> getCellBuilder() {
+			return new TableCellBuilder();
 		}
 	}
 

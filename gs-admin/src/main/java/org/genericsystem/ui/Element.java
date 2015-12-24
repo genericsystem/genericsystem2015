@@ -12,10 +12,13 @@ import java.util.function.Function;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 
 public class Element<N> {
@@ -38,12 +41,61 @@ public class Element<N> {
 	}
 
 	// must be protected
-	protected <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
-		this(parent, nodeClass, Pane::getChildren);
+	protected <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
+		this(parent, nodeClass, getClassChildren(parent));
+	}
+
+	// // must be protected
+	// protected <PARENTNODE extends ScrollPane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
+	// this(parent, nodeClass, PARENTNODE::getContent);
+	// }
+
+	static <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
+		Function<Pane, ObservableList<?>> paneChildren = Pane::getChildren;
+		Function<Group, ObservableList<?>> groupChildren = Group::getChildren;
+		Function<ScrollPane, ObservableList<?>> scrollChildren = scrollPane -> new ModifiableObservableListBase<Node>() {
+
+			@Override
+			public Node get(int index) {
+				return scrollPane.getContent();
+			}
+
+			@Override
+			public int size() {
+				return scrollPane.getContent() == null ? 0 : 1;
+			}
+
+			@Override
+			protected void doAdd(int index, Node element) {
+				scrollPane.setContent(element);
+			}
+
+			@Override
+			protected Node doSet(int index, Node element) {
+				Node result = doRemove(index);
+				doAdd(index, element);
+				return result;
+			}
+
+			@Override
+			protected Node doRemove(int index) {
+				Node result = scrollPane.getContent();
+				scrollPane.setContent(null);
+				return result;
+			}
+		};
+		if (Pane.class.isAssignableFrom(parent.nodeClass))
+			return (Function) paneChildren;
+		if (Group.class.isAssignableFrom(parent.nodeClass))
+			return (Function) groupChildren;
+		if (ScrollPane.class.isAssignableFrom(parent.nodeClass))
+			return (Function) scrollChildren;
+		throw new IllegalStateException();
+
 	}
 
 	// must be protected
-	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
 		this.getGraphicChildren = getGraphicChildren;
@@ -136,7 +188,7 @@ public class Element<N> {
 		return new ViewContext<>(null, new ModelContext(null, this, model), this, (N) parentNode).getNode();
 	}
 
-	N createNode(Object parent) {
+	protected N createNode(Object parent) {
 		try {
 			if (parent != null && !Modifier.isStatic(nodeClass.getModifiers()) && nodeClass.getEnclosingClass() != null)
 				return nodeClass.getDeclaredConstructor(new Class[] { parent.getClass() }).newInstance(new Object[] { parent });
