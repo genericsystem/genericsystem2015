@@ -67,6 +67,8 @@ public class Element<N> {
 
 			@Override
 			protected void doAdd(int index, Node element) {
+				if (size() != 0)
+					throw new IllegalStateException("Only one element is supported in a GSScrollPane !");
 				scrollPane.setContent(element);
 			}
 
@@ -90,7 +92,7 @@ public class Element<N> {
 			return (Function) groupChildren;
 		if (ScrollPane.class.isAssignableFrom(parent.nodeClass))
 			return (Function) scrollChildren;
-		throw new IllegalStateException();
+		throw new IllegalStateException("Not a supported JavaFX container : " + parent.nodeClass);
 
 	}
 
