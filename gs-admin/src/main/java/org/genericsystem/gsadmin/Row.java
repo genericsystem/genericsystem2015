@@ -5,8 +5,8 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Stylable.Listable;
 
-public class Row extends Listable<Cell> {
-	public Row(ObservableValue<Cell> firstCell, ObservableList<Cell> cells, ObservableValue<String> styleClass) {
+public class Row extends Listable<Cell<?>> {
+	public Row(ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<String> styleClass) {
 		super(styleClass, firstCell, cells);
 	}
 }

@@ -95,9 +95,7 @@ public abstract class TableModel<ITEM, COL, T> {
 	}
 
 	public static class TableCellTableModel<ITEM, COL> extends TableModel<ITEM, COL, Table> {
-
-		Function<COL, ObservableValue<Table>> columnExtractor = column -> new ReadOnlyObjectWrapper<Table>(new TableBuilder() {
-		}.build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6))));
+		Function<COL, ObservableValue<Table>> columnExtractor = column -> new ReadOnlyObjectWrapper<Table>(new TableBuilder<>().build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6))));
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
 			super(items, columns);

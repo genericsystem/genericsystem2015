@@ -3,12 +3,8 @@ package org.genericsystem.gsadmin;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
 import org.genericsystem.admin.model.Color;
-import org.genericsystem.admin.model.Color.Red;
-import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
-import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
 

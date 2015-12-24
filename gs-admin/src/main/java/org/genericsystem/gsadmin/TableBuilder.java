@@ -13,34 +13,29 @@ import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public interface TableBuilder<ITEM, COL> {
-	default <T> Table build(TableModel<ITEM, COL, T> tableModel) {
-		ObservableValue<Row> firstRow = new SimpleObjectProperty<>(new FirstRowBuilder() {
-		}.build(tableModel.getRowfirstColumnString() != null ? tableModel.getFirstRowFirstColumnString() : null, tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle()));
-		ObservableList<Row> rows = new Transformation<Row, ITEM>(tableModel.getItems(), item -> new RowBuilder() {
-		}.build(tableModel.getRowfirstColumnString() != null ? tableModel.getRowfirstColumnString().apply(item) : null, tableModel.getColumns(), tableModel.getRowColumnExtractor().apply(item), tableModel.getTableStyle()));
+public class TableBuilder<ITEM, COL> {
+	<T> Table build(TableModel<ITEM, COL, T> tableModel) {
+		ObservableValue<Row> firstRow = new SimpleObjectProperty<>(new FirstRowBuilder<COL>().build(tableModel.getFirstRowFirstColumnString(), tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle()));
+		ObservableList<Row> rows = new Transformation<Row, ITEM>(tableModel.getItems(), item -> new RowBuilder<T, COL>().build(tableModel.getRowfirstColumnString() != null ? tableModel.getRowfirstColumnString().apply(item) : null, tableModel.getColumns(),
+				tableModel.getRowColumnExtractor().apply(item), tableModel.getTableStyle()));
 		return new Table(firstRow, rows, tableModel.getTableStyle());
 	}
 
-	public default void init(Element<?> parent) {
+	public void init(Element<?> parent) {
 		GSVBox tablePanel = new GSVBox(parent, Pane::getChildren).setPrefWidth(800).setPrefHeight(600).setStyleClass(Table::getStyleClass);
 		{
-			new GSHBox(tablePanel).select(Table::getFirstElement).include(new RowBuilder() {
-			}::init).setStyleClass(Row::getStyleClass);
-			new GSHBox(tablePanel).forEach(Table::getElements).include(new RowBuilder() {
-			}::init).setStyleClass(Row::getStyleClass);
+			new GSHBox(tablePanel).select(Table::getFirstElement).include(new RowBuilder<>()::init).setStyleClass(Row::getStyleClass);
+			new GSHBox(tablePanel).forEach(Table::getElements).include(new RowBuilder<>()::init).setStyleClass(Row::getStyleClass);
 		}
 	}
 
-	public interface ExtendedTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL> {
+	public static class ExtendedTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL> {
 		@Override
-		public default void init(Element<?> parent) {
+		public void init(Element<?> parent) {
 			GSVBox tablePanel = new GSVBox(parent, Group::getChildren).setPrefWidth(800).setPrefHeight(600).setStyleClass(Table::getStyleClass);
 			{
-				new GSHBox(tablePanel).select(Table::getFirstElement).include(new RowBuilder() {
-				}::init).setStyleClass(Row::getStyleClass);
-				new GSHBox(tablePanel).forEach(Table::getElements).include(new ExtendedRowBuilder() {
-				}::init).setStyleClass(Row::getStyleClass);
+				new GSHBox(tablePanel).select(Table::getFirstElement).include(new RowBuilder<>()::init).setStyleClass(Row::getStyleClass);
+				new GSHBox(tablePanel).forEach(Table::getElements).include(new ExtendedRowBuilder<>()::init).setStyleClass(Row::getStyleClass);
 			}
 		}
 	}

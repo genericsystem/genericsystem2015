@@ -57,8 +57,7 @@ public class App extends Application {
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
-		new ExtendedTableBuilder() {
-		}.init(elt);
+		new ExtendedTableBuilder<>().init(elt);
 		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2));
 		elt.apply(tableModel.createTable(), scene.getRoot());
 		stage.setScene(scene);
