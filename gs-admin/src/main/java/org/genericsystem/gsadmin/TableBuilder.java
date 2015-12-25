@@ -16,7 +16,7 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class TableBuilder<ITEM, COL, U, T> implements Builder {
+public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 
 	protected Table build(ObservableList<ITEM> items, ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, Function<ITEM, ObservableValue<String>> rowfirstColumnString,
 			Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
@@ -28,11 +28,11 @@ public abstract class TableBuilder<ITEM, COL, U, T> implements Builder {
 	}
 
 	protected ObservableValue<Row> getFirstElement(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, TableStyle tableStyle) {
-		return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL, String>().build(firstColumnString, columns, columnExtractor, tableStyle));
+		return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(firstColumnString, columns, columnExtractor, tableStyle));
 	}
 
 	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> rowfirstColumnString, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
-		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(rowfirstColumnString.apply(item), columns, col -> (ObservableValue) rowColumnExtractor.apply(item).apply(col), tableStyle));
+		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(rowfirstColumnString.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
 	}
 
 	@Override
@@ -47,20 +47,20 @@ public abstract class TableBuilder<ITEM, COL, U, T> implements Builder {
 		}
 	}
 
-	abstract RowBuilder<COL, U, T> getRowBuilder();
+	abstract RowBuilder<COL, T> getRowBuilder();
 
-	public static class TextCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, String, String> {
+	public static class TextCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, String> {
 
 		@Override
-		RowBuilder<COL, String, String> getRowBuilder() {
-			return new TextCellRowBuilder<COL, String>();
+		RowBuilder<COL, String> getRowBuilder() {
+			return new TextCellRowBuilder<COL>();
 		}
 	}
 
-	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table, Table> {
+	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
 		@Override
-		RowBuilder<COL, Table, Table> getRowBuilder() {
-			return new TableCellRowBuilder<COL, Table>();
+		RowBuilder<COL, Table> getRowBuilder() {
+			return new TableCellRowBuilder<COL>();
 		}
 	}
 }

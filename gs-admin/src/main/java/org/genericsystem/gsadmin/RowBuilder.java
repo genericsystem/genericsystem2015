@@ -16,9 +16,9 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class RowBuilder<COL, U, T> implements Builder {
+public abstract class RowBuilder<COL, T> implements Builder {
 
-	protected Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, TableStyle tableStyle) {
+	protected Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
 		return new Row(getFirstElement(firstColumnString, tableStyle), getElements(columns, columnExtractor, tableStyle), getStyle(tableStyle));
 	}
 
@@ -26,8 +26,8 @@ public abstract class RowBuilder<COL, U, T> implements Builder {
 		return new ReadOnlyObjectWrapper<>(getRowFirstCellBuilder().build(firstColumnString, tableStyle));
 	}
 
-	protected ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, TableStyle tableStyle) {
-		return new Transformation<>(columns, column -> getCellBuilder().build((ObservableValue) columnExtractor.apply(column), tableStyle));
+	protected ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
+		return new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), tableStyle));
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public abstract class RowBuilder<COL, U, T> implements Builder {
 		return tableStyle.row;
 	}
 
-	static class TextCellRowBuilder<COL, U> extends RowBuilder<COL, U, String> {
+	static class TextCellRowBuilder<COL> extends RowBuilder<COL, String> {
 
 		@Override
 		CellBuilder<String> getRowFirstCellBuilder() {
@@ -57,7 +57,7 @@ public abstract class RowBuilder<COL, U, T> implements Builder {
 		}
 	}
 
-	static class TextCellFirstRowBuilder<COL, U> extends TextCellRowBuilder<COL, U> {
+	static class TextCellFirstRowBuilder<COL> extends TextCellRowBuilder<COL> {
 		@Override
 		CellBuilder<String> getRowFirstCellBuilder() {
 			return new FirstRowFirstCellTextCellBuilder();
@@ -74,7 +74,7 @@ public abstract class RowBuilder<COL, U, T> implements Builder {
 		}
 	}
 
-	static final class TableCellRowBuilder<COL, U> extends RowBuilder<COL, U, Table> {
+	static final class TableCellRowBuilder<COL> extends RowBuilder<COL, Table> {
 
 		@Override
 		CellBuilder<String> getRowFirstCellBuilder() {
