@@ -4,7 +4,7 @@ import javafx.beans.value.ObservableValue;
 
 public class Cell<T> extends Stylable {
 
-	private final ObservableValue<T> observableModel;
+	private ObservableValue<T> observableModel;
 
 	public Cell(ObservableValue<T> observableModel, ObservableValue<String> styleClass) {
 		super(styleClass);
@@ -13,5 +13,9 @@ public class Cell<T> extends Stylable {
 
 	public ObservableValue<T> getObservableModel() {
 		return observableModel;
+	}
+
+	public void setObservableModel(ObservableValue<T> observableModel) {
+		this.observableModel = observableModel;
 	}
 }

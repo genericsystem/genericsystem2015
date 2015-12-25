@@ -5,7 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 public class Stylable {
-	private final ObservableValue<String> styleClass;
+	private ObservableValue<String> styleClass;
 
 	public Stylable(ObservableValue<String> styleClass) {
 		this.styleClass = styleClass;
@@ -13,6 +13,10 @@ public class Stylable {
 
 	public ObservableValue<String> getStyleClass() {
 		return styleClass;
+	}
+
+	public void setStyleClass(ObservableValue<String> styleClass) {
+		this.styleClass = styleClass;
 	}
 
 	public static class TableStyle {
@@ -30,7 +34,7 @@ public class Stylable {
 		private final ObservableValue<Element> firstElement;
 		private final ObservableList<Element> elements;
 
-		public Listable(ObservableValue<String> styleClass, ObservableValue<Element> firstElement, ObservableList<Element> elements) {
+		public Listable(ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<String> styleClass) {
 			super(styleClass);
 			this.firstElement = firstElement;
 			this.elements = elements;

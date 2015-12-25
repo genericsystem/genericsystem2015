@@ -12,19 +12,17 @@ import org.genericsystem.gsadmin.Stylable.TableStyle;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilder.TextCellTableBuilder;
 
-/****************************************************************************************************************/
-
-public abstract class TableModel<ITEM, COL, U, T> extends Model {
+public abstract class TableModel<ITEM, COL, U, T> {
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
 	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb
 	// must be final
-	private Function<COL, ObservableValue<U>> firstRowExtractor; // = column -> new ReadOnlyStringWrapper("Column : " + column);// set to null for remove first row
+	private Function<COL, ObservableValue<String>> firstRowExtractor; // = column -> new ReadOnlyStringWrapper("Column : " + column);// set to null for remove first row
 	private Function<ITEM, ObservableValue<String>> rowfirstColumnString = item -> new ReadOnlyStringWrapper("Row : " + item);// set to null for remove first column
 	private Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;// = item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column);
-	TableStyle tableStyle = new TableStyle();
+	private TableStyle tableStyle = new TableStyle();
 
-	public TableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<COL, ObservableValue<U>> firstRowExtractor, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor) {
+	public TableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor) {
 		this.items = items;
 		this.columns = columns;
 		this.firstRowExtractor = firstRowExtractor;
@@ -51,11 +49,11 @@ public abstract class TableModel<ITEM, COL, U, T> extends Model {
 		return firstRowFirstColumnString;
 	}
 
-	public Function<COL, ObservableValue<U>> getFirstRowExtractor() {
+	public Function<COL, ObservableValue<String>> getFirstRowExtractor() {
 		return firstRowExtractor;
 	}
 
-	public void setFirstRowExtractor(Function<COL, ObservableValue<U>> firstRowExtractor) {
+	public void setFirstRowExtractor(Function<COL, ObservableValue<String>> firstRowExtractor) {
 		this.firstRowExtractor = firstRowExtractor;
 	}
 
@@ -75,7 +73,6 @@ public abstract class TableModel<ITEM, COL, U, T> extends Model {
 		this.rowColumnExtractor = rowColumnExtractor;
 	}
 
-	@Override
 	public TableStyle getTableStyle() {
 		return tableStyle;
 	}
@@ -85,7 +82,7 @@ public abstract class TableModel<ITEM, COL, U, T> extends Model {
 	}
 
 	public Table createTable() {
-		return getTableBuilder().build(this);
+		return getTableBuilder().build(items, firstRowFirstColumnString, columns, firstRowExtractor, rowfirstColumnString, rowColumnExtractor, tableStyle);
 	}
 
 	abstract TableBuilder<ITEM, COL, U, T> getTableBuilder();
@@ -101,15 +98,15 @@ public abstract class TableModel<ITEM, COL, U, T> extends Model {
 		}
 	}
 
-	public static class TableCellTableModel<ITEM, COL> extends TableModel<ITEM, COL, String, Table> {
+	public static class TableCellTableModel<ITEM, COL> extends TableModel<ITEM, COL, Table, Table> {
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
-			super(items, columns, column -> new ReadOnlyStringWrapper("Column : " + column), item -> column -> new ReadOnlyObjectWrapper<Table>(new TextCellTableBuilder<>().build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections
-					.observableArrayList(7, 6)))));
+			super(items, columns, column -> new ReadOnlyStringWrapper("Column : " + column), item -> column -> new ReadOnlyObjectWrapper<Table>(
+					new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6)).createTable()));
 		}
 
 		@Override
-		TableBuilder<ITEM, COL, String, Table> getTableBuilder() {
+		TableBuilder<ITEM, COL, Table, Table> getTableBuilder() {
 			return new TableCellTableBuilder<>();
 		}
 	}
