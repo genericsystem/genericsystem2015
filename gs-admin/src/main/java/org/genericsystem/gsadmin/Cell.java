@@ -11,7 +11,7 @@ public class Cell<T> extends Stylable {
 		this.observableModel = observableModel;
 	}
 
-	public ObservableValue<T> getObservableString() {
+	public ObservableValue<T> getObservableModel() {
 		return observableModel;
 	}
 }

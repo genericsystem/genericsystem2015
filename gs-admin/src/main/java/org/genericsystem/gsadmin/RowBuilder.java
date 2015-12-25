@@ -1,7 +1,5 @@
 package org.genericsystem.gsadmin;
 
-import java.util.function.Function;
-
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -14,25 +12,43 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class RowBuilder<T, COL> extends ElementBuilder {
+public abstract class RowBuilder<COL, U, T> extends ElementBuilder {
 
-	Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
-		if (firstColumnString == null)
+	Row build(RowMetaModel<COL, U, T> rowMetaModel) {
+		if (rowMetaModel.firstColumnString == null)
 			return null;
-		return new Row(getFirstElement(firstColumnString, getFirstCellStyle(tableStyle)), getElements(columns, columnExtractor, tableStyle), getRowStyle(tableStyle));
+		// return new Row(getFirstElement(firstColumnString, getFirstCellStyle(tableStyle)), getElements(columns, columnExtractor, getCellStyle(tableStyle)), getRowStyle(tableStyle));
+
+		// RowMetaModel<COL, T> rowMetaModel = new RowMetaModel<>(firstColumnString, columns, columnExtractor, tableStyle);
+		return new Row(getFirstElement(rowMetaModel), getElements(rowMetaModel), getRowStyle(rowMetaModel.getTableStyle()));
 	}
 
-	private ObservableValue<Cell<?>> getFirstElement(ObservableValue<String> firstColumnString, ObservableValue<String> elementStyle) {
-		return new ReadOnlyObjectWrapper<>(new TextCellBuilder().build(firstColumnString, elementStyle));
+	// Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
+	// if (firstColumnString == null)
+	// return null;
+	// // return new Row(getFirstElement(firstColumnString, getFirstCellStyle(tableStyle)), getElements(columns, columnExtractor, getCellStyle(tableStyle)), getRowStyle(tableStyle));
+	//
+	// RowMetaModel<COL, T> rowMetaModel = new RowMetaModel<>(firstColumnString, columns, columnExtractor, tableStyle);
+	// return new Row(getFirstElement(rowMetaModel), getElements(rowMetaModel), getRowStyle(tableStyle));
+	// }
+
+	private ObservableValue<Cell<?>> getFirstElement(RowMetaModel<COL, U, T> rowModel) {
+		return new ReadOnlyObjectWrapper<>(new TextCellBuilder<>().build(rowModel.getFirstColumnString(), getFirstCellStyle(rowModel.getTableStyle())));
 	}
 
-	private ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
-		return new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), getCellStyle(tableStyle)));
+	private ObservableList<Cell<?>> getElements(RowMetaModel<COL, U, T> rowModel) {
+
+		return new Transformation<>(rowModel.getColumns(), column -> {
+			ObservableValue<U> apply = rowModel.getColumnExtractor().apply(column);
+			assert apply.getValue() != null;
+			ObservableValue<T> result = (ObservableValue) apply;
+			return getCellBuilder().build(result, getCellStyle(rowModel.getTableStyle()));
+		});
 	}
 
 	@Override
 	public void init(Element<?> rowPanel) {
-		new GSHBox(rowPanel).select(Row::getFirstElement).include(new TextCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<T>::getStyleClass);
+		new GSHBox(rowPanel).select(Row::getFirstElement).include(new TextCellBuilder<>()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<T>::getStyleClass);
 		new GSHBox(rowPanel).forEach(Row::getElements).include(getCellBuilder()::init).setPrefWidth(200).setMinHeight(80).setStyleClass(Cell<T>::getStyleClass);
 	}
 
@@ -50,14 +66,14 @@ public abstract class RowBuilder<T, COL> extends ElementBuilder {
 		return tableStyle.cell;
 	}
 
-	static class TextCellRowBuilder<COL> extends RowBuilder<String, COL> {
+	static class TextCellRowBuilder<COL, U> extends RowBuilder<COL, U, String> {
 		@Override
 		CellBuilder<String> getCellBuilder() {
-			return new TextCellBuilder();
+			return new TextCellBuilder<>();
 		}
 	}
 
-	static class TextCellFirstRowBuilder<COL> extends TextCellRowBuilder<COL> {
+	static class TextCellFirstRowBuilder<COL, U> extends TextCellRowBuilder<COL, U> {
 		@Override
 		ObservableValue<String> getFirstCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowFirstCell;
@@ -74,11 +90,11 @@ public abstract class RowBuilder<T, COL> extends ElementBuilder {
 		}
 	}
 
-	static final class TableCellRowBuilder<COL> extends RowBuilder<Table, COL> {
+	static final class TableCellRowBuilder<COL, U> extends RowBuilder<COL, U, Table> {
 
 		@Override
 		CellBuilder<Table> getCellBuilder() {
-			return new TableCellBuilder();
+			return new TableCellBuilder<>();
 		}
 	}
 

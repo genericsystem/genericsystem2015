@@ -9,20 +9,20 @@ import org.genericsystem.ui.components.GSVBox;
 
 public abstract class CellBuilder<T> implements Builder {
 	Cell<T> build(ObservableValue<T> observableString, ObservableValue<String> styleClass) {
-		return observableString != null ? new Cell<>(observableString, styleClass) : null;
+		return observableString != null ? new Cell<T>(observableString, styleClass) : null;
 	}
 
-	public static class TextCellBuilder extends CellBuilder<String> {
+	public static class TextCellBuilder<T> extends CellBuilder<String> {
 		@Override
 		public void init(Element<?> cellPanels) {
-			new GSLabel(cellPanels, Cell<String>::getObservableString).setPrefWidth(200);
+			new GSLabel(cellPanels, Cell<String>::getObservableModel).setPrefWidth(200);
 		}
 	}
 
-	public static class TableCellBuilder extends CellBuilder<Table> {
+	public static class TableCellBuilder<T> extends CellBuilder<Table> {
 		@Override
 		public void init(Element<?> cellPanels) {
-			new GSVBox(cellPanels).select(Cell<Table>::getObservableString).include(new TextCellTableBuilder<>()::init);
+			new GSVBox(cellPanels).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder<>()::init);
 		}
 	}
 }
