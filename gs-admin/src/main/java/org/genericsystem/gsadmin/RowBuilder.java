@@ -12,31 +12,19 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class RowBuilder<COL, U, T> extends ElementBuilder {
+public abstract class RowBuilder<COL, U, T> extends ElementBuilder<Cell<?>, RowModel<COL, U, T>> {
 
-	Row build(RowMetaModel<COL, U, T> rowMetaModel) {
-		if (rowMetaModel.firstColumnString == null)
-			return null;
-		// return new Row(getFirstElement(firstColumnString, getFirstCellStyle(tableStyle)), getElements(columns, columnExtractor, getCellStyle(tableStyle)), getRowStyle(tableStyle));
-
-		// RowMetaModel<COL, T> rowMetaModel = new RowMetaModel<>(firstColumnString, columns, columnExtractor, tableStyle);
+	Row build(RowModel<COL, U, T> rowMetaModel) {
 		return new Row(getFirstElement(rowMetaModel), getElements(rowMetaModel), getRowStyle(rowMetaModel.getTableStyle()));
 	}
 
-	// Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
-	// if (firstColumnString == null)
-	// return null;
-	// // return new Row(getFirstElement(firstColumnString, getFirstCellStyle(tableStyle)), getElements(columns, columnExtractor, getCellStyle(tableStyle)), getRowStyle(tableStyle));
-	//
-	// RowMetaModel<COL, T> rowMetaModel = new RowMetaModel<>(firstColumnString, columns, columnExtractor, tableStyle);
-	// return new Row(getFirstElement(rowMetaModel), getElements(rowMetaModel), getRowStyle(tableStyle));
-	// }
-
-	private ObservableValue<Cell<?>> getFirstElement(RowMetaModel<COL, U, T> rowModel) {
+	@Override
+	protected ObservableValue<Cell<?>> getFirstElement(RowModel<COL, U, T> rowModel) {
 		return new ReadOnlyObjectWrapper<>(new TextCellBuilder<>().build(rowModel.getFirstColumnString(), getFirstCellStyle(rowModel.getTableStyle())));
 	}
 
-	private ObservableList<Cell<?>> getElements(RowMetaModel<COL, U, T> rowModel) {
+	@Override
+	protected ObservableList<Cell<?>> getElements(RowModel<COL, U, T> rowModel) {
 
 		return new Transformation<>(rowModel.getColumns(), column -> {
 			ObservableValue<U> apply = rowModel.getColumnExtractor().apply(column);

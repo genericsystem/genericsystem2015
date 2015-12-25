@@ -17,20 +17,18 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder {
+public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder<Row, TableModel<ITEM, COL, U, T>> {
 	Table build(TableModel<ITEM, COL, U, T> tableModel) {
-		return new Table(getFirstElement(tableModel), getElements(tableModel), tableModel.getTableStyle());
+		return new Table(getFirstElement(tableModel), getElements(tableModel), tableModel.getTableStyle().table);
 	}
 
-	private ObservableValue<Row> getFirstElement(TableModel<ITEM, COL, U, T> tableModel) {
-
-		RowMetaModel<COL, U, String> rowMetaModel = new RowMetaModel<COL, U, String>(tableModel.getFirstRowFirstColumnString(), tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle());
-
-		return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL, U>().build(rowMetaModel));
-		// return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(tableModel.getFirstRowFirstColumnString(), tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle()));
+	@Override
+	protected ObservableValue<Row> getFirstElement(TableModel<ITEM, COL, U, T> tableModel) {
+		return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL, U>().build(new RowModel<COL, U, String>(tableModel.getFirstRowFirstColumnString(), tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle())));
 	}
 
-	private ObservableList<Row> getElements(TableModel<ITEM, COL, U, T> tableModel) {
+	@Override
+	protected ObservableList<Row> getElements(TableModel<ITEM, COL, U, T> tableModel) {
 		return new Transformation<Row, ITEM>(tableModel.getItems(), item -> {
 			Function<COL, ObservableValue<T>> apply = tableModel.getRowColumnExtractor().apply(item);
 			Function<COL, ObservableValue<U>> result = col -> {
@@ -39,7 +37,7 @@ public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder {
 				ObservableValue<U> result2 = Bindings.<U> createObjectBinding(() -> (U) apply2.getValue(), apply2);
 				return result2;
 			};
-			return getRowBuilder().build(new RowMetaModel<>(tableModel.getRowfirstColumnString().apply(item), tableModel.getColumns(), result, tableModel.getTableStyle()));
+			return getRowBuilder().build(new RowModel<>(tableModel.getRowfirstColumnString().apply(item), tableModel.getColumns(), result, tableModel.getTableStyle()));
 		});
 	}
 
@@ -51,7 +49,6 @@ public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder {
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass);
 				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass);
-				;
 			}
 		}
 	}

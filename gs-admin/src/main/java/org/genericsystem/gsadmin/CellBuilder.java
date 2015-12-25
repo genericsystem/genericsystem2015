@@ -8,8 +8,8 @@ import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
 
 public abstract class CellBuilder<T> implements Builder {
-	Cell<T> build(ObservableValue<T> observableString, ObservableValue<String> styleClass) {
-		return observableString != null ? new Cell<T>(observableString, styleClass) : null;
+	Cell<T> build(ObservableValue<T> observableModel, ObservableValue<String> styleClass) {
+		return observableModel != null ? new Cell<T>(observableModel, styleClass) : null;
 	}
 
 	public static class TextCellBuilder<T> extends CellBuilder<String> {

@@ -14,7 +14,7 @@ import org.genericsystem.gsadmin.TableBuilder.TextCellTableBuilder;
 
 /****************************************************************************************************************/
 
-public abstract class TableModel<ITEM, COL, U, T> {
+public abstract class TableModel<ITEM, COL, U, T> extends Model {
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
 	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb
@@ -75,6 +75,7 @@ public abstract class TableModel<ITEM, COL, U, T> {
 		this.rowColumnExtractor = rowColumnExtractor;
 	}
 
+	@Override
 	public TableStyle getTableStyle() {
 		return tableStyle;
 	}
@@ -101,7 +102,6 @@ public abstract class TableModel<ITEM, COL, U, T> {
 	}
 
 	public static class TableCellTableModel<ITEM, COL> extends TableModel<ITEM, COL, String, Table> {
-		// Function<COL, ObservableValue<Table>> columnExtractor = column -> new ReadOnlyObjectWrapper<Table>(new TextCellTableBuilder<>().build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6))));
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
 			super(items, columns, column -> new ReadOnlyStringWrapper("Column : " + column), item -> column -> new ReadOnlyObjectWrapper<Table>(new TextCellTableBuilder<>().build(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections
