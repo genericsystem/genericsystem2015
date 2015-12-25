@@ -8,16 +8,14 @@ import org.genericsystem.ui.Element;
 public interface Builder {
 	public void init(Element<?> parent);
 
-	public abstract class ElementBuilder<ELEMENT, MODEL extends Model> implements Builder {
+	public abstract class ElementBuilder<ELEMENT, SUBELEMENT, MODEL extends Model> implements Builder {
 
-		protected abstract ObservableValue<ELEMENT> getFirstElement(MODEL model);
+		protected abstract ELEMENT build(MODEL model);
 
-		// {
-		// return new ReadOnlyObjectWrapper<>(new TextCellFirstRowBuilder<COL, U>().build(new RowModel<COL, U, String>(model.getFirstRowFirstColumnString(), model.getColumns(), model.getFirstRowExtractor(), model.getTableStyle())));
-		// return new ReadOnlyObjectWrapper<>(new TextCellBuilder<>().build(model.getFirstColumnString(), getFirstCellStyle(model.getTableStyle())));
-		//
-		// }
+		protected abstract ObservableValue<String> getStyle(MODEL model);
 
-		protected abstract ObservableList<ELEMENT> getElements(MODEL tableModel);
+		protected abstract ObservableValue<SUBELEMENT> getFirstElement(MODEL model);
+
+		protected abstract ObservableList<SUBELEMENT> getElements(MODEL tableModel);
 	}
 }

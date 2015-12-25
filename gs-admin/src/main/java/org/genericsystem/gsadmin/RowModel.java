@@ -11,16 +11,12 @@ class RowModel<COL, U, T> extends Model {
 	final ObservableValue<String> firstColumnString;
 	final Function<COL, ObservableValue<U>> columnExtractor;
 	final TableStyle tableStyle;
-	// final ObservableValue<String> firstElementStyle;
-	// final ObservableValue<String> elementStyle;
 	final ObservableList<COL> columns;
 
 	RowModel(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<U>> columnExtractor, TableStyle tableStyle/* , ObservableValue<String> firstElementStyle, ObservableValue<String> elementStyle */) {
 		this.firstColumnString = firstColumnString;
 		this.columnExtractor = columnExtractor;
 		this.tableStyle = tableStyle;
-		// this.firstElementStyle = firstElementStyle;
-		// this.elementStyle = elementStyle;
 		this.columns = columns;
 	}
 
@@ -28,17 +24,10 @@ class RowModel<COL, U, T> extends Model {
 		return firstColumnString;
 	}
 
+	@Override
 	public TableStyle getTableStyle() {
 		return tableStyle;
 	}
-
-	// public ObservableValue<String> getFirstElementStyle() {
-	// return firstElementStyle;
-	// }
-	//
-	// public ObservableValue<String> getElementStyle() {
-	// return elementStyle;
-	// }
 
 	public ObservableList<COL> getColumns() {
 		return columns;

@@ -17,9 +17,15 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder<Row, TableModel<ITEM, COL, U, T>> {
-	Table build(TableModel<ITEM, COL, U, T> tableModel) {
-		return new Table(getFirstElement(tableModel), getElements(tableModel), tableModel.getTableStyle().table);
+public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder<Table, Row, TableModel<ITEM, COL, U, T>> {
+	@Override
+	protected Table build(TableModel<ITEM, COL, U, T> tableModel) {
+		return new Table(getFirstElement(tableModel), getElements(tableModel), getStyle(tableModel));
+	}
+
+	@Override
+	protected ObservableValue<String> getStyle(TableModel<ITEM, COL, U, T> model) {
+		return model.getTableStyle().table;
 	}
 
 	@Override
