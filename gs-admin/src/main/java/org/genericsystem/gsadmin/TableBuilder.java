@@ -1,8 +1,5 @@
 package org.genericsystem.gsadmin;
 
-import java.util.function.Function;
-
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -30,21 +27,13 @@ public abstract class TableBuilder<ITEM, COL, U, T> extends ElementBuilder<Table
 
 	@Override
 	protected ObservableValue<Row> getFirstElement(TableModel<ITEM, COL, U, T> tableModel) {
-		return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL, U>().build(new RowModel<COL, U, String>(tableModel.getFirstRowFirstColumnString(), tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle())));
+		return new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL, U>().build(new RowModel<>(tableModel.getFirstRowFirstColumnString(), tableModel.getColumns(), tableModel.getFirstRowExtractor(), tableModel.getTableStyle())));
 	}
 
 	@Override
 	protected ObservableList<Row> getElements(TableModel<ITEM, COL, U, T> tableModel) {
-		return new Transformation<Row, ITEM>(tableModel.getItems(), item -> {
-			Function<COL, ObservableValue<T>> apply = tableModel.getRowColumnExtractor().apply(item);
-			Function<COL, ObservableValue<U>> result = col -> {
-				ObservableValue<T> apply2 = apply.apply(col);
-				assert apply2.getValue() != null;
-				ObservableValue<U> result2 = Bindings.<U> createObjectBinding(() -> (U) apply2.getValue(), apply2);
-				return result2;
-			};
-			return getRowBuilder().build(new RowModel<>(tableModel.getRowfirstColumnString().apply(item), tableModel.getColumns(), result, tableModel.getTableStyle()));
-		});
+		return new Transformation<Row, ITEM>(tableModel.getItems(), item -> getRowBuilder().build(
+				new RowModel<>(tableModel.getRowfirstColumnString().apply(item), tableModel.getColumns(), col -> (ObservableValue) tableModel.getRowColumnExtractor().apply(item).apply(col), tableModel.getTableStyle())));
 	}
 
 	@Override

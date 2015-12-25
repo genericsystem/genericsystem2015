@@ -28,13 +28,7 @@ public abstract class RowBuilder<COL, U, T> extends ElementBuilder<Row, Cell<?>,
 
 	@Override
 	protected ObservableList<Cell<?>> getElements(RowModel<COL, U, T> rowModel) {
-
-		return new Transformation<>(rowModel.getColumns(), column -> {
-			ObservableValue<U> apply = rowModel.getColumnExtractor().apply(column);
-			assert apply.getValue() != null;
-			ObservableValue<T> result = (ObservableValue) apply;
-			return getCellBuilder().build(new CellModel<T>(result, rowModel.getTableStyle()));
-		});
+		return new Transformation<>(rowModel.getColumns(), column -> getCellBuilder().build(new CellModel<T>((ObservableValue) rowModel.getColumnExtractor().apply(column), rowModel.getTableStyle())));
 	}
 
 	@Override
