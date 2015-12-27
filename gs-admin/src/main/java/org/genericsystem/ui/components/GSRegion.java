@@ -26,7 +26,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setOptionalPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth) {
+	public <M> Component setPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth) {
 		addBinding(N::prefWidthProperty, observablePrefWidth);
 		return (Component) this;
 	}
@@ -38,7 +38,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setOptionalPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight) {
+	public <M> Component setPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight) {
 		addBinding(N::prefHeightProperty, observablePrefHeight);
 		return (Component) this;
 	}
@@ -50,7 +50,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setOptionalMinWidth(Function<M, ObservableValue<Number>> observableMinWidth) {
+	public <M> Component setMinWidth(Function<M, ObservableValue<Number>> observableMinWidth) {
 		addBinding(N::minWidthProperty, observableMinWidth);
 		return (Component) this;
 	}
@@ -62,7 +62,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setOptionalMinHeight(Function<M, ObservableValue<Number>> observableMinHeight) {
+	public <M> Component setMinHeight(Function<M, ObservableValue<Number>> observableMinHeight) {
 		addBinding(N::minHeightProperty, observableMinHeight);
 		return (Component) this;
 	}
@@ -74,7 +74,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setOptionalMaxWidth(Function<M, ObservableValue<Number>> observableMaxWidth) {
+	public <M> Component setMaxWidth(Function<M, ObservableValue<Number>> observableMaxWidth) {
 		addBinding(N::maxWidthProperty, observableMaxWidth);
 		return (Component) this;
 	}
@@ -86,7 +86,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setOptionalMaxHeight(Function<M, ObservableValue<Number>> observableMaxHeight) {
+	public <M> Component setMaxHeight(Function<M, ObservableValue<Number>> observableMaxHeight) {
 		addBinding(N::maxHeightProperty, observableMaxHeight);
 		return (Component) this;
 	}

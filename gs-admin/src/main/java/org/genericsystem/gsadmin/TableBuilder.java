@@ -35,11 +35,24 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(rowfirstColumnString.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
 	}
 
+	// scene.widthProperty().addListener(new ChangeListener<Number>() {
+	// @Override
+	// public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+	// System.out.println("Width: " + newSceneWidth);
+	// }
+	// });
+	// scene.heightProperty().addListener(new ChangeListener<Number>() {
+	// @Override
+	// public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+	// System.out.println("Height: " + newSceneHeight);
+	// }
+	// });
+
 	@Override
 	public void init(Element<?> parent) {
-		GSSCrollPane scrollPane = new GSSCrollPane(parent);
+		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable").setPrefWidth(Table::getScrollableTableWidth).setPrefHeight(Table::getScrollableTableHeight);
 		{
-			GSVBox tablePanel = new GSVBox(scrollPane).setPrefWidth(800).setPrefHeight(600).setStyleClass(Table::getStyleClass);
+			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setMinHeight(Table::getTableHeight);
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass);
 				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass);
@@ -58,6 +71,7 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 	}
 
 	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
+
 		@Override
 		RowBuilder<COL, Table> getRowBuilder() {
 			return new TableCellRowBuilder<COL>();

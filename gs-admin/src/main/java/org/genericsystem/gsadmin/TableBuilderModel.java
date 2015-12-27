@@ -12,7 +12,7 @@ import org.genericsystem.gsadmin.Stylable.TableStyle;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilder.TextCellTableBuilder;
 
-public abstract class TableModel<ITEM, COL, T> {
+public abstract class TableBuilderModel<ITEM, COL, T> {
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
 	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb
@@ -21,7 +21,7 @@ public abstract class TableModel<ITEM, COL, T> {
 	private Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;// = item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column);
 	private TableStyle tableStyle = new TableStyle();
 
-	public TableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor) {
+	public TableBuilderModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor) {
 		this.items = items;
 		this.columns = columns;
 		this.rowColumnExtractor = rowColumnExtractor;
@@ -85,7 +85,7 @@ public abstract class TableModel<ITEM, COL, T> {
 
 	abstract TableBuilder<ITEM, COL, T> getTableBuilder();
 
-	public static class TextTableModel<ITEM, COL> extends TableModel<ITEM, COL, String> {
+	public static class TextTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, String> {
 		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
 			super(items, columns, item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column));
 		}
@@ -96,16 +96,25 @@ public abstract class TableModel<ITEM, COL, T> {
 		}
 	}
 
-	public static class TableCellTableModel<ITEM, COL> extends TableModel<ITEM, COL, Table> {
+	public static class TableCellTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, Table> {
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
-			super(items, columns, item -> column -> new ReadOnlyObjectWrapper<Table>(new TextTableModel<>(FXCollections.observableArrayList(8, 9), FXCollections.observableArrayList(7, 6)).createTable()));
+			super(items, columns, item -> column -> new ReadOnlyObjectWrapper<Table>(new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6)).createTable()));
 		}
 
 		@Override
 		TableBuilder<ITEM, COL, Table> getTableBuilder() {
 			return new TableCellTableBuilder<>();
 		}
-	}
 
+		@Override
+		public Table createTable() {
+			Table result = super.createTable();
+			result.getColumnWidth().setValue(300);
+			result.getRowHeight().setValue(100);
+			result.getScrollableTableWidth().setValue(result.getTableWidth().getValue().intValue() + 10);
+			result.getScrollableTableHeight().setValue(result.getTableHeight().getValue().intValue() + 13);
+			return result;
+		}
+	}
 }

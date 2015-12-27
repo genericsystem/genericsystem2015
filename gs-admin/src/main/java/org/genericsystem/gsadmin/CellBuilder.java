@@ -20,7 +20,7 @@ public abstract class CellBuilder<T> implements Builder {
 	public static class TextCellBuilder extends CellBuilder<String> {
 		@Override
 		public void init(Element<?> cellPanels) {
-			new GSLabel(cellPanels, Cell<String>::getObservableModel).setPrefWidth(200);
+			new GSLabel(cellPanels, Cell<String>::getObservableModel);
 		}
 	}
 
