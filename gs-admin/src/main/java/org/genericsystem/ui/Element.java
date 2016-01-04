@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -15,7 +16,8 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.layout.Pane;
+
+import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
 	public final Class<N> nodeClass;
@@ -37,12 +39,12 @@ public class Element<N> {
 	}
 
 	// must be protected
-	protected <PARENTNODE extends Pane> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
-		this(parent, nodeClass, Pane::getChildren);
+	protected <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
+		this(parent, nodeClass, Utils.getClassChildren(parent));
 	}
 
 	// must be protected
-	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
 		this.getGraphicChildren = getGraphicChildren;
@@ -74,6 +76,11 @@ public class Element<N> {
 		return this;
 	}
 
+	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
+		bindings.add(Binding.bindSuperProperty(getProperty, function));
+		return this;
+	}
+
 	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
 		bindings.add(Binding.bindObservableList(getProperty, function));
 		return this;
@@ -91,6 +98,11 @@ public class Element<N> {
 
 	public <M, T> Element<N> addReversedBinding(Function<N, Property<T>> getProperty, Function<M, Property<T>> function) {
 		bindings.add(Binding.bindReversedProperty(getProperty, function));
+		return this;
+	}
+
+	public <M> Element<N> addObservableListBinding(Function<N, ObservableList<String>> getObservable, Function<M, ObservableValue<String>> function) {
+		bindings.add(Binding.bindObservableListToObservableValue(getObservable, function));
 		return this;
 	}
 
@@ -130,7 +142,7 @@ public class Element<N> {
 		return new ViewContext<>(null, new ModelContext(null, this, model), this, (N) parentNode).getNode();
 	}
 
-	N createNode(Object parent) {
+	protected N createNode(Object parent) {
 		try {
 			if (parent != null && !Modifier.isStatic(nodeClass.getModifiers()) && nodeClass.getEnclosingClass() != null)
 				return nodeClass.getDeclaredConstructor(new Class[] { parent.getClass() }).newInstance(new Object[] { parent });

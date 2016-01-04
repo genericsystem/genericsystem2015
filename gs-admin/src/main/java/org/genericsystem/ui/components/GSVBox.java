@@ -21,4 +21,9 @@ public class GSVBox extends GSPane<GSVBox, VBox> {
 		addBoot(VBox::spacingProperty, value);
 		return this;
 	}
+
+	// public GSVBox setFillWidth() {
+	// addBoot(VBox::fillWidthProperty, true);
+	// return this;
+	// }
 }

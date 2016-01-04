@@ -25,11 +25,12 @@ public class App extends Application {
 	}
 
 	private CocClientEngine initGS() {
-		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8083, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		CocClientEngine engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8083, Car.class, Power.class, CarColor.class, Color.class);
+		CocClientEngine engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
+
 		Generic base = type.setInstance("myBmw");
 		assert base.isAlive();
 		type.setInstance("myAudi");
@@ -53,9 +54,13 @@ public class App extends Application {
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
-		GenericList.init(elt);
-		elt.apply(new GenericList(initGS()), scene.getRoot());
+		WindowBuilder builder = new WindowBuilder();
+		builder.init(elt);// Do this only one time
+		Window window = builder.build(scene.widthProperty(), scene.heightProperty());
+		elt.apply(window, scene.getRoot());// Do this only one time
 		stage.setScene(scene);
+		stage.setWidth(800);
+		stage.setHeight(600);
 		stage.show();
 	}
 }

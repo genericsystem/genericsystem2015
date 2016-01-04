@@ -1,11 +1,51 @@
-
-.cell {
-	-fx-background-color: #32f988;
+.table {
+	/*-fx-border-style: none;
+	-fx-border-width: 0px;
+	-fx-spacing: 1px;
+	-fx-padding: 1px;*/
 }
+
+.scrollable {
+	-fx-background-color: transparent;
+	-fx-control-inner-background: transparent;
+	-fx-fit-to-height: true;
+	-fx-fit-to-width: true;	
+}
+
+
+.firstrow {
+	-fx-spacing: 1px;
+	-fx-padding: 1px;
+}
+
+.row {
+
+	-fx-spacing: 1px;
+	-fx-padding: 1px;
+}
+
+.firstrowcell {
+	-fx-background-color: #eeeebb;
+}
+
+.firstrowfirstcell {
+	-fx-background-color: #ffeebb;
+}
+
+.firstcell {
+	-fx-background-color: #ddccdd;
+}
+.cell {
+	-fx-background-color: #ddffdd;
+}
+
+
+
 
 .header {
 	-fx-background-color: #ff0000;
 }
+
 
 .columnInstance{
 	-fx-background-color: #ff00b2;

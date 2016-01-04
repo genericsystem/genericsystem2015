@@ -40,11 +40,11 @@ public class GSTableButtonColumn<SUPERMODEL, T> extends Element<ActionTableColum
 		setText(columnTitle);
 		setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply(features.getValue())));
 		super.addBoot(TableColumn::cellFactoryProperty, (Callback<ActionTableColumn<T>, TableCell<T, String>>) col -> new DeleteButtonCell<T>(model -> col.getOnActionProperty().getValue().accept(model)));
-		pushModelActionOnSupermodel(action);
+		pushModelActionOnSuperModel(action);
 
 	}
 
-	public GSTableButtonColumn<SUPERMODEL, T> pushModelActionOnSupermodel(BiConsumer<SUPERMODEL, T> action) {
+	public GSTableButtonColumn<SUPERMODEL, T> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, T> action) {
 		bindings.add(Binding.pushModelActionOnSuperModel(ActionTableColumn::getOnActionProperty, action));
 		return this;
 	}
