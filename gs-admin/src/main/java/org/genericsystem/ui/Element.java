@@ -76,6 +76,11 @@ public class Element<N> {
 		return this;
 	}
 
+	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
+		bindings.add(Binding.bindSuperProperty(getProperty, function));
+		return this;
+	}
+
 	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
 		bindings.add(Binding.bindObservableList(getProperty, function));
 		return this;

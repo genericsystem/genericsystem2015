@@ -99,7 +99,10 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 	public static class TableCellTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, Table> {
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns) {
-			super(items, columns, item -> column -> new ReadOnlyObjectWrapper<Table>(new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6)).createTable()));
+			super(items, columns, item -> column -> {
+				TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6));
+				return new ReadOnlyObjectWrapper<Table>(textTableModel.createTable());
+			});
 		}
 
 		@Override
@@ -110,10 +113,10 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 		@Override
 		public Table createTable() {
 			Table result = super.createTable();
+			/* default values */
 			result.getColumnWidth().setValue(300);
-			result.getRowHeight().setValue(100);
-			result.getScrollableTableWidth().setValue(result.getTableWidth().getValue().intValue() + 10);
-			result.getScrollableTableHeight().setValue(result.getTableHeight().getValue().intValue() + 13);
+			result.getRowHeight().setValue(200);
+			result.getFirstRowHeight().setValue(50);
 			return result;
 		}
 	}

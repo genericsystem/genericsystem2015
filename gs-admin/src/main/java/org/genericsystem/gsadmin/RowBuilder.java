@@ -32,10 +32,9 @@ public abstract class RowBuilder<COL, T> implements Builder {
 
 	@Override
 	public void init(Element<?> rowPanel) {
-		new GSHBox(rowPanel).select(Row::getFirstElement).include(getRowFirstCellBuilder()::init).setMinWidth(Table::getColumnWidth).setMinHeight(Table::getRowHeight).setMaxWidth(Table::getColumnWidth).setMaxHeight(Table::getRowHeight)
+		new GSHBox(rowPanel).select(Row::getFirstElement).include(getRowFirstCellBuilder()::init).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth)
 				.setStyleClass(Cell<T>::getStyleClass);
-		new GSHBox(rowPanel).forEach(Row::getElements).include(getCellBuilder()::init).setMinWidth(Table::getColumnWidth).setMinHeight(Table::getRowHeight).setMaxWidth(Table::getColumnWidth).setMaxHeight(Table::getRowHeight)
-				.setStyleClass(Cell<T>::getStyleClass);
+		new GSHBox(rowPanel).forEach(Row::getElements).include(getCellBuilder()::init).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<T>::getStyleClass);
 	}
 
 	abstract CellBuilder<String> getRowFirstCellBuilder();

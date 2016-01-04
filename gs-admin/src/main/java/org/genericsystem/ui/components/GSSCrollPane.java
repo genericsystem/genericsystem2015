@@ -18,7 +18,6 @@ public class GSSCrollPane extends Element<ScrollPane> {
 		super(parent, ScrollPane.class, getGraphicChildren);
 	}
 
-	@SuppressWarnings("unchecked")
 	public GSSCrollPane setPrefWidth(Number prefWidth) {
 		addBoot(ScrollPane::prefWidthProperty, prefWidth);
 		return this;

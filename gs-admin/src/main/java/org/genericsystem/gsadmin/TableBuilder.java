@@ -35,32 +35,24 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(rowfirstColumnString.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
 	}
 
-	// scene.widthProperty().addListener(new ChangeListener<Number>() {
-	// @Override
-	// public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-	// System.out.println("Width: " + newSceneWidth);
-	// }
-	// });
-	// scene.heightProperty().addListener(new ChangeListener<Number>() {
-	// @Override
-	// public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-	// System.out.println("Height: " + newSceneHeight);
-	// }
-	// });
-
 	@Override
 	public void init(Element<?> parent) {
-		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable").setPrefWidth(Table::getScrollableTableWidth).setPrefHeight(Table::getScrollableTableHeight);
+		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
 		{
-			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setMinHeight(Table::getTableHeight);
+			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setSuperPrefWidth(getSuperPrefWidth()).setMinHeight(Table::getTableHeight).setSuperPrefHeight(getSuperPrefHeight());
 			{
-				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass);
-				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass);
+				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
+						.setPrefHeight(Table::getFirstRowHeight);
+				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
 			}
 		}
 	}
 
 	abstract RowBuilder<COL, T> getRowBuilder();
+
+	abstract <M> Function<M, ObservableValue<Number>> getSuperPrefHeight();
+
+	abstract <M> Function<M, ObservableValue<Number>> getSuperPrefWidth();
 
 	public static class TextCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, String> {
 
@@ -68,6 +60,17 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 		RowBuilder<COL, String> getRowBuilder() {
 			return new TextCellRowBuilder<COL>();
 		}
+
+		@Override
+		<M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+			return table -> ((Table) table).getColumnWidth();
+		}
+
+		@Override
+		<M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+			return table -> ((Table) table).getRowHeight();
+		}
+
 	}
 
 	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
@@ -75,6 +78,16 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 		@Override
 		RowBuilder<COL, Table> getRowBuilder() {
 			return new TableCellRowBuilder<COL>();
+		}
+
+		@Override
+		<M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+			return app -> ((Window) app).getWidth();
+		}
+
+		@Override
+		<M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+			return app -> ((Window) app).getHeight();
 		}
 	}
 }

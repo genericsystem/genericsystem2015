@@ -53,6 +53,5 @@ public abstract class CellBuilder<T> implements Builder {
 		public void init(Element<?> cellPanels) {
 			new GSVBox(cellPanels).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder<>()::init);
 		}
-
 	}
 }

@@ -84,8 +84,16 @@ public class Binding<N, T> {
 		return Binding.bind(function, Binder.propertyReverseBinder(getProperty));
 	}
 
+	public static <SUPERMODEL, N, M, T extends Event> Binding<N, Function<SUPERMODEL, T>> bindMetaAction(Function<N, Property<EventHandler<T>>> propAction, BiConsumer<SUPERMODEL, M> biconsumer) {
+		return Binding.<SUPERMODEL, N, M, T> bind(biconsumer, Binder.metaActionBinder(propAction));
+	}
+
 	public static <N, M, W> Binding<N, ObservableValue<W>> bindProperty(Function<N, Property<W>> getProperty, Function<M, ObservableValue<W>> function) {
 		return Binding.bind(Binder.propertyBinder(getProperty), function);
+	}
+
+	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, ObservableValue<W>>> bindSuperProperty(Function<N, Property<W>> getProperty, Function<SUPERMODEL, ObservableValue<W>> function) {
+		return Binding.bind(Binder.<N, SUPERMODEL, W> superPropertyBinder(getProperty), m -> function);
 	}
 
 	public static <N, M, W> Binding<N, Property<W>> bindBiDirectionalProperty(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
@@ -106,10 +114,6 @@ public class Binding<N, T> {
 
 	public static <N, M, T extends Event> Binding<N, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
 		return Binding.<N, M, T> bind(consumer, Binder.actionBinder(propAction));
-	}
-
-	public static <SUPERMODEL, N, M, T extends Event> Binding<N, Function<SUPERMODEL, T>> bindMetaAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, BiConsumer<SUPERMODEL, M> biconsumer) {
-		return Binding.<SUPERMODEL, N, M, T> bind(biconsumer, Binder.metaActionBinder(propAction));
 	}
 
 	public static <SUPERMODEL, N, T> Binding<N, Function<T, SUPERMODEL>> pushModelActionOnSuperModel(Function<N, ObjectProperty<Consumer<T>>> propAction, BiConsumer<SUPERMODEL, T> biconsumer) {

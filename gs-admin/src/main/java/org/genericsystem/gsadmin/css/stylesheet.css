@@ -8,8 +8,8 @@
 .scrollable {
 	-fx-background-color: transparent;
 	-fx-control-inner-background: transparent;
-	/*-fx-fit-to-height: true;*/
-	/*-fx-fit-to-width: true;*/	
+	-fx-fit-to-height: true;
+	-fx-fit-to-width: true;	
 }
 
 
@@ -19,6 +19,7 @@
 }
 
 .row {
+
 	-fx-spacing: 1px;
 	-fx-padding: 1px;
 }

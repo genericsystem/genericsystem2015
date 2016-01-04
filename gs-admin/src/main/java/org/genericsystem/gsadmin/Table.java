@@ -12,19 +12,26 @@ import org.genericsystem.gsadmin.Stylable.Listable;
 public class Table extends Listable<Row> {
 
 	private final Property<Number> rowHeight = new SimpleIntegerProperty(20);
+	private final Property<Number> firstRowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(80);
-	private final ObservableValue<Number> tableHeight = Bindings.multiply(getElements().size() + 1, (ObservableNumberValue) rowHeight);
-	private final ObservableValue<Number> tableWidth = Bindings.multiply(getFirstElement().getValue().getElements().size() + 1, (ObservableNumberValue) columnWidth);
-
-	private final Property<Number> scrollableTableHeight = new SimpleIntegerProperty(Integer.MAX_VALUE);
-	private final Property<Number> scrollableTableWidth = new SimpleIntegerProperty(Integer.MAX_VALUE);
+	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(50);
+	private final ObservableValue<Number> tableWidth = Bindings.add(Bindings.multiply(getFirstElement().getValue().getElements().size(), (ObservableNumberValue) columnWidth), (ObservableNumberValue) firstColumnWidth);
+	private final ObservableValue<Number> tableHeight = Bindings.add(Bindings.multiply(getElements().size(), (ObservableNumberValue) rowHeight), (ObservableNumberValue) firstRowHeight);
 
 	public Table(ObservableValue<Row> firstRow, ObservableList<Row> rows, ObservableValue<String> tableStyle) {
 		super(firstRow, rows, tableStyle);
 	}
 
+	public Property<Number> getFirstRowHeight() {
+		return firstRowHeight;
+	}
+
 	public Property<Number> getRowHeight() {
 		return rowHeight;
+	}
+
+	public Property<Number> getFirstColumnWidth() {
+		return firstColumnWidth;
 	}
 
 	public Property<Number> getColumnWidth() {
@@ -37,13 +44,5 @@ public class Table extends Listable<Row> {
 
 	public ObservableValue<Number> getTableWidth() {
 		return tableWidth;
-	}
-
-	public Property<Number> getScrollableTableWidth() {
-		return scrollableTableWidth;
-	}
-
-	public Property<Number> getScrollableTableHeight() {
-		return scrollableTableHeight;
 	}
 }

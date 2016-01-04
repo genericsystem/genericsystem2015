@@ -104,4 +104,16 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		super.forEach(function);
 		return (Component) this;
 	}
+
+	@SuppressWarnings("unchecked")
+	public <M> Component setSuperPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth) {
+		addSuperBinding(N::prefWidthProperty, observablePrefWidth);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <M> Component setSuperPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight) {
+		addSuperBinding(N::prefHeightProperty, observablePrefHeight);
+		return (Component) this;
+	}
 }
