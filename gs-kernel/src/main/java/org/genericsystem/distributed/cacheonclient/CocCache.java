@@ -238,6 +238,7 @@ public class CocCache extends HeavyCache {
 		ObservableList<Generic> result = dependenciesPromiseAsOservableListCacheMap.get(generic);
 		if (result == null) {
 			result = new ListBinding<Generic>() {
+				@SuppressWarnings("unused")
 				private final InvalidationListener listener;
 				private final Observable invalidator = getInvalidator(generic);
 				private List<Generic> promisedList = new ArrayList<Generic>();
@@ -245,8 +246,13 @@ public class CocCache extends HeavyCache {
 				{
 					invalidator.addListener(new WeakInvalidationListener(listener = (o) -> CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
 						promisedList = snapshot.toList();
-						Platform.runLater(() -> invalidate());
-					})));
+						// TODO ugly, find a way to ask is JavaFX is currently used.
+							try {
+								Platform.runLater(() -> invalidate());
+							} catch (IllegalStateException e) {
+								invalidate();
+							}
+						})));
 				}
 
 				@Override
