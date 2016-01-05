@@ -34,8 +34,7 @@ public class WindowBuilder implements Builder {
 					tab.getFirstColumnWidth().setValue(295);
 					tab.getRowHeight().setValue(100);
 					return new ReadOnlyObjectWrapper<Table>(tab);
-				}
-				,	column -> new ReadOnlyStringWrapper("" + column),
+				},	column -> new ReadOnlyStringWrapper("" + column),
 					firstColumString->new ReadOnlyStringWrapper(""+firstColumString));
 		
 		Table table = tableModel.createTable();
