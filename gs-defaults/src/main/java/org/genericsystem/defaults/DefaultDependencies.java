@@ -4,11 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.beans.Observable;
@@ -252,19 +253,23 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 	default ObservableList<T> getObservableSubInstances() {
 		return new TransitiveObservableList<T>(getObservableSubInheritings()) {
-			private final List<T> list = new ArrayList<>();
-
+			@SuppressWarnings("unchecked")
 			@Override
 			protected ObservableList<T> computeValue() {
-				unbindAllSlaves();
-				list.clear();
+				final Set<T> set = new HashSet<>();
 
-				for (T generic : master) {
-					ObservableList<T> observableSubInstances = generic.getObservableSubInstances();
-					bindSlave(observableSubInstances);
-					list.addAll(observableSubInstances);
-				}
-				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(list.stream().distinct().collect(Collectors.toList())));
+				set.add((T) DefaultDependencies.this);
+				for (List<T> slave : getSlaves())
+					set.addAll(slave);
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<T>(new ArrayList<>(set)));
+			}
+
+			@Override
+			protected void onMasterInvalidation() {
+				unbindAllSlaves();
+				for (T generic : master)
+					bindSlave(generic.getObservableInstances());
+				invalidate();
 			}
 		};
 	}
@@ -536,50 +541,27 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 	default ObservableList<T> getObservableSubInheritings() {
 		return new TransitiveObservableList<T>(getObservableInheritings()) {
-			private final List<T> list = new ArrayList<>();
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected ObservableList<T> computeValue() {
-				unbindAllSlaves();
-				list.clear();
+				final Set<T> set = new HashSet<>();
 
-				for (T generic : master) {
-					ObservableList<T> observableSubInheritings = generic.getObservableSubInheritings();
-					bindSlave(observableSubInheritings);
-					list.addAll(observableSubInheritings);
-				}
-				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(list.stream().distinct().collect(Collectors.toList())));
+				set.add((T) DefaultDependencies.this);
+				for (List<T> slave : getSlaves())
+					set.addAll(slave);
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(new ArrayList<>(set)));
+			}
+
+			@Override
+			protected void onMasterInvalidation() {
+				unbindAllSlaves();
+				for (T generic : master)
+					bindSlave(generic.getObservableSubInheritings());
+				invalidate();
 			}
 		};
 	}
-
-	// default ObservableList<T> getObservableSubInheritings() {
-	// return new TransitiveObservableList<T>(getObservableInheritings()) {
-	// private final List<T> list = new ArrayList<>();
-	//
-	// @Override
-	// protected ObservableList<T> computeValue() {
-	// System.out.println(System.identityHashCode(this) + " getObservableSubInheritings, computeValue, master=" + master);
-	// unbindAllSlaves();
-	// list.clear();
-	//
-	// for (T generic : master) {
-	// ObservableList<T> observableSubInheritings = generic.getObservableSubInheritings();
-	// try {
-	// Thread.sleep(500);
-	// } catch (InterruptedException e) {
-	// e.printStackTrace();
-	// }
-	// observableSubInheritings.size();
-	// System.out.println(System.identityHashCode(this) + " observableSubInheritings " + observableSubInheritings);
-	// bindSlave(observableSubInheritings);
-	// list.addAll(observableSubInheritings);
-	// }
-	// System.out.println(System.identityHashCode(this) + " list : " + list);
-	// return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(list.stream().distinct().collect(Collectors.toList())));
-	// }
-	// };
-	// }
 
 	@Override
 	default T getComposite(Serializable value) {

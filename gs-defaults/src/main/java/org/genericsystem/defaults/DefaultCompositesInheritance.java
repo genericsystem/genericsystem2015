@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,6 +22,8 @@ import org.genericsystem.defaults.async.AsyncInheritanceComputer;
 import org.genericsystem.defaults.async.ObservableInheritanceComputer;
 import org.genericsystem.defaults.tools.TransitiveObservableValue;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+
 public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	// Remove
@@ -26,9 +31,9 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 
 	CompletableFuture<T> getAsyncKey(Class<? extends SystemProperty> propertyClass, int pos);
 
-	ObservableValue<T> getObservableKey(Class<? extends SystemProperty> propertyClass, int pos);
-
 	ObservableList<T> getObservableComposites();
+
+	ObservableValue<T> getObservableKey(Class<? extends SystemProperty> propertyClass, int pos);
 
 	//
 
@@ -148,19 +153,17 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	default ObservableList<T> getObservableAttributes(T attribute) {
 		return new TransitiveObservableValue<T>(getObservableKey(NonHeritableProperty.class, ApiStatics.NO_POSITION)) {
 			@Override
-			protected ObservableList<T> computeValue() {
-				unbindAllSlaves();
-				ObservableList<T> obsList;
-				T nonHeritableProperty = master.getValue();
-
-				if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-					obsList = new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).observableInheritanceList();
+			protected void onMasterInvalidation() {
+				if (master.getValue() == null || attribute.inheritsFrom(master.getValue()) || attribute.isInheritanceEnabled())
+					changeSlave(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).observableInheritanceList());
 				else
-					obsList = getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
+					changeSlave(getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL));
+				invalidate();
+			}
 
-				bindSlave(obsList);
-				return FXCollections.unmodifiableObservableList(obsList);
-				// return slave.get();
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(getSlave());
 			}
 		};
 	}
@@ -267,18 +270,17 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	default ObservableList<T> getObservableHolders(T attribute) {
 		return new TransitiveObservableValue<T>(getObservableKey(NonHeritableProperty.class, ApiStatics.NO_POSITION)) {
 			@Override
-			protected ObservableList<T> computeValue() {
-				unbindAllSlaves();
-				ObservableList<T> obsList;
-				T nonHeritableProperty = master.getValue();
-
-				if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-					obsList = new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).observableInheritanceList();
+			protected void onMasterInvalidation() {
+				if (master.getValue() == null || attribute.inheritsFrom(master.getValue()) || attribute.isInheritanceEnabled())
+					changeSlave(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).observableInheritanceList());
 				else
-					obsList = getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+					changeSlave(getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE));
+				invalidate();
+			}
 
-				bindSlave(obsList);
-				return FXCollections.unmodifiableObservableList(obsList);
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(getSlave());
 			}
 		};
 	}
@@ -487,6 +489,22 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<Serializable> getObservableValue(T attribute, Serializable value, T... targets) {
+		return new ObjectBinding<Serializable>() {
+			private final ObservableValue<T> holder;
+			{
+				holder = getObservableHolder(attribute, value, targets);
+				bind(holder);
+			}
+
+			@Override
+			protected Serializable computeValue() {
+				return holder.getValue() != null ? holder.getValue().getValue() : null;
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Serializable getValue(T attribute, T... targets) {
 		T holder = getHolder(attribute, targets);
@@ -496,6 +514,22 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Serializable> getAsyncValue(T attribute, T... targets) {
 		return getAsyncHolder(attribute, targets).thenApply(holder -> holder != null ? holder.getValue() : null);
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<Serializable> getObservableValue(T attribute, T... targets) {
+		return new ObjectBinding<Serializable>() {
+			private final ObservableValue<T> holder;
+			{
+				holder = getObservableHolder(attribute, targets);
+				bind(holder);
+			}
+
+			@Override
+			protected Serializable computeValue() {
+				return holder.getValue() != null ? holder.getValue().getValue() : null;
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -510,6 +544,23 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<Serializable> getObservableValues(T attribute, Serializable value, T... targets) {
+		return new ListBinding<Serializable>() {
+			private final ObservableList<T> links;
+			{
+				links = getObservableLinks(attribute, value, targets);
+				bind(links);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<Serializable> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, T... targets) {
 		return () -> getLinks(attribute, targets).stream().map(x -> x.getValue());
@@ -520,6 +571,23 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 		return getAsyncLinks(attribute, targets).thenApply(links -> () -> links.stream().map(x -> x.getValue()));
 	}
 
+	@SuppressWarnings("unchecked")
+	default ObservableList<Serializable> getObservableValues(T attribute, T... targets) {
+		return new ListBinding<Serializable>() {
+			private final ObservableList<T> links;
+			{
+				links = getObservableLinks(attribute, targets);
+				bind(links);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<Serializable> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+			}
+		};
+	}
+
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, int pos) {
 		return () -> getHolders(attribute, pos).stream().map(x -> x.getValue());
@@ -527,6 +595,22 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 
 	default CompletableFuture<Snapshot<Serializable>> getAsyncValues(T attribute, int pos) {
 		return getAsyncHolders(attribute, pos).thenApply(holders -> () -> holders.stream().map(x -> x.getValue()));
+	}
+
+	default ObservableList<Serializable> getObservableValues(T attribute, int pos) {
+		return new ListBinding<Serializable>() {
+			private final ObservableList<T> holders;
+			{
+				holders = getObservableHolders(attribute, pos);
+				bind(holders);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<Serializable> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -562,6 +646,22 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableLinkTargetComponent(T relation, T... targets) {
+		return new ObjectBinding<T>() {
+			private final ObservableValue<T> link;
+			{
+				link = getObservableLink(relation, targets);
+				bind(link);
+			}
+
+			@Override
+			protected T computeValue() {
+				return link.getValue() != null ? link.getValue().getTargetComponent() : null;
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
 	default T getLinkTargetComponent(T relation, Serializable value, T... targets) {
 		T link = getLink(relation, value, targets);
 		return link != null ? link.getTargetComponent() : null;
@@ -570,5 +670,21 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<T> getAsyncLinkTargetComponent(T relation, Serializable value, T... targets) {
 		return getAsyncLink(relation, value, targets).thenApply(link -> link != null ? link.getTargetComponent() : null);
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
+		return new ObjectBinding<T>() {
+			private final ObservableValue<T> link;
+			{
+				link = getObservableLink(relation, value, targets);
+				bind(link);
+			}
+
+			@Override
+			protected T computeValue() {
+				return link.getValue() != null ? link.getValue().getTargetComponent() : null;
+			}
+		};
 	}
 }

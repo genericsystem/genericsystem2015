@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -20,8 +19,6 @@ public class ObservableDefaultTest extends AbstractTest {
 		CocClientEngine engine = new CocClientEngine();
 
 		Generic vehicle = engine.addInstance("vehicle");
-		ObservableList<Generic> vehicleObservableDependencies = vehicle.getCurrentCache().getObservableDependencies(vehicle);
-		vehicleObservableDependencies.addListener((InvalidationListener) l -> System.out.println("vehicleObservableDependencies invalidation"));
 
 		Generic power = vehicle.addAttribute("power");
 		vehicle.addInstance("myBmw");
@@ -31,12 +28,8 @@ public class ObservableDefaultTest extends AbstractTest {
 
 	public void basicObservableAttributesTest2() throws InterruptedException {
 		CocClientEngine engine = new CocClientEngine();
-		ObservableList<Generic> engineObservableDependencies = engine.getCurrentCache().getObservableDependencies(engine);
-		engineObservableDependencies.addListener((InvalidationListener) l -> System.out.println("engineObservableDependencies invalidation"));
 
 		Generic vehicle = engine.addInstance("vehicle");
-		ObservableList<Generic> vehicleObservableDependencies = vehicle.getCurrentCache().getObservableDependencies(vehicle);
-		vehicleObservableDependencies.addListener((InvalidationListener) l -> System.out.println("vehicleObservableDependencies invalidation"));
 		ObservableList<Generic> vehicleObservableAttributes = vehicle.getObservableAttributes();
 
 		Generic car = engine.addInstance(vehicle, "car");
@@ -281,32 +274,52 @@ public class ObservableDefaultTest extends AbstractTest {
 		assert blueObservableInstances.size() == 1;
 	}
 
-	// public void test_getInstanceTest20() throws InterruptedException {
-	// CocClientEngine root = new CocClientEngine();
-	// Generic vehicle = root.addInstance("Vehicle");
-	// Generic myBmw = vehicle.addInstance("myBmw");
-	// ObservableList<Generic> myBmwObservableSubInstancesByVehicle = vehicle.getObservableSubInstances("myBmw");
-	// myBmwObservableSubInstancesByVehicle.size();
+	public void test_getInstanceTest20() throws InterruptedException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("Vehicle");
+		Generic myBmw = vehicle.addInstance("myBmw");
+		ObservableList<Generic> myBmwObservableSubInstancesByVehicle = vehicle.getObservableSubInstances("myBmw");
+		myBmwObservableSubInstancesByVehicle.size();
+
+		vehicle.addInstance("myAudi");
+		Generic car = root.addInstance(vehicle, "Car");
+		ObservableList<Generic> myBmwObservableSubInstancesByCar = car.getObservableSubInstances("myBmw");
+		myBmwObservableSubInstancesByCar.size();
+
+		Generic myBmwCar = car.addInstance("myBmw");
+		car.addInstance("myAudi");
+
+		Thread.sleep(100);
+
+		myBmwObservableSubInstancesByVehicle.size();
+		myBmwObservableSubInstancesByCar.size();
+
+		assert myBmwObservableSubInstancesByVehicle.containsAll(Arrays.asList(myBmw, myBmwCar)) : vehicle.getSubInstances("myBmw").info();
+		assert myBmwObservableSubInstancesByCar.get(0) == myBmwCar;
+	}
+
+	public void test_getInstanceTest21() throws InterruptedException, ExecutionException, TimeoutException {//
+		CocClientEngine root = new CocClientEngine();
+
+		Generic tree = root.addInstance("Tree");
+		ObservableList<Generic> treeObservableSubInstances = tree.getObservableSubInstances("children2");
+		treeObservableSubInstances.size();
+
+		Generic father = tree.addInstance("father");
+		Generic mother = tree.addInstance("mother");
+		Generic children1 = tree.addInstance(Arrays.asList(father, mother), "children1");
+		Generic children2 = tree.addInstance(Arrays.asList(father, mother), "children2");
+		Generic children3 = tree.addInstance(children1, "children2");
+
+		assert treeObservableSubInstances.size() == 2;
+		assert treeObservableSubInstances.containsAll(Arrays.asList(children2, children3));
+	}
+
 	//
-	// vehicle.addInstance("myAudi");
-	// Generic car = root.addInstance(vehicle, "Car");
-	// ObservableList<Generic> myBmwObservableSubInstancesByCar = car.getObservableSubInstances("myBmw");
-	// myBmwObservableSubInstancesByCar.size();
+
 	//
-	// Generic myBmwCar = car.addInstance("myBmw");
-	// car.addInstance("myAudi");
+
 	//
-	// Thread.sleep(100);
-	//
-	// myBmwObservableSubInstancesByVehicle.size();
-	// myBmwObservableSubInstancesByCar.size();
-	//
-	// System.out.println("myBmwObservableSubInstancesByVehicle " + myBmwObservableSubInstancesByVehicle);
-	// System.out.println("myBmwObservableSubInstancesByCar " + myBmwObservableSubInstancesByCar);
-	//
-	// assert myBmwObservableSubInstancesByVehicle.containsAll(Arrays.asList(myBmw, myBmwCar)) : vehicle.getSubInstances("myBmw").info();
-	// assert myBmwObservableSubInstancesByCar.get(0) == myBmwCar;
-	// }
 
 	//
 
@@ -315,60 +328,72 @@ public class ObservableDefaultTest extends AbstractTest {
 		ObservableList<Generic> engineSubInheritings = engine.getObservableSubInheritings();
 		engineSubInheritings.size();
 
-		// Generic animal = engine.addInstance("Animal");// Alone type
-		// ObservableList<Generic> animalSubInheritings = animal.getObservableSubInheritings();
-		// animalSubInheritings.size();
-		//
-		// Generic machine = engine.addInstance("Machine");
-		// ObservableList<Generic> machineSubInheritings = machine.getObservableSubInheritings();
-		// machineSubInheritings.size();
-		//
-		// Generic vehicle = engine.addInstance(machine, "Vehicle");
-		// ObservableList<Generic> vehicleSubInheritings = vehicle.getObservableSubInheritings();
-		// vehicleSubInheritings.size();
-		//
-		// Generic robot = engine.addInstance(machine, "Robot");
-		// ObservableList<Generic> robotSubInheritings = robot.getObservableSubInheritings();
-		// robotSubInheritings.size();
-		//
-		// Generic car = engine.addInstance(vehicle, "Car");
-		// ObservableList<Generic> carSubInheritings = car.getObservableSubInheritings();
-		// carSubInheritings.size();
-		//
-		// Generic bike = engine.addInstance(vehicle, "Bike");
-		// ObservableList<Generic> bikeSubInheritings = bike.getObservableSubInheritings();
-		// bikeSubInheritings.size();
-		//
-		// Generic transformer = engine.addInstance(Arrays.asList(robot, car), "Transformer");
-		// ObservableList<Generic> transformerSubInheritings = transformer.getObservableSubInheritings();
-		// transformerSubInheritings.size();
-		//
-		// Generic plasticTransformer = engine.addInstance(transformer, "PlasticTransformer");
-		// ObservableList<Generic> plasticTransformerSubInheritings = plasticTransformer.getObservableSubInheritings();
-		// plasticTransformerSubInheritings.size();
+		Generic animal = engine.addInstance("Animal");// Alone type
+		ObservableList<Generic> animalSubInheritings = animal.getObservableSubInheritings();
+		animalSubInheritings.size();
 
-		Thread.sleep(500);
+		Generic machine = engine.addInstance("Machine");
+		ObservableList<Generic> machineSubInheritings = machine.getObservableSubInheritings();
+		machineSubInheritings.size();
+
+		Generic vehicle = engine.addInstance(machine, "Vehicle");
+		ObservableList<Generic> vehicleSubInheritings = vehicle.getObservableSubInheritings();
+		vehicleSubInheritings.size();
+
+		Generic robot = engine.addInstance(machine, "Robot");
+		ObservableList<Generic> robotSubInheritings = robot.getObservableSubInheritings();
+		robotSubInheritings.size();
+
+		Generic car = engine.addInstance(vehicle, "Car");
+		ObservableList<Generic> carSubInheritings = car.getObservableSubInheritings();
+		carSubInheritings.size();
+
+		Generic bike = engine.addInstance(vehicle, "Bike");
+		ObservableList<Generic> bikeSubInheritings = bike.getObservableSubInheritings();
+		bikeSubInheritings.size();
+
+		Generic transformer = engine.addInstance(Arrays.asList(robot, car), "Transformer");
+		ObservableList<Generic> transformerSubInheritings = transformer.getObservableSubInheritings();
+		transformerSubInheritings.size();
+
+		Generic plasticTransformer = engine.addInstance(transformer, "PlasticTransformer");
+		ObservableList<Generic> plasticTransformerSubInheritings = plasticTransformer.getObservableSubInheritings();
+		plasticTransformerSubInheritings.size();
+
+		Thread.sleep(700);
 
 		engineSubInheritings.size();
 
-		System.out.println("-> engineObservableSubInheritings " + engineSubInheritings);
-		System.out.println("-> engineInheritings " + engine.getSubInheritings().toList());
+		assert engine.getSubInheritings().toList().containsAll(engineSubInheritings);
+		assert engine.getSubInheritings().size() == engineSubInheritings.size();
 
-		// System.out.println("engineSubInheritings " + engineSubInheritings);
-		// System.out.println("engine.getSubInheritings() " + engine.getSubInheritings().toList());
+		assert animal.getSubInheritings().toList().containsAll(animalSubInheritings);
+		assert animal.getSubInheritings().size() == animalSubInheritings.size();
 
-		assert engine.getSubInheritings().toList().equals(engineSubInheritings);
-		// assert animal.getSubInheritings().toList().equals(animalSubInheritings);
-		// assert machine.getSubInheritings().toList().equals(machineSubInheritings);
-		// assert vehicle.getSubInheritings().toList().equals(vehicleSubInheritings);
-		// assert robot.getSubInheritings().toList().equals(robotSubInheritings);
-		// assert car.getSubInheritings().toList().equals(carSubInheritings);
-		// assert bike.getSubInheritings().toList().equals(bikeSubInheritings);
-		// assert transformer.getSubInheritings().toList().equals(transformerSubInheritings);
-		// assert plasticTransformer.getSubInheritings().toList().equals(plasticTransformerSubInheritings);
-		//
-		// assert !machineSubInheritings.contains(animal) : machine.getSubInheritings().info();
-		// assert machineSubInheritings.containsAll(Arrays.asList(machine, vehicle, robot, car, bike, transformer, plasticTransformer)) : machine.getSubInheritings().info();
-		// assert machineSubInheritings.size() == 7 : machine.getSubInheritings().info();
+		assert machine.getSubInheritings().toList().containsAll(machineSubInheritings);
+		assert machine.getSubInheritings().size() == machineSubInheritings.size();
+
+		assert vehicle.getSubInheritings().toList().containsAll(vehicleSubInheritings);
+
+		assert vehicle.getSubInheritings().size() == vehicleSubInheritings.size();
+
+		assert robot.getSubInheritings().toList().containsAll(robotSubInheritings);
+		assert robot.getSubInheritings().size() == robotSubInheritings.size();
+
+		assert car.getSubInheritings().toList().containsAll(carSubInheritings);
+		assert car.getSubInheritings().size() == carSubInheritings.size();
+
+		assert bike.getSubInheritings().toList().containsAll(bikeSubInheritings);
+		assert bike.getSubInheritings().size() == bikeSubInheritings.size();
+
+		assert transformer.getSubInheritings().toList().containsAll(transformerSubInheritings);
+		assert transformer.getSubInheritings().size() == transformerSubInheritings.size();
+
+		assert plasticTransformer.getSubInheritings().toList().containsAll(plasticTransformerSubInheritings);
+		assert plasticTransformer.getSubInheritings().size() == plasticTransformerSubInheritings.size();
+
+		assert !machineSubInheritings.contains(animal) : machine.getSubInheritings().info();
+		assert machineSubInheritings.containsAll(Arrays.asList(machine, vehicle, robot, car, bike, transformer, plasticTransformer)) : machine.getSubInheritings().info();
+		assert machineSubInheritings.size() == 7 : machine.getSubInheritings().info();
 	}
 }
