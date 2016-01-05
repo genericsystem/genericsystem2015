@@ -21,15 +21,15 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 
 	protected Table build(ObservableList<ITEM> items, ObservableValue<String> firstRowFirstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<String>> firstColumnExtractor,
 			Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
-		return new Table(getFirstElement(firstRowFirstColumnString, columns, firstRowExtractor, tableStyle), getElements(items, firstColumnExtractor, columns, rowColumnExtractor, tableStyle), getStyle(tableStyle));
+		return new Table(getFirstElement(firstRowFirstColumnString, columns, firstRowExtractor,firstColumnExtractor, tableStyle), getElements(items, firstColumnExtractor, columns, rowColumnExtractor, tableStyle), getStyle(tableStyle));
 	}
 
 	protected ObservableValue<String> getStyle(TableStyle tableStyle) {
 		return tableStyle.table;
 	}
 
-	protected ObservableValue<Row> getFirstElement(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor, TableStyle tableStyle) {
-		return firstRowExtractor!= null ? new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(firstColumnString, columns, firstRowExtractor, tableStyle)): new SimpleObjectProperty<>();
+	protected ObservableValue<Row> getFirstElement(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor,Function<ITEM, ObservableValue<String>> firstColumnExtractor, TableStyle tableStyle) {
+		return firstRowExtractor!= null ? new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(firstColumnExtractor!=null?firstColumnString:new SimpleStringProperty(), columns, firstRowExtractor, tableStyle)): new SimpleObjectProperty<>();
 	}
 
 	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> firstColumnExtractor, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
