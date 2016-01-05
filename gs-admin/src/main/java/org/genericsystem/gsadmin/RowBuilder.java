@@ -23,6 +23,8 @@ public abstract class RowBuilder<COL, T> implements Builder {
 	}
 
 	protected ObservableValue<Cell<?>> getFirstElement(ObservableValue<String> firstColumnString, TableStyle tableStyle) {
+		if(firstColumnString.getValue() == null)
+			return new ReadOnlyObjectWrapper<>();
 		return new ReadOnlyObjectWrapper<>(getRowFirstCellBuilder().build(firstColumnString, tableStyle));
 	}
 

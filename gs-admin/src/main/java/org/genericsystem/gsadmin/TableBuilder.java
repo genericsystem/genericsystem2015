@@ -3,6 +3,7 @@ package org.genericsystem.gsadmin;
 import java.util.function.Function;
 
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -18,9 +19,9 @@ import org.genericsystem.ui.utils.Transformation;
 
 public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 
-	protected Table build(ObservableList<ITEM> items, ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<String>> rowfirstColumnString,
+	protected Table build(ObservableList<ITEM> items, ObservableValue<String> firstRowFirstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<String>> firstColumnExtractor,
 			Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
-		return new Table(getFirstElement(firstColumnString, columns, firstRowExtractor, tableStyle), getElements(items, rowfirstColumnString, columns, rowColumnExtractor, tableStyle), getStyle(tableStyle));
+		return new Table(getFirstElement(firstRowFirstColumnString, columns, firstRowExtractor, tableStyle), getElements(items, firstColumnExtractor, columns, rowColumnExtractor, tableStyle), getStyle(tableStyle));
 	}
 
 	protected ObservableValue<String> getStyle(TableStyle tableStyle) {
@@ -31,8 +32,8 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 		return firstRowExtractor!= null ? new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(firstColumnString, columns, firstRowExtractor, tableStyle)): new SimpleObjectProperty<>();
 	}
 
-	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> rowfirstColumnString, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
-		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(rowfirstColumnString.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
+	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> firstColumnExtractor, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
+		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(firstColumnExtractor==null?new SimpleStringProperty():firstColumnExtractor.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
 	}
 
 	@Override

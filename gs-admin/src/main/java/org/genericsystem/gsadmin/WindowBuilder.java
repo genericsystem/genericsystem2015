@@ -24,13 +24,14 @@ public class WindowBuilder implements Builder {
 	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		
 		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2),
-				item -> column -> {
-					TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6),null);
+				itemTableCell -> columnTableCell -> {
+					TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6), 
+							itemTextTable -> columnTextTable -> new ReadOnlyStringWrapper("Cell : " + itemTextTable + " " + columnTextTable),null,null);
 					return new ReadOnlyObjectWrapper<Table>(textTableModel.createTable());
-				},column -> new ReadOnlyStringWrapper("Column : " + column));
+				},	column -> new ReadOnlyStringWrapper("Column : " + column),
+					firstColumString->new ReadOnlyStringWrapper(""+firstColumString));
 		
 		Table table = tableModel.createTable();
-		
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(50);
