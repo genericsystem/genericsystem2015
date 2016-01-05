@@ -6,8 +6,10 @@ import javafx.collections.FXCollections;
 
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
+import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSVBox;
+import javafx.beans.property.ReadOnlyStringWrapper;
 
 public class WindowBuilder implements Builder {
 
@@ -20,8 +22,15 @@ public class WindowBuilder implements Builder {
 	}
 
 	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
-		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2));
+		
+		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2),
+				item -> column -> {
+					TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6),null);
+					return new ReadOnlyObjectWrapper<Table>(textTableModel.createTable());
+				},column -> new ReadOnlyStringWrapper("Column : " + column));
+		
 		Table table = tableModel.createTable();
+		
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(50);
