@@ -44,15 +44,11 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> extends H
 
 	private class InheritenceComputerBinding extends ListBinding<T> {
 
-		Set<Observable> observables = new HashSet<>();
+		Set<ObservableList<?>> observables = new HashSet<>();
 
-		public boolean toBind(Observable observable) {
-			return observables.add(observable);
-		}
-
-		private void bindAll() {
-			for (Observable observable : observables)
-				bind(observable);
+		public void toBind(ObservableList<?> observable) {
+			observables.add(observable);
+			bind(observable);
 		}
 
 		private void unbindAll() {
@@ -68,7 +64,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> extends H
 			ObservableInheritanceComputer.this.clear();
 
 			List<T> list = getInheringsStream(base).filter(holder -> !ObservableInheritanceComputer.this.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList());
-			bindAll();
+
 			return new ObservableListWrapper<>(list);
 		}
 	}
@@ -78,7 +74,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> extends H
 		if (result == null)
 			inheritingsCache.put(superVertex, result = new Inheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
 		return result.stream();
-		// return new Inheritings(superVertex).inheritanceStream();
+		// return new Inheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
 	}
 
 	private class Inheritings {
@@ -111,7 +107,6 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> extends H
 			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(localBase, holder) : Stream.empty(), compositesBySuper(localBase, holder));
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
 		}
-
 	}
 
 	@SuppressWarnings("hiding")

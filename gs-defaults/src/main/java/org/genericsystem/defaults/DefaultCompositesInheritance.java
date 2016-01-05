@@ -7,8 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,6 +17,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 import org.genericsystem.defaults.async.AsyncInheritanceComputer;
 import org.genericsystem.defaults.async.ObservableInheritanceComputer;
+import org.genericsystem.defaults.tools.TransitiveObservableValue;
 
 public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extends IVertex<T> {
 
@@ -147,27 +146,7 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableAttributes(T attribute) {
-		class InternalBinding extends ListBinding<T> {
-
-			private final List<Observable> slaves = new ArrayList<>();
-			private final ObservableValue<T> master;
-
-			public InternalBinding(ObservableValue<T> master) {
-				this.master = master;
-				bind(this.master);
-			}
-
-			public void bindSlave(Observable observable) {
-				slaves.add(observable);
-				bind(observable);
-			}
-
-			private void unbindAllSlaves() {
-				for (Observable observable : slaves)
-					unbind(observable);
-				slaves.clear();
-			}
-
+		return new TransitiveObservableValue<T>(getObservableKey(NonHeritableProperty.class, ApiStatics.NO_POSITION)) {
 			@Override
 			protected ObservableList<T> computeValue() {
 				unbindAllSlaves();
@@ -181,10 +160,9 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 
 				bindSlave(obsList);
 				return FXCollections.unmodifiableObservableList(obsList);
+				// return slave.get();
 			}
-		}
-
-		return new InternalBinding(getObservableKey(NonHeritableProperty.class, ApiStatics.NO_POSITION));
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -287,27 +265,7 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableHolders(T attribute) {
-		class InternalBinding extends ListBinding<T> {
-
-			private final List<Observable> slaves = new ArrayList<>();
-			private final ObservableValue<T> master;
-
-			public InternalBinding(ObservableValue<T> master) {
-				this.master = master;
-				bind(this.master);
-			}
-
-			public void bindSlave(Observable observable) {
-				slaves.add(observable);
-				bind(observable);
-			}
-
-			private void unbindAllSlaves() {
-				for (Observable observable : slaves)
-					unbind(observable);
-				slaves.clear();
-			}
-
+		return new TransitiveObservableValue<T>(getObservableKey(NonHeritableProperty.class, ApiStatics.NO_POSITION)) {
 			@Override
 			protected ObservableList<T> computeValue() {
 				unbindAllSlaves();
@@ -318,11 +276,11 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 					obsList = new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).observableInheritanceList();
 				else
 					obsList = getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
+
 				bindSlave(obsList);
 				return FXCollections.unmodifiableObservableList(obsList);
 			}
-		}
-		return new InternalBinding(getObservableKey(NonHeritableProperty.class, ApiStatics.NO_POSITION));
+		};
 	}
 
 	@SuppressWarnings("unchecked")

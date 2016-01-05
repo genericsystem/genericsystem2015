@@ -12,16 +12,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.beans.Observable;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.tools.TransitiveObservableList;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 
+@SuppressWarnings("restriction")
 public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@SuppressWarnings("unchecked")
@@ -58,6 +59,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableInstance(Serializable value, T... components) { // TODO CHECK
+		return getObservableNonAmbiguousResult(getObservableInstances(value, components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getInstance(T... components) {
 		return getNonAmbiguousResult(getInstances(components).stream());
@@ -88,6 +94,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableInstance(T override, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInstances(override, value, components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getInstance(List<T> overrides, Serializable value, T... components) {
 		return getNonAmbiguousResult(getInstances(overrides, value, components).stream());
@@ -101,6 +112,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableInstance(List<T> overrides, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInstances(overrides, value, components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getInstances(Serializable value, T... components) {
 		return getInstances(components).filter(valueFilter(value));
@@ -109,6 +125,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncInstances(Serializable value, T... components) {
 		return getAsyncInstances(components).thenApply(instances -> instances.filter(valueFilter(value)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableInstances(Serializable value, T... components) {
+		return getObservableInstances(components).filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,6 +176,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return getAsyncInstances(Collections.singletonList(override), value, components);
 	}
 
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableInstances(T override, Serializable value, T... components) {
+		return getObservableInstances(Collections.singletonList(override), value, components);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	default Snapshot<T> getInstances(List<T> overrides, Serializable value, T... components) {
@@ -170,6 +196,13 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableInstances(List<T> overrides, Serializable value, T... components) { // TODO computeAndCheckOverridesAreReached observable
+		assert false;
+		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
+		return getObservableInstances(value, components).filtered(overridesFilter(supers));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getSubInstance(Serializable value, T... components) {
 		return getNonAmbiguousResult(getSubInstances(value, components).stream());
@@ -182,6 +215,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableSubInstance(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(value, components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getSubInstances(Serializable value, T... components) {
 		return getSubInstances(components).filter(valueFilter(value));
@@ -191,6 +229,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	default CompletableFuture<Snapshot<T>> getAsyncSubInstances(Serializable value, T... components) {
 		CompletableFuture<Snapshot<T>> subInstancePromise = getAsyncSubInstances(components);
 		return subInstancePromise.thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableSubInstances(Serializable value, T... components) {
+		return getObservableSubInstances(components).filtered(valueFilter(value));
 	}
 
 	@Override
@@ -208,35 +251,19 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	default ObservableList<T> getObservableSubInstances() {
-		return new ListBinding<T>() {
-
-			private final ObservableList<T> observableSubInheritings = getObservableSubInheritings();
-			private final List<ObservableList<T>> observables = new ArrayList<>();
+		return new TransitiveObservableList<T>(getObservableSubInheritings()) {
 			private final List<T> list = new ArrayList<>();
 
-			{
-				bind(observableSubInheritings);
-			}
-
-			private void removeAndUnbindAll() {
-				list.clear();
-				for (Observable observable : observables)
-					unbind(observable);
-				observables.clear();
-			}
-
-			private void addAndBind(ObservableList<T> observable) {
-				observables.add(observable);
-				bind(observable);
-				list.addAll(observable);
-			}
-
-			@SuppressWarnings("restriction")
 			@Override
 			protected ObservableList<T> computeValue() {
-				removeAndUnbindAll();
-				for (T generic : observableSubInheritings)
-					addAndBind(generic.getObservableSubInstances());
+				unbindAllSlaves();
+				list.clear();
+
+				for (T generic : master) {
+					ObservableList<T> observableSubInstances = generic.getObservableSubInstances();
+					bindSlave(observableSubInstances);
+					list.addAll(observableSubInstances);
+				}
 				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(list.stream().distinct().collect(Collectors.toList())));
 			}
 		};
@@ -255,6 +282,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableSubInstance(T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getSubInstances(T... components) {
 		return getSubInstances().filter(componentsFilter(components));
@@ -263,6 +295,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncSubInstances(T... components) {
 		return getAsyncSubInstances().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableSubInstances(T... components) {
+		return getObservableSubInstances().filtered(componentsFilter(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -278,6 +315,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableSubInstance(T override, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(override, value, components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getSubInstances(T override, Serializable value, T... components) {
 		return getSubInstances(Collections.singletonList(override), value, components);
@@ -290,6 +332,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableSubInstances(T override, Serializable value, T... components) {
+		return getObservableSubInstances(Collections.singletonList(override), value, components);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getSubInstance(List<T> overrides, Serializable value, T... components) {
 		return getNonAmbiguousResult(getSubInstances(overrides, value, components).stream());
@@ -299,6 +346,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	// use computeAsyncAndCheckOverridesAreReached : unimplemented
 	default CompletableFuture<T> getAsyncSubInstance(List<T> overrides, Serializable value, T... components) {
 		return getAsyncSubInstances(overrides, value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableSubInstance(List<T> overrides, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(overrides, value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -316,6 +368,13 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableSubInstances(List<T> overrides, Serializable value, T... components) {
+		assert false;
+		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
+		return getObservableSubInstances(value, components).filtered(overridesFilter(supers));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getInheriting(Serializable value, T... components) {
 		return getNonAmbiguousResult(getInheritings(value, components).stream());
@@ -324,6 +383,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<T> getAsyncInheriting(Serializable value, T... components) {
 		return getAsyncInheritings(value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableInheriting(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInheritings(value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -338,6 +402,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableInheriting(T... components) {
+		return getObservableNonAmbiguousResult(getObservableInheritings(components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getInheritings(Serializable value, T... components) {
 		return getInheritings(components).filter(valueFilter(value));
@@ -346,6 +415,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncInheritings(Serializable value, T... components) {
 		return getAsyncInheritings(components).thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableInheritings(Serializable value, T... components) {
+		return getObservableInheritings(components).filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -376,6 +450,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableInheritings(T... components) {
+		return getObservableInheritings().filtered(componentsFilter(components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getSubInheriting(Serializable value, T... components) {
 		return getNonAmbiguousResult(getSubInheritings(value, components).stream());
@@ -384,6 +463,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<T> getAsyncSubInheriting(Serializable value, T... components) {
 		return getAsyncSubInheritings(value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableSubInheriting(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInheritings(value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -398,6 +482,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableSubInheritings(Serializable value, T... components) {
+		return getObservableSubInheritings(components).filtered(valueFilter(value));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getSubInheriting(T... components) {
 		return getNonAmbiguousResult(getSubInheritings(components).stream());
@@ -409,6 +498,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableSubInheriting(T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInheritings(components));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getSubInheritings(T... components) {
 		return getSubInheritings().filter(componentsFilter(components));
@@ -417,6 +511,11 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@SuppressWarnings("unchecked")
 	default CompletableFuture<Snapshot<T>> getAsyncSubInheritings(T... components) {
 		return getAsyncSubInheritings().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableSubInheritings(T... components) {
+		return getObservableSubInheritings().filtered(componentsFilter(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -435,41 +534,52 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableSubInheritings() {
-		return new ListBinding<T>() {
-
-			private final ObservableList<T> observableInheritings = getObservableInheritings();
-			private final List<ObservableList<T>> observables = new ArrayList<>();
+		return new TransitiveObservableList<T>(getObservableInheritings()) {
 			private final List<T> list = new ArrayList<>();
 
-			{
-				bind(observableInheritings);
-			}
-
-			private void removeAndUnbindAll() {
-				list.clear();
-				for (Observable observable : observables)
-					unbind(observable);
-				observables.clear();
-			}
-
-			private void addAndBind(ObservableList<T> observable) {
-				observables.add(observable);
-				bind(observable);
-				list.addAll(observable);
-			}
-
-			@SuppressWarnings("restriction")
 			@Override
 			protected ObservableList<T> computeValue() {
-				removeAndUnbindAll();
-				for (T generic : observableInheritings)
-					addAndBind(generic.getObservableSubInheritings());
+				unbindAllSlaves();
+				list.clear();
+
+				for (T generic : master) {
+					ObservableList<T> observableSubInheritings = generic.getObservableSubInheritings();
+					bindSlave(observableSubInheritings);
+					list.addAll(observableSubInheritings);
+				}
 				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(list.stream().distinct().collect(Collectors.toList())));
 			}
 		};
 	}
+
+	// default ObservableList<T> getObservableSubInheritings() {
+	// return new TransitiveObservableList<T>(getObservableInheritings()) {
+	// private final List<T> list = new ArrayList<>();
+	//
+	// @Override
+	// protected ObservableList<T> computeValue() {
+	// System.out.println(System.identityHashCode(this) + " getObservableSubInheritings, computeValue, master=" + master);
+	// unbindAllSlaves();
+	// list.clear();
+	//
+	// for (T generic : master) {
+	// ObservableList<T> observableSubInheritings = generic.getObservableSubInheritings();
+	// try {
+	// Thread.sleep(500);
+	// } catch (InterruptedException e) {
+	// e.printStackTrace();
+	// }
+	// observableSubInheritings.size();
+	// System.out.println(System.identityHashCode(this) + " observableSubInheritings " + observableSubInheritings);
+	// bindSlave(observableSubInheritings);
+	// list.addAll(observableSubInheritings);
+	// }
+	// System.out.println(System.identityHashCode(this) + " list : " + list);
+	// return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(list.stream().distinct().collect(Collectors.toList())));
+	// }
+	// };
+	// }
 
 	@Override
 	default T getComposite(Serializable value) {
@@ -480,6 +590,10 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return getAsyncComposites(value).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
 	}
 
+	default ObservableValue<T> getObservableComposite(Serializable value) {
+		return getObservableNonAmbiguousResult(getObservableComposites(value));
+	}
+
 	@Override
 	default Snapshot<T> getComposites(Serializable value) {
 		return getComposites().filter(valueFilter(value));
@@ -487,6 +601,10 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 	default CompletableFuture<Snapshot<T>> getAsyncComposites(Serializable value) {
 		return getAsyncComposites().thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	}
+
+	default ObservableList<T> getObservableComposites(Serializable value) {
+		return getObservableComposites().filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -500,6 +618,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return getCurrentCache().getAsyncComposites((T) this);
 	}
 
+	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableComposites() {
 		return getCurrentCache().getObservableComposites((T) this);
 	}

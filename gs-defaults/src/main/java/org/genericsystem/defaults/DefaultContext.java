@@ -143,20 +143,7 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new OrderedDependencies().traverse(node);
 	}
 
-	default NavigableSet<T> computeObservableDependencies(T node) {
-		class OrderedDependencies extends TreeSet<T> {
-			private static final long serialVersionUID = -441180182522681264L;
-
-			OrderedDependencies visit(T node) {
-				if (!contains(node)) {
-					add(node);
-					getDependencies(node).forEach(this::visit);
-				}
-				return this;
-			}
-		}
-		return new OrderedDependencies().visit(node);
-	}
+	// TODO computeObservableDependencies ! --------------------------------------------
 
 	default NavigableSet<T> computePotentialDependencies(T meta, List<T> supers, Serializable value, List<T> components) {
 		class PotentialDependenciesComputer extends TreeSet<T> {
@@ -207,6 +194,8 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 
 		return new PotentialDependenciesComputer().traverse(meta);
 	}
+
+	// TODO computePotentialDependencies Observable -------------------------------------------------
 
 	default NavigableSet<T> computeRemoveDependencies(T node) {
 		class OrderedRemoveDependencies extends TreeSet<T> {
@@ -292,6 +281,8 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new OrderedRemoveDependencies().traverse(node);
 	}
 
+	// TODO computeRemoveDependencies Observable ------------------------------------------------
+
 	default List<T> computeAndCheckOverridesAreReached(T adjustedMeta, List<T> overrides, Serializable value, List<T> components) {
 		List<T> supers = new ArrayList<>(new SupersComputer<>(adjustedMeta, overrides, value, components));
 		if (!ApiStatics.areOverridesReached(supers, overrides))
@@ -314,6 +305,8 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 
 		return cf;
 	}
+
+	// TODO computeAndCheckOverridesAreReached Observable------------------------------------
 
 	Snapshot<T> getDependencies(T vertex);
 
