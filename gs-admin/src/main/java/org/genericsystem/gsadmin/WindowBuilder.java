@@ -4,11 +4,14 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
 import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSVBox;
+
 import javafx.beans.property.ReadOnlyStringWrapper;
 
 public class WindowBuilder implements Builder {
@@ -21,20 +24,24 @@ public class WindowBuilder implements Builder {
 		}
 	}
 
-	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
+	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height,CocClientEngine engine) {
 		
-		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2),
+		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>( FXCollections.observableArrayList(engine.getSubInstances().toList()),FXCollections.observableArrayList(engine.getAttributes().toList()),
 				itemTableCell -> columnTableCell -> {
-					TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 8, 9), FXCollections.observableArrayList(1, 2, 7, 6), 
-							itemTextTable -> columnTextTable -> new ReadOnlyStringWrapper("Cell : " + itemTextTable + " " + columnTextTable),null,null);
-					return new ReadOnlyObjectWrapper<Table>(textTableModel.createTable());
-				},	column -> new ReadOnlyStringWrapper("Column : " + column),
+					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell.getHolders(columnTableCell).toList()), FXCollections.observableArrayList(), 
+							itemTextTable -> columnTextTable -> new ReadOnlyStringWrapper("Cell : " + itemTextTable + " " + columnTextTable),null,column -> new ReadOnlyStringWrapper("" + column));
+					Table tab = textTableModel.createTable();
+					tab.getFirstColumnWidth().setValue(280);
+					tab.getRowHeight().setValue(80);
+					return new ReadOnlyObjectWrapper<Table>(tab);
+				},	column -> new ReadOnlyStringWrapper("" + column),
 					firstColumString->new ReadOnlyStringWrapper(""+firstColumString));
 		
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(50);
+		table.getFirstColumnWidth().setValue(200);
 		return new Window(new ReadOnlyObjectWrapper<Table>(table), width, height);
 	}
 }

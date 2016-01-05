@@ -20,8 +20,8 @@ public class Table extends Listable<Row> {
 	private final Property<Number> rowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> firstRowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(80);
-	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(50);
-	private final ObservableValue<Number> tableWidth = Bindings.add(Bindings.multiply(getSize(), (ObservableNumberValue) columnWidth), (ObservableNumberValue) firstColumnWidth);;
+	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(80);
+	private final ObservableValue<Number> tableWidth = Bindings.add(Bindings.multiply(getSize(), (ObservableNumberValue) columnWidth), (ObservableNumberValue) firstColumnWidth);
 	private final ObservableValue<Number> tableHeight = Bindings.add(Bindings.multiply(getElements().size(), (ObservableNumberValue) rowHeight), (ObservableNumberValue) firstRowHeight);
 
 	private ObservableNumberValue getSize(){
