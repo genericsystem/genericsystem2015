@@ -1,10 +1,17 @@
 package org.genericsystem.gsadmin;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.CellBuilder.FirstRowFirstCellTextCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.FirstRowTextCellBuilder;
@@ -31,7 +38,7 @@ public abstract class RowBuilder<COL, T> implements Builder {
 	protected ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
 		return new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), tableStyle));
 	}
-
+	
 	@Override
 	public void init(Element<?> rowPanel) {
 		new GSHBox(rowPanel).select(Row::getFirstElement).include(getRowFirstCellBuilder()::init).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth)

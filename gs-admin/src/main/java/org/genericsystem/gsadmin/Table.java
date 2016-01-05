@@ -21,12 +21,17 @@ public class Table extends Listable<Row> {
 	private final Property<Number> firstRowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(80);
 	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(80);
-	private final ObservableValue<Number> tableWidth = Bindings.add(Bindings.multiply(getSize(), (ObservableNumberValue) columnWidth), (ObservableNumberValue) firstColumnWidth);
-	private final ObservableValue<Number> tableHeight = Bindings.add(Bindings.multiply(getElements().size(), (ObservableNumberValue) rowHeight), (ObservableNumberValue) firstRowHeight);
+	private final ObservableValue<Number> tableWidth = Bindings.add(Bindings.multiply(getWidth(), (ObservableNumberValue) columnWidth), (ObservableNumberValue) firstColumnWidth);
+	private final ObservableValue<Number> tableHeight = Bindings.add(Bindings.multiply(getHeight(), (ObservableNumberValue) rowHeight), (ObservableNumberValue) firstRowHeight);
 
-	private ObservableNumberValue getSize(){
+	private ObservableNumberValue getWidth(){
 		SimpleBooleanProperty isFirstElementNull =new SimpleBooleanProperty(Bindings.createBooleanBinding(()-> getFirstElement().getValue() == null, new SimpleObjectProperty<>(getFirstElement().getValue()) ).getValue());
-		return new SimpleIntegerProperty((int) Bindings.when(isFirstElementNull).then(!isFirstElementNull.getValue()?getFirstElement().getValue().getElements().size():0).otherwise(getElements().size()).getValue());
+		return new SimpleIntegerProperty((int) Bindings.when(isFirstElementNull).then(getElements().size()-1).otherwise(!isFirstElementNull.getValue() ? getFirstElement().getValue().getElements().size():getElements().size()-1).getValue().intValue());
+	}
+	
+	private ObservableNumberValue getHeight(){
+		SimpleBooleanProperty isFirstElementNull =new SimpleBooleanProperty(Bindings.createBooleanBinding(()-> getFirstElement().getValue() == null, new SimpleObjectProperty<>(getFirstElement().getValue()) ).getValue());
+		return new SimpleIntegerProperty((int) Bindings.when(isFirstElementNull).then(getElements().size()-1).otherwise(getElements().size()).getValue().intValue());
 	}
 	
 	public Table(ObservableValue<Row> firstRow, ObservableList<Row> rows, ObservableValue<String> tableStyle) {

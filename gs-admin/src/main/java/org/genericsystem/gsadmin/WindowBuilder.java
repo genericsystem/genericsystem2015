@@ -29,12 +29,13 @@ public class WindowBuilder implements Builder {
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>( FXCollections.observableArrayList(engine.getSubInstances().toList()),FXCollections.observableArrayList(engine.getAttributes().toList()),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell.getHolders(columnTableCell).toList()), FXCollections.observableArrayList(), 
-							itemTextTable -> columnTextTable -> new ReadOnlyStringWrapper("Cell : " + itemTextTable + " " + columnTextTable),null,column -> new ReadOnlyStringWrapper("" + column));
+							null,null,column -> new ReadOnlyStringWrapper("" + column));
 					Table tab = textTableModel.createTable();
-					tab.getFirstColumnWidth().setValue(280);
-					tab.getRowHeight().setValue(80);
+					tab.getFirstColumnWidth().setValue(295);
+					tab.getRowHeight().setValue(100);
 					return new ReadOnlyObjectWrapper<Table>(tab);
-				},	column -> new ReadOnlyStringWrapper("" + column),
+				}
+				,	column -> new ReadOnlyStringWrapper("" + column),
 					firstColumString->new ReadOnlyStringWrapper(""+firstColumString));
 		
 		Table table = tableModel.createTable();

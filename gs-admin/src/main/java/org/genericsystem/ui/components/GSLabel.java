@@ -27,5 +27,9 @@ public class GSLabel extends GSRegion<GSLabel, Label> {
 		addBinding(Label::textProperty, observableText);
 		return this;
 	}
+	
+	public void clickkk(){
+		System.out.println("ffgffffgh");
+	}
 
 }
