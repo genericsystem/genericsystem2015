@@ -7,12 +7,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Tab;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.RowBuilder.TableCellRowBuilder;
 import org.genericsystem.gsadmin.RowBuilder.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.RowBuilder.TextCellRowBuilder;
 import org.genericsystem.gsadmin.Stylable.TableStyle;
+import org.genericsystem.todomvc.Todo;
+import org.genericsystem.todomvc.TodoList;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSSCrollPane;
@@ -31,11 +34,11 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 	}
 
 	protected ObservableValue<Row> getFirstElement(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor,Function<ITEM, ObservableValue<String>> firstColumnExtractor, TableStyle tableStyle) {
-		return firstRowExtractor!= null ? new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(firstColumnExtractor!=null?firstColumnString:new SimpleStringProperty(), columns, firstRowExtractor, tableStyle)): new SimpleObjectProperty<>();
+		return firstRowExtractor!= null ? new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(null,firstColumnExtractor!=null?firstColumnString:new SimpleStringProperty(), columns, firstRowExtractor, tableStyle)): new SimpleObjectProperty<>();
 	}
 
 	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> firstColumnExtractor, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, TableStyle tableStyle) {
-		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(firstColumnExtractor==null?new SimpleStringProperty():firstColumnExtractor.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
+		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(item,firstColumnExtractor==null?new SimpleStringProperty():firstColumnExtractor.apply(item), columns, col -> rowColumnExtractor.apply(item).apply(col), tableStyle));
 	}
 
 	@Override
@@ -46,7 +49,7 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
-				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight).addGenericActionBinding(HBox::onMouseClickedProperty,Table::select);
+				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight).addGenericActionBinding(HBox::onMouseClickedProperty,Row::selected);//(table, row) -> ((Table) table).getRowSelected().setValue((Row) row) );
 			}
 		}
 	}

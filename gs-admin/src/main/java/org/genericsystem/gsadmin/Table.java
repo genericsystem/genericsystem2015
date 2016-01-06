@@ -1,12 +1,11 @@
 package org.genericsystem.gsadmin;
 
-import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
@@ -14,14 +13,14 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Stylable.Listable;
 
-import com.google.common.base.Supplier;
-
 public class Table extends Listable<Row> {
 
 	private final Property<Number> rowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> firstRowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(80);
 	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(80);
+	
+	private ObjectProperty<Row> rowSelected = new SimpleObjectProperty<>();
 	
 	private final ObservableValue<Row> referenceRow = Bindings.createObjectBinding(()-> getReferenceRow().getValue(), getFirstElement(),getElements());
 	private final ObservableIntegerValue firstRowNumber = Bindings.createIntegerBinding(() -> getFirstElement().getValue() != null ? 1 : 0, getFirstElement());
@@ -43,8 +42,9 @@ public class Table extends Listable<Row> {
 		}
 	}
 	
-	public void select(){
-		System.out.println("row selected");
+	public ObjectProperty<Row> getRowSelected() {
+		System.out.println("kkkkkkkkk");
+		return rowSelected;
 	}
 	
 	private ObservableNumberValue getOptionalFirstRowHeight() {
