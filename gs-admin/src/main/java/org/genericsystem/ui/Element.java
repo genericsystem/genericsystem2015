@@ -91,7 +91,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T extends Event> Element<N> addGenericActionBinding(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
+	public <M, T> Element<N> addGenericActionBinding(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
 		bindings.add(Binding.bindGenericAction(propAction, consumer));
 		return this;
 	}

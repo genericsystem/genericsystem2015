@@ -1,17 +1,10 @@
 package org.genericsystem.gsadmin;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseDragEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.CellBuilder.FirstRowFirstCellTextCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.FirstRowTextCellBuilder;
@@ -19,14 +12,16 @@ import org.genericsystem.gsadmin.CellBuilder.RowFirstCellTextCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.TableCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.TextCellBuilder;
 import org.genericsystem.gsadmin.Stylable.TableStyle;
+import org.genericsystem.todomvc.Todo;
+import org.genericsystem.todomvc.TodoList;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
 
 public abstract class RowBuilder<COL, T> implements Builder {
 
-	protected Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
-		return new Row(getFirstElement(firstColumnString, tableStyle), getElements(columns, columnExtractor, tableStyle), getStyle(tableStyle));
+	protected Row build(Object item,ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
+		return new Row(item,getFirstElement(firstColumnString, tableStyle), getElements(columns, columnExtractor, tableStyle), getStyle(tableStyle));
 	}
 
 	protected ObservableValue<Cell<?>> getFirstElement(ObservableValue<String> firstColumnString, TableStyle tableStyle) {

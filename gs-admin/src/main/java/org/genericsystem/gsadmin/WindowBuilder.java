@@ -23,25 +23,26 @@ public class WindowBuilder implements Builder {
 			new TableCellTableBuilder<>().init(table);
 		}
 	}
-
+	public TableCellTableModel<Generic, Generic> tableModel;
+	Table table ;
 	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height,CocClientEngine engine) {
 		
-		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>( FXCollections.observableArrayList(engine.getSubInstances().toList()),FXCollections.observableArrayList(engine.getAttributes().toList()),
+		tableModel = new TableCellTableModel<>( FXCollections.observableArrayList(engine.getSubInstances().toList()),FXCollections.observableArrayList(engine.getAttributes().toList()),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell.getHolders(columnTableCell).toList()), FXCollections.observableArrayList(), 
 							null,null,column -> new ReadOnlyStringWrapper("" + column));
 					Table tab = textTableModel.createTable();
-					tab.getFirstColumnWidth().setValue(295);
-					tab.getRowHeight().setValue(100);
+//					tab.getFirstColumnWidth().setValue(295);
+//					tab.getRowHeight().setValue(100);
 					return new ReadOnlyObjectWrapper<Table>(tab);
 				},	column -> new ReadOnlyStringWrapper("" + column),
 					firstColumString->new ReadOnlyStringWrapper(""+firstColumString));
 		
-		Table table = tableModel.createTable();
+		table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(50);
-		table.getFirstColumnWidth().setValue(200);
+		//table.getFirstColumnWidth().setValue(200);
 		return new Window(new ReadOnlyObjectWrapper<Table>(table), width, height);
 	}
 }
