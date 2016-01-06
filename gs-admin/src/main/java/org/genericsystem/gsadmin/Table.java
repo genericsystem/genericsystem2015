@@ -1,8 +1,12 @@
 package org.genericsystem.gsadmin;
 
+import java.util.function.Function;
+
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
@@ -10,30 +14,47 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.gsadmin.Stylable.Listable;
 
+import com.google.common.base.Supplier;
+
 public class Table extends Listable<Row> {
 
 	private final Property<Number> rowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> firstRowHeight = new SimpleIntegerProperty(20);
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(80);
 	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(80);
-
-	private final ObservableValue<Number> tableHeight = Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight());
+	
+	private final ObservableValue<Row> referenceRow = Bindings.createObjectBinding(()-> getReferenceRow().getValue(), getFirstElement(),getElements());
 	private final ObservableIntegerValue firstRowNumber = Bindings.createIntegerBinding(() -> getFirstElement().getValue() != null ? 1 : 0, getFirstElement());
-
+	private final ObservableValue<Number> tableHeight = Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight());
+	private final ObservableIntegerValue firstCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getFirstElement().getValue() != null ? 1 : 0 :0, referenceRow);
+	private final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
+	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
+	
+	private ObservableValue<Row> getReferenceRow(){
+		if(getFirstElement()!=null){
+			return getFirstElement();
+		}
+		else if(getElements().size()!=0)
+		{	
+			return new SimpleObjectProperty<>(getElements().get(0));
+		}
+		else{
+			return new SimpleObjectProperty<>();
+		}
+	}
+	
+	public void select(){
+		System.out.println("row selected");
+	}
+	
 	private ObservableNumberValue getOptionalFirstRowHeight() {
 		return Bindings.multiply(firstRowNumber, (ObservableNumberValue) firstRowHeight);
 	}
 
 	private ObservableNumberValue getOtherRowsHeight() {
 		return Bindings.multiply(getElements().size(), (ObservableNumberValue) rowHeight);
-	}
-
-	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
-	private final ObservableValue<Row> referenceRow = KK;
-
-	private final ObservableIntegerValue firstCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getFirstElement().getValue() != null ? 1 : 0 : 0, referenceRow KK);
-	private final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
-
+	}	
+	
 	private ObservableNumberValue getOptionalFirstCellWidth() {
 		return Bindings.multiply(firstCellNumber, (ObservableNumberValue) firstColumnWidth);
 	}

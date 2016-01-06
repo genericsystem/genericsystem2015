@@ -1,11 +1,13 @@
 package org.genericsystem.gsadmin;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.RowBuilder.TableCellRowBuilder;
 import org.genericsystem.gsadmin.RowBuilder.TextCellFirstRowBuilder;
@@ -44,11 +46,11 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
-				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
+				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight).addGenericActionBinding(HBox::onMouseClickedProperty,(m)->System.out.println("test"));
 			}
 		}
 	}
-
+	
 	abstract RowBuilder<COL, T> getRowBuilder();
 
 	abstract <M> Function<M, ObservableValue<Number>> getSuperPrefHeight();
