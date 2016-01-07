@@ -3,9 +3,6 @@ package org.genericsystem.distributed.cacheonclient;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -78,24 +75,6 @@ public abstract class AbstractTest {
 			return;
 		}
 		assert false : "Unable to catch any rollback exception!";
-	}
-
-	public void catchAndCheckCausePromise(CompletableFuture<?> cf, Class<? extends Throwable> clazz) throws InterruptedException, TimeoutException, ExecutionException {
-		try {
-			cf.get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
-		} catch (ExecutionException ex) {
-			if (RollbackException.class.isAssignableFrom(ex.getCause().getClass())) {
-				if (ex.getCause().getCause() == null)
-					throw new IllegalStateException("Rollback Exception has not any cause", ex);
-				if (!clazz.isAssignableFrom(ex.getCause().getCause().getClass()))
-					throw new IllegalStateException("Cause of rollback exception is not of type : " + clazz.getSimpleName() + ", but is " + ex.getCause(), ex);
-				return;
-			} else {
-				throw ex;
-			}
-		}
-		assert false : "Unable to catch any rollback exception!";
-
 	}
 
 	protected static void compareGraph(Generic persisted, Generic read) {

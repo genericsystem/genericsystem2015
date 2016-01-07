@@ -1,22 +1,18 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Map;
 
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.ListBinding;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
+
+import com.sun.javafx.collections.ObservableListWrapper;
 
 public class CocCache extends HeavyCache {
 
@@ -41,14 +37,17 @@ public class CocCache extends HeavyCache {
 	protected class AsyncTransactionDifferential extends TransactionDifferential implements AsyncIDifferential {
 
 		// @Override
-		// public ObservableValue<CompletableFuture<Snapshot<Generic>>> getObervableDependenciesPromise(Generic generic) {
+		// public ObservableValue<CompletableFuture<Snapshot<Generic>>>
+		// getObervableDependenciesPromise(Generic generic) {
 		//
 		// return new ObjectBinding<CompletableFuture<Snapshot<Generic>>>() {
 		//
-		// private CompletableFuture<Snapshot<Generic>> currentDependenciesPromise;
+		// private CompletableFuture<Snapshot<Generic>>
+		// currentDependenciesPromise;
 		//
 		// {
-		// currentDependenciesPromise = getTransaction().getDependenciesPromise(generic);
+		// currentDependenciesPromise =
+		// getTransaction().getDependenciesPromise(generic);
 		// bind(transactionProperty);
 		// }
 		//
@@ -59,7 +58,8 @@ public class CocCache extends HeavyCache {
 		//
 		// @Override
 		// protected void onInvalidating() {
-		// currentDependenciesPromise = getTransaction().getDependenciesPromise(generic);
+		// currentDependenciesPromise =
+		// getTransaction().getDependenciesPromise(generic);
 		// invalidate();
 		// }
 		//
@@ -67,17 +67,25 @@ public class CocCache extends HeavyCache {
 		// }
 
 		// @Override
-		// public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
+		// public ObservableSnapshot<Generic>
+		// getDependenciesObservableSnapshot(Generic generic) {
 		//
-		// return new ObservableSnapshotBinding(generic, getTransaction().getDependenciesObservableSnapshot(generic), transactionProperty);
+		// return new ObservableSnapshotBinding(generic,
+		// getTransaction().getDependenciesObservableSnapshot(generic),
+		// transactionProperty);
 		// }
 		//
-		// private class ObservableSnapshotBinding extends SetBinding<Generic> implements ObservableSnapshot<Generic> {
+		// private class ObservableSnapshotBinding extends SetBinding<Generic>
+		// implements ObservableSnapshot<Generic> {
 		//
 		// private final ObjectBinding<ObservableSnapshot<Generic>> binding;
 		//
-		// ObservableSnapshotBinding(Generic generic, ObservableSnapshot<Generic> dependencies, ObjectProperty<IDifferential<Generic>> transactionProperty) {
-		// bind(binding = new GSObjectBinding<ObservableSnapshot<Generic>>(dependencies, transactionProperty, false) {
+		// ObservableSnapshotBinding(Generic generic,
+		// ObservableSnapshot<Generic> dependencies,
+		// ObjectProperty<IDifferential<Generic>> transactionProperty) {
+		// bind(binding = new
+		// GSObjectBinding<ObservableSnapshot<Generic>>(dependencies,
+		// transactionProperty, false) {
 		//
 		// @Override
 		// protected void onInvalidating() {
@@ -113,10 +121,11 @@ public class CocCache extends HeavyCache {
 			return TransitiveInvalidator.create(transactionProperty, () -> ((AsyncITransaction) transactionProperty.get()).getInvalidator(generic));
 		}
 
-		@Override
-		public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-			return getTransaction().getDependenciesPromise(generic);
-		}
+		// @Override
+		// public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(
+		// Generic generic) {
+		// return getTransaction().getDependenciesPromise(generic);
+		// }
 	}
 
 	@Override
@@ -134,37 +143,54 @@ public class CocCache extends HeavyCache {
 		return (AsyncDifferential) super.getDifferential();
 	}
 
-	// private Map<Generic, PromiseListBinding> dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic, PromiseListBinding>();
+	// private Map<Generic, PromiseListBinding>
+	// dependenciesPromiseAsOservableListCacheMap = new HashMap<Generic,
+	// PromiseListBinding>();
 	//
-	// public CompletableFuture<ObservableList<Generic>> getObervableDependenciesPromise(Generic generic) {
-	// ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise = getDifferential().getObervableDependenciesPromise(generic);
+	// public CompletableFuture<ObservableList<Generic>>
+	// getObervableDependenciesPromise(Generic generic) {
+	// ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise
+	// = getDifferential().getObervableDependenciesPromise(generic);
 	// return dependenciesPromise.getValue().thenApply(snapshot -> {
-	// PromiseListBinding observableList = dependenciesPromiseAsOservableListCacheMap.get(generic);
+	// PromiseListBinding observableList =
+	// dependenciesPromiseAsOservableListCacheMap.get(generic);
 	// if (observableList == null)
-	// dependenciesPromiseAsOservableListCacheMap.put(generic, observableList = new PromiseListBinding(generic, dependenciesPromise, differentialProperty));
+	// dependenciesPromiseAsOservableListCacheMap.put(generic, observableList =
+	// new PromiseListBinding(generic, dependenciesPromise,
+	// differentialProperty));
 	// observableList.push(snapshot.toList());
 	// return observableList;
 	// });
 	// }
 
 	// private class PromiseListBinding extends ListBinding<Generic> {
-	// private final ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>> binding;
+	// private final
+	// ObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>
+	// binding;
 	// private Collection<? extends Generic> elements = new ArrayList<>();
 	// @SuppressWarnings("unused")
-	// private ChangeListener<ObservableValue<CompletableFuture<Snapshot<Generic>>>> bindingListener;
+	// private
+	// ChangeListener<ObservableValue<CompletableFuture<Snapshot<Generic>>>>
+	// bindingListener;
 	//
-	// PromiseListBinding(Generic generic, ObservableValue<CompletableFuture<Snapshot<Generic>>> dependenciesPromise, ObjectProperty<Differential> differentialProperty) {
+	// PromiseListBinding(Generic generic,
+	// ObservableValue<CompletableFuture<Snapshot<Generic>>>
+	// dependenciesPromise, ObjectProperty<Differential> differentialProperty) {
 	//
-	// this.binding = new GSObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>(dependenciesPromise, differentialProperty, true) {
+	// this.binding = new
+	// GSObjectBinding<ObservableValue<CompletableFuture<Snapshot<Generic>>>>(dependenciesPromise,
+	// differentialProperty, true) {
 	//
 	// @Override
 	// protected void onInvalidating() {
-	// changeBindedObject(((AsyncIDifferential) differentialProperty.get()).getObervableDependenciesPromise(generic));
+	// changeBindedObject(((AsyncIDifferential)
+	// differentialProperty.get()).getObervableDependenciesPromise(generic));
 	// }
 	//
 	// };
 	//
-	// binding.addListener(new WeakChangeListener<>(bindingListener = ((observable, oldV, newV) -> {
+	// binding.addListener(new WeakChangeListener<>(bindingListener =
+	// ((observable, oldV, newV) -> {
 	// newV.getValue().thenAccept(snapshot -> {
 	// elements = snapshot.toList();
 	// invalidate();
@@ -185,29 +211,38 @@ public class CocCache extends HeavyCache {
 	//
 	// }
 
-	// public ObservableList<Generic> getDependenciesObservableList(Generic generic) {
-	// ObservableList<Generic> dependenciesObservableList = getDifferential().getDependenciesObservableSnapshot(generic).toObservableList();
+	// public ObservableList<Generic> getDependenciesObservableList(Generic
+	// generic) {
+	// ObservableList<Generic> dependenciesObservableList =
+	// getDifferential().getDependenciesObservableSnapshot(generic).toObservableList();
 	//
-	// return new ObservableSnapshotListBinding(generic, dependenciesObservableList, differentialProperty);
+	// return new ObservableSnapshotListBinding(generic,
+	// dependenciesObservableList, differentialProperty);
 	// }
 
-	// private class ObservableSnapshotListBinding extends ListBinding<Generic> {
+	// private class ObservableSnapshotListBinding extends ListBinding<Generic>
+	// {
 	// private final ObjectBinding<ObservableList<Generic>> binding;
 	// @SuppressWarnings("unused")
 	// private ChangeListener<ObservableList<Generic>> bindingListener;
 	//
-	// ObservableSnapshotListBinding(Generic generic, ObservableList<Generic> dependenciesPromise, ObjectProperty<Differential> differentialProperty) {
+	// ObservableSnapshotListBinding(Generic generic, ObservableList<Generic>
+	// dependenciesPromise, ObjectProperty<Differential> differentialProperty) {
 	//
-	// this.binding = new GSObjectBinding<ObservableList<Generic>>(dependenciesPromise, differentialProperty, true) {
+	// this.binding = new
+	// GSObjectBinding<ObservableList<Generic>>(dependenciesPromise,
+	// differentialProperty, true) {
 	//
 	// @Override
 	// protected void onInvalidating() {
-	// changeBindedObject(((AsyncIDifferential) differentialProperty.get()).getDependenciesObservableSnapshot(generic).toObservableList());
+	// changeBindedObject(((AsyncIDifferential)
+	// differentialProperty.get()).getDependenciesObservableSnapshot(generic).toObservableList());
 	// }
 	//
 	// };
 	//
-	// binding.addListener(new WeakChangeListener<>(bindingListener = ((observable, oldV, newV) -> {
+	// binding.addListener(new WeakChangeListener<>(bindingListener =
+	// ((observable, oldV, newV) -> {
 	// invalidate();
 	// })));
 	// }
@@ -222,85 +257,54 @@ public class CocCache extends HeavyCache {
 		return TransitiveInvalidator.create(differentialProperty, () -> ((AsyncDifferential) differentialProperty.get()).getInvalidator(generic));
 	}
 
-	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-		return getDifferential().getDependenciesPromise(generic);
-	}
+	// public CompletableFuture<Snapshot<Generic>>
+	// getDependenciesPromise(Generic generic) {
+	// return getDifferential().getDependenciesPromise(generic);
+	// }
+	//
+	// public ObservableList<Generic> getObservableDependencies(Generic generic)
+	// {
+	// return new ListBinding<Generic>() {
+	// @SuppressWarnings("unused")
+	// private final InvalidationListener listener;
+	// private final Observable invalidator = getInvalidator(generic);
+	// private List<Generic> promisedList = new ArrayList<Generic>();
+	//
+	// {
+	// invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
+	// CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
+	// promisedList = snapshot.toList();
+	// Platform.runLater(() -> invalidate());// resolve Not FX thread
+	// });
+	// }));
+	// }
+	//
+	// @Override
+	// protected ObservableList<Generic> computeValue() {
+	// return
+	// FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
+	// }
+	// };
+	// }
+	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
+	@Override
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		return new ListBinding<Generic>() {
-			@SuppressWarnings("unused")
-			private final InvalidationListener listener;
-			private final Observable invalidator = getInvalidator(generic);
-			private List<Generic> promisedList = new ArrayList<Generic>();
+		ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
+		if (result == null) {
+			result = new ListBinding<Generic>() {
+				private final Observable invalidator = getInvalidator(generic);
+				{
+					bind(invalidator);
+				}
 
-			{
-				invalidator.addListener(new WeakInvalidationListener(listener = (o) -> {
-					CocCache.this.getDependenciesPromise(generic).thenAccept(snapshot -> {
-						promisedList = snapshot.toList();
-						Platform.runLater(() -> invalidate());// resolve Not FX thread
-						});
-				}));
-			}
-
-			@Override
-			protected ObservableList<Generic> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections.observableList(promisedList));
-			}
-		};
+				@SuppressWarnings("restriction")
+				@Override
+				protected ObservableList<Generic> computeValue() {
+					return new ObservableListWrapper<>(CocCache.this.getDependencies(generic).toList());
+				}
+			};
+		}
+		return result;
 	}
-
-	//
-	// @Override
-	// public boolean isAlive(Generic vertex) {
-	// try {
-	// return isAsyncAlive(vertex).get();
-	// } catch (InterruptedException | ExecutionException e) {
-	// e.printStackTrace();
-	// throw new RuntimeException();
-	// }
-	// }
-	//
-	// @Override
-	// public NavigableSet<Generic> computeDependencies(Generic node) {
-	// try {
-	// return computeAsyncDependencies(node).get();
-	// } catch (InterruptedException | ExecutionException e) {
-	// e.printStackTrace();
-	// throw new RuntimeException();
-	// }
-	// }
-	//
-	// @Override
-	// public NavigableSet<Generic> computePotentialDependencies(Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
-	// try {
-	// return computeAsyncPotentialDependencies(meta, supers, value, components).get();
-	// } catch (InterruptedException | ExecutionException e) {
-	// e.printStackTrace();
-	// throw new RuntimeException();
-	// }
-	//
-	// }
-	//
-	// @Override
-	// public NavigableSet<Generic> computeRemoveDependencies(Generic node) throws RollbackException {
-	// CompletableFuture<NavigableSet<Generic>> removeDependenciesPromise = computeAsyncRemoveDependencies(node);
-	//
-	// try {
-	//
-	// return removeDependenciesPromise.get();
-	// } catch (InterruptedException | ExecutionException e) {
-	// if (e.getCause() instanceof RollbackException) {
-	// throw new RollbackException(e.getCause().getCause());
-	// }
-	//
-	// e.printStackTrace();
-	// throw new RuntimeException();
-	// }
-	// }
-	//
-	// @Override
-	// public DefaultRoot<Generic> getAsyncRoot() {
-	// return super.getRoot();
-	// }
-
 }

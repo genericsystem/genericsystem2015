@@ -6,17 +6,15 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
-
 import org.genericsystem.admin.UiFunctions.AttributeUiFunctions;
+import org.genericsystem.admin.javafx.AbstractColumn;
+import org.genericsystem.admin.javafx.LinksTableView.TriConsumer;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.javafx.AbstractColumn;
-import org.genericsystem.javafx.LinksTableView.TriConsumer;
 
 public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions<G>> {
 	public Function<G, Serializable> genericGetter;

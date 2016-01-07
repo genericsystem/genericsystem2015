@@ -7,8 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
+import org.genericsystem.admin.javafx.Crud;
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
 import org.genericsystem.admin.model.Color;
@@ -19,7 +19,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
-import org.genericsystem.javafx.Crud;
 import org.genericsystem.kernel.Statics;
 
 /**

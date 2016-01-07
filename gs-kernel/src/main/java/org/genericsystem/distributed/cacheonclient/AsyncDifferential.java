@@ -1,11 +1,7 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 import javafx.beans.Observable;
 
-import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Differential;
 import org.genericsystem.common.Generic;
 
@@ -83,21 +79,21 @@ public class AsyncDifferential extends Differential implements AsyncIDifferentia
 		return Invalidator.createInvalidator(getSubDifferential().getInvalidator(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
 	}
 
-	@Override
-	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-		return getSubDifferential().getDependenciesPromise(generic).<Snapshot<Generic>> thenApply(subSnapshot -> new Snapshot<Generic>() {
-			@Override
-			public Generic get(Object o) {
-				Generic result = adds.get(o);
-				if (result != null)
-					return generic.isDirectAncestorOf(result) ? result : null;
-				return !removes.contains(o) ? subSnapshot.get(o) : null;
-			}
-
-			@Override
-			public Stream<Generic> stream() {
-				return Stream.concat(adds.contains(generic) ? Stream.empty() : subSnapshot.stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
-			}
-		});
-	}
+	// @Override
+	// public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+	// return getSubDifferential().getDependenciesPromise(generic).<Snapshot<Generic>> thenApply(subSnapshot -> new Snapshot<Generic>() {
+	// @Override
+	// public Generic get(Object o) {
+	// Generic result = adds.get(o);
+	// if (result != null)
+	// return generic.isDirectAncestorOf(result) ? result : null;
+	// return !removes.contains(o) ? subSnapshot.get(o) : null;
+	// }
+	//
+	// @Override
+	// public Stream<Generic> stream() {
+	// return Stream.concat(adds.contains(generic) ? Stream.empty() : subSnapshot.stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
+	// }
+	// });
+	// }
 }

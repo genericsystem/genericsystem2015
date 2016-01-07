@@ -2,9 +2,9 @@ package org.genericsystem.common;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
 
-import org.genericsystem.api.core.Snapshot;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
@@ -27,7 +27,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	@Override
-	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic vertex) {
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
 		throw new UnsupportedOperationException();
 	}
 

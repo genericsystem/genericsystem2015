@@ -4,14 +4,22 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.tools.TransitiveObservableList;
+
+import com.sun.javafx.collections.ObservableListWrapper;
 
 public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex<T> {
 
@@ -19,11 +27,6 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	@Override
 	default boolean isAlive() {
 		return getCurrentCache().isAlive((T) this);
-	}
-
-	@SuppressWarnings("unchecked")
-	default CompletableFuture<Boolean> isAsyncAlive() {
-		return getCurrentCache().isAsyncAlive((T) this);
 	}
 
 	@Override
@@ -43,9 +46,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncInstance(Serializable value, T... components) {
-		CompletableFuture<Snapshot<T>> snapshotPromise = getAsyncInstances(value, components);
-		return snapshotPromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableInstance(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInstances(value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -55,9 +57,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncInstance(T... components) {
-		CompletableFuture<Snapshot<T>> snapshotPromise = getAsyncInstances(components);
-		return snapshotPromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableInstance(T... components) {
+		return getObservableNonAmbiguousResult(getObservableInstances(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,10 +68,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached
-	default CompletableFuture<T> getAsyncInstance(T override, Serializable value, T... components) {
-		CompletableFuture<Snapshot<T>> snapshotPromise = getAsyncInstances(override, value, components);
-		return snapshotPromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableInstance(T override, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInstances(override, value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,10 +79,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// user computeAsyncAndCheckOverridesAreReached
-	default CompletableFuture<T> getAsyncInstance(List<T> overrides, Serializable value, T... components) {
-		CompletableFuture<Snapshot<T>> snapshotPromise = getAsyncInstances(overrides, value, components);
-		return snapshotPromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableInstance(List<T> overrides, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInstances(overrides, value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -93,8 +90,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInstances(Serializable value, T... components) {
-		return getAsyncInstances(components).thenApply(instances -> instances.filter(valueFilter(value)));
+	default ObservableList<T> getObservableInstances(Serializable value, T... components) {
+		return getObservableInstances(components).filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -104,8 +101,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInstances() {
-		return getCurrentCache().getAsyncInstances((T) this);
+	default ObservableList<T> getObservableInstances() {
+		return getCurrentCache().getObservableInstances((T) this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -115,8 +112,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInstances(T... components) {// **//
-		return getAsyncInstances().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
+	default ObservableList<T> getObservableInstances(T... components) {
+		return getObservableInstances().filtered(componentsFilter(components));
 	}
 
 	@Override
@@ -126,9 +123,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached : unimplemented
-	default CompletableFuture<Snapshot<T>> getAsyncInstances(T override, Serializable value, T... components) {
-		return getAsyncInstances(Collections.singletonList(override), value, components);
+	default ObservableList<T> getObservableInstances(T override, Serializable value, T... components) {
+		return getObservableInstances(Collections.singletonList(override), value, components);
 	}
 
 	@Override
@@ -139,10 +135,9 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached : unimplemented
-	default CompletableFuture<Snapshot<T>> getAsyncInstances(List<T> overrides, Serializable value, T... components) {
-		CompletableFuture<List<T>> supersPromise = getCurrentCache().computeAsyncAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
-		return supersPromise.thenCompose(supers -> getAsyncInstances(value, components).thenApply(instances -> instances.filter(overridesFilter(supers))));
+	default ObservableList<T> getObservableInstances(List<T> overrides, Serializable value, T... components) {
+		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
+		return getObservableInstances(value, components).filtered(overridesFilter(supers));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -152,9 +147,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncSubInstance(Serializable value, T... components) {
-		CompletableFuture<Snapshot<T>> subInstancePromise = getAsyncSubInstances(value, components);
-		return subInstancePromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableSubInstance(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -164,9 +158,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncSubInstances(Serializable value, T... components) {
-		CompletableFuture<Snapshot<T>> subInstancePromise = getAsyncSubInstances(components);
-		return subInstancePromise.thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	default ObservableList<T> getObservableSubInstances(Serializable value, T... components) {
+		return getObservableSubInstances(components).filtered(valueFilter(value));
 	}
 
 	@Override
@@ -174,13 +167,27 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return () -> getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream());
 	}
 
-	default CompletableFuture<Snapshot<T>> getAsyncSubInstances() {
-		return getAsyncSubInheritings().thenCompose(snapshot -> {
-			CompletableFuture<Snapshot<T>> internal = CompletableFuture.completedFuture(() -> Stream.empty());
-			for (T generic : snapshot)
-				internal = internal.thenCompose(internalSnapshot -> generic.getAsyncInstances().thenApply(instances -> () -> Stream.concat(internalSnapshot.stream(), instances.stream())));
-			return internal;
-		});
+	default ObservableList<T> getObservableSubInstances() {
+		return new TransitiveObservableList<T>(getObservableSubInheritings()) {
+			@SuppressWarnings({ "unchecked", "restriction" })
+			@Override
+			protected ObservableList<T> computeValue() {
+				final Set<T> set = new HashSet<>();
+
+				set.add((T) DefaultDependencies.this);
+				for (List<T> slave : getSlaves())
+					set.addAll(slave);
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<T>(new ArrayList<>(set)));
+			}
+
+			@Override
+			protected void onMasterInvalidation() {
+				unbindAllSlaves();
+				for (T generic : master)
+					bindSlave(generic.getObservableInstances());
+				invalidate();
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -190,9 +197,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncSubInstance(T... components) {
-		CompletableFuture<Snapshot<T>> subInstancePromise = getAsyncSubInstances(components);
-		return subInstancePromise.thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableSubInstance(T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -202,8 +208,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncSubInstances(T... components) {
-		return getAsyncSubInstances().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
+	default ObservableList<T> getObservableSubInstances(T... components) {
+		return getObservableSubInstances().filtered(componentsFilter(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -213,9 +219,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached : unimplemented
-	default CompletableFuture<T> getAsyncSubInstance(T override, Serializable value, T... components) {
-		return getAsyncSubInstances(override, value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableSubInstance(T override, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(override, value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -225,9 +230,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached : unimplemented
-	default CompletableFuture<Snapshot<T>> getAsyncSubInstances(T override, Serializable value, T... components) {
-		return getAsyncSubInstances(Collections.singletonList(override), value, components);
+	default ObservableList<T> getObservableSubInstances(T override, Serializable value, T... components) {
+		return getObservableSubInstances(Collections.singletonList(override), value, components);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -237,9 +241,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached : unimplemented
-	default CompletableFuture<T> getAsyncSubInstance(List<T> overrides, Serializable value, T... components) {
-		return getAsyncSubInstances(overrides, value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableSubInstance(List<T> overrides, Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInstances(overrides, value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -250,10 +253,9 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	// use computeAsyncAndCheckOverridesAreReached : unimplemented
-	default CompletableFuture<Snapshot<T>> getAsyncSubInstances(List<T> overrides, Serializable value, T... components) {
-		CompletableFuture<List<T>> supersPromise = getCurrentCache().computeAsyncAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
-		return supersPromise.thenApply(supers -> getSubInstances(value, components).filter(overridesFilter(supers)));
+	default ObservableList<T> getObservableSubInstances(List<T> overrides, Serializable value, T... components) {
+		List<T> supers = getCurrentCache().computeAndCheckOverridesAreReached((T) this, overrides, value, Arrays.asList(components));
+		return getObservableSubInstances(value, components).filtered(overridesFilter(supers));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -263,8 +265,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncInheriting(Serializable value, T... components) {
-		return getAsyncInheritings(value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableInheriting(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableInheritings(value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -274,8 +276,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncInheriting(T... components) {
-		return getAsyncInheritings(components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableInheriting(T... components) {
+		return getObservableNonAmbiguousResult(getObservableInheritings(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -285,8 +287,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInheritings(Serializable value, T... components) {
-		return getAsyncInheritings(components).thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	default ObservableList<T> getObservableInheritings(Serializable value, T... components) {
+		return getObservableInheritings(components).filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -296,8 +298,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInheritings() {
-		return getCurrentCache().getAsyncInheritings((T) this);
+	default ObservableList<T> getObservableInheritings() {
+		return getCurrentCache().getObservableInheritings((T) this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -307,8 +309,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncInheritings(T... components) {
-		return getAsyncInheritings().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
+	default ObservableList<T> getObservableInheritings(T... components) {
+		return getObservableInheritings().filtered(componentsFilter(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -318,8 +320,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncSubInheriting(Serializable value, T... components) {
-		return getAsyncSubInheritings(value, components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableSubInheriting(Serializable value, T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInheritings(value, components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -329,8 +331,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncSubInheritings(Serializable value, T... components) {
-		return getAsyncSubInheritings(components).thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	default ObservableList<T> getObservableSubInheritings(Serializable value, T... components) {
+		return getObservableSubInheritings(components).filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -340,8 +342,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<T> getAsyncSubInheriting(T... components) {
-		return getAsyncSubInheritings(components).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableSubInheriting(T... components) {
+		return getObservableNonAmbiguousResult(getObservableSubInheritings(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -351,8 +353,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncSubInheritings(T... components) {
-		return getAsyncSubInheritings().thenApply(snapshot -> snapshot.filter(componentsFilter(components)));
+	default ObservableList<T> getObservableSubInheritings(T... components) {
+		return getObservableSubInheritings().filtered(componentsFilter(components));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -361,14 +363,28 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return () -> Stream.concat(Stream.of((T) this), getInheritings().stream().flatMap(inheriting -> inheriting.getSubInheritings().stream())).distinct();
 	}
 
-	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncSubInheritings() {
-		return getAsyncInheritings().thenCompose(snapshot -> {
-			CompletableFuture<Snapshot<T>> internal = CompletableFuture.completedFuture(() -> Stream.empty());
-			for (T generic : snapshot)
-				internal = internal.thenCompose(internalSnapshot -> generic.getAsyncSubInheritings().thenApply(inheritings -> () -> Stream.concat(internalSnapshot.stream(), inheritings.stream())));
-			return internal.thenApply(internalSnapshot -> () -> Stream.concat(Stream.of((T) this), internalSnapshot.stream()).distinct());
-		});
+	default ObservableList<T> getObservableSubInheritings() {
+		return new TransitiveObservableList<T>(getObservableInheritings()) {
+
+			@SuppressWarnings({ "unchecked", "restriction" })
+			@Override
+			protected ObservableList<T> computeValue() {
+				final Set<T> set = new HashSet<>();
+
+				set.add((T) DefaultDependencies.this);
+				for (List<T> slave : getSlaves())
+					set.addAll(slave);
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(new ArrayList<>(set)));
+			}
+
+			@Override
+			protected void onMasterInvalidation() {
+				unbindAllSlaves();
+				for (T generic : master)
+					bindSlave(generic.getObservableSubInheritings());
+				invalidate();
+			}
+		};
 	}
 
 	@Override
@@ -376,8 +392,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return getNonAmbiguousResult(getComposites(value).stream());
 	}
 
-	default CompletableFuture<T> getAsyncComposite(Serializable value) {
-		return getAsyncComposites(value).thenApply(snapshot -> getNonAmbiguousResult(snapshot.stream()));
+	default ObservableValue<T> getObservableComposite(Serializable value) {
+		return getObservableNonAmbiguousResult(getObservableComposites(value));
 	}
 
 	@Override
@@ -385,8 +401,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return getComposites().filter(valueFilter(value));
 	}
 
-	default CompletableFuture<Snapshot<T>> getAsyncComposites(Serializable value) {
-		return getAsyncComposites().thenApply(snapshot -> snapshot.filter(valueFilter(value)));
+	default ObservableList<T> getObservableComposites(Serializable value) {
+		return getObservableComposites().filtered(valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -396,8 +412,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	@SuppressWarnings("unchecked")
-	default CompletableFuture<Snapshot<T>> getAsyncComposites() {
-		return getCurrentCache().getAsyncComposites((T) this);
+	default ObservableList<T> getObservableComposites() {
+		return getCurrentCache().getObservableComposites((T) this);
 	}
 
 	static <T extends DefaultVertex<T>> Predicate<T> valueFilter(Serializable value) {
@@ -428,5 +444,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	T getNonAmbiguousResult(Stream<T> stream);
+
+	ObservableValue<T> getObservableNonAmbiguousResult(ObservableList<T> observableList);
 
 }
