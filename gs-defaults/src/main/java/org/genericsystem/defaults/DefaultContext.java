@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -120,6 +119,10 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new OrderedDependencies().visit(node);
 	}
 
+	/**
+	 * 
+	 * TODO A TESTER
+	 */
 	default CompletableFuture<NavigableSet<T>> computeAsyncDependencies(T node) {
 		class OrderedDependencies extends TreeSet<T> {
 			private static final long serialVersionUID = -8377068939538941700L;
@@ -143,8 +146,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new OrderedDependencies().traverse(node);
 	}
 
-	// TODO computeObservableDependencies ! --------------------------------------------
-
 	default NavigableSet<T> computePotentialDependencies(T meta, List<T> supers, Serializable value, List<T> components) {
 		class PotentialDependenciesComputer extends TreeSet<T> {
 			private static final long serialVersionUID = -4464199068092100672L;
@@ -164,6 +165,10 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new PotentialDependenciesComputer().visit(meta);
 	}
 
+	/**
+	 * 
+	 * TODO A TESTER
+	 */
 	default CompletableFuture<NavigableSet<T>> computeAsyncPotentialDependencies(T meta, List<T> supers, Serializable value, List<T> components) {
 		class PotentialDependenciesComputer extends TreeSet<T> {
 			private static final long serialVersionUID = -8377068939538941700L;
@@ -194,8 +199,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 
 		return new PotentialDependenciesComputer().traverse(meta);
 	}
-
-	// TODO computePotentialDependencies Observable -------------------------------------------------
 
 	default NavigableSet<T> computeRemoveDependencies(T node) {
 		class OrderedRemoveDependencies extends TreeSet<T> {
@@ -228,6 +231,10 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new OrderedRemoveDependencies().visit(node);
 	}
 
+	/**
+	 * 
+	 * TODO A TESTER
+	 */
 	default CompletableFuture<NavigableSet<T>> computeAsyncRemoveDependencies(T node) {
 		class OrderedRemoveDependencies extends TreeSet<T> {
 			private static final long serialVersionUID = -5970021419012502402L;
@@ -281,8 +288,6 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 		return new OrderedRemoveDependencies().traverse(node);
 	}
 
-	// TODO computeRemoveDependencies Observable ------------------------------------------------
-
 	default List<T> computeAndCheckOverridesAreReached(T adjustedMeta, List<T> overrides, Serializable value, List<T> components) {
 		List<T> supers = new ArrayList<>(new SupersComputer<>(adjustedMeta, overrides, value, components));
 		if (!ApiStatics.areOverridesReached(supers, overrides))
@@ -291,22 +296,15 @@ public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> 
 	}
 
 	default CompletableFuture<List<T>> computeAsyncAndCheckOverridesAreReached(T adjustedMeta, List<T> overrides, Serializable value, List<T> components) {
-		assert false; // AsyncSupersComputer in not implemented
-		CompletableFuture<LinkedHashSet<T>> promise = new AsyncSupersComputer<T>(adjustedMeta, overrides, value, components);
 		CompletableFuture<List<T>> cf = new CompletableFuture<>();
-
-		promise.thenApply(list -> {
+		new AsyncSupersComputer<T>(adjustedMeta, overrides, value, components).get().thenAccept(list -> {
 			List<T> supers = new ArrayList<>(list);
 			if (!ApiStatics.areOverridesReached(supers, overrides))
 				cf.completeExceptionally(discardWithExceptionPromise(new UnreachableOverridesException("Unable to reach overrides : " + overrides + " with computed supers : " + supers)));
 			cf.complete(supers);
-			return list;
 		});
-
 		return cf;
 	}
-
-	// TODO computeAndCheckOverridesAreReached Observable------------------------------------
 
 	Snapshot<T> getDependencies(T vertex);
 

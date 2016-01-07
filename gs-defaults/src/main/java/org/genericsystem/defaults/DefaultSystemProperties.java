@@ -11,6 +11,7 @@ import javafx.beans.value.ObservableValue;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.NotFoundException;
 import org.genericsystem.defaults.DefaultConfig.CascadeRemoveProperty;
@@ -26,6 +27,12 @@ import org.genericsystem.defaults.tools.GSSimpleObjectProperty;
 
 public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVertex<T> {
 
+	// Remove
+
+	CompletableFuture<Snapshot<T>> getAsyncHolders(T attribute, T... targets);
+
+	//
+
 	@Override
 	default Serializable getSystemPropertyValue(Class<? extends SystemProperty> propertyClass, int pos) {
 		T key = getKey(propertyClass, pos);
@@ -34,6 +41,21 @@ public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVe
 			return result != null ? result.getValue() : null;
 		}
 		return null;
+	}
+
+	/**
+	 * TODO A TESTER
+	 */
+	@SuppressWarnings("unchecked")
+	default CompletableFuture<Serializable> getAsyncSystemPropertyValue(Class<? extends SystemProperty> propertyClass, int pos) {
+		return getAsyncKey(propertyClass, pos).thenCompose(key -> {
+			if (key != null)
+				return getAsyncHolders(key).thenApply(holders -> {
+					T result = holders.stream().filter(x -> this.isSpecializationOf(x.getBaseComponent())).findFirst().orElse(null);
+					return result != null ? result.getValue() : null;
+				});
+			return CompletableFuture.completedFuture(null);
+		});
 	}
 
 	@Override

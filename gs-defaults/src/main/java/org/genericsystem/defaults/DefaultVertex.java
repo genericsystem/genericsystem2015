@@ -46,6 +46,11 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return DefaultDependencies.super.getObservableComposites();
 	}
 
+	@Override
+	default CompletableFuture<Snapshot<T>> getAsyncHolders(T attribute, T... targets) {
+		return DefaultCompositesInheritance.super.getAsyncHolders(attribute, targets);
+	}
+
 	//
 
 	@Override
@@ -62,6 +67,12 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 	@Override
 	default boolean isAlive() {
 		return getCurrentCache().isAlive((T) this);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default CompletableFuture<Boolean> isAsyncAlive() {
+		return getCurrentCache().isAsyncAlive((T) this);
 	}
 
 	@Override

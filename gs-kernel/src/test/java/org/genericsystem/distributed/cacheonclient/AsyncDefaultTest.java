@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -79,7 +80,7 @@ public class AsyncDefaultTest extends AbstractTest {
 
 		catchAndCheckCausePromise(root.getRoot().getMetaAttribute().getAsyncInstance("power"), AmbiguousSelectionException.class);
 		// computeAsyncAndCheckOverridesAreReached unimplemented
-		// catchAndCheckCausePromise(root.getRoot().getMetaAttribute().getAsyncInstance(Collections.emptyList(), "power"), AmbiguousSelectionException.class);
+		catchAndCheckCausePromise(root.getRoot().getMetaAttribute().getAsyncInstance(Collections.emptyList(), "power"), AmbiguousSelectionException.class);
 	}
 
 	public void test_getInstanceTest13() throws InterruptedException, ExecutionException, TimeoutException {
@@ -213,6 +214,26 @@ public class AsyncDefaultTest extends AbstractTest {
 		assert vehicleColor.getAsyncSubInstances("", myBmw).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).toList().containsAll(Arrays.asList(myBmwRed, myBmwBlue));// .toList()
 	}
 
+	public void test_getInstanceTest24() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("Vehicle");
+		Generic vehiclePower = vehicle.addAttribute("power");
+		Generic car = root.addInstance(vehicle, "Car");
+		Generic trunck = root.addInstance(vehicle, "Trunck");
+		Generic bike = root.addInstance(vehicle, "Bike");
+		Generic carPower = car.addAttribute("carPower");
+		Generic bikePower = bike.addAttribute(vehiclePower, "power");
+		Generic trunckPower = trunck.addAttribute("power");
+
+		assert !carPower.inheritsFrom(vehiclePower);
+		assert trunckPower.inheritsFrom(vehiclePower);
+
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(Collections.emptyList(), "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1;
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(Collections.emptyList(), "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).first() == vehiclePower;
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(vehiclePower, "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 2;
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(vehiclePower, "power").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).containsAll(Arrays.asList(bikePower, trunckPower));
+	}
+
 	public void test_getInstanceTest25() throws InterruptedException, ExecutionException, TimeoutException {
 		CocClientEngine root = new CocClientEngine();
 		Generic tree = root.addInstance("Tree");
@@ -222,8 +243,51 @@ public class AsyncDefaultTest extends AbstractTest {
 		Generic children2 = tree.addInstance(Arrays.asList(father, mother), "children2");
 		tree.addInstance(children1, "children2");
 
-		// assert tree.getAsyncSubInstances(Arrays.asList(mother), "children2").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1; // computeAsyncAndCheckOverridesAreReached unimplemented
+		assert tree.getAsyncSubInstances(Arrays.asList(mother), "children2").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1; // computeAsyncAndCheckOverridesAreReached unimplemented
 		assert tree.getAsyncSubInstances("children2").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).toList().get(0) == children2;// .toList().get(0), before .first()
+	}
+
+	public void test_getInstanceTest26() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("Vehicle");
+		Generic vehiclePower = vehicle.addAttribute("power");
+		Generic car = root.addInstance(vehicle, "Car");
+		Generic trunck = root.addInstance(vehicle, "Trunck");
+		Generic bike = root.addInstance(vehicle, "Bike");
+		Generic carPower = car.addAttribute("carPower");
+		Generic bikePower = bike.addAttribute(vehiclePower, "power");
+		Generic trunckPower = trunck.addAttribute("power");
+
+		assert !carPower.inheritsFrom(vehiclePower);
+		assert trunckPower.inheritsFrom(vehiclePower);
+
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(Collections.emptyList(), "power", vehicle).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1;
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(Collections.emptyList(), "power", vehicle).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).first() == vehiclePower;
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(vehiclePower, "power", bike).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1;
+		assert root.getRoot().getMetaAttribute().getAsyncSubInstances(vehiclePower, "power", bike).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).first() == bikePower;
+	}
+
+	public void test_updatableServiceTetst100_addSuper_Type() throws InterruptedException, ExecutionException, TimeoutException {
+		// given
+		Generic engine = new CocClientEngine();
+		Generic vehicle = engine.addInstance("Vehicle");
+		Generic car = engine.addInstance("Car");
+
+		// when
+		Generic result = car.updateSupers(vehicle);
+		assert !car.equals(result);
+		assert result.isAlive();
+		// then
+		assert engine.isAlive();
+		assert vehicle.isAlive();
+		assert !car.isAlive();
+
+		// assert engine.getAllInstances().count() == 2;
+
+		Generic newVehicle = engine.getAsyncInstance("Vehicle").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+		assert newVehicle == vehicle;
+		assert newVehicle.getAsyncInheritings().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).size() == 1 : newVehicle.getInheritings().stream().collect(Collectors.toList());
+		assert engine.getAsyncInstance(newVehicle, "Car").get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT).getSupers().size() == 1;
 	}
 
 	public void test_MetaAttribueTest1() {
@@ -1253,5 +1317,59 @@ public class AsyncDefaultTest extends AbstractTest {
 		assert power2.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
 		assert v1.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
 		assert v2.isAsyncAlive().get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
+	}
+
+	public void test_asyncSupersComputer() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("vehicle");
+		Generic vehiclePower = vehicle.addAttribute("power");
+		Generic car = root.addInstance(vehicle, "car");
+
+		assert root.getCurrentCache().computeAndCheckOverridesAreReached(root.getRoot().getMetaAttribute(), new ArrayList<>(), "power", Arrays.asList(car))
+				.equals(root.getCurrentCache().computeAsyncAndCheckOverridesAreReached(root.getRoot().getMetaAttribute(), new ArrayList<>(), "power", Arrays.asList(car)).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+	}
+
+	public void test_asyncSupersComputer2() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("vehicle");
+		vehicle.addAttribute("power");
+		Generic vehicle2 = root.addInstance(vehicle, "vehicle2");
+		Generic vehicle3 = root.addInstance(vehicle2, "vehicle3");
+		Generic vehicle4 = root.addInstance(vehicle3, "vehicle4");
+		Generic car = root.addInstance(vehicle4, "car");
+
+		assert root.getCurrentCache().computeAndCheckOverridesAreReached(root.getRoot().getMetaAttribute(), new ArrayList<>(), "power", Arrays.asList(car))
+				.equals(root.getCurrentCache().computeAsyncAndCheckOverridesAreReached(root.getRoot().getMetaAttribute(), new ArrayList<>(), "power", Arrays.asList(car)).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+	}
+
+	public void test_asyncSupersComputer3() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("vehicle");
+		Generic vehicle2 = root.addInstance(vehicle, "vehicle2");
+		Generic vehicle3 = root.addInstance(vehicle2, "vehicle3");
+		Generic vehicle4 = root.addInstance(vehicle3, "vehicle4");
+
+		Generic color = root.addInstance("color");
+		Generic color2 = root.addInstance(color, "color2");
+		Generic color3 = root.addInstance(color2, "color3");
+
+		vehicle.addRelation("vehicleColor", color);
+
+		assert root.getCurrentCache().computeAndCheckOverridesAreReached(root.getRoot().getMetaRelation(), new ArrayList<>(), "vehicleColor", Arrays.asList(vehicle4, color3))
+				.equals(root.getCurrentCache().computeAsyncAndCheckOverridesAreReached(root.getRoot().getMetaRelation(), new ArrayList<>(), "vehicleColor", Arrays.asList(vehicle4, color3)).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
+	}
+
+	public void test_asyncSupersComputer4() throws InterruptedException, ExecutionException, TimeoutException {
+		CocClientEngine root = new CocClientEngine();
+		Generic vehicle = root.addInstance("vehicle");
+		Generic standard = vehicle.addInstance("standard");
+		Generic myCar = vehicle.addInstance(standard, "myCar");
+
+		Generic vehiclePower = vehicle.addAttribute("power");
+		Generic v235 = standard.addHolder(vehiclePower, "235");
+		vehiclePower.enableSingularConstraint(ApiStatics.BASE_POSITION);
+
+		assert root.getCurrentCache().computeAndCheckOverridesAreReached(vehiclePower, new ArrayList<>(), "238", Arrays.asList(myCar))
+				.equals(root.getCurrentCache().computeAsyncAndCheckOverridesAreReached(vehiclePower, new ArrayList<>(), "238", Arrays.asList(myCar)).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT));
 	}
 }
