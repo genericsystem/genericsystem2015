@@ -101,6 +101,37 @@ public interface Binder<N, W> {
 		};
 	}
 
+	public static <N,S, W> Binder<N, Function<S, W>> genericMouseActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
+		return new Binder<N, Function<S, W>>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void init(Supplier<Function<S, W>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).setValue((W) (EventHandler) event -> {
+					
+					ModelContext modelContext_ = modelContext;
+					String s = "/";
+					while (modelContext_ != null) {
+						s += modelContext_.getModel() + "/";
+						try {
+							applyOnModel.get().apply(modelContext_ != null ? modelContext_.getModel() : null);
+						} catch (ClassCastException ignore) {
+						}
+						modelContext_ = modelContext_.getParent();
+					}
+					
+				});
+//					try {
+//						applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null);
+//					} catch (Exception e) {
+//						applyOnModel.get().apply(modelContext.getParent().getParent() != null ? modelContext.getParent().getParent().getModel() : null);
+//					}
+//									
+//					});
+			}
+		};
+
+	}
+	
 	public static <N, W> Binder<N, W> genericActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
 		return new Binder<N, W>() {
 			@Override

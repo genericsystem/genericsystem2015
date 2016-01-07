@@ -12,8 +12,6 @@ import org.genericsystem.gsadmin.CellBuilder.RowFirstCellTextCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.TableCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.TextCellBuilder;
 import org.genericsystem.gsadmin.Stylable.TableStyle;
-import org.genericsystem.todomvc.Todo;
-import org.genericsystem.todomvc.TodoList;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
