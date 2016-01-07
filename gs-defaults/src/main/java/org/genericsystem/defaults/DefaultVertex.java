@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
@@ -16,6 +22,15 @@ import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
 public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
+
+	// Remove
+
+	@Override
+	default ObservableList<T> getObservableComposites() {
+		return DefaultDependencies.super.getObservableComposites();
+	}
+
+	//
 
 	@Override
 	default DefaultCache<T> getCurrentCache() {
@@ -273,6 +288,28 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		if (iterator.hasNext())
 			getCurrentCache().discardWithException(new AmbiguousSelectionException(result.info() + " " + iterator.next().info()));
 		return result;
+	}
+
+	@Override
+	default ObservableValue<T> getObservableNonAmbiguousResult(ObservableList<T> list) {
+
+		SimpleObjectProperty<T> internal = new SimpleObjectProperty<>();
+
+		@SuppressWarnings("unused")
+		InvalidationListener listener;
+
+		list.addListener(new WeakInvalidationListener(listener = l -> {
+			Iterator<T> iterator = list.iterator();
+			if (!iterator.hasNext()) {
+				internal.set(null);
+				return;
+			}
+			T result = iterator.next();
+			if (iterator.hasNext())
+				getCurrentCache().discardWithException(new AmbiguousSelectionException(result.info() + " " + iterator.next().info()));
+			internal.set(result);
+		}));
+		return internal;
 	}
 
 	@Override
