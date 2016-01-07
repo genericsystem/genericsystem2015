@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -40,7 +40,8 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		getRoot().getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
-		removes.forEach(this::invalid);// Not efficient ! plug and unplug is better
+		removes.forEach(this::invalid);// Not efficient ! plug and unplug is
+										// better
 		adds.forEach(this::invalid);// Not efficient !
 		adds.forEach(this::giveBirth);
 	}
@@ -93,21 +94,34 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 	}
 
 	// @Override
-	// public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic) {
-	// return new CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
+	// public ObservableSnapshot<Generic>
+	// getDependenciesObservableSnapshot(Generic generic) {
+	// return new
+	// CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(),
+	// generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
+	// }
+
+	// @Override
+	// public Observable getInvalidator(Generic generic) {
+	// ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
+	// getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
+	// try {
+	// Thread.sleep(200);
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// objectProperty.set(snapshot);
+	// });
+	// return objectProperty;
 	// }
 
 	@Override
 	public Observable getInvalidator(Generic generic) {
-		ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
-		getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
-			try {
-				Thread.sleep(200);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			objectProperty.set(snapshot);
-		});
-		return objectProperty;
+		return new SimpleObjectProperty<Snapshot<Generic>>();
+	}
+
+	@Override
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		throw new UnsupportedOperationException();
 	}
 }
