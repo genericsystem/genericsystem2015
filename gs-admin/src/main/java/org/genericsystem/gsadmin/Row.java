@@ -15,7 +15,7 @@ public class Row extends Listable<Cell<?>> {
 		this.item = item;
 	}
 	
-	public void selected(){
-		System.out.println(((Generic)this.item).getInstances().toList());
+	public <ITEM> ITEM getItem() {
+		return (ITEM)item;
 	}
 }

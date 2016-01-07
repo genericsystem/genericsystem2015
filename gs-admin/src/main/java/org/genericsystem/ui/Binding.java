@@ -112,6 +112,10 @@ public class Binding<N, T> {
 		return Binding.<N, M, T> bind(consumer, Binder.genericActionBinder(propAction));
 	}
 
+	public static <SUPERMODEL,N, M, T> Binding<N, Function<SUPERMODEL, T>> bindGenericMouseAction(Function<N, ObjectProperty<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
+		return Binding.<SUPERMODEL,N, M, T> bind(biConsumer, Binder.genericMouseActionBinder(propAction));
+	}
+	
 	public static <N, M, T extends Event> Binding<N, T> bindAction(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
 		return Binding.<N, M, T> bind(consumer, Binder.actionBinder(propAction));
 	}

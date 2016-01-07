@@ -43,7 +43,6 @@ public class Table extends Listable<Row> {
 	}
 	
 	public ObjectProperty<Row> getRowSelected() {
-		System.out.println("kkkkkkkkk");
 		return rowSelected;
 	}
 	
@@ -109,5 +108,10 @@ public class Table extends Listable<Row> {
 
 	public ObservableValue<Number> getTableWidth() {
 		return tableWidth;
+	}
+
+	public void selectRow(Row row) {
+		rowSelected.setValue(row);
+		System.out.println(row.getItem());
 	}
 }

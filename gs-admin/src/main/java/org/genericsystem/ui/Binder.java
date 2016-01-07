@@ -101,6 +101,18 @@ public interface Binder<N, W> {
 		};
 	}
 
+	public static <N,S, W> Binder<N, Function<S, W>> genericMouseActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
+		return new Binder<N, Function<S, W>>() {
+			@Override
+			public void init(Supplier<Function<S, W>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
+				applyOnNode.apply(viewContext.getNode()).setValue((W) (EventHandler) event -> {
+					applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null);
+				});
+			}
+		};
+
+	}
+	
 	public static <N, W> Binder<N, W> genericActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
 		return new Binder<N, W>() {
 			@Override
