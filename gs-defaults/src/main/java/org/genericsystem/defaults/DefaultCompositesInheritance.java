@@ -4,19 +4,39 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javafx.beans.binding.ListBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+
 public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extends IVertex<T> {
+
+	// Remove
+
+	ObservableList<T> getObservableComposites();
+
+	//
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default T getAttribute(Serializable value, T... targets) {
 		return getNonAmbiguousResult(getAttributes(value, targets).stream());
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableAttribute(Serializable value, T... targets) {
+		return getObservableNonAmbiguousResult(getObservableAttributes(value, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -26,14 +46,29 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableAttribute(T... targets) {
+		return getObservableNonAmbiguousResult(getObservableAttributes(targets));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(Serializable value, T... targets) {
 		return getAttributes(targets).filter(DefaultDependencies.valueFilter(value));
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableAttributes(Serializable value, T... targets) {
+		return getObservableAttributes(targets).filtered(DefaultDependencies.valueFilter(value));
+	}
+
 	@Override
 	default Snapshot<T> getAttributes() {
 		return getAttributes(getRoot().getMetaAttribute());
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableAttributes() {
+		return getObservableAttributes(getRoot().getMetaAttribute());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -43,9 +78,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableAttributes(T... targets) {
+		return getObservableAttributes().filtered(componentsFilter(addThisToTargets(targets)));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getAttributes(int pos) {
 		return () -> getAttributes().stream().filter(attribute -> attribute.getComponent(pos) != null && ((T) this).isSpecializationOf(attribute.getComponent(pos)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableAttributes(int pos) {
+		return getObservableAttributes().filtered(attribute -> attribute.getComponent(pos) != null && ((T) this).isSpecializationOf(attribute.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -58,9 +103,34 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableAttributes(T attribute) {
+		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+			return new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).observableInheritanceList();
+
+		return new ListBinding<T>() {
+			ObservableList<T> composites = DefaultCompositesInheritance.this.getObservableComposites();
+			{
+				bind(composites);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL).collect(Collectors.toList())));
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getHolder(T attribute, Serializable value, T... targets) {
 		return getNonAmbiguousResult(getHolders(attribute, value, targets).stream());
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableHolder(T attribute, Serializable value, T... targets) {
+		return getObservableNonAmbiguousResult(getObservableHolders(attribute, value, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,9 +140,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
+		return getObservableNonAmbiguousResult(getObservableHolders(attribute, targets));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute, Serializable value, T... targets) {
 		return getHolders(attribute).filter(DefaultDependencies.valueFilter(value)).filter(componentsFilter(addThisToTargets(targets)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableHolders(T attribute, Serializable value, T... targets) {
+		return getObservableHolders(attribute).filtered(DefaultDependencies.valueFilter(value)).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,9 +162,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableHolders(T attribute, T... targets) {
+		return getObservableHolders(attribute).filtered(componentsFilter(addThisToTargets(targets)));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getHolders(T attribute, int pos) {
 		return () -> getHolders(attribute).stream().filter(holder -> holder.getComponent(pos) != null && ((T) this).isSpecializationOf(holder.getComponent(pos)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableHolders(T attribute, int pos) {
+		return getObservableHolders(attribute).filtered(holder -> holder.getComponent(pos) != null && ((T) this).isSpecializationOf(holder.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,9 +187,34 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableHolders(T attribute) {
+		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
+			return new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).observableInheritanceList();
+
+		return new ListBinding<T>() {
+			ObservableList<T> composites = DefaultCompositesInheritance.this.getObservableComposites();
+			{
+				bind(composites);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE).collect(Collectors.toList())));
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getRelation(Serializable value, T... targets) {
 		return getNonAmbiguousResult(getRelations(value, targets).stream());
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableRelation(Serializable value, T... targets) {
+		return getObservableNonAmbiguousResult(getObservableRelations(value, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,9 +224,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableRelation(T... targets) {
+		return getObservableNonAmbiguousResult(getObservableRelations(targets));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(Serializable value, T... targets) {
 		return getRelations(targets).filter(DefaultDependencies.valueFilter(value));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableRelations(Serializable value, T... targets) {
+		return getObservableRelations(targets).filtered(DefaultDependencies.valueFilter(value));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -121,9 +246,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableRelations(T... targets) {
+		return getObservableRelations(getRoot().getMetaRelation()).filtered(componentsFilter(addThisToTargets(targets)));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getRelations(int pos) {
 		return () -> getRelations().stream().filter(relation -> relation.getComponent(pos) != null && ((T) this).isSpecializationOf(relation.getComponent(pos)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableRelations(int pos) {
+		return getObservableRelations().filtered(relation -> relation.getComponent(pos) != null && ((T) this).isSpecializationOf(relation.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -133,9 +268,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableRelations(T relation) {
+		return ((T) this).getObservableAttributes(relation);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default T getLink(T relation, Serializable value, T... targets) {
 		return getNonAmbiguousResult(getLinks(relation, value, targets).stream());
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableLink(T relation, Serializable value, T... targets) {
+		return getObservableNonAmbiguousResult(getObservableLinks(relation, value, targets));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -145,9 +290,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservableLink(T relation, T... targets) {
+		return getObservableNonAmbiguousResult(getObservableLinks(relation, targets));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getLinks(T relation, Serializable value, T... targets) {
 		return getLinks(relation).filter(DefaultDependencies.valueFilter(value)).filter(componentsFilter(addThisToTargets(targets)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableLinks(T relation, Serializable value, T... targets) {
+		return getObservableLinks(relation).filtered(DefaultDependencies.valueFilter(value)).filtered(componentsFilter(addThisToTargets(targets)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -157,9 +312,19 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableLinks(T relation, T... targets) {
+		return getObservableLinks(relation).filtered(componentsFilter(addThisToTargets(targets)));
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<T> getLinks(T relation, int pos) {
 		return () -> getLinks(relation).stream().filter(link -> link.getComponent(pos) != null && ((T) this).isSpecializationOf(link.getComponent(pos)));
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableLinks(T relation, int pos) {
+		return getObservableLinks(relation).filtered(link -> link.getComponent(pos) != null && ((T) this).isSpecializationOf(link.getComponent(pos)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -169,17 +334,54 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<T> getObservableLinks(T relation) {
+		return ((T) this).getObservableHolders(relation);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Serializable getValue(T attribute, Serializable value, T... targets) {
 		T holder = getHolder(attribute, value, targets);
-		return holder!=null ? holder.getValue() : null;
+		return holder != null ? holder.getValue() : null;
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<Serializable> getObservableValue(T attribute, Serializable value, T... targets) {
+		return new ObjectBinding<Serializable>() {
+			private final ObservableValue<T> holder;
+			{
+				holder = getObservableHolder(attribute, value, targets);
+				bind(holder);
+			}
+
+			@Override
+			protected Serializable computeValue() {
+				return holder.getValue() != null ? holder.getValue().getValue() : null;
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	default Serializable getValue(T attribute, T... targets) {
 		T holder = getHolder(attribute, targets);
-		return holder!=null ? holder.getValue() : null;
+		return holder != null ? holder.getValue() : null;
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<Serializable> getObservableValue(T attribute, T... targets) {
+		return new ObjectBinding<Serializable>() {
+			private final ObservableValue<T> holder;
+			{
+				holder = getObservableHolder(attribute, targets);
+				bind(holder);
+			}
+
+			@Override
+			protected Serializable computeValue() {
+				return holder.getValue() != null ? holder.getValue().getValue() : null;
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -189,14 +391,64 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
+	default ObservableList<Serializable> getObservableValues(T attribute, Serializable value, T... targets) {
+		return new ListBinding<Serializable>() {
+			private final ObservableList<T> links;
+			{
+				links = getObservableLinks(attribute, value, targets);
+				bind(links);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<Serializable> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, T... targets) {
 		return () -> getLinks(attribute, targets).stream().map(x -> x.getValue());
 	}
 
+	@SuppressWarnings("unchecked")
+	default ObservableList<Serializable> getObservableValues(T attribute, T... targets) {
+		return new ListBinding<Serializable>() {
+			private final ObservableList<T> links;
+			{
+				links = getObservableLinks(attribute, targets);
+				bind(links);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<Serializable> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+			}
+		};
+	}
+
 	@Override
 	default Snapshot<Serializable> getValues(T attribute, int pos) {
 		return () -> getHolders(attribute, pos).stream().map(x -> x.getValue());
+	}
+
+	default ObservableList<Serializable> getObservableValues(T attribute, int pos) {
+		return new ListBinding<Serializable>() {
+			private final ObservableList<T> holders;
+			{
+				holders = getObservableHolders(attribute, pos);
+				bind(holders);
+			}
+
+			@SuppressWarnings("restriction")
+			@Override
+			protected ObservableList<Serializable> computeValue() {
+				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -216,15 +468,49 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 
 	T getNonAmbiguousResult(Stream<T> stream);
 
+	ObservableValue<T> getObservableNonAmbiguousResult(ObservableList<T> list);
+
 	@SuppressWarnings("unchecked")
 	default T getLinkTargetComponent(T relation, T... targets) {
 		T link = getLink(relation, targets);
-		return link!=null ? link.getTargetComponent() : null;
+		return link != null ? link.getTargetComponent() : null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	default T getLinkTargetComponent(T relation,Serializable value, T... targets) {
+	default ObservableValue<T> getObservableLinkTargetComponent(T relation, T... targets) {
+		return new ObjectBinding<T>() {
+			private final ObservableValue<T> link;
+			{
+				link = getObservableLink(relation, targets);
+				bind(link);
+			}
+
+			@Override
+			protected T computeValue() {
+				return link.getValue() != null ? link.getValue().getTargetComponent() : null;
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
+	default T getLinkTargetComponent(T relation, Serializable value, T... targets) {
 		T link = getLink(relation, value, targets);
-		return link!=null ? link.getTargetComponent() : null;
+		return link != null ? link.getTargetComponent() : null;
+	}
+
+	@SuppressWarnings("unchecked")
+	default ObservableValue<T> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
+		return new ObjectBinding<T>() {
+			private final ObservableValue<T> link;
+			{
+				link = getObservableLink(relation, value, targets);
+				bind(link);
+			}
+
+			@Override
+			protected T computeValue() {
+				return link.getValue() != null ? link.getValue().getTargetComponent() : null;
+			}
+		};
 	}
 }

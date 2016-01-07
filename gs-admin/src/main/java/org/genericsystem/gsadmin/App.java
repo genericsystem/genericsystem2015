@@ -56,7 +56,7 @@ public class App extends Application {
 		Element<Group> elt = new Element<>(Group.class);
 		WindowBuilder builder = new WindowBuilder();
 		builder.init(elt);// Do this only one time
-		Window window = builder.build(scene.widthProperty(), scene.heightProperty());
+		Window window = builder.build(scene.widthProperty(), scene.heightProperty(),initGS());
 		elt.apply(window, scene.getRoot());// Do this only one time
 		stage.setScene(scene);
 		stage.setWidth(800);

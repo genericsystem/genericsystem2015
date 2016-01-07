@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -91,9 +92,14 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T extends Event> Element<N> addGenericActionBinding(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
+	public <M, T> Element<N> addGenericActionBinding(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
 		bindings.add(Binding.bindGenericAction(propAction, consumer));
 		return this;
+	}
+	
+	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, ObjectProperty<T>> propAction, BiConsumer<SUPERMODEL,M> biConsumer) {
+		bindings.add(Binding.bindGenericMouseAction(propAction, biConsumer));
+		return  this;
 	}
 
 	public <M, T> Element<N> addReversedBinding(Function<N, Property<T>> getProperty, Function<M, Property<T>> function) {

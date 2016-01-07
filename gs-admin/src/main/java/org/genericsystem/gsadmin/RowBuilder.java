@@ -12,24 +12,28 @@ import org.genericsystem.gsadmin.CellBuilder.RowFirstCellTextCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.TableCellBuilder;
 import org.genericsystem.gsadmin.CellBuilder.TextCellBuilder;
 import org.genericsystem.gsadmin.Stylable.TableStyle;
+import org.genericsystem.todomvc.Todo;
+import org.genericsystem.todomvc.TodoList;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;
 
 public abstract class RowBuilder<COL, T> implements Builder {
 
-	protected Row build(ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
-		return new Row(getFirstElement(firstColumnString, tableStyle), getElements(columns, columnExtractor, tableStyle), getStyle(tableStyle));
+	protected Row build(Object item,ObservableValue<String> firstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
+		return new Row(item,getFirstElement(firstColumnString, tableStyle), getElements(columns, columnExtractor, tableStyle), getStyle(tableStyle));
 	}
 
 	protected ObservableValue<Cell<?>> getFirstElement(ObservableValue<String> firstColumnString, TableStyle tableStyle) {
+		if(firstColumnString.getValue() == null)
+			return new ReadOnlyObjectWrapper<>();
 		return new ReadOnlyObjectWrapper<>(getRowFirstCellBuilder().build(firstColumnString, tableStyle));
 	}
 
 	protected ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
 		return new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), tableStyle));
 	}
-
+	
 	@Override
 	public void init(Element<?> rowPanel) {
 		new GSHBox(rowPanel).select(Row::getFirstElement).include(getRowFirstCellBuilder()::init).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth)
