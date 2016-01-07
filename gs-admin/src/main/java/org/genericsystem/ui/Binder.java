@@ -103,6 +103,7 @@ public interface Binder<N, W> {
 
 	public static <N,S, W> Binder<N, Function<S, W>> genericMouseActionBinder(Function<N, ObjectProperty<W>> applyOnNode) {
 		return new Binder<N, Function<S, W>>() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void init(Supplier<Function<S, W>> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
 				applyOnNode.apply(viewContext.getNode()).setValue((W) (EventHandler) event -> {
