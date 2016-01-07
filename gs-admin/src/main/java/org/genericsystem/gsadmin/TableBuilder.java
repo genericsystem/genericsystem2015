@@ -1,21 +1,18 @@
 package org.genericsystem.gsadmin;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
 
+import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Tab;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.RowBuilder.TableCellRowBuilder;
 import org.genericsystem.gsadmin.RowBuilder.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.RowBuilder.TextCellRowBuilder;
 import org.genericsystem.gsadmin.Stylable.TableStyle;
-import org.genericsystem.todomvc.Todo;
-import org.genericsystem.todomvc.TodoList;
+
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSSCrollPane;
@@ -42,17 +39,20 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 	}
 
 	@Override
-	public void init(Element<?> parent) {
+	public  void init(Element<?> parent) {
 		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setSuperPrefWidth(getSuperPrefWidth()).setMinHeight(Table::getTableHeight).setSuperPrefHeight(getSuperPrefHeight());
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
-				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight).addGenericMouseActionBinding(HBox::onMouseClickedProperty,(table, row) -> ((Table) table).selectRow((Row) row) );
+				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight).addGenericMouseActionBinding(HBox::onMouseClickedProperty,Window::selectRow);
+				
 			}
 		}
 	}
+	
+	
 	
 	abstract RowBuilder<COL, T> getRowBuilder();
 

@@ -1,9 +1,7 @@
 package org.genericsystem.gsadmin;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Stylable {

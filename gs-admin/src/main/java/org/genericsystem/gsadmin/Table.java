@@ -5,12 +5,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.gsadmin.Stylable.Listable;
 
 public class Table extends Listable<Row> {
@@ -108,10 +106,5 @@ public class Table extends Listable<Row> {
 
 	public ObservableValue<Number> getTableWidth() {
 		return tableWidth;
-	}
-
-	public void selectRow(Row row) {
-		rowSelected.setValue(row);
-		System.out.println(row.getItem());
 	}
 }
