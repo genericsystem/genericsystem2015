@@ -25,15 +25,15 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	default void init(Function<?, X> method, ModelContext modelContext, N node) {
-		init(applyOnModel(method, modelContext), modelContext, node);
+	default void init(Function<N, Y> applyOnNode, Function<?, X> method, ModelContext modelContext, N node) {
+		init(applyOnNode.apply(node), applyOnModel(method, modelContext), modelContext);
 	}
 
-	default void init(Supplier<X> applyOnModel, ModelContext modelContext, N node) {
-		init(applyOnModel.get(), modelContext, node);
+	default void init(Y nodeResult, Supplier<X> applyOnModel, ModelContext modelContext) {
+		init(nodeResult, applyOnModel.get());
 	}
 
-	default void init(X wrapper, ModelContext modelContext, N node) {}
+	default void init(Y nodeResult, X modelResult) {}
 
 	public static <N, W, W2> Binder<N, Property<W>, W2> injectBinder() {
 		return new Binder<N, Property<W>, W2>() {

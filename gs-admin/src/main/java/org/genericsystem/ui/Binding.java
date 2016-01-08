@@ -20,7 +20,7 @@ public class Binding<N, X, Y> {
 	}
 
 	public void init(ModelContext modelContext, N node) {
-		binder.init(applyOnModel, modelContext, node);
+		binder.init(applyOnNode, applyOnModel, modelContext, node);
 	}
 
 	@SuppressWarnings("unchecked")
