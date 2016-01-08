@@ -12,16 +12,16 @@ import javafx.event.EventHandler;
 
 public class Binding<N, W> {
 
-	private final Function<?, W> method;
+	private final Function<?, W> applyOnModel;
 	private final Binder<N, W> binder;
 
-	public Binding(Function<?, W> method, Binder<N, W> binder) {
+	public Binding(Function<?, W> applyOnModel, Binder<N, W> binder) {
+		this.applyOnModel = applyOnModel;
 		this.binder = binder;
-		this.method = method;
 	}
 
 	public void init(ModelContext modelContext, N node) {
-		binder.init(method, modelContext, node);
+		binder.init(applyOnModel, modelContext, node);
 	}
 
 	@SuppressWarnings("unchecked")
