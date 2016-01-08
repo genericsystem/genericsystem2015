@@ -31,7 +31,6 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 		this.base = base;
 		this.origin = origin;
 		this.level = level;
-
 	}
 
 	public ObservableList<T> observableInheritanceList() {
@@ -42,9 +41,9 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 
 	private class InheritenceComputerBinding extends ListBinding<T> {
 
-		Set<ObservableList<?>> observables = new HashSet<>();
+		Set<Observable> observables = new HashSet<>();
 
-		public void toBind(ObservableList<?> observable) {
+		public void toBind(Observable observable) {
 			observables.add(observable);
 			bind(observable);
 		}
@@ -60,10 +59,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 			unbindAll();
 			inheritingsCache.clear();
 			set.clear();
-
-			List<T> list = getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList());
-
-			return new ObservableListWrapper<>(list);
+			return new ObservableListWrapper<>(getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()));
 		}
 	}
 
@@ -72,8 +68,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 		if (result == null)
 			inheritingsCache.put(superVertex, result = new Inheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
 		return result.stream();
-		// return new
-		// Inheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
+		// return new Inheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
 	}
 
 	private class Inheritings {
@@ -110,13 +105,15 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 
 	@SuppressWarnings("hiding")
 	private <T extends DefaultVertex<T>> Stream<T> compositesByMeta(T localBase, T holder) {
-		binding.toBind(localBase.getCurrentCache().getObservableDependencies(localBase));
-		return localBase.getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
+		ObservableList<T> composites = localBase.getObservableComposites().filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
+		binding.toBind(composites);
+		return composites.stream();
 	}
 
 	@SuppressWarnings("hiding")
 	private <T extends DefaultVertex<T>> Stream<T> compositesBySuper(T localBase, T holder) {
-		binding.toBind(localBase.getCurrentCache().getObservableDependencies(localBase));
-		return localBase.getComposites().stream().filter(x -> x.getSupers().contains(holder));
+		ObservableList<T> composites = localBase.getObservableComposites().filtered(x -> x.getSupers().contains(holder));
+		binding.toBind(composites);
+		return composites.stream();
 	}
 }

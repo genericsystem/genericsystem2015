@@ -3,6 +3,7 @@ package org.genericsystem.gsadmin;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 import org.genericsystem.admin.model.Car;
@@ -24,10 +25,12 @@ public class App extends Application {
 		launch(args);
 	}
 
+	static CocClientEngine engine;
+
 	private CocClientEngine initGS() {
 		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		CocClientEngine engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
+		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 
@@ -48,16 +51,25 @@ public class App extends Application {
 		return engine;
 	}
 
+	int i = 0;
+
 	@Override
 	public void start(Stage stage) throws Exception {
+		Button addGen = new Button("Add");
+		addGen.setOnAction(e -> {
+			engine.addInstance("*********************************" + i);
+			i++;
+		});
+
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
 		WindowBuilder builder = new WindowBuilder();
 		builder.init(elt);// Do this only one time
-		Window window = builder.build(scene.widthProperty(), scene.heightProperty(),initGS());
+		Window window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
 		elt.apply(window, scene.getRoot());// Do this only one time
+		((Group) scene.getRoot()).getChildren().add(addGen);
 		stage.setScene(scene);
 		stage.setWidth(800);
 		stage.setHeight(600);
