@@ -74,6 +74,9 @@ public class Window {
 
 		
 		Table table = tableModel.createTable();
+		table.getColumnWidth().setValue(400);
+		table.getRowHeight().setValue(100);
+		table.getFirstRowHeight().setValue(50);
 		tableSelectedRow.setValue(table);
 	}
 }

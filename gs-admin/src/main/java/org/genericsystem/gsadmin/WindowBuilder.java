@@ -18,9 +18,9 @@ public class WindowBuilder implements Builder {
 
 	@Override
 	public void init(Element<?> parent) {
-		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
-		{
-			GSVBox main = new GSVBox(scrollPane).setPrefHeight(Window::getmainPanelHeight);
+//		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+//		{
+			GSVBox main = new GSVBox(parent).setPrefHeight(Window::getmainPanelHeight);
 			{
 				GSVBox table = new GSVBox(main).select(Window::getTable);
 				{
@@ -31,7 +31,7 @@ public class WindowBuilder implements Builder {
 					new TableCellTableBuilder<>().init(table2);
 				}
 			}
-		}
+//		}
 	}
 
 	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine c) {
