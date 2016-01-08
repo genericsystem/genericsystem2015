@@ -304,6 +304,7 @@ public class CocCache extends HeavyCache {
 					return new ObservableListWrapper<>(CocCache.this.getDependencies(generic).toList());
 				}
 			};
+			dependenciesAsOservableListCacheMap.put(generic, result);
 		}
 		return result;
 	}
