@@ -9,10 +9,12 @@ import javafx.collections.ObservableList;
 
 public class Binding<N, X, Y> {
 
+	private final Function<N, Y> applyOnNode;
 	private final Function<?, X> applyOnModel;
-	private final Binder<N, X> binder;
+	private final Binder<N, X, Y> binder;
 
-	public Binding(Function<N, Y> applyOnNode, Function<?, X> applyOnModel, Binder<N, X> binder) {
+	public Binding(Function<N, Y> applyOnNode, Function<?, X> applyOnModel, Binder<N, X, Y> binder) {
+		this.applyOnNode = applyOnNode;
 		this.applyOnModel = applyOnModel;
 		this.binder = binder;
 	}
@@ -22,12 +24,12 @@ public class Binding<N, X, Y> {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <N, M, X, Y> Binding<N, X, Y> bind(Function<N, Y> applyOnNode, Function<M, X> applyOnModel, Binder<N, X> binder) {
+	static <N, M, X, Y> Binding<N, X, Y> bind(Function<N, Y> applyOnNode, Function<M, X> applyOnModel, Binder<N, X, Y> binder) {
 		return new Binding<>(applyOnNode, (u) -> applyOnModel.apply((M) u), binder);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <N, M, X, Y> Binding<N, X, Y> bind(Function<N, Y> applyOnNode, Consumer<M> applyOnModel, Binder<N, X> binder) {
+	private static <N, M, X, Y> Binding<N, X, Y> bind(Function<N, Y> applyOnNode, Consumer<M> applyOnModel, Binder<N, X, Y> binder) {
 		return new Binding<>(applyOnNode, (u) -> {
 			applyOnModel.accept((M) u);
 			return null;
@@ -35,7 +37,7 @@ public class Binding<N, X, Y> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <SUPERMODEL, N, M, W, Y> Binding<N, Function<SUPERMODEL, W>, Y> bind(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, M> applyOnModel, Binder<N, Function<SUPERMODEL, W>> binder) {
+	private static <SUPERMODEL, N, M, W, Y> Binding<N, Function<SUPERMODEL, W>, Y> bind(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, M> applyOnModel, Binder<N, Function<SUPERMODEL, W>, Y> binder) {
 		return new Binding<>(applyOnNode, (m) -> (sm -> {
 			applyOnModel.accept(sm, (M) m);
 			return null;
@@ -43,7 +45,7 @@ public class Binding<N, X, Y> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <SUPERMODEL, N, W, Y> Binding<N, Function<W, SUPERMODEL>, Y> pushBinding(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, W> applyOnModel, Binder<N, Function<W, SUPERMODEL>> binder) {
+	private static <SUPERMODEL, N, W, Y> Binding<N, Function<W, SUPERMODEL>, Y> pushBinding(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, W> applyOnModel, Binder<N, Function<W, SUPERMODEL>, Y> binder) {
 		return new Binding<>(applyOnNode, (sm) -> (m -> {
 			applyOnModel.accept((SUPERMODEL) sm, m);
 			return null;
@@ -91,6 +93,6 @@ public class Binding<N, X, Y> {
 	}
 
 	public static <N, M, W> Binding<N, ObservableList<W>, Property<ObservableList<W>>> bindObservableList(Function<M, ObservableList<W>> applyOnModel, Function<N, Property<ObservableList<W>>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder(applyOnNode));
+		return Binding.<N, M, ObservableList<W>, Property<ObservableList<W>>> bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder(applyOnNode));
 	}
 }
