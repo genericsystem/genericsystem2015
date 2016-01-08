@@ -10,19 +10,16 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
 	public final Class<N> nodeClass;
-	public final List<Binding<N, ?>> metaBindings = new ArrayList<>();
+	public final List<MetaBinding<N, ?>> metaBindings = new ArrayList<>();
 	public final List<Binding<N, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
@@ -78,7 +75,7 @@ public class Element<N> {
 	}
 
 	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
-		bindings.add(Binding.bindSuperProperty(getProperty, function));
+		bindings.add(Binding.bindMetaProperty(getProperty, function));
 		return this;
 	}
 
@@ -87,19 +84,14 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T extends Event> Element<N> addActionBinding(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
+	public <M, T> Element<N> addActionBinding(Function<N, Property<T>> propAction, Consumer<M> consumer) {
 		bindings.add(Binding.bindAction(propAction, consumer));
 		return this;
 	}
 
-	public <M, T> Element<N> addGenericActionBinding(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
-		bindings.add(Binding.bindGenericAction(propAction, consumer));
-		return this;
-	}
-	
-	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, ObjectProperty<T>> propAction, BiConsumer<SUPERMODEL,M> biConsumer) {
+	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
 		bindings.add(Binding.bindGenericMouseAction(propAction, biConsumer));
-		return  this;
+		return this;
 	}
 
 	public <M, T> Element<N> addReversedBinding(Function<N, Property<T>> getProperty, Function<M, Property<T>> function) {
@@ -118,7 +110,7 @@ public class Element<N> {
 	}
 
 	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> function) {
-		metaBindings.add(Binding.forEach(function));
+		metaBindings.add(MetaBinding.forEach(function));
 		return this;
 	}
 
@@ -129,7 +121,7 @@ public class Element<N> {
 	}
 
 	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function) {
-		metaBindings.add(Binding.selector(function));
+		metaBindings.add(MetaBinding.selector(function));
 		return this;
 	}
 
