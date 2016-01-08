@@ -53,27 +53,27 @@ public class Binding<N, X, Y> {
 	}
 
 	public static <N, M, W> Binding<N, ObservableValue<W>, Property<W>> bindProperty(Function<M, ObservableValue<W>> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBinder());
 	}
 
 	public static <N, M, W> Binding<N, Property<W>, ObservableValue<W>> bindReversedProperty(Function<M, Property<W>> applyOnModel, Function<N, ObservableValue<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyReverseBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyReverseBinder());
 	}
 
 	public static <N, M, W> Binding<N, Property<W>, Property<W>> bindBiDirectionalProperty(Function<M, Property<W>> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBiDirectionalBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBiDirectionalBinder());
 	}
 
 	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>> bindMetaProperty(Function<SUPERMODEL, ObservableValue<W>> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, m -> applyOnModel, Binder.<N, SUPERMODEL, W> metaPropertyBinder(applyOnNode));
+		return Binding.bind(applyOnNode, m -> applyOnModel, Binder.<N, SUPERMODEL, W> metaPropertyBinder());
 	}
 
 	public static <N, M, W> Binding<N, W, Property<W>> bindAction(Consumer<M> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.actionBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.actionBinder());
 	}
 
 	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, W>, Property<W>> bindMetaAction(BiConsumer<SUPERMODEL, M> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.metaActionBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.metaActionBinder());
 	}
 
 	public static <N, M, W> Binding<N, ObservableValue<Boolean>, ObservableList<W>> bindObservableList(Function<M, ObservableValue<Boolean>> applyOnModel, W styleClass, Function<N, ObservableList<W>> applyOnNode) {
@@ -81,18 +81,18 @@ public class Binding<N, X, Y> {
 	}
 
 	public static <N, M> Binding<N, ObservableValue<String>, ObservableList<String>> bindObservableListToObservableValue(Function<M, ObservableValue<String>> applyOnModel, Function<N, ObservableList<String>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListBinder());
 	}
 
 	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, W>, Property<W>> bindGenericMouseAction(BiConsumer<SUPERMODEL, M> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.genericMouseActionBinder(applyOnNode));
+		return Binding.bind(applyOnNode, applyOnModel, Binder.genericMouseActionBinder());
 	}
 
 	public static <SUPERMODEL, N, W> Binding<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, W> applyOnModel, Function<N, Property<Consumer<W>>> applyOnNode) {
-		return Binding.pushBinding(applyOnNode, applyOnModel, Binder.pushModelActionOnSuperModel(applyOnNode));
+		return Binding.pushBinding(applyOnNode, applyOnModel, Binder.pushModelActionOnSuperModel());
 	}
 
 	public static <N, M, W> Binding<N, ObservableList<W>, Property<ObservableList<W>>> bindObservableList(Function<M, ObservableList<W>> applyOnModel, Function<N, Property<ObservableList<W>>> applyOnNode) {
-		return Binding.<N, M, ObservableList<W>, Property<ObservableList<W>>> bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder(applyOnNode));
+		return Binding.<N, M, ObservableList<W>, Property<ObservableList<W>>> bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder());
 	}
 }

@@ -3,6 +3,7 @@ package org.genericsystem.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -38,27 +39,29 @@ public interface Binder<N, X, Y> {
 	public static <N, W, W2> Binder<N, Property<W>, W2> injectBinder() {
 		return new Binder<N, Property<W>, W2>() {
 			@Override
-			public void init(Property<W> wrapper, ModelContext modelContext, N node) {
-				wrapper.setValue(modelContext.getParent().getModel());
+			public void init(W2 nodeResult, Supplier<Property<W>> applyOnModel, ModelContext modelContext) {
+				applyOnModel.get().setValue(modelContext.getParent().getModel());
 			}
+			
 		};
 
 	}
 
-	public static <N, W> Binder<N, ObservableValue<W>, Property<W>> propertyBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, W,Y> Binder<N, ObservableValue<W>, Property<W>> propertyBinder() {
 		return new Binder<N, ObservableValue<W>, Property<W>>() {
 			@Override
-			public void init(ObservableValue<W> wrapper, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).bind(wrapper);
+			public void init(Property<W> nodeResult, ObservableValue<W> modelResult) {
+				nodeResult.bind(modelResult);
 			}
 		};
 	}
 
-	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>> metaPropertyBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>> metaPropertyBinder() {
 		return new Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>>() {
+			
 			@Override
-			public void init(Supplier<Function<SUPERMODEL, ObservableValue<W>>> applyOnModel, ModelContext modelContext, N node) {
-				Property<W> property = applyOnNode.apply(node);
+			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, ObservableValue<W>>> applyOnModel, ModelContext modelContext) {
+				Property<W> property = nodeResult;
 				ModelContext modelContext_ = modelContext.getParent();
 				String s = "/";
 				while (modelContext_ != null) {
@@ -74,40 +77,40 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N, W> Binder<N, W, Property<W>> actionBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, W> Binder<N, W, Property<W>> actionBinder() {
 		return new Binder<N, W, Property<W>>() {
 			@Override
-			public void init(Supplier<W> applyOnModel, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue((W) (EventHandler) event -> applyOnModel.get());
+			public void init(Property<W> nodeResult, W modelResult) {
+				nodeResult.setValue(modelResult);
 			}
 		};
-
 	}
 
-	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>, Property<W>> metaActionBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>, Property<W>> metaActionBinder() {
 		return new Binder<N, Function<SUPERMODEL, W>, Property<W>>() {
 			@Override
-			public void init(Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue((W) (EventHandler) event -> applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null));
+			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext) {
+				nodeResult.setValue(applyOnModel.get().apply(modelContext.getModel()));
 			}
+			
 		};
 	}
 
-	public static <N, SUPERMODEL, W> Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel(Function<N, Property<Consumer<W>>> applyOnNode) {
+	public static <N, SUPERMODEL, W> Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel() {
 		return new Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>>() {
 			@Override
-			public void init(Supplier<Function<W, SUPERMODEL>> applyOnModel, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
+			public void init(Function<N, Property<Consumer<W>>> applyOnNode, Function<?, Function<W, SUPERMODEL>> method, ModelContext modelContext, N node) {
+				applyOnNode.apply(node).setValue(w -> applyOnModel(method,modelContext.getModel()).get().apply(w));
 			}
 		};
 	}
 
-	public static <N, S, W> Binder<N, Function<S, W>, Property<W>> genericMouseActionBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, S, W> Binder<N, Function<S, W>, Property<W>> genericMouseActionBinder() {
 		return new Binder<N, Function<S, W>, Property<W>>() {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			public void init(Supplier<Function<S, W>> applyOnModel, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue((W) (EventHandler) event -> {
+			public void init(Property<W> nodeResult, Supplier<Function<S, W>> applyOnModel, ModelContext modelContext) {
+				nodeResult.setValue((W) (EventHandler) event -> {
 					ModelContext modelContext_ = modelContext;
 					String s = "/";
 					while (modelContext_ != null) {
@@ -123,60 +126,59 @@ public interface Binder<N, X, Y> {
 
 	}
 
-	public static <N, W> Binder<N, Property<W>, ObservableValue<W>> propertyReverseBinder(Function<N, ObservableValue<W>> applyOnNode) {
+	public static <N, W> Binder<N, Property<W>, ObservableValue<W>> propertyReverseBinder() {
 		return new Binder<N, Property<W>, ObservableValue<W>>() {
 			@Override
-			public void init(Property<W> wrapper, ModelContext modelContext, N node) {
-				wrapper.bind(applyOnNode.apply(node));
+			public void init(ObservableValue<W> nodeResult, Property<W> modelResult) {
+				modelResult.bind(nodeResult);
 			}
 		};
 	}
 
-	public static <N, W> Binder<N, ObservableList<W>, Property<ObservableList<W>>> observableListPropertyBinder(Function<N, Property<ObservableList<W>>> applyOnNode) {
+	public static <N, W> Binder<N, ObservableList<W>, Property<ObservableList<W>>> observableListPropertyBinder() {
 		return new Binder<N, ObservableList<W>, Property<ObservableList<W>>>() {
 			@Override
-			public void init(ObservableList<W> wrapper, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue(wrapper);
+			public void init(Property<ObservableList<W>> nodeResult, ObservableList<W> modelResult) {
+				nodeResult.setValue(modelResult);
 			}
 		};
 	}
 
-	public static <N, W> Binder<N, Property<W>, Property<W>> propertyBiDirectionalBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, W> Binder<N, Property<W>, Property<W>> propertyBiDirectionalBinder() {
 		return new Binder<N, Property<W>, Property<W>>() {
 			@Override
-			public void init(Property<W> wrapper, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).bindBidirectional(wrapper);
+			public void init(Property<W> nodeResult, Property<W> modelResult) {
+				nodeResult.bindBidirectional(modelResult);
 			}
 		};
 	}
 
-	public static <N> Binder<N, ObservableValue<String>, ObservableList<String>> observableListBinder(Function<N, ObservableList<String>> applyOnNode) {
+	public static <N> Binder<N, ObservableValue<String>, ObservableList<String>> observableListBinder() {
 		return new Binder<N, ObservableValue<String>, ObservableList<String>>() {
 			@Override
-			public void init(ObservableValue<String> wrapper, ModelContext modelContext, N node) {
-				ObservableList<String> styleClasses = applyOnNode.apply(node);
-				styleClasses.add(wrapper.getValue());
-				wrapper.addListener((o, ov, nv) -> {
-					styleClasses.remove(ov);
-					styleClasses.remove(nv);
+			public void init(ObservableList<String> nodeResult, ObservableValue<String> modelResult) {
+				nodeResult.add(modelResult.getValue());
+				modelResult.addListener((o, ov, nv) -> {
+					nodeResult.remove(ov);
+					nodeResult.remove(nv);
 				});
-			}
+			}		
 		};
-	}
-
+	}	
+	
 	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableList<W>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
 		return new Binder<N, ObservableValue<Boolean>, ObservableList<W>>() {
 			@Override
-			public void init(ObservableValue<Boolean> wrapper, ModelContext modelContext, N node) {
-				ObservableList<W> styleClasses = applyOnNode.apply(node);
+			public void init(ObservableList<W> nodeResult, ObservableValue<Boolean> modelResult) {
 				Consumer<Boolean> consumer = bool -> {
 					if (bool)
-						styleClasses.add(styleClass);
+						nodeResult.add(styleClass);
 					else
-						styleClasses.remove(styleClass);
+						nodeResult.remove(styleClass);
 				};
-				consumer.accept(wrapper.getValue());
-				wrapper.addListener((o, ov, nv) -> consumer.accept(nv));
+				
+				consumer.accept(modelResult.getValue());
+				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
 			}
 		};
 	}
