@@ -65,47 +65,47 @@ public class Element<N> {
 	}
 
 	public <M, W> Element<N> addBidirectionalBinding(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
-		bindings.add(Binding.bindBiDirectionalProperty(getProperty, function));
+		bindings.add(Binding.bindBiDirectionalProperty(function, getProperty));
 		return this;
 	}
 
 	public <M, T> Element<N> addBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
-		bindings.add(Binding.bindProperty(getProperty, function));
+		bindings.add(Binding.bindProperty(function, getProperty));
 		return this;
 	}
 
 	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
-		bindings.add(Binding.bindMetaProperty(getProperty, function));
+		bindings.add(Binding.bindMetaProperty(function, getProperty));
 		return this;
 	}
 
 	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
-		bindings.add(Binding.bindObservableList(getProperty, function));
+		bindings.add(Binding.bindObservableList(function, getProperty));
 		return this;
 	}
 
 	public <M, T> Element<N> addActionBinding(Function<N, Property<T>> propAction, Consumer<M> consumer) {
-		bindings.add(Binding.bindAction(propAction, consumer));
+		bindings.add(Binding.bindAction(consumer, propAction));
 		return this;
 	}
 
 	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
-		bindings.add(Binding.bindGenericMouseAction(propAction, biConsumer));
+		bindings.add(Binding.bindGenericMouseAction(biConsumer, propAction));
 		return this;
 	}
 
 	public <M, T> Element<N> addReversedBinding(Function<N, Property<T>> getProperty, Function<M, Property<T>> function) {
-		bindings.add(Binding.bindReversedProperty(getProperty, function));
+		bindings.add(Binding.bindReversedProperty(function, getProperty));
 		return this;
 	}
 
 	public <M> Element<N> addObservableListBinding(Function<N, ObservableList<String>> getObservable, Function<M, ObservableValue<String>> function) {
-		bindings.add(Binding.bindObservableListToObservableValue(getObservable, function));
+		bindings.add(Binding.bindObservableListToObservableValue(function, getObservable));
 		return this;
 	}
 
 	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> getObservable, Function<M, ObservableValue<Boolean>> function, T styleClass) {
-		bindings.add(Binding.bindObservableList(getObservable, function, styleClass));
+		bindings.add(Binding.bindObservableList(function, styleClass, getObservable));
 		return this;
 	}
 
