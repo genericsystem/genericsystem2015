@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -172,7 +173,7 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 			@SuppressWarnings({ "unchecked", "restriction" })
 			@Override
 			protected ObservableList<T> computeValue() {
-				final Set<T> set = new HashSet<>();
+				final Set<T> set = new LinkedHashSet<>();
 
 				set.add((T) DefaultDependencies.this);
 				for (List<T> slave : getSlaves())
