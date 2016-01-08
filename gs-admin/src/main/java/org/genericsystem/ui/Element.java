@@ -116,7 +116,7 @@ public class Element<N> {
 
 	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
 		forEach(function);
-		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		bindings.add(Binding.bind(injectedProperty, Binder.injectBinder()));
 		return this;
 	}
 
@@ -127,7 +127,7 @@ public class Element<N> {
 
 	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
 		select(function);
-		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+		bindings.add(Binding.bind(injectedProperty, Binder.injectBinder()));
 		return this;
 	}
 
