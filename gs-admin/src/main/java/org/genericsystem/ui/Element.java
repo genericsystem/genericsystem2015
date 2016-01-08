@@ -9,21 +9,16 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
-
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
 	public final Class<N> nodeClass;
-	public final List<Binding<N, ?>> metaBindings = new ArrayList<>();
-	public final List<Binding<N, ?>> bindings = new ArrayList<>();
+	public final List<MetaBinding<N, ?>> metaBindings = new ArrayList<>();
+	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
 	private final Function<?, ObservableList<?>> getGraphicChildren;
@@ -53,13 +48,13 @@ public class Element<N> {
 			parent.<N> getChildren().add(this);
 	}
 
-	public <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> getProperty, VALUE value) {
-		this.boots.add(Boot.setProperty(getProperty, value));
+	public <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
+		this.boots.add(Boot.setProperty(applyOnNode, value));
 		return this;
 	}
 
-	public <VALUE> Element<N> addObservableListBoot(Function<N, ObservableList<VALUE>> getProperty, VALUE value) {
-		this.boots.add(Boot.addProperty(getProperty, value));
+	public <VALUE> Element<N> addObservableListBoot(Function<N, ObservableList<VALUE>> applyOnNode, VALUE value) {
+		this.boots.add(Boot.addProperty(applyOnNode, value));
 		return this;
 	}
 
@@ -67,75 +62,70 @@ public class Element<N> {
 		return boots;
 	}
 
-	public <M, W> Element<N> addBidirectionalBinding(Function<N, Property<W>> getProperty, Function<M, Property<W>> function) {
-		bindings.add(Binding.bindBiDirectionalProperty(getProperty, function));
+	public <M, W> Element<N> addBidirectionalBinding(Function<N, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
+		bindings.add(Binding.bindBiDirectionalProperty(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T> Element<N> addBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
-		bindings.add(Binding.bindProperty(getProperty, function));
+	public <M, T> Element<N> addBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
+		bindings.add(Binding.bindProperty(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> getProperty, Function<M, ObservableValue<T>> function) {
-		bindings.add(Binding.bindSuperProperty(getProperty, function));
+	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
+		bindings.add(Binding.bindMetaProperty(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> getProperty, Function<M, ObservableList<T>> function) {
-		bindings.add(Binding.bindObservableList(getProperty, function));
+	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
+		bindings.add(Binding.bindObservableList(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T extends Event> Element<N> addActionBinding(Function<N, ObjectProperty<EventHandler<T>>> propAction, Consumer<M> consumer) {
-		bindings.add(Binding.bindAction(propAction, consumer));
+	public <M, T> Element<N> addActionBinding(Function<N, Property<T>> applyOnNode, Consumer<M> applyOnModel) {
+		bindings.add(Binding.bindAction(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T> Element<N> addGenericActionBinding(Function<N, ObjectProperty<T>> propAction, Consumer<M> consumer) {
-		bindings.add(Binding.bindGenericAction(propAction, consumer));
-		return this;
-	}
-	
-	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, ObjectProperty<T>> propAction, BiConsumer<SUPERMODEL,M> biConsumer) {
-		bindings.add(Binding.bindGenericMouseAction(propAction, biConsumer));
-		return  this;
-	}
-
-	public <M, T> Element<N> addReversedBinding(Function<N, Property<T>> getProperty, Function<M, Property<T>> function) {
-		bindings.add(Binding.bindReversedProperty(getProperty, function));
+	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
+		bindings.add(Binding.bindGenericMouseAction(biConsumer, propAction));
 		return this;
 	}
 
-	public <M> Element<N> addObservableListBinding(Function<N, ObservableList<String>> getObservable, Function<M, ObservableValue<String>> function) {
-		bindings.add(Binding.bindObservableListToObservableValue(getObservable, function));
+	public <M, T> Element<N> addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
+		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> getObservable, Function<M, ObservableValue<Boolean>> function, T styleClass) {
-		bindings.add(Binding.bindObservableList(getObservable, function, styleClass));
+	public <M> Element<N> addObservableListBinding(Function<N, ObservableList<String>> applyOnNode, Function<M, ObservableValue<String>> applyOnModel) {
+		bindings.add(Binding.bindObservableListToObservableValue(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> function) {
-		metaBindings.add(Binding.forEach(function));
+	public <M, T> Element<N> addObservableListBinding(Function<N, ObservableList<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
+		bindings.add(Binding.bindObservableList(applyOnModel, styleClass, applyOnNode));
 		return this;
 	}
 
-	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
-		forEach(function);
-		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel) {
+		metaBindings.add(MetaBinding.forEach(applyOnModel));
 		return this;
 	}
 
-	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function) {
-		metaBindings.add(Binding.selector(function));
+	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
+		forEach(applyOnModel);
+		bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
 		return this;
 	}
 
-	public <M, T> Element<N> select(Function<M, ObservableValue<T>> function, Function<T, Property<M>> injectedProperty) {
-		select(function);
-		bindings.add(Binding.bind(Binder.injectBinder(), injectedProperty));
+	public <M, T> Element<N> select(Function<M, ObservableValue<T>> applyOnModel) {
+		metaBindings.add(MetaBinding.selector(applyOnModel));
+		return this;
+	}
+
+	public <M, T> Element<N> select(Function<M, ObservableValue<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
+		select(applyOnModel);
+		bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
 		return this;
 	}
 

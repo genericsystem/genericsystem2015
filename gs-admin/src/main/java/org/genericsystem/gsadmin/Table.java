@@ -32,6 +32,7 @@ public class Table extends Listable<Row> {
 
 	private ObservableValue<Row> getReferenceRow() {
 		if (getFirstElement().getValue() != null) {
+
 			return getFirstElement();
 		} else if (getElements().size() != 0) {
 			return new SimpleObjectProperty<>(getElements().get(0));

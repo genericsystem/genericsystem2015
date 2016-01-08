@@ -17,15 +17,15 @@ public class Boot<NODE> {
 		consumer.accept(node);
 	}
 
-	public static <NODE, VALUE> Boot<NODE> setProperty(Function<NODE, Property<VALUE>> getProperty, VALUE value) {
-		return new Boot<>(node -> getProperty.apply(node).setValue(value));
+	public static <NODE, VALUE> Boot<NODE> setProperty(Function<NODE, Property<VALUE>> applyOnNode, VALUE value) {
+		return new Boot<>(node -> applyOnNode.apply(node).setValue(value));
 	}
 
-	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableList<VALUE>> getProperty, VALUE value) {
-		return new Boot<>(node -> getProperty.apply(node).add(value));
+	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableList<VALUE>> applyOnNode, VALUE value) {
+		return new Boot<>(node -> applyOnNode.apply(node).add(value));
 	}
 
-	public static <NODE> Boot<NODE> apply(Consumer<NODE> method) {
-		return new Boot<>(object -> method.accept(object));
+	public static <NODE> Boot<NODE> apply(Consumer<NODE> applyOnNode) {
+		return new Boot<>(object -> applyOnNode.accept(object));
 	}
 }
