@@ -20,12 +20,9 @@ public class Table extends Listable<Row> {
 	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(300);
 
 	private ObjectProperty<Row> rowSelected = new SimpleObjectProperty<>();
-
-	private ObservableValue<Number> otherRowsHeight = Bindings.createIntegerBinding(() -> getOtherRowsHeight().getValue().intValue(), getElements());
-
 	private final ObservableValue<Row> referenceRow = Bindings.createObjectBinding(() -> getReferenceRow().getValue(), getFirstElement(), getElements());
 	private final ObservableIntegerValue firstRowNumber = Bindings.createIntegerBinding(() -> getFirstElement().getValue() != null ? 1 : 0, getFirstElement());
-	private final ObservableValue<Number> tableHeight = Bindings.add(getOptionalFirstRowHeight(), (ObservableNumberValue) otherRowsHeight);
+	private final ObservableValue<Number> tableHeight = Bindings.createIntegerBinding(()->Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight()).intValue(),getElements());
 	private final ObservableIntegerValue firstCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getFirstElement().getValue() != null ? 1 : 0 : 0, referenceRow);
 	private final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
 	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
