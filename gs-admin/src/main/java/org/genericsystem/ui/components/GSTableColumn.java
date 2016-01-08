@@ -1,7 +1,7 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-import javafx.beans.property.Property;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -9,6 +9,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
+
 import org.genericsystem.ui.Element;
 
 public class GSTableColumn<T> extends Element<TableColumn> {
@@ -45,11 +46,11 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 		return this;
 	}
 
-	@Override
-	public <M, U> GSTableColumn<T> forEach(Function<M, ObservableList<U>> function, Function<U, Property<M>> injectedProperty) {
-		super.forEach(function, injectedProperty);
-		return this;
-	}
+	// @Override
+	// public <M, U> GSTableColumn<T> forEach(Function<M, ObservableList<U>> function, Function<U, Property<M>> injectedProperty) {
+	// super.forEach(function, injectedProperty);
+	// return this;
+	// }
 
 	@Override
 	public <M, U> GSTableColumn<T> forEach(Function<M, ObservableList<U>> function) {

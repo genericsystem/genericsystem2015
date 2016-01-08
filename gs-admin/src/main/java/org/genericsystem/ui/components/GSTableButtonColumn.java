@@ -45,7 +45,7 @@ public class GSTableButtonColumn<SUPERMODEL, T> extends Element<ActionTableColum
 	}
 
 	public GSTableButtonColumn<SUPERMODEL, T> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, T> action) {
-		bindings.add(Binding.pushModelActionOnSuperModel(ActionTableColumn::getOnActionProperty, action));
+		bindings.add(Binding.pushModelActionOnSuperModel(action, ActionTableColumn::getOnActionProperty));
 		return this;
 	}
 
