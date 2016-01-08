@@ -39,12 +39,12 @@ public class GSButton extends GSRegion<GSButton, Button> {
 	// }
 
 	public <M, T extends Event> GSButton setAction(Consumer<M> action) {
-		bindings.add(Binding.bindAction(Button::onActionProperty, action));
+		bindings.add(Binding.bindAction(action, Button::onActionProperty));
 		return this;
 	}
 
 	public <SUPERMODEL, M, T extends Event> GSButton setMetaAction(BiConsumer<SUPERMODEL, M> action) {
-		bindings.add(Binding.bindMetaAction(Button::onActionProperty, action));
+		bindings.add(Binding.bindMetaAction(action, Button::onActionProperty));
 		return this;
 	}
 

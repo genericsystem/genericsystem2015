@@ -18,9 +18,9 @@ public class ViewContext<N> {
 		modelContext.register(this);
 		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<N, ?> binding : template.bindings)
-			binding.init(modelContext, this, null);
+			binding.init(modelContext, getNode());
 		for (Element<CHILDNODE> childElement : template.<CHILDNODE> getChildren()) {
-			for (Binding<CHILDNODE, ?> metaBinding : childElement.metaBindings)
+			for (MetaBinding<CHILDNODE, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(modelContext, (ViewContext<CHILDNODE>) this, (Element) childElement);
 			if (childElement.metaBindings.isEmpty())
 				new ViewContext<>(this, modelContext, childElement, null);
