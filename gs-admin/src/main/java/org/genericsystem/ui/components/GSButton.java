@@ -3,11 +3,8 @@ package org.genericsystem.ui.components;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.scene.control.Button;
-
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Element;
 
@@ -33,17 +30,12 @@ public class GSButton extends GSRegion<GSButton, Button> {
 		setAction(action);
 	}
 
-	// public <SUPERMODEL, M> GSButton(Element parent, String text, BiConsumer<SUPERMODEL, M> action) {
-	// this(parent, text);
-	// setMetaAction(action);
-	// }
-
-	public <M, T extends Event> GSButton setAction(Consumer<M> action) {
+	public <M> GSButton setAction(Consumer<M> action) {
 		bindings.add(Binding.bindAction(action, Button::onActionProperty));
 		return this;
 	}
 
-	public <SUPERMODEL, M, T extends Event> GSButton setMetaAction(BiConsumer<SUPERMODEL, M> action) {
+	public <SUPERMODEL, M> GSButton setMetaAction(BiConsumer<SUPERMODEL, M> action) {
 		bindings.add(Binding.bindMetaAction(action, Button::onActionProperty));
 		return this;
 	}

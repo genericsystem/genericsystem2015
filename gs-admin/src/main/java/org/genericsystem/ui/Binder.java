@@ -3,11 +3,9 @@ package org.genericsystem.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 
 public interface Binder<N, W> {
@@ -20,8 +18,7 @@ public interface Binder<N, W> {
 				s += modelContext_.getModel() + "/";
 				try {
 					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
@@ -36,18 +33,7 @@ public interface Binder<N, W> {
 		init(applyOnModel.get(), modelContext, node);
 	}
 
-	default void init(W wrapper, ModelContext modelContext, N node) {
-	}
-
-	public static <N, T> Binder<N, T> actionBinder(Function<N, Property<T>> applyOnNode) {
-		return new Binder<N, T>() {
-			@Override
-			public void init(Supplier<T> applyOnModel, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue((T) (EventHandler) event -> applyOnModel.get());
-			}
-		};
-
-	}
+	default void init(W wrapper, ModelContext modelContext, N node) {}
 
 	public static <N, W> Binder<N, Property<W>> injectBinder() {
 		return new Binder<N, Property<W>>() {
@@ -80,8 +66,7 @@ public interface Binder<N, W> {
 					try {
 						property.bind(applyOnModel.get().apply(modelContext_.getModel()));
 						return;
-					} catch (ClassCastException ignore) {
-					}
+					} catch (ClassCastException ignore) {}
 					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference  on stack : " + s);
@@ -89,11 +74,21 @@ public interface Binder<N, W> {
 		};
 	}
 
-	public static <N, SUPERMODEL, W extends Event> Binder<N, Function<SUPERMODEL, W>> metaActionBinder(Function<N, Property<EventHandler<W>>> applyOnNode) {
+	public static <N, T> Binder<N, T> actionBinder(Function<N, Property<T>> applyOnNode) {
+		return new Binder<N, T>() {
+			@Override
+			public void init(Supplier<T> applyOnModel, ModelContext modelContext, N node) {
+				applyOnNode.apply(node).setValue((T) (EventHandler) event -> applyOnModel.get());
+			}
+		};
+
+	}
+
+	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>> metaActionBinder(Function<N, Property<W>> applyOnNode) {
 		return new Binder<N, Function<SUPERMODEL, W>>() {
 			@Override
 			public void init(Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue(event -> applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null));
+				applyOnNode.apply(node).setValue((W) (EventHandler) event -> applyOnModel.get().apply(modelContext.getParent() != null ? modelContext.getParent().getModel() : null));
 			}
 		};
 	}
@@ -119,8 +114,7 @@ public interface Binder<N, W> {
 						s += modelContext_.getModel() + "/";
 						try {
 							applyOnModel.get().apply(modelContext_ != null ? modelContext_.getModel() : null);
-						} catch (ClassCastException ignore) {
-						}
+						} catch (ClassCastException ignore) {}
 						modelContext_ = modelContext_.getParent();
 					}
 				});
@@ -129,7 +123,7 @@ public interface Binder<N, W> {
 
 	}
 
-	public static <N, W> Binder<N, Property<W>> propertyReverseBinder(Function<N, Property<W>> applyOnNode) {
+	public static <N, W> Binder<N, Property<W>> propertyReverseBinder(Function<N, ObservableValue<W>> applyOnNode) {
 		return new Binder<N, Property<W>>() {
 			@Override
 			public void init(Property<W> wrapper, ModelContext modelContext, N node) {
