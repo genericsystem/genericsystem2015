@@ -7,27 +7,27 @@ import javafx.collections.ObservableList;
 
 public class MetaBinding<N, T> {
 
-	private final Function<?, T> method;
+	private final Function<?, T> applyOnModel;
 	private final MetaBinder<N, T> binder;
 
-	public MetaBinding(MetaBinder<N, T> binder, Function<?, T> method) {
+	public MetaBinding(Function<?, T> applyOnModel, MetaBinder<N, T> binder) {
+		this.applyOnModel = applyOnModel;
 		this.binder = binder;
-		this.method = method;
 	}
 
 	public void init(ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-		binder.init(method, modelContext, viewContext, childElement);
+		binder.init(applyOnModel, modelContext, viewContext, childElement);
 	}
 
-	static <N, M, T> MetaBinding<N, T> bind(MetaBinder<N, T> binder, Function<M, T> function) {
-		return new MetaBinding<>(binder, (u) -> function.apply((M) u));
+	static <N, M, T> MetaBinding<N, T> bind(Function<M, T> applyOnModel, MetaBinder<N, T> binder) {
+		return new MetaBinding<>((u) -> applyOnModel.apply((M) u), binder);
 	}
 
-	public static <N, M, T> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> function) {
-		return MetaBinding.bind(MetaBinder.foreachBinder(), function);
+	public static <N, M, T> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> applyOnModel) {
+		return MetaBinding.bind(applyOnModel, MetaBinder.foreachBinder());
 	}
 
-	public static <N, M, T> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> function) {
-		return MetaBinding.bind(MetaBinder.selectorBinder(), function);
+	public static <N, M, T> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
+		return MetaBinding.bind(applyOnModel, MetaBinder.selectorBinder());
 	}
 }
