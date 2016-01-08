@@ -69,8 +69,8 @@ public class Binding<N, W> {
 		return Binding.bind(m -> applyOnModel, Binder.<N, SUPERMODEL, W> metaPropertyBinder(applyOnNode));
 	}
 
-	public static <N, M, W> Binding<N, W> bindAction(Consumer<M> consumer, Function<N, Property<W>> propAction) {
-		return Binding.bind(consumer, Binder.actionBinder(propAction));
+	public static <N, M, W> Binding<N, W> bindAction(Consumer<M> consumer, Function<N, Property<W>> applyOnNode) {
+		return Binding.bind(consumer, Binder.actionBinder(applyOnNode));
 	}
 
 	public static <SUPERMODEL, N, M, W extends Event> Binding<N, Function<SUPERMODEL, W>> bindMetaAction(BiConsumer<SUPERMODEL, M> applyOnModel, Function<N, Property<EventHandler<W>>> applyOnNode) {
