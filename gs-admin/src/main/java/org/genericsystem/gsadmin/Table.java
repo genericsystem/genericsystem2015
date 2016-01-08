@@ -28,7 +28,8 @@ public class Table extends Listable<Row> {
 	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
 	
 	private ObservableValue<Row> getReferenceRow(){
-		if(getFirstElement()!=null){
+		
+		if(getFirstElement().getValue()!=null){
 			return getFirstElement();
 		}
 		else if(getElements().size()!=0)
