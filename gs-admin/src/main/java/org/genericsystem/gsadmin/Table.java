@@ -1,7 +1,6 @@
 package org.genericsystem.gsadmin;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,14 +18,13 @@ public class Table extends Listable<Row> {
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(80);
 	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(300);
 
-	private ObjectProperty<Row> rowSelected = new SimpleObjectProperty<>();
 	private final ObservableValue<Row> referenceRow = Bindings.createObjectBinding(() -> getReferenceRow().getValue(), getFirstElement(), getElements());
 	private final ObservableIntegerValue firstRowNumber = Bindings.createIntegerBinding(() -> getFirstElement().getValue() != null ? 1 : 0, getFirstElement());
-	private final ObservableValue<Number> tableHeight = Bindings.createIntegerBinding(()->Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight()).intValue(),getElements());
+	private final ObservableNumberValue tableHeight = Bindings.createIntegerBinding(()->Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight()).intValue(),getElements());
 	private final ObservableIntegerValue firstCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getFirstElement().getValue() != null ? 1 : 0 : 0, referenceRow);
 	private final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
 	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
-
+	
 	private ObservableValue<Row> getReferenceRow() {
 		if (getFirstElement().getValue() != null) {
 
@@ -36,10 +34,6 @@ public class Table extends Listable<Row> {
 		} else {
 			return new SimpleObjectProperty<>();
 		}
-	}
-
-	public ObjectProperty<Row> getRowSelected() {
-		return rowSelected;
 	}
 
 	private ObservableNumberValue getOptionalFirstRowHeight() {
@@ -98,7 +92,7 @@ public class Table extends Listable<Row> {
 		return columnWidth;
 	}
 
-	public ObservableValue<Number> getTableHeight() {
+	public ObservableNumberValue getTableHeight() {
 		return tableHeight;
 	}
 

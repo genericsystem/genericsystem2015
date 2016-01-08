@@ -41,16 +41,17 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 
 	@Override
 	public void init(Element<?> parent) {
-		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
-		{
-			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setSuperPrefWidth(getSuperPrefWidth()).setMinHeight(Table::getTableHeight).setSuperPrefHeight(getSuperPrefHeight());
+//		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+//		{
+		
+			GSVBox tablePanel = new GSVBox(parent).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setSuperPrefWidth(getSuperPrefWidth()).setMinHeight(Table::getTableHeight).setSuperPrefHeight(getSuperPrefHeight());
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
 				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
 						.addGenericMouseActionBinding(HBox::onMouseClickedProperty, Window::selectRow);
 			}
-		}
+//		}
 	}
 
 	abstract RowBuilder<COL, T> getRowBuilder();
