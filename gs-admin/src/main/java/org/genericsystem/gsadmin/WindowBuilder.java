@@ -11,16 +11,27 @@ import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
 import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 
 public class WindowBuilder implements Builder {
 
 	@Override
 	public void init(Element<?> parent) {
-		GSVBox table = new GSVBox(parent).select(Window::getTable);
-		{
-			new TableCellTableBuilder<>().init(table);
-		}
+//		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+//		{
+			GSVBox main = new GSVBox(parent).setPrefHeight(Window::getmainPanelHeight);
+			{
+				GSVBox table = new GSVBox(main).select(Window::getTable);
+				{
+					new TableCellTableBuilder<>().init(table);
+				}
+				GSVBox table2 = new GSVBox(main).select(Window::getTableSelectedRow);
+				{
+					new TableCellTableBuilder<>().init(table2);
+				}
+			}
+//		}
 	}
 
 	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine c) {
@@ -40,7 +51,7 @@ public class WindowBuilder implements Builder {
 
 	public Window buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 
-		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableSubInstances(), engine.getObservableAttributes(), itemTableCell -> columnTableCell -> {
+		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableInstances(), engine.getObservableAttributes(), itemTableCell -> columnTableCell -> {
 			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, column -> new ReadOnlyStringWrapper("" + column));
 			Table tab = textTableModel.createTable();
 			return new ReadOnlyObjectWrapper<Table>(tab);

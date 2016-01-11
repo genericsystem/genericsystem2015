@@ -66,7 +66,6 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 		return getAttributes(getRoot().getMetaAttribute());
 	}
 
-	@SuppressWarnings("unchecked")
 	default ObservableList<T> getObservableAttributes() {
 		return getObservableAttributes(getRoot().getMetaAttribute());
 	}
@@ -107,19 +106,7 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
 			return new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL).observableInheritanceList();
-
-		return new ListBinding<T>() {
-			ObservableList<T> composites = DefaultCompositesInheritance.this.getObservableComposites();
-			{
-				bind(composites);
-			}
-
-			@SuppressWarnings("restriction")
-			@Override
-			protected ObservableList<T> computeValue() {
-				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL).collect(Collectors.toList())));
-			}
-		};
+		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -191,19 +178,7 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
 			return new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE).observableInheritanceList();
-
-		return new ListBinding<T>() {
-			ObservableList<T> composites = DefaultCompositesInheritance.this.getObservableComposites();
-			{
-				bind(composites);
-			}
-
-			@SuppressWarnings("restriction")
-			@Override
-			protected ObservableList<T> computeValue() {
-				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(composites.stream().filter(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE).collect(Collectors.toList())));
-			}
-		};
+		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
 	}
 
 	@SuppressWarnings("unchecked")
