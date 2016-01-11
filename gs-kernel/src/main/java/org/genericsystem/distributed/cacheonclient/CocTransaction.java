@@ -93,28 +93,6 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		return dependenciesPromise;
 	}
 
-	// @Override
-	// public ObservableSnapshot<Generic>
-	// getDependenciesObservableSnapshot(Generic generic) {
-	// return new
-	// CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(),
-	// generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
-	// }
-
-	// @Override
-	// public Observable getInvalidator(Generic generic) {
-	// ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
-	// getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
-	// try {
-	// Thread.sleep(200);
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// objectProperty.set(snapshot);
-	// });
-	// return objectProperty;
-	// }
-
 	@Override
 	public Observable getInvalidator(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
@@ -125,3 +103,25 @@ public class CocTransaction extends CheckedContext implements AsyncITransaction 
 		throw new UnsupportedOperationException();
 	}
 }
+
+// @Override
+// public ObservableSnapshot<Generic>
+// getDependenciesObservableSnapshot(Generic generic) {
+// return new
+// CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(),
+// generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
+// }
+
+// @Override
+// public Observable getInvalidator(Generic generic) {
+// ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
+// getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
+// try {
+// Thread.sleep(200);
+// } catch (Exception e) {
+// e.printStackTrace();
+// }
+// objectProperty.set(snapshot);
+// });
+// return objectProperty;
+// }

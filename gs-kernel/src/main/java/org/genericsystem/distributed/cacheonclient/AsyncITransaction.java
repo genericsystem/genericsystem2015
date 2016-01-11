@@ -12,7 +12,5 @@ public interface AsyncITransaction extends IDifferential<Generic> {
 
 	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
 
-	// public ObservableSnapshot<Generic> getDependenciesObservableSnapshot(Generic generic);
-
 	public Observable getInvalidator(Generic generic);
 }

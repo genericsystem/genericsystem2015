@@ -1,9 +1,13 @@
 package org.genericsystem.gsadmin;
 
+import java.awt.TextField;
+
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.scene.layout.VBox;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -11,27 +15,46 @@ import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
 import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.components.GSButton;
+import org.genericsystem.ui.components.GSHBox;
+import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSSCrollPane;
+import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 
 public class WindowBuilder implements Builder {
 
 	@Override
 	public void init(Element<?> parent) {
-//		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
-//		{
-			GSVBox main = new GSVBox(parent).setPrefHeight(Window::getmainPanelHeight);
+		GSVBox mainPanel = new GSVBox(parent).setPrefHeight(Window::getHeight);
+		{
+			GSSCrollPane scrollPane = new GSSCrollPane(mainPanel).setStyleClass("scrollable");
 			{
-				GSVBox table = new GSVBox(main).select(Window::getTable);
+				GSVBox containerTables = new GSVBox(scrollPane).setMinHeight(500);
 				{
-					new TableCellTableBuilder<>().init(table);
-				}
-				GSVBox table2 = new GSVBox(main).select(Window::getTableSelectedRow);
-				{
-					new TableCellTableBuilder<>().init(table2);
+//					GSHBox formPanel = new GSHBox(containerTables).setSpacing(10);
+//					{
+//						new GSTextField(formPanel).setPrefWidth(300);
+//						new GSButton(formPanel, "Add").setPrefWidth(100);
+//					}
+//					
+					GSVBox table = new GSVBox(containerTables).select(Window::getTable);
+					{
+						new TableCellTableBuilder<>().init(table);
+					}
+
+					GSVBox table2 = new GSVBox(containerTables).select(Window::getTableSelectedRow);
+					{
+						new TableCellTableBuilder<>().init(table2);
+					}
+					
+					GSHBox createPanel = new GSHBox(containerTables);
+					{
+						new GSButton(createPanel, "create");
+					}
 				}
 			}
-//		}
+		}
 	}
 
 	public Window build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine c) {
@@ -59,7 +82,7 @@ public class WindowBuilder implements Builder {
 
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(400);
-		table.getRowHeight().setValue(100);
+		table.getRowHeight().setValue(50);
 		table.getFirstRowHeight().setValue(50);
 		Window win = new Window(new ReadOnlyObjectWrapper<Table>(table), width, height);
 		return win;
