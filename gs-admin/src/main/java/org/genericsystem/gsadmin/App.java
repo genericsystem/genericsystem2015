@@ -55,11 +55,11 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		Button addGen = new Button("Add");
-		addGen.setOnAction(e -> {
-			engine.addInstance("*********************************" + i);
-			i++;
-		});
+//		Button addGen = new Button("Add");
+//		addGen.setOnAction(e -> {
+//			engine.addInstance("*********************************" + i);
+//			i++;
+//		});
 
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
@@ -69,7 +69,7 @@ public class App extends Application {
 		builder.init(elt);// Do this only one time
 		Window window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
 		elt.apply(window, scene.getRoot());// Do this only one time
-		((Group) scene.getRoot()).getChildren().add(addGen);
+//		((Group) scene.getRoot()).getChildren().add(addGen);
 		stage.setScene(scene);
 		stage.setWidth(800);
 		stage.setHeight(600);

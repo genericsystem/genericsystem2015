@@ -41,9 +41,10 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 
 	@Override
 	public void init(Element<?> parent) {
+		
 		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
 		{
-			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setMinWidth(Table::getTableWidth).setSuperPrefWidth(getSuperPrefWidth()).setMinHeight(Table::getTableHeight).setSuperPrefHeight(getSuperPrefHeight());
+			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
