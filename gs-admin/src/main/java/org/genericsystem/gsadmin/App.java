@@ -26,9 +26,9 @@ public class App extends Application {
 	}
 
 	static CocClientEngine engine;
-
+	static CocServer server;
 	private CocClientEngine initGS() {
-		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
@@ -74,5 +74,6 @@ public class App extends Application {
 		stage.setWidth(800);
 		stage.setHeight(600);
 		stage.show();
+		stage.setOnCloseRequest(e->server.stop());
 	}
 }

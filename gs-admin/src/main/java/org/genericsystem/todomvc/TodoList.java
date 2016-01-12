@@ -74,6 +74,7 @@ public class TodoList {
 	}
 
 	public void create() {
+		System.out.println("kjjjjjjjj");
 		todos.add(new Todo(getName().getValue()));
 	}
 
