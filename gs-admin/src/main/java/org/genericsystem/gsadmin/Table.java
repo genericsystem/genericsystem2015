@@ -33,8 +33,6 @@ public class Table extends Listable<Row> {
 	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
 	
 	private Property<Row> selectedRow = new SimpleObjectProperty<>();	
-	private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
-	
 	
 	private ObservableValue<Row> getReferenceRow() {
 		if (getFirstElement().getValue() != null) {
@@ -50,25 +48,6 @@ public class Table extends Listable<Row> {
 		return selectedRow;
 	}
 	
-	public void selectRow(Row row) {
-		selectedRow.setValue(row);
-		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(((Generic)row.getItem()).getObservableSubInstances(), ((Generic)row.getItem()).getObservableAttributes(), itemTableCell -> columnTableCell -> {
-			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, column -> new ReadOnlyStringWrapper("" + column));
-			Table tab = textTableModel.createTable();
-			return new ReadOnlyObjectWrapper<Table>(tab);
-		}, column -> new ReadOnlyStringWrapper("" + column), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString));
-
-		Table table = tableModel.createTable();
-		table.getColumnWidth().setValue(120);
-		table.getRowHeight().setValue(20);
-		table.getFirstRowHeight().setValue(20);
-		tableSelectedRow.setValue(table);
-		
-	}
-	
-	public Property<Table> getTableSelectedRow() {
-		return tableSelectedRow;
-	}
 	private ObservableNumberValue getOptionalFirstRowHeight() {
 		return Bindings.multiply(firstRowNumber, (ObservableNumberValue) firstRowHeight);
 	}
