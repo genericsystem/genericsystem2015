@@ -3,6 +3,7 @@ package org.genericsystem.ui;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -31,6 +32,7 @@ public class Binding<N, X, Y> {
 	@SuppressWarnings("unchecked")
 	private static <N, M, X, Y> Binding<N, X, Y> bind(Function<N, Y> applyOnNode, Consumer<M> applyOnModel, Binder<N, X, Y> binder) {
 		return new Binding<>(applyOnNode, (u) -> {
+			System.out.println("ZZZZZZZZZ : "+u);
 			applyOnModel.accept((M) u);
 			return null;
 		}, binder);
@@ -84,9 +86,9 @@ public class Binding<N, X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListBinder());
 	}
 
-	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, W>, Property<W>> bindGenericMouseAction(BiConsumer<SUPERMODEL, M> applyOnModel, Function<N, Property<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.genericMouseActionBinder());
-	}
+//	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, W>, Property<W>> bindGenericMouseAction(BiConsumer<SUPERMODEL, M> applyOnModel, Function<N, Property<W>> applyOnNode) {
+//		return Binding.bind(applyOnNode, applyOnModel, Binder.genericMouseActionBinder());
+//	}
 
 	public static <SUPERMODEL, N, W> Binding<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, W> applyOnModel, Function<N, Property<Consumer<W>>> applyOnNode) {
 		return Binding.pushBinding(applyOnNode, applyOnModel, Binder.pushModelActionOnSuperModel());
