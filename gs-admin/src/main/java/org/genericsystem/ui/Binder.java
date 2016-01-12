@@ -88,6 +88,7 @@ public interface Binder<N, X, Y> {
 	
 	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>, Property<W>> metaActionBinder() {
 		return new Binder<N, Function<SUPERMODEL, W>, Property<W>>() {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext) {			
 				nodeResult.setValue((W) (EventHandler) event -> {
@@ -96,7 +97,7 @@ public interface Binder<N, X, Y> {
 					while (modelContext_ != null) {
 						s += modelContext_.getModel() + "/";
 						try {
-							applyOnModel.get().apply(modelContext_ != null ? modelContext_.getModel() : null);
+							applyOnModel.get().apply( modelContext_.getModel());
 						} catch (ClassCastException ignore) {}
 						modelContext_ = modelContext_.getParent();
 					}

@@ -49,7 +49,7 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
 				new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
-						.addBindMetaAction(HBox::onMouseClickedProperty, Table::selectRow);
+						.addBindMetaAction(HBox::onMouseClickedProperty, Window::selectRow);
 			}
 		}
 	}

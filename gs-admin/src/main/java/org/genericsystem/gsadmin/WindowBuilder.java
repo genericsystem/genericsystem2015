@@ -33,15 +33,15 @@ public class WindowBuilder implements Builder {
 							new GSTextField(formPanel).bindTextProperty(Row::getName).setPrefWidth(300);
 							new GSButton(formPanel, "Add", Row::add);
 						}
-						
-						new TableCellTableBuilder<>().init(table);
-
-						GSVBox tableSelectedRow = new GSVBox(table).select(Table::getTableSelectedRow);
-						{
-							new TableCellTableBuilder<>().init(tableSelectedRow);
-						}						
+						new TableCellTableBuilder<>().init(table);					
 					}
-					GSHBox commandPanel = new GSHBox(table).setSpacing(10);
+					
+					GSVBox tableSelectedRow = new GSVBox(containerTables).select(Window::getTableSelectedRow);
+					{
+						new TableCellTableBuilder<>().init(tableSelectedRow);
+					}	
+					
+					GSHBox commandPanel = new GSHBox(containerTables).setSpacing(10);
 					{
 						 new GSButton(commandPanel, "Flush",Window::flush);
 						 new GSButton(commandPanel, "Cancel",Window::cancel);
@@ -70,7 +70,7 @@ public class WindowBuilder implements Builder {
 
 	public Window buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 
-		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableInstances(), engine.getObservableAttributes(), itemTableCell -> columnTableCell -> {
+		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {
 			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, column -> new ReadOnlyStringWrapper("" + column));
 			Table tab = textTableModel.createTable();
 			return new ReadOnlyObjectWrapper<Table>(tab);
