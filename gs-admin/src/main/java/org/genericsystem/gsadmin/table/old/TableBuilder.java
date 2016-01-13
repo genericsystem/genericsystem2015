@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import java.util.function.Function;
 
@@ -8,10 +8,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.HBox;
 
-import org.genericsystem.gsadmin.RowBuilder.TableCellRowBuilder;
-import org.genericsystem.gsadmin.RowBuilder.TextCellFirstRowBuilder;
-import org.genericsystem.gsadmin.RowBuilder.TextCellRowBuilder;
-import org.genericsystem.gsadmin.Stylable.TableStyle;
+import org.genericsystem.gsadmin.table.old.RowBuilder.TableCellRowBuilder;
+import org.genericsystem.gsadmin.table.old.RowBuilder.TextCellFirstRowBuilder;
+import org.genericsystem.gsadmin.table.old.RowBuilder.TextCellRowBuilder;
+import org.genericsystem.gsadmin.table.old.Stylable.TableStyle;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSSCrollPane;

@@ -1,9 +1,9 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
-import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
+import org.genericsystem.gsadmin.table.old.TableBuilderModel.TableCellTableModel;
+import org.genericsystem.gsadmin.table.old.TableBuilderModel.TextTableModel;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;

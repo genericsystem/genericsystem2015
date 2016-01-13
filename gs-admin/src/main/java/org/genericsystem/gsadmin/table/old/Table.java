@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -14,9 +14,9 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.Stylable.Listable;
-import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
-import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
+import org.genericsystem.gsadmin.table.old.Stylable.Listable;
+import org.genericsystem.gsadmin.table.old.TableBuilderModel.TableCellTableModel;
+import org.genericsystem.gsadmin.table.old.TableBuilderModel.TextTableModel;
 
 public class Table extends Listable<Row> {
 
