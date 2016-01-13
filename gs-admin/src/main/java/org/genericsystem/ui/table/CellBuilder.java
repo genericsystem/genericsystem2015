@@ -47,11 +47,4 @@ public abstract class CellBuilder<T> implements Builder {
 			return tableStyle.firstRowFirstCell;
 		}
 	}
-	
-	public static class TableCellBuilder<T> extends CellBuilder<Table> {
-		@Override
-		public void init(Element<?> cellPanels) {
-			new GSVBox(cellPanels).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder<>()::init);
-		}
-	}
 }

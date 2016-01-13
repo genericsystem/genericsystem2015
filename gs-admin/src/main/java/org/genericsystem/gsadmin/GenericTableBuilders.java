@@ -5,6 +5,7 @@ import java.util.function.Function;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
 import org.genericsystem.ui.Element;
@@ -18,7 +19,7 @@ import org.genericsystem.gsadmin.GenericRowBuilders.*;
 
 public abstract class GenericTableBuilders {
 	
-	public static class TextCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, String> {
+	public static class TextCellTableBuilder extends TableBuilder<Generic, Generic, String> {
 		@Override
 		public void init(Element<?> parent) {
 			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
@@ -34,8 +35,8 @@ public abstract class GenericTableBuilders {
 		}
 		
 		@Override
-		protected RowBuilder<COL, String> getRowBuilder() {
-			return new TextCellRowBuilder<COL>();
+		protected RowBuilder<Generic, String> getRowBuilder() {
+			return new TextCellRowBuilder<Generic>();
 		}
 
 		@Override
@@ -50,7 +51,7 @@ public abstract class GenericTableBuilders {
 
 	}
 
-	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
+	public static class TableCellTableBuilder extends TableBuilder<Generic, Generic, Table> {
 		@Override
 		public void init(Element<?> parent) {
 			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
@@ -66,8 +67,8 @@ public abstract class GenericTableBuilders {
 		}
 		
 		@Override
-		protected RowBuilder<COL, Table> getRowBuilder() {
-			return new TableCellRowBuilder<COL>();
+		protected RowBuilder<Generic, Table> getRowBuilder() {
+			return new TableCellRowBuilder();
 		}
 
 		@Override

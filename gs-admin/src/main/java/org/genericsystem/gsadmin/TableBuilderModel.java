@@ -96,7 +96,7 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 
 		@Override
 		TableBuilder<ITEM, COL, String> getTableBuilder() {
-			return new TextCellTableBuilder<>();
+			return (TableBuilder<ITEM, COL, String>) new TextCellTableBuilder();
 		}
 	}
 
@@ -110,7 +110,7 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 
 		@Override
 		TableBuilder<ITEM, COL, Table> getTableBuilder() {
-			return new TableCellTableBuilder<>();
+			return (TableBuilder<ITEM, COL, Table>) new TableCellTableBuilder();
 		}
 
 		@Override

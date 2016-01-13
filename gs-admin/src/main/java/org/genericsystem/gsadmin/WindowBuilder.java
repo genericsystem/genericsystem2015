@@ -36,12 +36,12 @@ public class WindowBuilder implements Builder {
 							new GSTextField(formPanel).bindTextProperty(GenericRow::getName).setPrefWidth(300);
 							new GSButton(formPanel, "Add", GenericRow::add);
 						}
-						new TableCellTableBuilder<>().init(table);					
+						new TableCellTableBuilder().init(table);					
 					}
 //					
 					GSVBox tableSelectedRow = new GSVBox(containerTables).select(GenericWindow::getTableSelectedRow);
 					{
-						new TableCellTableBuilder<>().init(tableSelectedRow);
+						new TableCellTableBuilder().init(tableSelectedRow);
 					}	
 					
 					GSHBox commandPanel = new GSHBox(containerTables).setSpacing(10);
