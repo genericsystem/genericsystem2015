@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import javafx.beans.value.ObservableValue;
 

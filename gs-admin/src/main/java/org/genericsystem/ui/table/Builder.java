@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.ui.table;
 
 import org.genericsystem.ui.Element;
 

@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.ui.table;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;

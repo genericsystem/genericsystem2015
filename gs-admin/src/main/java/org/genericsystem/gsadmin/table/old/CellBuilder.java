@@ -1,9 +1,9 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import javafx.beans.value.ObservableValue;
 
-import org.genericsystem.gsadmin.Stylable.TableStyle;
-import org.genericsystem.gsadmin.TableBuilder.TextCellTableBuilder;
+import org.genericsystem.gsadmin.table.old.Stylable.TableStyle;
+import org.genericsystem.gsadmin.table.old.TableBuilder.TextCellTableBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;

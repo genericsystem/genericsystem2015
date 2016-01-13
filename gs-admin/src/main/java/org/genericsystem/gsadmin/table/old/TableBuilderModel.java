@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import java.util.function.Function;
 
@@ -6,13 +6,11 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.ui.table.Table;
-import org.genericsystem.ui.table.TableBuilder;
-import org.genericsystem.ui.table.Stylable.TableStyle;
-import org.genericsystem.gsadmin.GenericTableBuilders.*;
+import org.genericsystem.gsadmin.table.old.Stylable.TableStyle;
+import org.genericsystem.gsadmin.table.old.TableBuilder.TableCellTableBuilder;
+import org.genericsystem.gsadmin.table.old.TableBuilder.TextCellTableBuilder;
 
 public abstract class TableBuilderModel<ITEM, COL, T> {
-	
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
 	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb

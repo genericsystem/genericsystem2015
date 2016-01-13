@@ -6,27 +6,27 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.gsadmin.Stylable.Listable;
+import org.genericsystem.ui.table.Cell;
+import org.genericsystem.ui.table.Row;
 
-public class Row extends Listable<Cell<?>> {
-	
-	private Object item;
+public class GenericRow extends Row{
 	private StringProperty name = new SimpleStringProperty("");
+	private Generic item;
 	
-	public Row(Object item,ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<String> styleClass) {
+	public GenericRow(Generic item, ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<String> styleClass) {
 		super(firstCell, cells, styleClass);
 		this.item = item;
-	}
-	
-	public <ITEM> ITEM getItem() {
-		return (ITEM)item;
 	}
 	
 	public StringProperty getName() {
 		return name;
 	}
 	
+	public Generic getItem() {
+		return item;
+	}
+	
 	public void add(){
-		((Generic)item).addInstance(name.get());
+		item.addInstance(name.get());
 	}
 }
