@@ -26,7 +26,7 @@ public class Table extends Listable<Row> {
 	private final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
 	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), getOtherCellsWidth());
 	
-	private Property<GenericRow> selectedRow = new SimpleObjectProperty<>();	
+	private Property<Row> selectedRow = new SimpleObjectProperty<>();	
 	
 	private ObservableValue<Row> getReferenceRow() {
 		if (getFirstElement().getValue() != null) {
@@ -38,7 +38,7 @@ public class Table extends Listable<Row> {
 		}
 	}
 	
-	public Property<GenericRow> getSelectedRow() {
+	public Property<Row> getSelectedRow() {
 		return selectedRow;
 	}
 	
