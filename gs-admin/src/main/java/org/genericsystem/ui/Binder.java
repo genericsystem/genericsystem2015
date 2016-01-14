@@ -111,6 +111,8 @@ public interface Binder<N, X, Y> {
 			@Override
 			public void init(Function<N, Property<Consumer<W>>> applyOnNode, Function<?, Function<W, SUPERMODEL>> method, ModelContext modelContext, N node) {
 				applyOnNode.apply(node).setValue(w -> applyOnModel(method,modelContext.getModel()).get().apply(w));
+				//applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
+				//applyOnNode.apply(node).setValue(w -> method.apply(null));
 			}
 		};
 	}

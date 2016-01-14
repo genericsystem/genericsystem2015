@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.scene.control.Button;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
@@ -44,12 +45,13 @@ public class WindowBuilder implements Builder {
 						new TableCellTableBuilder().init(tableSelectedRow);
 					}	
 					
-					GSHBox commandPanel = new GSHBox(containerTables).setSpacing(10);
+					GSHBox commandPanel = new GSHBox(containerTables).setSpacing(5);
 					{
 						 new GSButton(commandPanel, "Flush",GenericWindow::flush);
 						 new GSButton(commandPanel, "Cancel",GenericWindow::cancel);
 						 new GSButton(commandPanel, "Mount",GenericWindow::mount);
 						 new GSButton(commandPanel, "Unmount",GenericWindow::unmount);
+						 new GSButton(commandPanel, "ShiftTs",GenericWindow::shiftTs);
 					}
 				}
 			}
@@ -63,6 +65,7 @@ public class WindowBuilder implements Builder {
 			Table tab = textTableModel.createTable();
 			return new ReadOnlyObjectWrapper<Table>(tab);
 		}, col -> new ReadOnlyStringWrapper("col :" + col), item -> new ReadOnlyStringWrapper("item :" + item));
+		
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(100);
@@ -74,10 +77,10 @@ public class WindowBuilder implements Builder {
 	public GenericWindow buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {
-			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, column -> new ReadOnlyStringWrapper("" + column));
+			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString));
 			Table tab = textTableModel.createTable();
 			return new ReadOnlyObjectWrapper<Table>(tab);
-		}, column -> new ReadOnlyStringWrapper("" + column), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString));
+		}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString));
 
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(120);

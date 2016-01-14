@@ -1,8 +1,6 @@
 package org.genericsystem.gsadmin;
 
 import org.genericsystem.ui.Element;
-import org.genericsystem.ui.components.GSButton;
-import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.CellBuilder;

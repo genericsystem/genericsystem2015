@@ -15,7 +15,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 
 public class GenericWindow extends Window{
-	
 	private Property<Table> table = new SimpleObjectProperty<>();
 	private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
 	private final CocClientEngine engine;
@@ -34,6 +33,10 @@ public class GenericWindow extends Window{
 			engine.getCurrentCache().flush();
 	}
 	
+	public void shiftTs(){
+		engine.getCurrentCache().shiftTs();
+}
+	
 	public void cancel(){
 		engine.getCurrentCache().clear();
 	}
@@ -50,19 +53,20 @@ public class GenericWindow extends Window{
 		return tableSelectedRow;
 	}
 	
-	
 	public void selectRow(GenericRow row){
 		table.getValue().getSelectedRow().setValue(row);
 		
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(((Generic)row.getItem()).getObservableSubInstances(), ((Generic)row.getItem()).getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances((Generic)row.getItem())), itemTableCell -> columnTableCell -> {
-			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, column -> new ReadOnlyStringWrapper("" + column));
+			System.out.println(itemTableCell.getObservableAttributes());
+			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString));
 			Table tab = textTableModel.createTable();
+			tab.getColumnWidth().setValue(300);
 			return new ReadOnlyObjectWrapper<Table>(tab);
 		}, column -> new ReadOnlyStringWrapper("" + column), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString));
 
 		Table table = tableModel.createTable();
-		table.getColumnWidth().setValue(120);
-		table.getRowHeight().setValue(20);
+		table.getColumnWidth().setValue(300);
+		table.getRowHeight().setValue(200);
 		table.getFirstRowHeight().setValue(20);
 		tableSelectedRow.setValue(table);
 	}
