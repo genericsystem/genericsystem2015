@@ -83,15 +83,15 @@ public class WindowBuilder implements Builder {
 
 	public GenericWindow buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 
-		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {
-			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, column -> new ReadOnlyStringWrapper("" + column), null);
+		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {	
+		TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell),FXCollections.observableArrayList(itemTableCell.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + item2), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString),null);
 			Table tab = textTableModel.createTable();
 			return new ReadOnlyObjectWrapper<Table>(tab);
 		}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString),firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.createTable();
-		table.getColumnWidth().setValue(120);
-		table.getRowHeight().setValue(20);
+		table.getColumnWidth().setValue(300);
+		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(30);
 		GenericWindow win = new GenericWindow(engine, new ReadOnlyObjectWrapper<Table>(table), width, height);
 		return win;

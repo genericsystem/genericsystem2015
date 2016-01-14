@@ -66,16 +66,22 @@ public class GenericWindow extends Window{
 	public void selectRow(GenericRow row){		
 		table.getValue().getSelectedRow().setValue(row);
 		
+
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())), itemTableCell -> columnTableCell -> {
 			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+
+//		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(((Generic)row.getItem()).getObservableSubInstances(), ((Generic)row.getItem()).getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances((Generic)row.getItem())), itemTableCell -> columnTableCell -> {
+//			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), item2 -> column -> new ReadOnlyStringWrapper("" +  item2), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString),null);
+
 			Table tab = textTableModel.createTable();
 			tab.getColumnWidth().setValue(300);
 			return new ReadOnlyObjectWrapper<Table>(tab);
+
 		}, column -> new ReadOnlyStringWrapper("" + column), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
-		table.getRowHeight().setValue(200);
+		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(20);
 		tableSelectedRow.setValue(table);
 
