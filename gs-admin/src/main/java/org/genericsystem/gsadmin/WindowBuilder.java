@@ -13,6 +13,7 @@ import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
+import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
@@ -26,30 +27,38 @@ public class WindowBuilder implements Builder {
 		{
 			GSSCrollPane scrollPane = new GSSCrollPane(mainPanel).setStyleClass("scrollable");
 			{
-				GSVBox containerTables = new GSVBox(scrollPane).setMinHeight(500);
+				GSHBox containTables = new GSHBox(scrollPane).setMinWidth(1000);
 				{
-					GSVBox table = new GSVBox(containerTables).select(GenericWindow::getTable);
+					GSVBox leftTables = new GSVBox(containTables).setMinHeight(500);
 					{
-						GSHBox formPanel = new GSHBox(table).setSpacing(10).select(Table::getSelectedRow);// .select(Window::getSelectedRow);//.select(Window::getSelectedRow);
+						GSVBox table = new GSVBox(leftTables).select(GenericWindow::getTable);
 						{
-							new GSTextField(formPanel).bindTextProperty(GenericRow::getName).setPrefWidth(300);
-							new GSButton(formPanel, "Add", GenericRow::add);
+							GSHBox formPanel = new GSHBox(table).setSpacing(10).select(Table::getSelectedRow);// .select(Window::getSelectedRow);//.select(Window::getSelectedRow);
+							{
+								new GSTextField(formPanel).bindTextProperty(GenericRow::getName).setPrefWidth(300);
+								new GSButton(formPanel, "Add", GenericRow::add);
+							}
+							new TableCellTableBuilder().init(table);					
 						}
-						new TableCellTableBuilder().init(table);					
-					}
 //					
-					GSVBox tableSelectedRow = new GSVBox(containerTables).select(GenericWindow::getTableSelectedRow);
+						GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableSelectedRow);
+						{
+							new TableCellTableBuilder().init(tableSelectedRow);
+						}	
+						
+						GSHBox commandPanel = new GSHBox(leftTables).setSpacing(5);
+						{
+							 new GSButton(commandPanel, "Flush",GenericWindow::flush);
+							 new GSButton(commandPanel, "Cancel",GenericWindow::cancel);
+							 new GSButton(commandPanel, "Mount",GenericWindow::mount);
+							 new GSButton(commandPanel, "Unmount",GenericWindow::unmount);
+							 new GSButton(commandPanel, "ShiftTs",GenericWindow::shiftTs);
+						}
+					}
+					GSVBox editTable = new	 GSVBox(containTables).select(GenericWindow::getEditTableSelectedRow);
 					{
-						new TableCellTableBuilder().init(tableSelectedRow);
-					}	
-					
-					GSHBox commandPanel = new GSHBox(containerTables).setSpacing(5);
-					{
-						 new GSButton(commandPanel, "Flush",GenericWindow::flush);
-						 new GSButton(commandPanel, "Cancel",GenericWindow::cancel);
-						 new GSButton(commandPanel, "Mount",GenericWindow::mount);
-						 new GSButton(commandPanel, "Unmount",GenericWindow::unmount);
-						 new GSButton(commandPanel, "ShiftTs",GenericWindow::shiftTs);
+						new GSLabel(editTable, "Edit table");
+						new TableCellTableBuilder().init(editTable);
 					}
 				}
 			}
