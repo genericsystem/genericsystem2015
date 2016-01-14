@@ -2,11 +2,11 @@ package org.genericsystem.ui.table;
 
 import javafx.beans.value.ObservableValue;
 
+import org.genericsystem.gsadmin.GenericTableBuilders.TextCellTableBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Stylable.TableStyle;
-import org.genericsystem.gsadmin.GenericTableBuilders.*;
 
 public abstract class CellBuilder<T> implements Builder {
 	public Cell<T> build(ObservableValue<T> observableModel, TableStyle tableStyle) {
@@ -45,6 +45,29 @@ public abstract class CellBuilder<T> implements Builder {
 		@Override
 		public ObservableValue<String> getStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowFirstCell;
+		}
+	}
+
+	public static class FirstRowLastCellTextCellBuilder extends TextCellBuilder {
+
+		@Override
+		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+			return tableStyle.firstRowLastCell;
+		}
+	}
+
+	public static class RowLastCellTextCellBuilder extends TextCellBuilder {
+
+		@Override
+		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+			return tableStyle.lastCell;
+		}
+	}
+
+	public static class TableCellBuilder<T> extends CellBuilder<Table> {
+		@Override
+		public void init(Element<?> cellPanels) {
+			new GSVBox(cellPanels).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder()::init);
 		}
 	}
 }
