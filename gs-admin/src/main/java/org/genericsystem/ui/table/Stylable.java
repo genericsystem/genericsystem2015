@@ -26,6 +26,8 @@ public class Stylable {
 		public ObservableValue<String> firstRowCell = new ReadOnlyStringWrapper("firstrowcell");
 		public ObservableValue<String> firstRowFirstCell = new ReadOnlyStringWrapper("firstrowfirstcell");
 		public ObservableValue<String> firstCell = new ReadOnlyStringWrapper("firstcell");
+		public ObservableValue<String> firstRowLastCell = new ReadOnlyStringWrapper("firstrowlastcell");
+		public ObservableValue<String> lastCell = new ReadOnlyStringWrapper("lastcell");
 		public ObservableValue<String> cell = new ReadOnlyStringWrapper("cell");
 	}
 
@@ -33,11 +35,13 @@ public class Stylable {
 
 		private final ObservableValue<Element> firstElement;
 		private final ObservableList<Element> elements;
+		private final ObservableValue<Element> lastElement;
 
-		public Listable(ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<String> styleClass) {
+		public Listable(ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
 			super(styleClass);
 			this.firstElement = firstElement;
 			this.elements = elements;
+			this.lastElement = lastElement;
 		}
 
 		public ObservableValue<Element> getFirstElement() {
@@ -46,6 +50,10 @@ public class Stylable {
 
 		public ObservableList<Element> getElements() {
 			return elements;
+		}
+
+		public ObservableValue<Element> getLastElement() {
+			return lastElement;
 		}
 
 	}
