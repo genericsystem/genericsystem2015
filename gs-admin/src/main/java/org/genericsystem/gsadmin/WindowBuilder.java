@@ -19,6 +19,7 @@ import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Builder;
 import org.genericsystem.ui.table.Table;
+import org.genericsystem.ui.table.Window;
 
 public class WindowBuilder implements Builder {
 	@Override
@@ -31,14 +32,19 @@ public class WindowBuilder implements Builder {
 				{
 					GSVBox leftTables = new GSVBox(containTables).setMinHeight(500);
 					{
+						GSHBox formPanelEngine = new GSHBox(leftTables).setSpacing(10);
+						{
+							new GSTextField(formPanelEngine).bindTextProperty(GenericWindow::getName).setPrefWidth(300);
+							new GSButton(formPanelEngine, "Add", GenericWindow::add);
+						}
 						GSVBox table = new GSVBox(leftTables).select(GenericWindow::getTable);
 						{
-							GSHBox formPanel = new GSHBox(table).setSpacing(10).select(Table::getSelectedRow);// .select(Window::getSelectedRow);//.select(Window::getSelectedRow);
+							new TableCellTableBuilder().init(table);
+							GSHBox formPanelGeneric = new GSHBox(table).setSpacing(10).select(Table::getSelectedRow);// .select(Window::getSelectedRow);//.select(Window::getSelectedRow);
 							{
-								new GSTextField(formPanel).bindTextProperty(GenericRow::getName).setPrefWidth(300);
-								new GSButton(formPanel, "Add", GenericRow::add);
+								new GSTextField(formPanelGeneric).bindTextProperty(GenericRow::getName).setPrefWidth(300);
+								new GSButton(formPanelGeneric, "Add", GenericRow::add);
 							}
-							new TableCellTableBuilder().init(table);					
 						}
 //					
 						GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableSelectedRow);
@@ -75,7 +81,7 @@ public class WindowBuilder implements Builder {
 		
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
-		table.getRowHeight().setValue(100);
+		table.getRowHeight().setValue(20);
 		table.getFirstRowHeight().setValue(30);
 		GenericWindow win = new GenericWindow(cocClient,new ReadOnlyObjectWrapper<Table>(table), width, height);
 		return win;
@@ -91,7 +97,7 @@ public class WindowBuilder implements Builder {
 
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
-		table.getRowHeight().setValue(100);
+		table.getRowHeight().setValue(70);
 		table.getFirstRowHeight().setValue(30);
 		GenericWindow win = new GenericWindow(engine, new ReadOnlyObjectWrapper<Table>(table), width, height);
 		return win;

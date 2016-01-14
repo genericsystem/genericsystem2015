@@ -6,6 +6,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 
@@ -24,6 +26,7 @@ public class GenericWindow extends Window{
 	private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
 	private Property<Table> editTableSelectedRow = new SimpleObjectProperty<>();
 	private final CocClientEngine engine;
+	private StringProperty name = new SimpleStringProperty();
 	
 	public GenericWindow(CocClientEngine engine,Property<Table> table, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width,height);
@@ -34,6 +37,14 @@ public class GenericWindow extends Window{
 	public ObservableValue<Table> getTable() {
 		return table;
 	}
+	
+	public StringProperty getName() {
+		return name;
+	}
+	
+	public void add(){
+		engine.addInstance(name.getValue());
+}
 	
 	public void flush(){
 			engine.getCurrentCache().flush();
@@ -65,8 +76,6 @@ public class GenericWindow extends Window{
 
 	public void selectRow(GenericRow row){		
 		table.getValue().getSelectedRow().setValue(row);
-		
-
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())), itemTableCell -> columnTableCell -> {
 			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 
