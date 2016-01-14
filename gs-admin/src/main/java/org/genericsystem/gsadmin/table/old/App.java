@@ -1,8 +1,9 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 import org.genericsystem.admin.model.Car;
@@ -54,15 +55,22 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
+//		Button addGen = new Button("Add");
+//		addGen.setOnAction(e -> {
+//			engine.addInstance("*********************************" + i);
+//			i++;
+//		});
 
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
+		
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 		Element<Group> elt = new Element<>(Group.class);
 		WindowBuilder builder = new WindowBuilder();
 		builder.init(elt);// Do this only one time
-		GenericWindow window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
+		Window window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
 		elt.apply(window, scene.getRoot());// Do this only one time
+//		((Group) scene.getRoot()).getChildren().add(addGen);
 		stage.setScene(scene);
 		stage.setWidth(800);
 		stage.setHeight(600);

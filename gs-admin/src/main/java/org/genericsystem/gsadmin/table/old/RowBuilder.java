@@ -1,4 +1,4 @@
-package org.genericsystem.gsadmin;
+package org.genericsystem.gsadmin.table.old;
 
 import java.util.function.Function;
 
@@ -6,12 +6,12 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.gsadmin.CellBuilder.FirstRowFirstCellTextCellBuilder;
-import org.genericsystem.gsadmin.CellBuilder.FirstRowTextCellBuilder;
-import org.genericsystem.gsadmin.CellBuilder.RowFirstCellTextCellBuilder;
-import org.genericsystem.gsadmin.CellBuilder.TableCellBuilder;
-import org.genericsystem.gsadmin.CellBuilder.TextCellBuilder;
-import org.genericsystem.gsadmin.Stylable.TableStyle;
+import org.genericsystem.gsadmin.table.old.CellBuilder.FirstRowFirstCellTextCellBuilder;
+import org.genericsystem.gsadmin.table.old.CellBuilder.FirstRowTextCellBuilder;
+import org.genericsystem.gsadmin.table.old.CellBuilder.RowFirstCellTextCellBuilder;
+import org.genericsystem.gsadmin.table.old.CellBuilder.TableCellBuilder;
+import org.genericsystem.gsadmin.table.old.CellBuilder.TextCellBuilder;
+import org.genericsystem.gsadmin.table.old.Stylable.TableStyle;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.utils.Transformation;

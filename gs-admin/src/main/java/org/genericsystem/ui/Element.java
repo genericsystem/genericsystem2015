@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
+
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
@@ -87,8 +89,8 @@ public class Element<N> {
 		return this;
 	}
 
-	public <SUPERMODEL, M, T> Element<N> addGenericMouseActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
-		bindings.add(Binding.bindGenericMouseAction(biConsumer, propAction));
+	public <SUPERMODEL, M, T> Element<N> addBindMetaAction(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
+		bindings.add(Binding.bindMetaAction(biConsumer, propAction));
 		return this;
 	}
 
