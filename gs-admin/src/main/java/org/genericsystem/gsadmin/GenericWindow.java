@@ -21,11 +21,6 @@ import com.sun.javafx.collections.ObservableListWrapper;
 
 @SuppressWarnings("restriction")
 public class GenericWindow extends Window {
-	// private Property<Table> table = new SimpleObjectProperty<>();
-	// private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
-	// private Property<Table> editTableSelectedRow = new SimpleObjectProperty<>();
-	// private CocClientEngine engine;
-	// private StringProperty name = new SimpleStringProperty();
 
 	private Property<Crud> tableCrud = new SimpleObjectProperty<>();
 	private Property<Crud> tableCrudSelectedRow = new SimpleObjectProperty<>();
@@ -54,18 +49,6 @@ public class GenericWindow extends Window {
 		this.tableCrud.setValue(tableCrud);
 	}
 
-	// public ObservableValue<Table> getTable() {
-	// return table;
-	// }
-	//
-	// public StringProperty getName() {
-	// return name;
-	// }
-	//
-	// public void add(){
-	// engine.addInstance(name.getValue());
-	// }
-	//
 	public void flush() {
 		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().flush();
 	}
@@ -85,15 +68,6 @@ public class GenericWindow extends Window {
 	public void unmount() {
 		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
 	}
-
-	//
-	// public Property<Table> getTableSelectedRow() {
-	// return tableSelectedRow;
-	// }
-	//
-	// public Property<Table> getEditTableSelectedRow() {
-	// return editTableSelectedRow;
-	// }
 
 	public void selectRow(GenericRow row) {
 		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
@@ -137,6 +111,5 @@ public class GenericWindow extends Window {
 		editTable.getColumnWidth().setValue(310);
 		editTable.getRowHeight().setValue(45);
 		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(editTable), row.getItem()));
-
 	}
 }

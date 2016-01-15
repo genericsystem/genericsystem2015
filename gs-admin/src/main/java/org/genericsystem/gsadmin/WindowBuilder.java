@@ -26,35 +26,31 @@ public class WindowBuilder implements Builder {
 		{
 			GSSCrollPane scrollPane = new GSSCrollPane(mainPanel).setStyleClass("scrollable");
 			{
-				GSHBox containTables = new GSHBox(scrollPane).setMinWidth(1000);
+
+				GSVBox leftTables = new GSVBox(scrollPane).setMinHeight(500);
 				{
-					GSVBox leftTables = new GSVBox(containTables).setMinHeight(500);
-					{
 
-						GSVBox crud = new GSVBox(leftTables).select(GenericWindow::getTableCrud);
-						{
-							new GenericCrudBuilder().init(crud);
-						}
-						GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableCrudSelectedRow);
-						{
-							new GenericCrudBuilder().init(tableSelectedRow);
-						}
-
-						GSHBox commandPanel = new GSHBox(leftTables).setSpacing(5);
-						{
-							new GSButton(commandPanel, "Flush", GenericWindow::flush);
-							new GSButton(commandPanel, "Cancel", GenericWindow::cancel);
-							new GSButton(commandPanel, "Mount", GenericWindow::mount);
-							new GSButton(commandPanel, "Unmount", GenericWindow::unmount);
-							new GSButton(commandPanel, "ShiftTs", GenericWindow::shiftTs);
-						}
-					}
-					GSVBox editTable = new GSVBox(containTables).select(GenericWindow::getEditTableCrudSelectedRow);
+					GSVBox crud = new GSVBox(leftTables).select(GenericWindow::getTableCrud);
 					{
-						new GenericCrudBuilder().init(editTable);
+						new GenericCrudBuilder().init(crud);
 					}
+					GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableCrudSelectedRow);
+					{
+						new GenericCrudBuilder().init(tableSelectedRow);
+					}
+
+					GSHBox commandPanel = new GSHBox(leftTables).setSpacing(5);
+					{
+						new GSButton(commandPanel, "Flush", GenericWindow::flush);
+						new GSButton(commandPanel, "Cancel", GenericWindow::cancel);
+						new GSButton(commandPanel, "Mount", GenericWindow::mount);
+						new GSButton(commandPanel, "Unmount", GenericWindow::unmount);
+						new GSButton(commandPanel, "ShiftTs", GenericWindow::shiftTs);
+					}
+
 				}
 			}
+
 		}
 	}
 
