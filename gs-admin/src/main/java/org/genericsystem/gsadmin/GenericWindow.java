@@ -17,82 +17,111 @@ import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
 import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Window;
-
+import org.genericsystem.gsadmin.Crud.*;
 import com.sun.javafx.collections.ObservableListWrapper;
 
 @SuppressWarnings("restriction")
 public class GenericWindow extends Window{
-	private Property<Table> table = new SimpleObjectProperty<>();
-	private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
-	private Property<Table> editTableSelectedRow = new SimpleObjectProperty<>();
-	private final CocClientEngine engine;
-	private StringProperty name = new SimpleStringProperty();
+//	private Property<Table> table = new SimpleObjectProperty<>();
+//	private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
+//	private Property<Table> editTableSelectedRow = new SimpleObjectProperty<>();
+//	private CocClientEngine engine;
+//	private StringProperty name = new SimpleStringProperty();
+	
+	
+	private Property<Crud> tableCrud = new SimpleObjectProperty<>();
+	private Property<Crud> tableCrudSelectedRow = new SimpleObjectProperty<>();
+	private Property<Crud> editTableCrudSelectedRow = new SimpleObjectProperty<>();
+	
+	public Property<Crud> getEditTableCrudSelectedRow() {
+		return editTableCrudSelectedRow;
+	}
+	
+	public Property<Crud> getTableCrud() {
+		return tableCrud;
+	}
+	
+	public Property<Crud> getTableCrudSelectedRow() {
+		return tableCrudSelectedRow;
+	}
 	
 	public GenericWindow(CocClientEngine engine,Property<Table> table, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width,height);
-		this.table = table;
-		this.engine = engine;
+//		this.table = table;
+//		this.engine = engine;
 	}
 
-	public ObservableValue<Table> getTable() {
-		return table;
+
+	public GenericWindow(Crud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
+		super(width,height);
+		this.tableCrud.setValue(tableCrud);
 	}
 	
-	public StringProperty getName() {
-		return name;
-	}
-	
-	public void add(){
-		engine.addInstance(name.getValue());
-}
-	
+//	public ObservableValue<Table> getTable() {
+//		return table;
+//	}
+//	
+//	public StringProperty getName() {
+//		return name;
+//	}
+//	
+//	public void add(){
+//		engine.addInstance(name.getValue());
+//	}
+//	
 	public void flush(){
-			engine.getCurrentCache().flush();
+		tableCrud.getValue().<CocClientEngine>getModel().getCurrentCache().flush();
 	}
 	
 	public void shiftTs(){
-		engine.getCurrentCache().shiftTs();
+		tableCrud.getValue().<CocClientEngine>getModel().getCurrentCache().shiftTs();
 	}
 	
 	public void cancel(){
-		engine.getCurrentCache().clear();
+		tableCrud.getValue().<CocClientEngine>getModel().getCurrentCache().clear();
 	}
 	
 	public void mount(){
-		engine.getCurrentCache().mount();
+		tableCrud.getValue().<CocClientEngine>getModel().getCurrentCache().mount();
 	}
 	
 	public void unmount(){
-		engine.getCurrentCache().unmount();
+		tableCrud.getValue().<CocClientEngine>getModel().getCurrentCache().unmount();
 	}
-	
-	public Property<Table> getTableSelectedRow() {
-		return tableSelectedRow;
-	}
-	
-	public Property<Table> getEditTableSelectedRow() {
-		return editTableSelectedRow;
-	}
+//	
+//	public Property<Table> getTableSelectedRow() {
+//		return tableSelectedRow;
+//	}
+//	
+//	public Property<Table> getEditTableSelectedRow() {
+//		return editTableSelectedRow;
+//	}
 
 	public void selectRow(GenericRow row){		
-		table.getValue().getSelectedRow().setValue(row);
+		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
+		System.out.println("item :: ");
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())), itemTableCell -> columnTableCell -> {
-			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+			System.out.println(itemTableCell);
+			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(),
+//					item->col->{
+//						TextTableModel<Integer, Integer> textTableModel2 = new TextTableModel<>(FXCollections.observableArrayList(1,2,3,4), FXCollections.observableArrayList(0,0,0,0),
+//								item2 -> column -> new ReadOnlyStringWrapper("Cell : " + item2 + " " + column), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+//						return new ReadOnlyObjectWrapper<Table>(textTableModel2.createTable());
+//					}
 
-//		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(((Generic)row.getItem()).getObservableSubInstances(), ((Generic)row.getItem()).getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances((Generic)row.getItem())), itemTableCell -> columnTableCell -> {
-//			TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), item2 -> column -> new ReadOnlyStringWrapper("" +  item2), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString),null);
-
+					item2 -> column -> new ReadOnlyStringWrapper("" + item2.getComponent(0)), null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 			Table tab = textTableModel.createTable();
 			tab.getColumnWidth().setValue(300);
 			return new ReadOnlyObjectWrapper<Table>(tab);
 
-		}, column -> new ReadOnlyStringWrapper("" + column), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
+		}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.createTable();
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(100);
 		table.getFirstRowHeight().setValue(20);
-		tableSelectedRow.setValue(table);
+//		tableSelectedRow.setValue(table);
+		tableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(table),row.getItem()));
 
 
 		// Edit table model
@@ -106,7 +135,9 @@ public class GenericWindow extends Window{
 		editTable.getColumnWidth().setValue(120);
 		editTable.getRowHeight().setValue(20);
 		editTable.getFirstRowHeight().setValue(20);
-		editTableSelectedRow.setValue(editTable);
+		//editTableSelectedRow.setValue(editTable);
+		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(table),row.getItem()));
+
 	}
 	
 }

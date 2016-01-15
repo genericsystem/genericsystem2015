@@ -2,6 +2,7 @@ package org.genericsystem.gsadmin;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 
@@ -20,6 +21,8 @@ import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Builder;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Window;
+import org.genericsystem.gsadmin.Crud;
+import org.genericsystem.gsadmin.Crud.*;
 
 public class WindowBuilder implements Builder {
 	@Override
@@ -32,26 +35,16 @@ public class WindowBuilder implements Builder {
 				{
 					GSVBox leftTables = new GSVBox(containTables).setMinHeight(500);
 					{
-						GSHBox formPanelEngine = new GSHBox(leftTables).setSpacing(10);
-						{
-							new GSTextField(formPanelEngine).bindTextProperty(GenericWindow::getName).setPrefWidth(300);
-							new GSButton(formPanelEngine, "Add", GenericWindow::add);
-						}
-						GSVBox table = new GSVBox(leftTables).select(GenericWindow::getTable);
-						{
-							new TableCellTableBuilder().init(table);
-							GSHBox formPanelGeneric = new GSHBox(table).setSpacing(10).select(Table::getSelectedRow);// .select(Window::getSelectedRow);//.select(Window::getSelectedRow);
-							{
-								new GSTextField(formPanelGeneric).bindTextProperty(GenericRow::getName).setPrefWidth(300);
-								new GSButton(formPanelGeneric, "Add", GenericRow::add);
-							}
-						}
-//					
-						GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableSelectedRow);
-						{
-							new TableCellTableBuilder().init(tableSelectedRow);
-						}	
 						
+						GSVBox crud = new GSVBox(leftTables).select(GenericWindow::getTableCrud);
+						{
+							new GenericCrudBuilder().init(crud);
+						}
+						GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableCrudSelectedRow);
+						{
+							new GenericCrudBuilder().init(tableSelectedRow);
+						}	
+					
 						GSHBox commandPanel = new GSHBox(leftTables).setSpacing(5);
 						{
 							 new GSButton(commandPanel, "Flush",GenericWindow::flush);
@@ -61,10 +54,10 @@ public class WindowBuilder implements Builder {
 							 new GSButton(commandPanel, "ShiftTs",GenericWindow::shiftTs);
 						}
 					}
-					GSVBox editTable = new	 GSVBox(containTables).select(GenericWindow::getEditTableSelectedRow);
+					GSVBox editTable = new	 GSVBox(containTables).select(GenericWindow::getEditTableCrudSelectedRow);
 					{
 						new GSLabel(editTable, "Edit table");
-						new TableCellTableBuilder().init(editTable);
+						new GenericCrudBuilder().init(editTable);
 					}
 				}
 			}
@@ -99,7 +92,8 @@ public class WindowBuilder implements Builder {
 		table.getColumnWidth().setValue(300);
 		table.getRowHeight().setValue(70);
 		table.getFirstRowHeight().setValue(30);
-		GenericWindow win = new GenericWindow(engine, new ReadOnlyObjectWrapper<Table>(table), width, height);
+		Crud crud = new EngineCrud(engine, new SimpleObjectProperty<Table>(table));
+		GenericWindow win = new GenericWindow(crud, width, height);
 		return win;
 	}
 }
