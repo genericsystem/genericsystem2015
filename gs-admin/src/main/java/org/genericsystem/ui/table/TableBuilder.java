@@ -14,11 +14,26 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.utils.Transformation;
-import org.genericsystem.gsadmin.GenericWindow;
+import org.genericsystem.gsadmin.GenericRow;
 import org.genericsystem.gsadmin.GenericRowBuilders.*;
 
 public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 
+	@Override
+	public void init(Element<?> parent) {
+		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+		{
+			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
+			{
+				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
+						.setPrefHeight(Table::getFirstRowHeight);
+				setActionSelectionRow(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
+			}
+		}
+	}
+	
+	public abstract GSHBox setActionSelectionRow(Element<?> parent);
+	
 	public Table build(ObservableList<ITEM> items, ObservableValue<String> firstRowFirstColumnString, ObservableList<COL> columns, Function<COL, ObservableValue<String>> firstRowExtractor, ObservableValue<String> firstRowLastColumnString,
 			Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor, TableStyle tableStyle) {
 		return new Table(getFirstElement(firstRowFirstColumnString, columns, firstRowExtractor, firstRowLastColumnString, firstColumnExtractor, lastColumnExtractor, tableStyle), getElements(items, firstColumnExtractor, columns, rowColumnExtractor, lastColumnExtractor, tableStyle), getStyle(tableStyle));

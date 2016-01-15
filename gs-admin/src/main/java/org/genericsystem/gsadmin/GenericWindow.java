@@ -112,4 +112,8 @@ public class GenericWindow extends Window {
 		editTable.getRowHeight().setValue(45);
 		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(editTable), row.getItem()));
 	}
+	
+	public void test(GenericRow row){
+		System.out.println("test");
+	}
 }

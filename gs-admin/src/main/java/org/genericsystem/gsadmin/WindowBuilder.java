@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.Crud.EngineCrud;
+import org.genericsystem.gsadmin.GenericCrudBuilders.*;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
 import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.Element;
@@ -32,7 +33,7 @@ public class WindowBuilder implements Builder {
 
 					GSVBox crud = new GSVBox(leftTables).select(GenericWindow::getTableCrud);
 					{
-						new GenericCrudBuilder().init(crud);
+						new EngineCrudBuilder().init(crud);
 					}
 					GSVBox tableSelectedRow = new GSVBox(leftTables).select(GenericWindow::getTableCrudSelectedRow);
 					{
@@ -71,7 +72,6 @@ public class WindowBuilder implements Builder {
 	}
 
 	public GenericWindow buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
-
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item2 -> column -> new ReadOnlyStringWrapper(
