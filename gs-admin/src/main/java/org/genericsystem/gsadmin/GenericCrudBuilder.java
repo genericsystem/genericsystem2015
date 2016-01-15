@@ -13,22 +13,31 @@ public class GenericCrudBuilder implements Builder {
 
 	@Override
 	public void init(Element<?> parent) {
-		
-			GSHBox formPanelEngine = new GSHBox(parent).setSpacing(10);
+
+		GSHBox Hb = new GSHBox(parent);
+		{
+			GSVBox vb = new GSVBox(Hb);
 			{
-				new GSTextField(formPanelEngine).bindTextProperty(Crud::getName).setPrefWidth(300);
-				new GSButton(formPanelEngine, "Add", Crud::add);
+				GSHBox formPanelEngine = new GSHBox(vb).setSpacing(10);
+				{
+					new GSTextField(formPanelEngine).bindTextProperty(Crud::getName).setPrefWidth(300);
+					new GSButton(formPanelEngine, "Add", Crud::add);
+				}
+
+				GSVBox table = new GSVBox(vb).select(Crud::getTable);
+				{
+					new TableCellTableBuilder().init(table);
+				}
 			}
 
-			GSVBox table = new GSVBox(parent).select(Crud::getTable);
+			GSVBox editTable = new GSVBox(Hb).select(GenericWindow::getEditTableCrudSelectedRow);
 			{
-				new TableCellTableBuilder().init(table);
+				GSVBox table = new GSVBox(editTable).select(Crud::getTable);
+				{
+					new TableCellTableBuilder().init(table);
+				}
 			}
-		
-//		GSVBox editTable = new GSVBox(parent).select(GenericWindow::getEditTableCrudSelectedRow);
-//		{
-//			new GenericCrudBuilder().init(editTable);
-//		}
-		
+		}
+
 	}
 }

@@ -24,7 +24,7 @@ import com.sun.javafx.collections.ObservableListWrapper;
 public class GenericWindow extends Window{
 //	private Property<Table> table = new SimpleObjectProperty<>();
 //	private Property<Table> tableSelectedRow = new SimpleObjectProperty<>();
-//	private Property<Table> editTableSelectedRow = new SimpleObjectProperty<>();
+	private Property<Table> editTableSelectedRow = new SimpleObjectProperty<>();
 //	private CocClientEngine engine;
 //	private StringProperty name = new SimpleStringProperty();
 	
@@ -93,9 +93,9 @@ public class GenericWindow extends Window{
 //		return tableSelectedRow;
 //	}
 //	
-//	public Property<Table> getEditTableSelectedRow() {
-//		return editTableSelectedRow;
-//	}
+	public Property<Table> getEditTableSelectedRow() {
+		return editTableSelectedRow;
+	}
 
 	public void selectRow(GenericRow row){		
 		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
@@ -135,9 +135,7 @@ public class GenericWindow extends Window{
 		editTable.getColumnWidth().setValue(120);
 		editTable.getRowHeight().setValue(20);
 		editTable.getFirstRowHeight().setValue(20);
-		//editTableSelectedRow.setValue(editTable);
-		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(table),row.getItem()));
-
+		editTableSelectedRow.setValue(editTable);
+		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(editTable),row.getItem()));
 	}
-	
 }
