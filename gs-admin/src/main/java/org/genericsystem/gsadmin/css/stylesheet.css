@@ -32,6 +32,10 @@
 	-fx-background-color: #ffeebb;
 }
 
+.firstrowlastcell {
+	-fx-background-color: #ffeebb;
+}
+
 .firstcell {
 	-fx-background-color: #ddccdd;
 }
@@ -39,7 +43,9 @@
 	-fx-background-color: #ddffdd;
 }
 
-
+.lastcell {
+	
+}
 
 
 .header {

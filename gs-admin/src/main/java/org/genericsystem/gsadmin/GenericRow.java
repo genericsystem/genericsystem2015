@@ -13,8 +13,8 @@ public class GenericRow extends Row{
 	private StringProperty name = new SimpleStringProperty("");
 	private Generic item;
 	
-	public GenericRow(Generic item, ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<String> styleClass) {
-		super(firstCell, cells, styleClass);
+	public GenericRow(Generic item, ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
+		super(firstCell, cells, lastCell, styleClass);
 		this.item = item;
 	}
 	
@@ -28,5 +28,9 @@ public class GenericRow extends Row{
 	
 	public void add(){
 		item.addInstance(name.get());
+	}
+
+	public void delete() {
+		item.remove();
 	}
 }

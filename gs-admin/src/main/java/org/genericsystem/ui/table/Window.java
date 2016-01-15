@@ -1,6 +1,5 @@
 package org.genericsystem.ui.table;
 
-import org.genericsystem.gsadmin.GenericRow;
 import javafx.beans.value.ObservableValue;
 
 public abstract class Window {

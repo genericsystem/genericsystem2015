@@ -2,11 +2,13 @@ package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
+import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
@@ -15,7 +17,6 @@ import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.RowBuilder;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.TableBuilder;
-import org.genericsystem.gsadmin.GenericRowBuilders.*;
 
 public abstract class GenericTableBuilders {
 	
@@ -73,7 +74,8 @@ public abstract class GenericTableBuilders {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return app -> ((GenericWindow) app).getWidth();
+			return app -> new SimpleObjectProperty<Number>(900);
+			// return app -> ((GenericWindow) app).getWidth();
 		}
 
 		@Override
