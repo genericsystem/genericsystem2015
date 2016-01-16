@@ -21,19 +21,19 @@ import org.genericsystem.ui.table.TableBuilder;
 public abstract class GenericTableBuilders {
 	
 	public static class TextCellTableBuilder extends TableBuilder<Generic, Generic, String> {
-		@Override
-		public void init(Element<?> parent) {
-			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
-			{
-				GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
-				{
-					new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
-							.setPrefHeight(Table::getFirstRowHeight);
-					new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
-							.addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRow);
-				}
-			}
-		}
+//		@Override
+//		public void init(Element<?> parent) {
+//			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+//			{
+//				GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
+//				{
+//					new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
+//							.setPrefHeight(Table::getFirstRowHeight);
+//					new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
+//							.addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRow);
+//				}
+//			}
+//		}
 		
 		@Override
 		protected RowBuilder<Generic, String> getRowBuilder() {
@@ -50,22 +50,30 @@ public abstract class GenericTableBuilders {
 			return table -> ((Table) table).getRowHeight();
 		}
 
+		@Override
+		public GSHBox setActionSelectionRow(Element<?> parent) {
+			// TODO Auto-generated method stub
+			return  (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::test);
+		}
+
 	}
 
+	
+	
 	public static class TableCellTableBuilder extends TableBuilder<Generic, Generic, Table> {
-		@Override
-		public void init(Element<?> parent) {
-			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
-			{
-				GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
-				{
-					new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
-							.setPrefHeight(Table::getFirstRowHeight);
-					new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
-							.addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRow);
-				}
-			}
-		}
+//		@Override
+//		public void init(Element<?> parent) {
+//			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+//			{
+//				GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
+//				{
+//					new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
+//							.setPrefHeight(Table::getFirstRowHeight);
+//					new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
+//							.addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRow);
+//				}
+//			}
+//		}
 		
 		@Override
 		protected RowBuilder<Generic, Table> getRowBuilder() {
@@ -81,6 +89,48 @@ public abstract class GenericTableBuilders {
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
 			return app -> ((GenericWindow) app).getHeight();
+		}
+
+		@Override
+		public GSHBox setActionSelectionRow(Element<?> parent) {
+			return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRow);
+		}
+	}
+	
+	public static class TableCellTableBuilder2 extends TableBuilder<Generic, Generic, Table> {
+//		@Override
+//		public void init(Element<?> parent) {
+//			GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
+//			{
+//				GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());;
+//				{
+//					new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
+//							.setPrefHeight(Table::getFirstRowHeight);
+//					new GSHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight)
+//							.addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRow);
+//				}
+//			}
+//		}
+		
+		@Override
+		protected RowBuilder<Generic, Table> getRowBuilder() {
+			return new TableCellRowBuilder();
+		}
+
+		@Override
+		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+			return app -> new SimpleObjectProperty<Number>(900);
+			// return app -> ((GenericWindow) app).getWidth();
+		}
+
+		@Override
+		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+			return app -> ((GenericWindow) app).getHeight();
+		}
+
+		@Override
+		public GSHBox setActionSelectionRow(Element<?> parent) {
+			return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::test);
 		}
 	}
 }
