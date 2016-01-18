@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -19,7 +18,8 @@ public class CosCache extends AbstractCache implements DefaultCache<Generic> {
 	private final long cacheId;
 	private CosTransaction transaction;
 
-	public void shiftTs() throws RollbackException {
+	@Override
+	public long shiftTs() throws RollbackException {
 
 		long birthTs = getRoot().getServer().shiftTs(cacheId);
 		this.transaction = new CosTransaction(getRoot(), cacheId);
@@ -34,6 +34,8 @@ public class CosCache extends AbstractCache implements DefaultCache<Generic> {
 			else if (entryGeneric.getValue().getBirthTs() == Long.MAX_VALUE)
 				((ClientEngineHandler) entryGeneric.getValue().getProxyHandler()).birthTs = birthTs;
 		}
+		return birthTs;
+
 	}
 
 	public CosTransaction getTransaction() {
@@ -86,16 +88,19 @@ public class CosCache extends AbstractCache implements DefaultCache<Generic> {
 		discardWithException(cause);
 	}
 
+	@Override
 	public void clear() {
 		getRoot().getServer().clear(cacheId);
 		transaction = new CosTransaction(getRoot(), cacheId);
 	}
 
+	@Override
 	public void mount() {
 		getRoot().getServer().mount(cacheId);
 		// transaction = new LightClientTransaction(getRoot(), cacheId);
 	}
 
+	@Override
 	public void unmount() {
 		getRoot().getServer().unmount(cacheId);
 		transaction = new CosTransaction(getRoot(), cacheId);
