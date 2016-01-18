@@ -24,11 +24,12 @@ public class GenericWindow extends Window {
 
 	private Property<Crud> tableCrud = new SimpleObjectProperty<>();
 	private Property<Crud> tableCrudSelectedRow = new SimpleObjectProperty<>();
-	private Property<Crud> editTableCrudSelectedRow = new SimpleObjectProperty<>();
 
-	public Property<Crud> getEditTableCrudSelectedRow() {
-		return editTableCrudSelectedRow;
-	}
+	// private Property<Crud> editTableCrudSelectedRow = new SimpleObjectProperty<>();
+
+	// public Property<Crud> getEditTableCrudSelectedRow() {
+	// return editTableCrudSelectedRow;
+	// }
 
 	public Property<Crud> getTableCrud() {
 		return tableCrud;
@@ -69,9 +70,8 @@ public class GenericWindow extends Window {
 		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
 	}
 
-	public void selectRow(GenericRow row) {
+	public void selectRowEngineTable(GenericRow row) {
 		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
-		System.out.println("item :: ");
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					System.out.println(itemTableCell);
@@ -81,7 +81,6 @@ public class GenericWindow extends Window {
 					// item2 -> column -> new ReadOnlyStringWrapper("Cell : " + item2 + " " + column), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 					// return new ReadOnlyObjectWrapper<Table>(textTableModel2.createTable());
 					// }
-
 							item2 -> column -> new ReadOnlyStringWrapper("" + item2.getComponent(0)), null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 					Table tab = textTableModel.createTable();
 					tab.getColumnWidth().setValue(300);
@@ -95,11 +94,16 @@ public class GenericWindow extends Window {
 		table.getRowHeight().setValue(22);
 		table.getColumnWidth().setValue(310);
 		tableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(table), row.getItem()));
-
 		CocClientEngine engine = tableCrud.getValue().<CocClientEngine> getModel();
+		createEditTable(tableCrud, row, engine);
+	}
 
-		// Edit table model
-		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(engine.getObservableAttributes()/* .filtered(attribute -> attribute.isCompositeForInstances(engine)) */, new ObservableListWrapper<>(Arrays.asList(row.getItem())),
+	public void selectRowGenericTable(GenericRow row) {
+		createEditTable(tableCrudSelectedRow, row, row.getItem());
+	}
+
+	private void createEditTable(Property<Crud> crud, GenericRow row, Generic generic) {
+		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes()/* .filtered(attribute -> attribute.isCompositeForInstances(engine)) */, new ObservableListWrapper<>(Arrays.asList(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
 							item2 -> column -> new ReadOnlyStringWrapper("" + item2), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
@@ -110,10 +114,6 @@ public class GenericWindow extends Window {
 		editTable.getFirstColumnWidth().setValue(200);
 		editTable.getColumnWidth().setValue(310);
 		editTable.getRowHeight().setValue(45);
-		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(editTable), row.getItem()));
-	}
-	
-	public void test(GenericRow row){
-		System.out.println("test");
+		crud.getValue().getEditTable().setValue(editTable);
 	}
 }

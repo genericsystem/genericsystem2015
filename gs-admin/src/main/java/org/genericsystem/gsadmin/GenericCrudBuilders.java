@@ -9,9 +9,9 @@ import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Builder;
 
-public class GenericCrudBuilders  {
+public class GenericCrudBuilders {
 
-	public static class EngineCrudBuilder implements Builder{
+	public static class EngineCrudBuilder implements Builder {
 
 		@Override
 		public void init(Element<?> parent) {
@@ -31,19 +31,16 @@ public class GenericCrudBuilders  {
 					}
 				}
 
-				GSVBox editTable = new GSVBox(Hb).select(GenericWindow::getEditTableCrudSelectedRow);
+				GSVBox editTable = new GSVBox(Hb).select(Crud::getEditTable);
 				{
-					GSVBox table = new GSVBox(editTable).select(Crud::getTable);
-					{
-						new TableCellTableBuilder().init(table);
-					}
+					new TableCellTableBuilder().init(editTable);
 				}
 			}
 		}
-		
+
 	}
-	
-	public static class GenericCrudBuilder implements Builder{
+
+	public static class GenericCrudBuilder implements Builder {
 
 		@Override
 		public void init(Element<?> parent) {
@@ -63,15 +60,11 @@ public class GenericCrudBuilders  {
 					}
 				}
 
-				GSVBox editTable = new GSVBox(Hb).select(GenericWindow::getEditTableCrudSelectedRow);
+				GSVBox table = new GSVBox(Hb).select(Crud::getEditTable);
 				{
-					GSVBox table = new GSVBox(editTable).select(Crud::getTable);
-					{
-						new TableCellTableBuilder().init(table);
-					}
+					new TableCellTableBuilder().init(table);
 				}
 			}
 		}
-		
 	}
 }
