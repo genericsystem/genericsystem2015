@@ -85,19 +85,19 @@ public class GenericWindow extends Window {
 		table.getRowHeight().setValue(22);
 		table.getColumnWidth().setValue(310);
 		tableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(table), row.getItem()));
-		CocClientEngine engine = tableCrud.getValue().<CocClientEngine> getModel();
-		createEditTable(tableCrud, row, engine);
+		createEditTable(tableCrud, row);
 	}
 
 	public void selectRowGenericTable(GenericRow row) {
-		createEditTable(tableCrudSelectedRow, row, row.getItem());
+		createEditTable(tableCrudSelectedRow, row);
 	}
 
-	private void createEditTable(Property<GenericCrud> crud, GenericRow row, Generic generic) {
-		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes()/* .filtered(attribute -> attribute.isCompositeForInstances(engine)) */, new ObservableListWrapper<>(Arrays.asList(row.getItem())),
+	private void createEditTable(Property<GenericCrud> crud, GenericRow row) {
+		Generic generic = crud.getValue().getModel();
+		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), new ObservableListWrapper<>(Arrays.asList(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
-							item2 -> column -> new ReadOnlyStringWrapper("" + item2), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+							item2 -> column -> new ReadOnlyStringWrapper("" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
 					Table tab = textTableModel.createTable();
 					return new ReadOnlyObjectWrapper<Table>(tab);
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);

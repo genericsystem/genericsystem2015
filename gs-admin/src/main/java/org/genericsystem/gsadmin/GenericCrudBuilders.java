@@ -1,5 +1,6 @@
 package org.genericsystem.gsadmin;
 
+import org.genericsystem.gsadmin.GenericTableBuilders.EditTableCellTableBuilder;
 import org.genericsystem.gsadmin.GenericTableBuilders.TableCellTableBuilder;
 import org.genericsystem.gsadmin.GenericTableBuilders.TableCellTableBuilder2;
 import org.genericsystem.ui.Element;
@@ -33,7 +34,7 @@ public class GenericCrudBuilders {
 
 				GSVBox editTable = new GSVBox(Hb).select(GenericCrud::getEditTable);
 				{
-					new TableCellTableBuilder().init(editTable);
+					new EditTableCellTableBuilder().init(editTable);
 				}
 			}
 		}
@@ -41,7 +42,6 @@ public class GenericCrudBuilders {
 	}
 
 	public static class GenericCrudBuilder implements Builder {
-
 		@Override
 		public void init(Element<?> parent) {
 			GSHBox Hb = new GSHBox(parent);
@@ -62,7 +62,8 @@ public class GenericCrudBuilders {
 
 				GSVBox table = new GSVBox(Hb).select(GenericCrud::getEditTable);
 				{
-					new TableCellTableBuilder().init(table);
+
+					new EditTableCellTableBuilder().init(table);
 				}
 			}
 		}

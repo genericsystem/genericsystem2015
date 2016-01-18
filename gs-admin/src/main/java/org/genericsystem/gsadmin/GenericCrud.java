@@ -10,6 +10,10 @@ public class GenericCrud extends Crud {
 
 	private final Generic generic;
 
+	public void test(GenericRow row) {
+		System.out.println("testttttttttttt");
+	}
+
 	public GenericCrud(Property<Table> table, Generic generic) {
 		super(table);
 		this.generic = generic;
@@ -44,4 +48,5 @@ public class GenericCrud extends Crud {
 	public void unmount() {
 		generic.getCurrentCache().unmount();
 	}
+
 }

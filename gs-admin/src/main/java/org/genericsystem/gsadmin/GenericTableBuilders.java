@@ -36,25 +36,23 @@ public abstract class GenericTableBuilders {
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
-
 	}
 
 	public static class TableCellTableBuilder extends TableBuilder<Generic, Generic, Table> {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
-
 		}
+	}
 
+	public static class EditTableCellTableBuilder extends TableBuilder<Generic, Generic, Table> {
+		@Override
+		public GSHBox createSelectionHBox(Element<?> parent) {
+			return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericCrud::test);
+		}
 	}
 
 	public static class TableCellTableBuilder2 extends TableBuilder<Generic, Generic, Table> {
-
-		// @Override
-		// public GSHBox setActionSelectionRow(Element<?> parent) {
-		// return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
-		// }
-
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSHBox(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
