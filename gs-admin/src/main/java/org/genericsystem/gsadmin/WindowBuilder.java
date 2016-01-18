@@ -8,7 +8,6 @@ import javafx.collections.FXCollections;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.Crud.GenericCrud;
 import org.genericsystem.gsadmin.GenericCrudBuilders.EngineCrudBuilder;
 import org.genericsystem.gsadmin.GenericCrudBuilders.GenericCrudBuilder;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
@@ -87,7 +86,7 @@ public class WindowBuilder implements Builder {
 		table.getRowHeight().setValue(45);
 		table.getColumnWidth().setValue(310);
 
-		Crud crud = new GenericCrud(new SimpleObjectProperty<Table>(table), engine);
+		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<Table>(table), engine);
 		GenericWindow win = new GenericWindow(crud, width, height);
 		return win;
 	}

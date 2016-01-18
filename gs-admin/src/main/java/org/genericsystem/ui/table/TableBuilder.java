@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.gsadmin.GenericRow;
+import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
@@ -25,9 +25,9 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());
 			;
 			{
-				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
+				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
 						.setPrefHeight(Table::getFirstRowHeight);
-				createSelectionHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(GenericRow::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
+				createSelectionHBox(tablePanel).forEach(Table::getElements).include(getRowBuilder()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
 			}
 		}
 	}
@@ -56,10 +56,24 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 				lastColumnExtractor == null ? new SimpleStringProperty() : lastColumnExtractor.apply(item), tableStyle));
 	}
 
-	protected abstract RowBuilder<COL, T> getRowBuilder();
+	// protected abstract RowBuilder<COL, T> getRowBuilder();
+	//
+	// protected abstract <M> Function<M, ObservableValue<Number>> getSuperPrefHeight();
+	//
+	// protected abstract <M> Function<M, ObservableValue<Number>> getSuperPrefWidth();
+	//
 
-	protected abstract <M> Function<M, ObservableValue<Number>> getSuperPrefHeight();
+	protected RowBuilder<COL, T> getRowBuilder() {
+		return new TableCellRowBuilder();
+	}
 
-	protected abstract <M> Function<M, ObservableValue<Number>> getSuperPrefWidth();
+	protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+		return app -> new SimpleObjectProperty<Number>(900);
+		// return app -> ((GenericWindow) app).getWidth();
+	}
+
+	protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+		return app -> ((Window) app).getHeight();
+	}
 
 }

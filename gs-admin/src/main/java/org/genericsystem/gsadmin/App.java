@@ -26,6 +26,7 @@ public class App extends Application {
 
 	static CocClientEngine engine;
 	static CocServer server;
+
 	private CocClientEngine initGS() {
 		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
@@ -64,9 +65,10 @@ public class App extends Application {
 		GenericWindow window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
 		elt.apply(window, scene.getRoot());// Do this only one time
 		stage.setScene(scene);
-		stage.setWidth(800);
-		stage.setHeight(600);
+		stage.setWidth(1500);
+		stage.setHeight(800);
+		// stage.setFullScreen(true);
 		stage.show();
-		stage.setOnCloseRequest(e->server.stop());
+		stage.setOnCloseRequest(e -> server.stop());
 	}
 }

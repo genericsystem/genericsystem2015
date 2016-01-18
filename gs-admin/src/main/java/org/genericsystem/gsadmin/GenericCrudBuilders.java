@@ -21,17 +21,17 @@ public class GenericCrudBuilders {
 				{
 					GSHBox formPanelEngine = new GSHBox(vb).setSpacing(10);
 					{
-						new GSTextField(formPanelEngine).bindTextProperty(Crud::getName).setPrefWidth(300);
-						new GSButton(formPanelEngine, "Add", Crud::add);
+						new GSTextField(formPanelEngine).bindTextProperty(GenericCrud::getName).setPrefWidth(300);
+						new GSButton(formPanelEngine, "Add", GenericCrud::add);
 					}
 
-					GSVBox table = new GSVBox(vb).select(Crud::getTable);
+					GSVBox table = new GSVBox(vb).select(GenericCrud::getTable);
 					{
 						new TableCellTableBuilder().init(table);
 					}
 				}
 
-				GSVBox editTable = new GSVBox(Hb).select(Crud::getEditTable);
+				GSVBox editTable = new GSVBox(Hb).select(GenericCrud::getEditTable);
 				{
 					new TableCellTableBuilder().init(editTable);
 				}
@@ -50,17 +50,17 @@ public class GenericCrudBuilders {
 				{
 					GSHBox formPanelEngine = new GSHBox(vb).setSpacing(10);
 					{
-						new GSTextField(formPanelEngine).bindTextProperty(Crud::getName).setPrefWidth(300);
-						new GSButton(formPanelEngine, "Add", Crud::add);
+						new GSTextField(formPanelEngine).bindTextProperty(GenericCrud::getName).setPrefWidth(300);
+						new GSButton(formPanelEngine, "Add", GenericCrud::add);
 					}
 
-					GSVBox table = new GSVBox(vb).select(Crud::getTable);
+					GSVBox table = new GSVBox(vb).select(GenericCrud::getTable);
 					{
 						new TableCellTableBuilder2().init(table);
 					}
 				}
 
-				GSVBox table = new GSVBox(Hb).select(Crud::getEditTable);
+				GSVBox table = new GSVBox(Hb).select(GenericCrud::getEditTable);
 				{
 					new TableCellTableBuilder().init(table);
 				}

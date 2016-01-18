@@ -11,7 +11,6 @@ import javafx.collections.FXCollections;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.Crud.GenericCrud;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
 import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
 import org.genericsystem.ui.table.Table;
@@ -22,30 +21,22 @@ import com.sun.javafx.collections.ObservableListWrapper;
 @SuppressWarnings("restriction")
 public class GenericWindow extends Window {
 
-	private Property<Crud> tableCrud = new SimpleObjectProperty<>();
-	private Property<Crud> tableCrudSelectedRow = new SimpleObjectProperty<>();
+	private Property<GenericCrud> tableCrud = new SimpleObjectProperty<>();
+	private Property<GenericCrud> tableCrudSelectedRow = new SimpleObjectProperty<>();
 
-	// private Property<Crud> editTableCrudSelectedRow = new SimpleObjectProperty<>();
-
-	// public Property<Crud> getEditTableCrudSelectedRow() {
-	// return editTableCrudSelectedRow;
-	// }
-
-	public Property<Crud> getTableCrud() {
+	public Property<GenericCrud> getTableCrud() {
 		return tableCrud;
 	}
 
-	public Property<Crud> getTableCrudSelectedRow() {
+	public Property<GenericCrud> getTableCrudSelectedRow() {
 		return tableCrudSelectedRow;
 	}
 
 	public GenericWindow(CocClientEngine engine, Property<Table> table, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width, height);
-		// this.table = table;
-		// this.engine = engine;
 	}
 
-	public GenericWindow(Crud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
+	public GenericWindow(GenericCrud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width, height);
 		this.tableCrud.setValue(tableCrud);
 	}
@@ -102,7 +93,7 @@ public class GenericWindow extends Window {
 		createEditTable(tableCrudSelectedRow, row, row.getItem());
 	}
 
-	private void createEditTable(Property<Crud> crud, GenericRow row, Generic generic) {
+	private void createEditTable(Property<GenericCrud> crud, GenericRow row, Generic generic) {
 		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes()/* .filtered(attribute -> attribute.isCompositeForInstances(engine)) */, new ObservableListWrapper<>(Arrays.asList(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
