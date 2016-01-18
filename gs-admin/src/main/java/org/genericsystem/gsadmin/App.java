@@ -1,8 +1,10 @@
 package org.genericsystem.gsadmin;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import org.genericsystem.admin.model.Car;
@@ -51,8 +53,6 @@ public class App extends Application {
 		return engine;
 	}
 
-	int i = 0;
-
 	@Override
 	public void start(Stage stage) throws Exception {
 
@@ -65,10 +65,15 @@ public class App extends Application {
 		GenericWindow window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
 		elt.apply(window, scene.getRoot());// Do this only one time
 		stage.setScene(scene);
-		stage.setWidth(1500);
-		stage.setHeight(800);
+		stage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
+		stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
 		// stage.setFullScreen(true);
 		stage.show();
-		stage.setOnCloseRequest(e -> server.stop());
+		stage.setOnCloseRequest(e -> {
+			server.stop();
+			Platform.exit();
+			System.exit(0);
+		});
+
 	}
 }
