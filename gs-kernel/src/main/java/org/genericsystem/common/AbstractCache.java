@@ -2,9 +2,7 @@ package org.genericsystem.common;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
