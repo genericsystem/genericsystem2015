@@ -55,35 +55,40 @@ public class WindowBuilder implements Builder {
 		}
 	}
 
-	public GenericWindow build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine cocClient) {
-		TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2), item -> col -> {
-			TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 9, 6), FXCollections.observableArrayList(1, 1, 1, 1),
-					item2 -> column -> new ReadOnlyStringWrapper("Cell : " + item2 + " " + column), null, null, null);
-			Table tab = textTableModel.createTable();
-			return new ReadOnlyObjectWrapper<Table>(tab);
-		}, col -> new ReadOnlyStringWrapper("col :" + col), item -> new ReadOnlyStringWrapper("item :" + item), null);
-
-		Table table = tableModel.createTable();
-		table.getColumnWidth().setValue(300);
-		table.getRowHeight().setValue(20);
-		table.getFirstRowHeight().setValue(30);
-		GenericWindow win = new GenericWindow(cocClient, new ReadOnlyObjectWrapper<Table>(table), width, height);
-		return win;
-	}
+	// public GenericWindow build(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine cocClient) {
+	// TableCellTableModel<Integer, Integer> tableModel = new TableCellTableModel<>(FXCollections.observableArrayList(0, 1, 2, 3), FXCollections.observableArrayList(0, 1, 2), item -> col -> {
+	// TextTableModel<Integer, Integer> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(5, 8, 9, 6), FXCollections.observableArrayList(1, 1, 1, 1),
+	// item2 -> column -> new ReadOnlyStringWrapper("Cell : " + item2 + " " + column), null, null, null);
+	// Table tab = textTableModel.createTable();
+	// return new ReadOnlyObjectWrapper<Table>(tab);
+	// }, col -> new ReadOnlyStringWrapper("col :" + col), item -> new ReadOnlyStringWrapper("item :" + item), null);
+	//
+	// Table table = tableModel.createTable();
+	// table.getColumnWidth().setValue(300);
+	// table.getRowHeight().setValue(20);
+	// table.getFirstRowHeight().setValue(30);
+	// GenericWindow win = new GenericWindow(cocClient, new ReadOnlyObjectWrapper<Table>(table), width, height);
+	// return win;
+	// }
 
 	public GenericWindow buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item2 -> column -> new ReadOnlyStringWrapper(
-							"" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+							"" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
 					Table tab = textTableModel.createTable();
 					return new ReadOnlyObjectWrapper<Table>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
+				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), itemTableCell -> {
+					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableInstances(), FXCollections.observableArrayList(itemTableCell.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + item2),
+							null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+					Table tab = textTableModel.createTable();
+					return new ReadOnlyObjectWrapper<Table>(tab);
+				}, column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.createTable();
 		table.getFirstRowHeight().setValue(30);
-		table.getFirstColumnWidth().setValue(200);
-		table.getRowHeight().setValue(45);
+		table.getFirstColumnWidth().setValue(300);
+		table.getRowHeight().setValue(80);
 		table.getColumnWidth().setValue(310);
 
 		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<Table>(table), engine);
