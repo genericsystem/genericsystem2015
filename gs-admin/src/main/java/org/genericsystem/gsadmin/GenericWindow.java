@@ -72,12 +72,12 @@ public class GenericWindow extends Window {
 					// item2 -> column -> new ReadOnlyStringWrapper("Cell : " + item2 + " " + column), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 					// return new ReadOnlyObjectWrapper<Table>(textTableModel2.createTable());
 					// }
-							item2 -> column -> new ReadOnlyStringWrapper("" + item2.getComponent(0)), null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+							item2 -> column -> new ReadOnlyStringWrapper("" + item2.getComponent(0)), null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
 					Table tab = textTableModel.createTable();
 					tab.getColumnWidth().setValue(300);
 					return new ReadOnlyObjectWrapper<Table>(tab);
 
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
+				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.createTable();
 		table.getFirstRowHeight().setValue(25);
@@ -97,10 +97,10 @@ public class GenericWindow extends Window {
 		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), new ObservableListWrapper<>(Arrays.asList(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
-							item2 -> column -> new ReadOnlyStringWrapper("" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+							item2 -> column -> new ReadOnlyStringWrapper("" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
 					Table tab = textTableModel.createTable();
 					return new ReadOnlyObjectWrapper<Table>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
 		Table editTable = editTableModel.createTable();
 		editTable.getFirstColumnWidth().setValue(200);
 		editTable.getColumnWidth().setValue(310);

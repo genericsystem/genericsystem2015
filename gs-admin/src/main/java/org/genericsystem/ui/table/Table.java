@@ -18,17 +18,20 @@ public class Table extends Listable<Row> {
 	private final Property<Number> firstColumnWidth = new SimpleIntegerProperty(100);
 	private final Property<Number> columnWidth = new SimpleIntegerProperty(100);
 	private final Property<Number> lastColumnWidth = new SimpleIntegerProperty(100);
+	private final Property<Number> secondColumnWidth = new SimpleIntegerProperty(300);
 
 	private final ObservableValue<Row> referenceRow = Bindings.createObjectBinding(() -> getReferenceRow().getValue(), getFirstElement(), getElements());
 	private final ObservableIntegerValue firstRowNumber = Bindings.createIntegerBinding(() -> getFirstElement().getValue() != null ? 1 : 0, getFirstElement());
-	private final ObservableNumberValue tableHeight = Bindings.createIntegerBinding(()->Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight()).intValue(),getElements());
+	private final ObservableNumberValue tableHeight = Bindings.createIntegerBinding(() -> Bindings.add(getOptionalFirstRowHeight(), getOtherRowsHeight()).intValue(), getElements());
 	private final ObservableIntegerValue firstCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getFirstElement().getValue() != null ? 1 : 0 : 0, referenceRow);
 	private final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
 	private final ObservableIntegerValue lastCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getLastElement().getValue() != null ? 1 : 0 : 0, referenceRow);
-	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), Bindings.add(getOtherCellsWidth(), getOptionalLastCellWidth()));
+	private final ObservableIntegerValue secondCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getSecondElement().getValue() != null ? 1 : 0 : 0, referenceRow);
 
-	private Property<Row> selectedRow = new SimpleObjectProperty<>();	
-	
+	private final ObservableValue<Number> tableWidth = Bindings.add(getOptionalSecondCellWidth(), Bindings.add(getOptionalFirstCellWidth(), Bindings.add(getOtherCellsWidth(), getOptionalLastCellWidth())));
+
+	private Property<Row> selectedRow = new SimpleObjectProperty<>();
+
 	private ObservableValue<Row> getReferenceRow() {
 		if (getFirstElement().getValue() != null) {
 			return getFirstElement();
@@ -38,11 +41,11 @@ public class Table extends Listable<Row> {
 			return new SimpleObjectProperty<>();
 		}
 	}
-	
+
 	public Property<Row> getSelectedRow() {
 		return selectedRow;
 	}
-	
+
 	private ObservableNumberValue getOptionalFirstRowHeight() {
 		return Bindings.multiply(firstRowNumber, (ObservableNumberValue) firstRowHeight);
 	}
@@ -63,8 +66,13 @@ public class Table extends Listable<Row> {
 		return Bindings.multiply(lastCellNumber, (ObservableNumberValue) lastColumnWidth);
 	}
 
-	
-	
+	private ObservableNumberValue getOptionalSecondCellWidth() {
+		System.out.println("secondCellNumber :: " + secondCellNumber.get());
+		System.out.println(Bindings.multiply(secondCellNumber, (ObservableNumberValue) secondColumnWidth).intValue());
+		return Bindings.multiply(secondCellNumber, (ObservableNumberValue) secondColumnWidth);
+		// return new SimpleIntegerProperty(0);
+	}
+
 	// private ObservableList<Cell<?>> getCells() {
 	// return getFirstElement().getValue().getElements();
 	// }
@@ -85,8 +93,12 @@ public class Table extends Listable<Row> {
 	// return getFirstElement().getValue() != null ? (ObservableNumberValue) firstRowHeight : new SimpleIntegerProperty(1);
 	// }
 
+	public Property<Number> getSecondColumnWidth() {
+		return secondColumnWidth;
+	}
+
 	public Table(ObservableValue<Row> firstRow, ObservableList<Row> rows, ObservableValue<String> tableStyle) {
-		super(firstRow, rows, null, tableStyle);
+		super(firstRow, null, rows, null, tableStyle);
 	}
 
 	public Property<Number> getFirstRowHeight() {
