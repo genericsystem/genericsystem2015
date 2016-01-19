@@ -31,6 +31,8 @@ public abstract class RowBuilder<COL, T> implements Builder {
 	}
 
 	protected ObservableValue<Cell<?>> getSecondElement(ObservableValue<T> secondColumnString, TableStyle tableStyle) {
+		if (secondColumnString.getValue() == null)
+			return new ReadOnlyObjectWrapper<>();
 		return new ReadOnlyObjectWrapper<>(getSecondCellBuilder().build(secondColumnString, tableStyle));
 	}
 

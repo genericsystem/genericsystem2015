@@ -67,8 +67,8 @@ public class Table extends Listable<Row> {
 	}
 
 	private ObservableNumberValue getOptionalSecondCellWidth() {
-		System.out.println("secondCellNumber :: " + secondCellNumber.get());
-		System.out.println(Bindings.multiply(secondCellNumber, (ObservableNumberValue) secondColumnWidth).intValue());
+		// System.out.println("secondCellNumber :: " + secondCellNumber.get());
+		// System.out.println(Bindings.multiply(secondCellNumber, (ObservableNumberValue) secondColumnWidth).intValue());
 		return Bindings.multiply(secondCellNumber, (ObservableNumberValue) secondColumnWidth);
 		// return new SimpleIntegerProperty(0);
 	}
