@@ -119,7 +119,7 @@ public class GenericWindow extends Window {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
 							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
 					Table tab = textTableModel.buildTable();
-					return new ReadOnlyObjectWrapper<Table>(tab);
+					return new ReadOnlyObjectWrapper<>(tab);
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), null,
 
 				itemTableCell -> {
@@ -131,7 +131,7 @@ public class GenericWindow extends Window {
 					tab.getFirstRowHeight().setValue(30);
 					tab.getRowHeight().setValue(75);
 
-					return new ReadOnlyObjectWrapper<Table>(tab);
+					return new ReadOnlyObjectWrapper<>(tab);
 				}, column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.buildTable();
@@ -140,8 +140,7 @@ public class GenericWindow extends Window {
 		table.getRowHeight().setValue(80);
 		table.getColumnWidth().setValue(310);
 
-		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<Table>(table), engine);
-		GenericWindow win = new GenericWindow(crud, width, height);
-		return win;
+		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<>(table), engine);
+		return new GenericWindow(crud, width, height);
 	}
 }
