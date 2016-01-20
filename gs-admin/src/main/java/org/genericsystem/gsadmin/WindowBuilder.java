@@ -5,6 +5,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.GenericCrudBuilders.EngineCrudBuilder;
@@ -57,15 +58,15 @@ public class WindowBuilder implements Builder {
 	public GenericWindow buildWithGeneric(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)),
 				itemTableCell -> columnTableCell -> {
-					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item2 -> column -> new ReadOnlyStringWrapper(
-							"" + column), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
+							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
 					Table tab = textTableModel.createTable();
 					return new ReadOnlyObjectWrapper<Table>(tab);
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), null,
 
 				itemTableCell -> {
-					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
-							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item -> col -> new ReadOnlyStringWrapper(""
+							+ col), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
 					Table tab = textTableModel.createTable();
 					tab.getFirstColumnWidth().setValue(195);
 

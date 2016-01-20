@@ -105,7 +105,7 @@ public class GenericWindow extends Window {
 			TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), new ObservableListWrapper<>(Arrays.asList(row.getItem())),
 					itemTableCell -> columnTableCell -> {
 						TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
-								item2 -> column -> new ReadOnlyStringWrapper("" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+								item2 -> column -> new ReadOnlyStringWrapper("" + column), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
 						Table tab = textTableModel.createTable();
 						return new ReadOnlyObjectWrapper<Table>(tab);
 					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
