@@ -6,7 +6,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
 import org.genericsystem.admin.model.Color;
@@ -18,7 +17,6 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.distributed.cacheonclient.CocServer;
 import org.genericsystem.kernel.Statics;
-import org.genericsystem.ui.Element;
 
 public class App extends Application {
 
@@ -59,15 +57,10 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
-		Element<Group> elt = new Element<>(Group.class);
-		WindowBuilder builder = new WindowBuilder();
-		builder.init(elt);// Do this only one time
-		GenericWindow window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
-		elt.apply(window, scene.getRoot());// Do this only one time
+		new GSAdmin(GenericWindow.createWindow(scene.widthProperty(), scene.heightProperty(), initGS()), (Group) scene.getRoot());
 		stage.setScene(scene);
 		stage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
 		stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
-		// stage.setFullScreen(true);
 		stage.show();
 		stage.setOnCloseRequest(e -> {
 			server.stop();
