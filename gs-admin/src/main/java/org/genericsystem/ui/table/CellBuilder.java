@@ -23,7 +23,7 @@ public abstract class CellBuilder<T> implements Builder {
 			new GSLabel(cellPanels, Cell<String>::getObservableModel);
 		}
 	}
-	
+
 	public static class FirstRowTextCellBuilder extends TextCellBuilder {
 
 		@Override
@@ -70,4 +70,13 @@ public abstract class CellBuilder<T> implements Builder {
 			new GSVBox(cellPanels).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder()::init);
 		}
 	}
+
+	public static class SecondCellBuilder extends TextCellBuilder {
+
+		@Override
+		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+			return tableStyle.firstRowFirstCell;
+		}
+	}
+
 }

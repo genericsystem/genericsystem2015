@@ -20,7 +20,7 @@ public class GenericCellBuilders {
 			new GSVBox(cellPanels).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder()::init);
 		}
 	}
-	
+
 	public static class ButtonCellBuilder extends CellBuilder<String> {
 		@Override
 		public void init(Element<?> cellPanels) {
@@ -34,4 +34,5 @@ public class GenericCellBuilders {
 			return tableStyle.lastCell;
 		}
 	}
+
 }

@@ -4,14 +4,32 @@ import java.util.function.Function;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.gsadmin.GenericRow;
+import org.genericsystem.ui.Element;
+import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.utils.Transformation;
 
 public abstract class RowBuilder<COL, T> implements Builder {
 
-	protected abstract Row build(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
+	@Override
+	public void init(Element<?> rowPanel) {
+		new GSHBox(rowPanel).select(GenericRow::getFirstElement).include(getRowFirstCellBuilder()::init).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth)
+				.setStyleClass(Cell<Generic>::getStyleClass);
+
+		new GSHBox(rowPanel).select(GenericRow::getSecondElement).include(getSecondCellBuilder()::init).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth)
+				.setStyleClass(Cell<Generic>::getStyleClass);
+
+		new GSHBox(rowPanel).forEach(GenericRow::getElements).include(getCellBuilder()::init).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
+		new GSHBox(rowPanel).select(GenericRow::getLastElement).include(getRowLastCellBuilder()::init).setMinWidth(Table::getLastColumnWidth).setPrefWidth(Table::getLastColumnWidth).setMaxWidth(Table::getLastColumnWidth)
+				.setStyleClass(Cell<Generic>::getStyleClass);
+	}
+
+	public abstract Row build(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
 			TableStyle tableStyle);
 
 	protected ObservableValue<Cell<?>> getFirstElement(ObservableValue<String> firstColumnString, TableStyle tableStyle) {
@@ -21,6 +39,8 @@ public abstract class RowBuilder<COL, T> implements Builder {
 	}
 
 	protected ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
+		if (columnExtractor == null)
+			return FXCollections.emptyObservableList();
 		return new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), tableStyle));
 	}
 

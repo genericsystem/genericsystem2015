@@ -2,6 +2,8 @@ package org.genericsystem.gsadmin;
 
 import java.util.Arrays;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -57,6 +59,11 @@ public class GenericWindow extends Window {
 		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().mount();
 	}
 
+	public StringBinding getCacheLevel() {
+		return Bindings.createStringBinding(() -> "Cache level : " + tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache()
+				.getCacheLevelObservable());
+	}
+
 	public void unmount() {
 		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
 	}
@@ -93,18 +100,20 @@ public class GenericWindow extends Window {
 	}
 
 	private void createEditTable(Property<GenericCrud> crud, GenericRow row) {
-		Generic generic = crud.getValue().getModel();
-		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), new ObservableListWrapper<>(Arrays.asList(row.getItem())),
-				itemTableCell -> columnTableCell -> {
-					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
-							item2 -> column -> new ReadOnlyStringWrapper("" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
-					Table tab = textTableModel.createTable();
-					return new ReadOnlyObjectWrapper<Table>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
-		Table editTable = editTableModel.createTable();
-		editTable.getFirstColumnWidth().setValue(200);
-		editTable.getColumnWidth().setValue(310);
-		editTable.getRowHeight().setValue(45);
-		crud.getValue().getEditTable().setValue(editTable);
+		if (crud.getValue() != null) {
+			Generic generic = crud.getValue().getModel();
+			TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), new ObservableListWrapper<>(Arrays.asList(row.getItem())),
+					itemTableCell -> columnTableCell -> {
+						TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
+								item2 -> column -> new ReadOnlyStringWrapper("" + item2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+						Table tab = textTableModel.createTable();
+						return new ReadOnlyObjectWrapper<Table>(tab);
+					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
+			Table editTable = editTableModel.createTable();
+			editTable.getFirstColumnWidth().setValue(200);
+			editTable.getColumnWidth().setValue(310);
+			editTable.getRowHeight().setValue(45);
+			crud.getValue().getEditTable().setValue(editTable);
+		}
 	}
 }
