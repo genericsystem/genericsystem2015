@@ -5,7 +5,6 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.GenericCrudBuilders.EngineCrudBuilder;

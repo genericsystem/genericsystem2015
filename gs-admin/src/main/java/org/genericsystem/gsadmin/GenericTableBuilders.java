@@ -41,8 +41,7 @@ public abstract class GenericTableBuilders {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return app -> new SimpleObjectProperty<Number>(900);
-			// return app -> ((GenericWindow) app).getWidth();
+			return app -> new SimpleObjectProperty<>(900);
 		}
 
 		@Override

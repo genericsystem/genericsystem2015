@@ -17,17 +17,16 @@ import org.genericsystem.ui.utils.Transformation;
 
 public abstract class TableBuilderModel<ITEM, COL, T> {
 
-	protected final ObservableList<ITEM> items;
-	protected final ObservableList<COL> columns;
-	protected final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb
-	protected Function<COL, ObservableValue<String>> firstRowExtractor = column -> new ReadOnlyStringWrapper("Column : " + column);// set to null for remove first row
-	protected Function<ITEM, ObservableValue<String>> firstColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);// set to null for remove first column
-	protected Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;// = item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column);
-	protected final ObservableValue<String> firstRowLastColumnString = new ReadOnlyStringWrapper("Action");
-	// private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Test");
-	protected Function<ITEM, ObservableValue<String>> lastColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
-	protected TableStyle tableStyle = new TableStyle();
-	protected Function<ITEM, ObservableValue<T>> secondColumnExtractor;
+	private final ObservableList<ITEM> items;
+	private final ObservableList<COL> columns;
+	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");
+	private Function<COL, ObservableValue<String>> firstRowExtractor = column -> new ReadOnlyStringWrapper("Column : " + column);
+	private Function<ITEM, ObservableValue<String>> firstColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
+	private Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;
+	private final ObservableValue<String> firstRowLastColumnString = new ReadOnlyStringWrapper("Action");
+	private Function<ITEM, ObservableValue<String>> lastColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
+	private TableStyle tableStyle = new TableStyle();
+	private Function<ITEM, ObservableValue<T>> secondColumnExtractor;
 
 	public TableBuilderModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 			Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<T>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
@@ -132,16 +131,12 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 
 	public Row buildFirstRow(ITEM item, ObservableValue<String> firstColumnString, ObservableValue<String> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> lastColumnString) {
 		return new GenericRow((Generic) item, buildFirstCell(firstColumnString, tableStyle.firstRowFirstCell), buildFistRowSecondCell(secondColumnExtractor, tableStyle.firstRowFirstCell), buildFirstRowCells(columns, columnExtractor,
-				tableStyle.firstRowCell), buildLastCell(lastColumnString, tableStyle.firstRowLastCell), getRowStyle(tableStyle));
+				tableStyle.firstRowCell), buildLastCell(lastColumnString, tableStyle.firstRowLastCell), tableStyle.firstRow);
 	}
 
 	public Row buildRow(ITEM item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString) {
 		return new GenericRow((Generic) item, buildFirstCell(firstColumnString, tableStyle.firstCell), buildSecondCell(secondColumnExtractor, tableStyle.secondCell), buildCells(columns, columnExtractor, tableStyle.cell), buildLastCell(lastColumnString,
-				tableStyle.lastCell), getRowStyle(tableStyle));
-	}
-
-	protected ObservableValue<String> getRowStyle(TableStyle tableStyle) {
-		return tableStyle.row;
+				tableStyle.lastCell), tableStyle.row);
 	}
 
 	protected ObservableValue<Cell<?>> buildFirstCell(ObservableValue<String> firstColumnString, ObservableValue<String> cellStyle) {
@@ -185,18 +180,18 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 	}
 
 	public static class TextTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, String> {
-		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
+		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<String>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
-			super(items, columns, (Function) rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
+			super(items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
 		}
 
 	}
 
 	public static class TableCellTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, Table> {
 
-		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
+		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<Table>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
-			super(items, columns, (Function) rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
+			super(items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
 		}
 
 		@Override
