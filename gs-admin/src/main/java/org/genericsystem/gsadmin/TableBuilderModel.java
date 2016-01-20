@@ -1,13 +1,11 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
-
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
@@ -135,6 +133,11 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 		return firstRowExtractor != null ? new SimpleObjectProperty<>(new TextCellFirstRowBuilder<COL>().build(null, firstColumnExtractor != null ? firstColumnString : new SimpleStringProperty(), secondColumnExtractor != null ? firstRowSecondColumnString
 				: new SimpleStringProperty(), columns, firstRowExtractor, lastColumnExtractor != null ? firstRowLastColumnString : new SimpleStringProperty(), tableStyle)) : new SimpleObjectProperty<>();
 	}
+
+	// public Row buildRow(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
+	// TableStyle tableStyle) {
+	// return new GenericRow((Generic) item, getFirstRow(firstColumnString, tableStyle), getSecondRow(secondColumnExtractor, tableStyle), getRows(columns, columnExtractor, tableStyle), getLastRow(lastColumnString, tableStyle), getStyle(tableStyle));
+	// }
 
 	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<T>> secondColumnExtractor, ObservableList<COL> columns,
 			Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor, TableStyle tableStyle) {

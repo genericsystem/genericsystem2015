@@ -1,100 +1,181 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
-
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.gsadmin.GenericCellBuilders.FirstRowFirstCellTextCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.FirstRowLastCellTextCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.FirstRowTextCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.RowFirstCellTextCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.RowLastCellButtonCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.SecondCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.TableCellBuilder;
-import org.genericsystem.gsadmin.GenericCellBuilders.TextCellBuilder;
-import org.genericsystem.ui.table.CellBuilder;
+import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.RowBuilder;
 import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.table.Table;
+import org.genericsystem.ui.utils.Transformation;
 
 public abstract class GenericRowBuilders<COL, T> extends RowBuilder<COL, T> {
 
 	@Override
 	public Row build(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
 			TableStyle tableStyle) {
-		return new GenericRow((Generic) item, getFirstElement(firstColumnString, tableStyle), getSecondElement(secondColumnExtractor, tableStyle), getElements(columns, columnExtractor, tableStyle), getLastElement(lastColumnString, tableStyle),
-				getStyle(tableStyle));
+		return new GenericRow((Generic) item, getFirstCell(firstColumnString, tableStyle), getSecondCell(secondColumnExtractor, tableStyle), getCells(columns, columnExtractor, tableStyle), getLastCell(lastColumnString, tableStyle), getRowStyle(tableStyle));
+	}
+
+	protected ObservableValue<String> getRowStyle(TableStyle tableStyle) {
+		return tableStyle.row;
+	}
+
+	protected ObservableValue<Cell<?>> getFirstCell(ObservableValue<String> firstColumnString, TableStyle tableStyle) {
+		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, getRowFirstCellStyle(tableStyle)) : null);
+	}
+
+	protected ObservableValue<Cell<?>> getSecondCell(ObservableValue<T> secondColumnString, TableStyle tableStyle) {
+		return new ReadOnlyObjectWrapper<>(secondColumnString.getValue() != null ? new Cell<>(secondColumnString, getRowSecondCellStyle(tableStyle)) : null);
+	}
+
+	abstract ObservableValue<String> getRowFirstCellStyle(TableStyle tableStyle);
+
+	abstract ObservableValue<String> getRowSecondCellStyle(TableStyle tableStyle);
+
+	abstract ObservableValue<String> getRowCellsStyle(TableStyle tableStyle);
+
+	abstract ObservableValue<String> getRowLastCellsStyle(TableStyle tableStyle);
+
+	protected ObservableList<Cell<?>> getCells(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
+		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(columnExtractor.apply(column), getRowCellsStyle(tableStyle)));
+	}
+
+	protected ObservableValue<Cell<?>> getLastCell(ObservableValue<String> lastColumnString, TableStyle tableStyle) {
+		return new ReadOnlyObjectWrapper<>(lastColumnString.getValue() != null ? new Cell<>(lastColumnString, getRowLastCellsStyle(tableStyle)) : null);
 	}
 
 	public static class TextCellRowBuilder<COL> extends GenericRowBuilders<COL, String> {
 
 		@Override
-		protected CellBuilder<String> getRowFirstCellBuilder() {
-			return new RowFirstCellTextCellBuilder();
+		ObservableValue<String> getRowFirstCellStyle(TableStyle tableStyle) {
+			return tableStyle.firstCell;
 		}
 
 		@Override
-		protected CellBuilder<String> getCellBuilder() {
-			return new TextCellBuilder();
+		ObservableValue<String> getRowSecondCellStyle(TableStyle tableStyle) {
+			return tableStyle.firstCell;
 		}
 
 		@Override
-		protected CellBuilder<String> getRowLastCellBuilder() {
-			return new RowLastCellButtonCellBuilder();
+		ObservableValue<String> getRowCellsStyle(TableStyle tableStyle) {
+			return tableStyle.cell;
 		}
 
 		@Override
-		protected CellBuilder<String> getSecondCellBuilder() {
-			// TODO Auto-generated method stub
-			return new SecondCellBuilder();
+		ObservableValue<String> getRowLastCellsStyle(TableStyle tableStyle) {
+			return tableStyle.lastCell;
 		}
+
+		// @Override
+		// protected CellBuilder<String> getRowFirstCellBuilder() {
+		// return new RowFirstCellTextCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getCellBuilder() {
+		// return new TextCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getRowLastCellBuilder() {
+		// return new RowLastCellButtonCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getSecondCellBuilder() {
+		// return new SecondCellBuilder();
+		// }
 
 	}
 
 	public static class TextCellFirstRowBuilder<COL> extends TextCellRowBuilder<COL> {
+
 		@Override
-		protected CellBuilder<String> getRowFirstCellBuilder() {
-			return new FirstRowFirstCellTextCellBuilder();
+		ObservableValue<String> getRowFirstCellStyle(TableStyle tableStyle) {
+			return tableStyle.firstRowFirstCell;
 		}
 
 		@Override
-		protected CellBuilder<String> getCellBuilder() {
-			return new FirstRowTextCellBuilder();
+		ObservableValue<String> getRowSecondCellStyle(TableStyle tableStyle) {
+			return tableStyle.firstRowFirstCell;
 		}
 
 		@Override
-		protected CellBuilder<String> getRowLastCellBuilder() {
-			return new FirstRowLastCellTextCellBuilder();
+		ObservableValue<String> getRowCellsStyle(TableStyle tableStyle) {
+			return tableStyle.firstRowCell;
 		}
 
 		@Override
-		protected CellBuilder<String> getSecondCellBuilder() {
-			return new SecondCellBuilder();
+		ObservableValue<String> getRowLastCellsStyle(TableStyle tableStyle) {
+			return tableStyle.firstRowLastCell;
 		}
+
+		// @Override
+		// protected CellBuilder<String> getRowFirstCellBuilder() {
+		// return new FirstRowFirstCellTextCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getCellBuilder() {
+		// return new FirstRowTextCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getRowLastCellBuilder() {
+		// return new FirstRowLastCellTextCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getSecondCellBuilder() {
+		// return new SecondCellBuilder();
+		// }
 	}
 
 	public static final class TableCellRowBuilder<COL> extends GenericRowBuilders<COL, Table> {
 		@Override
-		protected CellBuilder<String> getRowFirstCellBuilder() {
-			return new RowFirstCellTextCellBuilder();
+		ObservableValue<String> getRowFirstCellStyle(TableStyle tableStyle) {
+			return tableStyle.firstCell;
 		}
 
 		@Override
-		protected CellBuilder<Table> getCellBuilder() {
-			return new TableCellBuilder<>();
+		ObservableValue<String> getRowSecondCellStyle(TableStyle tableStyle) {
+			return tableStyle.firstCell;
 		}
 
 		@Override
-		protected CellBuilder<String> getRowLastCellBuilder() {
-			return new RowLastCellButtonCellBuilder();
+		ObservableValue<String> getRowCellsStyle(TableStyle tableStyle) {
+			return tableStyle.cell;
 		}
 
 		@Override
-		protected CellBuilder<Table> getSecondCellBuilder() {
-			return new TableCellBuilder<>();
+		ObservableValue<String> getRowLastCellsStyle(TableStyle tableStyle) {
+			return tableStyle.lastCell;
 		}
+
+		// @Override
+		// protected CellBuilder<String> getRowFirstCellBuilder() {
+		// return new RowFirstCellTextCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<Table> getCellBuilder() {
+		// return new TableCellBuilder<>();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<String> getRowLastCellBuilder() {
+		// return new RowLastCellButtonCellBuilder();
+		// }
+		//
+		// @Override
+		// protected CellBuilder<Table> getSecondCellBuilder() {
+		// return new TableCellBuilder<>();
+		// }
+
 	}
 }
