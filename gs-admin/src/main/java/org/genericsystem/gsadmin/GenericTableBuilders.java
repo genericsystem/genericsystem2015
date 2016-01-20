@@ -1,11 +1,9 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
-
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;

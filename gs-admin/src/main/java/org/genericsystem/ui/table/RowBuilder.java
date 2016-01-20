@@ -1,8 +1,5 @@
 package org.genericsystem.ui.table;
 
-import java.util.function.Function;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import org.genericsystem.common.Generic;
@@ -14,7 +11,6 @@ import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;
 import org.genericsystem.ui.components.GSVBox;
-import org.genericsystem.ui.table.Stylable.TableStyle;
 
 public abstract class RowBuilder<COL, T> implements Builder {
 
@@ -47,7 +43,7 @@ public abstract class RowBuilder<COL, T> implements Builder {
 		}
 	}
 
-	public abstract Row build(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
-			TableStyle tableStyle);
+	// public abstract Row build(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
+	// TableStyle tableStyle);
 
 }
