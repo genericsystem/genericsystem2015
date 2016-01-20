@@ -60,14 +60,14 @@ public class WindowBuilder implements Builder {
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
 							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
-					Table tab = textTableModel.createTable();
+					Table tab = textTableModel.buildTable();
 					return new ReadOnlyObjectWrapper<Table>(tab);
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), null,
 
 				itemTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item -> col -> new ReadOnlyStringWrapper(""
 							+ col), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
-					Table tab = textTableModel.createTable();
+					Table tab = textTableModel.buildTable();
 					tab.getFirstColumnWidth().setValue(195);
 
 					tab.getFirstRowHeight().setValue(30);
@@ -76,7 +76,7 @@ public class WindowBuilder implements Builder {
 					return new ReadOnlyObjectWrapper<Table>(tab);
 				}, column -> new ReadOnlyStringWrapper("Delete"));
 
-		Table table = tableModel.createTable();
+		Table table = tableModel.buildTable();
 		table.getFirstRowHeight().setValue(30);
 		table.getFirstColumnWidth().setValue(300);
 		table.getRowHeight().setValue(80);
