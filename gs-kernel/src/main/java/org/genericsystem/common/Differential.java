@@ -2,6 +2,9 @@ package org.genericsystem.common;
 
 import java.util.stream.Stream;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -29,6 +32,10 @@ public class Differential implements IDifferential<Generic> {
 
 	public int getCacheLevel() {
 		return subDifferential instanceof Differential ? ((Differential) subDifferential).getCacheLevel() + 1 : 0;
+	}
+
+	public IntegerProperty getCacheLevelObservable() {
+		return subDifferential instanceof Differential ? new SimpleIntegerProperty(((Differential) subDifferential).getCacheLevel() + 1) : new SimpleIntegerProperty(0);
 	}
 
 	void checkConstraints(Checker checker) throws RollbackException {

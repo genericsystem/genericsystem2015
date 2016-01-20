@@ -1,7 +1,6 @@
 package org.genericsystem.gsadmin;
 
 import javafx.beans.property.Property;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.ui.table.Crud;
 import org.genericsystem.ui.table.Table;

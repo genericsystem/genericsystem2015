@@ -3,6 +3,8 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -23,9 +25,11 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
 	protected final ObjectProperty<Differential> differentialProperty;
+	private IntegerBinding cacheLevelObservable;
 	private final ContextEventListener<Generic> listener;
 	private final long cacheId;
 
+	@Override
 	public long shiftTs() throws RollbackException {
 
 		transactionProperty.set(buildTransaction());
@@ -59,6 +63,8 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
 		differentialProperty = new SimpleObjectProperty<Differential>();
+		cacheLevelObservable = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
+
 		initialize();
 	}
 
@@ -160,16 +166,19 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		}
 	}
 
+	@Override
 	public void clear() {
 		initialize();
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
 	}
 
+	@Override
 	public void mount() {
 		differentialProperty.set(buildDifferential(getDifferential()));
 	}
 
+	@Override
 	public void unmount() {
 		IDifferential<Generic> subCache = getDifferential().getSubDifferential();
 		differentialProperty.set(subCache instanceof Differential ? (Differential) subCache : new Differential(subCache));
@@ -211,6 +220,10 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	public int getCacheLevel() {
 		return getDifferential().getCacheLevel();
+	}
+
+	public IntegerBinding getCacheLevelObservable() {
+		return cacheLevelObservable;
 	}
 
 	@Override

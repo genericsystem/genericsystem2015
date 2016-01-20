@@ -7,7 +7,7 @@ import javafx.beans.property.StringProperty;
 
 public abstract class Crud {
 	protected final Property<Table> table;
-	protected Property<Table> editTable = new SimpleObjectProperty<Table>();
+	protected Property<Table> editTable = new SimpleObjectProperty<>();
 	protected StringProperty name = new SimpleStringProperty();
 
 	public Crud(Property<Table> table) {
