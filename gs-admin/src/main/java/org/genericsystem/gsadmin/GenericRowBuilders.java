@@ -6,15 +6,15 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.gsadmin.GenericCellBuilders.FirstRowFirstCellTextCellBuilder;
+import org.genericsystem.gsadmin.GenericCellBuilders.FirstRowLastCellTextCellBuilder;
+import org.genericsystem.gsadmin.GenericCellBuilders.FirstRowTextCellBuilder;
+import org.genericsystem.gsadmin.GenericCellBuilders.RowFirstCellTextCellBuilder;
 import org.genericsystem.gsadmin.GenericCellBuilders.RowLastCellButtonCellBuilder;
+import org.genericsystem.gsadmin.GenericCellBuilders.SecondCellBuilder;
 import org.genericsystem.gsadmin.GenericCellBuilders.TableCellBuilder;
+import org.genericsystem.gsadmin.GenericCellBuilders.TextCellBuilder;
 import org.genericsystem.ui.table.CellBuilder;
-import org.genericsystem.ui.table.CellBuilder.FirstRowFirstCellTextCellBuilder;
-import org.genericsystem.ui.table.CellBuilder.FirstRowLastCellTextCellBuilder;
-import org.genericsystem.ui.table.CellBuilder.FirstRowTextCellBuilder;
-import org.genericsystem.ui.table.CellBuilder.RowFirstCellTextCellBuilder;
-import org.genericsystem.ui.table.CellBuilder.SecondCellBuilder;
-import org.genericsystem.ui.table.CellBuilder.TextCellBuilder;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.RowBuilder;
 import org.genericsystem.ui.table.Stylable.TableStyle;
@@ -72,7 +72,6 @@ public abstract class GenericRowBuilders<COL, T> extends RowBuilder<COL, T> {
 
 		@Override
 		protected CellBuilder<String> getSecondCellBuilder() {
-			// TODO Auto-generated method stub
 			return new SecondCellBuilder();
 		}
 	}

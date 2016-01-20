@@ -24,7 +24,11 @@ public abstract class RowBuilder<COL, T> implements Builder {
 		new GSHBox(rowPanel).select(GenericRow::getSecondElement).include(getSecondCellBuilder()::init).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth)
 				.setStyleClass(Cell<Generic>::getStyleClass);
 
-		new GSHBox(rowPanel).forEach(GenericRow::getElements).include(getCellBuilder()::init).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
+		GSHBox elements = new GSHBox(rowPanel).forEach(GenericRow::getElements).include(getCellBuilder()::init).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth)
+				.setStyleClass(Cell<Generic>::getStyleClass);
+		{
+
+		}
 		new GSHBox(rowPanel).select(GenericRow::getLastElement).include(getRowLastCellBuilder()::init).setMinWidth(Table::getLastColumnWidth).setPrefWidth(Table::getLastColumnWidth).setMaxWidth(Table::getLastColumnWidth)
 				.setStyleClass(Cell<Generic>::getStyleClass);
 	}
@@ -54,6 +58,14 @@ public abstract class RowBuilder<COL, T> implements Builder {
 		if (secondColumnString.getValue() == null)
 			return new ReadOnlyObjectWrapper<>();
 		return new ReadOnlyObjectWrapper<>(getSecondCellBuilder().build(secondColumnString, tableStyle));
+	}
+
+	// public Cell<T> buildCell(ObservableValue<T> observableModel, TableStyle tableStyle) {
+	// return observableModel != null ? new Cell<T>(observableModel, getCellStyle(tableStyle)) : null;
+	// }
+
+	public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
+		return tableStyle.cell;
 	}
 
 	protected abstract CellBuilder<String> getRowFirstCellBuilder();

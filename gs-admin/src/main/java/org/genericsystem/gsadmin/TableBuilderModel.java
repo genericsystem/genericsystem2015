@@ -11,12 +11,9 @@ import javafx.collections.ObservableList;
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
-import org.genericsystem.gsadmin.GenericTableBuilders.TableCellTableBuilder;
-import org.genericsystem.gsadmin.GenericTableBuilders.TextCellTableBuilder;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.table.Table;
-import org.genericsystem.ui.table.TableBuilder;
 import org.genericsystem.ui.utils.Transformation;
 
 public abstract class TableBuilderModel<ITEM, COL, T> {
@@ -147,17 +144,10 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 
 	protected abstract Row buildRow(ITEM item);
 
-	abstract TableBuilder<ITEM, COL, T> getTableBuilder();
-
 	public static class TextTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, String> {
 		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 			super(items, columns, (Function) rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
-		}
-
-		@Override
-		TableBuilder<ITEM, COL, String> getTableBuilder() {
-			return (TableBuilder<ITEM, COL, String>) new TextCellTableBuilder();
 		}
 
 		@Override
@@ -175,11 +165,6 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<Table>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 
 			super(items, columns, (Function) rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
-		}
-
-		@Override
-		TableBuilder<ITEM, COL, Table> getTableBuilder() {
-			return (TableBuilder<ITEM, COL, Table>) new TableCellTableBuilder();
 		}
 
 		@Override
