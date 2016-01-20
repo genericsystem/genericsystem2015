@@ -14,7 +14,6 @@ import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
 import org.genericsystem.gsadmin.GenericTableBuilders.TableCellTableBuilder;
 import org.genericsystem.gsadmin.GenericTableBuilders.TextCellTableBuilder;
 import org.genericsystem.ui.table.Row;
-import org.genericsystem.ui.table.RowBuilder;
 import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.TableBuilder;
@@ -22,17 +21,17 @@ import org.genericsystem.ui.utils.Transformation;
 
 public abstract class TableBuilderModel<ITEM, COL, T> {
 
-	private final ObservableList<ITEM> items;
-	private final ObservableList<COL> columns;
-	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb
-	private Function<COL, ObservableValue<String>> firstRowExtractor = column -> new ReadOnlyStringWrapper("Column : " + column);// set to null for remove first row
-	private Function<ITEM, ObservableValue<String>> firstColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);// set to null for remove first column
-	private Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;// = item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column);
-	private final ObservableValue<String> firstRowLastColumnString = new ReadOnlyStringWrapper("Action");
+	protected final ObservableList<ITEM> items;
+	protected final ObservableList<COL> columns;
+	protected final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");// TODO set to null do work and disable on firstRowExtractor for solve final pb
+	protected Function<COL, ObservableValue<String>> firstRowExtractor = column -> new ReadOnlyStringWrapper("Column : " + column);// set to null for remove first row
+	protected Function<ITEM, ObservableValue<String>> firstColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);// set to null for remove first column
+	protected Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;// = item -> column -> new ReadOnlyStringWrapper("Cell : " + item + " " + column);
+	protected final ObservableValue<String> firstRowLastColumnString = new ReadOnlyStringWrapper("Action");
 	// private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Test");
-	private Function<ITEM, ObservableValue<String>> lastColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
-	private TableStyle tableStyle = new TableStyle();
-	Function<ITEM, ObservableValue<T>> secondColumnExtractor;
+	protected Function<ITEM, ObservableValue<String>> lastColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
+	protected TableStyle tableStyle = new TableStyle();
+	protected Function<ITEM, ObservableValue<T>> secondColumnExtractor;
 
 	public TableBuilderModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 			Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<T>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
@@ -143,42 +142,10 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 	protected ObservableList<Row> getElements(ObservableList<ITEM> items, Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<T>> secondColumnExtractor, ObservableList<COL> columns,
 			Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor, TableStyle tableStyle) {
 
-		return new Transformation<Row, ITEM>(items, item -> getRowBuilder().build(item, firstColumnExtractor == null ? new SimpleStringProperty() : firstColumnExtractor.apply(item),
-				secondColumnExtractor != null ? secondColumnExtractor.apply(item) : new SimpleObjectProperty<T>(), columns, rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null,
-				lastColumnExtractor == null ? new SimpleStringProperty() : lastColumnExtractor.apply(item), tableStyle));
+		return new Transformation<Row, ITEM>(items, item -> buildRow(item));
 	}
 
-	// public Row buildRow(Object item, ObservableValue<String> firstColumnString, ObservableValue<T> secondColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString,
-	// TableStyle tableStyle) {
-	// return new GenericRow((Generic) item, getFirstElement(firstColumnString, tableStyle), getSecondElement(secondColumnExtractor, tableStyle), getElements(columns, columnExtractor, tableStyle), getLastElement(lastColumnString, tableStyle),
-	// getStyle(tableStyle));
-	// }
-
-	// protected ObservableValue<Cell<?>> getFirstElement(ObservableValue<String> firstColumnString, TableStyle tableStyle) {
-	// if (firstColumnString.getValue() == null)
-	// return new ReadOnlyObjectWrapper<>();
-	// return new ReadOnlyObjectWrapper<>(getRowFirstCellBuilder().build(firstColumnString, tableStyle));
-	// }
-	//
-	// protected ObservableList<Cell<?>> getElements(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, TableStyle tableStyle) {
-	// if (columnExtractor == null)
-	// return FXCollections.emptyObservableList();
-	// return new Transformation<>(columns, column -> getCellBuilder().build(columnExtractor.apply(column), tableStyle));
-	// }
-	//
-	// protected ObservableValue<Cell<?>> getLastElement(ObservableValue<String> lastColumnString, TableStyle tableStyle) {
-	// if (lastColumnString.getValue() == null)
-	// return new ReadOnlyObjectWrapper<>();
-	// return new ReadOnlyObjectWrapper<>(getRowLastCellBuilder().build(lastColumnString, tableStyle));
-	// }
-	//
-	// protected ObservableValue<Cell<?>> getSecondElement(ObservableValue<T> secondColumnString, TableStyle tableStyle) {
-	// if (secondColumnString.getValue() == null)
-	// return new ReadOnlyObjectWrapper<>();
-	// return new ReadOnlyObjectWrapper<>(getSecondCellBuilder().build(secondColumnString, tableStyle));
-	// }
-
-	public abstract RowBuilder<COL, T> getRowBuilder();
+	protected abstract Row buildRow(ITEM item);
 
 	abstract TableBuilder<ITEM, COL, T> getTableBuilder();
 
@@ -194,9 +161,12 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 		}
 
 		@Override
-		public RowBuilder<COL, String> getRowBuilder() {
-			return new TextCellRowBuilder<COL>();
+		protected Row buildRow(ITEM item) {
+			return new TextCellRowBuilder<COL>()
+					.build(item, firstColumnExtractor == null ? new SimpleStringProperty() : firstColumnExtractor.apply(item), secondColumnExtractor != null ? secondColumnExtractor.apply(item) : new SimpleObjectProperty<String>(), columns,
+							rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null, lastColumnExtractor == null ? new SimpleStringProperty() : lastColumnExtractor.apply(item), tableStyle);
 		}
+
 	}
 
 	public static class TableCellTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, Table> {
@@ -223,8 +193,9 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 		}
 
 		@Override
-		public RowBuilder<COL, Table> getRowBuilder() {
-			return new TableCellRowBuilder<COL>();
+		protected Row buildRow(ITEM item) {
+			return new TableCellRowBuilder<COL>().build(item, firstColumnExtractor == null ? new SimpleStringProperty() : firstColumnExtractor.apply(item), secondColumnExtractor != null ? secondColumnExtractor.apply(item)
+					: new SimpleObjectProperty<Table>(), columns, rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null, lastColumnExtractor == null ? new SimpleStringProperty() : lastColumnExtractor.apply(item), tableStyle);
 		}
 	}
 }
