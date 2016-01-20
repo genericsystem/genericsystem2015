@@ -1,9 +1,7 @@
 package org.genericsystem.ui.table;
 
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
@@ -17,10 +15,9 @@ public abstract class TableBuilder<ITEM, COL, T> implements Builder {
 		GSSCrollPane scrollPane = new GSSCrollPane(parent).setStyleClass("scrollable");
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());
-			;
 			{
 				new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
-						.setPrefHeight(Table::getFirstRowHeight);
+				.setPrefHeight(Table::getFirstRowHeight);
 				createSelectionHBox(tablePanel).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
 			}
 		}

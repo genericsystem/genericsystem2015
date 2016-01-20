@@ -32,7 +32,7 @@ public class GenericCellBuilders {
 
 	public static class RowLastCellButtonCellBuilder extends ButtonCellBuilder {
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.lastCell;
 		}
 	}
@@ -47,7 +47,7 @@ public class GenericCellBuilders {
 	public static class SecondCellBuilder extends TextCellBuilder {
 
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowFirstCell;
 		}
 	}
@@ -55,7 +55,7 @@ public class GenericCellBuilders {
 	public static class FirstRowTextCellBuilder extends TextCellBuilder {
 
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowCell;
 		}
 	}
@@ -63,7 +63,7 @@ public class GenericCellBuilders {
 	public static class RowFirstCellTextCellBuilder extends TextCellBuilder {
 
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstCell;
 		}
 	}
@@ -71,7 +71,7 @@ public class GenericCellBuilders {
 	public static class FirstRowFirstCellTextCellBuilder extends TextCellBuilder {
 
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowFirstCell;
 		}
 	}
@@ -79,7 +79,7 @@ public class GenericCellBuilders {
 	public static class FirstRowLastCellTextCellBuilder extends TextCellBuilder {
 
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.firstRowLastCell;
 		}
 	}
@@ -87,7 +87,7 @@ public class GenericCellBuilders {
 	public static class RowLastCellTextCellBuilder extends TextCellBuilder {
 
 		@Override
-		public ObservableValue<String> getStyle(TableStyle tableStyle) {
+		public ObservableValue<String> getCellStyle(TableStyle tableStyle) {
 			return tableStyle.lastCell;
 		}
 	}
