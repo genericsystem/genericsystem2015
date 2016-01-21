@@ -1,11 +1,9 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
-
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
-
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellFirstRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
@@ -29,9 +27,6 @@ public abstract class GSTable extends GSVBox {
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());
 			{
-				// new GSHBox(tablePanel).select(Table::getFirstElement).include(new TextCellFirstRowBuilder<>()::init).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight)
-				// .setPrefHeight(Table::getFirstRowHeight);
-				// GSHBox hb = new GSHBox(tablePanel);
 				new GSTextCellFirstRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight).setPrefHeight(Table::getFirstRowHeight);
 				createSelectionHBox(tablePanel).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
 			}
@@ -63,7 +58,6 @@ public abstract class GSTable extends GSVBox {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSTextCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
-			// return (GSHBox) new GSHBox(parent).include(new TextCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
 
 	}
@@ -87,7 +81,6 @@ public abstract class GSTable extends GSVBox {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSTableCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
-			// return (GSHBox) new GSHBox(parent).include(new TableCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
 		}
 	}
 
@@ -100,7 +93,6 @@ public abstract class GSTable extends GSVBox {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSTableCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
-			// return (GSHBox) new GSHBox(parent).include(new TableCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
 	}
 
@@ -113,7 +105,6 @@ public abstract class GSTable extends GSVBox {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSTableCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericCrud::test);
-			// return (GSHBox) new GSHBox(parent).include(new TableCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
 	}
 

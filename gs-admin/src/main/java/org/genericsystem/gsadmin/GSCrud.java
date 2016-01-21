@@ -15,11 +15,6 @@ public class GSCrud extends GSVBox {
 		super(parent);
 	}
 
-	protected void initGSGenericTable(GSVBox vb) {
-		// new TableCellTableBuilder2().init(vb);
-		new GSTableCellTable2(vb).select(GenericCrud::getTable);
-	}
-
 	@Override
 	protected void initChildren() {
 		GSHBox Hb = new GSHBox(this);
@@ -39,6 +34,10 @@ public class GSCrud extends GSVBox {
 		}
 	}
 
+	protected void initGSGenericTable(GSVBox vb) {
+		new GSTableCellTable2(vb).select(GenericCrud::getTable);
+	}
+
 	public static class GSEngineCrud extends GSCrud {
 
 		public GSEngineCrud(Element<?> parent) {
@@ -47,10 +46,7 @@ public class GSCrud extends GSVBox {
 
 		@Override
 		protected void initGSGenericTable(GSVBox vb) {
-			// new TableCellTableBuilder().init(vb);
 			new GSTableCellTable(vb).select(GenericCrud::getTable);
 		}
-
 	}
-
 }
