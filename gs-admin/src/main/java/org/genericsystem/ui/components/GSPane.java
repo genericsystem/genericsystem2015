@@ -1,6 +1,5 @@
 package org.genericsystem.ui.components;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
@@ -26,10 +25,10 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 		return (Component) this;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Component include(Consumer<Element<N>> subModelInit) {
-		subModelInit.accept(this);
-		return (Component) this;
-	}
+	// @SuppressWarnings("unchecked")
+	// public Component include(Consumer<Element<N>> subModelInit) {
+	// subModelInit.accept(this);
+	// return (Component) this;
+	// }
 
 }

@@ -9,7 +9,6 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;
-import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
@@ -30,8 +29,8 @@ public class GSRow extends GSHBox {
 		GSHBox secondCell = new GSHBox(this).select(Row::getSecondElement).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
 			if (this instanceof GSTableCellRow) {
-				GSVBox vb = new GSVBox(secondCell);
-				new GSTextCellTable(vb).select(Cell<Table>::getObservableModel);// .include(new TextCellTableBuilder()::init);
+				// GSVBox vb = new GSVBox(secondCell);
+				new GSTextCellTable(secondCell).select(Cell<Table>::getObservableModel);// .include(new TextCellTableBuilder()::init);
 			} else
 				new GSLabel(secondCell, Cell<String>::getObservableModel);
 		}
@@ -39,8 +38,8 @@ public class GSRow extends GSHBox {
 		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
 			if (this instanceof GSTableCellRow) {
-				GSVBox vb = new GSVBox(cells);
-				new GSTextCellTable(vb).select(Cell<Table>::getObservableModel);
+				// GSVBox vb = new GSVBox(cells);
+				new GSTextCellTable(cells).select(Cell<Table>::getObservableModel);
 				// new GSVBox(cells).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder()::init);
 			} else
 				new GSLabel(cells, Cell<String>::getObservableModel);
@@ -55,21 +54,18 @@ public class GSRow extends GSHBox {
 	public static class GSTextCellRow extends GSRow {
 		public GSTextCellRow(Element<?> parent) {
 			super(parent);
-			System.out.println("GSTextCellRow");
 		}
 	}
 
 	public static class GSTextCellFirstRow extends GSTextCellRow {
 		public GSTextCellFirstRow(Element<?> parent) {
 			super(parent);
-			System.out.println("GSTextCellFirstRow");
 		}
 	}
 
 	public static final class GSTableCellRow extends GSRow {
 		public GSTableCellRow(Element<?> parent) {
 			super(parent);
-			System.out.println("GSTableCellRow");
 		}
 	}
 }
