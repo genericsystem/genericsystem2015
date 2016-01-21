@@ -27,12 +27,12 @@ public abstract class GSRow extends GSHBox {
 
 		GSHBox secondCell = new GSHBox(this).select(Row::getSecondElement).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			createGSRow(secondCell);
+			createGSCell(secondCell);
 		}
 
 		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			createGSRow(cells);
+			createGSCell(cells);
 		}
 
 		GSHBox lastCell = new GSHBox(this).select(Row::getLastElement).setMinWidth(Table::getLastColumnWidth).setPrefWidth(Table::getLastColumnWidth).setMaxWidth(Table::getLastColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
@@ -41,7 +41,7 @@ public abstract class GSRow extends GSHBox {
 		}
 	}
 
-	protected abstract Element<?> createGSRow(Element<?> parent);
+	protected abstract Element<?> createGSCell(Element<?> parent);
 
 	public static class GSTextCellRow extends GSRow {
 		public GSTextCellRow(Element<?> parent) {
@@ -49,7 +49,7 @@ public abstract class GSRow extends GSHBox {
 		}
 
 		@Override
-		protected Element<?> createGSRow(Element<?> parent) {
+		protected Element<?> createGSCell(Element<?> parent) {
 			return new GSLabel(parent, Cell<String>::getObservableModel);
 		}
 	}
@@ -60,7 +60,7 @@ public abstract class GSRow extends GSHBox {
 		}
 
 		@Override
-		protected Element<?> createGSRow(Element<?> parent) {
+		protected Element<?> createGSCell(Element<?> parent) {
 			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
 		}
 	}
