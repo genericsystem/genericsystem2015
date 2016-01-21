@@ -62,11 +62,10 @@ public interface MetaBinder<N, W> {
 						return children.size();
 					}
 
-					@SuppressWarnings("unchecked")
 					@Override
 					public void add(int index, W model) {
-						ModelContext childContext = new ModelContext(modelContext, childElement, model);
-						new ViewContext(viewContext, childContext, childElement, model);
+						ModelContext childContext = new ModelContext(modelContext, model);
+						new ViewContext<>(viewContext, childContext, childElement, null);
 						children.add(index, childContext);
 					}
 
@@ -112,8 +111,8 @@ public interface MetaBinder<N, W> {
 				List<ModelContext> children = modelContext.getChildren(childElement);
 				Consumer<W> consumer = (newModel) -> {
 					if (newModel != null) {
-						ModelContext childContext = new ModelContext(modelContext, childElement, newModel);
-						new ViewContext(viewContext, childContext, childElement, newModel);
+						ModelContext childContext = new ModelContext(modelContext, newModel);
+						new ViewContext<>(viewContext, childContext, childElement, null);
 						children.add(childContext);
 						assert children.size() == 1;
 					}
@@ -126,8 +125,7 @@ public interface MetaBinder<N, W> {
 						for (ViewContext<?> internalViewContext : removed.getViewContexts())
 							internalViewContext.destroyChild();
 					}
-					if (newModel != null) 
-						consumer.accept(newModel);
+					consumer.accept(newModel);
 				});
 				consumer.accept(wrapper.getValue());
 			}

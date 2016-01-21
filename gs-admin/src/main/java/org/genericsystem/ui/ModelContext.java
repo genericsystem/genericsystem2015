@@ -19,16 +19,10 @@ public class ModelContext {
 		}
 	};
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
-	private final Element<?> element;
 
-	public ModelContext(ModelContext parent, Element<?> element, Object model) {
+	public ModelContext(ModelContext parent, Object model) {
 		this.parent = parent;
 		this.model = model;
-		this.element = element;
-	}
-
-	public Element<?> getElement() {
-		return element;
 	}
 
 	@Override

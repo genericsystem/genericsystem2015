@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
+
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
@@ -78,12 +80,12 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addSuperBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
+	public <M, T> Element<N> addMetaBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
 		bindings.add(Binding.bindMetaProperty(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	public <M, T> Element<N> setObservableList(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
+	public <M, T> Element<N> setObservableListBinding(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
 		bindings.add(Binding.bindObservableList(applyOnModel, applyOnNode));
 		return this;
 	}
@@ -93,7 +95,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <SUPERMODEL, M, T> Element<N> addBindMetaAction(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
+	public <SUPERMODEL, M, T> Element<N> addMetaActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
 		bindings.add(Binding.bindMetaAction(biConsumer, propAction));
 		return this;
 	}
@@ -103,7 +105,7 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M> Element<N> addObservableListBinding(Function<N, ObservableList<String>> applyOnNode, Function<M, ObservableValue<String>> applyOnModel) {
+	public <M> Element<N> addObservableListToObservableValueBinding(Function<N, ObservableList<String>> applyOnNode, Function<M, ObservableValue<String>> applyOnModel) {
 		bindings.add(Binding.bindObservableListToObservableValue(applyOnModel, applyOnNode));
 		return this;
 	}
@@ -155,8 +157,8 @@ public class Element<N> {
 	}
 
 	@Deprecated
-	public N apply(Object model, Object parentNode) {
-		return new ViewContext<>(null, new ModelContext(null, this, model), this, (N) parentNode).getNode();
+	public N apply(Object model, N parentNode) {
+		return new ViewContext<>(null, new ModelContext(null, model), this, parentNode).getNode();
 	}
 
 	protected N createNode(Object parent) {

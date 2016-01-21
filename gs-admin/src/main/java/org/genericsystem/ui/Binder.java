@@ -19,9 +19,10 @@ public interface Binder<N, X, Y> {
 				s += modelContext_.getModel() + "/";
 				try {
 					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {}
+				} catch (ClassCastException ignore) {
+				}
 				modelContext_ = modelContext_.getParent();
-		
+
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
 		};
@@ -35,7 +36,8 @@ public interface Binder<N, X, Y> {
 		init(nodeResult, applyOnModel.get());
 	}
 
-	default void init(Y nodeResult, X modelResult) {}
+	default void init(Y nodeResult, X modelResult) {
+	}
 
 	public static <N, W, W2> Binder<N, Property<W>, W2> injectBinder() {
 		return new Binder<N, Property<W>, W2>() {
@@ -46,7 +48,7 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N, W,Y> Binder<N, ObservableValue<W>, Property<W>> propertyBinder() {
+	public static <N, W, Y> Binder<N, ObservableValue<W>, Property<W>> propertyBinder() {
 		return new Binder<N, ObservableValue<W>, Property<W>>() {
 			@Override
 			public void init(Property<W> nodeResult, ObservableValue<W> modelResult) {
@@ -67,7 +69,8 @@ public interface Binder<N, X, Y> {
 					try {
 						property.bind(applyOnModel.get().apply(modelContext_.getModel()));
 						return;
-					} catch (ClassCastException ignore) {}
+					} catch (ClassCastException ignore) {
+					}
 					modelContext_ = modelContext_.getParent();
 				}
 				throw new IllegalStateException("Unable to resolve a method reference  on stack : " + s);
@@ -83,22 +86,23 @@ public interface Binder<N, X, Y> {
 				nodeResult.setValue((W) (EventHandler) event -> applyOnModel.get());
 			}
 		};
-		
+
 	}
-	
+
 	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>, Property<W>> metaActionBinder() {
 		return new Binder<N, Function<SUPERMODEL, W>, Property<W>>() {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext) {			
+			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext) {
 				nodeResult.setValue((W) (EventHandler) event -> {
 					ModelContext modelContext_ = modelContext;
 					String s = "/";
 					while (modelContext_ != null) {
 						s += modelContext_.getModel() + "/";
 						try {
-							applyOnModel.get().apply( modelContext_.getModel());
-						} catch (ClassCastException ignore) {}
+							applyOnModel.get().apply(modelContext_.getModel());
+						} catch (ClassCastException ignore) {
+						}
 						modelContext_ = modelContext_.getParent();
 					}
 				});
@@ -110,34 +114,12 @@ public interface Binder<N, X, Y> {
 		return new Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>>() {
 			@Override
 			public void init(Function<N, Property<Consumer<W>>> applyOnNode, Function<?, Function<W, SUPERMODEL>> method, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue(w -> applyOnModel(method,modelContext.getModel()).get().apply(w));
-				//applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
-				//applyOnNode.apply(node).setValue(w -> method.apply(null));
+				applyOnNode.apply(node).setValue(w -> applyOnModel(method, modelContext.getModel()).get().apply(w));
+				// applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
+				// applyOnNode.apply(node).setValue(w -> method.apply(null));
 			}
 		};
 	}
-
-//	public static <N, S, W> Binder<N, Function<S, W>, Property<W>> genericMouseActionBinder() {
-//		return new Binder<N, Function<S, W>, Property<W>>() {
-//			@SuppressWarnings({ "unchecked", "rawtypes" })
-//			@Override
-//			public void init(Property<W> nodeResult, Supplier<Function<S, W>> applyOnModel, ModelContext modelContext) {
-//				nodeResult.setValue((W) (EventHandler) event -> {
-//					ModelContext modelContext_ = modelContext;
-//					String s = "/";
-//					while (modelContext_ != null) {
-//						s += modelContext_.getModel() + "/";
-//						try {
-//							applyOnModel.get().apply(modelContext_ != null ? modelContext_.getModel() : null);
-//						} catch (ClassCastException ignore) {}
-//						modelContext_ = modelContext_.getParent();
-//					}
-//				});
-//			
-//			}
-//		};
-//
-//	}
 
 	public static <N, W> Binder<N, Property<W>, ObservableValue<W>> propertyReverseBinder() {
 		return new Binder<N, Property<W>, ObservableValue<W>>() {
@@ -173,12 +155,12 @@ public interface Binder<N, X, Y> {
 				nodeResult.add(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> {
 					nodeResult.remove(ov);
-					nodeResult.remove(nv);
+					nodeResult.add(nv);
 				});
-			}		
+			}
 		};
-	}	
-	
+	}
+
 	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableList<W>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
 		return new Binder<N, ObservableValue<Boolean>, ObservableList<W>>() {
 			@Override
@@ -189,7 +171,7 @@ public interface Binder<N, X, Y> {
 					else
 						nodeResult.remove(styleClass);
 				};
-				
+
 				consumer.accept(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
 			}

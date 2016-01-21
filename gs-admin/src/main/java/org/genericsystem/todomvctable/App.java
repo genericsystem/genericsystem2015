@@ -21,7 +21,7 @@ public class App extends Application {
 		stage.setTitle("Generic System Reactive Example");
 		Element<Group> elt = new Element<>(Group.class);
 		TodoTableList.init(elt);
-		elt.apply(new TodoTableList(), scene.getRoot());
+		elt.apply(new TodoTableList(), (Group) scene.getRoot());
 		stage.setScene(scene);
 		stage.show();
 	}
