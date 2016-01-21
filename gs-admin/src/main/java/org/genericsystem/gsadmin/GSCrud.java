@@ -1,8 +1,8 @@
 package org.genericsystem.gsadmin;
 
+import org.genericsystem.gsadmin.GSTable.GSEditTableCellTable;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTable;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTable2;
-import org.genericsystem.gsadmin.GenericTableBuilders.EditTableCellTableBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -35,10 +35,7 @@ public class GSCrud extends GSVBox {
 				initGSGenericTable(vb);
 			}
 
-			GSVBox editTable = new GSVBox(Hb).select(GenericCrud::getEditTable);
-			{
-				new EditTableCellTableBuilder().init(editTable);
-			}
+			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable);
 		}
 	}
 
