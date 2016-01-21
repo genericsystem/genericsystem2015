@@ -1,9 +1,8 @@
 package org.genericsystem.gsadmin;
 
 import javafx.scene.Group;
+
 import org.genericsystem.gsadmin.GSCrud.GSEngineCrud;
-import org.genericsystem.gsadmin.GenericCrudBuilders.EngineCrudBuilder;
-import org.genericsystem.gsadmin.GenericCrudBuilders.GenericCrudBuilder;
 import org.genericsystem.ui.components.GSApplication;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -25,16 +24,9 @@ public class GSAdmin extends GSApplication {
 			{
 				GSVBox leftTables = new GSVBox(scrollPane).setMinHeight(500);
 				{
-
 					GSVBox select = new GSEngineCrud(leftTables).select(GenericWindow::getTableCrud);
-					{
-						new EngineCrudBuilder().init(select);
-					}
 
 					GSVBox select2 = new GSCrud(leftTables).select(GenericWindow::getTableCrudSelectedRow);
-					{
-						new GenericCrudBuilder().init(select2);
-					}
 
 					GSHBox commandPanel = new GSHBox(leftTables).setSpacing(5);
 					{

@@ -19,6 +19,7 @@ public class Utils {
 
 			@Override
 			public Node get(int index) {
+				assert size() == 1 && index == 0;
 				return scrollPane.getContent();
 			}
 
@@ -43,6 +44,8 @@ public class Utils {
 
 			@Override
 			protected Node doRemove(int index) {
+				if (size() == 0)
+					throw new IllegalStateException();
 				Node result = scrollPane.getContent();
 				scrollPane.setContent(null);
 				return result;

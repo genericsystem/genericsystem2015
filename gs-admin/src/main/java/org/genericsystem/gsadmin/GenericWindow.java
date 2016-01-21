@@ -8,6 +8,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
@@ -63,6 +64,7 @@ public class GenericWindow extends Window {
 	}
 
 	public void selectRowEngineTable(GenericRow row) {
+		System.out.println("zzz" + row);
 		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
 				itemTableCell -> columnTableCell -> {
@@ -91,6 +93,7 @@ public class GenericWindow extends Window {
 	}
 
 	public void selectRowGenericTable(GenericRow row) {
+		assert row != null;
 		createEditTable(tableCrudSelectedRow, row);
 	}
 

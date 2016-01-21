@@ -1,8 +1,11 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
+
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
+
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
@@ -12,6 +15,7 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
+import org.genericsystem.ui.table.Window;
 
 public abstract class GSTable extends GSVBox {
 
@@ -69,12 +73,12 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return table -> ((Table) table).getColumnWidth();
+			return app -> new SimpleObjectProperty<>(900);
 		}
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return table -> ((Table) table).getRowHeight();
+			return app -> ((Window) app).getHeight();
 		}
 
 		@Override
@@ -89,15 +93,15 @@ public abstract class GSTable extends GSVBox {
 			super(parent);
 		}
 
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return table -> ((Table) table).getColumnWidth();
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return table -> ((Table) table).getRowHeight();
-		}
+		// @Override
+		// protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+		// return table -> ((Table) table).getColumnWidth();
+		// }
+		//
+		// @Override
+		// protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+		// return table -> ((Table) table).getRowHeight();
+		// }
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
