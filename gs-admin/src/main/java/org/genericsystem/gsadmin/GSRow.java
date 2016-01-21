@@ -2,6 +2,7 @@ package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
 import org.genericsystem.ui.Element;
@@ -20,14 +21,10 @@ public abstract class GSRow extends GSHBox {
 
 	@Override
 	protected void initChildren() {
-		GSHBox firstCell = new GSHBox(this).select(GenericRow::getFirstElement).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
-		{
-			new GSLabel(firstCell, Cell<String>::getObservableModel);
-		}
 
-		GSHBox secondCell = new GSHBox(this).select(Row::getSecondElement).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
+		GSHBox firstCell = new GSHBox(this).select(Row::getFirstElement).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			createGSCell(secondCell);
+			createGSCell(firstCell);
 		}
 
 		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);

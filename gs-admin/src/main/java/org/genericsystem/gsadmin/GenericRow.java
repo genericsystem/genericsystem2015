@@ -13,8 +13,8 @@ public class GenericRow extends Row {
 	private StringProperty name = new SimpleStringProperty("");
 	private Generic item;
 
-	public GenericRow(Generic item, ObservableValue<Cell<?>> firstCell, ObservableValue<Cell<?>> secondCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
-		super(firstCell, secondCell, cells, lastCell, styleClass);
+	public GenericRow(Generic item, ObservableValue<Cell<?>> secondCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
+		super(secondCell, cells, lastCell, styleClass);
 		this.item = item;
 	}
 

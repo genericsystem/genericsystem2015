@@ -68,14 +68,14 @@ public class GenericWindow extends Window {
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
-							+ firstColumnString), null, null);
+							+ firstColumnString), null);
 					Table tab = textTableModel.buildTable();
 					tab.getColumnWidth().setValue(300);
 					tab.getRowHeight().setValue(30);
 					return new ReadOnlyObjectWrapper<>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), null, item -> {
+				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column), null,
-							firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
+							firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 					Table tab = textTableModel.buildTable();
 					tab.getColumnWidth().setValue(100);
 					tab.getRowHeight().setValue(50);
@@ -101,12 +101,21 @@ public class GenericWindow extends Window {
 			Generic generic = crud.getValue().getModel();
 			TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), FXCollections.observableArrayList(row.getItem()),
 					itemTableCell -> columnTableCell -> {
-						System.out.println(itemTableCell.getObservableHolders(columnTableCell).size());
 						TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(row.getItem().getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null, null, firstColumString -> new ReadOnlyStringWrapper(""
-								+ firstColumString), null, null);
+								+ firstColumString), null);
 						Table tab = textTableModel.buildTable();
 						return new ReadOnlyObjectWrapper<>(tab);
-					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null, null);
+					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
+						TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
+								firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+						Table tab = textTableModel.buildTable();
+						tab.getFirstColumnWidth().setValue(100);
+
+						tab.getFirstRowHeight().setValue(30);
+						tab.getRowHeight().setValue(40);
+
+						return new ReadOnlyObjectWrapper<>(tab);
+					}, null);
 			Table editTable = editTableModel.buildTable();
 			editTable.getFirstColumnWidth().setValue(200);
 			editTable.getColumnWidth().setValue(310);
@@ -119,16 +128,14 @@ public class GenericWindow extends Window {
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine)),
 				itemTableCell -> columnTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
-							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
 					Table tab = textTableModel.buildTable();
 					return new ReadOnlyObjectWrapper<>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), null,
-
-				itemTableCell -> {
+				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
 					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item -> col -> new ReadOnlyStringWrapper(""
-							+ col), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null, null);
+							+ col), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
 					Table tab = textTableModel.buildTable();
-					tab.getFirstColumnWidth().setValue(195);
+					tab.getFirstColumnWidth().setValue(150);
 
 					tab.getFirstRowHeight().setValue(30);
 					tab.getRowHeight().setValue(75);

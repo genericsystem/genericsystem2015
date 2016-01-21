@@ -35,20 +35,14 @@ public class Stylable {
 	public static class Listable<Element> extends Stylable {
 
 		private final ObservableValue<Element> firstElement;
-		private final ObservableValue<Element> secondElement;
 		private final ObservableList<Element> elements;
 		private final ObservableValue<Element> lastElement;
 
-		public Listable(ObservableValue<Element> firstElement, ObservableValue<Element> secondElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
+		public Listable(ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
 			super(styleClass);
 			this.firstElement = firstElement;
-			this.secondElement = secondElement;
 			this.elements = elements;
 			this.lastElement = lastElement;
-		}
-
-		public ObservableValue<Element> getSecondElement() {
-			return secondElement;
 		}
 
 		public ObservableValue<Element> getFirstElement() {
