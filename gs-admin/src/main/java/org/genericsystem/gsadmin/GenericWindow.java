@@ -11,8 +11,8 @@ import javafx.collections.FXCollections;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
-import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
+import org.genericsystem.gsadmin.TableBuilder.TableCellTableModel;
+import org.genericsystem.gsadmin.TableBuilder.TextTableModel;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Window;
 
@@ -64,7 +64,6 @@ public class GenericWindow extends Window {
 	}
 
 	public void selectRowEngineTable(GenericRow row) {
-		System.out.println("zzz" + row);
 		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
 		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
 				itemTableCell -> columnTableCell -> {

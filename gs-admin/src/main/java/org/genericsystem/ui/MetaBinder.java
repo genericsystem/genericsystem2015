@@ -122,15 +122,12 @@ public interface MetaBinder<N, W> {
 					if (oldModel == newModel)
 						return;
 					if (oldModel != null) {
-						System.out.println("remove" + oldModel);
 						ModelContext removed = children.remove(0);
 						for (ViewContext<?> internalViewContext : removed.getViewContexts())
 							internalViewContext.destroyChild();
 					}
-					if (newModel != null) {
-						System.out.println("add" + newModel);
+					if (newModel != null) 
 						consumer.accept(newModel);
-					}
 				});
 				consumer.accept(wrapper.getValue());
 			}

@@ -32,7 +32,6 @@ public class Binding<N, X, Y> {
 	@SuppressWarnings("unchecked")
 	private static <N, M, X, Y> Binding<N, X, Y> bind(Function<N, Y> applyOnNode, Consumer<M> applyOnModel, Binder<N, X, Y> binder) {
 		return new Binding<>(applyOnNode, (u) -> {
-			System.out.println("ZZZZZZZZZ : "+u);
 			applyOnModel.accept((M) u);
 			return null;
 		}, binder);
