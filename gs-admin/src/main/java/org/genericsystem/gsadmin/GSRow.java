@@ -2,7 +2,6 @@ package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
 import org.genericsystem.ui.Element;
@@ -52,12 +51,6 @@ public abstract class GSRow extends GSHBox {
 		@Override
 		protected Element<?> createGSRow(Element<?> parent) {
 			return new GSLabel(parent, Cell<String>::getObservableModel);
-		}
-	}
-
-	public static class GSTextCellFirstRow extends GSTextCellRow {
-		public GSTextCellFirstRow(Element<?> parent) {
-			super(parent);
 		}
 	}
 
