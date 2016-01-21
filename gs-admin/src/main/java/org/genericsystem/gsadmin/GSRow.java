@@ -2,7 +2,6 @@ package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
 import org.genericsystem.ui.Element;
@@ -28,20 +27,17 @@ public class GSRow extends GSHBox {
 
 		GSHBox secondCell = new GSHBox(this).select(Row::getSecondElement).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			if (this instanceof GSTableCellRow) {
-				// GSVBox vb = new GSVBox(secondCell);
+			if (this instanceof GSTableCellRow)
 				new GSTextCellTable(secondCell).select(Cell<Table>::getObservableModel);// .include(new TextCellTableBuilder()::init);
-			} else
+			else
 				new GSLabel(secondCell, Cell<String>::getObservableModel);
 		}
 
 		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			if (this instanceof GSTableCellRow) {
-				// GSVBox vb = new GSVBox(cells);
+			if (this instanceof GSTableCellRow)
 				new GSTextCellTable(cells).select(Cell<Table>::getObservableModel);
-				// new GSVBox(cells).select(Cell<Table>::getObservableModel).include(new TextCellTableBuilder()::init);
-			} else
+			else
 				new GSLabel(cells, Cell<String>::getObservableModel);
 		}
 
