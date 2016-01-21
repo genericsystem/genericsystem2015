@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
-import org.genericsystem.gsadmin.GSRow.GSTextCellFirstRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
@@ -27,7 +26,7 @@ public abstract class GSTable extends GSVBox {
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setSuperPrefWidth(getSuperPrefWidth()).setSuperPrefHeight(getSuperPrefHeight());
 			{
-				new GSTextCellFirstRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight).setPrefHeight(Table::getFirstRowHeight);
+				new GSTextCellRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight).setPrefHeight(Table::getFirstRowHeight);
 				createSelectionHBox(tablePanel).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
 			}
 		}
