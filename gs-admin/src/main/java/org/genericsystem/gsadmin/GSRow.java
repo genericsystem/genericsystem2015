@@ -2,6 +2,7 @@ package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
 import org.genericsystem.ui.Element;
@@ -12,7 +13,7 @@ import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
 
-public class GSRow extends GSHBox {
+public abstract class GSRow extends GSHBox {
 
 	public GSRow(Element<?> parent) {
 		super(parent);
@@ -27,18 +28,12 @@ public class GSRow extends GSHBox {
 
 		GSHBox secondCell = new GSHBox(this).select(Row::getSecondElement).setMinWidth(Table::getSecondColumnWidth).setPrefWidth(Table::getSecondColumnWidth).setMaxWidth(Table::getSecondColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			if (this instanceof GSTableCellRow)
-				new GSTextCellTable(secondCell).select(Cell<Table>::getObservableModel);// .include(new TextCellTableBuilder()::init);
-			else
-				new GSLabel(secondCell, Cell<String>::getObservableModel);
+			createGSRow(secondCell);
 		}
 
 		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			if (this instanceof GSTableCellRow)
-				new GSTextCellTable(cells).select(Cell<Table>::getObservableModel);
-			else
-				new GSLabel(cells, Cell<String>::getObservableModel);
+			createGSRow(cells);
 		}
 
 		GSHBox lastCell = new GSHBox(this).select(Row::getLastElement).setMinWidth(Table::getLastColumnWidth).setPrefWidth(Table::getLastColumnWidth).setMaxWidth(Table::getLastColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
@@ -47,9 +42,16 @@ public class GSRow extends GSHBox {
 		}
 	}
 
+	protected abstract Element<?> createGSRow(Element<?> parent);
+
 	public static class GSTextCellRow extends GSRow {
 		public GSTextCellRow(Element<?> parent) {
 			super(parent);
+		}
+
+		@Override
+		protected Element<?> createGSRow(Element<?> parent) {
+			return new GSLabel(parent, Cell<String>::getObservableModel);
 		}
 	}
 
@@ -62,6 +64,11 @@ public class GSRow extends GSHBox {
 	public static final class GSTableCellRow extends GSRow {
 		public GSTableCellRow(Element<?> parent) {
 			super(parent);
+		}
+
+		@Override
+		protected Element<?> createGSRow(Element<?> parent) {
+			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
 		}
 	}
 }

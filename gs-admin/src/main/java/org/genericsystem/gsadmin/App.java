@@ -58,7 +58,9 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
+
 		new GSAdmin(GenericWindow.createWindow(scene.widthProperty(), scene.heightProperty(), initGS()), (Group) scene.getRoot());
+
 		stage.setScene(scene);
 		stage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
 		stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
