@@ -15,7 +15,7 @@ import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.utils.Transformation;
 
-public abstract class TableBuilderModel<ITEM, COL, T> {
+public abstract class TableBuilder<ITEM, COL, T> {
 
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
@@ -28,7 +28,7 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 	private TableStyle tableStyle = new TableStyle();
 	private final Function<ITEM, ObservableValue<T>> secondColumnExtractor;
 
-	public TableBuilderModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
+	public TableBuilder(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 			Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<T>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 		this.items = items;
 		this.columns = columns;
@@ -175,7 +175,7 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 		return tableStyle.lastCell;
 	}
 
-	public static class TextTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, String> {
+	public static class TextTableModel<ITEM, COL> extends TableBuilder<ITEM, COL, String> {
 		public TextTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<String>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 			super(items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, secondColumnExtractor, lastColumnExtractor);
@@ -183,7 +183,7 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 
 	}
 
-	public static class TableCellTableModel<ITEM, COL> extends TableBuilderModel<ITEM, COL, Table> {
+	public static class TableCellTableModel<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
 
 		public TableCellTableModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<Table>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {

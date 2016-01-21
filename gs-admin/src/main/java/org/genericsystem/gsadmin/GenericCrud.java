@@ -10,7 +10,7 @@ public class GenericCrud extends Crud {
 	private final Generic generic;
 
 	public void test(GenericRow row) {
-		System.out.println("testttttttttttt");
+		System.out.println("test action");
 	}
 
 	public GenericCrud(Property<Table> table, Generic generic) {

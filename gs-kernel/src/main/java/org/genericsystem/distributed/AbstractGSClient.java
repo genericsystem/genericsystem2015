@@ -106,7 +106,6 @@ public abstract class AbstractGSClient implements Protocole {
 
 	@Override
 	public Vertex getVertex(long id) {
-		System.out.println("client ask vertex");
 		return extractRuntimeException(() -> getVertexPromise(id).get(/* Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT */));
 	}
 

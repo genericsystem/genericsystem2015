@@ -198,13 +198,11 @@ public class Element<N> {
 	};
 
 	void incrementSize(List uiChildren, Element child) {
-		// System.out.println(" INCREMENT : this : " + this + " uichildren : " + System.identityHashCode(uiChildren) + " child : " + child);
 		Map<Element, Integer> internal = map.get(uiChildren);
 		internal.put(child, internal.get(child) + 1);
 	}
 
 	void decrementSize(List uiChildren, Element child) {
-		// System.out.println(" DECREMENT : this : " + this + " uichildren : " + System.identityHashCode(uiChildren) + " child : " + child);
 		Map<Element, Integer> internal = map.get(uiChildren);
 		int size = internal.get(child) - 1;
 		assert size >= 0;

@@ -47,7 +47,7 @@ public class InstancesTableView<G> extends TableView<G> {
 
 			@Override
 			protected ContextMenu computeValue() {
-				System.out.println("Compute context menu for : " + observableType.getValue());
+				//System.out.println("Compute context menu for : " + observableType.getValue());
 				return observableType.getValue() != null ? new AddContextMenu<G>(observableType.getValue(), gsFunctions, () -> getItems()) : null;
 			}
 		});
@@ -64,7 +64,7 @@ public class InstancesTableView<G> extends TableView<G> {
 
 			@Override
 			protected ObservableList<TableColumn<G, ?>> computeValue() {
-				System.out.println("Compute columns menu for : " + observableType.getValue());
+				//System.out.println("Compute columns menu for : " + observableType.getValue());
 				return FXCollections.observableArrayList(buildColumns(observableType));
 			}
 		});

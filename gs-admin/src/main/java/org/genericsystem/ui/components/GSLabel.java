@@ -28,8 +28,4 @@ public class GSLabel extends GSRegion<GSLabel, Label> {
 		return this;
 	}
 	
-	public void clickkk(){
-		System.out.println("ffgffffgh");
-	}
-
 }
