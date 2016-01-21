@@ -20,22 +20,22 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
 	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");
-	private Function<COL, ObservableValue<String>> firstRowExtractor = column -> new ReadOnlyStringWrapper("Column : " + column);
-	private Function<ITEM, ObservableValue<String>> firstColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
-	private Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;
+	private Function<COL, ObservableValue<String>> firstRowExtractor;
+	private Function<ITEM, ObservableValue<String>> firstColumnExtractor;
+	private final Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;
 	private final ObservableValue<String> firstRowLastColumnString = new ReadOnlyStringWrapper("Action");
-	private Function<ITEM, ObservableValue<String>> lastColumnExtractor = item -> new ReadOnlyStringWrapper("Row : " + item);
+	private final Function<ITEM, ObservableValue<String>> lastColumnExtractor;
 	private TableStyle tableStyle = new TableStyle();
-	private Function<ITEM, ObservableValue<T>> secondColumnExtractor;
+	private final Function<ITEM, ObservableValue<T>> secondColumnExtractor;
 
 	public TableBuilderModel(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 			Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<T>> secondColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 		this.items = items;
 		this.columns = columns;
 		this.firstColumnExtractor = firstColumnExtractor;
+		this.secondColumnExtractor = secondColumnExtractor;
 		this.rowColumnExtractor = rowColumnExtractor;
 		this.firstRowExtractor = firstRowExtractor;
-		this.secondColumnExtractor = secondColumnExtractor;
 		this.lastColumnExtractor = lastColumnExtractor;
 	}
 
@@ -97,10 +97,6 @@ public abstract class TableBuilderModel<ITEM, COL, T> {
 
 	public Function<ITEM, ObservableValue<String>> getLastColumnExtractor() {
 		return lastColumnExtractor;
-	}
-
-	public void setRowColumnExtractor(Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor) {
-		this.rowColumnExtractor = rowColumnExtractor;
 	}
 
 	public TableStyle getTableStyle() {
