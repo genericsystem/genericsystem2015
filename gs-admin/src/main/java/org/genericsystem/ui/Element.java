@@ -3,16 +3,19 @@ package org.genericsystem.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
+
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
@@ -134,9 +137,23 @@ public class Element<N> {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
+	// for scrollpane, cache is mandatory!
+	private final Map<Object, ObservableList<N>> uiChildreCachen = new HashMap<Object, ObservableList<N>>() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public ObservableList<N> get(Object uiParent) {
+			ObservableList<N> result = super.get(uiParent);
+			if (result == null) {
+				put(uiParent, result = (ObservableList<N>) ((Function) getGraphicChildren).apply(uiParent));
+				assert result != null;
+			}
+			return result;
+		};
+	};
+
 	public <PARENTNODE> ObservableList<N> uiChildren(PARENTNODE uiParent) {
-		return ((Function<PARENTNODE, ObservableList<N>>) (Function<?, ?>) getGraphicChildren).apply(uiParent);
+		return uiChildreCachen.get(uiParent);
 	}
 
 	@Deprecated
@@ -183,11 +200,13 @@ public class Element<N> {
 	};
 
 	void incrementSize(List uiChildren, Element child) {
+		System.out.println(" INCREMENT : this : " + this + " uichildren : " + System.identityHashCode(uiChildren) + " child : " + child);
 		Map<Element, Integer> internal = map.get(uiChildren);
 		internal.put(child, internal.get(child) + 1);
 	}
 
 	void decrementSize(List uiChildren, Element child) {
+		System.out.println(" DECREMENT : this : " + this + " uichildren : " + System.identityHashCode(uiChildren) + " child : " + child);
 		Map<Element, Integer> internal = map.get(uiChildren);
 		int size = internal.get(child) - 1;
 		assert size >= 0;

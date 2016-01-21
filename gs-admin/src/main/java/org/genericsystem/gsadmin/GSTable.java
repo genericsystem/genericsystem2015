@@ -1,17 +1,22 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
+
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
+
 import org.genericsystem.gsadmin.GenericRowBuilders.TableCellRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellFirstRowBuilder;
 import org.genericsystem.gsadmin.GenericRowBuilders.TextCellRowBuilder;
+import org.genericsystem.gsadmin.GenericTableBuilders.TableCellTableBuilder;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
+import org.genericsystem.ui.table.Window;
 
 public abstract class GSTable extends GSVBox {
 
@@ -58,47 +63,33 @@ public abstract class GSTable extends GSVBox {
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSHBox(parent).include(new TextCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
-
 	}
 
-	public static class GSTableCellTable extends GSTable {
-
-		public GSTableCellTable(Element<?> parent) {
-			super(parent);
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return table -> ((Table) table).getColumnWidth();
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return table -> ((Table) table).getRowHeight();
-		}
-
+	public static class GSTableCellTable extends GS {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSHBox(parent).include(new TableCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
 		}
-	}
-
-	public static class GSTableCellTable2 extends GSTableCellTable {
-
-		public GSTableCellTable2(Element<?> parent) {
-			super(parent);
-		}
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return table -> ((Table) table).getColumnWidth();
+			return app -> new SimpleObjectProperty<>(900);
 		}
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return table -> ((Table) table).getRowHeight();
+			return app -> ((Window) app).getHeight();
 		}
+	}
 
+	public static class EditTableCellTableBuilder extends TableCellTableBuilder {
+		@Override
+		public GSHBox createSelectionHBox(Element<?> parent) {
+			return (GSHBox) new GSHBox(parent).include(new TableCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericCrud::test);
+		}
+	}
+
+	public static class TableCellTableBuilder2 extends TableCellTableBuilder {
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSHBox(parent).include(new TableCellRowBuilder<>()::init).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);

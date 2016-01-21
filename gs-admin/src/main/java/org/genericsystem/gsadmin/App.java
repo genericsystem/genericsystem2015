@@ -6,6 +6,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+
 import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
 import org.genericsystem.admin.model.Color;
