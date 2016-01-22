@@ -84,7 +84,7 @@ public class GSSCrollPane extends Element<ScrollPane> {
 	}
 
 	public <M> GSSCrollPane setStyleClass(Function<M, ObservableValue<String>> function) {
-		addObservableListBinding(ScrollPane::getStyleClass, function);
+		addObservableListToObservableValueBinding(ScrollPane::getStyleClass, function);
 		return this;
 	}
 

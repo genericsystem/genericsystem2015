@@ -14,7 +14,7 @@ public class GSTableView extends GSRegion<GSTableView, TableView> {
 	}
 
 	public <M, T> GSTableView setObservableListItems(Function<M, ObservableList<T>> function) {
-		setObservableList(TableView::itemsProperty, function);
+		setObservableListBinding(TableView::itemsProperty, function);
 		return this;
 	}
 }

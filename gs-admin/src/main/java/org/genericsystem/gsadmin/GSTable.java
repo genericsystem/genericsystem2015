@@ -1,9 +1,11 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
+
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
 import org.genericsystem.ui.Element;
@@ -56,7 +58,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTextCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
+			return (GSHBox) new GSTextCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
 
 	}
@@ -79,7 +81,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTableCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
+			return (GSHBox) new GSTableCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
 		}
 	}
 
@@ -91,7 +93,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTableCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
+			return (GSHBox) new GSTableCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
 		}
 	}
 
@@ -103,7 +105,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTableCellRow(parent).addBindMetaAction(HBox::onMouseClickedProperty, GenericCrud::test);
+			return (GSHBox) new GSTableCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericCrud::test);
 		}
 	}
 
