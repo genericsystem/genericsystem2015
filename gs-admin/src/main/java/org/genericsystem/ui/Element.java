@@ -138,8 +138,9 @@ public class Element<N> {
 	}
 
 	// for scrollpane, cache is mandatory!
-	private final Map<Object, ObservableList<N>> uiChildreCachen = new HashMap<Object, ObservableList<N>>() {
-		private static final long serialVersionUID = 1L;
+	private final Map<Object, ObservableList<N>> uiChildrenCache = new HashMap<Object, ObservableList<N>>() {
+
+		private static final long serialVersionUID = -2967144422315171079L;
 
 		@Override
 		public ObservableList<N> get(Object uiParent) {
@@ -153,7 +154,7 @@ public class Element<N> {
 	};
 
 	public <PARENTNODE> ObservableList<N> uiChildren(PARENTNODE uiParent) {
-		return uiChildreCachen.get(uiParent);
+		return uiChildrenCache.get(uiParent);
 	}
 
 	@Deprecated

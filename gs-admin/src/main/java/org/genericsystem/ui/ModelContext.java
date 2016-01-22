@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ModelContext {
 
 	private final ModelContext parent;
 	private final Object model;
 	private Map<Element<?>, List<ModelContext>> children = new HashMap<Element<?>, List<ModelContext>>() {
+		private static final long serialVersionUID = -2758395427732908902L;
+
 		@Override
 		public List<ModelContext> get(Object element) {
 			List<ModelContext> list = super.get(element);
@@ -49,5 +53,27 @@ public class ModelContext {
 
 	public List<ViewContext<?>> getViewContexts() {
 		return viewContexts;
+	}
+
+	public <T> Supplier<T> applyOnModel(Function<?, T> methodReference) {
+		return () -> {
+			ModelContext modelContext_ = this;
+			String s = "/";
+			while (modelContext_ != null) {
+				s += modelContext_.getModel() + "/";
+				try {
+					return methodReference.apply(modelContext_.getModel());
+				} catch (ClassCastException ignore) {
+				}
+				modelContext_ = modelContext_.getParent();
+			}
+			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
+		};
+	}
+
+	public <MODEL> MODEL destroy() {
+		for (ViewContext<?> viewContext : getViewContexts())
+			viewContext.destroyChild();
+		return getModel();
 	}
 }

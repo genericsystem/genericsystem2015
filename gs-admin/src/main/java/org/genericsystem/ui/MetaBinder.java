@@ -11,24 +11,9 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 public interface MetaBinder<N, W> {
-	default <T> Supplier<T> applyOnModel(Function<?, T> methodReference, ModelContext modelContext) {
-		return () -> {
-			ModelContext modelContext_ = modelContext;
-			String s = "/";
-			while (modelContext_ != null) {
-				s += modelContext_.getModel() + "/";
-				try {
-					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
-				modelContext_ = modelContext_.getParent();
-			}
-			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
-		};
-	}
 
 	default void init(Function<?, W> method, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
-		init(applyOnModel(method, modelContext), modelContext, viewContext, childElement);
+		init(modelContext.applyOnModel(method), modelContext, viewContext, childElement);
 	}
 
 	default void init(Supplier<W> applyOnModel, ModelContext modelContext, ViewContext<N> viewContext, Element<?> childElement) {
@@ -78,10 +63,7 @@ public interface MetaBinder<N, W> {
 
 					@Override
 					public W remove(int index) {
-						ModelContext removed = children.remove(index);
-						for (ViewContext<?> internalViewContext : removed.getViewContexts())
-							internalViewContext.destroyChild();
-						return removed.getModel();
+						return children.remove(index).destroy();
 					}
 
 					@Override
@@ -120,11 +102,8 @@ public interface MetaBinder<N, W> {
 				wrapper.addListener((o, oldModel, newModel) -> {
 					if (oldModel == newModel)
 						return;
-					if (oldModel != null) {
-						ModelContext removed = children.remove(0);
-						for (ViewContext<?> internalViewContext : removed.getViewContexts())
-							internalViewContext.destroyChild();
-					}
+					if (oldModel != null)
+						children.remove(0).destroy();
 					consumer.accept(newModel);
 				});
 				consumer.accept(wrapper.getValue());

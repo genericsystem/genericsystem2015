@@ -11,25 +11,8 @@ import javafx.event.EventHandler;
 
 public interface Binder<N, X, Y> {
 
-	default <T> Supplier<T> applyOnModel(Function<?, T> methodReference, ModelContext modelContext) {
-		return () -> {
-			ModelContext modelContext_ = modelContext;
-			String s = "/";
-			while (modelContext_ != null) {
-				s += modelContext_.getModel() + "/";
-				try {
-					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
-				modelContext_ = modelContext_.getParent();
-
-			}
-			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
-		};
-	}
-
 	default void init(Function<N, Y> applyOnNode, Function<?, X> method, ModelContext modelContext, N node) {
-		init(applyOnNode.apply(node), applyOnModel(method, modelContext), modelContext);
+		init(applyOnNode.apply(node), modelContext.applyOnModel(method), modelContext);
 	}
 
 	default void init(Y nodeResult, Supplier<X> applyOnModel, ModelContext modelContext) {
@@ -114,7 +97,7 @@ public interface Binder<N, X, Y> {
 		return new Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>>() {
 			@Override
 			public void init(Function<N, Property<Consumer<W>>> applyOnNode, Function<?, Function<W, SUPERMODEL>> method, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue(w -> applyOnModel(method, modelContext.getModel()).get().apply(w));
+				applyOnNode.apply(node).setValue(w -> modelContext.applyOnModel(method).get().apply(w));
 				// applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
 				// applyOnNode.apply(node).setValue(w -> method.apply(null));
 			}
