@@ -44,6 +44,7 @@ public class ModelContext {
 	}
 
 	public List<ModelContext> getChildren(Element<?> childElement) {
+		System.out.println("this : " + System.identityHashCode(this) + " childElement :  " + childElement + " " + System.identityHashCode(childElement));
 		return children.get(childElement);
 	}
 
@@ -63,8 +64,7 @@ public class ModelContext {
 				s += modelContext_.getModel() + "/";
 				try {
 					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);

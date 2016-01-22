@@ -1,7 +1,6 @@
 package org.genericsystem.ui;
 
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -34,9 +33,10 @@ public class ViewContext<N> {
 				new ViewContext<>(this, modelContext, childElement, null);
 		}
 		if (parent != null) {
-			int indexInChildren = parent.computeIndex(nodeChildren, template);
-			parent.incrementSize(nodeChildren, template);
+			int indexInChildren = parent.computeIndex(template);
+			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
+			map2.put(template, indexInChildren);
 
 		}
 	}
@@ -45,58 +45,40 @@ public class ViewContext<N> {
 		return node;
 	}
 
-	void destroyChild() {
-		parent.decrementSize(nodeChildren, template);
-		nodeChildren.remove(getNode());
-	}
+	Map<Element<?>, Integer> map2 = new IdentityHashMap<Element<?>, Integer>() {
+		private static final long serialVersionUID = 1L;
 
-	// Map<Element, Integer> map2 = new IdentityHashMap<Element, Integer>() {
-	// @Override
-	// public Integer get(Object key) {
-	// Integer size = super.get(key);
-	// if (size == null)
-	// put((Element) key, size = 0);
-	// return size;
-	// };
-	// };
-
-	private Map<List, Map<Element, Integer>> map = new IdentityHashMap<List, Map<Element, Integer>>() {
 		@Override
-		public Map<Element, Integer> get(Object key) {
-			Map<Element, Integer> internal = super.get(key);
-			if (internal == null)
-				put((List) key, internal = new IdentityHashMap<Element, Integer>() {
-					@Override
-					public Integer get(Object key) {
-						Integer size = super.get(key);
-						if (size == null)
-							put((Element) key, size = 0);
-						return size;
-					};
-				});
-			return internal;
+		public Integer get(Object key) {
+			Integer size = super.get(key);
+			if (size == null)
+				put((Element<?>) key, size = 0);
+			return size;
 		};
 	};
 
-	void incrementSize(List uiChildren, Element child) {
-		Map<Element, Integer> internal = map.get(uiChildren);
-		internal.put(child, internal.get(child) + 1);
+	void destroyChild() {
+		parent.decrementSize(template);
+		nodeChildren.remove(getNode());
 	}
 
-	void decrementSize(List uiChildren, Element child) {
-		Map<Element, Integer> internal = map.get(uiChildren);
-		int size = internal.get(child) - 1;
+	void incrementSize(Element<?> child) {
+		map2.put(child, map2.get(child) + 1);
+	}
+
+	void decrementSize(Element<?> child) {
+		int size = map2.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
-			internal.remove(child);// remove map if 0 for avoid heap pollution
+			map2.remove(child);// remove map if 0 for avoid heap pollution
 		else
-			internal.put(child, size);
+			map2.put(child, size);
 	}
 
-	int computeIndex(List uiChildren, Element childElement) {
+	int computeIndex(Element<?> childElement) {
 		int indexInChildren = 0;
-		for (Element child : template.getChildren()) {
-			indexInChildren += map.get(uiChildren).get(child);
+		for (Element<?> child : template.getChildren()) {
+			indexInChildren += map2.get(child);
 			if (child == childElement)
 				break;
 		}
