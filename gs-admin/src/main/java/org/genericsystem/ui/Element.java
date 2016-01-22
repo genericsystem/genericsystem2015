@@ -3,10 +3,7 @@ package org.genericsystem.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -24,7 +21,7 @@ public class Element<N> {
 	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
-	private final Function<?, ObservableList<?>> getGraphicChildren;
+	final Function<?, ObservableList<?>> getGraphicChildren;
 
 	private List<Boot<N>> boots = new ArrayList<>();
 
@@ -137,26 +134,6 @@ public class Element<N> {
 		return this;
 	}
 
-	// for scrollpane, cache is mandatory!
-	private final Map<Object, ObservableList<N>> uiChildrenCache = new HashMap<Object, ObservableList<N>>() {
-
-		private static final long serialVersionUID = -2967144422315171079L;
-
-		@Override
-		public ObservableList<N> get(Object uiParent) {
-			ObservableList<N> result = super.get(uiParent);
-			if (result == null) {
-				put(uiParent, result = (ObservableList<N>) ((Function) getGraphicChildren).apply(uiParent));
-				assert result != null;
-			}
-			return result;
-		};
-	};
-
-	public <PARENTNODE> ObservableList<N> uiChildren(PARENTNODE uiParent) {
-		return uiChildrenCache.get(uiParent);
-	}
-
 	@Deprecated
 	public N apply(Object model, N parentNode) {
 		return new ViewContext<>(null, new ModelContext(null, model), this, parentNode).getNode();
@@ -180,49 +157,6 @@ public class Element<N> {
 
 	public Element<?> getParent() {
 		return parent;
-	}
-
-	private Map<List, Map<Element, Integer>> map = new IdentityHashMap<List, Map<Element, Integer>>() {
-		@Override
-		public Map<Element, Integer> get(Object key) {
-			Map<Element, Integer> internal = super.get(key);
-			if (internal == null)
-				put((List) key, internal = new IdentityHashMap<Element, Integer>() {
-					@Override
-					public Integer get(Object key) {
-						Integer size = super.get(key);
-						if (size == null)
-							put((Element) key, size = 0);
-						return size;
-					};
-				});
-			return internal;
-		};
-	};
-
-	void incrementSize(List uiChildren, Element child) {
-		Map<Element, Integer> internal = map.get(uiChildren);
-		internal.put(child, internal.get(child) + 1);
-	}
-
-	void decrementSize(List uiChildren, Element child) {
-		Map<Element, Integer> internal = map.get(uiChildren);
-		int size = internal.get(child) - 1;
-		assert size >= 0;
-		if (size == 0)
-			internal.remove(child);// remove map if 0 for avoid heap pollution
-		else
-			internal.put(child, size);
-	}
-
-	int computeIndex(List uiChildren, Element childElement) {
-		int indexInChildren = 0;
-		for (Element child : getChildren()) {
-			indexInChildren += map.get(uiChildren).get(child);
-			if (child == childElement)
-				break;
-		}
-		return indexInChildren;
 	}
 
 }
