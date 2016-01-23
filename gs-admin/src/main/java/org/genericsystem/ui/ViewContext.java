@@ -22,7 +22,6 @@ public class ViewContext<N> {
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
-		// TODO KK
 		nodeChildren = this.parent != null ? (ObservableList<N>) ((Function) this.template.getGraphicChildren).apply(parent.node) : null;
 		init();
 	}

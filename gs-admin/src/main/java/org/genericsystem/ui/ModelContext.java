@@ -143,6 +143,5 @@ public class ModelContext {
 		public RootModelContext(Object model) {
 			super(null, model);
 		}
-
 	}
 }
