@@ -27,61 +27,6 @@ public class ModelContext {
 		}
 	};
 
-	public class ModelContextList {
-
-		private Element<?> childElement;
-		private List<ModelContext> internal = new ArrayList<ModelContext>();
-
-		public ModelContextList(Element<?> childElement) {
-			this.childElement = childElement;
-		}
-
-		public <N> ModelContext insert(int index, Object model, ViewContext<N> viewContext) {
-			ModelContext childModelContext = createChildContext(model);
-			viewContext.createChildContext(childModelContext, childElement);
-			internal.add(index, childModelContext);
-			return childModelContext;
-		};
-
-		public void delete(int index) {
-			internal.remove(index).destroy();
-		};
-
-		public <W> ListChangeListener<W> getListChangeListener(ViewContext<?> viewContext) {
-			return change -> {
-				while (change.next()) {
-					if (change.wasPermutated()) {
-						for (int i = change.getFrom(); i < change.getTo(); i++)
-							delete(change.getFrom());
-						int index = change.getFrom();
-						for (W model : change.getList().subList(change.getFrom(), change.getTo()))
-							insert(index++, model, viewContext);
-					} else {
-						if (change.wasRemoved())
-							for (int i = 0; i < change.getRemovedSize(); i++)
-								delete(change.getFrom());
-						if (change.wasAdded()) {
-							int index = change.getFrom();
-							for (W model : change.getAddedSubList())
-								insert(index++, model, viewContext);
-						}
-					}
-				}
-			};
-		}
-
-		public <W> ChangeListener<W> getChangeListener(ViewContext<?> viewContext) {
-			return (o, oldModel, newModel) -> {
-				if (oldModel == newModel)
-					return;
-				if (oldModel != null)
-					delete(0);
-				if (newModel != null)
-					insert(0, newModel, viewContext);
-			};
-		}
-	}
-
 	private ModelContext(ModelContext parent, Object model) {
 		this.parent = parent;
 		this.model = model;
@@ -139,9 +84,62 @@ public class ModelContext {
 	}
 
 	public static class RootModelContext extends ModelContext {
-
 		public RootModelContext(Object model) {
 			super(null, model);
+		}
+	}
+
+	public class ModelContextList {
+
+		private Element<?> childElement;
+		private List<ModelContext> internal = new ArrayList<ModelContext>();
+
+		public ModelContextList(Element<?> childElement) {
+			this.childElement = childElement;
+		}
+
+		public <N> void insert(int index, Object model, ViewContext<N> viewContext) {
+			ModelContext childModelContext = createChildContext(model);
+			viewContext.createChildContext(childModelContext, childElement);
+			internal.add(index, childModelContext);
+		};
+
+		public void delete(int index) {
+			internal.remove(index).destroy();
+		};
+
+		public <W> ListChangeListener<W> getListChangeListener(ViewContext<?> viewContext) {
+			return change -> {
+				while (change.next()) {
+					if (change.wasPermutated()) {
+						for (int i = change.getFrom(); i < change.getTo(); i++)
+							delete(change.getFrom());
+						int index = change.getFrom();
+						for (W model : change.getList().subList(change.getFrom(), change.getTo()))
+							insert(index++, model, viewContext);
+					} else {
+						if (change.wasRemoved())
+							for (int i = 0; i < change.getRemovedSize(); i++)
+								delete(change.getFrom());
+						if (change.wasAdded()) {
+							int index = change.getFrom();
+							for (W model : change.getAddedSubList())
+								insert(index++, model, viewContext);
+						}
+					}
+				}
+			};
+		}
+
+		public <W> ChangeListener<W> getChangeListener(ViewContext<?> viewContext) {
+			return (o, oldModel, newModel) -> {
+				if (oldModel == newModel)
+					return;
+				if (oldModel != null)
+					delete(0);
+				if (newModel != null)
+					insert(0, newModel, viewContext);
+			};
 		}
 	}
 }
