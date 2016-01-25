@@ -17,11 +17,11 @@ public class GSCrud extends GSVBox {
 
 	@Override
 	protected void initChildren() {
-		GSHBox Hb = new GSHBox(this);
+		GSHBox Hb = new GSHBox(this).setSpacing(10);// .setPrefHeight(500);
 		{
 			GSVBox vb = new GSVBox(Hb);
 			{
-				GSHBox formPanelEngine = new GSHBox(vb).setSpacing(10);
+				GSHBox formPanelEngine = new GSHBox(vb).setSpacing(3);
 				{
 					new GSTextField(formPanelEngine).bindTextProperty(GenericCrud::getName).setPrefWidth(300);
 					new GSButton(formPanelEngine, "Add", GenericCrud::add);
@@ -30,7 +30,7 @@ public class GSCrud extends GSVBox {
 				initGSGenericTable(vb);
 			}
 
-			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable);
+			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable).setSpacing(100);
 		}
 	}
 

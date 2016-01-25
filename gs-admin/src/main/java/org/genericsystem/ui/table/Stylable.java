@@ -4,10 +4,13 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-public class Stylable {
+import org.genericsystem.ui.Model;
+
+public class Stylable extends Model {
 	private ObservableValue<String> styleClass;
 
-	public Stylable(ObservableValue<String> styleClass) {
+	public Stylable(Model parent, ObservableValue<String> styleClass) {
+		super(parent);
 		this.styleClass = styleClass;
 	}
 
@@ -38,8 +41,8 @@ public class Stylable {
 		private final ObservableList<Element> elements;
 		private final ObservableValue<Element> lastElement;
 
-		public Listable(ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
-			super(styleClass);
+		public Listable(Model parent, ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
+			super(parent, styleClass);
 			this.firstElement = firstElement;
 			this.elements = elements;
 			this.lastElement = lastElement;

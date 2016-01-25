@@ -4,13 +4,15 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import org.genericsystem.ui.Model;
 
-public class Todo {
+public class Todo extends Model {
 
 	private ObservableValue<String> todoString;
 	private Property<Boolean> completed = new SimpleBooleanProperty(false);
 
-	Todo(String text) {
+	Todo(TodoList parentModel, String text) {
+		super(parentModel);
 		todoString = new ReadOnlyObjectWrapper<>(text);
 	}
 
@@ -22,5 +24,13 @@ public class Todo {
 
 	public Property<Boolean> getCompleted() {
 		return completed;
+	}
+
+	public void select() {
+		((TodoList) getParent()).getSelection().setValue(this);
+	}
+
+	public void remove() {
+		((TodoList) getParent()).getTodos().remove(this);
 	}
 }

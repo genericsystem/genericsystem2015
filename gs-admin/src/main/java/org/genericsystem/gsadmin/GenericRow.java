@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 
@@ -13,8 +14,8 @@ public class GenericRow extends Row {
 	private StringProperty name = new SimpleStringProperty("");
 	private Generic item;
 
-	public GenericRow(Generic item, ObservableValue<Cell<?>> secondCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
-		super(secondCell, cells, lastCell, styleClass);
+	public GenericRow(Model parent, Generic item, ObservableValue<Cell<?>> secondCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
+		super(parent, secondCell, cells, lastCell, styleClass);
 		this.item = item;
 	}
 

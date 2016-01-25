@@ -30,11 +30,11 @@ public class GenericWindow extends Window {
 	}
 
 	public GenericWindow(CocClientEngine engine, Property<Table> table, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
-		super(width, height);
+		super(null, width, height);
 	}
 
 	public GenericWindow(GenericCrud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
-		super(width, height);
+		super(null, width, height);
 		this.tableCrud.setValue(tableCrud);
 	}
 
@@ -87,7 +87,7 @@ public class GenericWindow extends Window {
 		table.getFirstColumnWidth().setValue(200);
 		table.getRowHeight().setValue(50);
 		table.getColumnWidth().setValue(310);
-		tableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<>(table), row.getItem()));
+		tableCrudSelectedRow.setValue(new GenericCrud(this, new SimpleObjectProperty<>(table), row.getItem()));
 		createEditTable(tableCrud, row);
 	}
 
@@ -149,7 +149,7 @@ public class GenericWindow extends Window {
 		table.getRowHeight().setValue(80);
 		table.getColumnWidth().setValue(310);
 
-		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<>(table), engine);
+		GenericCrud crud = new GenericCrud(null, new SimpleObjectProperty<>(table), engine);
 		return new GenericWindow(crud, width, height);
 	}
 }

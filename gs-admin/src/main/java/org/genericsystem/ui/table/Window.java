@@ -2,15 +2,18 @@ package org.genericsystem.ui.table;
 
 import javafx.beans.value.ObservableValue;
 
-public abstract class Window {
+import org.genericsystem.ui.Model;
+
+public abstract class Window extends Model {
 	private final ObservableValue<Number> width;
 	private final ObservableValue<Number> height;
-	
-	public Window(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
+
+	public Window(Model parent, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
+		super(parent);
 		this.width = (ObservableValue<Number>) width;
 		this.height = (ObservableValue<Number>) height;
 	}
-	
+
 	public ObservableValue<Number> getWidth() {
 		return width;
 	}

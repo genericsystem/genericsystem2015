@@ -14,7 +14,6 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
-import org.genericsystem.ui.table.Window;
 
 public abstract class GSTable extends GSVBox {
 
@@ -76,7 +75,8 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return app -> ((Window) app).getHeight();
+			// = return app -> ((Window) app).getHeight();
+			return app -> new SimpleObjectProperty<>(900);
 		}
 
 		@Override
@@ -101,6 +101,18 @@ public abstract class GSTable extends GSVBox {
 
 		public GSEditTableCellTable(Element<?> parent) {
 			super(parent);
+		}
+
+		@Override
+		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+
+			return app -> new SimpleObjectProperty<>(600);
+		}
+
+		@Override
+		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+			// return app -> ((Window) app).getHeight();
+			return app -> new SimpleObjectProperty<>(600);
 		}
 
 		@Override

@@ -1,6 +1,7 @@
 package org.genericsystem.todomvc;
 
 import javafx.scene.Group;
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.components.GSApplication;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -11,7 +12,7 @@ import org.genericsystem.ui.components.GSVBox;
 
 public class GSTodoList extends GSApplication {
 
-	public GSTodoList(Object model, Group parentNode) {
+	public GSTodoList(Model model, Group parentNode) {
 		super(model, parentNode);
 	}
 

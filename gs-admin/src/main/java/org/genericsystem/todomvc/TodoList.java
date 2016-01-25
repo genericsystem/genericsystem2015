@@ -13,8 +13,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import org.genericsystem.ui.Model;
 
-public class TodoList {
+public class TodoList extends Model {
 
 	private Property<String> name = new SimpleStringProperty();
 	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
@@ -30,11 +31,12 @@ public class TodoList {
 	private Property<Todo> selection = new SimpleObjectProperty<>();
 
 	public TodoList() {
+		super(null);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 	}
 
 	public void create() {
-		todos.add(new Todo(getName().getValue()));
+		todos.add(new Todo(this,getName().getValue()));
 	}
 
 	public void showAll() {

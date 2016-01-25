@@ -3,9 +3,7 @@ package org.genericsystem.ui;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.ui.ModelContext.RootModelContext;
 
 public class ViewContext<N> {
@@ -99,7 +97,7 @@ public class ViewContext<N> {
 
 	public static class RootViewContext<Group> extends ViewContext<Group> {
 
-		public RootViewContext(Object model, Element<Group> template, Group node) {
+		public RootViewContext(Model model, Element<Group> template, Group node) {
 			super(null, new RootModelContext(model), template, node);
 		}
 	}

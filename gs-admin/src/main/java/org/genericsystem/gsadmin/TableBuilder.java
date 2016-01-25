@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Stylable.TableStyle;
@@ -109,8 +110,8 @@ public abstract class TableBuilder<ITEM, COL, T> {
 		this.tableStyle = tableStyle;
 	}
 
-	public Table buildTable() {
-		return new Table(buildFirstRow(), buildRows(), tableStyle.table);
+	public Table buildTable(Model parent) {
+		return new Table(parent, buildFirstRow(), buildRows(), tableStyle.table);
 	}
 
 	protected ObservableValue<Row> buildFirstRow() {
