@@ -1,8 +1,8 @@
 package org.genericsystem.gsadmin;
 
 import javafx.scene.Group;
-
 import org.genericsystem.gsadmin.GSCrud.GSEngineCrud;
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.components.GSApplication;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -12,7 +12,7 @@ import org.genericsystem.ui.components.GSVBox;
 
 public class GSAdmin extends GSApplication {
 
-	public GSAdmin(Object model, Group parentNode) {
+	public GSAdmin(Model model, Group parentNode) {
 		super(model, parentNode);
 	}
 

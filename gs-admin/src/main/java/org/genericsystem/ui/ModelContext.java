@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 
@@ -27,12 +26,12 @@ public class ModelContext {
 		}
 	};
 
-	private ModelContext(ModelContext parent, Object model) {
+	private ModelContext(ModelContext parent, Model model) {
 		this.parent = parent;
 		this.model = model;
 	}
 
-	public ModelContext createChildContext(Object model) {
+	public ModelContext createChildContext(Model model) {
 		return new ModelContext(this, model);
 	}
 
@@ -70,8 +69,7 @@ public class ModelContext {
 				s += modelContext_.getModel() + "/";
 				try {
 					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
@@ -84,7 +82,7 @@ public class ModelContext {
 	}
 
 	public static class RootModelContext extends ModelContext {
-		public RootModelContext(Object model) {
+		public RootModelContext(Model model) {
 			super(null, model);
 		}
 	}
@@ -92,13 +90,13 @@ public class ModelContext {
 	public class ModelContextList {
 
 		private Element<?> childElement;
-		private List<ModelContext> internal = new ArrayList<ModelContext>();
+		private List<ModelContext> internal = new ArrayList<>();
 
 		public ModelContextList(Element<?> childElement) {
 			this.childElement = childElement;
 		}
 
-		public <N> void insert(int index, Object model, ViewContext<N> viewContext) {
+		public <N> void insert(int index, Model model, ViewContext<N> viewContext) {
 			ModelContext childModelContext = createChildContext(model);
 			viewContext.createChildContext(childModelContext, childElement);
 			internal.add(index, childModelContext);
@@ -108,14 +106,14 @@ public class ModelContext {
 			internal.remove(index).destroy();
 		};
 
-		public <W> ListChangeListener<W> getListChangeListener(ViewContext<?> viewContext) {
+		public ListChangeListener<Model> getListChangeListener(ViewContext<?> viewContext) {
 			return change -> {
 				while (change.next()) {
 					if (change.wasPermutated()) {
 						for (int i = change.getFrom(); i < change.getTo(); i++)
 							delete(change.getFrom());
 						int index = change.getFrom();
-						for (W model : change.getList().subList(change.getFrom(), change.getTo()))
+						for (Model model : change.getList().subList(change.getFrom(), change.getTo()))
 							insert(index++, model, viewContext);
 					} else {
 						if (change.wasRemoved())
@@ -123,7 +121,7 @@ public class ModelContext {
 								delete(change.getFrom());
 						if (change.wasAdded()) {
 							int index = change.getFrom();
-							for (W model : change.getAddedSubList())
+							for (Model model : change.getAddedSubList())
 								insert(index++, model, viewContext);
 						}
 					}
@@ -131,7 +129,7 @@ public class ModelContext {
 			};
 		}
 
-		public <W> ChangeListener<W> getChangeListener(ViewContext<?> viewContext) {
+		public ChangeListener<Model> getChangeListener(ViewContext<?> viewContext) {
 			return (o, oldModel, newModel) -> {
 				if (oldModel == newModel)
 					return;

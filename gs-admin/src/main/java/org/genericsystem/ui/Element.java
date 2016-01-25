@@ -7,12 +7,10 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
@@ -112,23 +110,23 @@ public class Element<N> {
 		return this;
 	}
 
-	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel) {
+	protected <M, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
 		return this;
 	}
 
-	protected <M, T> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
+	protected <M, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
 		forEach(applyOnModel);
 		bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
 		return this;
 	}
 
-	public <M, T> Element<N> select(Function<M, ObservableValue<T>> applyOnModel) {
+	public <M, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
 		return this;
 	}
 
-	public <M, T> Element<N> select(Function<M, ObservableValue<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
+	public <M, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
 		select(applyOnModel);
 		bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
 		return this;

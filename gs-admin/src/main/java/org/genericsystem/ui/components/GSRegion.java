@@ -1,12 +1,11 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.Region;
-
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.Model;
 
 public abstract class GSRegion<Component extends GSNode<Component, N>, N extends Region> extends GSNode<Component, N> {
 
@@ -99,7 +98,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component forEach(Function<M, ObservableList<T>> function) {
+	public <M, T extends Model> Component forEach(Function<M, ObservableList<T>> function) {
 		super.forEach(function);
 		return (Component) this;
 	}

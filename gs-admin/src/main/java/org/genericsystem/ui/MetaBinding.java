@@ -1,7 +1,6 @@
 package org.genericsystem.ui;
 
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -19,15 +18,15 @@ public class MetaBinding<N, T> {
 		binder.init(applyOnModel, viewContext, childElement);
 	}
 
-	static <N, M, T> MetaBinding<N, T> bind(Function<M, T> applyOnModel, MetaBinder<N, T> binder) {
+	static <N, M, W> MetaBinding<N, W> bind(Function<M, W> applyOnModel, MetaBinder<N, W> binder) {
 		return new MetaBinding<>((u) -> applyOnModel.apply((M) u), binder);
 	}
 
-	public static <N, M, T> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> applyOnModel) {
-		return MetaBinding.bind(applyOnModel, MetaBinder.foreachBinder());
+	public static <N, M, T extends Model> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> applyOnModel) {
+		return MetaBinding.bind(applyOnModel, MetaBinder.<N, T> foreachBinder());
 	}
 
-	public static <N, M, T> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
+	public static <N, M, T extends Model> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
 		return MetaBinding.bind(applyOnModel, MetaBinder.selectorBinder());
 	}
 }
