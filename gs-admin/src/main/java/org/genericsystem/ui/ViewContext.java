@@ -6,38 +6,50 @@ import java.util.function.Function;
 
 import javafx.collections.ObservableList;
 
+import org.genericsystem.ui.ModelContext.RootModelContext;
+
 public class ViewContext<N> {
 	private final ViewContext<?> parent;
 	private final Element<N> template;
 	private final N node;
+	private ModelContext modelContext;
 
 	private final ObservableList<N> nodeChildren;
 
-	public ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
+	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
 		this.parent = parent;
 		this.template = template;
-		this.node = node != null ? node : template.createNode(parent != null ? parent.getNode() : null);
+		assert node != null;
+		this.node = node;
+		this.modelContext = modelContext;
 		nodeChildren = this.parent != null ? (ObservableList<N>) ((Function) this.template.getGraphicChildren).apply(parent.node) : null;
-		init(modelContext);
+		init();
 	}
 
-	private void init(ModelContext modelContext) {
+	public ModelContext getModelContext() {
+		return modelContext;
+	}
+
+	public <SUBNODE> ViewContext<SUBNODE> createChildContext(ModelContext childModelContext, Element<SUBNODE> template) {
+		return new ViewContext<SUBNODE>(this, childModelContext, template, template.createNode(getNode()));
+	}
+
+	private void init() {
 		modelContext.register(this);
 		this.template.getBootList().forEach(boot -> boot.init(node));
 		for (Binding<N, ?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
 		for (Element<N> childElement : template.<N> getChildren()) {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
-				metaBinding.init(modelContext, this, childElement);
+				metaBinding.init(this, childElement);
 			if (childElement.metaBindings.isEmpty())
-				new ViewContext<>(this, modelContext, childElement, null);
+				createChildContext(modelContext, childElement);
 		}
 		if (parent != null) {
 			int indexInChildren = parent.computeIndex(template);
 			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
-			map2.put(template, indexInChildren);
-
+			sizeByElement.put(template, indexInChildren);
 		}
 	}
 
@@ -45,8 +57,8 @@ public class ViewContext<N> {
 		return node;
 	}
 
-	Map<Element<?>, Integer> map2 = new IdentityHashMap<Element<?>, Integer>() {
-		private static final long serialVersionUID = 1L;
+	private Map<Element<?>, Integer> sizeByElement = new IdentityHashMap<Element<?>, Integer>() {
+		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
 		public Integer get(Object key) {
@@ -62,27 +74,33 @@ public class ViewContext<N> {
 		nodeChildren.remove(getNode());
 	}
 
-	void incrementSize(Element<?> child) {
-		map2.put(child, map2.get(child) + 1);
+	private void incrementSize(Element<?> child) {
+		sizeByElement.put(child, sizeByElement.get(child) + 1);
 	}
 
-	void decrementSize(Element<?> child) {
-		int size = map2.get(child) - 1;
+	private void decrementSize(Element<?> child) {
+		int size = sizeByElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
-			map2.remove(child);// remove map if 0 for avoid heap pollution
+			sizeByElement.remove(child);// remove map if empty
 		else
-			map2.put(child, size);
+			sizeByElement.put(child, size);
 	}
 
-	int computeIndex(Element<?> childElement) {
+	private int computeIndex(Element<?> childElement) {
 		int indexInChildren = 0;
 		for (Element<?> child : template.getChildren()) {
-			indexInChildren += map2.get(child);
+			indexInChildren += sizeByElement.get(child);
 			if (child == childElement)
 				break;
 		}
 		return indexInChildren;
 	}
 
+	public static class RootViewContext<Group> extends ViewContext<Group> {
+
+		public RootViewContext(Object model, Element<Group> template, Group node) {
+			super(null, new RootModelContext(model), template, node);
+		}
+	}
 }
