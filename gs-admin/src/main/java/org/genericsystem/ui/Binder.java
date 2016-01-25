@@ -154,7 +154,6 @@ public interface Binder<N, X, Y> {
 					else
 						nodeResult.remove(styleClass);
 				};
-
 				consumer.accept(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
 			}
