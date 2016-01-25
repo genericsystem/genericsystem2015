@@ -77,6 +77,10 @@ public class Table extends Listable<Row> {
 		super(parent, firstRow, rows, null, tableStyle);
 	}
 
+	public Table(Model parent) {
+		super(parent, null, null, null, null);
+	}
+
 	public Property<Number> getFirstRowHeight() {
 		return firstRowHeight;
 	}

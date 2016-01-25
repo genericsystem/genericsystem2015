@@ -37,9 +37,9 @@ public class Stylable extends Model {
 
 	public static class Listable<Element> extends Stylable {
 
-		private final ObservableValue<Element> firstElement;
-		private final ObservableList<Element> elements;
-		private final ObservableValue<Element> lastElement;
+		private ObservableValue<Element> firstElement;
+		private ObservableList<Element> elements;
+		private ObservableValue<Element> lastElement;
 
 		public Listable(Model parent, ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
 			super(parent, styleClass);
@@ -52,8 +52,20 @@ public class Stylable extends Model {
 			return firstElement;
 		}
 
+		public void setFirstElement(ObservableValue<Element> firstElement) {
+			this.firstElement = firstElement;
+		}
+
 		public ObservableList<Element> getElements() {
 			return elements;
+		}
+
+		public void setElements(ObservableList<Element> elements) {
+			this.elements = elements;
+		}
+
+		public void setLastElement(ObservableValue<Element> lastElement) {
+			this.lastElement = lastElement;
 		}
 
 		public ObservableValue<Element> getLastElement() {

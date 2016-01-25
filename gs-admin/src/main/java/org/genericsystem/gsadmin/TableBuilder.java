@@ -111,54 +111,71 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	public Table buildTable(Model parent) {
-		return new Table(parent, buildFirstRow(), buildRows(), tableStyle.table);
+		Table table = new Table(parent);
+		table.setFirstElement(buildFirstRow(table));
+		table.setElements(buildRows(table));
+		return table;
+		// return new Table(parent, buildFirstRow(), buildRows(), tableStyle.table);
 	}
 
-	protected ObservableValue<Row> buildFirstRow() {
-		return firstRowExtractor != null ? new SimpleObjectProperty<>(buildFirstRow(null, firstColumnExtractor != null ? firstRowFirstColumnString : new SimpleStringProperty(), columns, firstRowExtractor,
+	protected ObservableValue<Row> buildFirstRow(Table parent) {
+		return firstRowExtractor != null ? new SimpleObjectProperty<>(buildFirstRow(parent, null, firstColumnExtractor != null ? firstRowFirstColumnString : new SimpleStringProperty(), columns, firstRowExtractor,
 				lastColumnExtractor != null ? firstRowLastColumnString : new SimpleStringProperty())) : new SimpleObjectProperty<>();
 	}
 
-	protected ObservableList<Row> buildRows() {
-		return new Transformation<>(items, item -> buildRow(item));
+	protected ObservableList<Row> buildRows(Table parent) {
+		return new Transformation<>(items, item -> buildRow(parent, item));
 	}
 
-	protected Row buildRow(ITEM item) {
-		return buildRow(item, firstColumnExtractor != null ? firstColumnExtractor.apply(item) : new SimpleObjectProperty<T>(), columns, rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null,
+	protected Row buildRow(Table parent, ITEM item) {
+		return buildRow(parent, item, firstColumnExtractor != null ? firstColumnExtractor.apply(item) : new SimpleObjectProperty<T>(), columns, rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null,
 				lastColumnExtractor == null ? new SimpleStringProperty() : lastColumnExtractor.apply(item));
 	}
 
-	public Row buildFirstRow(ITEM item, ObservableValue<String> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> lastColumnString) {
-		return new GenericRow((Generic) item, buildFirstCell((ObservableValue<T>) firstColumnExtractor, tableStyle.firstRowFirstCell), buildFirstRowCells(columns, columnExtractor, tableStyle.firstRowCell), buildLastCell(lastColumnString,
-				tableStyle.firstRowLastCell), tableStyle.firstRow);
+	public Row buildFirstRow(Table parent, ITEM item, ObservableValue<String> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> lastColumnString) {
+		GenericRow firstRow = new GenericRow(parent);
+		firstRow.setItem((Generic) item);
+		firstRow.setFirstElement(buildFirstCell(firstRow, (ObservableValue<T>) firstColumnExtractor, tableStyle.firstRowFirstCell));
+		firstRow.setElements(buildFirstRowCells(firstRow, columns, columnExtractor, tableStyle.firstRowCell));
+		firstRow.setLastElement(buildLastCell(firstRow, lastColumnString, tableStyle.firstRowLastCell));
+
+		return firstRow;
+		// return new GenericRow(parent, (Generic) item, buildFirstCell((ObservableValue<T>) firstColumnExtractor, tableStyle.firstRowFirstCell), buildFirstRowCells(columns, columnExtractor, tableStyle.firstRowCell), buildLastCell(lastColumnString,
+		// tableStyle.firstRowLastCell), tableStyle.firstRow);
 	}
 
-	public Row buildRow(ITEM item, ObservableValue<T> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString) {
-		return new GenericRow((Generic) item, buildFirstCell(firstColumnExtractor, tableStyle.firstCell), buildCells(columns, columnExtractor, tableStyle.cell), buildLastCell(lastColumnString, tableStyle.lastCell), tableStyle.row);
+	public Row buildRow(Table parent, ITEM item, ObservableValue<T> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString) {
+		GenericRow currentRow = new GenericRow(parent);
+		currentRow.setItem((Generic) item);
+		currentRow.setFirstElement(buildFirstCell(currentRow, firstColumnExtractor, tableStyle.firstCell));
+		currentRow.setElements(buildCells(currentRow, columns, columnExtractor, tableStyle.cell));
+		currentRow.setLastElement(buildLastCell(currentRow, lastColumnString, tableStyle.lastCell));
+		return currentRow;
+		// return new GenericRow(parent, (Generic) item, buildFirstCell(firstColumnExtractor, tableStyle.firstCell), buildCells(columns, columnExtractor, tableStyle.cell), buildLastCell(lastColumnString, tableStyle.lastCell), tableStyle.row);
 	}
 
-	protected ObservableValue<Cell<?>> buildFirstCell(ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
-		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
+	protected ObservableValue<Cell<?>> buildFirstCell(Row parent, ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
+		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(parent, firstColumnString, cellStyle) : null);
 	}
 
-	protected ObservableValue<Cell<?>> buildFistRowfirstCell(ObservableValue<String> firstColumnString, ObservableValue<String> cellStyle) {
-		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
+	protected ObservableValue<Cell<?>> buildFistRowfirstCell(Row parent, ObservableValue<String> firstColumnString, ObservableValue<String> cellStyle) {
+		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(parent, firstColumnString, cellStyle) : null);
 	}
 
-	protected ObservableList<Cell<?>> buildFirstRowCells(ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> cellStyle) {
-		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(columnExtractor.apply(column), cellStyle));
+	protected ObservableList<Cell<?>> buildFirstRowCells(Row parent, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> cellStyle) {
+		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(parent, columnExtractor.apply(column), cellStyle));
 	}
 
-	protected ObservableValue<Cell<?>> buildfirstCell(ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
-		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
+	protected ObservableValue<Cell<?>> buildfirstCell(Row parent, ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
+		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(parent, firstColumnString, cellStyle) : null);
 	}
 
-	protected ObservableList<Cell<?>> buildCells(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> cellStyle) {
-		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(columnExtractor.apply(column), cellStyle));
+	protected ObservableList<Cell<?>> buildCells(Row parent, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> cellStyle) {
+		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(parent, columnExtractor.apply(column), cellStyle));
 	}
 
-	protected ObservableValue<Cell<?>> buildLastCell(ObservableValue<String> lastColumnString, ObservableValue<String> cellStyle) {
-		return new ReadOnlyObjectWrapper<>(lastColumnString.getValue() != null ? new Cell<>(lastColumnString, cellStyle) : null);
+	protected ObservableValue<Cell<?>> buildLastCell(Row parent, ObservableValue<String> lastColumnString, ObservableValue<String> cellStyle) {
+		return new ReadOnlyObjectWrapper<>(lastColumnString.getValue() != null ? new Cell<>(parent, lastColumnString, cellStyle) : null);
 	}
 
 	ObservableValue<String> getRowFirstCellStyle() {
@@ -193,8 +210,8 @@ public abstract class TableBuilder<ITEM, COL, T> {
 		}
 
 		@Override
-		public Table buildTable() {
-			Table result = super.buildTable();
+		public Table buildTable(Model parent) {
+			Table result = super.buildTable(parent);
 			/* default values */
 			result.getColumnWidth().setValue(300);
 			result.getRowHeight().setValue(200);
