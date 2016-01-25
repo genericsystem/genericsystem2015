@@ -134,11 +134,6 @@ public class Element<N> {
 		return this;
 	}
 
-	@Deprecated
-	public N apply(Object model, N parentNode) {
-		return new ViewContext<>(null, new ModelContext(null, model), this, parentNode).getNode();
-	}
-
 	protected N createNode(Object parent) {
 		try {
 			if (parent != null && !Modifier.isStatic(nodeClass.getModifiers()) && nodeClass.getEnclosingClass() != null)

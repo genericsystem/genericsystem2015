@@ -85,10 +85,6 @@ public class Binding<N, X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListBinder());
 	}
 
-//	public static <SUPERMODEL, N, M, W> Binding<N, Function<SUPERMODEL, W>, Property<W>> bindGenericMouseAction(BiConsumer<SUPERMODEL, M> applyOnModel, Function<N, Property<W>> applyOnNode) {
-//		return Binding.bind(applyOnNode, applyOnModel, Binder.genericMouseActionBinder());
-//	}
-
 	public static <SUPERMODEL, N, W> Binding<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, W> applyOnModel, Function<N, Property<Consumer<W>>> applyOnNode) {
 		return Binding.pushBinding(applyOnNode, applyOnModel, Binder.pushModelActionOnSuperModel());
 	}
