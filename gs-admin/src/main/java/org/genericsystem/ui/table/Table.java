@@ -101,7 +101,6 @@ public class Table extends Listable<Row> {
 	}
 
 	public ObservableValue<Number> getTableWidth() {
-		System.out.println(tableWidth);
 		return tableWidth;
 	}
 }
