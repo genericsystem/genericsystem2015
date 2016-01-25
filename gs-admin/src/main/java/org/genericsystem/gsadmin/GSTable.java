@@ -75,7 +75,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			// return app -> ((Window) app).getHeight();
+			// = return app -> ((Window) app).getHeight();
 			return app -> new SimpleObjectProperty<>(900);
 		}
 
@@ -101,6 +101,18 @@ public abstract class GSTable extends GSVBox {
 
 		public GSEditTableCellTable(Element<?> parent) {
 			super(parent);
+		}
+
+		@Override
+		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
+
+			return app -> new SimpleObjectProperty<>(600);
+		}
+
+		@Override
+		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
+			// return app -> ((Window) app).getHeight();
+			return app -> new SimpleObjectProperty<>(600);
 		}
 
 		@Override

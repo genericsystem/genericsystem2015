@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.table.Stylable.Listable;
 
 public class Table extends Listable<Row> {
@@ -72,8 +73,8 @@ public class Table extends Listable<Row> {
 	// return secondColumnWidth;
 	// }
 
-	public Table(ObservableValue<Row> firstRow, ObservableList<Row> rows, ObservableValue<String> tableStyle) {
-		super(firstRow, rows, null, tableStyle);
+	public Table(Model parent, ObservableValue<Row> firstRow, ObservableList<Row> rows, ObservableValue<String> tableStyle) {
+		super(parent, firstRow, rows, null, tableStyle);
 	}
 
 	public Property<Number> getFirstRowHeight() {

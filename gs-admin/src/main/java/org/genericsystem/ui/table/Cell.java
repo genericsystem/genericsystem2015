@@ -2,12 +2,14 @@ package org.genericsystem.ui.table;
 
 import javafx.beans.value.ObservableValue;
 
+import org.genericsystem.ui.Model;
+
 public class Cell<T> extends Stylable {
 
 	private ObservableValue<T> observableModel;
 
-	public Cell(ObservableValue<T> observableModel, ObservableValue<String> styleClass) {
-		super(styleClass);
+	public Cell(Model parent, ObservableValue<T> observableModel, ObservableValue<String> styleClass) {
+		super(parent, styleClass);
 		this.observableModel = observableModel;
 	}
 

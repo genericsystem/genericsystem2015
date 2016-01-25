@@ -5,12 +5,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public abstract class Crud {
+import org.genericsystem.ui.Model;
+
+public abstract class Crud extends Model {
 	protected final Property<Table> table;
 	protected Property<Table> editTable = new SimpleObjectProperty<>();
 	protected StringProperty name = new SimpleStringProperty();
 
-	public Crud(Property<Table> table) {
+	public Crud(Model parent, Property<Table> table) {
+		super(parent);
 		this.table = table;
 	}
 
