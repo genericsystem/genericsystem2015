@@ -23,10 +23,11 @@ import javafx.util.Callback;
 
 import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.components.GSTableButtonColumn.ActionTableColumn;
 
 public class GSTableButtonColumn<SUPERMODEL, T> extends Element<ActionTableColumn> {
-
+	<MODEL extends Model<?, MODEL>>
 	public static class ActionTableColumn<T> extends TableColumn {
 		ObjectProperty<Consumer<T>> onActionProperty = new SimpleObjectProperty<Consumer<T>>();
 

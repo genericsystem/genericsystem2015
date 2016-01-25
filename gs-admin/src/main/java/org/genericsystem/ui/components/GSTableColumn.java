@@ -11,9 +11,10 @@ import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.Model;
 
 public class GSTableColumn<T> extends Element<TableColumn> {
-
+	<MODEL extends Model<?, MODEL>>
 	public <M> GSTableColumn(Element parent, String columnTitle, Function<M, String> stringConverter) {
 		super(parent, TableColumn.class, TableView<M>::getColumns);
 		setText(columnTitle);

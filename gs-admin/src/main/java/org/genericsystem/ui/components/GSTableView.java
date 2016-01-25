@@ -7,7 +7,7 @@ import javafx.scene.control.TableView;
 
 import org.genericsystem.ui.Element;
 
-public class GSTableView extends GSRegion<GSTableView, TableView> {
+public class GSTableView<MODEL extends Model<?, MODEL>> extends GSRegion<GSTableView, TableView> {
 
 	public GSTableView(Element<?> parent) {
 		super(parent, TableView.class);
