@@ -1,7 +1,6 @@
 package org.genericsystem.todomvctable;
 
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -9,8 +8,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-
 import org.genericsystem.ui.Element;
+import org.genericsystem.ui.Model;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSTableButtonColumn;
@@ -19,7 +18,11 @@ import org.genericsystem.ui.components.GSTableView;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
 
-public class TodoTableList {
+public class TodoTableList extends Model {
+
+	public TodoTableList() {
+		super(null);
+	}
 
 	private Property<String> name = new SimpleStringProperty();
 	private ObservableList<Todo> todos = FXCollections.observableArrayList();
@@ -53,7 +56,7 @@ public class TodoTableList {
 	/*********************************************************************************************************************************/
 
 	public void create() {
-		Todo todo = new Todo();
+		Todo todo = new Todo(this);
 		todo.stringProperty.setValue(name.getValue());
 		todos.add(todo);
 	}
@@ -63,7 +66,7 @@ public class TodoTableList {
 	}
 
 	public void createColumn() {
-		TodoColumn ac = new TodoColumn();
+		TodoColumn ac = new TodoColumn(this);
 		columns.add(ac);
 		ac.title.setValue("Col : " + columns.indexOf(ac));
 	}
