@@ -2,6 +2,7 @@ package org.genericsystem.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -13,6 +14,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+
 import org.genericsystem.ui.Model;
 
 public class TodoList extends Model {
@@ -31,12 +33,11 @@ public class TodoList extends Model {
 	private Property<Todo> selection = new SimpleObjectProperty<>();
 
 	public TodoList() {
-		super(null);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 	}
 
 	public void create() {
-		todos.add(new Todo(this,getName().getValue()));
+		todos.add(new Todo(this, getName().getValue()));
 	}
 
 	public void showAll() {

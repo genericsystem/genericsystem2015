@@ -7,19 +7,14 @@ import javafx.collections.ObservableList;
 import org.genericsystem.ui.Model;
 
 public class Stylable extends Model {
-	private ObservableValue<String> styleClass;
+	private final ObservableValue<String> styleClass;
 
-	public Stylable(Model parent, ObservableValue<String> styleClass) {
-		super(parent);
+	public Stylable(ObservableValue<String> styleClass) {
 		this.styleClass = styleClass;
 	}
 
 	public ObservableValue<String> getStyleClass() {
 		return styleClass;
-	}
-
-	public void setStyleClass(ObservableValue<String> styleClass) {
-		this.styleClass = styleClass;
 	}
 
 	public static class TableStyle {
@@ -37,12 +32,12 @@ public class Stylable extends Model {
 
 	public static class Listable<Element> extends Stylable {
 
-		private ObservableValue<Element> firstElement;
-		private ObservableList<Element> elements;
-		private ObservableValue<Element> lastElement;
+		private final ObservableValue<Element> firstElement;
+		private final ObservableList<Element> elements;
+		private final ObservableValue<Element> lastElement;
 
-		public Listable(Model parent, ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
-			super(parent, styleClass);
+		public Listable(ObservableValue<Element> firstElement, ObservableList<Element> elements, ObservableValue<Element> lastElement, ObservableValue<String> styleClass) {
+			super(styleClass);
 			this.firstElement = firstElement;
 			this.elements = elements;
 			this.lastElement = lastElement;
@@ -52,25 +47,12 @@ public class Stylable extends Model {
 			return firstElement;
 		}
 
-		public void setFirstElement(ObservableValue<Element> firstElement) {
-			this.firstElement = firstElement;
-		}
-
 		public ObservableList<Element> getElements() {
 			return elements;
-		}
-
-		public void setElements(ObservableList<Element> elements) {
-			this.elements = elements;
-		}
-
-		public void setLastElement(ObservableValue<Element> lastElement) {
-			this.lastElement = lastElement;
 		}
 
 		public ObservableValue<Element> getLastElement() {
 			return lastElement;
 		}
-
 	}
 }

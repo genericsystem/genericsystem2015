@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 
@@ -69,7 +70,8 @@ public class ModelContext {
 				s += modelContext_.getModel() + "/";
 				try {
 					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {}
+				} catch (ClassCastException ignore) {
+				}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
@@ -98,6 +100,8 @@ public class ModelContext {
 
 		public <N> void insert(int index, Model model, ViewContext<N> viewContext) {
 			ModelContext childModelContext = createChildContext(model);
+			model.parent = getModel();// inject parent
+			model.afterParentConstruct();
 			viewContext.createChildContext(childModelContext, childElement);
 			internal.add(index, childModelContext);
 		};

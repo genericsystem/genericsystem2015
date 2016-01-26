@@ -8,8 +8,7 @@ public abstract class Window extends Model {
 	private final ObservableValue<Number> width;
 	private final ObservableValue<Number> height;
 
-	public Window(Model parent, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
-		super(parent);
+	public Window(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		this.width = (ObservableValue<Number>) width;
 		this.height = (ObservableValue<Number>) height;
 	}

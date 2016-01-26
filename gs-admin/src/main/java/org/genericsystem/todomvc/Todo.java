@@ -4,6 +4,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.ui.Model;
 
 public class Todo extends Model {
@@ -12,7 +13,6 @@ public class Todo extends Model {
 	private Property<Boolean> completed = new SimpleBooleanProperty(false);
 
 	Todo(TodoList parentModel, String text) {
-		super(parentModel);
 		todoString = new ReadOnlyObjectWrapper<>(text);
 	}
 

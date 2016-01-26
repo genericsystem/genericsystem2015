@@ -9,11 +9,10 @@ import org.genericsystem.ui.Model;
 
 public abstract class Crud extends Model {
 	protected final Property<Table> table;
-	protected Property<Table> editTable = new SimpleObjectProperty<>();
-	protected StringProperty name = new SimpleStringProperty();
+	protected final Property<Table> editTable = new SimpleObjectProperty<>();
+	protected final StringProperty name = new SimpleStringProperty();
 
-	public Crud(Model parent, Property<Table> table) {
-		super(parent);
+	public Crud(Property<Table> table) {
 		this.table = table;
 	}
 
