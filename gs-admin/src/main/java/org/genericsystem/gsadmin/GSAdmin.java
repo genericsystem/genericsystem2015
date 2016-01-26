@@ -25,9 +25,9 @@ public class GSAdmin extends GSApplication {
 			{
 				GSVBox leftTables = new GSVBox(scrollPane).setMinHeight(1000).setMinWidth(1400).setSpacing(20);
 				{
-					new GSEngineCrud(leftTables).select(GenericWindow::getTableCrud);
+					new GSEngineCrud(leftTables).select(GenericWindow::getFirstCrud);
 
-					new GSCrud(leftTables).select(GenericWindow::getTableCrudSelectedRow);
+					new GSCrud(leftTables).select(GenericWindow::getSecondCrud);
 
 					GSHBox commandPanel = new GSHBox(leftTables).setSpacing(5);
 					{

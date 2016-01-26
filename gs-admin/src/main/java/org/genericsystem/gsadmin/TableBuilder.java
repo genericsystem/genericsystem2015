@@ -1,7 +1,6 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
-
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
@@ -9,7 +8,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;

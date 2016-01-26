@@ -8,7 +8,6 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
@@ -18,53 +17,49 @@ import org.genericsystem.ui.table.Window;
 
 public class GenericWindow extends Window {
 
-	private final Property<GenericCrud> tableCrud = new SimpleObjectProperty<>();
-	private final Property<GenericCrud> tableCrudSelectedRow = new SimpleObjectProperty<>();
-
-	public Property<GenericCrud> getTableCrud() {
-		return tableCrud;
-	}
-
-	public Property<GenericCrud> getTableCrudSelectedRow() {
-		return tableCrudSelectedRow;
-	}
-
-	public GenericWindow(CocClientEngine engine, Property<Table> table, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
-		super(width, height);
-	}
+	private final Property<GenericCrud> firstCrud = new SimpleObjectProperty<>();
+	private final Property<GenericCrud> secondCrud = new SimpleObjectProperty<>();
 
 	public GenericWindow(GenericCrud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width, height);
-		this.tableCrud.setValue(tableCrud);
+		this.firstCrud.setValue(tableCrud);
+	}
+
+	public Property<GenericCrud> getFirstCrud() {
+		return firstCrud;
+	}
+
+	public Property<GenericCrud> getSecondCrud() {
+		return secondCrud;
 	}
 
 	public void flush() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().flush();
+		firstCrud.getValue().<Generic> getModel().getCurrentCache().flush();
 	}
 
 	public void shiftTs() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().shiftTs();
+		firstCrud.getValue().<Generic> getModel().getCurrentCache().shiftTs();
 	}
 
 	public void cancel() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().clear();
+		firstCrud.getValue().<Generic> getModel().getCurrentCache().clear();
 	}
 
 	public void mount() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().mount();
+		firstCrud.getValue().<Generic> getModel().getCurrentCache().mount();
 	}
 
 	public StringBinding getCacheLevel() {
-		return Bindings.createStringBinding(() -> "Cache level : " + tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache()
+		return Bindings.createStringBinding(() -> "Cache level : " + firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache()
 				.getCacheLevelObservable());
 	}
 
 	public void unmount() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
+		firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
 	}
 
 	public void selectRowEngineTable(GenericRow row) {
-		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
+		firstCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
 		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
 				itemTableCell -> columnTableCell -> {
 					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
@@ -89,13 +84,13 @@ public class GenericWindow extends Window {
 		table.getColumnWidth().setValue(310);
 
 		GenericCrud genericCrud = new GenericCrud(new SimpleObjectProperty<>(table), row.getItem());
-		tableCrudSelectedRow.setValue(genericCrud);
-		createEditTable(tableCrud.getValue(), row);
+		secondCrud.setValue(genericCrud);
+		createEditTable(firstCrud.getValue(), row);
 	}
 
 	public void selectRowGenericTable(GenericRow row) {
 		assert row != null;
-		createEditTable(tableCrudSelectedRow.getValue(), row);
+		createEditTable(secondCrud.getValue(), row);
 	}
 
 	private void createEditTable(GenericCrud crud, GenericRow row) {
