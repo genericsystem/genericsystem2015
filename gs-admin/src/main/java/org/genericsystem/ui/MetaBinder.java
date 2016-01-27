@@ -12,7 +12,7 @@ import org.genericsystem.ui.ModelContext.ModelContextList;
 
 public interface MetaBinder<N, W> {
 
-	default void init(Function<?, W> method, ViewContext<N> viewContext, Element<?> childElement) {
+	default void init(Function<Model, W> method, ViewContext<N> viewContext, Element<?> childElement) {
 		init(viewContext.getModelContext().applyOnModel(method), viewContext, childElement);
 	}
 

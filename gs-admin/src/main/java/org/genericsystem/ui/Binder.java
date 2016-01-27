@@ -10,7 +10,7 @@ import javafx.event.EventHandler;
 
 public interface Binder<N, X, Y> {
 
-	default void init(Function<N, Y> applyOnNode, Function<?, X> method, ModelContext modelContext, N node) {
+	default void init(Function<N, Y> applyOnNode, Function<Model, X> method, ModelContext modelContext, N node) {
 		init(applyOnNode.apply(node), modelContext.applyOnModel(method), modelContext);
 	}
 

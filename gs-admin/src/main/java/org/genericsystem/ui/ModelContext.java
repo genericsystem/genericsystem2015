@@ -6,14 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 
 public class ModelContext {
 
 	private final ModelContext parent;
-	private final Object model;
+	private final Model model;
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
 	private Map<Element<?>, ModelContextList> children = new HashMap<Element<?>, ModelContextList>() {
 		private static final long serialVersionUID = -2758395427732908902L;
@@ -42,7 +41,7 @@ public class ModelContext {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> M getModel() {
+	public <M extends Model> M getModel() {
 		return (M) model;
 	}
 
@@ -62,7 +61,7 @@ public class ModelContext {
 		return viewContexts;
 	}
 
-	public <T> Supplier<T> applyOnModel(Function<?, T> methodReference) {
+	public <T> Supplier<T> applyOnModel(Function<Model, T> methodReference) {
 		return () -> {
 			ModelContext modelContext_ = this;
 			String s = "/";
@@ -70,8 +69,7 @@ public class ModelContext {
 				s += modelContext_.getModel() + "/";
 				try {
 					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {
-				}
+				} catch (ClassCastException ignore) {}
 				modelContext_ = modelContext_.getParent();
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);

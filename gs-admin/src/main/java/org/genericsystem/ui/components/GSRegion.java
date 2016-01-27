@@ -98,7 +98,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T extends Model> Component forEach(Function<M, ObservableList<T>> function) {
+	public <M extends Model, T extends Model> Component forEach(Function<M, ObservableList<T>> function) {
 		super.forEach(function);
 		return (Component) this;
 	}

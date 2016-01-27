@@ -6,10 +6,10 @@ import javafx.collections.ObservableList;
 
 public class MetaBinding<N, T> {
 
-	private final Function<?, T> applyOnModel;
+	private final Function<Model, T> applyOnModel;
 	private final MetaBinder<N, T> binder;
 
-	public MetaBinding(Function<?, T> applyOnModel, MetaBinder<N, T> binder) {
+	public MetaBinding(Function<Model, T> applyOnModel, MetaBinder<N, T> binder) {
 		this.applyOnModel = applyOnModel;
 		this.binder = binder;
 	}
@@ -22,11 +22,11 @@ public class MetaBinding<N, T> {
 		return new MetaBinding<>((u) -> applyOnModel.apply((M) u), binder);
 	}
 
-	public static <N, M, T extends Model> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> applyOnModel) {
+	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> applyOnModel) {
 		return MetaBinding.bind(applyOnModel, MetaBinder.<N, T> foreachBinder());
 	}
 
-	public static <N, M, T extends Model> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
+	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
 		return MetaBinding.bind(applyOnModel, MetaBinder.selectorBinder());
 	}
 }
