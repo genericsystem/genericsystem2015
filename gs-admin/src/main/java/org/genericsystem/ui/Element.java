@@ -114,22 +114,23 @@ public class Element<N> {
 		return this;
 	}
 
-	protected <M, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
-		forEach(applyOnModel);
-		bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
-		return this;
-	}
+	// protected <M, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
+	// forEach(applyOnModel);
+	// bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
+	// return this;
+	// }
 
 	public <M, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
 		return this;
 	}
 
-	public <M, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
-		select(applyOnModel);
-		bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
-		return this;
-	}
+	//
+	// public <M, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
+	// select(applyOnModel);
+	// bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
+	// return this;
+	// }
 
 	protected N createNode(Object parent) {
 		try {

@@ -3,7 +3,6 @@ package org.genericsystem.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -19,17 +18,16 @@ public interface Binder<N, X, Y> {
 		init(nodeResult, applyOnModel.get());
 	}
 
-	default void init(Y nodeResult, X modelResult) {
-	}
+	default void init(Y nodeResult, X modelResult) {}
 
-	public static <N, W, W2> Binder<N, Property<W>, W2> injectBinder() {
-		return new Binder<N, Property<W>, W2>() {
-			@Override
-			public void init(W2 nodeResult, Supplier<Property<W>> applyOnModel, ModelContext modelContext) {
-				applyOnModel.get().setValue(modelContext.getParent().getModel());
-			}
-		};
-	}
+	// public static <N, W, W2> Binder<N, Property<W>, W2> injectBinder() {
+	// return new Binder<N, Property<W>, W2>() {
+	// @Override
+	// public void init(W2 nodeResult, Supplier<Property<W>> applyOnModel, ModelContext modelContext) {
+	// applyOnModel.get().setValue(modelContext.getParent().getModel());
+	// }
+	// };
+	// }
 
 	public static <N, W, Y> Binder<N, ObservableValue<W>, Property<W>> propertyBinder() {
 		return new Binder<N, ObservableValue<W>, Property<W>>() {
@@ -40,26 +38,56 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>> metaPropertyBinder() {
-		return new Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>>() {
-			@Override
-			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, ObservableValue<W>>> applyOnModel, ModelContext modelContext) {
-				Property<W> property = nodeResult;
-				ModelContext modelContext_ = modelContext.getParent();
-				String s = "/";
-				while (modelContext_ != null) {
-					s += modelContext_.getModel() + "/";
-					try {
-						property.bind(applyOnModel.get().apply(modelContext_.getModel()));
-						return;
-					} catch (ClassCastException ignore) {
-					}
-					modelContext_ = modelContext_.getParent();
-				}
-				throw new IllegalStateException("Unable to resolve a method reference  on stack : " + s);
-			}
-		};
-	}
+	// public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>> metaPropertyBinder() {
+	// return new Binder<N, Function<SUPERMODEL, ObservableValue<W>>, Property<W>>() {
+	// @Override
+	// public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, ObservableValue<W>>> applyOnModel, ModelContext modelContext) {
+	// Property<W> property = nodeResult;
+	// ModelContext modelContext_ = modelContext.getParent();
+	// String s = "/";
+	// while (modelContext_ != null) {
+	// s += modelContext_.getModel() + "/";
+	// try {
+	// property.bind(applyOnModel.get().apply(modelContext_.getModel()));
+	// return;
+	// } catch (ClassCastException ignore) {}
+	// modelContext_ = modelContext_.getParent();
+	// }
+	// throw new IllegalStateException("Unable to resolve a method reference  on stack : " + s);
+	// }
+	// };
+	// }
+
+	// public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>, Property<W>> metaActionBinder() {
+	// return new Binder<N, Function<SUPERMODEL, W>, Property<W>>() {
+	// @SuppressWarnings({ "unchecked", "rawtypes" })
+	// @Override
+	// public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext) {
+	// nodeResult.setValue((W) (EventHandler) event -> {
+	// ModelContext modelContext_ = modelContext;
+	// String s = "/";
+	// while (modelContext_ != null) {
+	// s += modelContext_.getModel() + "/";
+	// try {
+	// applyOnModel.get().apply(modelContext_.getModel());
+	// } catch (ClassCastException ignore) {}
+	// modelContext_ = modelContext_.getParent();
+	// }
+	// });
+	// }
+	// };
+	// }
+
+	// public static <N, SUPERMODEL, W> Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel() {
+	// return new Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>>() {
+	// @Override
+	// public void init(Function<N, Property<Consumer<W>>> applyOnNode, Function<?, Function<W, SUPERMODEL>> method, ModelContext modelContext, N node) {
+	// applyOnNode.apply(node).setValue(w -> modelContext.applyOnModel(method).get().apply(w));
+	// // applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
+	// // applyOnNode.apply(node).setValue(w -> method.apply(null));
+	// }
+	// };
+	// }
 
 	public static <N, W> Binder<N, W, Property<W>> actionBinder() {
 		return new Binder<N, W, Property<W>>() {
@@ -70,38 +98,6 @@ public interface Binder<N, X, Y> {
 			}
 		};
 
-	}
-
-	public static <N, SUPERMODEL, W> Binder<N, Function<SUPERMODEL, W>, Property<W>> metaActionBinder() {
-		return new Binder<N, Function<SUPERMODEL, W>, Property<W>>() {
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			@Override
-			public void init(Property<W> nodeResult, Supplier<Function<SUPERMODEL, W>> applyOnModel, ModelContext modelContext) {
-				nodeResult.setValue((W) (EventHandler) event -> {
-					ModelContext modelContext_ = modelContext;
-					String s = "/";
-					while (modelContext_ != null) {
-						s += modelContext_.getModel() + "/";
-						try {
-							applyOnModel.get().apply(modelContext_.getModel());
-						} catch (ClassCastException ignore) {
-						}
-						modelContext_ = modelContext_.getParent();
-					}
-				});
-			}
-		};
-	}
-
-	public static <N, SUPERMODEL, W> Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>> pushModelActionOnSuperModel() {
-		return new Binder<N, Function<W, SUPERMODEL>, Property<Consumer<W>>>() {
-			@Override
-			public void init(Function<N, Property<Consumer<W>>> applyOnNode, Function<?, Function<W, SUPERMODEL>> method, ModelContext modelContext, N node) {
-				applyOnNode.apply(node).setValue(w -> modelContext.applyOnModel(method).get().apply(w));
-				// applyOnNode.apply(node).setValue(w -> applyOnModel.get().apply(w));
-				// applyOnNode.apply(node).setValue(w -> method.apply(null));
-			}
-		};
 	}
 
 	public static <N, W> Binder<N, Property<W>, ObservableValue<W>> propertyReverseBinder() {
