@@ -1,6 +1,5 @@
 package org.genericsystem.ui.components;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.value.ObservableValue;
@@ -35,10 +34,10 @@ public class GSButton extends GSRegion<GSButton, Button> {
 		return this;
 	}
 
-	public <SUPERMODEL, M> GSButton setMetaAction(BiConsumer<SUPERMODEL, M> action) {
-		bindings.add(Binding.bindMetaAction(action, Button::onActionProperty));
-		return this;
-	}
+	// public <SUPERMODEL, M> GSButton setMetaAction(BiConsumer<SUPERMODEL, M> action) {
+	// bindings.add(Binding.bindMetaAction(action, Button::onActionProperty));
+	// return this;
+	// }
 
 	public GSButton setText(String text) {
 		addBoot(Button::textProperty, text);

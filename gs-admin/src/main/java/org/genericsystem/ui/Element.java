@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.Property;
@@ -75,10 +74,10 @@ public class Element<N> {
 		return this;
 	}
 
-	public <M, T> Element<N> addMetaBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
-		bindings.add(Binding.bindMetaProperty(applyOnModel, applyOnNode));
-		return this;
-	}
+	// public <M, T> Element<N> addMetaBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
+	// bindings.add(Binding.bindMetaProperty(applyOnModel, applyOnNode));
+	// return this;
+	// }
 
 	public <M, T> Element<N> setObservableListBinding(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
 		bindings.add(Binding.bindObservableList(applyOnModel, applyOnNode));
@@ -90,10 +89,10 @@ public class Element<N> {
 		return this;
 	}
 
-	public <SUPERMODEL, M, T> Element<N> addMetaActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
-		bindings.add(Binding.bindMetaAction(biConsumer, propAction));
-		return this;
-	}
+	// public <SUPERMODEL, M, T> Element<N> addMetaActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
+	// bindings.add(Binding.bindMetaAction(biConsumer, propAction));
+	// return this;
+	// }
 
 	public <M, T> Element<N> addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
 		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));

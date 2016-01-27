@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -20,8 +19,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-
-import org.genericsystem.ui.Binding;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSTableButtonColumn.ActionTableColumn;
 
@@ -40,14 +37,14 @@ public class GSTableButtonColumn<SUPERMODEL, T> extends Element<ActionTableColum
 		setText(columnTitle);
 		setCellValueFactory(features -> new SimpleObjectProperty<>(stringConverter.apply(features.getValue())));
 		super.addBoot(TableColumn::cellFactoryProperty, (Callback<ActionTableColumn<T>, TableCell<T, String>>) col -> new DeleteButtonCell<T>(model -> col.getOnActionProperty().getValue().accept(model)));
-		pushModelActionOnSuperModel(action);
+		// pushModelActionOnSuperModel(action);
 
 	}
 
-	public GSTableButtonColumn<SUPERMODEL, T> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, T> action) {
-		bindings.add(Binding.pushModelActionOnSuperModel(action, ActionTableColumn::getOnActionProperty));
-		return this;
-	}
+	// public GSTableButtonColumn<SUPERMODEL, T> pushModelActionOnSuperModel(BiConsumer<SUPERMODEL, T> action) {
+	// bindings.add(Binding.pushModelActionOnSuperModel(action, ActionTableColumn::getOnActionProperty));
+	// return this;
+	// }
 
 	public GSTableButtonColumn<SUPERMODEL, T> setCellValueFactory(Callback<CellDataFeatures<T, String>, ObservableValue<String>> valueFactory) {
 		super.addBoot(TableColumn::cellValueFactoryProperty, valueFactory);
