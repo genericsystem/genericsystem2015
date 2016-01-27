@@ -59,11 +59,12 @@ public class App extends Application {
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
 
-		new GSAdmin(GenericWindow.createWindow(scene.widthProperty(), scene.heightProperty(), initGS()), (Group) scene.getRoot());
-
 		stage.setScene(scene);
 		stage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
 		stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+
+		new GSAdmin(GenericWindow.createWindow(stage.widthProperty(), stage.heightProperty(), initGS()), (Group) scene.getRoot());
+
 		stage.show();
 		stage.setOnCloseRequest(e -> {
 			server.stop();

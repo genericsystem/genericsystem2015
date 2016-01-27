@@ -47,20 +47,22 @@ public class GenericRow extends Row {
 		firstCrud.getTable().getValue().getSelectedRow().setValue(this);
 		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(this.item.getObservableSubInstances(), this.item.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(this.item)),
 				itemTableCell -> columnTableCell -> {
+
 					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
 							+ firstColumnString), null);
 					Table tab = textTableModel.buildTable();
-					tab.getColumnWidth().setValue(300);
-					tab.getRowHeight().setValue(30);
-					return new ReadOnlyObjectWrapper<>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column),
-							null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
-					Table tab = textTableModel.buildTable();
-					tab.getColumnWidth().setValue(100);
-					tab.getRowHeight().setValue(50);
-					return new ReadOnlyObjectWrapper<>(tab);
-				}, column -> new ReadOnlyStringWrapper("Delete"));
+					// tab.getColumnWidth().setValue(300);
+					// tab.getRowHeight().setValue(30);
+				return new ReadOnlyObjectWrapper<>(tab);
+
+			}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
+				TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column), null,
+						firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+				Table tab = textTableModel.buildTable();
+				// tab.getColumnWidth().setValue(100);
+				// tab.getRowHeight().setValue(50);
+				return new ReadOnlyObjectWrapper<>(tab);
+			}, column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.buildTable();
 		table.getFirstRowHeight().setValue(25);
@@ -89,13 +91,12 @@ public class GenericRow extends Row {
 						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
 								firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
 						Table tab = textTableModel.buildTable();
-						tab.getFirstColumnWidth().setValue(100);
+						// tab.getFirstColumnWidth().setValue(100);
+						// tab.getFirstRowHeight().setValue(30);
+						// tab.getRowHeight().setValue(40);
 
-						tab.getFirstRowHeight().setValue(30);
-						tab.getRowHeight().setValue(40);
-
-						return new ReadOnlyObjectWrapper<>(tab);
-					}, null);
+					return new ReadOnlyObjectWrapper<>(tab);
+				}, null);
 			Table editTable = editTableModel.buildTable();
 			editTable.getFirstColumnWidth().setValue(200);
 			editTable.getColumnWidth().setValue(310);
