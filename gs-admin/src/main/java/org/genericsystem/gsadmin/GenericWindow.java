@@ -8,6 +8,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
@@ -56,69 +57,6 @@ public class GenericWindow extends Window {
 
 	public void unmount() {
 		firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
-	}
-
-	public void selectRowEngineTable(GenericRow row) {
-		firstCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
-		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
-				itemTableCell -> columnTableCell -> {
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
-							+ firstColumnString), null);
-					Table tab = textTableModel.buildTable();
-					tab.getColumnWidth().setValue(300);
-					tab.getRowHeight().setValue(30);
-					return new ReadOnlyObjectWrapper<>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column),
-							null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
-					Table tab = textTableModel.buildTable();
-					tab.getColumnWidth().setValue(100);
-					tab.getRowHeight().setValue(50);
-					return new ReadOnlyObjectWrapper<>(tab);
-				}, column -> new ReadOnlyStringWrapper("Delete"));
-
-		Table table = tableModel.buildTable();
-		table.getFirstRowHeight().setValue(25);
-		table.getFirstColumnWidth().setValue(200);
-		table.getRowHeight().setValue(50);
-		table.getColumnWidth().setValue(310);
-
-		GenericCrud genericCrud = new GenericCrud(new SimpleObjectProperty<>(table), row.getItem());
-		secondCrud.setValue(genericCrud);
-		createEditTable(firstCrud.getValue(), row);
-	}
-
-	public void selectRowGenericTable(GenericRow row) {
-		assert row != null;
-		createEditTable(secondCrud.getValue(), row);
-	}
-
-	private void createEditTable(GenericCrud crud, GenericRow row) {
-		if (crud != null) {
-			Generic generic = crud.getModel();
-			TableCellTableBuilder<Generic, Generic> editTableModel = new TableCellTableBuilder<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), FXCollections.observableArrayList(row.getItem()),
-					itemTableCell -> columnTableCell -> {
-						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(row.getItem().getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null, null, firstColumString -> new ReadOnlyStringWrapper(""
-								+ firstColumString), null);
-						Table tab = textTableModel.buildTable();
-						return new ReadOnlyObjectWrapper<>(tab);
-					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
-						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
-								firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-						Table tab = textTableModel.buildTable();
-						tab.getFirstColumnWidth().setValue(100);
-
-						tab.getFirstRowHeight().setValue(30);
-						tab.getRowHeight().setValue(40);
-
-						return new ReadOnlyObjectWrapper<>(tab);
-					}, null);
-			Table editTable = editTableModel.buildTable();
-			editTable.getFirstColumnWidth().setValue(200);
-			editTable.getColumnWidth().setValue(310);
-			editTable.getRowHeight().setValue(45);
-			crud.getEditTable().setValue(editTable);
-		}
 	}
 
 	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {

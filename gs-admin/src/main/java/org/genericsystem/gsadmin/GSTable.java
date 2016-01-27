@@ -57,7 +57,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTextCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
+			return (GSHBox) new GSTextCellRow(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
 		}
 
 	}
@@ -81,7 +81,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTableCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericWindow::selectRowEngineTable);
+			return (GSHBox) new GSTableCellRow(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowEngineTable);
 		}
 	}
 
@@ -93,7 +93,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return (GSHBox) new GSTableCellRow(parent).addMetaActionBinding(HBox::onMouseClickedProperty, GenericWindow::selectRowGenericTable);
+			return (GSHBox) new GSTableCellRow(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
 		}
 	}
 
