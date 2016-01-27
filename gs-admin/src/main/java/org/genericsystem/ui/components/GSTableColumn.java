@@ -52,7 +52,7 @@ public class GSTableColumn<T> extends Element<TableColumn> {
 	// }
 
 	@Override
-	public <M, U extends Model> GSTableColumn<T> forEach(Function<M, ObservableList<U>> function) {
+	public <M extends Model, U extends Model> GSTableColumn<T> forEach(Function<M, ObservableList<U>> function) {
 		super.forEach(function);
 		return this;
 	}

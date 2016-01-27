@@ -1,6 +1,5 @@
 package org.genericsystem.ui;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javafx.beans.property.Property;
@@ -10,10 +9,10 @@ import javafx.collections.ObservableList;
 public class Binding<N, X, Y> {
 
 	private final Function<N, Y> applyOnNode;
-	private final Function<?, X> applyOnModel;
+	private final Function<Model, X> applyOnModel;
 	private final Binder<N, X, Y> binder;
 
-	public Binding(Function<N, Y> applyOnNode, Function<?, X> applyOnModel, Binder<N, X, Y> binder) {
+	public Binding(Function<N, Y> applyOnNode, Function<Model, X> applyOnModel, Binder<N, X, Y> binder) {
 		this.applyOnNode = applyOnNode;
 		this.applyOnModel = applyOnModel;
 		this.binder = binder;
@@ -36,21 +35,21 @@ public class Binding<N, X, Y> {
 		}, binder);
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <SUPERMODEL, N, M, W, Y> Binding<N, Function<SUPERMODEL, W>, Y> bind(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, M> applyOnModel, Binder<N, Function<SUPERMODEL, W>, Y> binder) {
-		return new Binding<>(applyOnNode, (m) -> (sm -> {
-			applyOnModel.accept(sm, (M) m);
-			return null;
-		}), binder);
-	}
+	// @SuppressWarnings("unchecked")
+	// private static <SUPERMODEL, N, M, W, Y> Binding<N, Function<SUPERMODEL, W>, Y> bind(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, M> applyOnModel, Binder<N, Function<SUPERMODEL, W>, Y> binder) {
+	// return new Binding<>(applyOnNode, (m) -> (sm -> {
+	// applyOnModel.accept(sm, (M) m);
+	// return null;
+	// }), binder);
+	// }
 
-	@SuppressWarnings("unchecked")
-	private static <SUPERMODEL, N, W, Y> Binding<N, Function<W, SUPERMODEL>, Y> pushBinding(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, W> applyOnModel, Binder<N, Function<W, SUPERMODEL>, Y> binder) {
-		return new Binding<>(applyOnNode, (sm) -> (m -> {
-			applyOnModel.accept((SUPERMODEL) sm, m);
-			return null;
-		}), binder);
-	}
+	// @SuppressWarnings("unchecked")
+	// private static <SUPERMODEL, N, W, Y> Binding<N, Function<W, SUPERMODEL>, Y> pushBinding(Function<N, Y> applyOnNode, BiConsumer<SUPERMODEL, W> applyOnModel, Binder<N, Function<W, SUPERMODEL>, Y> binder) {
+	// return new Binding<>(applyOnNode, (sm) -> (m -> {
+	// applyOnModel.accept((SUPERMODEL) sm, m);
+	// return null;
+	// }), binder);
+	// }
 
 	public static <N, M, W> Binding<N, ObservableValue<W>, Property<W>> bindProperty(Function<M, ObservableValue<W>> applyOnModel, Function<N, Property<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBinder());

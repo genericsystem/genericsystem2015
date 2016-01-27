@@ -19,7 +19,7 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T extends Model> Component select(Function<M, ObservableValue<T>> function) {
+	public <M extends Model, T extends Model> Component select(Function<M, ObservableValue<T>> function) {
 		super.select(function);
 		return (Component) this;
 	}
