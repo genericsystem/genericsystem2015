@@ -69,7 +69,7 @@ public class GenericWindow extends Window {
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
 					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), item -> col -> new ReadOnlyStringWrapper(""
 							+ col), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-					Table tab = textTableModel.buildTable();
+					Table tab = textTableModel.buildTableFirstColumn();
 					return new ReadOnlyObjectWrapper<>(tab);
 				}, column -> new ReadOnlyStringWrapper("Delete"));
 

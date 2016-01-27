@@ -58,7 +58,7 @@ public class GenericRow extends Row {
 			}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
 				TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column), null,
 						firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
-				Table tab = textTableModel.buildTable();
+				Table tab = textTableModel.buildTableFirstColumn();
 				// tab.getColumnWidth().setValue(100);
 				// tab.getRowHeight().setValue(50);
 				return new ReadOnlyObjectWrapper<>(tab);
@@ -86,14 +86,15 @@ public class GenericRow extends Row {
 						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null, null, firstColumString -> new ReadOnlyStringWrapper(""
 								+ firstColumString), null);
 						Table tab = textTableModel.buildTable();
-						return new ReadOnlyObjectWrapper<>(tab);
-					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
-						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
-								firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-						Table tab = textTableModel.buildTable();
-						// tab.getFirstColumnWidth().setValue(100);
-						// tab.getFirstRowHeight().setValue(30);
-						// tab.getRowHeight().setValue(40);
+						// tab.getFirstColumnWidth().setValue(200);
+					return new ReadOnlyObjectWrapper<>(tab);
+				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
+					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
+							firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+					Table tab = textTableModel.buildTableFirstColumn();
+					// tab.getFirstColumnWidth().setValue(100);
+					// tab.getFirstRowHeight().setValue(30);
+					// tab.getRowHeight().setValue(40);
 
 					return new ReadOnlyObjectWrapper<>(tab);
 				}, null);
