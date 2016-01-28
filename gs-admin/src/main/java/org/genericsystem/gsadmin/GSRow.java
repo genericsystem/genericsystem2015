@@ -22,17 +22,20 @@ public abstract class GSRow extends GSHBox {
 	@Override
 	protected void initChildren() {
 
-		GSHBox firstCell = new GSHBox(this).select(Row::getFirstElement).setMinWidth(Table::getFirstColumnWidth).setPrefWidth(Table::getFirstColumnWidth).setMaxWidth(Table::getFirstColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
+		GSHBox firstCell = new GSHBox(this).setStyleClass(Cell<Generic>::getStyleClass).select(Row::getFirstElement).setMinWidth(Cell<Generic>::getFirstColumnCellsWidth).setPrefWidth(Cell<Generic>::getFirstColumnCellsWidth)
+				.setMaxWidth(Cell<Generic>::getFirstColumnCellsWidth).setStyleClass(Cell<Generic>::getStyleClass);
 		{
 			createGSCell(firstCell);
 		}
 
-		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Table::getColumnWidth).setPrefWidth(Table::getColumnWidth).setMaxWidth(Table::getColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
+		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Cell<Generic>::getColumnCellsWidth).setMaxWidth(Cell<Generic>::getColumnCellsWidth).setPrefWidth(Cell<Generic>::getColumnCellsWidth)
+				.setStyleClass(Cell<Generic>::getStyleClass);
 		{
 			createGSCell(cells);
 		}
 
-		GSHBox lastCell = new GSHBox(this).select(Row::getLastElement).setMinWidth(Table::getLastColumnWidth).setPrefWidth(Table::getLastColumnWidth).setMaxWidth(Table::getLastColumnWidth).setStyleClass(Cell<Generic>::getStyleClass);
+		GSHBox lastCell = new GSHBox(this).select(Row::getLastElement).setMinWidth(Cell<Generic>::getLastColumnCellsWidth).setPrefWidth(Cell<Generic>::getLastColumnCellsWidth).setMaxWidth(Cell<Generic>::getLastColumnCellsWidth)
+				.setStyleClass(Cell<Generic>::getStyleClass);
 		{
 			new GSButton(lastCell, Cell<String>::getObservableModel).setAction(GenericRow::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
 		}

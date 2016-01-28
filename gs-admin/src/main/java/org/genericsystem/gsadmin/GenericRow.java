@@ -71,7 +71,7 @@ public class GenericRow extends Row {
 	}
 
 	public void selectRowGenericTable() {
-		createEditTable(((GenericWindow) (getParent().getParent()).getParent()).getSecondCrud().getValue());
+		createEditTable(((GenericWindow) (getParent().getParent().getParent().getParent().getParent().getParent())).getSecondCrud().getValue());
 	}
 
 	private void createEditTable(GenericCrud crud) {
