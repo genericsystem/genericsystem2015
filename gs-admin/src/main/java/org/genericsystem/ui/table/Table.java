@@ -26,7 +26,7 @@ public class Table extends Listable<Row> {
 	protected final ObservableIntegerValue otherCellsNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getElements().size() : 0, referenceRow);
 	protected final ObservableIntegerValue lastCellNumber = Bindings.createIntegerBinding(() -> referenceRow.getValue() != null ? referenceRow.getValue().getLastElement().getValue() != null ? 1 : 0 : 0, referenceRow);
 	protected final ObservableValue<Number> tableWidth = Bindings.add(getOptionalFirstCellWidth(), Bindings.add(getOtherCellsWidth(), getOptionalLastCellWidth()));
-
+	protected final ObservableIntegerValue otherRowsNumber = Bindings.createIntegerBinding(() -> getElements().size(), getElements());
 	protected Property<Row> selectedRow = new SimpleObjectProperty<>();
 
 	protected ObservableValue<Row> getReferenceRow() {
@@ -75,14 +75,17 @@ public class Table extends Listable<Row> {
 	}
 
 	public Property<Number> getRowHeight() {
-		if (getParent() instanceof Cell)
-			rowHeight.setValue(((Table) getParent().getParent()).rowHeight.getValue());
+		if (getParent() instanceof Cell) {
+			if (otherRowsNumber.get() > 0)
+				rowHeight.setValue(((Table) getParent().getParent().getParent()).rowHeight.getValue().intValue() - 4);
+		}
 		return rowHeight;
 	}
 
 	public Property<Number> getFirstColumnWidth() {
 		if (getParent() instanceof Cell)
-			firstColumnWidth.setValue(((Table) getParent().getParent()).columnWidth.getValue());
+			if (otherCellsNumber.intValue() == 0)
+				firstColumnWidth.setValue(((Table) getParent().getParent().getParent()).columnWidth.getValue().intValue() - 4);
 		return firstColumnWidth;
 	}
 
@@ -126,7 +129,8 @@ public class Table extends Listable<Row> {
 		public Property<Number> getFirstColumnWidth() {
 			if (getParent() instanceof Cell)
 				if (otherCellsNumber.getValue().intValue() == 0)
-					firstColumnWidth.setValue(((Table) getParent().getParent()).firstColumnWidth.getValue());
+					firstColumnWidth.setValue(((Table) getParent().getParent().getParent()).firstColumnWidth.getValue());
+			firstColumnWidth.setValue(firstColumnWidth.getValue().intValue() - 4);
 			return firstColumnWidth;
 		}
 

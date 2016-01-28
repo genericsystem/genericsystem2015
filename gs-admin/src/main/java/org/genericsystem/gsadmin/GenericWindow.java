@@ -76,8 +76,8 @@ public class GenericWindow extends Window {
 		Table table = tableModel.buildTable();
 		table.getFirstRowHeight().setValue(30);
 		table.getFirstColumnWidth().setValue(300);
-		table.getRowHeight().setValue(80);
-		table.getColumnWidth().setValue(310);
+		table.getRowHeight().setValue(50);
+		table.getColumnWidth().setValue(300);
 		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<>(table), engine);
 		return new GenericWindow(crud, width, height);
 	}
