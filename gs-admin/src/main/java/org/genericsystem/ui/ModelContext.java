@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 
@@ -64,13 +65,10 @@ public class ModelContext {
 	public <T> Supplier<T> applyOnModel(Function<Model, T> methodReference) {
 		return () -> {
 			ModelContext modelContext_ = this;
-			String s = "/";
-			while (modelContext_ != null) {
-				s += modelContext_.getModel() + "/";
-				try {
-					return methodReference.apply(modelContext_.getModel());
-				} catch (ClassCastException ignore) {}
-				modelContext_ = modelContext_.getParent();
+			String s = "/" + modelContext_.getModel() + "/";
+			try {
+				return methodReference.apply(modelContext_.getModel());
+			} catch (ClassCastException ignore) {
 			}
 			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
 		};

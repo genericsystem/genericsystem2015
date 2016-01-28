@@ -14,6 +14,7 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
+import org.genericsystem.ui.table.Window;
 
 public abstract class GSTable extends GSVBox {
 
@@ -27,8 +28,8 @@ public abstract class GSTable extends GSVBox {
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);// .setPrefWidth(getSuperPrefWidth()).setPrefHeight(getSuperPrefHeight());
 			{
-				new GSTextCellRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Table::getFirstRowHeight).setMaxHeight(Table::getFirstRowHeight).setPrefHeight(Table::getFirstRowHeight);
-				createSelectionHBox(tablePanel).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Table::getRowHeight).setMaxHeight(Table::getRowHeight).setPrefHeight(Table::getRowHeight);
+				new GSTextCellRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Row::getFirstRowHeight).setMaxHeight(Row::getFirstRowHeight).setPrefHeight(Row::getFirstRowHeight);
+				createSelectionHBox(tablePanel).forEach(Table::getElements).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
 			}
 		}
 	}
@@ -70,13 +71,14 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return app -> new SimpleObjectProperty<>(900);
+			return app -> ((Window) app).getWidth();
+			// return app -> new SimpleObjectProperty<>(900);
 		}
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
 			// = return app -> ((Window) app).getHeight();
-			return app -> new SimpleObjectProperty<>(900);
+			return app -> ((Window) app).getHeight();
 		}
 
 		@Override
@@ -111,7 +113,6 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			// return app -> ((Window) app).getHeight();
 			return app -> new SimpleObjectProperty<>(600);
 		}
 

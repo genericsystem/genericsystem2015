@@ -90,7 +90,6 @@ public class Table extends Listable<Row> {
 	}
 
 	public Property<Number> getColumnWidth() {
-
 		return columnWidth;
 	}
 
@@ -108,7 +107,8 @@ public class Table extends Listable<Row> {
 
 	public ObservableValue<Number> getParentWidth() {
 		if (getParent() instanceof Cell) {
-			return new SimpleObjectProperty<Number>(((Table) getParent().getParent()).columnWidth.getValue());
+
+			return new SimpleObjectProperty<Number>(((Table) getParent().getParent().getParent()).columnWidth.getValue());
 		}
 		return new SimpleObjectProperty<Number>(((Window) getParent().getParent()).getWidth().getValue());
 	}

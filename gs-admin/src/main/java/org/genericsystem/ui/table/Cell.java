@@ -1,5 +1,6 @@
 package org.genericsystem.ui.table;
 
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 public class Cell<T> extends Stylable {
@@ -13,5 +14,17 @@ public class Cell<T> extends Stylable {
 
 	public ObservableValue<T> getObservableModel() {
 		return observableModel;
+	}
+
+	public Property<Number> getLastColumnCellsWidth() {
+		return ((Table) getParent().getParent()).getLastColumnWidth();
+	}
+
+	public Property<Number> getFirstColumnCellsWidth() {
+		return ((Table) getParent().getParent()).getFirstColumnWidth();
+	}
+
+	public Property<Number> getColumnCellsWidth() {
+		return ((Table) getParent().getParent()).getColumnWidth();
 	}
 }
