@@ -87,7 +87,7 @@ public class GenericWindow extends Window {
 					return new ReadOnlyObjectWrapper<>(tab);
 				}, column -> new ReadOnlyStringWrapper("Delete"));
 
-		Table table = tableModel.buildTable(900, 900);
+		Table table = tableModel.buildTable(500, 900);
 		table.getFirstRowHeight().setValue(30);
 		table.getFirstColumnWidth().setValue(100);
 		table.getRowHeight().setValue(50);

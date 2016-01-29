@@ -29,7 +29,6 @@ public class GSCrud extends GSVBox {
 
 				initGSGenericTable(vb);
 			}
-
 			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable);
 		}
 	}
