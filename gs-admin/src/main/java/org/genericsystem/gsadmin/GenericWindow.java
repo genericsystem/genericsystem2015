@@ -18,45 +18,45 @@ import org.genericsystem.ui.table.Window;
 
 public class GenericWindow extends Window {
 
-	private final Property<GenericCrud> firstCrud = new SimpleObjectProperty<>();
-	private final Property<GenericCrud> secondCrud = new SimpleObjectProperty<>();
+	private final Property<GenericCrud> engineCrud = new SimpleObjectProperty<>();
+	private final Property<GenericCrud> genericCrud = new SimpleObjectProperty<>();
 
 	public GenericWindow(GenericCrud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width, height);
-		this.firstCrud.setValue(tableCrud);
+		this.engineCrud.setValue(tableCrud);
 	}
 
 	public Property<GenericCrud> getFirstCrud() {
-		return firstCrud;
+		return engineCrud;
 	}
 
 	public Property<GenericCrud> getSecondCrud() {
-		return secondCrud;
+		return genericCrud;
 	}
 
 	public void flush() {
-		firstCrud.getValue().<Generic> getModel().getCurrentCache().flush();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().flush();
 	}
 
 	public void shiftTs() {
-		firstCrud.getValue().<Generic> getModel().getCurrentCache().shiftTs();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().shiftTs();
 	}
 
 	public void cancel() {
-		firstCrud.getValue().<Generic> getModel().getCurrentCache().clear();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().clear();
 	}
 
 	public void mount() {
-		firstCrud.getValue().<Generic> getModel().getCurrentCache().mount();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().mount();
 	}
 
 	public StringBinding getCacheLevel() {
-		return Bindings.createStringBinding(() -> "Cache level : " + firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache()
+		return Bindings.createStringBinding(() -> "Cache level : " + engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache()
 				.getCacheLevelObservable());
 	}
 
 	public void unmount() {
-		firstCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
+		engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
 	}
 
 	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
@@ -75,9 +75,9 @@ public class GenericWindow extends Window {
 
 		Table table = tableModel.buildTable();
 		table.getFirstRowHeight().setValue(30);
-		table.getFirstColumnWidth().setValue(300);
+		table.getFirstColumnWidth().setValue(100);
 		table.getRowHeight().setValue(50);
-		table.getColumnWidth().setValue(300);
+		table.getColumnWidth().setValue(100);
 		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<>(table), engine);
 		return new GenericWindow(crud, width, height);
 	}

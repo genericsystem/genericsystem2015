@@ -47,7 +47,6 @@ public class GenericRow extends Row {
 		firstCrud.getTable().getValue().getSelectedRow().setValue(this);
 		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(this.item.getObservableSubInstances(), this.item.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(this.item)),
 				itemTableCell -> columnTableCell -> {
-
 					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
 							+ firstColumnString), null);
 					Table tab = textTableModel.buildTable();
