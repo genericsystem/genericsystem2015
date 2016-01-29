@@ -106,17 +106,15 @@ public class Table extends Listable<Row> {
 	}
 
 	public ObservableValue<Number> getParentWidth() {
-		if (getParent() instanceof Cell) {
-
+		if (getParent() instanceof Cell)
 			return new SimpleObjectProperty<Number>(((Table) getParent().getParent().getParent()).columnWidth.getValue());
-		}
-		return new SimpleObjectProperty<Number>(((Window) getParent().getParent()).getWidth().getValue());
+		return getTableWidth();// new SimpleObjectProperty<Number>(900);
 	}
 
 	public ObservableValue<Number> getParentHeight() {
 		if (getParent() instanceof Cell)
 			return new SimpleObjectProperty<Number>(((Table) getParent().getParent().getParent()).rowHeight.getValue());
-		return new SimpleObjectProperty<Number>(((Window) getParent().getParent()).getHeight().getValue());
+		return getTableHeight();// new SimpleObjectProperty<Number>(900);
 	}
 
 	// *****************************************************************************************************************************
@@ -133,6 +131,5 @@ public class Table extends Listable<Row> {
 			firstColumnWidth.setValue(firstColumnWidth.getValue().intValue() - 4);
 			return firstColumnWidth;
 		}
-
 	}
 }

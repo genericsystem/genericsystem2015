@@ -1,8 +1,8 @@
 package org.genericsystem.gsadmin;
 
 import org.genericsystem.gsadmin.GSTable.GSEditTableCellTable;
-import org.genericsystem.gsadmin.GSTable.GSTableCellTable;
-import org.genericsystem.gsadmin.GSTable.GSTableCellTable2;
+import org.genericsystem.gsadmin.GSTable.GSTableCellTableEngine;
+import org.genericsystem.gsadmin.GSTable.GSTableCellTableGeneric;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
@@ -17,7 +17,7 @@ public class GSCrud extends GSVBox {
 
 	@Override
 	protected void initChildren() {
-		GSHBox Hb = new GSHBox(this).setSpacing(10);// .setPrefHeight(500);
+		GSHBox Hb = new GSHBox(this).setSpacing(10);// .setPrefHeight(900);
 		{
 			GSVBox vb = new GSVBox(Hb);
 			{
@@ -30,12 +30,12 @@ public class GSCrud extends GSVBox {
 				initGSGenericTable(vb);
 			}
 
-			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable).setSpacing(100);
+			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable);
 		}
 	}
 
 	protected void initGSGenericTable(GSVBox vb) {
-		new GSTableCellTable2(vb).select(GenericCrud::getTable);
+		new GSTableCellTableGeneric(vb).select(GenericCrud::getTable);
 	}
 
 	public static class GSEngineCrud extends GSCrud {
@@ -46,7 +46,7 @@ public class GSCrud extends GSVBox {
 
 		@Override
 		protected void initGSGenericTable(GSVBox vb) {
-			new GSTableCellTable(vb).select(GenericCrud::getTable);
+			new GSTableCellTableEngine(vb).select(GenericCrud::getTable);
 		}
 	}
 }

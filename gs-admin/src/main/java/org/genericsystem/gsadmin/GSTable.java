@@ -1,9 +1,5 @@
 package org.genericsystem.gsadmin;
 
-import java.util.function.Function;
-
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
@@ -14,7 +10,6 @@ import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
-import org.genericsystem.ui.table.Window;
 
 public abstract class GSTable extends GSVBox {
 
@@ -36,10 +31,6 @@ public abstract class GSTable extends GSVBox {
 
 	protected abstract GSHBox createSelectionHBox(Element<?> parent);
 
-	protected abstract <M> Function<M, ObservableValue<Number>> getSuperPrefWidth();
-
-	protected abstract <M> Function<M, ObservableValue<Number>> getSuperPrefHeight();
-
 	public static class GSTextCellTable extends GSTable {
 
 		public GSTextCellTable(Element<?> parent) {
@@ -47,38 +38,15 @@ public abstract class GSTable extends GSVBox {
 		}
 
 		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return table -> ((Table) table).getColumnWidth();
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return table -> ((Table) table).getRowHeight();
-		}
-
-		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
 			return (GSHBox) new GSTextCellRow(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
 		}
-
 	}
 
-	public static class GSTableCellTable extends GSTable {
+	public static class GSTableCellTableEngine extends GSTable {
 
-		public GSTableCellTable(Element<?> parent) {
+		public GSTableCellTableEngine(Element<?> parent) {
 			super(parent);
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-			return app -> ((Window) app).getWidth();
-			// return app -> new SimpleObjectProperty<>(900);
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			// = return app -> ((Window) app).getHeight();
-			return app -> ((Window) app).getHeight();
 		}
 
 		@Override
@@ -87,9 +55,9 @@ public abstract class GSTable extends GSVBox {
 		}
 	}
 
-	public static class GSTableCellTable2 extends GSTableCellTable {
+	public static class GSTableCellTableGeneric extends GSTableCellTableEngine {
 
-		public GSTableCellTable2(Element<?> parent) {
+		public GSTableCellTableGeneric(Element<?> parent) {
 			super(parent);
 		}
 
@@ -99,21 +67,10 @@ public abstract class GSTable extends GSVBox {
 		}
 	}
 
-	public static class GSEditTableCellTable extends GSTableCellTable {
+	public static class GSEditTableCellTable extends GSTableCellTableEngine {
 
 		public GSEditTableCellTable(Element<?> parent) {
 			super(parent);
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefWidth() {
-
-			return app -> new SimpleObjectProperty<>(600);
-		}
-
-		@Override
-		protected <M> Function<M, ObservableValue<Number>> getSuperPrefHeight() {
-			return app -> new SimpleObjectProperty<>(600);
 		}
 
 		@Override
@@ -121,5 +78,4 @@ public abstract class GSTable extends GSVBox {
 			return new GSTableCellRow(parent);
 		}
 	}
-
 }
