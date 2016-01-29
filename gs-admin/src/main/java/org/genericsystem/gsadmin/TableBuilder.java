@@ -40,8 +40,8 @@ public abstract class TableBuilder<ITEM, COL, T> {
 		this.lastColumnExtractor = lastColumnExtractor;
 	}
 
-	public Table buildTable() {
-		return new Table(buildFirstRow(), buildRows(), tableStyle.table);
+	public Table buildTable(int height, int width) {
+		return new Table(height, width, buildFirstRow(), buildRows(), tableStyle.table);
 	}
 
 	public Table buildTableFirstColumn() {
@@ -126,16 +126,6 @@ public abstract class TableBuilder<ITEM, COL, T> {
 		public TableCellTableBuilder(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
 				Function<ITEM, ObservableValue<Table>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 			super(items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
-		}
-
-		@Override
-		public Table buildTable() {
-			Table result = super.buildTable();
-			/* default values */
-			// result.getColumnWidth().setValue(300);
-			// result.getRowHeight().setValue(200);
-			// result.getFirstRowHeight().setValue(50);
-			return result;
 		}
 	}
 }

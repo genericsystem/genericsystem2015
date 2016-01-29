@@ -17,7 +17,7 @@ public class GSCrud extends GSVBox {
 
 	@Override
 	protected void initChildren() {
-		GSHBox Hb = new GSHBox(this).setSpacing(10);// .setPrefHeight(900);
+		GSHBox Hb = new GSHBox(this).setSpacing(10);
 		{
 			GSVBox vb = new GSVBox(Hb);
 			{

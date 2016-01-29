@@ -49,7 +49,7 @@ public class GenericRow extends Row {
 				itemTableCell -> columnTableCell -> {
 					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
 							+ firstColumnString), null);
-					Table tab = textTableModel.buildTable();
+					Table tab = textTableModel.buildTable(5, 5);
 					return new ReadOnlyObjectWrapper<>(tab);
 
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
@@ -59,7 +59,7 @@ public class GenericRow extends Row {
 					return new ReadOnlyObjectWrapper<>(tab);
 				}, column -> new ReadOnlyStringWrapper("Delete"));
 
-		Table table = tableModel.buildTable();
+		Table table = tableModel.buildTable(300, 500);
 		table.getFirstRowHeight().setValue(25);
 		table.getFirstColumnWidth().setValue(200);
 		table.getRowHeight().setValue(50);
@@ -80,7 +80,7 @@ public class GenericRow extends Row {
 					itemTableCell -> columnTableCell -> {
 						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null, null, firstColumString -> new ReadOnlyStringWrapper(""
 								+ firstColumString), null);
-						Table tab = textTableModel.buildTable();
+						Table tab = textTableModel.buildTable(0, 0);
 						return new ReadOnlyObjectWrapper<>(tab);
 					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
 						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
@@ -88,7 +88,7 @@ public class GenericRow extends Row {
 						Table tab = textTableModel.buildTableFirstColumn();
 						return new ReadOnlyObjectWrapper<>(tab);
 					}, null);
-			Table editTable = editTableModel.buildTable();
+			Table editTable = editTableModel.buildTable(200, 500);
 			editTable.getFirstColumnWidth().setValue(200);
 			editTable.getColumnWidth().setValue(310);
 			editTable.getRowHeight().setValue(45);

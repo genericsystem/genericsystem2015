@@ -1,5 +1,6 @@
 package org.genericsystem.gsadmin;
 
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
@@ -19,8 +20,12 @@ public abstract class GSTable extends GSVBox {
 
 	@Override
 	protected void initChildren() {
+		this.setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);
 		GSSCrollPane scrollPane = new GSSCrollPane(this).setStyleClass("scrollable");
 		{
+			scrollPane.addBoot(ScrollPane::fitToWidthProperty, true);
+			scrollPane.addBoot(ScrollPane::fitToHeightProperty, true);
+
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);// .setPrefWidth(getSuperPrefWidth()).setPrefHeight(getSuperPrefHeight());
 			{
 				new GSTextCellRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Row::getFirstRowHeight).setMaxHeight(Row::getFirstRowHeight).setPrefHeight(Row::getFirstRowHeight);
