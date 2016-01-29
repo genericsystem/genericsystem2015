@@ -19,11 +19,11 @@ public class GSAdmin extends GSApplication {
 
 	@Override
 	protected void initChildren() {
-		GSVBox mainPanel = new GSVBox(this).setPrefHeight(GenericWindow::getHeight).setPrefWidth(GenericWindow::getWidth);
+		GSVBox mainPanel = new GSVBox(this).setPrefHeight(GenericWindow::getHeight);
 		{
-			GSSCrollPane scrollPane = new GSSCrollPane(mainPanel).setStyleClass("scrollable");// .setPrefHeight(GenericWindow::getHeight);
+			GSSCrollPane scrollPane = new GSSCrollPane(mainPanel).setStyleClass("scrollable");// .setMinHeight(500).setMinWidth(500);// .setPrefHeight(900).setPrefWidth(1000);
 			{
-				GSVBox leftTables = new GSVBox(scrollPane).setMinHeight(1000).setMinWidth(1400).setSpacing(20);
+				GSVBox leftTables = new GSVBox(scrollPane).setMinHeight(1930);
 				{
 					new GSEngineCrud(leftTables).select(GenericWindow::getFirstCrud);
 
