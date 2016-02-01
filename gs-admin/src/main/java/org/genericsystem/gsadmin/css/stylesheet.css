@@ -6,7 +6,7 @@
 }
 
 .scrollable {
-	-fx-background-color:transparent;
+	-fx-background-color: transparent;
 	-fx-control-inner-background: transparent;
 	-fx-fit-to-height: true;
 	-fx-fit-to-width: true;	
