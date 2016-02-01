@@ -69,8 +69,9 @@ public class ModelContext {
 			try {
 				return methodReference.apply(modelContext_.getModel());
 			} catch (ClassCastException ignore) {
+				return methodReference.apply(modelContext_.getModel());
 			}
-			throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
+			// throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
 		};
 	}
 
