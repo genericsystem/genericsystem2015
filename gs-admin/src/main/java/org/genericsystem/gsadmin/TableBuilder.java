@@ -1,15 +1,12 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
-
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
@@ -22,16 +19,18 @@ public abstract class TableBuilder<ITEM, COL, T> {
 
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
-	private final ObservableValue<String> firstRowFirstColumnString = new ReadOnlyStringWrapper("Table");
+	private final ObservableValue<String> firstRowFirstColumnString;
 	private Function<COL, ObservableValue<String>> firstRowExtractor;
 	private final Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;
-	private final ObservableValue<String> firstRowLastColumnString = new ReadOnlyStringWrapper("Action");
+	private final ObservableValue<String> firstRowLastColumnString;
 	private final Function<ITEM, ObservableValue<String>> lastColumnExtractor;
 	private TableStyle tableStyle = new TableStyle();
 	private final Function<ITEM, ObservableValue<T>> firstColumnExtractor;
 
-	public TableBuilder(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
-			Function<ITEM, ObservableValue<T>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+	public TableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor,
+			Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<T>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+		this.firstRowFirstColumnString = firstRowFirstColumnString;
+		this.firstRowLastColumnString = firstRowLastColumnString;
 		this.items = items;
 		this.columns = columns;
 		this.firstColumnExtractor = firstColumnExtractor;
@@ -40,8 +39,8 @@ public abstract class TableBuilder<ITEM, COL, T> {
 		this.lastColumnExtractor = lastColumnExtractor;
 	}
 
-	public Table buildTable(int height, int width) {
-		return new Table(height, width, buildFirstRow(), buildRows(), tableStyle.table);
+	public Table buildTable() {
+		return new Table(buildFirstRow(), buildRows(), tableStyle.table);
 	}
 
 	public Table buildTableFirstColumn() {
@@ -63,12 +62,16 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	public Row buildFirstRow(ITEM item, ObservableValue<String> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> lastColumnString) {
-		return new GenericRow((Generic) item, buildFirstCell((ObservableValue<T>) firstColumnExtractor, tableStyle.firstRowFirstCell), buildFirstRowCells(columns, columnExtractor, tableStyle.firstRowCell), buildLastCell(lastColumnString,
-				tableStyle.firstRowLastCell), tableStyle.firstRow);
+		return new GenericRow((Generic) item, buildFirstRowFirstCell(firstColumnExtractor, tableStyle.firstRowFirstCell), buildFirstRowCells(columns, columnExtractor, tableStyle.firstRowCell), buildLastCell(lastColumnString, tableStyle.firstRowLastCell),
+				tableStyle.firstRow);
 	}
 
 	public Row buildRow(ITEM item, ObservableValue<T> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString) {
 		return new GenericRow((Generic) item, buildFirstCell(firstColumnExtractor, tableStyle.firstCell), buildCells(columns, columnExtractor, tableStyle.cell), buildLastCell(lastColumnString, tableStyle.lastCell), tableStyle.row);
+	}
+
+	protected ObservableValue<Cell<?>> buildFirstRowFirstCell(ObservableValue<String> firstColumnString, ObservableValue<String> cellStyle) {
+		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
 	}
 
 	protected ObservableValue<Cell<?>> buildFirstCell(ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
@@ -89,7 +92,7 @@ public abstract class TableBuilder<ITEM, COL, T> {
 
 	protected ObservableList<Cell<?>> buildCells(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> cellStyle) {
 		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> {
-			return new Cell<T>(columnExtractor.apply(column), cellStyle);
+			return new Cell<>(columnExtractor.apply(column), cellStyle);
 		});
 	}
 
@@ -114,18 +117,30 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	public static class TextTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, String> {
-		public TextTableBuilder(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<String>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
-				Function<ITEM, ObservableValue<String>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
-			super(items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
+		public TextTableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns,
+				Function<ITEM, Function<COL, ObservableValue<String>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<String>> firstColumnExtractor,
+				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+			super(firstRowFirstColumnString, firstRowLastColumnString, items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
 		}
 
 	}
 
 	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
 
-		public TableCellTableBuilder(ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor,
-				Function<ITEM, ObservableValue<Table>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
-			super(items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
+		public TableCellTableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns,
+				Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<Table>> firstColumnExtractor,
+				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+			super(firstRowFirstColumnString, firstRowLastColumnString, items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
+		}
+
+		@Override
+		public Table buildTable() {
+			Table result = super.buildTable();
+			/* default values */
+			// result.getColumnWidth().setValue(300);
+			// result.getRowHeight().setValue(200);
+			// result.getFirstRowHeight().setValue(50);
+			return result;
 		}
 	}
 }

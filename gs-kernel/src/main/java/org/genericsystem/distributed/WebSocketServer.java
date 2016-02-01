@@ -3,14 +3,12 @@ package org.genericsystem.distributed;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.genericsystem.kernel.AbstractServer;
 
-public class WebSocketServer <T extends AbstractServer> {
+public class WebSocketServer<T extends AbstractServer> {
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
@@ -45,7 +43,6 @@ public class WebSocketServer <T extends AbstractServer> {
 				});
 
 			});
-			// /!\
 			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
@@ -53,7 +50,6 @@ public class WebSocketServer <T extends AbstractServer> {
 	}
 
 	public void stop(Map<String, AbstractServer> roots) {
-		// /!\
 		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		roots.values().forEach(root -> root.close());
 		roots = null;

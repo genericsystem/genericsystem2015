@@ -19,7 +19,7 @@ public abstract class GSTable extends GSVBox {
 
 	@Override
 	protected void initChildren() {
-		GSSCrollPane scrollPane = new GSSCrollPane(this).setStyleClass("scrollable");// .setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);
+		GSSCrollPane scrollPane = new GSSCrollPane(this).setStyleClass("scrollable");
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);// .setPrefWidth(getSuperPrefWidth()).setPrefHeight(getSuperPrefHeight());
 			{

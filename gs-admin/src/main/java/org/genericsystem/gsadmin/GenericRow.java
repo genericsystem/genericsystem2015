@@ -8,7 +8,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilder.TextTableBuilder;
@@ -45,21 +44,22 @@ public class GenericRow extends Row {
 		GenericCrud firstCrud = ((GenericWindow) (getParent().getParent()).getParent()).getFirstCrud().getValue();
 
 		firstCrud.getTable().getValue().getSelectedRow().setValue(this);
-		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(this.item.getObservableSubInstances(), this.item.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(this.item)),
-				itemTableCell -> columnTableCell -> {
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null, null, firstColumnString -> new ReadOnlyStringWrapper(""
-							+ firstColumnString), null);
-					Table tab = textTableModel.buildTable(5, 5);
+
+		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Concretes"), new ReadOnlyStringWrapper("Action"), this.item.getObservableSubInstances(), this.item.getObservableAttributes().filtered(
+				attribute -> attribute.isCompositeForInstances(this.item)), itemTableCell -> columnTableCell -> {
+					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(), null,
+							null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+					Table tab = textTableModel.buildTable();
 					return new ReadOnlyObjectWrapper<>(tab);
 
 				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), item -> {
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column),
-							null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
+					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(item),
+							FXCollections.observableArrayList(item.getComponents()), item2 -> column -> new ReadOnlyStringWrapper("" + column), null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
 					Table tab = textTableModel.buildTableFirstColumn();
 					return new ReadOnlyObjectWrapper<>(tab);
 				}, column -> new ReadOnlyStringWrapper("Delete"));
 
-		Table table = tableModel.buildTable(300, 500);
+		Table table = tableModel.buildTable();
 		table.getFirstRowHeight().setValue(25);
 		table.getFirstColumnWidth().setValue(200);
 		table.getRowHeight().setValue(50);
@@ -76,19 +76,19 @@ public class GenericRow extends Row {
 	private void createEditTable(GenericCrud crud) {
 		if (crud != null) {
 			Generic generic = crud.getModel();
-			TableCellTableBuilder<Generic, Generic> editTableModel = new TableCellTableBuilder<>(generic.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generic)), FXCollections.observableArrayList(this.item),
-					itemTableCell -> columnTableCell -> {
-						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null, null, firstColumString -> new ReadOnlyStringWrapper(""
-								+ firstColumString), null);
-						Table tab = textTableModel.buildTable(0, 0);
+			TableCellTableBuilder<Generic, Generic> editTableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Edition"), new ReadOnlyStringWrapper("Action"), generic.getObservableAttributes().filtered(
+					attribute -> attribute.isCompositeForInstances(generic)), FXCollections.observableArrayList(this.item), itemTableCell -> columnTableCell -> {
+						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null,
+						null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+						Table tab = textTableModel.buildTable();
 						return new ReadOnlyObjectWrapper<>(tab);
 					}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
-						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(FXCollections.observableArrayList(itemTableCell), FXCollections.observableArrayList(itemTableCell.getComponents()), null, null,
-								firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+						TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(itemTableCell),
+								FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
 						Table tab = textTableModel.buildTableFirstColumn();
 						return new ReadOnlyObjectWrapper<>(tab);
 					}, null);
-			Table editTable = editTableModel.buildTable(200, 500);
+			Table editTable = editTableModel.buildTable();
 			editTable.getFirstColumnWidth().setValue(200);
 			editTable.getColumnWidth().setValue(310);
 			editTable.getRowHeight().setValue(45);
