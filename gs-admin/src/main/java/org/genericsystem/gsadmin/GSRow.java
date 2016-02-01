@@ -37,11 +37,17 @@ public abstract class GSRow extends GSHBox {
 		GSHBox lastCell = new GSHBox(this).select(Row::getLastElement).setMinWidth(Cell<Generic>::getLastColumnCellsWidth).setPrefWidth(Cell<Generic>::getLastColumnCellsWidth).setMaxWidth(Cell<Generic>::getLastColumnCellsWidth)
 				.setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			new GSButton(lastCell, Cell<String>::getObservableModel).setAction(GenericRow::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
+			createLastCell(lastCell);
 		}
+
 	}
 
 	protected abstract Element<?> createGSCell(Element<?> parent);
+
+	protected Element<?> createLastCell(Element<?> parent) {
+		return new GSButton(parent, Cell<String>::getObservableModel).setAction(GenericRow::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
+
+	}
 
 	public static class GSTextCellRow extends GSRow {
 		public GSTextCellRow(Element<?> parent) {
@@ -50,6 +56,18 @@ public abstract class GSRow extends GSHBox {
 
 		@Override
 		protected Element<?> createGSCell(Element<?> parent) {
+			return new GSLabel(parent, Cell<String>::getObservableModel);
+		}
+	}
+
+	public static class GSTextCellFirstRow extends GSTextCellRow {
+		public GSTextCellFirstRow(Element<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected Element<?> createLastCell(Element<?> parent) {
+			// TODO Auto-generated method stub
 			return new GSLabel(parent, Cell<String>::getObservableModel);
 		}
 	}

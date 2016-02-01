@@ -31,7 +31,7 @@ public class GSAdmin extends GSApplication {
 				new GSButton(commandPanel, "Mount", GenericWindow::mount);
 				new GSButton(commandPanel, "Unmount", GenericWindow::unmount);
 				new GSButton(commandPanel, "ShiftTs", GenericWindow::shiftTs);
-				new GSLabel(commandPanel, GenericWindow::getCacheLevel);// .setObservableTextProperty(GenericWindow::getCacheLevel);
+				new GSLabel(commandPanel, GenericWindow::getCacheLevel);
 			}
 		}
 
