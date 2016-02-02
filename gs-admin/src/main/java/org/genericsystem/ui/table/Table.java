@@ -130,9 +130,15 @@ public class Table extends Listable<Row> {
 		@Override
 		public Property<Number> getFirstColumnWidth() {
 			if (getParent() instanceof Cell)
-				firstColumnWidth.setValue(((Table) getParent().getParent().getParent()).firstColumnWidth.getValue());
-			firstColumnWidth.setValue(firstColumnWidth.getValue().intValue() - 4);
+				if (otherCellsNumber.get() == 0)
+					firstColumnWidth.setValue(((Table) getParent().getParent().getParent()).firstColumnWidth.getValue().intValue() - 4);
+			// firstColumnWidth.setValue(firstColumnWidth.getValue().intValue() - 4);
 			return firstColumnWidth;
+		}
+
+		@Override
+		public ObservableValue<Number> getParentWidth() {
+			return new SimpleObjectProperty<Number>(((Table) getParent().getParent().getParent()).firstColumnWidth.getValue());
 		}
 
 	}

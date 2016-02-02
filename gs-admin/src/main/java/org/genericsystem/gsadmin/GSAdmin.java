@@ -1,6 +1,7 @@
 package org.genericsystem.gsadmin;
 
 import javafx.scene.Group;
+
 import org.genericsystem.gsadmin.GSCrud.GSEngineCrud;
 import org.genericsystem.ui.Model;
 import org.genericsystem.ui.components.GSApplication;
@@ -35,7 +36,7 @@ public class GSAdmin extends GSApplication {
 						new GSButton(commandPanel, "Mount", GenericWindow::mount);
 						new GSButton(commandPanel, "Unmount", GenericWindow::unmount);
 						new GSButton(commandPanel, "ShiftTs", GenericWindow::shiftTs);
-						new GSLabel(commandPanel, GenericWindow::getCacheLevel);// .setObservableTextProperty(GenericWindow::getCacheLevel);
+						new GSLabel(commandPanel, GenericWindow::getCacheLevel);
 					}
 				}
 			}

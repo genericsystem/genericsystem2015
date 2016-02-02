@@ -3,6 +3,7 @@ package org.genericsystem.ui.table;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.ui.Model;
 
 public abstract class Window extends Model {
@@ -15,7 +16,7 @@ public abstract class Window extends Model {
 		this.width = (ObservableValue<Number>) width;
 		this.height = (ObservableValue<Number>) height;
 
-		this.scrollHeight = Bindings.subtract((ObservableNumberValue) height, Integer.valueOf(28));
+		this.scrollHeight = Bindings.subtract((ObservableNumberValue) height, Integer.valueOf(25));
 	}
 
 	public ObservableValue<Number> getWidth() {
