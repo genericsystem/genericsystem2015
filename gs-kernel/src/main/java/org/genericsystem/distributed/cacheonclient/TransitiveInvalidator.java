@@ -14,6 +14,7 @@ class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 	private Supplier<Observable> slaveObservableExtractor;
 	private InvalidationListener slaveInvalidationListener = o -> fireValueChangedEvent();
 	private InvalidationListener masterInvalidationListener = o -> {
+		System.out.println("TransitiveInvalidator :: masterInvalidationListener");
 		observableSlave.removeListener(slaveInvalidationListener);
 		observableSlave = slaveObservableExtractor.get();
 		observableSlave.addListener(slaveInvalidationListener);
