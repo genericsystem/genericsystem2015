@@ -3,14 +3,18 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
+
 import com.sun.javafx.collections.ObservableListWrapper;
 
 public class CocCache extends HeavyCache {
@@ -53,6 +57,10 @@ public class CocCache extends HeavyCache {
 	@Override
 	public AsyncITransaction getTransaction() {
 		return (AsyncITransaction) super.getTransaction();
+	}
+
+	public ObservableValue<IDifferential<Generic>> getObservableTransaction() {
+		return super.getTransactionProperty();
 	}
 
 	@Override

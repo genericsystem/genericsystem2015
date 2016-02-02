@@ -1,6 +1,7 @@
 package org.genericsystem.ui.table;
 
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 
 public class Cell<T> extends Stylable {
@@ -26,5 +27,9 @@ public class Cell<T> extends Stylable {
 
 	public Property<Number> getColumnCellsWidth() {
 		return ((Table) getParent().getParent()).getColumnWidth();
+	}
+
+	public Property<String> getName() {
+		return new SimpleStringProperty("Test");
 	}
 }

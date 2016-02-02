@@ -1,5 +1,8 @@
 package org.genericsystem.gsadmin;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
@@ -13,6 +16,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonclient.CocClientEngine;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilder.TextTableBuilder;
+import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Window;
 
@@ -40,6 +44,11 @@ public class GenericWindow extends Window {
 
 	public void shiftTs() {
 		engineCrud.getValue().<Generic> getModel().getCurrentCache().shiftTs();
+	}
+
+	public StringBinding getTs() {
+		return Bindings.createStringBinding(() -> "TS : " + new SimpleDateFormat("dd:MM:YY / HH:mm:ss").format(new Date(engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getTransaction().getTs() / Statics.MILLI_TO_NANOSECONDS)),
+				engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getObservableTransaction());
 	}
 
 	public void cancel() {

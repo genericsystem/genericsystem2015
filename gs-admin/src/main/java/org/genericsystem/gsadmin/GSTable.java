@@ -77,7 +77,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return new GSTableCellRow(parent);
+			return new GSTableCellRow(parent);// new GSEditableCellRow(parent);
 		}
 	}
 }

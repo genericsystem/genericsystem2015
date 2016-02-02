@@ -4,6 +4,7 @@ import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;
+import org.genericsystem.ui.components.GSVBox;
 
 public class GSCommandPanel extends GSHBox {
 
@@ -19,6 +20,10 @@ public class GSCommandPanel extends GSHBox {
 		new GSButton(this, "Mount", GenericWindow::mount);
 		new GSButton(this, "Unmount", GenericWindow::unmount);
 		new GSButton(this, "ShiftTs", GenericWindow::shiftTs);
-		new GSLabel(this, GenericWindow::getCacheLevel);
+		GSVBox vbLabel = new GSVBox(this);
+		{
+			new GSLabel(vbLabel, GenericWindow::getCacheLevel);
+			new GSLabel(vbLabel, GenericWindow::getTs);
+		}
 	}
 }

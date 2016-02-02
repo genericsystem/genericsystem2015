@@ -50,7 +50,6 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	protected ObservableValue<Row> buildFirstRow() {
-		System.out.println(firstRowLastColumnString.getValue());
 		return firstRowExtractor != null ? new SimpleObjectProperty<>(buildFirstRow(null, firstColumnExtractor != null ? firstRowFirstColumnString : new SimpleStringProperty(), columns, firstRowExtractor,
 				lastColumnExtractor != null ? firstRowLastColumnString : new SimpleStringProperty())) : new SimpleObjectProperty<>();
 	}
