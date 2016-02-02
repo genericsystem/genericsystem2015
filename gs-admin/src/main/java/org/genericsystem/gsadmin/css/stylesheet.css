@@ -6,13 +6,10 @@
 }
 
 .scrollable {
-	-fx-background-color: transparent;
+	-fx-background-color: #ddffdd;
 	-fx-control-inner-background: transparent;
 	-fx-fit-to-height: true;
 	-fx-fit-to-width: true;	
-	-fx-border-width: 2px;
-	
-
 }
 
 
@@ -48,10 +45,6 @@
 }
 .cell {
 	-fx-background-color: #ddffdd;
-}
-
-.lastcell {
-	
 }
 
 

@@ -132,7 +132,6 @@ public class Table extends Listable<Row> {
 			if (getParent() instanceof Cell)
 				if (otherCellsNumber.get() == 0)
 					firstColumnWidth.setValue(((Table) getParent().getParent().getParent()).firstColumnWidth.getValue().intValue() - 4);
-			// firstColumnWidth.setValue(firstColumnWidth.getValue().intValue() - 4);
 			return firstColumnWidth;
 		}
 
