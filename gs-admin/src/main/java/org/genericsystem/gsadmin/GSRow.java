@@ -50,7 +50,7 @@ public abstract class GSRow extends GSHBox {
 	}
 
 	protected Element<?> createLastCell(Element<?> parent) {
-		return new GSButton(parent, Cell<String>::getObservableModel).setAction(GenericRow::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
+		return new GSButton(parent, Cell<String>::getObservableModel).setAction(Cell<Generic>::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
 	}
 
 	public static class GSEditableCellRow extends GSRow {

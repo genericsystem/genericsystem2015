@@ -29,9 +29,9 @@ public class App extends Application {
 	static CocServer server;
 
 	private CocClientEngine initGS() {
-		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8083, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8083, Car.class, Power.class, CarColor.class, Color.class);
+		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 

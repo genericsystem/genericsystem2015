@@ -4,6 +4,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 
+import org.genericsystem.gsadmin.GenericRow;
+
 public class Cell<T> extends Stylable {
 
 	private final ObservableValue<T> observableModel;
@@ -31,5 +33,9 @@ public class Cell<T> extends Stylable {
 
 	public Property<String> getName() {
 		return new SimpleStringProperty("Test");
+	}
+
+	public void delete() {
+		((GenericRow) getParent()).delete();
 	}
 }
