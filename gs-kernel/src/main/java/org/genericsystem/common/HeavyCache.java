@@ -7,6 +7,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
@@ -74,6 +75,10 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	public long getCacheId() {
 		return cacheId;
+	}
+
+	public ObservableValue<IDifferential<Generic>> getTransactionProperty() {
+		return transactionProperty;
 	}
 
 	public IDifferential<Generic> getTransaction() {
