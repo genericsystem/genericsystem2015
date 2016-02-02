@@ -3,7 +3,6 @@ package org.genericsystem.distributed;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,20 +11,15 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
-
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Statics;
 
-public abstract class AbstractGSServer <T extends AbstractServer> {
-	
+public abstract class AbstractGSServer<T extends AbstractServer> {
+
 	protected Map<String, AbstractServer> roots;
 
-	/*public AbstractGSServer(AbstractServer... roots) {
-		this.roots = Arrays.stream(roots).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));	
-	}*/
-
 	public AbstractGSServer(GSDeploymentOptions options) {
-		webSocket = new WebSocketServer<T>(this, options);
+		webSocket = new WebSocketServer<>(this, options);
 		this.roots = Arrays.stream(getRoots(options)).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
@@ -42,24 +36,19 @@ public abstract class AbstractGSServer <T extends AbstractServer> {
 			}
 		return roots.toArray(new AbstractServer[roots.size()]);
 	}
-	
+
 	protected WebSocketServer<T> webSocket;
-	
+
 	abstract protected T buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses);
 
-	public void start(){
+	public void start() {
 		webSocket.start(roots);
 	}
-	
+
 	public void stop() {
 		webSocket.stop(roots);
 	}
-	/*
-	private void stop() {
-		roots.values().forEach(root -> root.close());
-		roots = null;
-	}
-	 */
+
 	protected static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
 		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
 		consumer.handle(res -> {
@@ -79,10 +68,7 @@ public abstract class AbstractGSServer <T extends AbstractServer> {
 			throw new IllegalStateException(res.cause());
 		return res.result();
 	}
-	
+
 	protected abstract Buffer getReplyBuffer(int methodId, int op, T root, GSBuffer gsBuffer);
-	
-	
-	
-	
+
 }

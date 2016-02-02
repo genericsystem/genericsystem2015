@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+
 import org.genericsystem.admin.UiFunctions.GsUiFunctions;
 import org.genericsystem.admin.javafx.Crud;
 import org.genericsystem.admin.model.Car;

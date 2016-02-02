@@ -3,6 +3,7 @@ package org.genericsystem.gsadmin;
 import javafx.scene.layout.HBox;
 
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
+import org.genericsystem.gsadmin.GSRow.GSTextCellFirstRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
@@ -23,8 +24,9 @@ public abstract class GSTable extends GSVBox {
 		{
 			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);// .setPrefWidth(getSuperPrefWidth()).setPrefHeight(getSuperPrefHeight());
 			{
-				new GSTextCellRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Row::getFirstRowHeight).setMaxHeight(Row::getFirstRowHeight).setPrefHeight(Row::getFirstRowHeight);
-				createSelectionHBox(tablePanel).forEach(Table::getElements).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
+				new GSTextCellFirstRow(tablePanel).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Row::getFirstRowHeight).setMaxHeight(Row::getFirstRowHeight).setPrefHeight(Row::getFirstRowHeight);
+				createSelectionHBox(tablePanel).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
+
 			}
 		}
 	}
@@ -75,7 +77,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return new GSTableCellRow(parent);
+			return new GSTableCellRow(parent);// new GSEditableCellRow(parent);
 		}
 	}
 }

@@ -30,9 +30,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +73,7 @@ public class Archiver {
 	public Archiver(AbstractServer root, String directoryPath) {
 		this.root = root;
 		directory = prepareAndLockDirectory(directoryPath);
+		log.info("Start archiver in repository : " + directory.getAbsolutePath());
 		if (directory != null) {
 			String snapshotPath = getSnapshotPath(directory);
 			if (snapshotPath != null) {
@@ -163,10 +164,12 @@ public class Archiver {
 			throw new IllegalStateException("Can't make directory : " + directoryPath);
 		try {
 			lockFile = new FileOutputStream(directoryPath + File.separator + LOCK_FILE_NAME).getChannel().tryLock();
-			return directory;
+			if (lockFile == null)
+				throw new IllegalStateException("Locked directory : " + directoryPath);
 		} catch (OverlappingFileLockException | IOException e) {
 			throw new IllegalStateException("Locked directory : " + directoryPath);
 		}
+		return directory;
 	}
 
 	private String getSnapshotPath(File directory) {

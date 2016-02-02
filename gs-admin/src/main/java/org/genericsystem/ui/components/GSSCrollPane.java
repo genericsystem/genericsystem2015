@@ -1,11 +1,9 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
-
 import org.genericsystem.ui.Element;
 
 public class GSSCrollPane extends Element<ScrollPane> {
@@ -100,6 +98,31 @@ public class GSSCrollPane extends Element<ScrollPane> {
 
 	public <M> GSSCrollPane setVisibility(Function<M, ObservableValue<Boolean>> observableVisibility) {
 		addBinding(ScrollPane::visibleProperty, observableVisibility);
+		return this;
+	}
+
+	public <M> GSSCrollPane setMinViewPortHeight(Double height) {
+		addBoot(ScrollPane::minViewportHeightProperty, height);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortHeight(Double height) {
+		addBoot(ScrollPane::prefViewportHeightProperty, height);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortWidth(Double width) {
+		addBoot(ScrollPane::prefViewportWidthProperty, width);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortHeight(Function<M, ObservableValue<Number>> height) {
+		addBinding(ScrollPane::prefViewportHeightProperty, height);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortWidth(Function<M, ObservableValue<Number>> width) {
+		addBinding(ScrollPane::prefViewportWidthProperty, width);
 		return this;
 	}
 

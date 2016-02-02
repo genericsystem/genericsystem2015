@@ -1,12 +1,14 @@
 package org.genericsystem.gsadmin;
 
 import java.util.function.Function;
+
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
@@ -39,8 +41,8 @@ public abstract class TableBuilder<ITEM, COL, T> {
 		this.lastColumnExtractor = lastColumnExtractor;
 	}
 
-	public Table buildTable() {
-		return new Table(buildFirstRow(), buildRows(), tableStyle.table);
+	public Table buildTable(int width, int height) {
+		return new Table(width, height, buildFirstRow(), buildRows(), tableStyle.table);
 	}
 
 	public Table buildTableFirstColumn() {
@@ -131,16 +133,6 @@ public abstract class TableBuilder<ITEM, COL, T> {
 				Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<Table>> firstColumnExtractor,
 				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 			super(firstRowFirstColumnString, firstRowLastColumnString, items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
-		}
-
-		@Override
-		public Table buildTable() {
-			Table result = super.buildTable();
-			/* default values */
-			// result.getColumnWidth().setValue(300);
-			// result.getRowHeight().setValue(200);
-			// result.getFirstRowHeight().setValue(50);
-			return result;
 		}
 	}
 }
