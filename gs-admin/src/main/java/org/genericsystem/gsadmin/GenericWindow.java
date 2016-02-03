@@ -72,7 +72,7 @@ public class GenericWindow extends Window {
 		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
 				attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {
 			TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), itemTableCell.getObservableHolders(columnTableCell),
-					FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+					FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, currentGeneric -> new ReadOnlyStringWrapper("" + currentGeneric), null);
 			Table tab = textTableModel.buildTable(0, 0);
 			return new ReadOnlyObjectWrapper<>(tab);
 		}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
