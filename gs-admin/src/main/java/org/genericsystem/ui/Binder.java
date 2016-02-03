@@ -3,6 +3,7 @@ package org.genericsystem.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -18,7 +19,8 @@ public interface Binder<N, X, Y> {
 		init(nodeResult, applyOnModel.get());
 	}
 
-	default void init(Y nodeResult, X modelResult) {}
+	default void init(Y nodeResult, X modelResult) {
+	}
 
 	// public static <N, W, W2> Binder<N, Property<W>, W2> injectBinder() {
 	// return new Binder<N, Property<W>, W2>() {
@@ -97,7 +99,6 @@ public interface Binder<N, X, Y> {
 				nodeResult.setValue((W) (EventHandler) event -> applyOnModel.get());
 			}
 		};
-
 	}
 
 	public static <N, W> Binder<N, Property<W>, ObservableValue<W>> propertyReverseBinder() {

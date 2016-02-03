@@ -5,6 +5,7 @@ import org.genericsystem.gsadmin.GSTable.GSTableCellTableEngine;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTableGeneric;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
+import org.genericsystem.ui.components.GSComboBox;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
@@ -25,6 +26,7 @@ public class GSCrud extends GSVBox {
 				{
 					new GSTextField(formPanelEngine).bindTextProperty(GenericCrud::getName).setPrefWidth(300);
 					new GSButton(formPanelEngine, "Add", GenericCrud::add);
+					new GSComboBox<>(formPanelEngine, GenericCombobox::getItems).setStyleClass("ComboBox").forEach(GenericCrud::getListCombobox).addReversedBinding(c -> c.getSelectionModel().selectedItemProperty(), GenericCombobox::getSelectedItem);
 				}
 
 				initGSGenericTable(vb);

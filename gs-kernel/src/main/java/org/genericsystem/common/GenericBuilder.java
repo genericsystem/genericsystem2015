@@ -3,6 +3,7 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
 
@@ -22,7 +23,7 @@ public abstract class GenericBuilder {
 		this.meta = meta != null ? meta : (Generic) context.getRoot();
 		this.overrides = overrides;
 		this.components = components;
-		this.value = generateValue(value);
+		this.value = value;// generateValue(value);
 		check();
 		adjust();
 	}
