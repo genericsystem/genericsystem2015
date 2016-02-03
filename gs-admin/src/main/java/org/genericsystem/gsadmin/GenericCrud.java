@@ -44,8 +44,7 @@ public class GenericCrud extends Crud {
 
 	@Override
 	public void add() {
-		ObservableList<Generic> list = new Transformation<Generic, GenericCombobox>(listCombobox, combo -> combo.getSelectedItem().getValue());
-		generic.addInstance(getInstanceValue(), list.toArray(new Generic[listCombobox.size()]));
+		generic.addInstance(getInstanceValue(), new Transformation<Generic, GenericCombobox>(listCombobox, combo -> combo.getSelectedItem().getValue()).toArray(new Generic[listCombobox.size()]));
 	}
 
 	private Serializable getInstanceValue() {

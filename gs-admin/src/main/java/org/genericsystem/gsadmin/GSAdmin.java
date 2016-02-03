@@ -20,7 +20,7 @@ public class GSAdmin extends GSApplication {
 		{
 			GSSCrollPane scrollpane = new GSSCrollPane(leftTables).setStyleClass("scrollable").setPrefHeight(GenericWindow::getScrollHeight).setPrefWidth(GenericWindow::getWidth);
 			{
-				GSVBox vbox = new GSVBox(scrollpane).setMinHeight(800).setMinWidth(1200);
+				GSVBox vbox = new GSVBox(scrollpane).setMinHeight(800).setMinWidth(1200).setSpacing(20);
 				{
 					new GSEngineCrud(vbox).select(GenericWindow::getFirstCrud);
 					new GSCrud(vbox).select(GenericWindow::getSecondCrud);
