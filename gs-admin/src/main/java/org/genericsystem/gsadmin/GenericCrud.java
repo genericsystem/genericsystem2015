@@ -1,5 +1,7 @@
 package org.genericsystem.gsadmin;
 
+import java.io.Serializable;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -41,7 +43,17 @@ public class GenericCrud extends Crud {
 	@Override
 	public void add() {
 		ObservableList<Generic> list = new Transformation<Generic, GenericCombobox>(listCombobox, combo -> combo.getSelectedItem().getValue());
-		generic.addInstance(name.getValue(), list.toArray(new Generic[listCombobox.size()]));
+		generic.addInstance(converter(name.getValue()), list.toArray(new Generic[listCombobox.size()]));
+	}
+
+	private Serializable converter(String valueToConvert) {
+		if (Integer.class.equals(generic.getInstanceValueClassConstraint()))
+			return Integer.parseInt(name.getValue());
+
+		if (Double.class.equals(generic.getInstanceValueClassConstraint()))
+			return Double.parseDouble(name.getValue());
+
+		return valueToConvert;
 	}
 
 	@Override
