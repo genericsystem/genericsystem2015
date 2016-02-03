@@ -7,6 +7,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.ui.table.Crud;
@@ -43,17 +45,17 @@ public class GenericCrud extends Crud {
 	@Override
 	public void add() {
 		ObservableList<Generic> list = new Transformation<Generic, GenericCombobox>(listCombobox, combo -> combo.getSelectedItem().getValue());
-		generic.addInstance(converter(name.getValue()), list.toArray(new Generic[listCombobox.size()]));
+		generic.addInstance(getInstanceValue(), list.toArray(new Generic[listCombobox.size()]));
 	}
 
-	private Serializable converter(String valueToConvert) {
+	private Serializable getInstanceValue() {
 		if (Integer.class.equals(generic.getInstanceValueClassConstraint()))
-			return Integer.parseInt(name.getValue());
+			return new IntegerStringConverter().fromString(name.getValue());
 
 		if (Double.class.equals(generic.getInstanceValueClassConstraint()))
-			return Double.parseDouble(name.getValue());
+			return new DoubleStringConverter().fromString(name.getValue());
 
-		return valueToConvert;
+		return name.getValue();
 	}
 
 	@Override
