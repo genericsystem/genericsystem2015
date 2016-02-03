@@ -30,14 +30,14 @@ public class GSCrud extends GSVBox {
 			GSHBox tablesPanel = new GSHBox(vb).setSpacing(10);
 			{
 				initGSGenericTable(tablesPanel);
-				new GSEditTableCellTable(tablesPanel).select(GenericCrud::getEditTable).setStyleClass("blackBorder");
+				new GSEditTableCellTable(tablesPanel).select(GenericCrud::getEditTable).setStyleClass("blackBorder").setStyleClass("tablePading");
 			}
 		}
 
 	}
 
 	protected void initGSGenericTable(GSHBox vb) {
-		new GSTableCellTableGeneric(vb).select(GenericCrud::getTable).setStyleClass("blackBorder");
+		new GSTableCellTableGeneric(vb).select(GenericCrud::getTable).setStyleClass("blackBorder").setStyleClass("tablePading");
 	}
 
 	public static class GSEngineCrud extends GSCrud {
@@ -48,7 +48,7 @@ public class GSCrud extends GSVBox {
 
 		@Override
 		protected void initGSGenericTable(GSHBox vb) {
-			new GSTableCellTableEngine(vb).select(GenericCrud::getTable).setStyleClass("blackBorder");
+			new GSTableCellTableEngine(vb).select(GenericCrud::getTable).setStyleClass("blackBorder").setStyleClass("tablePading");
 		}
 	}
 }
