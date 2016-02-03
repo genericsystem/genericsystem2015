@@ -18,12 +18,10 @@
 	-fx-padding: 1px;
 }
 
-#comboBox .list-cell
- {
-    -fx-font-family: arial;
-    -fx-font-size: 16px;
-    
- }
+
+.blackBorder{
+	-fx-border-color : black;
+}
 
 .ComboBox .list-cell{
   -fx-text-fill: #a0522d; 
