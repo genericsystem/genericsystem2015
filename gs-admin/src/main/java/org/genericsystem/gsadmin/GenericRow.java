@@ -59,8 +59,8 @@ public class GenericRow extends Row {
 			return new ReadOnlyObjectWrapper<>(tab);
 		}, column -> new ReadOnlyStringWrapper("Delete"));
 
-		Table table = tableModel.buildTable(900, 300);
-		table.getFirstRowHeight().setValue(25);
+		Table table = tableModel.buildTable(900, 400);
+		table.getFirstRowHeight().setValue(30);
 		table.getFirstColumnWidth().setValue(150);
 		table.getRowHeight().setValue(50);
 		table.getColumnWidth().setValue(150);
@@ -89,9 +89,10 @@ public class GenericRow extends Row {
 				Table tab = textTableModel.buildTableFirstColumn();
 				return new ReadOnlyObjectWrapper<>(tab);
 			}, null);
-			Table editTable = editTableModel.buildTable(500, 300);
+			Table editTable = editTableModel.buildTable(500, 400);
 			editTable.getFirstColumnWidth().setValue(200);
-			editTable.getColumnWidth().setValue(310);
+			editTable.getFirstRowHeight().setValue(30);
+			editTable.getColumnWidth().setValue(150);
 			editTable.getRowHeight().setValue(45);
 			crud.getEditTable().setValue(editTable);
 		}

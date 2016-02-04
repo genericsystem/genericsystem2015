@@ -5,6 +5,7 @@ import org.genericsystem.gsadmin.GSTable.GSTableCellTableEngine;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTableGeneric;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
+import org.genericsystem.ui.components.GSComboBox;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSTextField;
 import org.genericsystem.ui.components.GSVBox;
@@ -17,25 +18,27 @@ public class GSCrud extends GSVBox {
 
 	@Override
 	protected void initChildren() {
-		GSHBox Hb = new GSHBox(this).setSpacing(10);// .setPrefHeight(900);
+
+		GSVBox vb = new GSVBox(this).setSpacing(10);
 		{
-			GSVBox vb = new GSVBox(Hb);
+			GSHBox formPanelEngine = new GSHBox(vb).setSpacing(5);
 			{
-				GSHBox formPanelEngine = new GSHBox(vb).setSpacing(3);
-				{
-					new GSTextField(formPanelEngine).bindTextProperty(GenericCrud::getName).setPrefWidth(300);
-					new GSButton(formPanelEngine, "Add", GenericCrud::add);
-				}
-
-				initGSGenericTable(vb);
+				new GSTextField(formPanelEngine).bindTextProperty(GenericCrud::getName).setPrefWidth(300).setStyleClass("blackBorder");
+				new GSButton(formPanelEngine, "Add", GenericCrud::add).setStyleClass("blackBorder");
+				new GSComboBox<>(formPanelEngine, GenericCombobox::getItems).setStyleClass("blackBorder").setStyleClass("ComboBox").forEach(GenericCrud::getListCombobox)
+						.addReversedBinding(c -> c.getSelectionModel().selectedItemProperty(), GenericCombobox::getSelectedItem);
 			}
-
-			new GSEditTableCellTable(Hb).select(GenericCrud::getEditTable);
+			GSHBox tablesPanel = new GSHBox(vb).setSpacing(10);
+			{
+				initGSGenericTable(tablesPanel);
+				new GSEditTableCellTable(tablesPanel).select(GenericCrud::getEditTable).setStyleClass("blackBorder").setStyleClass("tablePadding");
+			}
 		}
+
 	}
 
-	protected void initGSGenericTable(GSVBox vb) {
-		new GSTableCellTableGeneric(vb).select(GenericCrud::getTable);
+	protected void initGSGenericTable(GSHBox vb) {
+		new GSTableCellTableGeneric(vb).select(GenericCrud::getTable).setStyleClass("blackBorder").setStyleClass("tablePadding");
 	}
 
 	public static class GSEngineCrud extends GSCrud {
@@ -45,8 +48,8 @@ public class GSCrud extends GSVBox {
 		}
 
 		@Override
-		protected void initGSGenericTable(GSVBox vb) {
-			new GSTableCellTableEngine(vb).select(GenericCrud::getTable);
+		protected void initGSGenericTable(GSHBox vb) {
+			new GSTableCellTableEngine(vb).select(GenericCrud::getTable).setStyleClass("blackBorder").setStyleClass("tablePadding");
 		}
 	}
 }

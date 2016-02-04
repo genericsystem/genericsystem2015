@@ -18,6 +18,20 @@
 	-fx-padding: 1px;
 }
 
+
+.tablePadding{
+	-fx-padding: 1px;
+}
+
+.blackBorder{
+	-fx-border-width: 1px;
+	-fx-border-color : black;
+}
+
+.ComboBox .list-cell{
+  -fx-text-fill: #a0522d; 
+}
+
 .row {
 
 	-fx-spacing: 1px;

@@ -72,7 +72,7 @@ public class GenericWindow extends Window {
 		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
 				attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {
 			TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), itemTableCell.getObservableHolders(columnTableCell),
-					FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+					FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, currentGeneric -> new ReadOnlyStringWrapper("" + currentGeneric), null);
 			Table tab = textTableModel.buildTable(0, 0);
 			return new ReadOnlyObjectWrapper<>(tab);
 		}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
@@ -84,9 +84,9 @@ public class GenericWindow extends Window {
 
 		Table table = tableModel.buildTable(900, 400);
 		table.getFirstRowHeight().setValue(30);
-		table.getFirstColumnWidth().setValue(200);
+		table.getFirstColumnWidth().setValue(207);
 		table.getRowHeight().setValue(50);
-		table.getColumnWidth().setValue(200);
+		table.getColumnWidth().setValue(94);
 		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<>(table), engine);
 		return new GenericWindow(crud, width, height);
 	}
