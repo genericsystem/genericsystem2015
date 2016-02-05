@@ -53,6 +53,7 @@ public abstract class GSRow extends GSHBox {
 		return new GSButton(parent, Cell<String>::getObservableModel).setAction(Cell<Generic>::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
 	}
 
+	// ************************************************************************************
 	public static class GSEditableCellRow extends GSRow {
 
 		public GSEditableCellRow(Element<?> parent) {
@@ -61,7 +62,7 @@ public abstract class GSRow extends GSHBox {
 
 		@Override
 		protected Element<?> createGSCell(Element<?> parent) {
-			return new GSTextField(parent, Cell<Generic>::getName);
+			return new GSTextField(parent);
 		}
 
 		@Override
@@ -71,6 +72,8 @@ public abstract class GSRow extends GSHBox {
 
 	}
 
+	// ************************************************************************************
+
 	public static class GSTextCellRow extends GSRow {
 		public GSTextCellRow(Element<?> parent) {
 			super(parent);
@@ -79,6 +82,7 @@ public abstract class GSRow extends GSHBox {
 		@Override
 		protected Element<?> createGSCell(Element<?> parent) {
 			return new GSLabel(parent, Cell<String>::getObservableModel);
+			// return new GSTextField(parent, Cell<String>::getObservableModel);
 		}
 	}
 
