@@ -68,7 +68,7 @@ public abstract class GSTable extends GSVBox {
 		}
 	}
 
-	public static class GSEditTableCellTable extends GSTableCellTableEngine {
+	public static class GSEditTableCellTable extends GSTable {
 
 		public GSEditTableCellTable(Element<?> parent) {
 			super(parent);
@@ -76,7 +76,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createSelectionHBox(Element<?> parent) {
-			return new GSTableCellRow(parent);// new GSEditableCellRow(parent);
+			return new GSTableCellRow(parent);// new GSEditableCellRow(parent);//
 		}
 	}
 }
