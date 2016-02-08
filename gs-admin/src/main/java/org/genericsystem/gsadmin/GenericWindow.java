@@ -97,12 +97,18 @@ public class GenericWindow extends Window {
 
 	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
 
-		Builders.TableBuilder<Generic, Generic> tableBuilder = new Builders.TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
-				attribute -> attribute.isCompositeForInstances(engine)));
+		ObservableList<Generic> items = engine.getObservableSubInstances();
+		ObservableList<Generic> columns = engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine));
+		
+		Builders.TableBuilder<Generic, Generic> tableBuilder = new Builders.TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"),items ,columns,null,null,null);
+		
+		
 		Builders.RowBuilder<Generic> rowBuilder = new Builders.RowBuilder<>(tableBuilder);
 		Builders.CellBuilder<Generic, Generic, Table> cellBuilder = new CellBuilder<>(rowBuilder, item -> col -> {
-
-			TableBuilder<Generic, Generic> innerTableBuilder = new TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Structurals"), FXCollections.observableArrayList(item), FXCollections.observableArrayList(col));
+			ObservableList<Generic> innerItems =  FXCollections.observableArrayList(item);
+			ObservableList<Generic> innerColumns = FXCollections.observableArrayList(col);
+			
+			TableBuilder<Generic, Generic> innerTableBuilder = new TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Structurals"),innerItems,innerColumns,null,null,null);
 			RowBuilder<Generic> innerRowBuilder = new RowBuilder<>(innerTableBuilder);
 			Builders.CellBuilder<Generic, Generic, String> innerCellBuilder = new Builders.CellBuilder<>(innerRowBuilder, i -> c -> {
 				return new ReadOnlyStringWrapper("Structurals");

@@ -2,15 +2,17 @@ package org.genericsystem.experimental;
 
 import java.util.function.Function;
 
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
+import org.genericsystem.common.Generic;
+import org.genericsystem.gsadmin.GenericRow;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.utils.Transformation;
+
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public interface Builders {
 
@@ -18,6 +20,7 @@ public interface Builders {
 
 		private final ObservableValue<String> firstRowFirstColumnString;
 		private final ObservableValue<String> firstRowLastColumnString;
+		
 		private final Function<COL, ObservableValue<String>> firstRowExtractor;
 		private final Function<ITEM, ObservableValue<?>> firstColumnExtractor;
 		private final Function<ITEM, ObservableValue<String>> lastColumnExtractor;
@@ -71,23 +74,31 @@ public interface Builders {
 				return true;
 			return false;
 		}
+
+		public Function<COL, ObservableValue<String>> getFirstRowExtractor() {
+			return firstRowExtractor;
+		}
+		
+		public Function<ITEM, ObservableValue<String>> getLastColumnExtractor() {
+			return lastColumnExtractor;
+		}
 	}
 
 	// *************************************************************************************
 	public static class RowBuilder<ITEM> {
 		private TableBuilder<ITEM, ?> tableBuilder;
-
+		
 		public RowBuilder(TableBuilder<ITEM, ?> tableBuilder) {
 			this.tableBuilder = tableBuilder;
 		}
 
 		public ObservableList<Row> buildRow(ObservableValue<String> styleClass, ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell) {
-			return new Transformation<>(tableBuilder.getItems(), item -> new Row(firstCell, cells, lastCell, styleClass));
+			return new Transformation<>(tableBuilder.getItems(), item -> new GenericRow((Generic) item,firstCell, cells, lastCell, styleClass));
 		}
 
-		public ObservableValue<Row> buildFirstRow(ObservableValue<String> styleClass){
+		public ObservableValue<Row> buildFirstRow(ObservableValue<String> styleClass, ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell){
 			if(tableBuilder.isFirstRowPresent())
-				return null; //créer le row
+				return new SimpleObjectProperty<>(new Row(firstCell, cells, lastCell, styleClass)); //créer le row
 			return new SimpleObjectProperty<>();
 		}
 
@@ -128,25 +139,32 @@ public interface Builders {
 		
 		public ObservableValue<Cell<?>> buildFirstRowFirstCell(ObservableValue<String> styleClass){
 			if(rowBuilder.getTableBuilder().isFirstColumnPresent() || rowBuilder.getTableBuilder().isFirstRowPresent())
-				return null; //créer la cell
+				return new SimpleObjectProperty<>( new Cell<>(rowBuilder.getTableBuilder().getFirstRowFirstColumnString(),styleClass)); //créer la cell
 			return new SimpleObjectProperty<>();
 		}
 		
-		public ObservableValue<Cell<?>> buildFirstCell(ObservableValue<String> styleClass){
+		public ObservableList<Cell<?>> buildFirstRowCells(ObservableValue<String> cellStyle){
 			if(rowBuilder.getTableBuilder().isFirstColumnPresent())
-				return null; //créer la cell
+			{
+				@SuppressWarnings("unchecked")
+				Function<COL, ObservableValue<String>> firstRowExtractor = (Function<COL, ObservableValue<String>>) rowBuilder.getTableBuilder().getFirstRowExtractor();
+				return new Transformation<>(rowBuilder.getTableBuilder().getColumns(), column -> new Cell<>(firstRowExtractor.apply((COL)column), cellStyle)); //créer la cell
+			}
+				return FXCollections.emptyObservableList();
+		}
+		
+		public ObservableValue<Cell<?>> buildFirstRowLastCell(ObservableValue<String> cellStyle){
+			if(rowBuilder.getTableBuilder().isFirstRowPresent()&& rowBuilder.getTableBuilder().isLastColumnPresent())
+				return new SimpleObjectProperty<>(new Cell<>(rowBuilder.getTableBuilder().getFirstRowLastColumnString(), cellStyle)); //créer la cell
 			return new SimpleObjectProperty<>();
 		}
 		
-		public ObservableValue<Cell<?>> buildFirstRowLastCell(ObservableValue<String> styleClass){
-			if(rowBuilder.getTableBuilder().isFirstRowPresent())
-				return null; //créer la cell
-			return new SimpleObjectProperty<>();
-		}
-		
-		public ObservableValue<Cell<?>> buildLastCell(ObservableValue<String> styleClass){
+		public ObservableValue<Cell<?>> buildLastCell(ObservableValue<String> cellStyle,ITEM item){
 			if(rowBuilder.getTableBuilder().isLastColumnPresent())
-				return null; //créer la cell
+			{
+				Function<ITEM, ObservableValue<String>> lastColumnExtractor = (Function<ITEM, ObservableValue<String>>) rowBuilder.getTableBuilder().getLastColumnExtractor();
+				return new SimpleObjectProperty<>(new Cell<>(lastColumnExtractor.apply(item),cellStyle)); //créer la cell
+			}
 			return new SimpleObjectProperty<>();
 		}
 		
