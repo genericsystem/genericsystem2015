@@ -17,21 +17,20 @@ import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Table.FirstColumnTable;
 import org.genericsystem.ui.utils.Transformation;
 
-public class TableBuilder<ITEM, COL, CELL> {
+public abstract class TableBuilder<ITEM, COL, T> {
 
 	private final ObservableList<ITEM> items;
 	private final ObservableList<COL> columns;
 	private final ObservableValue<String> firstRowFirstColumnString;
 	private Function<COL, ObservableValue<String>> firstRowExtractor;
-	private final Function<ITEM, Function<COL, ObservableValue<CELL>>> rowColumnExtractor;
+	private final Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor;
 	private final ObservableValue<String> firstRowLastColumnString;
 	private final Function<ITEM, ObservableValue<String>> lastColumnExtractor;
 	private TableStyle tableStyle = new TableStyle();
-	private final Function<ITEM, ObservableValue<CELL>> firstColumnExtractor;
+	private final Function<ITEM, ObservableValue<T>> firstColumnExtractor;
 
-	public TableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<CELL>>> rowColumnExtractor,
-			Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<CELL>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
-
+	public TableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns, Function<ITEM, Function<COL, ObservableValue<T>>> rowColumnExtractor,
+			Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<T>> firstColumnExtractor, Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 		this.firstRowFirstColumnString = firstRowFirstColumnString;
 		this.firstRowLastColumnString = firstRowLastColumnString;
 		this.items = items;
@@ -60,7 +59,7 @@ public class TableBuilder<ITEM, COL, CELL> {
 	}
 
 	protected Row buildRow(ITEM item) {
-		return buildRow(item, firstColumnExtractor != null ? firstColumnExtractor.apply(item) : new SimpleObjectProperty<CELL>(), columns, rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null,
+		return buildRow(item, firstColumnExtractor != null ? firstColumnExtractor.apply(item) : new SimpleObjectProperty<T>(), columns, rowColumnExtractor != null ? col -> rowColumnExtractor.apply(item).apply(col) : null,
 				lastColumnExtractor == null ? new SimpleStringProperty() : lastColumnExtractor.apply(item));
 	}
 
@@ -69,7 +68,7 @@ public class TableBuilder<ITEM, COL, CELL> {
 				tableStyle.firstRow);
 	}
 
-	public Row buildRow(ITEM item, ObservableValue<CELL> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<CELL>> columnExtractor, ObservableValue<String> lastColumnString) {
+	public Row buildRow(ITEM item, ObservableValue<T> firstColumnExtractor, ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> lastColumnString) {
 		return new GenericRow((Generic) item, buildFirstCell(firstColumnExtractor, tableStyle.firstCell), buildCells(columns, columnExtractor, tableStyle.cell), buildLastCell(lastColumnString, tableStyle.lastCell), tableStyle.row);
 	}
 
@@ -77,7 +76,7 @@ public class TableBuilder<ITEM, COL, CELL> {
 		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
 	}
 
-	protected ObservableValue<Cell<?>> buildFirstCell(ObservableValue<CELL> firstColumnString, ObservableValue<String> cellStyle) {
+	protected ObservableValue<Cell<?>> buildFirstCell(ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
 		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
 	}
 
@@ -89,11 +88,11 @@ public class TableBuilder<ITEM, COL, CELL> {
 		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(columnExtractor.apply(column), cellStyle));
 	}
 
-	protected ObservableValue<Cell<?>> buildfirstCell(ObservableValue<CELL> firstColumnString, ObservableValue<String> cellStyle) {
+	protected ObservableValue<Cell<?>> buildfirstCell(ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
 		return new ReadOnlyObjectWrapper<>(firstColumnString.getValue() != null ? new Cell<>(firstColumnString, cellStyle) : null);
 	}
 
-	protected ObservableList<Cell<?>> buildCells(ObservableList<COL> columns, Function<COL, ObservableValue<CELL>> columnExtractor, ObservableValue<String> cellStyle) {
+	protected ObservableList<Cell<?>> buildCells(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> cellStyle) {
 		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> {
 			return new Cell<>(columnExtractor.apply(column), cellStyle);
 		});
@@ -117,5 +116,23 @@ public class TableBuilder<ITEM, COL, CELL> {
 
 	ObservableValue<String> getRowLastCellsStyle() {
 		return tableStyle.lastCell;
+	}
+
+	public static class TextTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, String> {
+		public TextTableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns,
+				Function<ITEM, Function<COL, ObservableValue<String>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<String>> firstColumnExtractor,
+				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+			super(firstRowFirstColumnString, firstRowLastColumnString, items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
+		}
+
+	}
+
+	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
+
+		public TableCellTableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns,
+				Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<Table>> firstColumnExtractor,
+				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+			super(firstRowFirstColumnString, firstRowLastColumnString, items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
+		}
 	}
 }
