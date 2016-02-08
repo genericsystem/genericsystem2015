@@ -18,18 +18,12 @@ public interface Builders {
 
 		private final ObservableValue<String> firstRowFirstColumnString;
 		private final ObservableValue<String> firstRowLastColumnString;
-		private final Function<COL, ObservableValue<String>> firstRowExtractor;
-		private final Function<ITEM, ObservableValue<?>> firstColumnExtractor;
-		private final Function<ITEM, ObservableValue<String>> lastColumnExtractor;
 		private final ObservableList<ITEM> items;
 		private final ObservableList<COL> columns;
 
-		public TableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns,Function<COL, ObservableValue<String>> firstRowExtractor,Function<ITEM, ObservableValue<?>> firstColumnExtractor,Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
+		public TableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns) {
 			this.firstRowFirstColumnString = firstRowFirstColumnString;
 			this.firstRowLastColumnString = firstRowLastColumnString;
-			this.firstColumnExtractor = firstColumnExtractor;
-			this.firstRowExtractor = firstRowExtractor;
-			this.lastColumnExtractor = lastColumnExtractor;
 			this.items = items;
 			this.columns = columns;
 		}
@@ -53,28 +47,13 @@ public interface Builders {
 		public ObservableList<COL> getColumns() {
 			return columns;
 		}
-		
-		public boolean isFirstRowPresent(){
-			if(firstRowExtractor!=null)
-				return true;
-			return false;
-		}
-		
-		public boolean isFirstColumnPresent(){
-			if(firstColumnExtractor!=null)
-				return true;
-			return false;
-		}
-		
-		public boolean isLastColumnPresent(){
-			if(lastColumnExtractor!=null)
-				return true;
-			return false;
-		}
 	}
 
 	// *************************************************************************************
 	public static class RowBuilder<ITEM> {
+		// private ObservableValue<Cell<?>> firstCell;
+		// private ObservableList<Cell<?>> cells;
+		// private ObservableValue<Cell<?>> lastCell;
 		private TableBuilder<ITEM, ?> tableBuilder;
 
 		public RowBuilder(TableBuilder<ITEM, ?> tableBuilder) {
@@ -85,11 +64,29 @@ public interface Builders {
 			return new Transformation<>(tableBuilder.getItems(), item -> new Row(firstCell, cells, lastCell, styleClass));
 		}
 
-		public ObservableValue<Row> buildFirstRow(ObservableValue<String> styleClass){
-			if(tableBuilder.isFirstRowPresent())
-				return null; //créer le row
-			return new SimpleObjectProperty<>();
-		}
+		// public ObservableValue<Cell<?>> getFirstCell() {
+		// return firstCell;
+		// }
+		//
+		// public void setFirstCell(ObservableValue<Cell<?>> firstCell) {
+		// this.firstCell = firstCell;
+		// }
+		//
+		// public ObservableList<Cell<?>> getCells() {
+		// return cells;
+		// }
+		//
+		// public void setCells(ObservableList<Cell<?>> cells) {
+		// this.cells = cells;
+		// }
+		//
+		// public ObservableValue<Cell<?>> getLastCell() {
+		// return lastCell;
+		// }
+		//
+		// public void setLastCell(ObservableValue<Cell<?>> lastCell) {
+		// this.lastCell = lastCell;
+		// }
 
 		public TableBuilder<ITEM, ?> getTableBuilder() {
 			return tableBuilder;
@@ -125,31 +122,27 @@ public interface Builders {
 
 			return listCell;
 		}
-		
-		public ObservableValue<Cell<?>> buildFirstRowFirstCell(ObservableValue<String> styleClass){
-			if(rowBuilder.getTableBuilder().isFirstColumnPresent() || rowBuilder.getTableBuilder().isFirstRowPresent())
-				return null; //créer la cell
-			return new SimpleObjectProperty<>();
-		}
-		
-		public ObservableValue<Cell<?>> buildFirstCell(ObservableValue<String> styleClass){
-			if(rowBuilder.getTableBuilder().isFirstColumnPresent())
-				return null; //créer la cell
-			return new SimpleObjectProperty<>();
-		}
-		
-		public ObservableValue<Cell<?>> buildFirstRowLastCell(ObservableValue<String> styleClass){
-			if(rowBuilder.getTableBuilder().isFirstRowPresent())
-				return null; //créer la cell
-			return new SimpleObjectProperty<>();
-		}
-		
-		public ObservableValue<Cell<?>> buildLastCell(ObservableValue<String> styleClass){
-			if(rowBuilder.getTableBuilder().isLastColumnPresent())
-				return null; //créer la cell
-			return new SimpleObjectProperty<>();
-		}
-		
+
+		// public <IITEM, ICOL> ObservableList<Cell<Table>> buildTextCellTable(ObservableValue<String> styleClass, Function<ITEM, ObservableList<IITEM>> itemExtractor, Function<COL, ObservableList<ICOL>> columnExtractor,
+		// Function<IITEM, Function<ICOL, ObservableValue<String>>> rowColumnExtractor) {
+		// ObservableList<Cell<Table>> listCell = FXCollections.emptyObservableList();
+		//
+		// rowBuilder.getTableBuilder().getItems().forEach(item -> {
+		// rowBuilder.getTableBuilder().getColumns().forEach(col -> {
+		//
+		// TableBuilder<IITEM, ICOL> tableBuilder = new TableBuilder<IITEM, ICOL>(null, null, itemExtractor.apply((ITEM) item), columnExtractor.apply((COL) col));
+		// RowBuilder<IITEM> rowBuilder = new RowBuilder<IITEM>(tableBuilder);
+		// CellBuilder<IITEM, ICOL, String> cellBuilder = new CellBuilder<>(rowBuilder, rowColumnExtractor);
+		//
+		// cellBuilder.buildTextCell(styleClass);
+		// rowBuilder.buildRow(styleClass);
+		// ObservableValue<Table> table = tableBuilder.buildTable(500, 500, styleClass);
+		// listCell.add(new Cell<Table>(table, styleClass));
+		//
+		// });
+		// });
+		// return listCell;
+		// }
 	}
 
 }
