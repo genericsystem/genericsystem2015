@@ -1,17 +1,13 @@
 package org.genericsystem.ui;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-
 import org.genericsystem.ui.utils.Utils;
 
 public class Element<N> {
@@ -76,11 +72,6 @@ public class Element<N> {
 		return this;
 	}
 
-	// public <M, T> Element<N> addMetaBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
-	// bindings.add(Binding.bindMetaProperty(applyOnModel, applyOnNode));
-	// return this;
-	// }
-
 	public <M, T> Element<N> setObservableListBinding(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
 		bindings.add(Binding.bindObservableList(applyOnModel, applyOnNode));
 		return this;
@@ -90,11 +81,6 @@ public class Element<N> {
 		bindings.add(Binding.bindAction(applyOnModel, applyOnNode));
 		return this;
 	}
-
-	// public <SUPERMODEL, M, T> Element<N> addMetaActionBinding(Function<N, Property<T>> propAction, BiConsumer<SUPERMODEL, M> biConsumer) {
-	// bindings.add(Binding.bindMetaAction(biConsumer, propAction));
-	// return this;
-	// }
 
 	public <M, T> Element<N> addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
 		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));
@@ -116,31 +102,15 @@ public class Element<N> {
 		return this;
 	}
 
-	// protected <M, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
-	// forEach(applyOnModel);
-	// bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
-	// return this;
-	// }
-
 	public <M extends Model, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
 		return this;
 	}
 
-	//
-	// public <M, T extends Model> Element<N> select(Function<M, ObservableValue<T>> applyOnModel, Function<T, Property<M>> injectedProperty) {
-	// select(applyOnModel);
-	// bindings.add(Binding.bind(null, injectedProperty, Binder.injectBinder()));
-	// return this;
-	// }
-
 	protected N createNode(Object parent) {
 		try {
-			if (parent != null && !Modifier.isStatic(nodeClass.getModifiers()) && nodeClass.getEnclosingClass() != null)
-				return nodeClass.getDeclaredConstructor(new Class[] { parent.getClass() }).newInstance(new Object[] { parent });
-			else
-				return nodeClass.getDeclaredConstructor(new Class[] {}).newInstance(new Object[] {});
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			return nodeClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
 	}
