@@ -82,6 +82,10 @@ public interface Builders {
 		public Function<ITEM, ObservableValue<String>> getLastColumnExtractor() {
 			return lastColumnExtractor;
 		}
+		
+		public Function<ITEM, ObservableValue<?>> getFirstColumnExtractor() {
+			return firstColumnExtractor;
+		}
 	}
 
 	// *************************************************************************************
@@ -129,12 +133,20 @@ public interface Builders {
 
 			rowBuilder.getTableBuilder().getItems().forEach(item -> {
 				rowBuilder.getTableBuilder().getColumns().forEach(col -> {
-
 					listCell.add(new Cell<T>(rowColumnExtractor.apply((ITEM) item).apply((COL) col), styleClass));
 				});
 			});
 
 			return listCell;
+		}
+		
+		public ObservableValue<Cell<?>> buildFirstCell(ObservableValue<String> styleClass,ITEM item){
+			if(rowBuilder.getTableBuilder().getFirstColumnExtractor()!=null){
+				Function<ITEM, ObservableValue<?>> firstColumnExtractor = (Function<ITEM, ObservableValue<?>>) rowBuilder.getTableBuilder().getFirstColumnExtractor();
+				return new SimpleObjectProperty<>(new Cell<>(firstColumnExtractor.apply(item),styleClass));
+			}
+			return new SimpleObjectProperty<>();
+			
 		}
 		
 		public ObservableValue<Cell<?>> buildFirstRowFirstCell(ObservableValue<String> styleClass){
