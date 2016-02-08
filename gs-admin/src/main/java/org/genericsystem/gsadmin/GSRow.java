@@ -2,7 +2,6 @@ package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
 import org.genericsystem.ui.Element;
@@ -32,7 +31,7 @@ public abstract class GSRow extends GSHBox {
 		GSHBox cells = new GSHBox(this).forEach(GenericRow::getElements).setMinWidth(Cell<Generic>::getColumnCellsWidth).setMaxWidth(Cell<Generic>::getColumnCellsWidth).setPrefWidth(Cell<Generic>::getColumnCellsWidth)
 				.setStyleClass(Cell<Generic>::getStyleClass);
 		{
-			createGSCell(cells);
+			createCells(cells);
 		}
 
 		GSHBox lastCell = new GSHBox(this).select(Row::getLastElement).setMinWidth(Cell<Generic>::getLastColumnCellsWidth).setPrefWidth(Cell<Generic>::getLastColumnCellsWidth).setMaxWidth(Cell<Generic>::getLastColumnCellsWidth)
@@ -43,7 +42,7 @@ public abstract class GSRow extends GSHBox {
 
 	}
 
-	protected abstract Element<?> createGSCell(Element<?> parent);
+	protected abstract Element<?> createCells(Element<?> parent);
 
 	protected Element<?> createFirstCell(Element<?> parent) {
 		return new GSLabel(parent, Cell<String>::getObservableModel);
@@ -60,7 +59,7 @@ public abstract class GSRow extends GSHBox {
 		}
 
 		@Override
-		protected Element<?> createGSCell(Element<?> parent) {
+		protected Element<?> createCells(Element<?> parent) {
 			return new GSTextField(parent, Cell<Generic>::getName);
 		}
 
@@ -77,7 +76,7 @@ public abstract class GSRow extends GSHBox {
 		}
 
 		@Override
-		protected Element<?> createGSCell(Element<?> parent) {
+		protected Element<?> createCells(Element<?> parent) {
 			return new GSLabel(parent, Cell<String>::getObservableModel);
 		}
 	}
@@ -100,13 +99,13 @@ public abstract class GSRow extends GSHBox {
 		}
 
 		@Override
-		protected Element<?> createGSCell(Element<?> parent) {
+		protected Element<?> createCells(Element<?> parent) {
 			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
 		}
 
 		@Override
 		protected Element<?> createFirstCell(Element<?> parent) {
-			return createGSCell(parent);
+			return createCells(parent);
 		}
 	}
 }
