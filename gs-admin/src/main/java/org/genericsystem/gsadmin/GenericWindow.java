@@ -100,34 +100,7 @@ public class GenericWindow extends Window {
 		ObservableList<Generic> items = engine.getObservableSubInstances();
 		ObservableList<Generic> columns = engine.getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(engine));
 		
-		Builders.TableBuilder<Generic, Generic> tableBuilder = new Builders.TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"),items ,columns,firstRowString -> new ReadOnlyStringWrapper("" + firstRowString),item->{
-			Builders.TableBuilder<Generic, Generic> innerTableFirstCell = new Builders.TableBuilder<>(new ReadOnlyStringWrapper("Structurals"),new ReadOnlyStringWrapper("Action"),FXCollections.observableArrayList(item),FXCollections.observableArrayList(item.getComponents()),firstColumString -> new ReadOnlyStringWrapper("" + firstColumString),firstColumString -> new ReadOnlyStringWrapper("" + firstColumString),null);
-			Builders.RowBuilder<Generic> innerTableFirstCellRow = new Builders.RowBuilder<>(innerTableFirstCell);
-			Builders.CellBuilder<Generic, Generic, Table> cellBuilder  = new Builders.CellBuilder<>(innerTableFirstCellRow, innerItem->innerCol->{
-				ObservableList<Generic> innerItems =  FXCollections.observableArrayList(innerItem);
-				ObservableList<Generic> innerColumns = FXCollections.observableArrayList(innerCol);
-				TableBuilder<Generic, Generic> innerTableBuilder = new TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Structurals"),innerItems,innerColumns,null,null,null);
-				Builders.RowBuilder<Generic> innerRowBuilder = new Builders.RowBuilder<>(innerTableBuilder);
-				Builders.CellBuilder<Generic, Generic, String> innerCellBuilder = new Builders.CellBuilder<>(innerRowBuilder, i -> c -> {
-					return new ReadOnlyStringWrapper("Structurals");
-				});
-
-				ObservableList firstRowCells = innerCellBuilder.buildFirstRowCells(new SimpleStringProperty("z"));
-				ObservableValue firstRowFirstCell = innerCellBuilder.buildFirstRowFirstCell(new SimpleStringProperty("z"));
-				ObservableValue firstRowLastCell = innerCellBuilder.buildFirstRowLastCell(new SimpleStringProperty("z"));
-				ObservableValue firstRow = innerRowBuilder.buildFirstRow(new SimpleStringProperty("z"),firstRowFirstCell,firstRowCells,firstRowLastCell);
-				
-				ObservableList listCell = innerCellBuilder.buildCell(new SimpleStringProperty("z"));
-				ObservableValue firstCell = innerCellBuilder.buildFirstCell(new SimpleStringProperty("z"),innerItem);
-				ObservableValue lastCell = innerCellBuilder.buildLastCell(new SimpleStringProperty("z"),innerItem);
-				
-				ObservableList listRow = innerRowBuilder.buildRow(new SimpleStringProperty("z"), firstCell, listCell, lastCell);
-				ObservableValue<Table> innerTable = innerTableBuilder.buildTable(200, 200, new SimpleStringProperty(""), firstRow, listRow);
-
-				return innerTable;
-			});
-			return null;
-		},null);
+		Builders.TableBuilder<Generic, Generic> tableBuilder = new Builders.TableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"),items ,columns,null,null,null);
 		
 		
 		Builders.RowBuilder<Generic> rowBuilder = new Builders.RowBuilder<>(tableBuilder);
