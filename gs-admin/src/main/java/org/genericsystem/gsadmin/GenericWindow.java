@@ -68,19 +68,24 @@ public class GenericWindow extends Window {
 		engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
 	}
 
-	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
-		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
-				attribute -> attribute.isCompositeForInstances(engine)), itemTableCell -> columnTableCell -> {
+	static ReadOnlyObjectWrapper<Table> createCellContent(Generic itemTableCell,Generic columnTableCell){
 			TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), itemTableCell.getObservableHolders(columnTableCell),
 					FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, currentGeneric -> new ReadOnlyStringWrapper("" + currentGeneric), null);
 			Table tab = textTableModel.buildTable(0, 0);
 			return new ReadOnlyObjectWrapper<>(tab);
-		}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
-			TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(itemTableCell),
-					FXCollections.observableArrayList(itemTableCell.getComponents()), item -> col -> new ReadOnlyStringWrapper("" + col), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-			Table tab = textTableModel.buildTableFirstColumn();
-			return new ReadOnlyObjectWrapper<>(tab);
-		}, column -> new ReadOnlyStringWrapper("Delete"));
+	}
+	
+	static ReadOnlyObjectWrapper<Table> createFirstColumnTable(Generic item){
+		TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(item),
+				FXCollections.observableArrayList(item.getComponents()), item2 -> col2 -> new ReadOnlyStringWrapper("" + col2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+		Table tab = textTableModel.buildTableFirstColumn();
+		return new ReadOnlyObjectWrapper<>(tab);
+	
+	}
+	
+	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
+		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
+				attribute -> attribute.isCompositeForInstances(engine)),item->col->createCellContent(item,col) , firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> createFirstColumnTable(itemTableCell), column -> new ReadOnlyStringWrapper("Delete"));
 
 		Table table = tableModel.buildTable(900, 400);
 		table.getFirstRowHeight().setValue(30);
