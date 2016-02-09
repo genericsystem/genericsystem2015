@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 
@@ -68,7 +69,8 @@ public class ModelContext {
 			try {
 				return methodReference.apply(modelContext_.getModel());
 			} catch (ClassCastException ignore) {
-				throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
+				return methodReference.apply(modelContext_.getModel());
+				// throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
 			}
 		};
 	}

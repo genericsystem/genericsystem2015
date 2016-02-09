@@ -1,6 +1,6 @@
 package org.genericsystem.gsadmin;
 
-import org.genericsystem.gsadmin.GSTable.GSEditTableCellTable;
+import org.genericsystem.gsadmin.GSTable.GSEditTable;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTableEngine;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTableGeneric;
 import org.genericsystem.ui.Element;
@@ -31,7 +31,7 @@ public class GSCrud extends GSVBox {
 			GSHBox tablesPanel = new GSHBox(vb).setSpacing(10);
 			{
 				initGSGenericTable(tablesPanel);
-				new GSEditTableCellTable(tablesPanel).select(GenericCrud::getEditTable).setStyleClass("blackBorder").setStyleClass("tablePadding");
+				new GSEditTable(tablesPanel).select(GenericCrud::getEditTable).setStyleClass("blackBorder").setStyleClass("tablePadding");
 			}
 		}
 

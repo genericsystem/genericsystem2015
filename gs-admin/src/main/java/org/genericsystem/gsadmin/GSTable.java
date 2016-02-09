@@ -2,6 +2,8 @@ package org.genericsystem.gsadmin;
 
 import javafx.scene.layout.HBox;
 
+import org.genericsystem.gsadmin.GSRow.GSEditableCellRow;
+import org.genericsystem.gsadmin.GSRow.GSEditableCellTableRow;
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellFirstRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
@@ -25,26 +27,24 @@ public abstract class GSTable extends GSVBox {
 
 		GSSCrollPane scrollPane = new GSSCrollPane(this).setStyleClass("scrollable");
 		{
-			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass)
-					.setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);// .setPrefWidth(getSuperPrefWidth()).setPrefHeight(getSuperPrefHeight());
+			GSVBox tablePanel = new GSVBox(scrollPane).setStyleClass(Table::getStyleClass).setPrefHeight(Table::getParentHeight).setPrefWidth(Table::getParentWidth);// .setPrefWidth(getSuperPrefWidth()).setPrefHeight(getSuperPrefHeight());
 			{
 				createRows(tablePanel);
 			}
 		}
 	}
 
-	protected GSHBox createRows(Element<?> parent){
-		return (GSHBox) new GSTableCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
+	protected GSHBox createRows(Element<?> parent) {
+		return new GSTableCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
 	}
 
 	protected void createFirstRow(Element<?> parent) {
-		new GSTextCellFirstRow(parent).select(Table::getFirstElement).setStyleClass(Row::getStyleClass)
-				.setMinHeight(Row::getFirstRowHeight).setMaxHeight(Row::getFirstRowHeight)
-				.setPrefHeight(Row::getFirstRowHeight);
+		new GSTextCellFirstRow(parent).select(Table::getFirstElement).setStyleClass(Row::getStyleClass).setMinHeight(Row::getFirstRowHeight).setMaxHeight(Row::getFirstRowHeight).setPrefHeight(Row::getFirstRowHeight);
 	}
 
-	protected void createLastRow(Element<?> parent){}
-	
+	protected void createLastRow(Element<?> parent) {
+	}
+
 	public static class GSTextCellTable extends GSTable {
 
 		public GSTextCellTable(Element<?> parent) {
@@ -53,7 +53,8 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return (GSHBox) new GSTextCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
+			return (GSHBox) new GSTextCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight)
+					.addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
 		}
 	}
 
@@ -65,8 +66,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return (GSHBox) super.createRows(parent).addActionBinding(HBox::onMouseClickedProperty,
-					GenericRow::selectRowEngineTable);
+			return (GSHBox) super.createRows(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowEngineTable);
 		}
 	}
 
@@ -78,20 +78,31 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return (GSHBox) super.createRows(parent).addActionBinding(HBox::onMouseClickedProperty,
-					GenericRow::selectRowGenericTable);
+			return (GSHBox) super.createRows(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
 		}
 	}
 
-	public static class GSEditTableCellTable extends GSTableCellTableEngine {
+	public static class GSEditTable extends GSTable {
 
-		public GSEditTableCellTable(Element<?> parent) {
+		public GSEditTable(Element<?> parent) {
 			super(parent);
 		}
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return super.createRows(parent);// new GSEditableCellRow(parent);
+			return new GSEditableCellTableRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
+		}
+	}
+
+	public static class GSEditTableCell extends GSTable {
+
+		public GSEditTableCell(Element<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		public GSHBox createRows(Element<?> parent) {
+			return new GSEditableCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight);
 		}
 	}
 }

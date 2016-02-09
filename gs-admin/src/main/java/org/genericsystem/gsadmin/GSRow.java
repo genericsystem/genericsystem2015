@@ -2,7 +2,9 @@ package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+
 import org.genericsystem.common.Generic;
+import org.genericsystem.gsadmin.GSTable.GSEditTableCell;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
 import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
@@ -52,6 +54,23 @@ public abstract class GSRow extends GSHBox {
 		return new GSButton(parent, Cell<String>::getObservableModel).setAction(Cell<Generic>::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
 	}
 
+	public static class GSEditableCellTableRow extends GSRow {
+
+		public GSEditableCellTableRow(Element<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected Element<?> createCells(Element<?> parent) {
+			return new GSEditTableCell(parent).select(Cell<Table>::getObservableModel);
+		}
+
+		@Override
+		protected Element<?> createFirstCell(Element<?> parent) {
+			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
+		}
+	}
+
 	public static class GSEditableCellRow extends GSRow {
 
 		public GSEditableCellRow(Element<?> parent) {
@@ -60,14 +79,16 @@ public abstract class GSRow extends GSHBox {
 
 		@Override
 		protected Element<?> createCells(Element<?> parent) {
-			return new GSTextField(parent, Cell<Generic>::getName);
+			return null;
 		}
 
 		@Override
 		protected Element<?> createFirstCell(Element<?> parent) {
-			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
+			GSHBox cellPanel = new GSHBox(parent);
+			new GSTextField(cellPanel, Cell<String>::getValue).bindTextProperty(Cell<String>::getNewValModel);
+			new GSButton(cellPanel, "Update").setAction(Cell<Generic>::update).addBoot(Button::paddingProperty, new Insets(5, 0, 5, 0));
+			return cellPanel;
 		}
-
 	}
 
 	public static class GSTextCellRow extends GSRow {
