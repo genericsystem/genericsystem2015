@@ -73,8 +73,8 @@ public class Archiver {
 	public Archiver(AbstractServer root, String directoryPath) {
 		this.root = root;
 		directory = prepareAndLockDirectory(directoryPath);
-		log.info("Start archiver in repository : " + directory.getAbsolutePath());
 		if (directory != null) {
+			log.info("Start archiver in repository : " + directory.getAbsolutePath());
 			String snapshotPath = getSnapshotPath(directory);
 			if (snapshotPath != null) {
 				try {
