@@ -24,9 +24,6 @@ public class Cell<T> extends Stylable {
 	public Property<String> getNewValModel() {
 		if (observableModel.getValue() != null)
 			newValModel.setValue(observableModel.getValue() + "");
-		newValModel.addListener(e -> {
-			update();
-		});
 		return newValModel;
 	}
 
@@ -47,7 +44,7 @@ public class Cell<T> extends Stylable {
 	}
 
 	public void update() {
-		((GenericRow) getParent()).update(newValModel.getValue(), observableModel.getValue());
+		((GenericRow) getParent()).update(newValModel.getValue());
 	}
 
 	public void delete() {

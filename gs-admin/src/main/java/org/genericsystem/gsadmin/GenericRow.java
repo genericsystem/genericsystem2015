@@ -1,5 +1,6 @@
 package org.genericsystem.gsadmin;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -10,6 +11,8 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
@@ -43,8 +46,18 @@ public class GenericRow extends Row {
 		item.remove();
 	}
 
-	public void update(String newValue, Object col) {
-		System.out.println("update :: " + newValue + " :: " + col);
+	public Object update(String newValue) {
+		return item.updateValue(convertValue(newValue));
+	}
+
+	private Serializable convertValue(String newValue) {
+		if (Integer.class.equals(item.getInstanceValueClassConstraint()))
+			return new IntegerStringConverter().fromString(newValue);
+
+		if (Double.class.equals(item.getInstanceValueClassConstraint()))
+			return new DoubleStringConverter().fromString(newValue);
+
+		return name.getValue();
 	}
 
 	private ReadOnlyObjectWrapper<Table> createCellContent(Generic item, Generic col) {
@@ -81,34 +94,27 @@ public class GenericRow extends Row {
 	}
 
 	public void selectRowGenericTable() {
-		if (getParent().getParent().getParent().getParent() != null)
-			createEditTable(((GenericWindow) (getParent().getParent().getParent().getParent().getParent().getParent())).getSecondCrud().getValue());
+		if (getParent().getParent().getParent() instanceof GenericWindow)
+			createEditTable(((GenericWindow) (getParent().getParent().getParent())).getSecondCrud().getValue());
+
 	}
 
 	private void createEditTable(GenericCrud crud) {
 		if (crud != null) {
 			Generic generic = crud.getModel();
-			// TextTableBuilder<Generic, Generic> textTableModel2 = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), generic.getObservableAttributes().filtered(
-			// attribute -> attribute.isCompositeForInstances(generic)), FXCollections.observableArrayList(this.item), i -> c -> {
-			// return new ReadOnlyObjectWrapper(this.item.getHolder(i));
-			// }, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-
 			TableCellTableBuilder<Generic, Generic> editTableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Edition"), new ReadOnlyStringWrapper("Action"), generic.getObservableAttributes().filtered(
 					attribute -> attribute.isCompositeForInstances(generic)), FXCollections.observableArrayList(this.item), itemTableCell -> columnTableCell -> {
-				// TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null,
-				// null, null, it -> new ReadOnlyStringWrapper("" + it));
-				//
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(),
-							null, null, firstColumString -> new ReadOnlyObjectWrapper(firstColumString), null);
+				TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), this.item.getObservableHolders(itemTableCell), FXCollections.observableArrayList(), null,
+						null, currentGeneric -> new ReadOnlyObjectWrapper(currentGeneric), null);
 
-					Table tab = textTableModel.buildTable(0, 0);
-					return new ReadOnlyObjectWrapper<>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
-					TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(itemTableCell),
-							FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-					Table tab = textTableModel.buildTableFirstColumn();
-					return new ReadOnlyObjectWrapper<>(tab);
-				}, null);
+				Table tab = textTableModel.buildTable(0, 0);
+				return new ReadOnlyObjectWrapper<>(tab);
+			}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> {
+				TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(itemTableCell),
+						FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+				Table tab = textTableModel.buildTableFirstColumn();
+				return new ReadOnlyObjectWrapper<>(tab);
+			}, null);
 
 			Table editTable = editTableModel.buildTable(500, 400);
 			editTable.getFirstColumnWidth().setValue(200);

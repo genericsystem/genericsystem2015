@@ -54,6 +54,45 @@ public abstract class GSRow extends GSHBox {
 		return new GSButton(parent, Cell<String>::getObservableModel).setAction(Cell<Generic>::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
 	}
 
+	public static class GSTextCellRow extends GSRow {
+		public GSTextCellRow(Element<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected Element<?> createCells(Element<?> parent) {
+			return new GSLabel(parent, Cell<String>::getObservableModel);
+		}
+	}
+
+	public static class GSTextCellFirstRow extends GSTextCellRow {
+		public GSTextCellFirstRow(Element<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected Element<?> createLastCell(Element<?> parent) {
+			// TODO Auto-generated method stub
+			return new GSLabel(parent, Cell<String>::getObservableModel);
+		}
+	}
+
+	public static class GSTableCellRow extends GSRow {
+		public GSTableCellRow(Element<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected Element<?> createCells(Element<?> parent) {
+			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
+		}
+
+		@Override
+		protected Element<?> createFirstCell(Element<?> parent) {
+			return createCells(parent);
+		}
+	}
+
 	public static class GSEditableCellTableRow extends GSRow {
 
 		public GSEditableCellTableRow(Element<?> parent) {
@@ -88,45 +127,6 @@ public abstract class GSRow extends GSHBox {
 			new GSTextField(cellPanel, Cell<String>::getValue).bindTextProperty(Cell<String>::getNewValModel);
 			new GSButton(cellPanel, "Update").setAction(Cell<Generic>::update).addBoot(Button::paddingProperty, new Insets(5, 0, 5, 0));
 			return cellPanel;
-		}
-	}
-
-	public static class GSTextCellRow extends GSRow {
-		public GSTextCellRow(Element<?> parent) {
-			super(parent);
-		}
-
-		@Override
-		protected Element<?> createCells(Element<?> parent) {
-			return new GSLabel(parent, Cell<String>::getObservableModel);
-		}
-	}
-
-	public static class GSTextCellFirstRow extends GSTextCellRow {
-		public GSTextCellFirstRow(Element<?> parent) {
-			super(parent);
-		}
-
-		@Override
-		protected Element<?> createLastCell(Element<?> parent) {
-			// TODO Auto-generated method stub
-			return new GSLabel(parent, Cell<String>::getObservableModel);
-		}
-	}
-
-	public static final class GSTableCellRow extends GSRow {
-		public GSTableCellRow(Element<?> parent) {
-			super(parent);
-		}
-
-		@Override
-		protected Element<?> createCells(Element<?> parent) {
-			return new GSTextCellTable(parent).select(Cell<Table>::getObservableModel);
-		}
-
-		@Override
-		protected Element<?> createFirstCell(Element<?> parent) {
-			return createCells(parent);
 		}
 	}
 }
