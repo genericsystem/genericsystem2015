@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<script src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
+
+<script type="text/javascript">
+	var wsocket;
+	var serviceLocation = "ws://0.0.0.0:8082/Engine";
+	
+
+	
+	
+	function onMessageReceived(evt) {
+		var root = document.getElementById("12789");
+		root.appendChild(document.createTextNode("coucou"));
+		var
+		  binaryString = '',
+		  bytes = new Uint8Array(evt.data),
+		  length = bytes.length;
+		for (var i = 4; i < length; i++) {
+		  binaryString += String.fromCharCode(bytes[i]);
+		}
+		alert("Message received : " + new Uint32Array(evt.data,0,1)[0] +" "+binaryString+" root : "+root);
+		sendMessage();
+	}
+	
+	function sendMessage() {
+		var methodId = new Uint32Array(1);
+		methodId[0] = 19;
+		var opId = new Uint32Array(1);
+		opId[0] = 12789;
+		wsocket.send(new Blob([methodId,opId]));
+	}
+
+	function connect() {
+		wsocket = new WebSocket(serviceLocation);
+		wsocket.binaryType = "arraybuffer";
+		wsocket.onmessage = onMessageReceived;
+		wsocket.onopen = sendMessage;
+	}
+	
+	function leave() {
+		wsocket.close();
+	}
+
+	$(document).ready(function() {
+		connect();
+	});
+</script>
+</head>
+<body>
+
+<div id="12789">
+</div>
+
+</body>
+</html>

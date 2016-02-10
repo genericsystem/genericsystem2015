@@ -1,12 +1,12 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import io.vertx.core.buffer.Buffer;
-
+import io.vertx.core.buffer.impl.BufferFactoryImpl;
 import java.io.Serializable;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
@@ -18,15 +18,14 @@ public class CosServer extends AbstractGSServer<Engine> {
 	public static void main(String[] args) {
 		new CosServer(new GSDeploymentOptions()).start();
 	}
-	
+
 	public CosServer(GSDeploymentOptions options) {
 		super(options);
 	}
 
 	@Override
 	protected Buffer getReplyBuffer(int methodId, int op, Engine root, GSBuffer gsBuffer) {
-		
-		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
+		GSBuffer replyBuffer = new GSBuffer(new BufferFactoryImpl().buffer(Buffer.buffer().getByteBuf().order(ByteOrder.LITTLE_ENDIAN))).appendInt(op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
@@ -89,14 +88,17 @@ public class CosServer extends AbstractGSServer<Engine> {
 		}
 		case AbstractGSClient.CLEAR:
 			return replyBuffer.appendLongThrowException(() -> root.clear(gsBuffer.getLong()));
+		case AbstractGSClient.SUBELEMENTS: {
+			System.out.println("receive op : " + op);
+			return replyBuffer.appendString("div");
+		}
 		default:
 			throw new IllegalStateException("unable to find method : " + methodId);
 		}
 	}
 
 	@Override
-	protected Engine buildRoot(String value,
-			String persistentDirectoryPath, Class[] userClasses) {
+	protected Engine buildRoot(String value, String persistentDirectoryPath, Class[] userClasses) {
 		return new Engine(value, persistentDirectoryPath, userClasses);
 	}
 }

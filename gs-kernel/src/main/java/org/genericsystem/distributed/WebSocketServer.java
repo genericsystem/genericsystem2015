@@ -1,8 +1,11 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.buffer.impl.BufferFactoryImpl;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +23,7 @@ public class WebSocketServer<T extends AbstractServer> {
 		this.host = options.getHost();
 	}
 
-	@SuppressWarnings("unchecked")
+	// @SuppressWarnings("unchecked")
 	public void start(Map<String, AbstractServer> roots) {
 		Vertx vertx = GSVertx.vertx().getVertx();
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
@@ -35,14 +38,27 @@ public class WebSocketServer<T extends AbstractServer> {
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
+
 				webSocket.handler(buffer -> {
-					GSBuffer gsBuffer = new GSBuffer(buffer);
+					Buffer buf = new BufferFactoryImpl().buffer(buffer.getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
+					GSBuffer gsBuffer = new GSBuffer(buf);
 					int methodId = gsBuffer.getInt();
 					int op = gsBuffer.getInt();
 					webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
 				});
 
-			});
+				// Byte methodId = buffer.getByte(0);
+				// String nodeId = buffer.getString(1, buffer.length());
+				// System.out.println("ZZZZZZZZZZZ" + methodId + " " + nodeId);
+				// Buffer buf = new BufferFactoryImpl().buffer(Buffer.buffer().getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
+				//
+				// buf.appendInt(54);
+				// webSocket.writeBinaryMessage(buf);
+				// int op = gsBuffer.getInt();
+				// webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
+				// });
+
+				});
 			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
