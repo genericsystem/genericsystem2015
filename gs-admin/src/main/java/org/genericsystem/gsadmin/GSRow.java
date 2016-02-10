@@ -123,9 +123,9 @@ public abstract class GSRow extends GSHBox {
 
 		@Override
 		protected Element<?> createFirstCell(Element<?> parent) {
-			GSHBox cellPanel = new GSHBox(parent);
+			GSHBox cellPanel = new GSHBox(parent).setSpacing(2);
 			new GSTextField(cellPanel, Cell<String>::getValue).bindTextProperty(Cell<String>::getNewValModel);
-			new GSButton(cellPanel, "Update").setAction(Cell<Generic>::update).addBoot(Button::paddingProperty, new Insets(5, 0, 5, 0));
+			new GSButton(cellPanel, "Update").setAction(Cell<Generic>::update).addBoot(Button::paddingProperty, new Insets(5, 2, 5, 2));
 			return cellPanel;
 		}
 	}

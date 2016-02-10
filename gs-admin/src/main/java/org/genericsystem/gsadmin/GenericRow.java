@@ -119,7 +119,7 @@ public class GenericRow extends Row {
 			Table editTable = editTableModel.buildTable(500, 400);
 			editTable.getFirstColumnWidth().setValue(200);
 			editTable.getFirstRowHeight().setValue(30);
-			editTable.getColumnWidth().setValue(225);
+			editTable.getColumnWidth().setValue(230);
 			editTable.getRowHeight().setValue(45);
 			crud.getEditTable().setValue(editTable);
 		}
