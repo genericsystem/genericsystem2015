@@ -124,11 +124,9 @@ public abstract class TableBuilder<ITEM, COL, T> {
 				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
 			super(firstRowFirstColumnString, firstRowLastColumnString, items, columns, rowColumnExtractor, firstRowExtractor, firstColumnExtractor, lastColumnExtractor);
 		}
-
 	}
 
 	public static class TableCellTableBuilder<ITEM, COL> extends TableBuilder<ITEM, COL, Table> {
-
 		public TableCellTableBuilder(ObservableValue<String> firstRowFirstColumnString, ObservableValue<String> firstRowLastColumnString, ObservableList<ITEM> items, ObservableList<COL> columns,
 				Function<ITEM, Function<COL, ObservableValue<Table>>> rowColumnExtractor, Function<COL, ObservableValue<String>> firstRowExtractor, Function<ITEM, ObservableValue<Table>> firstColumnExtractor,
 				Function<ITEM, ObservableValue<String>> lastColumnExtractor) {
