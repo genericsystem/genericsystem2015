@@ -8,39 +8,49 @@
 <script type="text/javascript">
 	var wsocket;
 	var serviceLocation = "ws://0.0.0.0:8082/Engine";
-	
 
-	
-	
 	function onMessageReceived(evt) {
-		var root = document.getElementById("12789");
-		root.appendChild(document.createTextNode("coucou"));
-		var
-		  binaryString = '',
-		  bytes = new Uint8Array(evt.data),
-		  length = bytes.length;
-		for (var i = 4; i < length; i++) {
-		  binaryString += String.fromCharCode(bytes[i]);
+
+		var dataString = '', idString = '', parentId = '', bytes = new Uint8Array(
+				evt.data), length = bytes.length;
+
+		for (var i = 0; i < 10; i++) {
+			parentId += String.fromCharCode(bytes[i]);
 		}
-		alert("Message received : " + new Uint32Array(evt.data,0,1)[0] +" "+binaryString+" root : "+root);
-		sendMessage();
-	}
+
+		for (var i = 10; i < 20; i++) {
+			idString += String.fromCharCode(bytes[i]);
+		}
+
+		for (var i = 20; i < length; i++) {
+			dataString += String.fromCharCode(bytes[i]);
+		}
+
+		var firstChar = idString.charAt(0);
+
+
+		var root = document.getElementById("12789");
+		var parent = document.getElementById(parentId);
 	
-	function sendMessage() {
-		var methodId = new Uint32Array(1);
-		methodId[0] = 19;
-		var opId = new Uint32Array(1);
-		opId[0] = 12789;
-		wsocket.send(new Blob([methodId,opId]));
+		if (parent == null) {
+			parent = document.createElement("div");
+			parent.setAttribute("id", parentId);
+			root.insertBefore(parent,null);
+		}
+		
+		var elt = document.createTextNode(dataString);
+		parent.insertBefore(elt,null);
+		sendMessage();
 	}
 
 	function connect() {
+
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
 		wsocket.onmessage = onMessageReceived;
-		wsocket.onopen = sendMessage;
+		// 		wsocket.onopen = sendMessage;
 	}
-	
+
 	function leave() {
 		wsocket.close();
 	}
@@ -48,12 +58,19 @@
 	$(document).ready(function() {
 		connect();
 	});
+
+	function sendMessage() {
+		var methodId = new Uint32Array(1);
+		methodId[0] = 19;
+		var opId = new Uint32Array(1);
+		opId[0] = 12789;
+		wsocket.send(new Blob([ methodId, opId ]));
+	}
 </script>
 </head>
 <body>
 
-<div id="12789">
-</div>
+	<div id="12789"></div>
 
 </body>
 </html>

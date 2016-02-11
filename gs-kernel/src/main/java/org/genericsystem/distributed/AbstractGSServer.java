@@ -3,6 +3,7 @@ package org.genericsystem.distributed;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
+
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Statics;
 
@@ -47,6 +49,10 @@ public abstract class AbstractGSServer<T extends AbstractServer> {
 
 	public void stop() {
 		webSocket.stop(roots);
+	}
+
+	public WebSocketServer<T> getwebSocket() {
+		return this.webSocket;
 	}
 
 	protected static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
