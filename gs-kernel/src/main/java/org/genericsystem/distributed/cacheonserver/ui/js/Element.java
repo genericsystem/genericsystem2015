@@ -102,7 +102,7 @@ public class Element<N> {
 		return this;
 	}
 
-	protected <M extends Model, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel) {
+	public <M extends Model, T extends Model> Element<N> forEach(Function<M, ObservableList<T>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
 		return this;
 	}

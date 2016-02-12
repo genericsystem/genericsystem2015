@@ -35,6 +35,12 @@ public class ViewContext<N> {
 	private void init() {
 		modelContext.register(this);
 		this.template.getBootList().forEach(boot -> boot.init(node));
+		if (parent != null) {
+			int indexInChildren = parent.computeIndex(template);
+			parent.incrementSize(template);
+			nodeChildren.add(indexInChildren, node);
+			sizeByElement.put(template, indexInChildren);
+		}
 		for (Binding<N, ?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
 		for (Element<N> childElement : template.<N> getChildren()) {
@@ -43,12 +49,7 @@ public class ViewContext<N> {
 			if (childElement.metaBindings.isEmpty())
 				createChildContext(modelContext, childElement);
 		}
-		if (parent != null) {
-			int indexInChildren = parent.computeIndex(template);
-			parent.incrementSize(template);
-			nodeChildren.add(indexInChildren, node);
-			sizeByElement.put(template, indexInChildren);
-		}
+		
 	}
 
 	public N getNode() {

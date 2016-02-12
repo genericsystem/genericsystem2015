@@ -1,17 +1,15 @@
 package org.genericsystem.distributed;
 
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.genericsystem.distributed.cacheonserver.jsadmin.JsAdmin;
+import org.genericsystem.distributed.cacheonserver.jsadmin.TodoList;
 import org.genericsystem.distributed.cacheonserver.ui.js.NodeJs;
 import org.genericsystem.kernel.AbstractServer;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.buffer.impl.BufferFactoryImpl;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 
@@ -45,7 +43,8 @@ public class WebSocketServer<T extends AbstractServer> {
 					throw new IllegalStateException(e);
 				});
 
-					JsAdmin jsAdmin = new JsAdmin(null, new NodeJs('d'), webSocket);
+				TodoList todolist= new TodoList();
+					JsAdmin jsAdmin = new JsAdmin(todolist, new NodeJs('d'), webSocket);
 
 //					 webSocket.handler(buffer -> {
 //					 Buffer buf = new BufferFactoryImpl().buffer(buffer.getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
