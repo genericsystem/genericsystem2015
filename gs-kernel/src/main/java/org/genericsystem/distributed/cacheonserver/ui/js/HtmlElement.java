@@ -11,7 +11,6 @@ import javafx.collections.ObservableList;
 public class HtmlElement extends Element<NodeJs>{
 	private final char type;
 	
-	
 	public HtmlElement(Class<NodeJs> nodeClass) {
 		super(nodeClass);
 		type='R';

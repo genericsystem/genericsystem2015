@@ -45,8 +45,6 @@ public class WebSocketServer<T extends AbstractServer> {
 					throw new IllegalStateException(e);
 				});
 
-					System.out.println("start");
-					
 					JsAdmin jsAdmin = new JsAdmin(null, new NodeJs('d'), webSocket);
 
 //					 webSocket.handler(buffer -> {

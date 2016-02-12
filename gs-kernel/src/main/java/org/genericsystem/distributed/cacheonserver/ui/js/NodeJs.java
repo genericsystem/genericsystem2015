@@ -1,6 +1,10 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
 import io.vertx.core.buffer.Buffer;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -9,7 +13,7 @@ import org.genericsystem.distributed.GSBuffer;
 public class NodeJs {
 
 	private final String id;
-	private final String tag;
+	private final StringProperty tag;
 	private char type;
 	private ObservableList<NodeJs> childrenNode = FXCollections.emptyObservableList();
 
@@ -21,15 +25,14 @@ public class NodeJs {
 		return id;
 	}
 
-	public String getTag() {
+	public StringProperty getTag() {
 		return tag;
 	}
 
 	public NodeJs(char type) {
 		this.type = type;
 		this.id = (type + "" + this.hashCode()).substring(0, 10);
-		tag="TEST";
-		//System.out.println(id);
+		tag=new SimpleStringProperty("valeur initiale NodeJs Constructor");
 	}
 
 	public Buffer getBuffer() {

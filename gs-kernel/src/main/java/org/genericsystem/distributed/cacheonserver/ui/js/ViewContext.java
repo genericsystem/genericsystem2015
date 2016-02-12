@@ -18,7 +18,7 @@ public class ViewContext<N> {
 	private final ObservableList<N> nodeChildren;
 
 	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
-		System.out.println("viewContext constructor");
+//		System.out.println("viewContext constructor");
 		this.parent = parent;
 		this.template = template;
 		assert node != null;
@@ -38,9 +38,14 @@ public class ViewContext<N> {
 	}
 
 	private void init() {
-		System.out.println("init");
+//		System.out.println("init");
 		modelContext.register(this);
 		this.template.getBootList().forEach(boot -> boot.init(node));
+		
+		
+		
+		for (Binding<N, ?, ?> binding : template.bindings)
+			binding.init(modelContext, getNode());
 		
 		if (parent != null) {
 			int indexInChildren = parent.computeIndex(template);
@@ -49,15 +54,12 @@ public class ViewContext<N> {
 			sizeByElement.put(template, indexInChildren);
 		}
 		
-		for (Binding<N, ?, ?> binding : template.bindings)
-			binding.init(modelContext, getNode());
 		for (Element<N> childElement : template.<N> getChildren()) {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(this, childElement);
 			if (childElement.metaBindings.isEmpty())
 				createChildContext(modelContext, childElement);
 		}
-		
 	}
 
 	private RootViewContext getRootViewContext() {

@@ -16,16 +16,17 @@ public class JsAdmin extends GSApplication {
 
 	@Override
 	protected void initChildren() {
-		HtmlElement rootJs2 = new HtmlElement(this, 'd', getWebSocket());
+		HtmlElement rootJs2 = (HtmlElement) new HtmlElement(this, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");;
 		{
-			HtmlElement rootJs4 = new HtmlElement(rootJs2, 'd', getWebSocket());
-			HtmlElement rootJs3 = new HtmlElement(rootJs2, 'D', getWebSocket());
+			HtmlElement rootJs4 =  (HtmlElement) new HtmlElement(rootJs2, 'd', getWebSocket()).addBoot(NodeJs::getTag,"button");
+			HtmlElement rootJs42 =  (HtmlElement) new HtmlElement(rootJs4, 't', getWebSocket()).addBoot(NodeJs::getTag,"button Test");
+			//HtmlElement rootJs3 = (HtmlElement) new HtmlElement(rootJs2, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
 		}
 		
-		HtmlElement rootJs6 = new HtmlElement(this, 'd', getWebSocket());
+		HtmlElement rootJs6 =  (HtmlElement) new HtmlElement(this, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
 		{
-			HtmlElement rootJs4 = new HtmlElement(rootJs6, 'd', getWebSocket());
-			HtmlElement rootJs3 = new HtmlElement(rootJs6, 'D', getWebSocket());//.addBinding(NodeJs::getData, MyModel::getString);
+			HtmlElement rootJs4 = (HtmlElement) new HtmlElement(rootJs6, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
+			HtmlElement rootJs3 = (HtmlElement) new HtmlElement(rootJs6, 't', getWebSocket()).addBoot(NodeJs::getTag,"text");
 		}
 	}
 
