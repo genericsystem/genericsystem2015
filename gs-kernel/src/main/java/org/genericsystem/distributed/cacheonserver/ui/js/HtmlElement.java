@@ -29,4 +29,9 @@ public class HtmlElement extends Element<NodeJs>{
 	protected NodeJs createNode(Object parent) {
 		return new NodeJs(this.type);
 	}
+	
+	@Override
+	public <M extends Model, T extends Model> Element<NodeJs> forEach(Function<M, ObservableList<T>> applyOnModel) {
+		return super.forEach(applyOnModel);
+	}
 }

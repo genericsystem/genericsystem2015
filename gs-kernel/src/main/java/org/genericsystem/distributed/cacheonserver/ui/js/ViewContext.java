@@ -40,26 +40,25 @@ public class ViewContext<N> {
 	private void init() {
 //		System.out.println("init");
 		modelContext.register(this);
+		
 		this.template.getBootList().forEach(boot -> boot.init(node));
-		
-		
 		
 		for (Binding<N, ?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
-		
 		if (parent != null) {
 			int indexInChildren = parent.computeIndex(template);
 			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
 			sizeByElement.put(template, indexInChildren);
 		}
-		
 		for (Element<N> childElement : template.<N> getChildren()) {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(this, childElement);
 			if (childElement.metaBindings.isEmpty())
 				createChildContext(modelContext, childElement);
 		}
+		
+		
 	}
 
 	private RootViewContext getRootViewContext() {
