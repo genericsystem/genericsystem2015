@@ -36,6 +36,7 @@ public abstract class AbstractGSClient implements Protocole {
 	public static final int GET_CACHE_LEVEL = 16;
 	public static final int NEW_CACHE = 17;
 	public static final int CLEAR = 18;
+	public static final int SUBELEMENTS = 19;
 
 	protected WebSocketClient webSocketClient;
 
