@@ -29,7 +29,7 @@
 		var root = document.getElementById("root");
 		var parent = document.getElementById(parentId);
 		if (parent == null) {
-			parent = document.createElement("div");
+			parent = document.createElement(tagHtml);
 			parent.setAttribute("id", parentId);
 			root.insertBefore(parent,null);
 		}
@@ -38,11 +38,11 @@
 		var elt = document.getElementById(nodeId);
 		if(nodeType=='d')
 		{
-			elt = document.createElement('div');
+			elt = document.createElement(tagHtml);
 			elt.setAttribute("id", nodeId);
 		}else
 			elt = document.createTextNode(tagHtml);
-		alert(elt);
+
 		parent.insertBefore(elt,null);
 		
 		sendMessage();

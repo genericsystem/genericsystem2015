@@ -38,9 +38,9 @@ public class Utils {
 			@Override
 			protected void doAdd(int index, Object element) {
 				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getTag());
+				bufferAdmin.appendString(parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getTag().get());
 				webSocket.writeBinaryMessage(bufferAdmin);
-				
+				System.out.println("send");
 			}
 
 			@Override
