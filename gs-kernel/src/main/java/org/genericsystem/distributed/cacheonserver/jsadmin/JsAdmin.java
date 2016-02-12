@@ -17,24 +17,23 @@ public class JsAdmin extends GSApplication {
 
 	@Override
 	protected void initChildren() {
-		
-		HtmlElement root = (HtmlElement) new HtmlElement(this,'d',getWebSocket()).forEach(TodoList::getFiltered).addBoot(NodeJs::getTag,"div");
-//		root;
+		HtmlElement div =  (HtmlElement) new HtmlElement(this, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
 		{
-			HtmlElement label =(HtmlElement) new HtmlElement(root,'t',getWebSocket()).addBinding(NodeJs::getTag,Todo::getTodoString);
+			HtmlElement inputText =  (HtmlElement) new HtmlElement(div, 'd', getWebSocket()).addBoot(NodeJs::getTag,"input");
+			{
+				HtmlElement text =  (HtmlElement) new HtmlElement(inputText, 't', getWebSocket()).addBinding(NodeJs::getTag, TodoList::getName);
+			}
+			
+			HtmlElement button =  (HtmlElement) new HtmlElement(div, 'd', getWebSocket()).addBoot(NodeJs::getTag,"button");
+			{
+				HtmlElement textButton =  (HtmlElement) new HtmlElement(button, 't', getWebSocket()).addBoot(NodeJs::getTag,"Add");
+			}
+		}
+		HtmlElement todoList = (HtmlElement) new HtmlElement(this,'d',getWebSocket()).forEach(TodoList::getFiltered).addBoot(NodeJs::getTag,"div");
+		{
+			HtmlElement label =(HtmlElement) new HtmlElement(todoList,'t',getWebSocket()).addBinding(NodeJs::getTag,Todo::getTodoString);
 		}
 		
-//		HtmlElement rootJs2 = (HtmlElement) new HtmlElement(this, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
-//		{
-//			HtmlElement rootJs4 =  (HtmlElement) new HtmlElement(rootJs2, 'd', getWebSocket()).addBoot(NodeJs::getTag,"button");
-//			HtmlElement rootJs42 =  (HtmlElement) new HtmlElement(rootJs4, 't', getWebSocket()).addBoot(NodeJs::getTag,"button Test");
-//		}
-//		
-//		HtmlElement rootJs6 =  (HtmlElement) new HtmlElement(this, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
-//		{
-//			HtmlElement rootJs4 = (HtmlElement) new HtmlElement(rootJs6, 'd', getWebSocket()).addBoot(NodeJs::getTag,"div");
-//			HtmlElement rootJs3 = (HtmlElement) new HtmlElement(rootJs6, 't', getWebSocket()).addBoot(NodeJs::getTag,"text");
-//		}
 	}
 
 }

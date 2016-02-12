@@ -19,7 +19,7 @@ import javafx.collections.transformation.FilteredList;
 
 public class TodoList extends Model {
 
-	private Property<String> name = new SimpleStringProperty();
+	private Property<String> name = new SimpleStringProperty("test");
 	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
@@ -68,7 +68,7 @@ public class TodoList extends Model {
 	/*********************************************************************************************************************************/
 
 	public Property<String> getName() {
-		return new SimpleStringProperty("okiii");
+		return name;
 	}
 
 	public Property<Predicate<Todo>> getMode() {
