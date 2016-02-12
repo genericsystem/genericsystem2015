@@ -37,13 +37,10 @@ public class Utils {
 
 			@Override
 			protected void doAdd(int index, Object element) {
-				System.out.println("doAdd");
 				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getData());
-				System.out.println("doAdd :: webSocket :: " + parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getData());
+				bufferAdmin.appendString(parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getTag());
 				webSocket.writeBinaryMessage(bufferAdmin);
-				System.out.println(bufferAdmin.getString(0, bufferAdmin.length()));
-				System.out.println("send");
+				
 			}
 
 			@Override
