@@ -57,8 +57,6 @@ public class ViewContext<N> {
 			if (childElement.metaBindings.isEmpty())
 				createChildContext(modelContext, childElement);
 		}
-		
-		
 	}
 
 	private RootViewContext getRootViewContext() {

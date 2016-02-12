@@ -40,10 +40,16 @@
 		{
 			elt = document.createElement(tagHtml);
 			elt.setAttribute("id", nodeId);
+			if(tagHtml=="input")
+				elt.setAttribute("type","text");
 		}else
+		{		
 			elt = document.createTextNode(tagHtml);
-
-		parent.insertBefore(elt,null);
+		}
+		if(parent.type='input')
+			parent.value=tagHtml;
+		
+			parent.insertBefore(elt,null);
 		
 		sendMessage();
 	}
