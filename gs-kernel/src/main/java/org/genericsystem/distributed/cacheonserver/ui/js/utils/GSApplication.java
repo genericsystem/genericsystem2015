@@ -3,11 +3,12 @@ package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 import io.vertx.core.http.ServerWebSocket;
 
 import org.genericsystem.distributed.cacheonserver.ui.js.Element;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
 import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 import org.genericsystem.distributed.cacheonserver.ui.js.NodeJs;
 import org.genericsystem.distributed.cacheonserver.ui.js.ViewContext.RootViewContext;
 
-public class GSApplication extends Element<NodeJs> {
+public class GSApplication extends HtmlElement {
 
 	private final ServerWebSocket webSocket;
 
