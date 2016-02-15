@@ -9,51 +9,60 @@
 	var wsocket;
 	var serviceLocation = "ws://127.0.0.1:8082/Engine";
 
-	function getSubString(bytes,start,end){
-		subString='';
+	function getSubString(bytes, start, end) {
+		subString = '';
 		for (var i = start; i < end; i++) {
 			subString += String.fromCharCode(bytes[i]);
 		}
 		return subString;
 	}
-	
+
 	function onMessageReceived(evt) {
-		
-		var
-		bytes = new Uint8Array(evt.data),
-		length = bytes.length,
-		parentId = getSubString(bytes,0,10),
-		nodeId =  getSubString(bytes,10,20),
-		tagHtml = getSubString(bytes,20,length);
+		var bytes = new Uint8Array(evt.data), length = bytes.length, parentId = getSubString(
+				bytes, 0, 10), nodeId = getSubString(bytes, 10, 20), tagHtml = getSubString(
+				bytes, 20, length);
 
 		var root = document.getElementById("root");
 		var parent = document.getElementById(parentId);
 		if (parent == null) {
-			parent = document.createElement(tagHtml);
-			parent.setAttribute("id", parentId);
-			root.insertBefore(parent,null);
+			parent = createElement(tagHtml,parentId);
+			root.insertBefore(parent, null);
 		}
-			
+
 		var nodeType = nodeId.charAt(0);
 		var elt = document.getElementById(nodeId);
-		if(nodeType=='d')
-		{
-			elt = document.createElement(tagHtml);
-			elt.setAttribute("id", nodeId);
-			if(tagHtml=="input")
-				elt.setAttribute("type","text");
-		}else
-		{		
+		if (nodeType == 'c') {
+			elt = createElement(tagHtml,nodeId);
+			if (tagHtml == "input") 
+				elt.setAttribute("type", "text");			
+		} else {
 			elt = document.createTextNode(tagHtml);
 		}
-		if(parent.type='input')
-			parent.value=tagHtml;
-		
-			parent.insertBefore(elt,null);
-		
-		sendMessage();
+		if (parent.type = 'input')
+			parent.value = tagHtml;
+		parent.insertBefore(elt, null);
+// 		sendMessage();
 	}
-
+	
+	function createElement(tag,id){
+		 var elt = document.createElement(tag);
+		 elt.setAttribute("id", id)
+		 if(tag=="button")
+			 elt.onclick = function click(){sendMessageAction(id)};
+		 if(tag == "input")
+			 elt.onblur = function onblurInput(){sendMessageAction(id)}
+		 return elt;
+	}
+	
+	function sendMessageAction(id){
+		var methodId = new Uint32Array(1);
+		methodId[0] = 19;
+		var opId = new Uint32Array(1);
+		opId[0] = id.substr(1,id.length);
+		wsocket.send(new Blob([ methodId, opId ]));
+	}
+	
+	
 	function connect() {
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
