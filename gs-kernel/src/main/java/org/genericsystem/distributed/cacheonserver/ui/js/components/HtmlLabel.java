@@ -3,15 +3,17 @@ package org.genericsystem.distributed.cacheonserver.ui.js.components;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
 
-public class HtmlText extends HtmlElement {
+public class HtmlLabel extends HtmlElement {
 
-	public HtmlText(HtmlElement parent) {
+	public HtmlLabel(HtmlElement parent) {
 		super(parent);
 	}
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		return new HtmlNode('t');
+		HtmlNode label = new HtmlNode('c');
+		label.getTag().set("label");
+		return label;
 	}
 
 }

@@ -1,17 +1,14 @@
 package org.genericsystem.distributed.cacheonserver.jsadmin;
 
-import org.genericsystem.distributed.cacheonserver.ui.js.Model;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 
-
+import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 
 public class Todo extends Model {
 
-	private ObservableValue<String> todoString;
+	private Property<String> todoString;
 	private Property<Boolean> completed = new SimpleBooleanProperty(false);
 
 	Todo(TodoList parentModel, String text) {
@@ -20,7 +17,7 @@ public class Todo extends Model {
 
 	/*********************************************************************************************************************************/
 
-	public ObservableValue<String> getTodoString() {
+	public Property<String> getTodoString() {
 		return todoString;
 	}
 

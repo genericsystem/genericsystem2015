@@ -1,12 +1,10 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.buffer.impl.BufferFactoryImpl;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
 
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +30,7 @@ public class WebSocketServer<T extends AbstractServer> {
 
 	// @SuppressWarnings("unchecked")
 	public void start(Map<String, AbstractServer> roots) {
+
 		System.out.println("start");
 		Vertx vertx = GSVertx.vertx().getVertx();
 		HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
@@ -48,18 +47,20 @@ public class WebSocketServer<T extends AbstractServer> {
 
 			TodoList todolist = new TodoList();
 			HtmlNode parent = new HtmlNode('c');
-
 			HtmlAdmin jsAdmin = new HtmlAdmin(todolist, parent, webSocket);
-			System.out.println(jsAdmin.getRootViewContext().getNodeById().size());
-			webSocket.handler(buffer -> {
-				Buffer buf = new BufferFactoryImpl().buffer(buffer.getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
-				GSBuffer gsBuffer = new GSBuffer(buf);
-				int methodId = gsBuffer.getInt();
-				int op = gsBuffer.getInt();
-				HtmlNode node = jsAdmin.getRootViewContext().getNodeById().get("c" + op);
-				if (node != null)
-					node.getActionProperty().get().handle(new ActionEvent());
 
+			webSocket.handler(buffer -> {
+				GSBuffer gsBuffer = new GSBuffer(buffer);
+				String message = gsBuffer.getString(0, gsBuffer.length());
+				JsonObject obj = new JsonObject(message);
+				HtmlNode node = jsAdmin.getRootViewContext().getNodeById().get(obj.getString("nodeId"));
+				if (node != null) {
+					if (obj.getString("tag").equals("BUTTON"))
+						node.getActionProperty().get().handle(new ActionEvent());
+
+					if (obj.getString("tag").equals("INPUT"))
+						node.getText().setValue(obj.getString("textContent"));
+				}
 				// webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
 				});
 		});

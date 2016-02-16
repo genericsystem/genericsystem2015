@@ -1,13 +1,14 @@
 package org.genericsystem.distributed.cacheonserver.jsadmin;
 
 import io.vertx.core.http.ServerWebSocket;
-import org.genericsystem.distributed.cacheonserver.ui.js.Model;
+
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlApplication;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlButton;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlDiv;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlInputText;
-import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlText;
+import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlLabel;
 
 public class HtmlAdmin extends HtmlApplication {
 
@@ -20,21 +21,14 @@ public class HtmlAdmin extends HtmlApplication {
 
 		HtmlDiv div = new HtmlDiv(this);
 		{
-			HtmlInputText inputText = (HtmlInputText) new HtmlInputText(div).addActionBinding(HtmlNode::getActionProperty, TodoList::test);
+			new HtmlInputText(div).addBidirectionalBinding(HtmlNode::getText, TodoList::getName);
 
-			{
-				new HtmlText(inputText).addBinding(HtmlNode::getTag, TodoList::getName);
-			}
-
-			HtmlButton button = (HtmlButton) new HtmlButton(div).addActionBinding(HtmlNode::getActionProperty, TodoList::test);
-			{
-				new HtmlText(button).addBoot(HtmlNode::getTag, "Add");
-			}
+			new HtmlButton(div).addActionBinding(HtmlNode::getActionProperty, TodoList::create).addBoot(HtmlNode::getText, "Add");
 		}
 
 		HtmlDiv todoList = (HtmlDiv) new HtmlDiv(this).forEach(TodoList::getFiltered);
 		{
-			new HtmlText(todoList).addBinding(HtmlNode::getTag, Todo::getTodoString);
+			new HtmlLabel(todoList).addBinding(HtmlNode::getText, Todo::getTodoString);
 		}
 
 	}

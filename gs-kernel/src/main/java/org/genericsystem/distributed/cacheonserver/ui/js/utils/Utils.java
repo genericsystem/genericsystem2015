@@ -1,5 +1,7 @@
 package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -35,10 +37,16 @@ public class Utils {
 
 			@Override
 			protected void doAdd(int index, Object element) {
+				JsonObject jsonObj = new JsonObject().put("msg_type", "A");
+				jsonObj.put("parentId", parentNodeJs.getId());
+				jsonObj.put("nodeId", ((HtmlNode) element).getId());
+				jsonObj.put("tagHtml", ((HtmlNode) element).getTag().get());
+				jsonObj.put("textContent", ((HtmlNode) element).getText().get());
 				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString("A" + parentNodeJs.getId() + ((HtmlNode) element).getId() + ((HtmlNode) element).getTag().get());
+				bufferAdmin.appendString(jsonObj.encode());
 				if (parent instanceof HtmlElement)
-					((HtmlElement) parent).getWebSocket().writeBinaryMessage(bufferAdmin);
+					((HtmlElement) parent).getWebSocket().write(bufferAdmin);
+
 				childrenNode.add(((HtmlNode) element));
 			}
 
@@ -49,11 +57,13 @@ public class Utils {
 
 			@Override
 			protected Object doRemove(int index) {
-				HtmlNode element = childrenNode.get(index);
+				JsonObject jsonObj = new JsonObject().put("msg_type", "R");
+				jsonObj.put("nodeId", (childrenNode.get(index)).getId());
 				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString("R" + element.getId());
+				bufferAdmin.appendString(jsonObj.encode());
 				if (parent instanceof HtmlElement)
-					((HtmlElement) parent).getWebSocket().writeBinaryMessage(bufferAdmin);
+					((HtmlElement) parent).getWebSocket().write(bufferAdmin);
+
 				return childrenNode.remove(index);
 			}
 		};

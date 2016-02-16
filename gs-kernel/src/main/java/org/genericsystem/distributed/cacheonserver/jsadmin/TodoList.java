@@ -19,7 +19,7 @@ import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 
 public class TodoList extends Model {
 
-	private Property<String> name = new SimpleStringProperty("test");
+	private Property<String> name = new SimpleStringProperty("init");
 	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
@@ -41,12 +41,9 @@ public class TodoList extends Model {
 	}
 
 	public void create() {
+		System.out.println("create");
 		todos.add(new Todo(this, getName().getValue()));
-	}
-
-	public void test() {
-		todos.remove(1);
-		System.out.println("Test clic");
+		todos.get(2).getTodoString().setValue("change value");
 	}
 
 	public void showAll() {

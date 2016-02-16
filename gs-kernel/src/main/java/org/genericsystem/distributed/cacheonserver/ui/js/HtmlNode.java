@@ -16,6 +16,7 @@ public class HtmlNode {
 	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
 	private final String id;
 	private StringProperty tag = new SimpleStringProperty();
+	private StringProperty text = new SimpleStringProperty();
 	private char type;
 	private ObservableList<HtmlNode> childrenNode = FXCollections.emptyObservableList();
 
@@ -24,6 +25,10 @@ public class HtmlNode {
 		String hashCode = String.format("%010d", Integer.parseInt(this.hashCode() + ""));
 		this.id = (type + hashCode).substring(0, 10);
 
+	}
+
+	public StringProperty getText() {
+		return text;
 	}
 
 	public Buffer getBuffer() {
