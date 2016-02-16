@@ -1,17 +1,12 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.distributed.cacheonserver.ui.js.utils.Utils;
 
 public class Element<N> {
 	public final Class<N> nodeClass;
@@ -27,13 +22,8 @@ public class Element<N> {
 		return "Element<" + nodeClass.getSimpleName() + ">";
 	}
 
-	public <PARENTNODE> Element(Class<N> nodeClass) {
-
-		this(null, nodeClass, NodeJs::getChildrenNode);// Group::getChildren
-	}
-
-	public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, ServerWebSocket webSocket) {
-		this(parent, nodeClass, Utils.getClassChildren(parent, webSocket));
+	public <PARENTNODE> Element(Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
+		this(null, nodeClass, getGraphicChildren);
 	}
 
 	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
@@ -42,7 +32,7 @@ public class Element<N> {
 		this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
 			parent.<N> getChildren().add(this);
-		// initChildren();
+		initChildren();
 	}
 
 	protected void initChildren() {
