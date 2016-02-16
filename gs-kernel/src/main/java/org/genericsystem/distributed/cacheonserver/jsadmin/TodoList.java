@@ -3,8 +3,6 @@ package org.genericsystem.distributed.cacheonserver.jsadmin;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
-import org.genericsystem.distributed.cacheonserver.ui.js.Model;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -16,6 +14,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+
+import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 
 public class TodoList extends Model {
 
@@ -42,6 +42,10 @@ public class TodoList extends Model {
 
 	public void create() {
 		todos.add(new Todo(this, getName().getValue()));
+	}
+
+	public void test() {
+		System.out.println("Test clic");
 	}
 
 	public void showAll() {

@@ -1,17 +1,22 @@
 package org.genericsystem.distributed;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.buffer.impl.BufferFactoryImpl;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javafx.event.ActionEvent;
 
 import org.genericsystem.distributed.cacheonserver.jsadmin.JsAdmin;
 import org.genericsystem.distributed.cacheonserver.jsadmin.TodoList;
 import org.genericsystem.distributed.cacheonserver.ui.js.NodeJs;
 import org.genericsystem.kernel.AbstractServer;
-
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
 
 public class WebSocketServer<T extends AbstractServer> {
 	private List<HttpServer> httpServers = new ArrayList<>();
@@ -29,34 +34,37 @@ public class WebSocketServer<T extends AbstractServer> {
 	public void start(Map<String, AbstractServer> roots) {
 		System.out.println("start");
 		Vertx vertx = GSVertx.vertx().getVertx();
-//		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
-			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
+		HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
+		httpServer.websocketHandler(webSocket -> {
+			String path = webSocket.path();
+			AbstractServer root = roots.get(path);
+			if (root == null)
+				throw new IllegalStateException("Unable to find database :" + path);
+			webSocket.exceptionHandler(e -> {
 
-			httpServer.websocketHandler(webSocket -> {
-				String path = webSocket.path();
-				AbstractServer root = roots.get(path);
-				if (root == null)
-					throw new IllegalStateException("Unable to find database :" + path);
-				webSocket.exceptionHandler(e -> {
+				e.printStackTrace();
+				throw new IllegalStateException(e);
+			});
 
-					e.printStackTrace();
-					throw new IllegalStateException(e);
+			TodoList todolist = new TodoList();
+			NodeJs parent = new NodeJs('c');
+
+			JsAdmin jsAdmin = new JsAdmin(todolist, parent, webSocket);
+			System.out.println(jsAdmin.getRootViewContext().getNodeById().size());
+			webSocket.handler(buffer -> {
+				Buffer buf = new BufferFactoryImpl().buffer(buffer.getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
+				GSBuffer gsBuffer = new GSBuffer(buf);
+				int methodId = gsBuffer.getInt();
+				int op = gsBuffer.getInt();
+				NodeJs node = jsAdmin.getRootViewContext().getNodeById().get("c" + op);
+				if (node != null)
+					node.getActionProperty().get().handle(new ActionEvent());
+
+				// webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
 				});
-
-				TodoList todolist= new TodoList();
-					JsAdmin jsAdmin = new JsAdmin(todolist, new NodeJs('d'), webSocket);
-
-//					 webSocket.handler(buffer -> {
-//					 Buffer buf = new BufferFactoryImpl().buffer(buffer.getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
-//					 GSBuffer gsBuffer = new GSBuffer(buf);
-//					 int methodId = gsBuffer.getInt();
-//					 int op = gsBuffer.getInt();
-//					 webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
-//					 });
-				});
-			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
-			httpServers.add(httpServer);
-//		}
+		});
+		AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
+		httpServers.add(httpServer);
 		System.out.println("Generic System server ready!");
 	}
 

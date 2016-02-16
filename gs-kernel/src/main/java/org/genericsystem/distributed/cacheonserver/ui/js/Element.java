@@ -36,10 +36,6 @@ public class Element<N> {
 		this(parent, nodeClass, Utils.getClassChildren(parent, webSocket));
 	}
 
-	// public <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass, ServerWebSocket webSocket) {
-	// this(parent, nodeClass, Utils.getClassChildren(parent, webSocket));
-	// }
-
 	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;

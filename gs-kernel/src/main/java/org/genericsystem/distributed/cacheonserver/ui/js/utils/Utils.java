@@ -2,6 +2,8 @@ package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 
 import io.vertx.core.http.ServerWebSocket;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.collections.ModifiableObservableListBase;
@@ -19,20 +21,17 @@ public class Utils {
 	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent, ServerWebSocket webSocket) {
 		Function<Pane, ObservableList<?>> paneChildren = Pane::getChildren;
 		Function<Group, ObservableList<?>> groupChildren = Group::getChildren;
-		Function<NodeJs, ObservableList<?>> nodeJsChildren = parentNodeJs -> new ModifiableObservableListBase() {
+		Function<NodeJs, List<?>> nodeJsChildren = parentNodeJs -> new ModifiableObservableListBase() {
+			private List<NodeJs> childrenNode = new ArrayList<>();
 
 			@Override
 			public Object get(int index) {
-				// TODO Auto-generated method stub
-				System.out.println("ddddd");
-				return null;
+				return childrenNode.get(index);
 			}
 
 			@Override
 			public int size() {
-				// TODO Auto-generated method stub
-				System.out.println("ddddd");
-				return 0;
+				return childrenNode.size();
 			}
 
 			@Override
@@ -40,21 +39,18 @@ public class Utils {
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getTag().get());
 				webSocket.writeBinaryMessage(bufferAdmin);
-				System.out.println("send");
+				childrenNode.add(((NodeJs) element));
 			}
 
 			@Override
 			protected Object doSet(int index, Object element) {
-				// TODO Auto-generated method stub
-				System.out.println("ddddd");
-				return null;
+				return childrenNode.set(index, ((NodeJs) element));
 			}
 
 			@Override
 			protected Object doRemove(int index) {
-				// TODO Auto-generated method stub
-				System.out.println("ddddd");
-				return null;
+
+				return childrenNode.remove(index);
 			}
 		};
 
