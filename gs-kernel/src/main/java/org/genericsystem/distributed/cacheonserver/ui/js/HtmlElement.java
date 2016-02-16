@@ -1,25 +1,27 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
 import io.vertx.core.http.ServerWebSocket;
-
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.distributed.cacheonserver.ui.js.utils.Utils;
 
-public class HtmlElement extends Element<NodeJs> {
-	public HtmlElement(HtmlElement parent, ServerWebSocket webSocket) {
-		super(parent, NodeJs.class, Utils.getClassChildren(parent, webSocket));
+public class HtmlElement extends Element<HtmlNode> {
+
+	public HtmlElement(HtmlElement parent) {
+		super(parent, HtmlNode.class, Utils.getClassChildren(parent));
 
 	}
 
-	public HtmlElement(Class<NodeJs> class1) {
-		super(class1);
+	public HtmlElement(Class<HtmlNode> nodeClass) {
+		super(nodeClass, HtmlNode::getChildrenNode);
+	}
+
+	public ServerWebSocket getWebSocket() {
+		return ((HtmlElement) getParent()).getWebSocket();
 	}
 
 	@Override
-	public <M extends Model, T extends Model> Element<NodeJs> forEach(Function<M, ObservableList<T>> applyOnModel) {
+	public <M extends Model, T extends Model> Element<HtmlNode> forEach(Function<M, ObservableList<T>> applyOnModel) {
 		return super.forEach(applyOnModel);
 	}
 }

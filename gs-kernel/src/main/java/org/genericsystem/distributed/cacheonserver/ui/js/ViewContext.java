@@ -48,8 +48,8 @@ public class ViewContext<N> {
 			int indexInChildren = parent.computeIndex(template);
 			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
-			if (node instanceof NodeJs)
-				getRootViewContext().getNodeById().put(((NodeJs) node).getId(), (NodeJs) node);
+			if (node instanceof HtmlNode)
+				getRootViewContext().getNodeById().put(((HtmlNode) node).getId(), (HtmlNode) node);
 			sizeByElement.put(template, indexInChildren);
 		}
 		for (Element<N> childElement : template.<N> getChildren()) {
@@ -119,13 +119,13 @@ public class ViewContext<N> {
 	}
 
 	public static class RootViewContext<N> extends ViewContext<N> {
-		private Map<String, NodeJs> nodeById;
+		private Map<String, HtmlNode> nodeById;
 
 		public RootViewContext(Model model, Element<N> template, N node) {
 			super(null, new RootModelContext(model), template, node);
 		}
 
-		public Map<String, NodeJs> getNodeById() {
+		public Map<String, HtmlNode> getNodeById() {
 			return nodeById != null ? nodeById : (nodeById = new HashMap<>());
 		}
 	}

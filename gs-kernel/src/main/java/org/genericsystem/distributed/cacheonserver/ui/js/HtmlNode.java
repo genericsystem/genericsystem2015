@@ -12,14 +12,14 @@ import javafx.event.EventHandler;
 
 import org.genericsystem.distributed.GSBuffer;
 
-public class NodeJs {
+public class HtmlNode {
 	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
 	private final String id;
 	private final StringProperty tag;
 	private char type;
-	private ObservableList<NodeJs> childrenNode = FXCollections.emptyObservableList();
+	private ObservableList<HtmlNode> childrenNode = FXCollections.emptyObservableList();
 
-	public NodeJs(char type) {
+	public HtmlNode(char type) {
 		this.type = type;
 		this.id = (type + "" + this.hashCode()).substring(0, 10);
 		tag = new SimpleStringProperty("valeur initiale NodeJs Constructor");
@@ -33,7 +33,7 @@ public class NodeJs {
 		return actionProperty;
 	}
 
-	public ObservableList<NodeJs> getChildrenNode() {
+	public ObservableList<HtmlNode> getChildrenNode() {
 		return childrenNode;
 	}
 

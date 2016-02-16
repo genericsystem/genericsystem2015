@@ -13,9 +13,9 @@ import java.util.Map;
 
 import javafx.event.ActionEvent;
 
-import org.genericsystem.distributed.cacheonserver.jsadmin.JsAdmin;
+import org.genericsystem.distributed.cacheonserver.jsadmin.HtmlAdmin;
 import org.genericsystem.distributed.cacheonserver.jsadmin.TodoList;
-import org.genericsystem.distributed.cacheonserver.ui.js.NodeJs;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
 import org.genericsystem.kernel.AbstractServer;
 
 public class WebSocketServer<T extends AbstractServer> {
@@ -47,16 +47,16 @@ public class WebSocketServer<T extends AbstractServer> {
 			});
 
 			TodoList todolist = new TodoList();
-			NodeJs parent = new NodeJs('c');
+			HtmlNode parent = new HtmlNode('c');
 
-			JsAdmin jsAdmin = new JsAdmin(todolist, parent, webSocket);
+			HtmlAdmin jsAdmin = new HtmlAdmin(todolist, parent, webSocket);
 			System.out.println(jsAdmin.getRootViewContext().getNodeById().size());
 			webSocket.handler(buffer -> {
 				Buffer buf = new BufferFactoryImpl().buffer(buffer.getByteBuf().order(ByteOrder.LITTLE_ENDIAN));
 				GSBuffer gsBuffer = new GSBuffer(buf);
 				int methodId = gsBuffer.getInt();
 				int op = gsBuffer.getInt();
-				NodeJs node = jsAdmin.getRootViewContext().getNodeById().get("c" + op);
+				HtmlNode node = jsAdmin.getRootViewContext().getNodeById().get("c" + op);
 				if (node != null)
 					node.getActionProperty().get().handle(new ActionEvent());
 

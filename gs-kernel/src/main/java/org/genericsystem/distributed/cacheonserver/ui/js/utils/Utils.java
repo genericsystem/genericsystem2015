@@ -1,28 +1,25 @@
 package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
-
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.cacheonserver.ui.js.Element;
-import org.genericsystem.distributed.cacheonserver.ui.js.NodeJs;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
 
 public class Utils {
-	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent, ServerWebSocket webSocket) {
+	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
 		Function<Pane, ObservableList<?>> paneChildren = Pane::getChildren;
 		Function<Group, ObservableList<?>> groupChildren = Group::getChildren;
-		Function<NodeJs, List<?>> nodeJsChildren = parentNodeJs -> new ModifiableObservableListBase() {
-			private List<NodeJs> childrenNode = new ArrayList<>();
+		Function<HtmlNode, List<?>> nodeJsChildren = parentNodeJs -> new ModifiableObservableListBase() {
+			private List<HtmlNode> childrenNode = new ArrayList<>();
 
 			@Override
 			public Object get(int index) {
@@ -37,14 +34,15 @@ public class Utils {
 			@Override
 			protected void doAdd(int index, Object element) {
 				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(parentNodeJs.getId() + ((NodeJs) element).getId() + ((NodeJs) element).getTag().get());
-				webSocket.writeBinaryMessage(bufferAdmin);
-				childrenNode.add(((NodeJs) element));
+				bufferAdmin.appendString(parentNodeJs.getId() + ((HtmlNode) element).getId() + ((HtmlNode) element).getTag().get());
+				if (parent instanceof HtmlElement)
+					((HtmlElement) parent).getWebSocket().writeBinaryMessage(bufferAdmin);
+				childrenNode.add(((HtmlNode) element));
 			}
 
 			@Override
 			protected Object doSet(int index, Object element) {
-				return childrenNode.set(index, ((NodeJs) element));
+				return childrenNode.set(index, ((HtmlNode) element));
 			}
 
 			@Override
@@ -98,7 +96,7 @@ public class Utils {
 			return (Function) groupChildren;
 		if (ScrollPane.class.isAssignableFrom(parent.nodeClass))
 			return (Function) scrollChildren;
-		if (NodeJs.class.isAssignableFrom(parent.nodeClass))
+		if (HtmlNode.class.isAssignableFrom(parent.nodeClass))
 			return (Function) nodeJsChildren;
 		// }s
 		throw new IllegalStateException("Not a supported JavaFX container : ");
