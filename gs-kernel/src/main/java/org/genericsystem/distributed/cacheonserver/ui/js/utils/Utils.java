@@ -3,12 +3,14 @@ package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
+
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.cacheonserver.ui.js.Element;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
@@ -34,7 +36,7 @@ public class Utils {
 			@Override
 			protected void doAdd(int index, Object element) {
 				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(parentNodeJs.getId() + ((HtmlNode) element).getId() + ((HtmlNode) element).getTag().get());
+				bufferAdmin.appendString("A" + parentNodeJs.getId() + ((HtmlNode) element).getId() + ((HtmlNode) element).getTag().get());
 				if (parent instanceof HtmlElement)
 					((HtmlElement) parent).getWebSocket().writeBinaryMessage(bufferAdmin);
 				childrenNode.add(((HtmlNode) element));
@@ -47,7 +49,11 @@ public class Utils {
 
 			@Override
 			protected Object doRemove(int index) {
-
+				HtmlNode element = childrenNode.get(index);
+				GSBuffer bufferAdmin = new GSBuffer();
+				bufferAdmin.appendString("R" + element.getId());
+				if (parent instanceof HtmlElement)
+					((HtmlElement) parent).getWebSocket().writeBinaryMessage(bufferAdmin);
 				return childrenNode.remove(index);
 			}
 		};

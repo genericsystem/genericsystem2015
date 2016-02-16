@@ -15,14 +15,15 @@ import org.genericsystem.distributed.GSBuffer;
 public class HtmlNode {
 	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
 	private final String id;
-	private final StringProperty tag;
+	private StringProperty tag = new SimpleStringProperty();
 	private char type;
 	private ObservableList<HtmlNode> childrenNode = FXCollections.emptyObservableList();
 
 	public HtmlNode(char type) {
 		this.type = type;
-		this.id = (type + "" + this.hashCode()).substring(0, 10);
-		tag = new SimpleStringProperty("valeur initiale NodeJs Constructor");
+		String hashCode = String.format("%010d", Integer.parseInt(this.hashCode() + ""));
+		this.id = (type + hashCode).substring(0, 10);
+
 	}
 
 	public Buffer getBuffer() {

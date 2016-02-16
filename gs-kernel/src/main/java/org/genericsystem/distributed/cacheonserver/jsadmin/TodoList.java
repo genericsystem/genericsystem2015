@@ -45,6 +45,7 @@ public class TodoList extends Model {
 	}
 
 	public void test() {
+		todos.remove(1);
 		System.out.println("Test clic");
 	}
 
