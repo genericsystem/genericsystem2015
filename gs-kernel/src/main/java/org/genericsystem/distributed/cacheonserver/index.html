@@ -8,7 +8,13 @@
 <script type="text/javascript">
 	var wsocket;
 	var serviceLocation = "ws://127.0.0.1:8082/Engine";
-
+	const 
+		MESSAGE_DO_ADD = 'A',
+		MESSAGE_DO_REMOVE = 'R',
+		MESSAGE_DO_UPDATE = 'U',
+		ELEMENT_TYPE = 'E'; //element 
+	
+//-------------------------------------------------------------	
 	function getSubString(bytes, start, end) {
 		subString = '';
 		for (var i = start; i < end; i++) {
@@ -16,59 +22,112 @@
 		}
 		return subString;
 	}
-
+	
+//-------------------------------------------------------------
 	function onMessageReceived(evt) {
-		var bytes = new Uint8Array(evt.data), length = bytes.length, parentId = getSubString(
-				bytes, 0, 10), nodeId = getSubString(bytes, 10, 20), tagHtml = getSubString(
-				bytes, 20, length);
+		var bytes = new Uint8Array(evt.data);
+		var message = jQuery.parseJSON(getSubString(bytes,0,bytes.length));
+		
+		//alert(message.textContent);
+		
+		messageType = message.msg_type;
+		
+		switch(messageType) {
+		 	case MESSAGE_DO_ADD:
+		 		addElement(message);
+		        break;
+		    case MESSAGE_DO_REMOVE:
+				removeElement(message);
+		        break;
+// 		    case MESSAGE_DO_UPDATE:
+// 				updateElement(bytes);
+// 		        break;
+		    default:
+		        alert("message d'erreur");
+		}
+	}
 
+//-------------------------------------------------------------
+	function addElement(message){
+		var
+		parentId =  message.parentId, 
+		nodeId = message.nodeId,
+		tagHtml = message.tagHtml,
+		textContentValue = message.textContent;	
+	
 		var root = document.getElementById("root");
 		var parent = document.getElementById(parentId);
 		if (parent == null) {
-			parent = createElement(tagHtml,parentId);
-			root.insertBefore(parent, null);
+			parent = createElement(root,tagHtml,parentId,"");
 		}
+	
+		elt = createElement(parent,tagHtml,nodeId,textContentValue);
+		
+	}
 
-		var nodeType = nodeId.charAt(0);
-		var elt = document.getElementById(nodeId);
-		if (nodeType == 'c') {
-			elt = createElement(tagHtml,nodeId);
-			if (tagHtml == "input") 
-				elt.setAttribute("type", "text");			
-		} else {
-			elt = document.createTextNode(tagHtml);
+//-------------------------------------------------------------
+	function createElement(parent,tag,id,textContentValue){
+		var elt = document.createElement(tag);
+		elt.setAttribute("id", id);
+		
+		if(tag=="button")
+		{
+			elt.textContent = textContentValue;
+			elt.onclick = function click(){sendMessageAction(elt)};
 		}
-		if (parent.type = 'input')
-			parent.value = tagHtml;
+		
+		if(tag=="label")
+			elt.textContent = textContentValue;
+		
+		if(tag == "input")
+		{
+			elt.setAttribute("type", "text");	
+			elt.value = textContentValue;
+			elt.onkeyup = function keyup(){sendMessageKeyup(elt)}
+		}
 		parent.insertBefore(elt, null);
-// 		sendMessage();
+		return elt;
 	}
 	
-	function createElement(tag,id){
-		 var elt = document.createElement(tag);
-		 elt.setAttribute("id", id)
-		 if(tag=="button")
-			 elt.onclick = function click(){sendMessageAction(id)};
-		 if(tag == "input")
-			 elt.onblur = function onblurInput(){sendMessageAction(id)}
-		 return elt;
+//-------------------------------------------------------------
+	function updateElement(message){
+		var
+		nodeId = message.nodeId,
+		textContentValue = message.textContent;
+		var elt = document.getElementById(nodeId);
+		if(elt.type='input')
+			elt.value = textContentValue;
+		else
+			elt.textContent = textContentValue;
+		alert("update")
 	}
 	
-	function sendMessageAction(id){
-		var methodId = new Uint32Array(1);
-		methodId[0] = 19;
-		var opId = new Uint32Array(1);
-		opId[0] = id.substr(1,id.length);
-		wsocket.send(new Blob([ methodId, opId ]));
+//-------------------------------------------------------------
+	function removeElement(message){
+		var 
+		nodeId = message.nodeId;
+		var elt = document.getElementById(nodeId);
+		elt.parentNode.removeChild(elt);
+	}
+//-------------------------------------------------------------
+
+	function sendMessageKeyup(elt){
+		wsocket.send(JSON.stringify({nodeId: elt.id,tag: elt.tagName,textContent:elt.value}));
+	}
+
+//-------------------------------------------------------------	
+	function sendMessageAction(elt){
+		wsocket.send(JSON.stringify({nodeId: elt.id,tag: elt.tagName}));
 	}
 	
-	
+//-------------------------------------------------------------	
 	function connect() {
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
 		wsocket.onmessage = onMessageReceived;
 	}
-
+	
+//-------------------------------------------------------------
 	function leave() {
 		wsocket.close();
 	}
