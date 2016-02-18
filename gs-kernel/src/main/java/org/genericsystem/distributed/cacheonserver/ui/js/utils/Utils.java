@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.cacheonserver.ui.js.Element;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlInput;
 
 public class Utils {
 	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
@@ -42,6 +44,11 @@ public class Utils {
 				jsonObj.put("nodeId", ((HtmlNode) element).getId());
 				jsonObj.put("tagHtml", ((HtmlNode) element).getTag().get());
 				jsonObj.put("textContent", ((HtmlNode) element).getText().get());
+				if (((HtmlNode) element).getTag().get().equals("input"))
+					jsonObj.put("type", ((HtmlInput) element).getType());
+				JsonArray arrayJS = new JsonArray();
+				((HtmlNode) element).getStyleClass().forEach(clazz -> arrayJS.add(clazz));
+				jsonObj.put("styleClass", arrayJS);
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(jsonObj.encode());
 				if (parent instanceof HtmlElement)

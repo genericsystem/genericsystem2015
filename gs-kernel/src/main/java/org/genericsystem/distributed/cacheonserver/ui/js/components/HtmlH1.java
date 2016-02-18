@@ -3,16 +3,18 @@ package org.genericsystem.distributed.cacheonserver.ui.js.components;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
 
-public class HtmlButton extends HtmlElement {
+public class HtmlH1 extends HtmlElement {
 
-	public HtmlButton(HtmlElement parent) {
+	public HtmlH1(HtmlElement parent) {
 		super(parent);
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode button = new HtmlNode(getWebSocket());
-		button.getTag().set("button");
-		return button;
+		HtmlNode h1 = new HtmlNode(getWebSocket());
+		h1.getTag().set("h1");
+		return h1;
 	}
+
 }

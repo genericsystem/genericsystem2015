@@ -10,7 +10,7 @@ public class HtmlDiv extends HtmlElement {
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode div = new HtmlNode('c');
+		HtmlNode div = new HtmlNode(getWebSocket());
 		div.getTag().set("div");
 		return div;
 	}

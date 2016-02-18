@@ -1,8 +1,12 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
 import io.vertx.core.http.ServerWebSocket;
+
 import java.util.function.Function;
+
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.distributed.cacheonserver.ui.js.utils.Utils;
 
 public class HtmlElement extends Element<HtmlNode> {
@@ -23,5 +27,15 @@ public class HtmlElement extends Element<HtmlNode> {
 	@Override
 	public <M extends Model, T extends Model> Element<HtmlNode> forEach(Function<M, ObservableList<T>> applyOnModel) {
 		return super.forEach(applyOnModel);
+	}
+
+	public <M> HtmlElement setStyleClass(Function<M, ObservableValue<String>> function) {
+		addObservableListToObservableValueBinding(HtmlNode::getStyleClass, function);
+		return this;
+	}
+
+	public HtmlElement setStyleClass(String text) {
+		addObservableListBoot(HtmlNode::getStyleClass, text);
+		return this;
 	}
 }
