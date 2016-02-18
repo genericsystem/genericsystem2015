@@ -101,4 +101,18 @@ public class HtmlNode {
 	public void setTag(String tag) {
 		this.tag.set(tag);
 	}
+
+	public static class HtmlInputNode extends HtmlNode {
+		private String type;
+
+		public HtmlInputNode(ServerWebSocket webSocket, String type) {
+			super(webSocket);
+			this.type = type;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+	}
 }
