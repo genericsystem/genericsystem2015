@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.jsadmin;
+package org.genericsystem.distributed.cacheonserver.ui.js.todomvc;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 
 <script src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
-
+<LINK rel=stylesheet type="text/css" href="style.css">
 <script type="text/javascript">
 	var wsocket;
 	var serviceLocation = "ws://127.0.0.1:8082/Engine";
@@ -27,9 +27,6 @@
 	function onMessageReceived(evt) {
 		var bytes = new Uint8Array(evt.data);
 		var message = jQuery.parseJSON(getSubString(bytes,0,bytes.length));
-		
-		//alert(message.textContent);
-		
 		messageType = message.msg_type;
 		
 		switch(messageType) {
@@ -39,9 +36,9 @@
 		    case MESSAGE_DO_REMOVE:
 				removeElement(message);
 		        break;
-// 		    case MESSAGE_DO_UPDATE:
-// 				updateElement(bytes);
-// 		        break;
+		    case MESSAGE_DO_UPDATE:
+				updateElement(message);
+		        break;
 		    default:
 		        alert("message d'erreur");
 		}
@@ -58,15 +55,15 @@
 		var root = document.getElementById("root");
 		var parent = document.getElementById(parentId);
 		if (parent == null) {
-			parent = createElement(root,tagHtml,parentId,"");
+			parent = createElement(root,tagHtml,parentId,"",message.styleClass);
 		}
 	
-		elt = createElement(parent,tagHtml,nodeId,textContentValue);
+		elt = createElement(parent,tagHtml,nodeId,textContentValue,message.styleClass);
 		
 	}
 
 //-------------------------------------------------------------
-	function createElement(parent,tag,id,textContentValue){
+	function createElement(parent,tag,id,textContentValue,styleClass){
 		var elt = document.createElement(tag);
 		elt.setAttribute("id", id);
 		
@@ -78,6 +75,7 @@
 		
 		if(tag=="label")
 			elt.textContent = textContentValue;
+			
 		
 		if(tag == "input")
 		{
@@ -85,21 +83,25 @@
 			elt.value = textContentValue;
 			elt.onkeyup = function keyup(){sendMessageKeyup(elt)}
 		}
+		
+		for(var i=0;i<styleClass.length;i++)
+			elt.className += " " + styleClass[i];
+		
 		parent.insertBefore(elt, null);
 		return elt;
 	}
 	
 //-------------------------------------------------------------
 	function updateElement(message){
-		var
-		nodeId = message.nodeId,
-		textContentValue = message.textContent;
-		var elt = document.getElementById(nodeId);
-		if(elt.type='input')
-			elt.value = textContentValue;
-		else
-			elt.textContent = textContentValue;
-		alert("update")
+		var elt = document.getElementById(message.nodeId);
+		if(elt!=null)
+		{
+			if(elt.type = "input")
+			{
+				elt.value = message.textContent;	
+			}else
+				elt.textContent = message.textContent;
+		}
 	}
 	
 //-------------------------------------------------------------
@@ -107,17 +109,18 @@
 		var 
 		nodeId = message.nodeId;
 		var elt = document.getElementById(nodeId);
-		elt.parentNode.removeChild(elt);
+		if(elt!=null)
+			elt.parentNode.removeChild(elt);
 	}
+	
 //-------------------------------------------------------------
-
 	function sendMessageKeyup(elt){
-		wsocket.send(JSON.stringify({nodeId: elt.id,tag: elt.tagName,textContent:elt.value}));
+		wsocket.send(JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,textContent:elt.value}));
 	}
 
 //-------------------------------------------------------------	
 	function sendMessageAction(elt){
-		wsocket.send(JSON.stringify({nodeId: elt.id,tag: elt.tagName}));
+		wsocket.send(JSON.stringify({msg_type:"A",nodeId: elt.id,tag: elt.tagName}));
 	}
 	
 //-------------------------------------------------------------	
@@ -129,7 +132,7 @@
 	
 //-------------------------------------------------------------
 	function leave() {
-		wsocket.close();
+		//wsocket.close();
 	}
 
 	$(document).ready(function() {

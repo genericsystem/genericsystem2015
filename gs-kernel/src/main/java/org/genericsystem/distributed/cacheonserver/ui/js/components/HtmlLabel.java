@@ -11,7 +11,7 @@ public class HtmlLabel extends HtmlElement {
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode label = new HtmlNode('c');
+		HtmlNode label = new HtmlNode(getWebSocket());
 		label.getTag().set("label");
 		return label;
 	}

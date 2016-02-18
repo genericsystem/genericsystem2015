@@ -11,9 +11,9 @@ import java.util.Map;
 
 import javafx.event.ActionEvent;
 
-import org.genericsystem.distributed.cacheonserver.jsadmin.HtmlAdmin;
-import org.genericsystem.distributed.cacheonserver.jsadmin.TodoList;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.todomvc.HtmlAdmin;
+import org.genericsystem.distributed.cacheonserver.ui.js.todomvc.TodoList;
 import org.genericsystem.kernel.AbstractServer;
 
 public class WebSocketServer<T extends AbstractServer> {
@@ -46,7 +46,7 @@ public class WebSocketServer<T extends AbstractServer> {
 			});
 
 			TodoList todolist = new TodoList();
-			HtmlNode parent = new HtmlNode('c');
+			HtmlNode parent = new HtmlNode(webSocket);
 			HtmlAdmin jsAdmin = new HtmlAdmin(todolist, parent, webSocket);
 
 			webSocket.handler(buffer -> {
@@ -55,10 +55,10 @@ public class WebSocketServer<T extends AbstractServer> {
 				JsonObject obj = new JsonObject(message);
 				HtmlNode node = jsAdmin.getRootViewContext().getNodeById().get(obj.getString("nodeId"));
 				if (node != null) {
-					if (obj.getString("tag").equals("BUTTON"))
+					if (obj.getString("msg_type").equals("A"))
 						node.getActionProperty().get().handle(new ActionEvent());
 
-					if (obj.getString("tag").equals("INPUT"))
+					if (obj.getString("msg_type").equals("U"))
 						node.getText().setValue(obj.getString("textContent"));
 				}
 				// webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));

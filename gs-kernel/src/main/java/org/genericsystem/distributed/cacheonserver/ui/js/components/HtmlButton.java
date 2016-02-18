@@ -11,7 +11,7 @@ public class HtmlButton extends HtmlElement {
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode button = new HtmlNode('c');
+		HtmlNode button = new HtmlNode(getWebSocket());
 		button.getTag().set("button");
 		return button;
 	}

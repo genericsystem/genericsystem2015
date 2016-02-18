@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.jsadmin;
+package org.genericsystem.distributed.cacheonserver.ui.js.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
@@ -17,6 +17,7 @@ import javafx.collections.transformation.FilteredList;
 
 import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 
+@SuppressWarnings("unchecked")
 public class TodoList extends Model {
 
 	private Property<String> name = new SimpleStringProperty("init");

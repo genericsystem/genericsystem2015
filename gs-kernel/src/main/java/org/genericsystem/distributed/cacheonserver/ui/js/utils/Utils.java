@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.ui.js.utils;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class Utils {
 				jsonObj.put("nodeId", ((HtmlNode) element).getId());
 				jsonObj.put("tagHtml", ((HtmlNode) element).getTag().get());
 				jsonObj.put("textContent", ((HtmlNode) element).getText().get());
+				JsonArray arrayJS = new JsonArray();
+				((HtmlNode) element).getStyleClass().forEach(clazz -> arrayJS.add(clazz));
+				jsonObj.put("styleClass", arrayJS);
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(jsonObj.encode());
 				if (parent instanceof HtmlElement)

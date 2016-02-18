@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.jsadmin;
+package org.genericsystem.distributed.cacheonserver.ui.js.todomvc;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -29,7 +29,13 @@ public class HtmlAdmin extends HtmlApplication {
 		HtmlDiv todoList = (HtmlDiv) new HtmlDiv(this).forEach(TodoList::getFiltered);
 		{
 			new HtmlLabel(todoList).addBinding(HtmlNode::getText, Todo::getTodoString);
+			new HtmlButton(todoList).addActionBinding(HtmlNode::getActionProperty, Todo::select).addBoot(HtmlNode::getText, "Select");
+			new HtmlButton(todoList).addActionBinding(HtmlNode::getActionProperty, Todo::remove).addBoot(HtmlNode::getText, "Remove");
 		}
 
+		HtmlDiv selectionContext = (HtmlDiv) new HtmlDiv(this).select(TodoList::getSelection);
+		{
+			new HtmlLabel(selectionContext).setStyleClass("lab2").setStyleClass("lab").addBinding(HtmlNode::getText, Todo::getTodoString);
+		}
 	}
 }

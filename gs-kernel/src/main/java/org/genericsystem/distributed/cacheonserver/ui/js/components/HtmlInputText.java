@@ -11,7 +11,7 @@ public class HtmlInputText extends HtmlElement {
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode input = new HtmlNode('c');
+		HtmlNode input = new HtmlNode(getWebSocket());
 		input.getTag().set("input");
 		return input;
 	}
