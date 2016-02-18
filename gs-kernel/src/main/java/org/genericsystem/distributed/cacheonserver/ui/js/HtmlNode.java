@@ -4,7 +4,9 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -102,10 +104,10 @@ public class HtmlNode {
 		this.tag.set(tag);
 	}
 
-	public static class HtmlInputNode extends HtmlNode {
+	public static class HtmlInput extends HtmlNode {
 		private String type;
 
-		public HtmlInputNode(ServerWebSocket webSocket, String type) {
+		public HtmlInput(ServerWebSocket webSocket, String type) {
 			super(webSocket);
 			this.type = type;
 		}
@@ -113,6 +115,24 @@ public class HtmlNode {
 		public String getType() {
 			return type;
 		}
-
 	}
+
+	public static class HtmlCheckBox extends HtmlInput {
+		private BooleanProperty checked = new SimpleBooleanProperty(false);
+
+		public HtmlCheckBox(ServerWebSocket webSocket) {
+			super(webSocket, "checkbox");
+			checked.addListener(new ChangeListener<Boolean>() {
+				@Override
+				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+
+				}
+			});
+		}
+
+		public BooleanProperty getChecked() {
+			return checked;
+		}
+	}
+
 }

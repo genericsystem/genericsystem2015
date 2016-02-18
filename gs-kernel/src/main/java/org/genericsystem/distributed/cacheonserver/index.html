@@ -83,7 +83,12 @@
 		{
 			elt.setAttribute("type", message.type);	
 			elt.value = textContentValue;
-			elt.onkeyup = function keyup(){sendMessageKeyup(elt)}
+			elt.onkeyup = function keyup(e){
+				var code = (e.keyCode ? e.keyCode : e.which)
+				if(code== 13)
+					sendMessageAction(elt)
+				sendMessageKeyup(elt)
+			}
 		}
 		
 		for(var i=0;i<styleClass.length;i++)

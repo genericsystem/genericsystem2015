@@ -32,7 +32,7 @@ public class HtmlAdmin extends HtmlApplication {
 				HtmlHeader header = (HtmlHeader) new HtmlHeader(todoapp).setStyleClass("header");
 				{
 					new HtmlH1(header).addBoot(HtmlNode::getText, "Todos");
-					new HtmlInputText(header).setStyleClass("new-todo").addBidirectionalBinding(HtmlNode::getText, TodoList::getName);
+					new HtmlInputText(header).setStyleClass("new-todo").addActionBinding(HtmlNode::getActionProperty, TodoList::create).addBidirectionalBinding(HtmlNode::getText, TodoList::getName);
 				}
 				HtmlSection main = (HtmlSection) new HtmlSection(todoapp).setStyleClass("main");
 				{

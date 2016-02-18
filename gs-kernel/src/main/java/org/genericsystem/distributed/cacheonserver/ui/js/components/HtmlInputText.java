@@ -1,7 +1,7 @@
 package org.genericsystem.distributed.cacheonserver.ui.js.components;
 
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
-import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlInputNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlInput;
 
 public class HtmlInputText extends HtmlElement {
 
@@ -10,8 +10,8 @@ public class HtmlInputText extends HtmlElement {
 	}
 
 	@Override
-	protected HtmlInputNode createNode(Object parent) {
-		HtmlInputNode input = new HtmlInputNode(getWebSocket(), "text");
+	protected HtmlInput createNode(Object parent) {
+		HtmlInput input = new HtmlInput(getWebSocket(), "text");
 		input.getTag().set("input");
 		return input;
 	}
