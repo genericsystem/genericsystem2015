@@ -20,7 +20,7 @@ import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 @SuppressWarnings("unchecked")
 public class TodoList extends Model {
 
-	private Property<String> name = new SimpleStringProperty("init");
+	private Property<String> name = new SimpleStringProperty();
 	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
@@ -32,19 +32,18 @@ public class TodoList extends Model {
 	private ObservableValue<Boolean> activeMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, ACTIVE);
 	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, COMPLETE);
 	private Property<Todo> selection = new SimpleObjectProperty<>();
+	private ObservableValue<String> items = Bindings.createStringBinding(()->completedCount.getValue().intValue()>1?" items":" item", completedCount);
 
 	public TodoList() {
-		todos.add(new Todo(this, "todo1"));
-		todos.add(new Todo(this, "todo2"));
-		todos.add(new Todo(this, "todo3"));
-		todos.add(new Todo(this, "todo4"));
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 	}
 
+	public ObservableValue<String> getItems() {
+		return items;
+	}
+	
 	public void create() {
-		System.out.println("create");
 		todos.add(new Todo(this, getName().getValue()));
-		todos.get(2).getTodoString().setValue("change value");
 	}
 
 	public void showAll() {
@@ -86,8 +85,8 @@ public class TodoList extends Model {
 		return filtered;
 	}
 
-	public ObservableValue<Number> getCompletedCount() {
-		return completedCount;
+	public ObservableValue<String> getCompletedCount() {
+		return new SimpleStringProperty(completedCount.intValue()+"");
 	}
 
 	public ObservableValue<String> getClearButtonText() {

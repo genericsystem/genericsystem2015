@@ -3,17 +3,21 @@ package org.genericsystem.distributed.cacheonserver.ui.js.todomvc;
 import io.vertx.core.http.ServerWebSocket;
 
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlNodeCheckBox;
 import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlApplication;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlButton;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlCheckBox;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlDiv;
+import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlFooter;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlH1;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlHeader;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlInputText;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlLabel;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlLi;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlSection;
+import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlSpan;
+import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlStrong;
 import org.genericsystem.distributed.cacheonserver.ui.js.components.HtmlUl;
 
 public class HtmlAdmin extends HtmlApplication {
@@ -38,16 +42,25 @@ public class HtmlAdmin extends HtmlApplication {
 				{
 					HtmlUl todoList = (HtmlUl) new HtmlUl(main).setStyleClass("todo-list");
 					{
-						HtmlLi li = (HtmlLi) new HtmlLi(todoList).setStyleClass("completed").forEach(TodoList::getFiltered);
+						HtmlLi li = (HtmlLi) new HtmlLi(todoList).forEach(TodoList::getFiltered);
 						{
 							HtmlDiv todoDiv = (HtmlDiv) new HtmlDiv(li).setStyleClass("view");
 							{
-								new HtmlCheckBox(todoDiv).setStyleClass("toggle");
+								new HtmlCheckBox(todoDiv).setStyleClass("toggle").addBidirectionalBinding(HtmlNode::getChecked, Todo::getCompleted);
 								new HtmlLabel(todoDiv).addBinding(HtmlNode::getText, Todo::getTodoString);
 								new HtmlButton(todoDiv).setStyleClass("destroy").addActionBinding(HtmlNode::getActionProperty, Todo::remove);
 							}
 						}
 					}
+				}
+				HtmlFooter footer = (HtmlFooter) new HtmlFooter(todoapp).setStyleClass("footer");
+				{
+					HtmlSpan span = (HtmlSpan) new HtmlSpan(footer).setStyleClass("todo-count");
+					{
+						HtmlStrong strong = (HtmlStrong) new HtmlStrong(span).addBinding(HtmlNode::getText, TodoList::getCompletedCount);
+						HtmlSpan spanItems = (HtmlSpan) new HtmlSpan(span).addBinding(HtmlNode::getText, TodoList::getItems);
+					}
+					
 				}
 			}
 		}

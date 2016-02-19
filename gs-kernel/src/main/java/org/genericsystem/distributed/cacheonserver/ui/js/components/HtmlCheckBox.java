@@ -1,7 +1,7 @@
 package org.genericsystem.distributed.cacheonserver.ui.js.components;
 
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
-import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlInput;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlNodeInput;
 
 public class HtmlCheckBox extends HtmlElement {
 
@@ -10,8 +10,8 @@ public class HtmlCheckBox extends HtmlElement {
 	}
 
 	@Override
-	protected HtmlInput createNode(Object parent) {
-		HtmlInput h1 = new HtmlInput(getWebSocket(), "checkbox");
+	protected HtmlNodeInput createNode(Object parent) {
+		HtmlNodeInput h1 = new HtmlNodeInput(getWebSocket(), "checkbox");
 		h1.getTag().set("input");
 		return h1;
 	}
