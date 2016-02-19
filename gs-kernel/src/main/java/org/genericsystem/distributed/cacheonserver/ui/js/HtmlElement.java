@@ -1,37 +1,41 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.util.function.Function;
 
-import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.distributed.cacheonserver.ui.js.utils.Utils;
-
-import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-public class HtmlElement extends Element<NodeJs>{
-	private final char type;
-	
-	public HtmlElement(Class<NodeJs> nodeClass) {
-		super(nodeClass);
-		type='R';
+import org.genericsystem.distributed.cacheonserver.ui.js.utils.Utils;
+
+public class HtmlElement extends Element<HtmlNode> {
+
+	public HtmlElement(HtmlElement parent) {
+		super(parent, HtmlNode.class, Utils.getClassChildren(parent));
+
 	}
 
-	public HtmlElement(HtmlElement parent, char type, ServerWebSocket webSocket) {
-		super(parent, NodeJs.class, Utils.getClassChildren(parent, webSocket));
-		this.type=type;
+	public HtmlElement(Class<HtmlNode> nodeClass) {
+		super(nodeClass, HtmlNode::getChildrenNode);
 	}
 
-	public char getType() {
-		return type;
+	public ServerWebSocket getWebSocket() {
+		return ((HtmlElement) getParent()).getWebSocket();
 	}
-	
+
 	@Override
-	protected NodeJs createNode(Object parent) {
-		return new NodeJs(this.type);
-	}
-	
-	@Override
-	public <M extends Model, T extends Model> Element<NodeJs> forEach(Function<M, ObservableList<T>> applyOnModel) {
+	public <M extends Model, T extends Model> Element<HtmlNode> forEach(Function<M, ObservableList<T>> applyOnModel) {
 		return super.forEach(applyOnModel);
+	}
+
+	public <M> HtmlElement setStyleClass(Function<M, ObservableValue<String>> function) {
+		addObservableListToObservableValueBinding(HtmlNode::getStyleClass, function);
+		return this;
+	}
+
+	public HtmlElement setStyleClass(String text) {
+		addObservableListBoot(HtmlNode::getStyleClass, text);
+		return this;
 	}
 }

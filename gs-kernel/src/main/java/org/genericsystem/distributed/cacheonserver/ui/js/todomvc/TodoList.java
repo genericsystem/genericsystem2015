@@ -1,9 +1,7 @@
-package org.genericsystem.distributed.cacheonserver.jsadmin;
+package org.genericsystem.distributed.cacheonserver.ui.js.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
-
-import org.genericsystem.distributed.cacheonserver.ui.js.Model;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -17,9 +15,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
+import org.genericsystem.distributed.cacheonserver.ui.js.Model;
+
+@SuppressWarnings("unchecked")
 public class TodoList extends Model {
 
-	private Property<String> name = new SimpleStringProperty("test");
+	private Property<String> name = new SimpleStringProperty("init");
 	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
 	private ObservableList<Todo> todos = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
 	private FilteredList<Todo> filtered = new FilteredList<>(todos);
@@ -41,7 +42,9 @@ public class TodoList extends Model {
 	}
 
 	public void create() {
+		System.out.println("create");
 		todos.add(new Todo(this, getName().getValue()));
+		todos.get(2).getTodoString().setValue("change value");
 	}
 
 	public void showAll() {

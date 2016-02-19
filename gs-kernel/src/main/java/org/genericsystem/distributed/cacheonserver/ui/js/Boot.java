@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonserver.ui.js;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 
@@ -22,6 +23,7 @@ public class Boot<NODE> {
 	}
 
 	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableList<VALUE>> applyOnNode, VALUE value) {
+		System.out.println(value);
 		return new Boot<>(node -> applyOnNode.apply(node).add(value));
 	}
 

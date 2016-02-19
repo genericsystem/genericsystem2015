@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,14 +19,12 @@ public class ViewContext<N> {
 	private final ObservableList<N> nodeChildren;
 
 	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
-//		System.out.println("viewContext constructor");
 		this.parent = parent;
 		this.template = template;
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
 		nodeChildren = this.parent != null ? (ObservableList<N>) ((Function) this.template.getGraphicChildren).apply(parent.node) : null;
-
 		init();
 	}
 
@@ -38,17 +37,19 @@ public class ViewContext<N> {
 	}
 
 	private void init() {
-//		System.out.println("init");
+		// System.out.println("init");
 		modelContext.register(this);
-		
+
 		this.template.getBootList().forEach(boot -> boot.init(node));
-		
+
 		for (Binding<N, ?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
 		if (parent != null) {
 			int indexInChildren = parent.computeIndex(template);
 			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
+			if (node instanceof HtmlNode)
+				getRootViewContext().getNodeById().put(((HtmlNode) node).getId(), (HtmlNode) node);
 			sizeByElement.put(template, indexInChildren);
 		}
 		for (Element<N> childElement : template.<N> getChildren()) {
@@ -59,16 +60,18 @@ public class ViewContext<N> {
 		}
 	}
 
-	private RootViewContext getRootViewContext() {
+	@SuppressWarnings("unchecked")
+	private RootViewContext<N> getRootViewContext() {
 		ViewContext<?> parent = this.parent;
 		while (parent != null) {
+
 			try {
-				return (RootViewContext) parent;
+				return (RootViewContext<N>) parent;
 			} catch (ClassCastException ignore) {
 			}
 			parent = parent.parent;
 		}
-		throw new IllegalStateException("");
+		throw new IllegalStateException("parent null");
 	}
 
 	public N getNode() {
@@ -115,9 +118,15 @@ public class ViewContext<N> {
 		return indexInChildren;
 	}
 
-	public static class RootViewContext extends ViewContext<NodeJs> {
-		public RootViewContext(Model model, Element<NodeJs> template, NodeJs node) {
+	public static class RootViewContext<N> extends ViewContext<N> {
+		private Map<String, HtmlNode> nodeById;
+
+		public RootViewContext(Model model, Element<N> template, N node) {
 			super(null, new RootModelContext(model), template, node);
+		}
+
+		public Map<String, HtmlNode> getNodeById() {
+			return nodeById != null ? nodeById : (nodeById = new HashMap<>());
 		}
 	}
 }
