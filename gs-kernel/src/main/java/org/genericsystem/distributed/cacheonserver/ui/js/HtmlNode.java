@@ -40,7 +40,7 @@ public class HtmlNode {
 				JsonObject jsonObj = new JsonObject().put("msg_type", "U");
 				jsonObj.put("nodeId", id);
 				jsonObj.put("textContent", newValue);
-
+				System.out.println("change text::"+text);
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(jsonObj.encode());
 				webSocket.write(bufferAdmin);
@@ -131,12 +131,13 @@ public class HtmlNode {
 
 				@Override
 				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-					JsonObject jsonObj = new JsonObject().put("msg_type", "U");
-					jsonObj.put("nodeId", id);
-					jsonObj.put("ckecked", newValue);
-					GSBuffer bufferAdmin = new GSBuffer();
-					bufferAdmin.appendString(jsonObj.encode());
-					webSocket.write(bufferAdmin);
+//					JsonObject jsonObj = new JsonObject().put("msg_type", "U");
+//					jsonObj.put("nodeId", id);
+//					jsonObj.put("ckecked", newValue);
+//					GSBuffer bufferAdmin = new GSBuffer();
+//					bufferAdmin.appendString(jsonObj.encode());
+//					webSocket.write(bufferAdmin);
+					System.out.println("checked");
 				}
 			});
 		}

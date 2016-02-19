@@ -57,8 +57,7 @@ public class HtmlAdmin extends HtmlApplication {
 				{
 					HtmlSpan span = (HtmlSpan) new HtmlSpan(footer).setStyleClass("todo-count");
 					{
-						HtmlStrong strong = (HtmlStrong) new HtmlStrong(span).addBinding(HtmlNode::getText, TodoList::getCompletedCount);
-						HtmlSpan spanItems = (HtmlSpan) new HtmlSpan(span).addBinding(HtmlNode::getText, TodoList::getItems);
+						new HtmlSpan(span).addBinding(HtmlNode::getText, TodoList::getItems);
 					}
 					
 				}
