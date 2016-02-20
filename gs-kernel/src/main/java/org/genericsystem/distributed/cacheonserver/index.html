@@ -82,13 +82,23 @@
 		if(tag == "input")
 		{
 			elt.setAttribute("type", message.type);	
-			elt.value = textContentValue;
-			elt.onkeyup = function keyup(e){
-				var code = (e.keyCode ? e.keyCode : e.which)
-				if(code== 13)
-					sendMessageAction(elt)
-				sendMessageKeyup(elt)
+			if(message.type='text')
+			{
+				elt.value = textContentValue;
+				elt.onkeyup = function keyup(e){
+					var code = (e.keyCode ? e.keyCode : e.which)
+					if(code== 13)
+						sendMessageAction(elt)
+					sendMessageKeyup(elt)
+				}
 			}
+			
+			if(elt.getAttribute("type") == 'checkbox'){
+				elt.onchange=function change(){
+					sendMessageCheckBoxValue(elt);
+				}
+			}
+			
 		}
 		
 		for(var i=0;i<styleClass.length;i++)
@@ -97,16 +107,18 @@
 		parent.insertBefore(elt, null);
 		return elt;
 	}
-	
+//-------------------------------------------------------------
+	function sendMessageCheckBoxValue(elt){
+		wsocket.send(JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,eltType:"checkbox",checked : elt.checked}));
+	}
 //-------------------------------------------------------------
 	function updateElement(message){
 		var elt = document.getElementById(message.nodeId);
 		if(elt!=null)
 		{
 			if(elt.type = "input")
-			{
 				elt.value = message.textContent;	
-			}else
+// 			}else
 				elt.textContent = message.textContent;
 		}
 	}
@@ -122,7 +134,7 @@
 	
 //-------------------------------------------------------------
 	function sendMessageKeyup(elt){
-		wsocket.send(JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,textContent:elt.value}));
+		wsocket.send(JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value}));
 	}
 
 //-------------------------------------------------------------	

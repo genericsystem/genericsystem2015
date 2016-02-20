@@ -18,7 +18,7 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.cacheonserver.ui.js.Element;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlElement;
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
-import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlInput;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlNodeInput;
 
 public class Utils {
 	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
@@ -45,7 +45,7 @@ public class Utils {
 				jsonObj.put("tagHtml", ((HtmlNode) element).getTag().get());
 				jsonObj.put("textContent", ((HtmlNode) element).getText().get());
 				if (((HtmlNode) element).getTag().get().equals("input"))
-					jsonObj.put("type", ((HtmlInput) element).getType());
+					jsonObj.put("type", ((HtmlNodeInput) element).getType());
 				JsonArray arrayJS = new JsonArray();
 				((HtmlNode) element).getStyleClass().forEach(clazz -> arrayJS.add(clazz));
 				jsonObj.put("styleClass", arrayJS);

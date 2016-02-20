@@ -1,20 +1,20 @@
 package org.genericsystem.distributed;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javafx.event.ActionEvent;
-
 import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlNodeCheckBox;
 import org.genericsystem.distributed.cacheonserver.ui.js.todomvc.HtmlAdmin;
 import org.genericsystem.distributed.cacheonserver.ui.js.todomvc.TodoList;
 import org.genericsystem.kernel.AbstractServer;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
+import javafx.event.ActionEvent;
 
 public class WebSocketServer<T extends AbstractServer> {
 	private List<HttpServer> httpServers = new ArrayList<>();
@@ -30,7 +30,7 @@ public class WebSocketServer<T extends AbstractServer> {
 
 	// @SuppressWarnings("unchecked")
 	public void start(Map<String, AbstractServer> roots) {
-
+		
 		System.out.println("start");
 		Vertx vertx = GSVertx.vertx().getVertx();
 		HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
@@ -59,7 +59,13 @@ public class WebSocketServer<T extends AbstractServer> {
 						node.getActionProperty().get().handle(new ActionEvent());
 
 					if (obj.getString("msg_type").equals("U"))
-						node.getText().setValue(obj.getString("textContent"));
+					{
+						if(obj.getString("eltType").equals("text"))
+							node.getText().setValue(obj.getString("textContent"));
+
+						if("checkbox".equals(obj.getString("eltType")))
+							((HtmlNodeCheckBox)node).getChecked().setValue(obj.getBoolean("checked"));
+					}
 				}
 				// webSocket.writeBinaryMessage(server.getReplyBuffer(methodId, op, (T) root, gsBuffer));
 				});

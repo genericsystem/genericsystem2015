@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -22,9 +23,9 @@ import org.genericsystem.distributed.GSBuffer;
 
 public class HtmlNode {
 	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
-	private final String id;
-	private StringProperty tag = new SimpleStringProperty();
-	private StringProperty text = new SimpleStringProperty();
+	protected final String id;
+	protected StringProperty tag = new SimpleStringProperty();
+	protected StringProperty text = new SimpleStringProperty();
 	private final ServerWebSocket webSocket;
 	private ObservableList<HtmlNode> childrenNode = FXCollections.emptyObservableList();
 	private StringProperty style = new SimpleStringProperty("label");
@@ -39,7 +40,7 @@ public class HtmlNode {
 				JsonObject jsonObj = new JsonObject().put("msg_type", "U");
 				jsonObj.put("nodeId", id);
 				jsonObj.put("textContent", newValue);
-
+				System.out.println("change text::"+text);
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(jsonObj.encode());
 				webSocket.write(bufferAdmin);
@@ -64,6 +65,10 @@ public class HtmlNode {
 		});
 	}
 
+	public Property<Boolean> getChecked(){
+		return new SimpleObjectProperty<>();
+	}
+	
 	public ObservableList<String> getStyleClass() {
 		return styleClass;
 	}
@@ -104,10 +109,10 @@ public class HtmlNode {
 		this.tag.set(tag);
 	}
 
-	public static class HtmlInput extends HtmlNode {
+	public static class HtmlNodeInput extends HtmlNode {
 		private String type;
 
-		public HtmlInput(ServerWebSocket webSocket, String type) {
+		public HtmlNodeInput(ServerWebSocket webSocket, String type) {
 			super(webSocket);
 			this.type = type;
 		}
@@ -117,20 +122,28 @@ public class HtmlNode {
 		}
 	}
 
-	public static class HtmlCheckBox extends HtmlInput {
-		private BooleanProperty checked = new SimpleBooleanProperty(false);
+	public static class HtmlNodeCheckBox extends HtmlNodeInput {
+		private Property<Boolean> checked = new SimpleBooleanProperty(false);
 
-		public HtmlCheckBox(ServerWebSocket webSocket) {
+		public HtmlNodeCheckBox(ServerWebSocket webSocket) {
 			super(webSocket, "checkbox");
 			checked.addListener(new ChangeListener<Boolean>() {
+
 				@Override
 				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-
+//					JsonObject jsonObj = new JsonObject().put("msg_type", "U");
+//					jsonObj.put("nodeId", id);
+//					jsonObj.put("ckecked", newValue);
+//					GSBuffer bufferAdmin = new GSBuffer();
+//					bufferAdmin.appendString(jsonObj.encode());
+//					webSocket.write(bufferAdmin);
+					System.out.println("checked");
 				}
 			});
 		}
-
-		public BooleanProperty getChecked() {
+		
+		@Override
+		public Property<Boolean> getChecked() {
 			return checked;
 		}
 	}

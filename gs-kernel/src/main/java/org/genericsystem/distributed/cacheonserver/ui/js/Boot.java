@@ -23,7 +23,6 @@ public class Boot<NODE> {
 	}
 
 	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableList<VALUE>> applyOnNode, VALUE value) {
-		System.out.println(value);
 		return new Boot<>(node -> applyOnNode.apply(node).add(value));
 	}
 
