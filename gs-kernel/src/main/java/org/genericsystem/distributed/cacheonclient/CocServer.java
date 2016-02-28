@@ -20,8 +20,8 @@ public class CocServer extends AbstractGSServer<BasicEngine> {
 
 	@Override
 	protected Buffer getReplyBuffer(int methodId, int op, BasicEngine root, GSBuffer gsBuffer) {
-
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
+		System.out.println("REPLY BUFFER : " + methodId + " " + op);
 		switch (methodId) {
 		case AbstractGSClient.PICK_NEW_TS:
 			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());

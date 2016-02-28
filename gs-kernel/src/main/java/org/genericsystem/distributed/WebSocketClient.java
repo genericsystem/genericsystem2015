@@ -4,9 +4,11 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+
 import org.genericsystem.kernel.Statics;
 
 class WebSocketClient {
@@ -23,7 +25,8 @@ class WebSocketClient {
 			getOpenPromise(client, path).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
 		} catch (InterruptedException | ExecutionException | TimeoutException e1) {
 			throw new IllegalThreadStateException();
-		};
+		}
+		;
 
 	}
 
@@ -47,11 +50,13 @@ class WebSocketClient {
 		try {
 			webSocketPromise.thenAccept(webSocket -> webSocket.close());
 			System.out.println("Close socket");
-		} catch (Exception ignore) {}
+		} catch (Exception ignore) {
+		}
 		try {
 			httpClient.close();
 			System.out.println("Close httpClient");
-		} catch (Exception ignore) {}
+		} catch (Exception ignore) {
+		}
 	}
 
 }

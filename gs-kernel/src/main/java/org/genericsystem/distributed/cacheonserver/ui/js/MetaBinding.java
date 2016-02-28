@@ -1,6 +1,7 @@
 package org.genericsystem.distributed.cacheonserver.ui.js;
 
 import java.util.function.Function;
+
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -23,10 +24,10 @@ public class MetaBinding<N, T> {
 	}
 
 	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableList<T>> forEach(Function<M, ObservableList<T>> applyOnModel) {
-		return MetaBinding.bind(applyOnModel, MetaBinder.<N, T> foreachBinder());
+		return bind(applyOnModel, MetaBinder.<N, T> foreachBinder());
 	}
 
 	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
-		return MetaBinding.bind(applyOnModel, MetaBinder.selectorBinder());
+		return bind(applyOnModel, MetaBinder.selectorBinder());
 	}
 }

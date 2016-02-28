@@ -2,6 +2,7 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -10,9 +11,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import org.genericsystem.common.Protocole;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
+
 import com.google.common.base.Supplier;
 
 public abstract class AbstractGSClient implements Protocole {
@@ -75,6 +78,7 @@ public abstract class AbstractGSClient implements Protocole {
 	protected <T> CompletableFuture<T> promise(int method, Function<GSBuffer, T> receiveReturn, Function<Buffer, Buffer> sendParams) {
 		CompletableFuture<T> promise = new CompletableFuture<>();
 		int key = indexCallback(buff -> promise.complete(receiveReturn.apply(buff)));
+		System.out.println("SENDING : " + method + " " + key);
 		send(sendParams.apply(Buffer.buffer().appendInt(method).appendInt(key)));
 		return promise.thenApplyAsync(p -> p);
 	}
