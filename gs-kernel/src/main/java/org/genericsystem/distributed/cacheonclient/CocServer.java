@@ -1,11 +1,14 @@
 package org.genericsystem.distributed.cacheonclient;
 
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.ServerWebSocket;
 
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.WebSocketsServer;
 import org.genericsystem.kernel.BasicEngine;
 
 public class CocServer extends AbstractGSServer<BasicEngine> {
@@ -44,5 +47,20 @@ public class CocServer extends AbstractGSServer<BasicEngine> {
 	@Override
 	protected BasicEngine buildRoot(String value, String persistentDirectoryPath, Class[] userClasses) {
 		return new BasicEngine(value, persistentDirectoryPath, userClasses);
+	}
+
+	@Override
+	protected WebSocketsServer<BasicEngine> buildWebSocketsServer(GSDeploymentOptions options) {
+		return new WebSocketsServer<BasicEngine>(this, options.getHost(), options.getPort()) {
+			@Override
+			public Handler<Buffer> getHandler(BasicEngine root, ServerWebSocket socket) {
+				return buffer -> {
+					GSBuffer gsBuffer = new GSBuffer(buffer);
+					int methodId = gsBuffer.getInt();
+					int op = gsBuffer.getInt();
+					socket.writeBinaryMessage(CocServer.this.getReplyBuffer(methodId, op, root, gsBuffer));
+				};
+			}
+		};
 	}
 }

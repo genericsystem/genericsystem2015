@@ -1,7 +1,10 @@
 package org.genericsystem.distributed.cacheonserver;
 
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.buffer.impl.BufferFactoryImpl;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.nio.ByteOrder;
@@ -9,10 +12,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javafx.event.ActionEvent;
+
 import org.genericsystem.distributed.AbstractGSClient;
 import org.genericsystem.distributed.AbstractGSServer;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.WebSocketsServer;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode;
+import org.genericsystem.distributed.cacheonserver.ui.js.HtmlNode.HtmlNodeCheckBox;
+import org.genericsystem.distributed.cacheonserver.ui.js.todomvc.HtmlAdmin;
+import org.genericsystem.distributed.cacheonserver.ui.js.todomvc.TodoList;
 import org.genericsystem.kernel.Engine;
 
 public class CosServer extends AbstractGSServer<Engine> {
@@ -102,5 +112,35 @@ public class CosServer extends AbstractGSServer<Engine> {
 	@Override
 	protected Engine buildRoot(String value, String persistentDirectoryPath, Class[] userClasses) {
 		return new Engine(value, persistentDirectoryPath, userClasses);
+	}
+
+	@Override
+	protected WebSocketsServer<Engine> buildWebSocketsServer(GSDeploymentOptions options) {
+		return new WebSocketsServer<Engine>(this, options.getHost(), options.getPort()) {
+			@Override
+			public Handler<Buffer> getHandler(Engine root, ServerWebSocket socket) {
+				TodoList todolist = new TodoList();
+				HtmlNode parent = new HtmlNode(socket);
+				HtmlAdmin jsAdmin = new HtmlAdmin(todolist, parent, socket);
+				return buffer -> {
+					GSBuffer gsBuffer = new GSBuffer(buffer);
+					String message = gsBuffer.getString(0, gsBuffer.length());
+					JsonObject obj = new JsonObject(message);
+					HtmlNode node = jsAdmin.getRootViewContext().getNodeById().get(obj.getString("nodeId"));
+					if (node != null) {
+						if (obj.getString("msg_type").equals("A"))
+							node.getActionProperty().get().handle(new ActionEvent());
+
+						if (obj.getString("msg_type").equals("U")) {
+							if (obj.getString("eltType").equals("text"))
+								node.getText().setValue(obj.getString("textContent"));
+
+							if ("checkbox".equals(obj.getString("eltType")))
+								((HtmlNodeCheckBox) node).getChecked().setValue(obj.getBoolean("checked"));
+						}
+					}
+				};
+			};
+		};
 	}
 }

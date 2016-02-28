@@ -19,11 +19,14 @@ import org.genericsystem.kernel.Statics;
 public abstract class AbstractGSServer<T extends AbstractServer> {
 
 	protected Map<String, AbstractServer> roots;
+	protected WebSocketsServer<T> webSocketsServer;
 
 	public AbstractGSServer(GSDeploymentOptions options) {
-		webSocket = new WebSocketServer<>(this, options);
+		webSocketsServer = buildWebSocketsServer(options);
 		this.roots = Arrays.stream(getRoots(options)).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
+
+	abstract protected WebSocketsServer<T> buildWebSocketsServer(GSDeploymentOptions options);
 
 	private AbstractServer[] getRoots(GSDeploymentOptions options) {
 		Set<AbstractServer> roots = new HashSet<>();
@@ -39,20 +42,18 @@ public abstract class AbstractGSServer<T extends AbstractServer> {
 		return roots.toArray(new AbstractServer[roots.size()]);
 	}
 
-	protected WebSocketServer<T> webSocket;
-
 	abstract protected T buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses);
 
 	public void start() {
-		webSocket.start(roots);
+		webSocketsServer.start(roots);
 	}
 
 	public void stop() {
-		webSocket.stop(roots);
+		webSocketsServer.stop(roots);
 	}
 
-	public WebSocketServer<T> getwebSocket() {
-		return this.webSocket;
+	public WebSocketsServer<T> getwebSocket() {
+		return this.webSocketsServer;
 	}
 
 	protected static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
