@@ -26,8 +26,6 @@ class WebSocketClient {
 		} catch (InterruptedException | ExecutionException | TimeoutException e1) {
 			throw new IllegalThreadStateException();
 		}
-		;
-
 	}
 
 	protected <T> void send(Buffer buffer) {
