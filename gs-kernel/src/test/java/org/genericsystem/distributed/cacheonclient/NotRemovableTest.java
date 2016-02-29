@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class NotRemovableTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -21,7 +21,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -30,7 +30,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

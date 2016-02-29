@@ -1,11 +1,7 @@
 package org.genericsystem.distributed.cacheonserver;
 
-import java.util.Arrays;
-
-import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
-import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -18,9 +14,9 @@ public class MultipleRootsTest extends AbstractTest {
 	}
 
 	public void test001_Engine_name() {
-		CosClientEngine engine1 = new CosClientEngine();
+		Engine engine1 = new Engine();
 		String nameOfsecondEngine = "SecondEngine";
-		CosClientEngine engine2 = new CosClientEngine(nameOfsecondEngine);
+		Engine engine2 = new Engine(nameOfsecondEngine);
 		assert engine1.getMeta().equals(engine1);
 		assert engine1.getSupers().isEmpty();
 		assert engine1.getComponents().size() == 0;
@@ -33,37 +29,37 @@ public class MultipleRootsTest extends AbstractTest {
 		assert engine2.isAlive();
 	}
 
-//	public void test002_addInstance_attribute() {
-//		LightClientEngine engine1 = new LightClientEngine();
-//		LightClientEngine engine2 = new LightClientEngine("SecondEngine");
-//		engine1.addInstance("Car");
-//		Generic car = engine2.addInstance("Car");
-//		catchAndCheckCause(() -> engine1.addInstance("Power", car), CrossEnginesAssignementsException.class);
-//	}
-//
-//	public void test003_addInstance_attribute() {
-//		LightClientEngine engine1 = new LightClientEngine();
-//		LightClientEngine engine2 = new LightClientEngine("SecondEngine");
-//		Generic car = engine1.addInstance("Car");
-//		engine2.addInstance("Car");
-//		catchAndCheckCause(() -> engine2.addInstance("Power", car), CrossEnginesAssignementsException.class);
-//	}
-//
-//	public void test004_addInstance_attribute() {
-//		LightClientEngine engine1 = new LightClientEngine("FirstEngine");
-//		LightClientEngine engine2 = new LightClientEngine("SecondEngine");
-//		Generic car = engine1.addInstance("Car");
-//		engine2.addInstance("Car");
-//		catchAndCheckCause(() -> engine2.addInstance("Power", car), CrossEnginesAssignementsException.class);
-//	}
-//
-//	public void test005_addInstance_overrides() {
-//		LightClientEngine engine1 = new LightClientEngine();
-//		LightClientEngine engine2 = new LightClientEngine("SecondEngine");
-//		Generic car = engine2.addInstance("Car");
-//		Generic robot = engine2.addInstance("Robot");
-//		catchAndCheckCause(() -> engine1.addInstance(Arrays.asList(car, robot), "Transformer"), CrossEnginesAssignementsException.class);
-//		// catchAndCheckCause(() -> engine1.addInstance(Arrays.asList(car, robot), "Transformer"), IllegalStateException.class);
-//	}
+	// public void test002_addInstance_attribute() {
+	// LightClientEngine engine1 = new LightClientEngine();
+	// LightClientEngine engine2 = new LightClientEngine("SecondEngine");
+	// engine1.addInstance("Car");
+	// Generic car = engine2.addInstance("Car");
+	// catchAndCheckCause(() -> engine1.addInstance("Power", car), CrossEnginesAssignementsException.class);
+	// }
+	//
+	// public void test003_addInstance_attribute() {
+	// LightClientEngine engine1 = new LightClientEngine();
+	// LightClientEngine engine2 = new LightClientEngine("SecondEngine");
+	// Generic car = engine1.addInstance("Car");
+	// engine2.addInstance("Car");
+	// catchAndCheckCause(() -> engine2.addInstance("Power", car), CrossEnginesAssignementsException.class);
+	// }
+	//
+	// public void test004_addInstance_attribute() {
+	// LightClientEngine engine1 = new LightClientEngine("FirstEngine");
+	// LightClientEngine engine2 = new LightClientEngine("SecondEngine");
+	// Generic car = engine1.addInstance("Car");
+	// engine2.addInstance("Car");
+	// catchAndCheckCause(() -> engine2.addInstance("Power", car), CrossEnginesAssignementsException.class);
+	// }
+	//
+	// public void test005_addInstance_overrides() {
+	// LightClientEngine engine1 = new LightClientEngine();
+	// LightClientEngine engine2 = new LightClientEngine("SecondEngine");
+	// Generic car = engine2.addInstance("Car");
+	// Generic robot = engine2.addInstance("Robot");
+	// catchAndCheckCause(() -> engine1.addInstance(Arrays.asList(car, robot), "Transformer"), CrossEnginesAssignementsException.class);
+	// // catchAndCheckCause(() -> engine1.addInstance(Arrays.asList(car, robot), "Transformer"), IllegalStateException.class);
+	// }
 
 }

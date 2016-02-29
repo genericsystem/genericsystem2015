@@ -12,9 +12,9 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.cacheonclient.CocProtocole;
+import org.genericsystem.distributed.cacheonclient.CocProtocol;
 
-public class BasicEngine extends AbstractServer implements Generic, CocProtocole {
+public class BasicEngine extends AbstractServer implements Generic, CocProtocol {
 
 	@Override
 	public BasicEngine getRoot() {

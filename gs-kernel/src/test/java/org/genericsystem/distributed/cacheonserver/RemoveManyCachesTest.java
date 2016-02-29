@@ -1,20 +1,20 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosCache;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		cache.flush();
-		CosCache cache2 = engine.newCache().start();
+		FrontEndCache cache2 = engine.newCache().start();
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myBmwRed = myBmw.addHolder(color, "red");
 
@@ -27,12 +27,12 @@ public class RemoveManyCachesTest extends AbstractTest {
 	}
 
 	public void test002_simpleHolder() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		cache.flush();
-		CosCache cache2 = engine.newCache().start();
+		FrontEndCache cache2 = engine.newCache().start();
 		Generic myBmw2 = car.addInstance("myBmw");
 		Generic myBmwRed2 = myBmw2.addHolder(color, "red");
 		cache.start();

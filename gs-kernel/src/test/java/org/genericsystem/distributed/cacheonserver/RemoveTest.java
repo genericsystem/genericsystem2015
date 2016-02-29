@@ -1,14 +1,14 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -23,7 +23,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -42,7 +42,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -58,7 +58,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -82,7 +82,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -97,7 +97,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -110,7 +110,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test007_removeConcretAndAttribut() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -125,7 +125,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test008_removeInstanceAndAttribute() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -140,7 +140,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test009_removeConcret() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

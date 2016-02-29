@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class ConcurrentTest extends AbstractTest {
 
 	public void test() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -27,11 +27,11 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testConcurrencyControlException() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();
-		CocClientEngine engine2 = new CocClientEngine();
+		Engine engine2 = new Engine();
 		HeavyCache cache2 = engine2.newCache().start();
 		Generic car2 = engine2.getInstance("Car");
 		engine.getCurrentCache().start();
@@ -51,7 +51,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testNonFlushedModificationsStillAliveInCache() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		HeavyCache cache = engine.getCurrentCache();
 
@@ -60,7 +60,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testFlushedModificationsAvailableInNewCacheOk() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -75,7 +75,7 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testNonFlushedModificationsAreNotAvailableInNewCacheOk() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 

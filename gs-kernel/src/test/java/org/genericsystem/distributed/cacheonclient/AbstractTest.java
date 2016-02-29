@@ -19,7 +19,7 @@ public abstract class AbstractTest {
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 	String ServerVerticleId;
 	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
-	private CocServer httpGsServer;
+	private BackEnd httpGsServer;
 
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
@@ -37,7 +37,7 @@ public abstract class AbstractTest {
 	@BeforeMethod
 	public void beforeClass() {
 		cleanDirectory(directoryPath);
-		httpGsServer = new CocServer(getDeploymentOptions());
+		httpGsServer = new BackEnd(getDeploymentOptions());
 		httpGsServer.start();
 	}
 

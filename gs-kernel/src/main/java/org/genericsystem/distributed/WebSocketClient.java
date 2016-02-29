@@ -15,12 +15,12 @@ class WebSocketClient {
 	private final HttpClient httpClient;
 	private CompletableFuture<WebSocket> webSocketPromise = new CompletableFuture<>();
 
-	public WebSocketClient(AbstractGSClient client, String host, int port, String path) {
+	public WebSocketClient(AbstractFrontEnd client, String host, int port, String path) {
 		httpClient = GSVertx.vertx().getVertx().createHttpClient(new HttpClientOptions().setDefaultPort(port).setDefaultHost(host != null ? host : HttpClientOptions.DEFAULT_DEFAULT_HOST));
 		webSocketPromise = getOpenPromise(client, path);
 	}
 
-	protected void open(AbstractGSClient client, String path) {
+	protected void open(AbstractFrontEnd client, String path) {
 		try {
 			getOpenPromise(client, path).get(Statics.SERVER_TIMEOUT, Statics.SERVER_TIMEOUT_UNIT);
 		} catch (InterruptedException | ExecutionException | TimeoutException e1) {
@@ -32,7 +32,7 @@ class WebSocketClient {
 		webSocketPromise.thenAccept(webSocket -> webSocket.writeBinaryMessage(buffer));
 	}
 
-	protected <T> CompletableFuture<WebSocket> getOpenPromise(AbstractGSClient client, String path) {
+	protected <T> CompletableFuture<WebSocket> getOpenPromise(AbstractFrontEnd client, String path) {
 		CompletableFuture<WebSocket> promise = new CompletableFuture<>();
 		httpClient.websocket(path, webSock -> {
 			webSock.exceptionHandler(e -> {

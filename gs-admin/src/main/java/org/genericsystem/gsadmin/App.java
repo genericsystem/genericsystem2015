@@ -15,8 +15,8 @@ import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.distributed.cacheonclient.CocServer;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.BackEnd;
 import org.genericsystem.kernel.Statics;
 
 public class App extends Application {
@@ -25,13 +25,13 @@ public class App extends Application {
 		launch(args);
 	}
 
-	static CocClientEngine engine;
-	static CocServer server;
+	static Engine engine;
+	static BackEnd server;
 
-	private CocClientEngine initGS() {
-		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+	private Engine initGS() {
+		server = new BackEnd(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
+		engine = new Engine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 

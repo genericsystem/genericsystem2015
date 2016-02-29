@@ -13,7 +13,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilder.TextTableBuilder;
 import org.genericsystem.kernel.Statics;
@@ -47,8 +47,8 @@ public class GenericWindow extends Window {
 	}
 
 	public StringBinding getTs() {
-		return Bindings.createStringBinding(() -> "TS : " + new SimpleDateFormat("dd:MM:YY / HH:mm:ss").format(new Date(engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getTransaction().getTs() / Statics.MILLI_TO_NANOSECONDS)),
-				engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getObservableTransaction());
+		return Bindings.createStringBinding(() -> "TS : " + new SimpleDateFormat("dd:MM:YY / HH:mm:ss").format(new Date(engineCrud.getValue().<Engine> getModel().getCurrentCache().getTransaction().getTs() / Statics.MILLI_TO_NANOSECONDS)),
+				engineCrud.getValue().<Engine> getModel().getCurrentCache().getObservableTransaction());
 	}
 
 	public void cancel() {
@@ -60,12 +60,12 @@ public class GenericWindow extends Window {
 	}
 
 	public StringBinding getCacheLevel() {
-		return Bindings.createStringBinding(() -> "Cache level : " + engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache()
+		return Bindings.createStringBinding(() -> "Cache level : " + engineCrud.getValue().<Engine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), engineCrud.getValue().<Engine> getModel().getCurrentCache()
 				.getCacheLevelObservable());
 	}
 
 	public void unmount() {
-		engineCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
+		engineCrud.getValue().<Engine> getModel().getCurrentCache().unmount();
 	}
 
 	static ReadOnlyObjectWrapper<Table> createCellContent(Generic itemTableCell,Generic columnTableCell){
@@ -83,7 +83,7 @@ public class GenericWindow extends Window {
 	
 	}
 	
-	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, CocClientEngine engine) {
+	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, Engine engine) {
 		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
 				attribute -> attribute.isCompositeForInstances(engine)),item->col->createCellContent(item,col) , firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> createFirstColumnTable(itemTableCell), column -> new ReadOnlyStringWrapper("Delete"));
 

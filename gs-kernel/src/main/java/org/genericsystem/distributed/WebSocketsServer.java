@@ -17,9 +17,9 @@ public abstract class WebSocketsServer<T extends AbstractServer> {
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
-	private AbstractGSServer<T> server;
+	private AbstractBackEnd<T> server;
 
-	public WebSocketsServer(AbstractGSServer<T> server, String host, int port) {
+	public WebSocketsServer(AbstractBackEnd<T> server, String host, int port) {
 		this.server = server;
 		this.port = port;
 		this.host = host;
@@ -43,14 +43,14 @@ public abstract class WebSocketsServer<T extends AbstractServer> {
 				});
 				webSocket.handler(getHandler((T) root, webSocket));
 			});
-			AbstractGSServer.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
+			AbstractBackEnd.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
 		System.out.println("Generic System server ready!");
 	}
 
 	public void stop(Map<String, AbstractServer> roots) {
-		httpServers.forEach(httpServer -> AbstractGSServer.<Void> synchronizeTask(handler -> httpServer.close(handler)));
+		httpServers.forEach(httpServer -> AbstractBackEnd.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		roots.values().forEach(root -> root.close());
 		roots = null;
 		System.out.println("Generic System server stopped!");
