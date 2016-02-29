@@ -6,17 +6,17 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosCache;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
 public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache1 = engine.getCurrentCache();
-		CosCache cache2 = engine.newCache().start();
+		Engine engine = new Engine();
+		FrontEndCache cache1 = engine.getCurrentCache();
+		FrontEndCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Generic myCar2 = car.addInstance("myCar2");
@@ -43,25 +43,25 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
-		CosCache cache1 = engine.getCurrentCache();
+		FrontEndCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
 		cache1.flush();
-		CosCache cache2 = engine.newCache().start();
+		FrontEndCache cache2 = engine.newCache().start();
 		catchAndCheckCause(() -> myCar1.remove(), AliveConstraintViolationException.class);
 		cache2.flush();
 	}
 
 	public void test002_() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
-		CosCache cache = engine.getCurrentCache();
+		FrontEndCache cache = engine.getCurrentCache();
 		cache.flush();
-		CosCache cache2 = engine.newCache().start();
+		FrontEndCache cache2 = engine.newCache().start();
 		myCar.remove();
 		cache.start();
 		cache.shiftTs();
@@ -73,9 +73,9 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test003_IterateAndRemove() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache1 = engine.getCurrentCache();
-		CosCache cache2 = engine.newCache().start();
+		Engine engine = new Engine();
+		FrontEndCache cache1 = engine.getCurrentCache();
+		FrontEndCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Generic myCar2 = car.addInstance("myCar2");
@@ -139,8 +139,8 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	// }
 
 	public void test009_IterateAndAdd() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache1 = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache1 = engine.getCurrentCache();
 
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");

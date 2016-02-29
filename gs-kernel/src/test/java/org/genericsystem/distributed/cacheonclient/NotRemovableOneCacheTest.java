@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 public class NotRemovableOneCacheTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -21,7 +21,7 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_aliveEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		assert car.isAlive();
@@ -36,7 +36,7 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -46,7 +46,7 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		CocClientEngine engine = new CocClientEngine();
+		Engine engine = new Engine();
 		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");

@@ -3,16 +3,16 @@ package org.genericsystem.distributed.cacheonserver;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosCache;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableOneCacheTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -22,8 +22,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_aliveEx() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		assert car.isAlive();
 		Generic color = car.addAttribute("Color");
@@ -37,8 +37,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
 		Generic color = car.addAttribute("Color");
@@ -47,8 +47,8 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

@@ -3,15 +3,15 @@ package org.genericsystem.distributed.cacheonserver;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosCache;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
 public class CacheTest extends AbstractTest {
 	public void test000() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle2");
 		assert vehicle.isAlive();
 		System.out.println("----------------------------------------------");
@@ -26,8 +26,8 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.clear();
@@ -39,7 +39,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().mount();
@@ -49,7 +49,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test003() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		engine.getCurrentCache().mount();
@@ -60,7 +60,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001_getInheritings() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -68,14 +68,14 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001_getInstances() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		assert engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
 	}
 
 	public void test001_getMetaComponents() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		assert vehicle.getComposites().contains(powerVehicle);
@@ -85,7 +85,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test001_getSuperComponents() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		Generic myVehicle = vehicle.addInstance("myVehicle");
@@ -96,7 +96,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_getSuperComponents() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic powerVehicle = engine.addInstance("power", vehicle);
 		powerVehicle.enablePropertyConstraint();
@@ -110,7 +110,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_flush() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.addInstance(vehicle, "Car");
 		assert vehicle.isAlive();
@@ -120,7 +120,7 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test002_clear() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.getCurrentCache().clear();
 		assert !engine.getInstances().stream().anyMatch(g -> g.equals(vehicle));
@@ -136,9 +136,9 @@ public class CacheTest extends AbstractTest {
 	// }
 
 	public void test002_mountNewCache() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.newCache().start();
-		CosCache currentCache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.newCache().start();
+		FrontEndCache currentCache = engine.getCurrentCache();
 		assert cache == currentCache;
 		currentCache.mount();
 		engine.addInstance("Vehicle");
@@ -146,8 +146,8 @@ public class CacheTest extends AbstractTest {
 	}
 
 	public void test005_TwoComponentsWithSameMetaInDifferentCaches_remove() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache currentCache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache currentCache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = engine.addInstance("vehiclePower", vehicle);
 		assert currentCache.getCacheLevel() == 0;

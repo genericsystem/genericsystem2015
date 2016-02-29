@@ -17,9 +17,9 @@ public class MultipleRootsTest extends AbstractTest {
 	}
 
 	public void test001_Engine_name() {
-		CocClientEngine engine1 = new CocClientEngine();
+		Engine engine1 = new Engine();
 		String nameOfsecondEngine = "SecondEngine";
-		CocClientEngine engine2 = new CocClientEngine(nameOfsecondEngine);
+		Engine engine2 = new Engine(nameOfsecondEngine);
 		assert engine1.getMeta().equals(engine1);
 		assert engine1.getSupers().isEmpty();
 		assert engine1.getComponents().size() == 0;
@@ -33,32 +33,32 @@ public class MultipleRootsTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_attribute() {
-		CocClientEngine engine1 = new CocClientEngine();
-		CocClientEngine engine2 = new CocClientEngine("SecondEngine");
+		Engine engine1 = new Engine();
+		Engine engine2 = new Engine("SecondEngine");
 		engine1.addInstance("Car");
 		Generic car = engine2.addInstance("Car");
 		catchAndCheckCause(() -> engine1.addInstance("Power", car), CrossEnginesAssignementsException.class);
 	}
 
 	public void test003_addInstance_attribute() {
-		CocClientEngine engine1 = new CocClientEngine();
-		CocClientEngine engine2 = new CocClientEngine("SecondEngine");
+		Engine engine1 = new Engine();
+		Engine engine2 = new Engine("SecondEngine");
 		Generic car = engine1.addInstance("Car");
 		engine2.addInstance("Car");
 		catchAndCheckCause(() -> engine2.addInstance("Power", car), CrossEnginesAssignementsException.class);
 	}
 
 	public void test004_addInstance_attribute() {
-		CocClientEngine engine1 = new CocClientEngine("FirstEngine");
-		CocClientEngine engine2 = new CocClientEngine("SecondEngine");
+		Engine engine1 = new Engine("FirstEngine");
+		Engine engine2 = new Engine("SecondEngine");
 		Generic car = engine1.addInstance("Car");
 		engine2.addInstance("Car");
 		catchAndCheckCause(() -> engine2.addInstance("Power", car), CrossEnginesAssignementsException.class);
 	}
 
 	public void test005_addInstance_overrides() {
-		CocClientEngine engine1 = new CocClientEngine();
-		CocClientEngine engine2 = new CocClientEngine("SecondEngine");
+		Engine engine1 = new Engine();
+		Engine engine2 = new Engine("SecondEngine");
 		Generic car = engine2.addInstance("Car");
 		Generic robot = engine2.addInstance("Robot");
 		catchAndCheckCause(() -> engine1.addInstance(Arrays.asList(car, robot), "Transformer"), CrossEnginesAssignementsException.class);

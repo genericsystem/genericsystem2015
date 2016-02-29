@@ -2,17 +2,17 @@ package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosCache;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
 public class ConcurrentTest extends AbstractTest {
 
 	public void test() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
-		CosCache cache2 = engine.newCache().start();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
+		FrontEndCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 
 		assert cache2.isAlive(car);
@@ -28,12 +28,12 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testConcurrencyControlException() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache().start();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache().start();
 		final Generic car = engine.addInstance("Car");
 		cache.flush();
-		CosClientEngine engine2 = new CosClientEngine();
-		CosCache cache2 = engine2.newCache().start();
+		Engine engine2 = new Engine();
+		FrontEndCache cache2 = engine2.newCache().start();
 		Generic car2 = engine2.getInstance("Car");
 		engine.getCurrentCache().start();
 		car.remove();
@@ -52,38 +52,38 @@ public class ConcurrentTest extends AbstractTest {
 	}
 
 	public void testNonFlushedModificationsStillAliveInCache() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
-		CosCache cache = engine.getCurrentCache();
+		FrontEndCache cache = engine.getCurrentCache();
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 	}
 
 	public void testFlushedModificationsAvailableInNewCacheOk() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 
-		CosCache cache2 = engine.newCache().start();
+		FrontEndCache cache2 = engine.newCache().start();
 
 		assert cache2.isAlive(car);
 		assert engine.getInstances().contains(car);
 	}
 
 	public void testNonFlushedModificationsAreNotAvailableInNewCacheOk() {
-		CosClientEngine engine = new CosClientEngine();
-		CosCache cache = engine.getCurrentCache();
+		Engine engine = new Engine();
+		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 
 		assert cache.isAlive(car);
 		assert engine.getInstances().contains(car);
 
-		CosCache cache2 = engine.newCache().start();
+		FrontEndCache cache2 = engine.newCache().start();
 		assert !cache2.isAlive(car);
 		assert !engine.getInstances().contains(car);
 	}

@@ -2,14 +2,14 @@ package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
 import org.testng.annotations.Test;
 
 @Test
 public class UpdateWithCacheTest extends AbstractTest {
 
 	public void test002_updateMeta() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -31,7 +31,7 @@ public class UpdateWithCacheTest extends AbstractTest {
 	}
 
 	public void test004_updateHolder() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -50,7 +50,7 @@ public class UpdateWithCacheTest extends AbstractTest {
 	}
 
 	public void test005_updateSuper() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -73,7 +73,7 @@ public class UpdateWithCacheTest extends AbstractTest {
 	}
 
 	public void test006_attributeToRelation() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("MyCar");
@@ -93,7 +93,7 @@ public class UpdateWithCacheTest extends AbstractTest {
 	}
 
 	public void test007_structurel_WithInheritings_AndInstances() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic power = car.addAttribute("Power");

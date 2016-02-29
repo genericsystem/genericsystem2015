@@ -3,14 +3,14 @@ package org.genericsystem.distributed.cacheonserver;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.CosClientEngine;
+import org.genericsystem.distributed.cacheonclient.Engine;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -22,7 +22,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -31,7 +31,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		CosClientEngine engine = new CosClientEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

@@ -18,8 +18,8 @@ import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.distributed.cacheonclient.CocServer;
+import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.BackEnd;
 import org.genericsystem.kernel.Statics;
 
 /**
@@ -29,7 +29,7 @@ import org.genericsystem.kernel.Statics;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		CocServer server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		BackEnd server = new BackEnd(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		launch(args);
 		// server.stop();
@@ -41,7 +41,7 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		CocClientEngine engine = new CocClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
+		Engine engine = new Engine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.setInstance("myBmw");
