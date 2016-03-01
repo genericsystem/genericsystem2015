@@ -3,9 +3,9 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlSection extends HtmlElement {
+public class HtmlSection extends HtmlElement<HtmlSection> {
 
-	public HtmlSection(HtmlElement parent) {
+	public HtmlSection(HtmlElement<?> parent) {
 		super(parent);
 	}
 

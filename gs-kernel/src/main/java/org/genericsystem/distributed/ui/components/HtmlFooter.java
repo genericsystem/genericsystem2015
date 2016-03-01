@@ -3,11 +3,10 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlFooter extends HtmlElement {
+public class HtmlFooter extends HtmlElement<HtmlFooter> {
 
-	public HtmlFooter(HtmlElement parent) {
+	public HtmlFooter(HtmlElement<?> parent) {
 		super(parent);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

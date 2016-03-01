@@ -2,11 +2,10 @@ package org.genericsystem.distributed.ui.components;
 
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeCheckBox;
-import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeInput;
 
-public class HtmlCheckBox extends HtmlElement {
+public class HtmlCheckBox extends HtmlElement<HtmlCheckBox> {
 
-	public HtmlCheckBox(HtmlElement parent) {
+	public HtmlCheckBox(HtmlElement<?> parent) {
 		super(parent);
 	}
 

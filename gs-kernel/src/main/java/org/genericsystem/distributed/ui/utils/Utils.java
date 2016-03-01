@@ -18,10 +18,11 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
+import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeCheckBox;
 import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeInput;
 
 public class Utils {
-	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
+	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<?, PARENTNODE> parent) {
 		Function<Pane, ObservableList<?>> paneChildren = Pane::getChildren;
 		Function<Group, ObservableList<?>> groupChildren = Group::getChildren;
 		Function<HtmlNode, List<?>> nodeJsChildren = parentNodeJs -> new ModifiableObservableListBase() {
@@ -44,15 +45,19 @@ public class Utils {
 				jsonObj.put("nodeId", ((HtmlNode) element).getId());
 				jsonObj.put("tagHtml", ((HtmlNode) element).getTag().get());
 				jsonObj.put("textContent", ((HtmlNode) element).getText().get());
-				if (((HtmlNode) element).getTag().get().equals("input"))
+
+				if (((HtmlNode) element).getTag().get().equals("input")) {
 					jsonObj.put("type", ((HtmlNodeInput) element).getType());
+					if (((HtmlNodeInput) element).getType().equals("checkbox"))
+						jsonObj.put("checked", ((HtmlNodeCheckBox) element).getChecked().getValue());
+				}
 				JsonArray arrayJS = new JsonArray();
 				((HtmlNode) element).getStyleClass().forEach(clazz -> arrayJS.add(clazz));
 				jsonObj.put("styleClass", arrayJS);
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(jsonObj.encode());
 				if (parent instanceof HtmlElement)
-					((HtmlElement) parent).getWebSocket().write(bufferAdmin);
+					((HtmlElement<?>) parent).getWebSocket().write(bufferAdmin);
 
 				childrenNode.add(((HtmlNode) element));
 			}

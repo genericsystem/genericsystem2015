@@ -3,9 +3,9 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlLabel extends HtmlElement {
+public class HtmlLabel extends HtmlElement<HtmlLabel> {
 
-	public HtmlLabel(HtmlElement parent) {
+	public HtmlLabel(HtmlElement<?> parent) {
 		super(parent);
 	}
 

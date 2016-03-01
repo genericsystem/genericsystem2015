@@ -14,15 +14,15 @@ import org.genericsystem.distributed.ui.ModelContext.ModelContextList;
 
 public interface MetaBinder<N, W> {
 
-	default void init(Function<Model, W> method, ViewContext<N> viewContext, Element<?> childElement) {
+	default void init(Function<Model, W> method, ViewContext<N> viewContext, Element<?, ?> childElement) {
 		init(viewContext.getModelContext().applyOnModel(method), viewContext, childElement);
 	}
 
-	default void init(Supplier<W> applyOnModel, ViewContext<N> viewContext, Element<?> childElement) {
+	default void init(Supplier<W> applyOnModel, ViewContext<N> viewContext, Element<?, ?> childElement) {
 		init(applyOnModel.get(), viewContext, childElement);
 	}
 
-	default void init(W wrapper, ViewContext<N> viewContext, Element<?> childElement) {
+	default void init(W wrapper, ViewContext<N> viewContext, Element<?, ?> childElement) {
 	}
 
 	public static <N, T extends Model> MetaBinder<N, ObservableList<T>> foreachBinder() {
@@ -30,7 +30,7 @@ public interface MetaBinder<N, W> {
 			private ListChangeListener<Model> listener;
 
 			@Override
-			public void init(ObservableList<T> wrapper, ViewContext<N> viewContext, Element<?> childElement) {
+			public void init(ObservableList<T> wrapper, ViewContext<N> viewContext, Element<?, ?> childElement) {
 				ModelContextList children = viewContext.getModelContext().getChildren(childElement);
 				wrapper.addListener(new WeakListChangeListener<>(listener = children.getListChangeListener(viewContext)));
 				int index = 0;
@@ -45,7 +45,7 @@ public interface MetaBinder<N, W> {
 			private ChangeListener<Model> listener;
 
 			@Override
-			public void init(ObservableValue<T> wrapper, ViewContext<N> viewContext, Element<?> childElement) {
+			public void init(ObservableValue<T> wrapper, ViewContext<N> viewContext, Element<?, ?> childElement) {
 				ModelContextList children = viewContext.getModelContext().getChildren(childElement);
 				wrapper.addListener(new WeakChangeListener<>(listener = children.getChangeListener(viewContext)));
 				listener.changed(wrapper, null, wrapper.getValue());

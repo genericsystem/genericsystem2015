@@ -3,8 +3,8 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlDiv extends HtmlElement {
-	public HtmlDiv(HtmlElement parent) {
+public class HtmlDiv extends HtmlElement<HtmlDiv> {
+	public HtmlDiv(HtmlElement<?> parent) {
 		super(parent);
 	}
 

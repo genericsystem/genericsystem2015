@@ -378,4 +378,7 @@ label[for='toggle-all'] {
 	color: inherit;
 }
 
+.hide {
+	display : none;
+}
 

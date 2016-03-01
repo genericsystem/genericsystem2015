@@ -9,11 +9,10 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.distributed.ui.utils.Utils;
 
-public class HtmlElement extends Element<HtmlNode> {
+public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT>> extends Element<COMPONENT, HtmlNode> {
 
-	public HtmlElement(HtmlElement parent) {
+	public HtmlElement(HtmlElement<?> parent) {
 		super(parent, HtmlNode.class, Utils.getClassChildren(parent));
-
 	}
 
 	public HtmlElement(Class<HtmlNode> nodeClass) {
@@ -21,21 +20,24 @@ public class HtmlElement extends Element<HtmlNode> {
 	}
 
 	public ServerWebSocket getWebSocket() {
-		return ((HtmlElement) getParent()).getWebSocket();
+		return ((HtmlElement<?>) getParent()).getWebSocket();
 	}
 
 	@Override
-	public <M extends Model, T extends Model> Element<HtmlNode> forEach(Function<M, ObservableList<T>> applyOnModel) {
+	public <M extends Model, T extends Model> COMPONENT forEach(Function<M, ObservableList<T>> applyOnModel) {
 		return super.forEach(applyOnModel);
 	}
 
-	public <M> HtmlElement setStyleClass(Function<M, ObservableValue<String>> function) {
-		addObservableListToObservableValueBinding(HtmlNode::getStyleClass, function);
-		return this;
+	public <M> COMPONENT setStyleClass(Function<M, ObservableValue<String>> function) {
+		return addObservableListToObservableValueBinding(HtmlNode::getStyleClass, function);
 	}
 
-	public HtmlElement setStyleClass(String text) {
-		addObservableListBoot(HtmlNode::getStyleClass, text);
-		return this;
+	public COMPONENT setStyleClass(String text) {
+		return addObservableListBoot(HtmlNode::getStyleClass, text);
 	}
+
+	public <M> COMPONENT setOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
+		return addObservableListBinding(HtmlNode::getStyleClass, function, text);
+	}
+
 }

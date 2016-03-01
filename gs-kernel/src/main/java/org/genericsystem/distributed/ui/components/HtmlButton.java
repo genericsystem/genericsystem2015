@@ -3,9 +3,9 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlButton extends HtmlElement {
+public class HtmlButton extends HtmlElement<HtmlButton> {
 
-	public HtmlButton(HtmlElement parent) {
+	public HtmlButton(HtmlElement<?> parent) {
 		super(parent);
 	}
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 
 <script src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
 <LINK rel=stylesheet type="text/css" href="style.css">
@@ -74,21 +74,26 @@
 		
 		elt.setAttribute("id", id);
 		
-		if(tag=="button")
-			elt.onclick = function click(){sendMessageAction(elt)};
+
 	
 		elt.textContent = textContentValue;
-	
-		if(tag == "input")
-		{
+		
+		if(tag=="button" || tag=="a") {
+			elt.onclick = function click(){sendMessageAction(elt)};
+			if(tag=="a") {
+				elt.setAttribute("href", "#");
+			}
+		} else 	if(tag == "input") 	{
 			elt.setAttribute("type", message.type);	
 			if(message.type='text')
 			{
 				elt.value = textContentValue;
 				elt.onkeyup = function keyup(e){
 					var code = (e.keyCode ? e.keyCode : e.which)
-					if(code== 13)
-						sendMessageAction(elt)
+					if(code== 13) {
+						sendMessageAction(elt);
+						elt.value = "";
+					}
 					sendMessageKeyup(elt)
 				}
 			}
@@ -97,6 +102,7 @@
 				elt.onchange=function change(){
 					sendMessageCheckBoxValue(elt);
 				}
+				elt.checked = message["checked"];
 			}
 			
 		}
@@ -114,13 +120,34 @@
 //-------------------------------------------------------------
 	function updateElement(message){
 		var elt = document.getElementById(message.nodeId);
-		if(elt!=null)
-		{
-			if(elt.type = "input")
-				elt.value = message.textContent;	
-// 			}else
-				elt.textContent = message.textContent;
+		if(elt == null) 
+			return;
+		
+		updateText(message, elt);
+		updateClass(message, elt);
+	}
+	
+	function updateText(message, elt) {
+		if(typeof message.textContent === 'undefined')
+			return;
+		
+		if(elt.type == "input") {
+			elt.value = message.textContent;
+			return;
 		}
+		
+		elt.textContent = message.textContent;
+		
+	}
+	
+	function updateClass(message, elt) {
+		if (typeof message.styleClass === 'undefined')
+			return;
+		
+		elt.className = "";
+		message.styleClass.forEach(function(element, index, array) {
+			elt.className += " " + element;
+		});
 	}
 	
 //-------------------------------------------------------------
@@ -134,7 +161,8 @@
 	
 //-------------------------------------------------------------
 	function sendMessageKeyup(elt){
-		wsocket.send(JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value}));
+		var toto = JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value});
+		wsocket.send(toto);
 	}
 
 //-------------------------------------------------------------	

@@ -15,14 +15,14 @@ public class ModelContext {
 	private final ModelContext parent;
 	private final Model model;
 	private final List<ViewContext<?>> viewContexts = new ArrayList<>();
-	private Map<Element<?>, ModelContextList> children = new HashMap<Element<?>, ModelContextList>() {
+	private Map<Element<?, ?>, ModelContextList> children = new HashMap<Element<?, ?>, ModelContextList>() {
 		private static final long serialVersionUID = -2758395427732908902L;
 
 		@Override
 		public ModelContextList get(Object element) {
 			ModelContextList list = super.get(element);
 			if (list == null)
-				put((Element<?>) element, list = new ModelContextList((Element<?>) element));
+				put((Element<?, ?>) element, list = new ModelContextList((Element<?, ?>) element));
 			return list;
 		}
 	};
@@ -50,7 +50,7 @@ public class ModelContext {
 		return this.parent;
 	}
 
-	public ModelContextList getChildren(Element<?> childElement) {
+	public ModelContextList getChildren(Element<?, ?> childElement) {
 		return children.get(childElement);
 	}
 
@@ -88,10 +88,10 @@ public class ModelContext {
 
 	public class ModelContextList {
 
-		private Element<?> childElement;
+		private Element<?, ?> childElement;
 		private List<ModelContext> internal = new ArrayList<>();
 
-		public ModelContextList(Element<?> childElement) {
+		public ModelContextList(Element<?, ?> childElement) {
 			this.childElement = childElement;
 		}
 

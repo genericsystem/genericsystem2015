@@ -7,7 +7,7 @@ import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.ViewContext.RootViewContext;
 
-public class HtmlApplication extends HtmlElement {
+public class HtmlApplication extends HtmlElement<HtmlApplication> {
 
 	private final ServerWebSocket webSocket;
 	private final RootViewContext<HtmlNode> rootViewContext;

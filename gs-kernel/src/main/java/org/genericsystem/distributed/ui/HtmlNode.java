@@ -4,7 +4,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -40,7 +39,7 @@ public class HtmlNode {
 				JsonObject jsonObj = new JsonObject().put("msg_type", "U");
 				jsonObj.put("nodeId", id);
 				jsonObj.put("textContent", newValue);
-				System.out.println("change text::"+text);
+				System.out.println("change text::" + text);
 				GSBuffer bufferAdmin = new GSBuffer();
 				bufferAdmin.appendString(jsonObj.encode());
 				webSocket.write(bufferAdmin);
@@ -65,10 +64,10 @@ public class HtmlNode {
 		});
 	}
 
-	public Property<Boolean> getChecked(){
+	public Property<Boolean> getChecked() {
 		return new SimpleObjectProperty<>();
 	}
-	
+
 	public ObservableList<String> getStyleClass() {
 		return styleClass;
 	}
@@ -131,17 +130,17 @@ public class HtmlNode {
 
 				@Override
 				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//					JsonObject jsonObj = new JsonObject().put("msg_type", "U");
-//					jsonObj.put("nodeId", id);
-//					jsonObj.put("ckecked", newValue);
-//					GSBuffer bufferAdmin = new GSBuffer();
-//					bufferAdmin.appendString(jsonObj.encode());
-//					webSocket.write(bufferAdmin);
+					// JsonObject jsonObj = new JsonObject().put("msg_type", "U");
+					// jsonObj.put("nodeId", id);
+					// jsonObj.put("ckecked", newValue);
+					// GSBuffer bufferAdmin = new GSBuffer();
+					// bufferAdmin.appendString(jsonObj.encode());
+					// webSocket.write(bufferAdmin);
 					System.out.println("checked");
 				}
 			});
 		}
-		
+
 		@Override
 		public Property<Boolean> getChecked() {
 			return checked;
