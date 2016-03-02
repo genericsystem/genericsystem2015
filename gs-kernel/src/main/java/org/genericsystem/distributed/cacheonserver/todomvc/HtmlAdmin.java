@@ -4,7 +4,7 @@ import io.vertx.core.http.ServerWebSocket;
 
 import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
-import org.genericsystem.distributed.ui.components.HtmlApplication;
+import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlCheckBox;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
@@ -20,7 +20,7 @@ import org.genericsystem.distributed.ui.components.HtmlSpan;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
 import org.genericsystem.distributed.ui.components.HtmlUl;
 
-public class HtmlAdmin extends HtmlApplication {
+public class HtmlAdmin extends HtmlApp {
 
 	public HtmlAdmin(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
 		super(model, parentNode, webSocket);
