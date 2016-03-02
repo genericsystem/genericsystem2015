@@ -1,5 +1,7 @@
 package org.genericsystem.distributed.ui;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -38,6 +40,9 @@ public class Element<COMPONENT extends Element<COMPONENT, N>, N> {
 
 	protected void initChildren() {
 
+	}
+
+	public void sendMessage(JsonObject jsonObj) {
 	}
 
 	@SuppressWarnings("unchecked")

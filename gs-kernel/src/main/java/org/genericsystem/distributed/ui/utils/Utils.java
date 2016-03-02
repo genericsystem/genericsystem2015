@@ -1,6 +1,5 @@
 package org.genericsystem.distributed.ui.utils;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -14,12 +13,8 @@ import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 
-import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.Element;
-import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
-import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeCheckBox;
-import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeInput;
 
 public class Utils {
 	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<?, PARENTNODE> parent) {
@@ -40,26 +35,11 @@ public class Utils {
 
 			@Override
 			protected void doAdd(int index, Object element) {
+				HtmlNode htmlNode = ((HtmlNode) element);
 				JsonObject jsonObj = new JsonObject().put("msg_type", "A");
-				jsonObj.put("parentId", parentNodeJs.getId());
-				jsonObj.put("nodeId", ((HtmlNode) element).getId());
-				jsonObj.put("tagHtml", ((HtmlNode) element).getTag().get());
-				jsonObj.put("textContent", ((HtmlNode) element).getText().get());
-
-				if (((HtmlNode) element).getTag().get().equals("input")) {
-					jsonObj.put("type", ((HtmlNodeInput) element).getType());
-					if (((HtmlNodeInput) element).getType().equals("checkbox"))
-						jsonObj.put("checked", ((HtmlNodeCheckBox) element).getChecked().getValue());
-				}
-				JsonArray arrayJS = new JsonArray();
-				((HtmlNode) element).getStyleClass().forEach(clazz -> arrayJS.add(clazz));
-				jsonObj.put("styleClass", arrayJS);
-				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(jsonObj.encode());
-				if (parent instanceof HtmlElement)
-					((HtmlElement<?>) parent).getWebSocket().write(bufferAdmin);
-
-				childrenNode.add(((HtmlNode) element));
+				htmlNode.fillJsonAdd(parentNodeJs, jsonObj);
+				parent.sendMessage(jsonObj);
+				childrenNode.add(htmlNode);
 			}
 
 			@Override
@@ -70,12 +50,8 @@ public class Utils {
 			@Override
 			protected Object doRemove(int index) {
 				JsonObject jsonObj = new JsonObject().put("msg_type", "R");
-				jsonObj.put("nodeId", (childrenNode.get(index)).getId());
-				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(jsonObj.encode());
-				if (parent instanceof HtmlElement)
-					((HtmlElement) parent).getWebSocket().write(bufferAdmin);
-
+				childrenNode.get(index).fillJsonRemove(jsonObj);
+				parent.sendMessage(jsonObj);
 				return childrenNode.remove(index);
 			}
 		};

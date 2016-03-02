@@ -1,12 +1,14 @@
 package org.genericsystem.distributed.ui;
 
 import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.utils.Utils;
 
 public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT>> extends Element<COMPONENT, HtmlNode> {
@@ -38,6 +40,11 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT>> exte
 
 	public <M> COMPONENT setOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
 		return addObservableListBinding(HtmlNode::getStyleClass, function, text);
+	}
+
+	@Override
+	public void sendMessage(JsonObject jsonObj) {
+		getWebSocket().write(new GSBuffer().appendString(jsonObj.encode()));
 	}
 
 }

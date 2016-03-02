@@ -64,6 +64,20 @@ public class HtmlNode {
 		});
 	}
 
+	public void fillJsonAdd(HtmlNode parentNodeJs, JsonObject jsonObj) {
+		jsonObj.put("parentId", parentNodeJs.getId());
+		jsonObj.put("nodeId", id);
+		jsonObj.put("tagHtml", tag);
+		jsonObj.put("textContent", text);
+		JsonArray arrayJS = new JsonArray();
+		styleClass.forEach(clazz -> arrayJS.add(clazz));
+		jsonObj.put("styleClass", arrayJS);
+	}
+
+	public void fillJsonRemove(JsonObject jsonObj) {
+		jsonObj.put("nodeId", id);
+	}
+
 	public Property<Boolean> getChecked() {
 		return new SimpleObjectProperty<>();
 	}
@@ -119,6 +133,12 @@ public class HtmlNode {
 		public String getType() {
 			return type;
 		}
+
+		@Override
+		public void fillJsonAdd(HtmlNode parentNodeJs, JsonObject jsonObj) {
+			super.fillJsonAdd(parentNodeJs, jsonObj);
+			jsonObj.put("type", type);
+		}
 	}
 
 	public static class HtmlNodeCheckBox extends HtmlNodeInput {
@@ -144,6 +164,12 @@ public class HtmlNode {
 		@Override
 		public Property<Boolean> getChecked() {
 			return checked;
+		}
+
+		@Override
+		public void fillJsonAdd(HtmlNode parentNodeJs, JsonObject jsonObj) {
+			super.fillJsonAdd(parentNodeJs, jsonObj);
+			jsonObj.put("checked", checked.getValue());
 		}
 	}
 
