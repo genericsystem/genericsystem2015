@@ -29,7 +29,7 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((BasicEngine) getRoot());
+				return new Transaction((Engine) getRoot());
 			}
 
 			@Override

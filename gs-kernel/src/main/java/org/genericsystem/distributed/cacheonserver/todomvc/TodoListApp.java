@@ -4,7 +4,7 @@ import io.vertx.core.http.ServerWebSocket;
 
 import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
-import org.genericsystem.distributed.ui.components.HtmlApplication;
+import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlCheckBox;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
@@ -20,9 +20,9 @@ import org.genericsystem.distributed.ui.components.HtmlSpan;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
 import org.genericsystem.distributed.ui.components.HtmlUl;
 
-public class HtmlAdmin extends HtmlApplication {
+public class TodoListApp extends HtmlApp {
 
-	public HtmlAdmin(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
+	public TodoListApp(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
 		super(model, parentNode, webSocket);
 	}
 
@@ -73,21 +73,5 @@ public class HtmlAdmin extends HtmlApplication {
 				}
 			}
 		}
-
-		// new HtmlInputText(div).addBidirectionalBinding(HtmlNode::getText, TodoList::getName);
-		//
-		// new HtmlButton(div).addActionBinding(HtmlNode::getActionProperty, TodoList::create).addBoot(HtmlNode::getText, "Add");
-		//
-		// HtmlDiv todoList = (HtmlDiv) new HtmlDiv(this).forEach(TodoList::getFiltered);
-		// {
-		// new HtmlLabel(todoList).addBinding(HtmlNode::getText, Todo::getTodoString);
-		// new HtmlButton(todoList).addActionBinding(HtmlNode::getActionProperty, Todo::select).addBoot(HtmlNode::getText, "Select");
-		// new HtmlButton(todoList).addActionBinding(HtmlNode::getActionProperty, Todo::remove).addBoot(HtmlNode::getText, "Remove");
-		// }
-		//
-		// HtmlDiv selectionContext = (HtmlDiv) new HtmlDiv(this).select(TodoList::getSelection);
-		// {
-		// new HtmlLabel(selectionContext).setStyleClass("lab2").setStyleClass("lab").addBinding(HtmlNode::getText, Todo::getTodoString);
-		// }
 	}
 }
