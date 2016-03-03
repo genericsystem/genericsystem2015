@@ -15,7 +15,7 @@ public class MetaBinding<N, T> {
 		this.binder = binder;
 	}
 
-	public void init(ViewContext<N> viewContext, Element<?, ?> childElement) {
+	public void init(ViewContext<N> viewContext, Element<?> childElement) {
 		binder.init(applyOnModel, viewContext, childElement);
 	}
 

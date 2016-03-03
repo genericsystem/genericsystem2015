@@ -33,17 +33,15 @@ public class HtmlNode {
 	public HtmlNode(ServerWebSocket webSocket) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.webSocket = webSocket;
-		text.addListener(new ChangeListener<String>() {
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				JsonObject jsonObj = new JsonObject().put("msg_type", "U");
-				jsonObj.put("nodeId", id);
-				jsonObj.put("textContent", newValue);
-				System.out.println("change text::" + text);
-				GSBuffer bufferAdmin = new GSBuffer();
-				bufferAdmin.appendString(jsonObj.encode());
-				webSocket.write(bufferAdmin);
-			}
+
+		text.addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+			JsonObject jsonObj = new JsonObject().put("msg_type", "U");
+			jsonObj.put("nodeId", id);
+			jsonObj.put("textContent", newValue);
+			System.out.println("change text::" + text);
+			GSBuffer bufferAdmin = new GSBuffer();
+			bufferAdmin.appendString(jsonObj.encode());
+			webSocket.write(bufferAdmin);
 		});
 
 		styleClass.addListener(new ListChangeListener<String>() {
@@ -67,8 +65,8 @@ public class HtmlNode {
 	public void fillJsonAdd(HtmlNode parentNodeJs, JsonObject jsonObj) {
 		jsonObj.put("parentId", parentNodeJs.getId());
 		jsonObj.put("nodeId", id);
-		jsonObj.put("tagHtml", tag);
-		jsonObj.put("textContent", text);
+		jsonObj.put("tagHtml", tag.getValue());
+		jsonObj.put("textContent", text.getValue());
 		JsonArray arrayJS = new JsonArray();
 		styleClass.forEach(clazz -> arrayJS.add(clazz));
 		jsonObj.put("styleClass", arrayJS);

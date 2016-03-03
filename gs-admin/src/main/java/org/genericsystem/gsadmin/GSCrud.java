@@ -1,9 +1,9 @@
 package org.genericsystem.gsadmin;
 
+import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.gsadmin.GSTable.GSEditTable;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTableEngine;
 import org.genericsystem.gsadmin.GSTable.GSTableCellTableGeneric;
-import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSComboBox;
 import org.genericsystem.ui.components.GSHBox;

@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.VBox;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 
 public class GSVBox extends GSPane<GSVBox, VBox> {
 
@@ -22,8 +22,4 @@ public class GSVBox extends GSPane<GSVBox, VBox> {
 		return this;
 	}
 
-	// public GSVBox setFillWidth() {
-	// addBoot(VBox::fillWidthProperty, true);
-	// return this;
-	// }
 }

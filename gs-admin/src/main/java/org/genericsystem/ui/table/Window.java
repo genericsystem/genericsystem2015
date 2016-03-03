@@ -4,7 +4,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
 
-import org.genericsystem.ui.Model;
+import org.genericsystem.distributed.ui.Model;
 
 public abstract class Window extends Model {
 	private final ObservableValue<Number> width;

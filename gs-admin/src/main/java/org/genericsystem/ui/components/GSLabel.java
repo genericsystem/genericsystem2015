@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 
 public class GSLabel extends GSRegion<GSLabel, Label> {
 	public GSLabel(Element<?> parent, String text) {
@@ -27,5 +27,5 @@ public class GSLabel extends GSRegion<GSLabel, Label> {
 		addBinding(Label::textProperty, observableText);
 		return this;
 	}
-	
+
 }

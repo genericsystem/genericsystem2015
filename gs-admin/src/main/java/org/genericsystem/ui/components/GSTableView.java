@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 
 public class GSTableView extends GSRegion<GSTableView, TableView> {
 

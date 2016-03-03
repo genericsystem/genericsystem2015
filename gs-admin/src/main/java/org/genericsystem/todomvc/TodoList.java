@@ -15,7 +15,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
-import org.genericsystem.ui.Model;
+import org.genericsystem.distributed.ui.Model;
 
 public class TodoList extends Model {
 

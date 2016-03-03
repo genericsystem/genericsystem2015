@@ -17,7 +17,7 @@ import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.HtmlNode;
 
 public class Utils {
-	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<?, PARENTNODE> parent) {
+	static public <PARENTNODE> Function<PARENTNODE, ObservableList<?>> getClassChildren(Element<PARENTNODE> parent) {
 		Function<Pane, ObservableList<?>> paneChildren = Pane::getChildren;
 		Function<Group, ObservableList<?>> groupChildren = Group::getChildren;
 		Function<HtmlNode, List<?>> nodeJsChildren = parentNodeJs -> new ModifiableObservableListBase() {

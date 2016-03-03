@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -19,7 +20,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-import org.genericsystem.ui.Element;
+
+import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.ui.components.GSTableButtonColumn.ActionTableColumn;
 
 public class GSTableButtonColumn<SUPERMODEL, T> extends Element<ActionTableColumn> {

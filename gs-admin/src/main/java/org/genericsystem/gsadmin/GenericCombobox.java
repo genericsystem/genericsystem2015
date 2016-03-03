@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.ui.Model;
+import org.genericsystem.distributed.ui.Model;
 
 public class GenericCombobox extends Model {
 

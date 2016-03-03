@@ -6,7 +6,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.genericsystem.ui.Model;
+
+import org.genericsystem.distributed.ui.Model;
 
 public class TodoTableList extends Model {
 

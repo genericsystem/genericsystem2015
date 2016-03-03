@@ -92,9 +92,9 @@
 					var code = (e.keyCode ? e.keyCode : e.which)
 					if(code== 13) {
 						sendMessageAction(elt);
-						elt.value = "";
+					} else {
+						sendMessageKeyup(elt)
 					}
-					sendMessageKeyup(elt)
 				}
 			}
 			
@@ -131,7 +131,7 @@
 		if(typeof message.textContent === 'undefined')
 			return;
 		
-		if(elt.type == "input") {
+		if(elt.tagName == "INPUT" && elt.getAttribute("type") == "text") {
 			elt.value = message.textContent;
 			return;
 		}

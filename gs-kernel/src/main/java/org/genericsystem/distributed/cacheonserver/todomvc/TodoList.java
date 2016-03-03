@@ -72,6 +72,7 @@ public class TodoList extends Model {
 
 	public void create() {
 		todos.add(new Todo(this, getName().getValue()));
+		name.setValue(null);
 	}
 
 	public void showAll() {

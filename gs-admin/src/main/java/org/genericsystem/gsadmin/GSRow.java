@@ -1,12 +1,11 @@
 package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.gsadmin.GSTable.GSEditTableCell;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
-import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;
@@ -51,7 +50,7 @@ public abstract class GSRow extends GSHBox {
 	}
 
 	protected Element<?> createLastCell(Element<?> parent) {
-		return new GSButton(parent, Cell<String>::getObservableModel).setAction(Cell<Generic>::delete).addBoot(Button::paddingProperty, new Insets(2, 2, 2, 2));
+		return new GSButton(parent, Cell<String>::getObservableModel).setAction(Cell<Generic>::delete).setPadding(new Insets(2, 2, 2, 2));
 	}
 
 	public static class GSTextCellRow extends GSRow {
@@ -125,7 +124,7 @@ public abstract class GSRow extends GSHBox {
 		protected Element<?> createFirstCell(Element<?> parent) {
 			GSHBox cellPanel = new GSHBox(parent).setSpacing(2);
 			new GSTextField(cellPanel, Cell<String>::getValue).bindTextProperty(Cell<String>::getNewValModel);
-			new GSButton(cellPanel, "Update").setAction(Cell<Generic>::update).addBoot(Button::paddingProperty, new Insets(5, 2, 5, 2));
+			new GSButton(cellPanel, "Update").setAction(Cell<Generic>::update).setPadding(new Insets(5, 2, 5, 2));
 			return cellPanel;
 		}
 	}

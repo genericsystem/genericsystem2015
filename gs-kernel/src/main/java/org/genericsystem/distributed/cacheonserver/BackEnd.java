@@ -38,12 +38,12 @@ public class BackEnd extends AbstractBackEnd<Engine> {
 			public Handler<Buffer> getHandler(Engine root, ServerWebSocket socket) {
 				TodoList todolist = new TodoList();
 				HtmlNode parent = new HtmlNode(socket);
-				TodoListApp jsAdmin = new TodoListApp(todolist, parent, socket);
+				TodoListApp todoListApp = new TodoListApp(todolist, parent, socket);
 				return buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					String message = gsBuffer.getString(0, gsBuffer.length());
 					JsonObject obj = new JsonObject(message);
-					HtmlNode node = jsAdmin.getRootViewContext().getNodeById().get(obj.getString("nodeId"));
+					HtmlNode node = todoListApp.getRootViewContext().getNodeById().get(obj.getString("nodeId"));
 					if (node != null) {
 						if (obj.getString("msg_type").equals("A"))
 							node.getActionProperty().get().handle(new ActionEvent());

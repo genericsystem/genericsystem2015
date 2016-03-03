@@ -6,7 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 
 public class GSComboBox<G> extends GSRegion<GSComboBox<G>, ComboBox> {
 	public GSComboBox(Element<?> parent) {

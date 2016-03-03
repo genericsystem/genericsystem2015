@@ -20,7 +20,8 @@ public class HtmlHyperLink extends HtmlElement<HtmlHyperLink> {
 	}
 
 	public <M, T extends Event> HtmlHyperLink setAction(Consumer<M> consumer) {
-		return addActionBinding(HtmlNode::getActionProperty, consumer);
+		addActionBinding(HtmlNode::getActionProperty, consumer);
+		return this;
 	}
 
 	@Override

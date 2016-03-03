@@ -1,6 +1,7 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -8,8 +9,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
-import org.genericsystem.ui.Element;
-import org.genericsystem.ui.Model;
+
+import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.distributed.ui.Model;
 
 public class GSTableColumn<T> extends Element<TableColumn> {
 

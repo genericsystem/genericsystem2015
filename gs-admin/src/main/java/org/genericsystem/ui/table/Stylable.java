@@ -4,7 +4,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.ui.Model;
+import org.genericsystem.distributed.ui.Model;
 
 public class Stylable extends Model {
 	private final ObservableValue<String> styleClass;

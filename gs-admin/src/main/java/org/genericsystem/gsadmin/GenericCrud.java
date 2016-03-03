@@ -11,9 +11,9 @@ import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.ui.utils.Transformation;
 import org.genericsystem.ui.table.Crud;
 import org.genericsystem.ui.table.Table;
-import org.genericsystem.ui.utils.Transformation;
 
 public class GenericCrud extends Crud {
 

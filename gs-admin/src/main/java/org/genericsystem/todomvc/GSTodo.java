@@ -1,6 +1,6 @@
 package org.genericsystem.todomvc;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSCheckBox;
 import org.genericsystem.ui.components.GSHBox;
@@ -15,7 +15,7 @@ public class GSTodo extends GSHBox {
 	@Override
 	protected void initChildren() {
 		new GSCheckBox(this, Todo::getCompleted);
-		new GSLabel(this,Todo::getTodoString).setPrefWidth(141).setOptionalStyleClass(Todo::getCompleted, "completed");
+		new GSLabel(this, Todo::getTodoString).setPrefWidth(141).setOptionalStyleClass(Todo::getCompleted, "completed");
 		new GSButton(this, "select").setAction(Todo::select).setPrefWidth(90);
 		new GSButton(this, "remove").setAction(Todo::remove).setPrefWidth(90);
 	}

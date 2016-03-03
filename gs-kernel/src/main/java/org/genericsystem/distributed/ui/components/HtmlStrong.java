@@ -15,5 +15,4 @@ public class HtmlStrong extends HtmlElement<HtmlStrong> {
 		strong.getTag().set("strong");
 		return strong;
 	}
-
 }

@@ -12,13 +12,13 @@ import org.genericsystem.distributed.ui.ModelContext.RootModelContext;
 public class ViewContext<N> {
 
 	private final ViewContext<?> parent;
-	private final Element<?, N> template;
+	private final Element<N> template;
 	private final N node;
 	private ModelContext modelContext;
 
 	private final ObservableList<N> nodeChildren;
 
-	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<?, N> template, N node) {
+	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
 		this.parent = parent;
 		this.template = template;
 		assert node != null;
@@ -32,7 +32,7 @@ public class ViewContext<N> {
 		return modelContext;
 	}
 
-	public <SUBNODE> ViewContext<SUBNODE> createChildContext(ModelContext childModelContext, Element<?, SUBNODE> template) {
+	public <SUBNODE> ViewContext<SUBNODE> createChildContext(ModelContext childModelContext, Element<SUBNODE> template) {
 		return new ViewContext<SUBNODE>(this, childModelContext, template, template.createNode(getNode()));
 	}
 
@@ -52,7 +52,7 @@ public class ViewContext<N> {
 				getRootViewContext().getNodeById().put(((HtmlNode) node).getId(), (HtmlNode) node);
 			sizeByElement.put(template, indexInChildren);
 		}
-		for (Element<?, N> childElement : template.<N> getChildren()) {
+		for (Element<N> childElement : template.<N> getChildren()) {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(this, childElement);
 			if (childElement.metaBindings.isEmpty())
@@ -78,14 +78,14 @@ public class ViewContext<N> {
 		return node;
 	}
 
-	private Map<Element<?, ?>, Integer> sizeByElement = new IdentityHashMap<Element<?, ?>, Integer>() {
+	private Map<Element<?>, Integer> sizeByElement = new IdentityHashMap<Element<?>, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
 		public Integer get(Object key) {
 			Integer size = super.get(key);
 			if (size == null)
-				put((Element<?, ?>) key, size = 0);
+				put((Element<?>) key, size = 0);
 			return size;
 		};
 	};
@@ -95,11 +95,11 @@ public class ViewContext<N> {
 		nodeChildren.remove(getNode());
 	}
 
-	private void incrementSize(Element<?, ?> child) {
+	private void incrementSize(Element<?> child) {
 		sizeByElement.put(child, sizeByElement.get(child) + 1);
 	}
 
-	private void decrementSize(Element<?, ?> child) {
+	private void decrementSize(Element<?> child) {
 		int size = sizeByElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
@@ -108,9 +108,9 @@ public class ViewContext<N> {
 			sizeByElement.put(child, size);
 	}
 
-	private int computeIndex(Element<?, ?> childElement) {
+	private int computeIndex(Element<?> childElement) {
 		int indexInChildren = 0;
-		for (Element<?, ?> child : template.getChildren()) {
+		for (Element<?> child : template.getChildren()) {
 			indexInChildren += sizeByElement.get(child);
 			if (child == childElement)
 				break;
@@ -121,7 +121,7 @@ public class ViewContext<N> {
 	public static class RootViewContext<N> extends ViewContext<N> {
 		private Map<String, HtmlNode> nodeById;
 
-		public RootViewContext(Model model, Element<?, N> template, N node) {
+		public RootViewContext(Model model, Element<N> template, N node) {
 			super(null, new RootModelContext(model), template, node);
 		}
 

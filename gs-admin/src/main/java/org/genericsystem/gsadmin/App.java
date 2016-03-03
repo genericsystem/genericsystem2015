@@ -15,8 +15,8 @@ import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.Engine;
 import org.genericsystem.distributed.cacheonclient.BackEnd;
+import org.genericsystem.distributed.cacheonclient.Engine;
 import org.genericsystem.kernel.Statics;
 
 public class App extends Application {

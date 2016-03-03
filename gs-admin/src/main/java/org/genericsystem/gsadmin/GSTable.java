@@ -1,13 +1,11 @@
 package org.genericsystem.gsadmin;
 
-import javafx.scene.layout.HBox;
-
+import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.gsadmin.GSRow.GSEditableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSEditableCellTableRow;
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellFirstRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
-import org.genericsystem.ui.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;
@@ -53,8 +51,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return (GSHBox) new GSTextCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight)
-					.addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
+			return new GSTextCellRow(parent).forEach(Table::getElements).setStyleClass(Row::getStyleClass).setMinHeight(Row::getRowHeight).setMaxHeight(Row::getRowHeight).setPrefHeight(Row::getRowHeight).addOnClick(GenericRow::selectRowGenericTable);
 		}
 	}
 
@@ -66,7 +63,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return (GSHBox) super.createRows(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowEngineTable);
+			return super.createRows(parent).addOnClick(GenericRow::selectRowEngineTable);
 		}
 	}
 
@@ -78,7 +75,7 @@ public abstract class GSTable extends GSVBox {
 
 		@Override
 		public GSHBox createRows(Element<?> parent) {
-			return (GSHBox) super.createRows(parent).addActionBinding(HBox::onMouseClickedProperty, GenericRow::selectRowGenericTable);
+			return super.createRows(parent).addOnClick(GenericRow::selectRowGenericTable);
 		}
 	}
 

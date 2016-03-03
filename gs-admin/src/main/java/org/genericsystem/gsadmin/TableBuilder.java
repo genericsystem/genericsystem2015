@@ -10,12 +10,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.ui.utils.Transformation;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Stylable.TableStyle;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Table.FirstColumnTable;
-import org.genericsystem.ui.utils.Transformation;
 
 public abstract class TableBuilder<ITEM, COL, T> {
 
