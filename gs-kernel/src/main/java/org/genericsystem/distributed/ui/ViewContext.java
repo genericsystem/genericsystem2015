@@ -2,10 +2,9 @@ package org.genericsystem.distributed.ui;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import javafx.collections.ObservableList;
 
 import org.genericsystem.distributed.ui.ModelContext.RootModelContext;
 
@@ -16,7 +15,7 @@ public class ViewContext<N> {
 	private final N node;
 	private ModelContext modelContext;
 
-	private final ObservableList<N> nodeChildren;
+	private final List<N> nodeChildren;
 
 	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
 		this.parent = parent;
@@ -24,7 +23,7 @@ public class ViewContext<N> {
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
-		nodeChildren = this.parent != null ? (ObservableList<N>) ((Function) this.template.getGraphicChildren).apply(parent.node) : null;
+		nodeChildren = this.parent != null ? (List<N>) ((Function) this.template.getGraphicChildren).apply(parent.node) : null;
 		init();
 	}
 

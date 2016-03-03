@@ -19,7 +19,7 @@ public class Element<N> {
 	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
-	final Function<?, ObservableList<?>> getGraphicChildren;
+	final Function<?, List<?>> getGraphicChildren;
 	private List<Boot<N>> boots = new ArrayList<>();
 
 	@Override
@@ -27,7 +27,7 @@ public class Element<N> {
 		return "Element<" + nodeClass.getSimpleName() + ">";
 	}
 
-	public <PARENTNODE> Element(Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	public <PARENTNODE> Element(Class<N> nodeClass, Function<PARENTNODE, List<?>> getGraphicChildren) {
 		this(null, nodeClass, getGraphicChildren);
 	}
 
@@ -36,7 +36,7 @@ public class Element<N> {
 		this(parent, nodeClass, Utils.getClassChildren(parent));
 	}
 
-	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, List<?>> getGraphicChildren) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
 		this.getGraphicChildren = getGraphicChildren;
