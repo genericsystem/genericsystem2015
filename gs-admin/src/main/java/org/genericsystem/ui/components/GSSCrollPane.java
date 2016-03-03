@@ -1,9 +1,9 @@
 package org.genericsystem.ui.components;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 
 import org.genericsystem.distributed.ui.Element;
@@ -14,7 +14,7 @@ public class GSSCrollPane extends Element<ScrollPane> {
 		super(parent, ScrollPane.class);
 	}
 
-	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent, Function<PARENTNODE, List<?>> getGraphicChildren) {
 		super(parent, ScrollPane.class, getGraphicChildren);
 	}
 

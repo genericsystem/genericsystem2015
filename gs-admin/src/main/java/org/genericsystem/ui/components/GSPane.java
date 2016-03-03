@@ -1,9 +1,9 @@
 package org.genericsystem.ui.components;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
 import org.genericsystem.distributed.ui.Element;
@@ -15,7 +15,7 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 		super(parent, paneClass);
 	}
 
-	public <PARENTNODE> GSPane(Element<?> parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	public <PARENTNODE> GSPane(Element<?> parent, Class<N> paneClass, Function<? super PARENTNODE, List<?>> getGraphicChildren) {
 		super(parent, paneClass, getGraphicChildren);
 	}
 

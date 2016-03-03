@@ -1,5 +1,6 @@
 package org.genericsystem.ui.components;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
@@ -16,7 +17,7 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		super(parent, class1);
 	}
 
-	public <PARENTNODE> GSRegion(Element parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
+	public <PARENTNODE> GSRegion(Element parent, Class<N> paneClass, Function<? super PARENTNODE, List<?>> getGraphicChildren) {
 		super(parent, paneClass, getGraphicChildren);
 	}
 
