@@ -20,9 +20,9 @@ import org.genericsystem.distributed.ui.components.HtmlSpan;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
 import org.genericsystem.distributed.ui.components.HtmlUl;
 
-public class TodoListApp extends HtmlApp {
+public class TodoApp extends HtmlApp {
 
-	public TodoListApp(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
+	public TodoApp(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
 		super(model, parentNode, webSocket);
 	}
 
