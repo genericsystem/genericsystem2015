@@ -45,7 +45,7 @@ public class Utils {
 
 			@Override
 			public HtmlNode set(int index, HtmlNode element) {
-				return childrenNode.set(index, element);
+				return childrenNode.set(index, (element));
 			}
 
 			@Override
