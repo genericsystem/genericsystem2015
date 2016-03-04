@@ -2,10 +2,8 @@ package org.genericsystem.ui.components;
 
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
-
 import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.Model;
 

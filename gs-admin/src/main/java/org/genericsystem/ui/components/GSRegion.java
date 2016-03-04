@@ -2,12 +2,10 @@ package org.genericsystem.ui.components;
 
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.layout.Region;
-
 import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.Model;
 

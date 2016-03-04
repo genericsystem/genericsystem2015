@@ -7,6 +7,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.genericsystem.distributed.GSBuffer;
+import org.genericsystem.distributed.ui.utils.Utils;
 
 public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>, NODE extends HtmlNode> extends Element<NODE> {
 
@@ -14,8 +15,8 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 		super(nodeClass, HtmlNode::getChildrenNode);
 	}
 
-	protected HtmlElement(HtmlElement<?, ?> parent, Class<NODE> nodeClass) {
-		super(parent, nodeClass);
+	protected <PARENTNODE extends HtmlNode> HtmlElement(Element<PARENTNODE> parent, Class<NODE> nodeClass) {
+		super(parent, nodeClass, Utils.getHtmlChildren(parent));
 	}
 
 	public ServerWebSocket getWebSocket() {

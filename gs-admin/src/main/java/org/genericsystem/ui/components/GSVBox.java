@@ -2,9 +2,7 @@ package org.genericsystem.ui.components;
 
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.scene.layout.VBox;
-
 import org.genericsystem.distributed.ui.Element;
 
 public class GSVBox extends GSPane<GSVBox, VBox> {

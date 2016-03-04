@@ -17,7 +17,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import org.genericsystem.distributed.GSBuffer;
 
 public class HtmlNode {
@@ -39,7 +38,6 @@ public class HtmlNode {
 			JsonObject jsonObj = new JsonObject().put("msg_type", "U");
 			jsonObj.put("nodeId", id);
 			jsonObj.put("textContent", newValue);
-			// System.out.println("change text::" + text);
 			GSBuffer bufferAdmin = new GSBuffer();
 			bufferAdmin.appendString(jsonObj.encode());
 			webSocket.write(bufferAdmin);
