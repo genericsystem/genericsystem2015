@@ -3,17 +3,15 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlH1 extends HtmlElement<HtmlH1> {
+public class HtmlH1 extends HtmlElement<HtmlH1, HtmlNode> {
 
-	public HtmlH1(HtmlElement<?> parent) {
-		super(parent);
+	public HtmlH1(HtmlElement<?, ?> parent) {
+		super(parent, HtmlNode.class);
 	}
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode h1 = new HtmlNode(getWebSocket());
-		h1.getTag().set("h1");
-		return h1;
+		return new HtmlNode(getWebSocket(), "h1");
 	}
 
 }

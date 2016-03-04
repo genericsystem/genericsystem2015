@@ -3,17 +3,15 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlLabel extends HtmlElement<HtmlLabel> {
+public class HtmlLabel extends HtmlElement<HtmlLabel, HtmlNode> {
 
-	public HtmlLabel(HtmlElement<?> parent) {
-		super(parent);
+	public HtmlLabel(HtmlElement<?, ?> parent) {
+		super(parent, HtmlNode.class);
 	}
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode label = new HtmlNode(getWebSocket());
-		label.getTag().set("label");
-		return label;
+		return new HtmlNode(getWebSocket(), "label");
 	}
 
 }

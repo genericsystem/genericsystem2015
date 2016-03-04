@@ -10,8 +10,8 @@ import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.WebSocketsServer;
-import org.genericsystem.distributed.cacheonserver.todomvc.TodoList;
 import org.genericsystem.distributed.cacheonserver.todomvc.TodoApp;
+import org.genericsystem.distributed.cacheonserver.todomvc.TodoList;
 import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeCheckBox;
 import org.genericsystem.kernel.Engine;
@@ -37,7 +37,7 @@ public class BackEnd extends AbstractBackEnd<Engine> {
 			@Override
 			public Handler<Buffer> getHandler(Engine root, ServerWebSocket socket) {
 				TodoList todolist = new TodoList();
-				HtmlNode parent = new HtmlNode(socket);
+				HtmlNode parent = new HtmlNode(socket, "div");
 				TodoApp todoListApp = new TodoApp(todolist, parent, socket);
 				return buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);

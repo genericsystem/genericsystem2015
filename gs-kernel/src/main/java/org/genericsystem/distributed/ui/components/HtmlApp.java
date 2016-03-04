@@ -7,13 +7,13 @@ import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.ViewContext.RootViewContext;
 
-public class HtmlApp extends HtmlElement<HtmlApp> {
+public class HtmlApp extends HtmlElement<HtmlApp, HtmlNode> {
 
 	private final ServerWebSocket webSocket;
 	private final RootViewContext<HtmlNode> rootViewContext;
 
 	public HtmlApp(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
-		super(HtmlNode.class);
+		super(null, HtmlNode.class);
 		this.webSocket = webSocket;
 		initHtmlChildren();
 		rootViewContext = new RootViewContext<>(model, this, parentNode);

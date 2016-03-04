@@ -6,17 +6,15 @@ import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeInput;
 
-public class HtmlInputText extends HtmlElement<HtmlInputText> {
+public class HtmlInputText extends HtmlElement<HtmlInputText, HtmlNode> {
 
-	public HtmlInputText(HtmlElement<?> parent) {
-		super(parent);
+	public HtmlInputText(HtmlElement<?, ?> parent) {
+		super(parent, HtmlNode.class);
 	}
 
 	@Override
 	protected HtmlNodeInput createNode(Object parent) {
-		HtmlNodeInput input = new HtmlNodeInput(getWebSocket(), "text");
-		input.getTag().set("input");
-		return input;
+		return new HtmlNodeInput(getWebSocket());
 	}
 
 	public <M> HtmlInputText setAction(Consumer<M> applyOnModel) {

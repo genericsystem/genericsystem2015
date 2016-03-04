@@ -5,17 +5,15 @@ import java.util.function.Consumer;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlButton extends HtmlElement<HtmlButton> {
+public class HtmlButton extends HtmlElement<HtmlButton, HtmlNode> {
 
-	public HtmlButton(HtmlElement<?> parent) {
-		super(parent);
+	public HtmlButton(HtmlElement<?, ?> parent) {
+		super(parent, HtmlNode.class);
 	}
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode button = new HtmlNode(getWebSocket());
-		button.getTag().set("button");
-		return button;
+		return new HtmlNode(getWebSocket(), "button");
 	}
 
 	public <M> HtmlButton setAction(Consumer<M> applyOnModel) {

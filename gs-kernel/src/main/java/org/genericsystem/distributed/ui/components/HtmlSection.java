@@ -3,16 +3,14 @@ package org.genericsystem.distributed.ui.components;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 
-public class HtmlSection extends HtmlElement<HtmlSection> {
+public class HtmlSection extends HtmlElement<HtmlSection, HtmlNode> {
 
-	public HtmlSection(HtmlElement<?> parent) {
-		super(parent);
+	public HtmlSection(HtmlElement<?, ?> parent) {
+		super(parent, HtmlNode.class);
 	}
 
 	@Override
 	protected HtmlNode createNode(Object parent) {
-		HtmlNode section = new HtmlNode(getWebSocket());
-		section.getTag().set("section");
-		return section;
+		return new HtmlNode(getWebSocket(), "section");
 	}
 }

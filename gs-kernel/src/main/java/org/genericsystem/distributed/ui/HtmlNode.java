@@ -23,22 +23,23 @@ import org.genericsystem.distributed.GSBuffer;
 public class HtmlNode {
 	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
 	protected final String id;
-	protected StringProperty tag = new SimpleStringProperty();
+	private final String tag;
 	protected StringProperty text = new SimpleStringProperty();
 	private final ServerWebSocket webSocket;
 	private ObservableList<HtmlNode> childrenNode = FXCollections.emptyObservableList();
 	private StringProperty style = new SimpleStringProperty("label");
 	private ObservableList<String> styleClass = FXCollections.observableArrayList();
 
-	public HtmlNode(ServerWebSocket webSocket) {
+	public HtmlNode(ServerWebSocket webSocket, String tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.webSocket = webSocket;
+		this.tag = tag;
 
 		text.addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
 			JsonObject jsonObj = new JsonObject().put("msg_type", "U");
 			jsonObj.put("nodeId", id);
 			jsonObj.put("textContent", newValue);
-			System.out.println("change text::" + text);
+			// System.out.println("change text::" + text);
 			GSBuffer bufferAdmin = new GSBuffer();
 			bufferAdmin.appendString(jsonObj.encode());
 			webSocket.write(bufferAdmin);
@@ -65,7 +66,7 @@ public class HtmlNode {
 	public void fillJsonAdd(HtmlNode parentNodeJs, JsonObject jsonObj) {
 		jsonObj.put("parentId", parentNodeJs.getId());
 		jsonObj.put("nodeId", id);
-		jsonObj.put("tagHtml", tag.getValue());
+		jsonObj.put("tagHtml", tag);
 		jsonObj.put("textContent", text.getValue());
 		JsonArray arrayJS = new JsonArray();
 		styleClass.forEach(clazz -> arrayJS.add(clazz));
@@ -74,10 +75,6 @@ public class HtmlNode {
 
 	public void fillJsonRemove(JsonObject jsonObj) {
 		jsonObj.put("nodeId", id);
-	}
-
-	public Property<Boolean> getChecked() {
-		return new SimpleObjectProperty<>();
 	}
 
 	public ObservableList<String> getStyleClass() {
@@ -112,19 +109,20 @@ public class HtmlNode {
 		return id;
 	}
 
-	public StringProperty getTag() {
+	public String getTag() {
 		return tag;
-	}
-
-	public void setTag(String tag) {
-		this.tag.set(tag);
 	}
 
 	public static class HtmlNodeInput extends HtmlNode {
 		private String type;
 
+		public HtmlNodeInput(ServerWebSocket webSocket) {
+			super(webSocket, "input");
+			this.type = "text";
+		}
+
 		public HtmlNodeInput(ServerWebSocket webSocket, String type) {
-			super(webSocket);
+			super(webSocket, "input");
 			this.type = type;
 		}
 
@@ -159,7 +157,6 @@ public class HtmlNode {
 			});
 		}
 
-		@Override
 		public Property<Boolean> getChecked() {
 			return checked;
 		}
