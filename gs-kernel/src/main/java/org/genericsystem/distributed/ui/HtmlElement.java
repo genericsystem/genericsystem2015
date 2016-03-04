@@ -2,23 +2,20 @@ package org.genericsystem.distributed.ui;
 
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.distributed.GSBuffer;
 
 public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>, NODE extends HtmlNode> extends Element<NODE> {
 
-	// public HtmlElement(HtmlElement<?, ?> parent) {
-	// super(parent, HtmlNode.class, Utils.getClassChildren(parent));
-	// }
-
-	public HtmlElement(HtmlElement<?, ?> parent, Class<NODE> nodeClass) {
+	protected HtmlElement(Class<NODE> nodeClass) {
 		super(nodeClass, HtmlNode::getChildrenNode);
+	}
+
+	protected HtmlElement(HtmlElement<?, ?> parent, Class<NODE> nodeClass) {
+		super(parent, nodeClass);
 	}
 
 	public ServerWebSocket getWebSocket() {

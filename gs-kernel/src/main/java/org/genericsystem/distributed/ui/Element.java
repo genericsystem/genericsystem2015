@@ -1,16 +1,13 @@
 package org.genericsystem.distributed.ui;
 
 import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.distributed.ui.utils.Utils;
 
 public class Element<N> {
@@ -27,7 +24,7 @@ public class Element<N> {
 		return "Element<" + nodeClass.getSimpleName() + ">";
 	}
 
-	public <PARENTNODE> Element(Class<N> nodeClass, Function<PARENTNODE, List<?>> getGraphicChildren) {
+	protected <PARENTNODE> Element(Class<N> nodeClass, Function<PARENTNODE, List<?>> getGraphicChildren) {
 		this(null, nodeClass, getGraphicChildren);
 	}
 
@@ -127,6 +124,5 @@ public class Element<N> {
 		return parent;
 	}
 
-	public void sendMessage(JsonObject jsonObj) {
-	}
+	public void sendMessage(JsonObject jsonObj) {}
 }

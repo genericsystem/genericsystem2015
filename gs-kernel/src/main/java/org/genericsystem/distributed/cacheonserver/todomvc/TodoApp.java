@@ -1,8 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.todomvc;
 
 import io.vertx.core.http.ServerWebSocket;
-
-import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlButton;
@@ -22,8 +20,8 @@ import org.genericsystem.distributed.ui.components.HtmlUl;
 
 public class TodoApp extends HtmlApp {
 
-	public TodoApp(Model model, HtmlNode parentNode, ServerWebSocket webSocket) {
-		super(model, parentNode, webSocket);
+	public TodoApp(Model model, ServerWebSocket webSocket) {
+		super(model, webSocket);
 	}
 
 	@Override

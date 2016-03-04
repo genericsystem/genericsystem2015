@@ -1,7 +1,6 @@
 package org.genericsystem.kernel;
 
 import java.util.Collections;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
@@ -10,7 +9,7 @@ import org.genericsystem.defaults.DefaultCache;
 
 public class Engine extends AbstractServer {
 
-	private ThreadLocal<Long> contextIds = new ThreadLocal<>();
+	// private ThreadLocal<Long> contextIds = new ThreadLocal<>();
 
 	// private ConcurrentHashMap<Long, AbstractCache> map;
 
@@ -219,36 +218,19 @@ public class Engine extends AbstractServer {
 
 	@Override
 	public HeavyCache getCurrentCache() {
-		// if (getRoot().isInitialized())
-		// assert contextIds.get() != null : contextIds.get();
-		// return (HeavyCache) (getRoot().isInitialized() ? getCurrentCache(contextIds.get()) : super.getCurrentCache());
 		return (HeavyCache) super.getCurrentCache();
 	}
 
 	@Override
 	protected AbstractCache start(AbstractCache context) {
-		if (!isInitialized()) {
-			// System.out.println("system context is ok");
-			super.start(context);
-			return context;
-		}
-		long cacheId = ((HeavyCache) context).getCacheId();
-		// map.put(cacheId, context);
-		contextIds.set(cacheId);
+		super.start(context);
 		assert getCurrentCache() == context;
-		// System.out.println("context ok cacheId : " + cacheId + " ts : " + ((Cache) context).getTs());
 		return context;
 	}
 
 	@Override
 	protected void stop(DefaultCache<Generic> context) {
-		if (!isInitialized()) {
-			super.stop(context);
-			return;
-		}
-		// Long cacheId = ((Cache) context).getCacheId();
-		contextIds.remove();
-		// map.remove(cacheId);
+		super.stop(context);
 	}
 
 	// public HeavyCache getCurrentCache(long cacheId) {
