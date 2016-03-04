@@ -40,7 +40,7 @@ public class TodoApp extends HtmlApp {
 				{
 					HtmlUl todoList = new HtmlUl(main).setStyleClass("todo-list");
 					{
-						HtmlLi li = new HtmlLi(todoList).forEach(TodoList::getFiltered).setStyleClass("toto").setOptionalStyleClass(Todo::getCompleted, "completed");
+						HtmlLi li = new HtmlLi(todoList).forEach(TodoList::getFiltered).setOptionalStyleClass(Todo::getCompleted, "completed");
 						{
 							HtmlDiv todoDiv = new HtmlDiv(li).setStyleClass("view");
 							{
