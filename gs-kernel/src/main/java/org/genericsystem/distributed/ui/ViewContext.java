@@ -120,22 +120,26 @@ public class ViewContext<N> {
 	}
 
 	public static class RootViewContext<N> extends ViewContext<N> {
-		private Map<String, HtmlDomNode> nodeById = new HashMap<>();
+		private Map<String, HtmlDomNode> nodeById;
 
 		public RootViewContext(Model model, Element<N> template, N node) {
 			super(null, new RootModelContext(model), template, node);
 		}
 
+		private Map<String, HtmlDomNode> getMap() {
+			return nodeById != null ? nodeById : (nodeById = new HashMap<>());
+		}
+
 		public HtmlDomNode getNodeById(String id) {
-			return nodeById.get(id);
+			return getMap().get(id);
 		}
 
 		public void add(String id, HtmlDomNode domNode) {
-			nodeById.put(id, domNode);
+			getMap().put(id, domNode);
 		}
 
 		public void remove(String id) {
-			nodeById.remove(id);
+			getMap().remove(id);
 		}
 	}
 }
