@@ -3,22 +3,22 @@ package org.genericsystem.distributed.ui.components;
 import java.util.function.Consumer;
 
 import org.genericsystem.distributed.ui.HtmlElement;
-import org.genericsystem.distributed.ui.HtmlNode;
-import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeInput;
+import org.genericsystem.distributed.ui.HtmlDomNode;
+import org.genericsystem.distributed.ui.HtmlDomNode.InputHtmlDomNode;
 
-public class HtmlInputText extends HtmlElement<HtmlInputText, HtmlNode> {
+public class HtmlInputText extends HtmlElement<HtmlInputText, HtmlDomNode> {
 
 	public HtmlInputText(HtmlElement<?, ?> parent) {
-		super(parent, HtmlNode.class);
+		super(parent, HtmlDomNode.class);
 	}
 
 	@Override
-	protected HtmlNodeInput createNode(Object parent) {
-		return new HtmlNodeInput(getWebSocket());
+	protected InputHtmlDomNode createNode(Object parent) {
+		return new InputHtmlDomNode(getWebSocket());
 	}
 
 	public <M> HtmlInputText setAction(Consumer<M> applyOnModel) {
-		addActionBinding(HtmlNode::getActionProperty, applyOnModel);
+		addActionBinding(HtmlDomNode::getActionProperty, applyOnModel);
 		return this;
 	}
 

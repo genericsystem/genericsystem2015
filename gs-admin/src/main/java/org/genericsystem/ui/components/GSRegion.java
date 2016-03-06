@@ -18,8 +18,9 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		super(parent, clazz);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	protected <CHILDNODE> Function<N, List<CHILDNODE>> getGraphicChildren() {
+	protected Function<N, List> getGraphicChildren() {
 		return parentNode -> Collections.emptyList();
 	}
 

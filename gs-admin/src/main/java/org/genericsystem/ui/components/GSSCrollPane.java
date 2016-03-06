@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ModifiableObservableListBase;
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 
@@ -17,9 +16,11 @@ public class GSSCrollPane extends Element<ScrollPane> {
 		super(parent, ScrollPane.class);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	protected <CHILDNODE> Function<ScrollPane, List<CHILDNODE>> getGraphicChildren() {
-		Function<ScrollPane, ObservableList<?>> scrollChildren = scrollPane -> new ModifiableObservableListBase<Node>() {
+	protected Function<ScrollPane, List> getGraphicChildren() {
+		// TODO change to AbstractList!!!
+		Function<ScrollPane, List> scrollChildren = scrollPane -> new ModifiableObservableListBase<Node>() {
 
 			@Override
 			public Node get(int index) {
@@ -55,7 +56,7 @@ public class GSSCrollPane extends Element<ScrollPane> {
 				return result;
 			}
 		};
-		return (Function) scrollChildren;
+		return scrollChildren;
 	}
 
 	public GSSCrollPane setPrefWidth(Number prefWidth) {

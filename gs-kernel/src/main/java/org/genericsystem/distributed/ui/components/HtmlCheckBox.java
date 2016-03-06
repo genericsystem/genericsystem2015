@@ -5,21 +5,21 @@ import java.util.function.Function;
 import javafx.beans.property.Property;
 
 import org.genericsystem.distributed.ui.HtmlElement;
-import org.genericsystem.distributed.ui.HtmlNode.HtmlNodeCheckBox;
+import org.genericsystem.distributed.ui.HtmlDomNode.CheckBoxHtmlDomNode;
 
-public class HtmlCheckBox extends HtmlElement<HtmlCheckBox, HtmlNodeCheckBox> {
+public class HtmlCheckBox extends HtmlElement<HtmlCheckBox, CheckBoxHtmlDomNode> {
 
 	public HtmlCheckBox(HtmlElement<?, ?> parent) {
-		super(parent, HtmlNodeCheckBox.class);
+		super(parent, CheckBoxHtmlDomNode.class);
 	}
 
 	@Override
-	protected HtmlNodeCheckBox createNode(Object parent) {
-		return new HtmlNodeCheckBox(getWebSocket());
+	protected CheckBoxHtmlDomNode createNode(Object parent) {
+		return new CheckBoxHtmlDomNode(getWebSocket());
 	}
 
 	public <M> HtmlCheckBox setChecked(Function<M, Property<Boolean>> applyOnModel) {
-		addBidirectionalBinding(HtmlNodeCheckBox::getChecked, applyOnModel);
+		addBidirectionalBinding(CheckBoxHtmlDomNode::getChecked, applyOnModel);
 		return this;
 	}
 

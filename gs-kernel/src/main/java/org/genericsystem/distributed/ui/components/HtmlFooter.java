@@ -1,17 +1,17 @@
 package org.genericsystem.distributed.ui.components;
 
 import org.genericsystem.distributed.ui.HtmlElement;
-import org.genericsystem.distributed.ui.HtmlNode;
+import org.genericsystem.distributed.ui.HtmlDomNode;
 
-public class HtmlFooter extends HtmlElement<HtmlFooter, HtmlNode> {
+public class HtmlFooter extends HtmlElement<HtmlFooter, HtmlDomNode> {
 
 	public HtmlFooter(HtmlElement<?, ?> parent) {
-		super(parent, HtmlNode.class);
+		super(parent, HtmlDomNode.class);
 	}
 
 	@Override
-	protected HtmlNode createNode(Object parent) {
-		return new HtmlNode(getWebSocket(), "footer");
+	protected HtmlDomNode createNode(Object parent) {
+		return new HtmlDomNode(getWebSocket(), "footer");
 	}
 
 }

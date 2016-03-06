@@ -1,7 +1,5 @@
 package org.genericsystem.distributed.ui;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -36,7 +34,8 @@ public abstract class Element<N> {
 
 	}
 
-	protected abstract <CHILDNODE> Function<N, List<CHILDNODE>> getGraphicChildren();
+	@SuppressWarnings("rawtypes")
+	protected abstract Function<N, List> getGraphicChildren();
 
 	protected <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.setProperty(applyOnNode, value));
@@ -114,7 +113,7 @@ public abstract class Element<N> {
 		return parent;
 	}
 
-	public void sendMessage(JsonObject jsonObj) {
-	}
+	// public void sendMessage(JsonObject jsonObj) {
+	// }
 
 }

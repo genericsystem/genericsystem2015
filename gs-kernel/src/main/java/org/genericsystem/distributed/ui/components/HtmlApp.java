@@ -2,21 +2,21 @@ package org.genericsystem.distributed.ui.components;
 
 import io.vertx.core.http.ServerWebSocket;
 
+import org.genericsystem.distributed.ui.HtmlDomNode;
 import org.genericsystem.distributed.ui.HtmlElement;
-import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.ViewContext.RootViewContext;
 
-public class HtmlApp extends HtmlElement<HtmlApp, HtmlNode> {
+public class HtmlApp extends HtmlElement<HtmlApp, HtmlDomNode> {
 
 	private final ServerWebSocket webSocket;
-	private final RootViewContext<HtmlNode> rootViewContext;
+	private final RootViewContext<HtmlDomNode> rootViewContext;
 
 	public HtmlApp(Model model, ServerWebSocket webSocket) {
-		super(null, HtmlNode.class);
+		super(null, HtmlDomNode.class);
 		this.webSocket = webSocket;
 		initHtmlChildren();
-		rootViewContext = new RootViewContext<>(model, this, new HtmlNode(webSocket, "div"));
+		rootViewContext = new RootViewContext<>(model, this, new HtmlDomNode(webSocket, "div"));
 	}
 
 	@Override
@@ -33,7 +33,8 @@ public class HtmlApp extends HtmlElement<HtmlApp, HtmlNode> {
 		return webSocket;
 	}
 
-	public RootViewContext<HtmlNode> getRootViewContext() {
-		return rootViewContext;
+	public HtmlDomNode getNodeById(String id) {
+		return rootViewContext.getNodeById(id);
 	}
+
 }

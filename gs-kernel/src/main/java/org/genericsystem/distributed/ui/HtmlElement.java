@@ -1,10 +1,7 @@
 package org.genericsystem.distributed.ui;
 
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -12,11 +9,9 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.distributed.GSBuffer;
+public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>, NODE extends HtmlDomNode> extends Element<NODE> {
 
-public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>, NODE extends HtmlNode> extends Element<NODE> {
-
-	protected <PARENTNODE extends HtmlNode> HtmlElement(Element<PARENTNODE> parent, Class<NODE> nodeClass) {
+	protected <PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTNODE> parent, Class<NODE> nodeClass) {
 		super(parent, nodeClass);
 	}
 
@@ -24,44 +19,10 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 		return ((HtmlElement<?, ?>) getParent()).getWebSocket();
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	protected <CHILDNODE> Function<NODE, List<CHILDNODE>> getGraphicChildren() {
-		Function<NODE, List<CHILDNODE>> nodeJsChildren = parentNodeJs -> new AbstractList<CHILDNODE>() {
-			private List<CHILDNODE> childrenNode = new ArrayList<>();
-
-			@Override
-			public CHILDNODE get(int index) {
-				return childrenNode.get(index);
-			}
-
-			@Override
-			public int size() {
-				return childrenNode.size();
-			}
-
-			@Override
-			public void add(int index, CHILDNODE htmlNode) {
-				JsonObject jsonObj = new JsonObject().put("msg_type", "A");
-				((HtmlNode) htmlNode).fillJsonAdd(parentNodeJs, jsonObj);
-				sendMessage(jsonObj);
-				childrenNode.add(htmlNode);
-			}
-
-			@Override
-			public CHILDNODE set(int index, CHILDNODE element) {
-				return childrenNode.set(index, (element));
-			}
-
-			@Override
-			public CHILDNODE remove(int index) {
-				JsonObject jsonObj = new JsonObject().put("msg_type", "R");
-				((HtmlNode) childrenNode.get(index)).fillJsonRemove(jsonObj);
-				sendMessage(jsonObj);
-				return childrenNode.remove(index);
-			}
-		};
-
-		return nodeJsChildren;
+	protected Function<NODE, List> getGraphicChildren() {
+		return NODE::getChildren;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -73,49 +34,43 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 
 	@SuppressWarnings({ "unchecked" })
 	public <M> COMPONENT setStyleClass(Function<M, ObservableValue<String>> function) {
-		addObservableListToObservableValueBinding(HtmlNode::getStyleClasses, function);
+		addObservableListToObservableValueBinding(HtmlDomNode::getStyleClasses, function);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public COMPONENT setStyleClass(String text) {
-		addObservableListBoot(HtmlNode::getStyleClasses, text);
+		addObservableListBoot(HtmlDomNode::getStyleClasses, text);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <M> COMPONENT setOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
-		addObservableListBinding(HtmlNode::getStyleClasses, function, text);
+		addObservableListBinding(HtmlDomNode::getStyleClasses, function, text);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public COMPONENT setText(String text) {
-		addBoot(HtmlNode::getText, text);
+		addBoot(HtmlDomNode::getText, text);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <M> COMPONENT setRWText(Function<M, Property<String>> applyOnModel) {
-		addBidirectionalBinding(HtmlNode::getText, applyOnModel);
+		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <M> COMPONENT setWText(Function<M, Property<String>> applyOnModel) {
-		addReversedBinding(HtmlNode::getText, applyOnModel);
+		addReversedBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <M> COMPONENT setText(Function<M, ObservableValue<String>> applyOnModel) {
-		addBinding(HtmlNode::getText, applyOnModel);
+		addBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}
-
-	@Override
-	public void sendMessage(JsonObject jsonObj) {
-		getWebSocket().write(new GSBuffer().appendString(jsonObj.encode()));
-	}
-
 }

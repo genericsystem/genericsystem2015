@@ -1,15 +1,15 @@
 package org.genericsystem.distributed.ui.components;
 
 import org.genericsystem.distributed.ui.HtmlElement;
-import org.genericsystem.distributed.ui.HtmlNode;
+import org.genericsystem.distributed.ui.HtmlDomNode;
 
-public class HtmlDiv extends HtmlElement<HtmlDiv, HtmlNode> {
+public class HtmlDiv extends HtmlElement<HtmlDiv, HtmlDomNode> {
 	public HtmlDiv(HtmlElement<?, ?> parent) {
-		super(parent, HtmlNode.class);
+		super(parent, HtmlDomNode.class);
 	}
 
 	@Override
-	protected HtmlNode createNode(Object parent) {
-		return new HtmlNode(getWebSocket(), "div");
+	protected HtmlDomNode createNode(Object parent) {
+		return new HtmlDomNode(getWebSocket(), "div");
 	}
 }

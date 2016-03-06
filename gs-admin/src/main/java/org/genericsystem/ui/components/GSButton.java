@@ -11,22 +11,22 @@ import org.genericsystem.distributed.ui.Element;
 
 public class GSButton extends GSRegion<GSButton, Button> {
 
-	public GSButton(Element parent, String text) {
+	public GSButton(Element<?> parent, String text) {
 		super(parent, Button.class);
 		setText(text);
 	}
 
-	public <M> GSButton(Element parent, Function<M, ObservableValue<String>> observableText) {
+	public <M> GSButton(Element<?> parent, Function<M, ObservableValue<String>> observableText) {
 		super(parent, Button.class);
 		setObservableTextProperty(observableText);
 	}
 
-	public <M> GSButton(Element parent, String text, Consumer<M> action) {
+	public <M> GSButton(Element<?> parent, String text, Consumer<M> action) {
 		this(parent, text);
 		setAction(action);
 	}
 
-	public <M> GSButton(Element parent, Function<M, ObservableValue<String>> observableText, Consumer<M> action) {
+	public <M> GSButton(Element<?> parent, Function<M, ObservableValue<String>> observableText, Consumer<M> action) {
 		this(parent, observableText);
 		setAction(action);
 	}
@@ -35,11 +35,6 @@ public class GSButton extends GSRegion<GSButton, Button> {
 		bindings.add(Binding.bindAction(action, Button::onActionProperty));
 		return this;
 	}
-
-	// public <SUPERMODEL, M> GSButton setMetaAction(BiConsumer<SUPERMODEL, M> action) {
-	// bindings.add(Binding.bindMetaAction(action, Button::onActionProperty));
-	// return this;
-	// }
 
 	public GSButton setText(String text) {
 		addBoot(Button::textProperty, text);
