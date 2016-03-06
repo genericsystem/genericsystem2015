@@ -23,7 +23,7 @@ public class ViewContext<N> {
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
-		nodeChildren = this.parent != null ? (List<N>) ((Function) this.template.getGraphicChildren()).apply(parent.node) : null;
+		nodeChildren = this.parent != null ? (List<N>) ((Function) template.getParent().getGraphicChildren()).apply(parent.node) : null;
 		init();
 	}
 

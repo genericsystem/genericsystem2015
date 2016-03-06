@@ -1,5 +1,7 @@
 package org.genericsystem.ui.components;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
@@ -14,6 +16,11 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 
 	public GSRegion(Element<?> parent, Class<N> clazz) {
 		super(parent, clazz);
+	}
+
+	@Override
+	protected <CHILDNODE> Function<N, List<CHILDNODE>> getGraphicChildren() {
+		return parentNode -> Collections.emptyList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,13 +95,6 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		return (Component) this;
 	}
 
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public <M, T> Component forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
-	// super.forEach(function, injectedProperty);
-	// return (Component) this;
-	// }
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <M extends Model, T extends Model> Component forEach(Function<M, ObservableList<T>> function) {
@@ -108,15 +108,4 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		return (Component) this;
 	}
 
-	// @SuppressWarnings("unchecked")
-	// public <M> Component setSuperPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth) {
-	// addMetaBinding(N::prefWidthProperty, observablePrefWidth);
-	// return (Component) this;
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// public <M> Component setSuperPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight) {
-	// addMetaBinding(N::prefHeightProperty, observablePrefHeight);
-	// return (Component) this;
-	// }
 }

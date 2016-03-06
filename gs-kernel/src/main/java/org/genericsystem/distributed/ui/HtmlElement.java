@@ -25,12 +25,12 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	}
 
 	@Override
-	protected <PARENTNODE> Function<PARENTNODE, List<NODE>> getGraphicChildren() {
-		Function<PARENTNODE, List<NODE>> nodeJsChildren = parentNodeJs -> new AbstractList<NODE>() {
-			private List<NODE> childrenNode = new ArrayList<>();
+	protected <CHILDNODE> Function<NODE, List<CHILDNODE>> getGraphicChildren() {
+		Function<NODE, List<CHILDNODE>> nodeJsChildren = parentNodeJs -> new AbstractList<CHILDNODE>() {
+			private List<CHILDNODE> childrenNode = new ArrayList<>();
 
 			@Override
-			public NODE get(int index) {
+			public CHILDNODE get(int index) {
 				return childrenNode.get(index);
 			}
 
@@ -40,23 +40,23 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 			}
 
 			@Override
-			public void add(int index, NODE htmlNode) {
+			public void add(int index, CHILDNODE htmlNode) {
 				JsonObject jsonObj = new JsonObject().put("msg_type", "A");
-				htmlNode.fillJsonAdd((HtmlNode) parentNodeJs, jsonObj);
-				getParent().sendMessage(jsonObj);
+				((HtmlNode) htmlNode).fillJsonAdd(parentNodeJs, jsonObj);
+				sendMessage(jsonObj);
 				childrenNode.add(htmlNode);
 			}
 
 			@Override
-			public NODE set(int index, NODE element) {
+			public CHILDNODE set(int index, CHILDNODE element) {
 				return childrenNode.set(index, (element));
 			}
 
 			@Override
-			public NODE remove(int index) {
+			public CHILDNODE remove(int index) {
 				JsonObject jsonObj = new JsonObject().put("msg_type", "R");
-				childrenNode.get(index).fillJsonRemove(jsonObj);
-				getParent().sendMessage(jsonObj);
+				((HtmlNode) childrenNode.get(index)).fillJsonRemove(jsonObj);
+				sendMessage(jsonObj);
 				return childrenNode.remove(index);
 			}
 		};

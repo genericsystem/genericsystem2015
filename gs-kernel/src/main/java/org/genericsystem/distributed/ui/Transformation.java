@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.ui.utils;
+package org.genericsystem.distributed.ui;
 
 import java.util.HashMap;
 import java.util.Map;

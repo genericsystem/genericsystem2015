@@ -1,8 +1,12 @@
 package org.genericsystem.ui.components;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ModifiableObservableListBase;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 
 import org.genericsystem.distributed.ui.Element;
@@ -11,6 +15,47 @@ public class GSSCrollPane extends Element<ScrollPane> {
 
 	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent) {
 		super(parent, ScrollPane.class);
+	}
+
+	@Override
+	protected <CHILDNODE> Function<ScrollPane, List<CHILDNODE>> getGraphicChildren() {
+		Function<ScrollPane, ObservableList<?>> scrollChildren = scrollPane -> new ModifiableObservableListBase<Node>() {
+
+			@Override
+			public Node get(int index) {
+				assert size() == 1 && index == 0;
+				return scrollPane.getContent();
+			}
+
+			@Override
+			public int size() {
+				return scrollPane.getContent() == null ? 0 : 1;
+			}
+
+			@Override
+			protected void doAdd(int index, Node element) {
+				if (size() != 0)
+					throw new IllegalStateException("Only one element is supported in a GSScrollPane !");
+				scrollPane.setContent(element);
+			}
+
+			@Override
+			protected Node doSet(int index, Node element) {
+				Node result = doRemove(index);
+				doAdd(index, element);
+				return result;
+			}
+
+			@Override
+			protected Node doRemove(int index) {
+				if (size() == 0)
+					throw new IllegalStateException();
+				Node result = scrollPane.getContent();
+				scrollPane.setContent(null);
+				return result;
+			}
+		};
+		return (Function) scrollChildren;
 	}
 
 	public GSSCrollPane setPrefWidth(Number prefWidth) {

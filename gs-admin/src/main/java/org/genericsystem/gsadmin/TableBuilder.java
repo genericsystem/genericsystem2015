@@ -10,7 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.utils.Transformation;
+import org.genericsystem.distributed.ui.Transformation;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Stylable.TableStyle;

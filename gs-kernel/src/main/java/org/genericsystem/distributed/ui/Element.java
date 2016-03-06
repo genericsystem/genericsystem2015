@@ -11,16 +11,13 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.distributed.ui.utils.Utils;
-
 public abstract class Element<N> {
-	public final Class<N> nodeClass;
+	private final Class<N> nodeClass;
+	private List<Boot<N>> boots = new ArrayList<>();
 	public final List<MetaBinding<N, ?>> metaBindings = new ArrayList<>();
 	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
-	// final Function<?, List<?>> getGraphicChildren;
-	private List<Boot<N>> boots = new ArrayList<>();
 
 	@Override
 	public String toString() {
@@ -30,7 +27,6 @@ public abstract class Element<N> {
 	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
-		// this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
 			parent.<N> getChildren().add(this);
 		initChildren();
@@ -40,11 +36,7 @@ public abstract class Element<N> {
 
 	}
 
-	protected <PARENTNODE> Function<PARENTNODE, List<N>> getGraphicChildren() {
-		return (Function) Utils.getClassChildren(parent);
-	}
-
-	// protected abstract Function<?, List<N>> getGraphicChildren();
+	protected abstract <CHILDNODE> Function<N, List<CHILDNODE>> getGraphicChildren();
 
 	protected <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.setProperty(applyOnNode, value));
