@@ -17,17 +17,16 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
 import org.genericsystem.distributed.GSBuffer;
 
 public class HtmlNode {
-	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
-	protected final String id;
-	private final String tag;
-	protected StringProperty text = new SimpleStringProperty();
 	private final ServerWebSocket webSocket;
-	private ObservableList<HtmlNode> childrenNode = FXCollections.emptyObservableList();
-	private StringProperty style = new SimpleStringProperty("label");
-	private ObservableList<String> styleClass = FXCollections.observableArrayList();
+	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
+	private final String id;
+	private final String tag;
+	private final StringProperty text = new SimpleStringProperty();
+	private final ObservableList<String> styleClasses = FXCollections.observableArrayList();
 
 	public HtmlNode(ServerWebSocket webSocket, String tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
@@ -43,12 +42,12 @@ public class HtmlNode {
 			webSocket.write(bufferAdmin);
 		});
 
-		styleClass.addListener(new ListChangeListener<String>() {
+		styleClasses.addListener(new ListChangeListener<String>() {
 
 			@Override
 			public void onChanged(javafx.collections.ListChangeListener.Change<? extends String> c) {
 				JsonArray arrayJS = new JsonArray();
-				styleClass.forEach(clazz -> arrayJS.add(clazz));
+				styleClasses.forEach(clazz -> arrayJS.add(clazz));
 
 				JsonObject jsonObj = new JsonObject().put("msg_type", "U");
 				jsonObj.put("nodeId", id);
@@ -67,7 +66,7 @@ public class HtmlNode {
 		jsonObj.put("tagHtml", tag);
 		jsonObj.put("textContent", text.getValue());
 		JsonArray arrayJS = new JsonArray();
-		styleClass.forEach(clazz -> arrayJS.add(clazz));
+		styleClasses.forEach(clazz -> arrayJS.add(clazz));
 		jsonObj.put("styleClass", arrayJS);
 	}
 
@@ -75,12 +74,8 @@ public class HtmlNode {
 		jsonObj.put("nodeId", id);
 	}
 
-	public ObservableList<String> getStyleClass() {
-		return styleClass;
-	}
-
-	public StringProperty getStyle() {
-		return style;
+	public ObservableList<String> getStyleClasses() {
+		return styleClasses;
 	}
 
 	public ServerWebSocket getWebSocket() {
@@ -97,10 +92,6 @@ public class HtmlNode {
 
 	public ObjectProperty<EventHandler<ActionEvent>> getActionProperty() {
 		return actionProperty;
-	}
-
-	public ObservableList<HtmlNode> getChildrenNode() {
-		return childrenNode;
 	}
 
 	public String getId() {

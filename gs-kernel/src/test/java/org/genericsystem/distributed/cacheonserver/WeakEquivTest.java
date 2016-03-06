@@ -2,7 +2,7 @@ package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test
@@ -50,7 +50,7 @@ public class WeakEquivTest extends AbstractTest {
 	// }
 
 	public void test004_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_supers() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);
@@ -64,7 +64,7 @@ public class WeakEquivTest extends AbstractTest {
 	}
 
 	public void test005_weakEquiv_Relation_SingularConstraintAndReferencialIntegrity_setInstance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic carColor = engine.addInstance("CarColor", car, color);

@@ -1,14 +1,14 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 
 	public void test001_addInstance_metaAttribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		assert metaAttribute != null;
 		assert engine.getLevel() == 0;
@@ -17,7 +17,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_metaAttribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -26,7 +26,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_metaAttribute_override() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic option = engine.addInstance("Option", vehicle);
@@ -37,7 +37,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test004_addInstance_metaAttribute_override() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -49,7 +49,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test005_setInstance_metaAttribute_engine() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		assert engine.getLevel() == 0;
 		assert metaAttribute.getLevel() == 0;
@@ -57,7 +57,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test006_setInstance_metaAttribute_attribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -66,7 +66,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test007_setInstance_metaAttribute_override() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic option = engine.addInstance("Option", vehicle);
@@ -77,7 +77,7 @@ public class AutomaticMetaAttributeCreationTest extends AbstractTest {
 	}
 
 	public void test008_setInstance_metaAttribute_override() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);

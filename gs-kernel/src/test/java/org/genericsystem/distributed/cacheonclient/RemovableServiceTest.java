@@ -11,7 +11,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test100_remove_instance_NormalStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic myVehicule = engine.addInstance("MyVehicule");
 
@@ -30,7 +30,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test101_remove_instance_NormalStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic myVehicule1 = vehicle.addInstance("MyVehicule1");
 		Generic myVehicule2 = vehicle.addInstance("MyVehicule2");
@@ -57,7 +57,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test102_remove_typeWithInstance() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.addInstance("MyVehicule");
 
@@ -66,7 +66,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test103_remove_SubType() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -85,7 +85,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test104_remove_attribute() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = vehicle.addAttribute("Power");
 		assert !engine.getRoot().getMetaAttribute().isReferentialIntegrityEnabled(ApiStatics.BASE_POSITION);
@@ -100,7 +100,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test105_remove_attribute_withInstance_KO() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.addInstance("Power", vehicle);
 		vehicle.addInstance("Car");
@@ -109,7 +109,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test105_remove_attribute_attribute_KO() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power);
@@ -125,7 +125,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test106_remove_TypeWithSubType_KO() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		engine.addInstance(vehicle, "Car");
 
@@ -134,7 +134,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test107_remove_relation_KO() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic color = engine.addInstance("Color");
@@ -147,7 +147,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test108_remove_relationFromTarget() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic color = engine.addInstance("Color");
@@ -171,7 +171,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test109_remove_link() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic color = engine.addInstance("Color");
@@ -194,7 +194,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test120_remove_Type_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 
 		// when
@@ -208,7 +208,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test121_remove_typeWithInstance_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic myVehicle = vehicle.addInstance("MyVehicule");
 
@@ -223,7 +223,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test122_remove_TypeWithSubType_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 
@@ -239,7 +239,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test123_remove_attribute_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 
@@ -258,7 +258,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test124_remove_relation_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic color = engine.addInstance("Color");
@@ -281,7 +281,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test125_remove_instanceBaseOfRelation_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic color = engine.addInstance("Color");
@@ -304,7 +304,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test126_remove_instanceBaseOfRelation_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic color = engine.addInstance("Color");
@@ -327,7 +327,7 @@ public class RemovableServiceTest extends AbstractTest {
 
 	public void test127_remove_typeWithlinks_ForceStrategy() {
 		// given
-		Generic engine = new Engine();
+		Generic engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic animals = engine.addInstance("Animals");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");
@@ -497,7 +497,7 @@ public class RemovableServiceTest extends AbstractTest {
 	// }
 
 	public void testRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		vehicle.remove();
 		catchAndCheckCause(() -> engine.addInstance(vehicle, "Car"), AliveConstraintViolationException.class);

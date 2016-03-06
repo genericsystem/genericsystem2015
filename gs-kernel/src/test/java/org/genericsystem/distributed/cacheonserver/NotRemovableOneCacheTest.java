@@ -3,7 +3,7 @@ package org.genericsystem.distributed.cacheonserver;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class NotRemovableOneCacheTest extends AbstractTest {
 
 	public void test001_aliveEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
@@ -22,7 +22,7 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_aliveEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		assert car.isAlive();
@@ -37,7 +37,7 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test002_referenceEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
@@ -47,7 +47,7 @@ public class NotRemovableOneCacheTest extends AbstractTest {
 	}
 
 	public void test003_referenceEx() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");

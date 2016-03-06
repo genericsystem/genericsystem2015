@@ -1,20 +1,16 @@
 package org.genericsystem.ui.components;
 
-import java.util.List;
 import java.util.function.Function;
+
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ScrollPane;
+
 import org.genericsystem.distributed.ui.Element;
-import org.genericsystem.distributed.ui.utils.Utils;
 
 public class GSSCrollPane extends Element<ScrollPane> {
 
 	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent) {
-		super(parent, ScrollPane.class, Utils.getClassChildren(parent));
-	}
-
-	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent, Function<PARENTNODE, List<?>> getGraphicChildren) {
-		super(parent, ScrollPane.class, getGraphicChildren);
+		super(parent, ScrollPane.class);
 	}
 
 	public GSSCrollPane setPrefWidth(Number prefWidth) {

@@ -16,18 +16,18 @@ import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.cacheonclient.Engine.ClientEngineHandler;
+import org.genericsystem.distributed.cacheonclient.ClientEngine.ClientEngineHandler;
 
 public class FrontEndTransaction extends CheckedContext implements AsyncITransaction {
 
 	private final long ts;
 
-	protected FrontEndTransaction(Engine engine, long ts) {
+	protected FrontEndTransaction(ClientEngine engine, long ts) {
 		super(engine);
 		this.ts = ts;
 	}
 
-	protected FrontEndTransaction(Engine engine) {
+	protected FrontEndTransaction(ClientEngine engine) {
 		this(engine, engine.pickNewTs());
 	}
 
@@ -64,8 +64,8 @@ public class FrontEndTransaction extends CheckedContext implements AsyncITransac
 	}
 
 	@Override
-	public Engine getRoot() {
-		return (Engine) super.getRoot();
+	public ClientEngine getRoot() {
+		return (ClientEngine) super.getRoot();
 	}
 
 	private Map<Generic, Snapshot<Generic>> dependenciesMap = new HashMap<>();

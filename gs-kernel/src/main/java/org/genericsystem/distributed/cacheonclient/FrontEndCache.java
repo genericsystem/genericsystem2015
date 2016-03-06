@@ -52,7 +52,7 @@ public class FrontEndCache extends HeavyCache {
 
 	@Override
 	protected FrontEndTransaction buildTransaction() {
-		return new FrontEndTransaction((Engine) (getRoot()), getRoot().pickNewTs());
+		return new FrontEndTransaction((ClientEngine) (getRoot()), getRoot().pickNewTs());
 	}
 
 	@Override

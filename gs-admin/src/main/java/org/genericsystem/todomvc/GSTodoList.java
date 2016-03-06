@@ -19,7 +19,7 @@ public class GSTodoList extends GSApplication {
 
 	@Override
 	protected void initChildren() {
-		GSVBox mainVBox = new GSVBox(this, Group::getChildren).setPrefHeight(600);// .setStyleClass("overrun");
+		GSVBox mainVBox = new GSVBox(this).setPrefHeight(600);// .setStyleClass("overrun");
 		{
 			GSHBox todosCreation = new GSHBox(mainVBox);
 			{

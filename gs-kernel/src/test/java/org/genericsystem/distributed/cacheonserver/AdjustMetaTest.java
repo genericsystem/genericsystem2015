@@ -1,19 +1,19 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class AdjustMetaTest extends AbstractTest {
 
 	public void test001_AdjustMeta_MetaLevel_metaAttribut_NoComposite() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		assert engine == engine.adjustMeta();
 	}
 
 	public void test002_AdjustMeta_MetaLevel_metaAttribut_OneComposite() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaAttribute = engine.getMetaAttribute();
 		Generic car = engine.addInstance("Car");
 		assert engine.adjustMeta(car).equals(metaAttribute);
@@ -23,7 +23,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test003_AdjustMeta_MetaLevel_metaAttribut_TwoComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaRelation = engine.getMetaRelation();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
@@ -31,7 +31,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test004_AdjustMeta_MetaLevel_metaAttribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		engine.addInstance("Robot");
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
@@ -41,7 +41,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test005_AdjustMeta_MetaLevel_metaRelation_ThreeComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic metaRelation = engine.getMetaRelation();
 		assert metaRelation.equals(engine.adjustMeta(engine, engine));
 		assert metaRelation.equals(engine.setInstance(engine.getValue(), engine, engine));
@@ -53,7 +53,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test006_AdjustMeta_TypeLevel_Relation_TwoComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -63,7 +63,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test007_AdjustMeta_TypeLevel_Relation_TwoComposites_oneCompositeSpecializedByInheritance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -74,7 +74,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test008_AdjustMeta_TypeLevel_Relation_TwoComposites_oneCompositeSpecializedByInstanciation() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("VehicleColor", color);
@@ -84,7 +84,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test009_AdjustMeta_TypeLevel_Relation_TwoComposites_TwoCompositeSpecializedByInheritance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -96,7 +96,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test010_AdjustMeta_TypeLevel_Relation_TwoComposites_TwoCompositeSpecializedByInstanciation() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -107,7 +107,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test011_AdjustMeta_TypeLevel_Relation_TwoComposites_TwoCompositeSpecialized() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -118,7 +118,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test012_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -131,7 +131,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test013_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = engine.addInstance("VehicleColor", vehicle, color);
@@ -144,7 +144,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test014_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("VehicleColor", color);
@@ -157,7 +157,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test015_AdjustMeta_TypeLevel_Relation_ThreeComposites() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("VehicleColor", color);
@@ -170,7 +170,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test020_AdjustMeta_TypeLevel_Attribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic power = engine.addInstance("Power", engine);
 		Generic car = engine.addInstance("Car", engine);
 		Generic carPower = engine.addInstance(power, "carPower", engine);

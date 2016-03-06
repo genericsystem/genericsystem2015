@@ -6,7 +6,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache1 = engine.getCurrentCache();
 		FrontEndCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -43,7 +43,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		FrontEndCache cache1 = engine.getCurrentCache();
@@ -56,7 +56,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test002_() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		FrontEndCache cache = engine.getCurrentCache();
@@ -73,7 +73,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test003_IterateAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache1 = engine.getCurrentCache();
 		FrontEndCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -139,7 +139,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	// }
 
 	public void test009_IterateAndAdd() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		FrontEndCache cache1 = engine.getCurrentCache();
 
 		Generic car = engine.addInstance("Car");

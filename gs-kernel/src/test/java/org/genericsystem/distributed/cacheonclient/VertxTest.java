@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 public class VertxTest extends AbstractTest {
 
 	public void test000() {
-		Engine root = new Engine(Statics.ENGINE_VALUE);
+		ClientEngine root = new ClientEngine(Statics.ENGINE_VALUE);
 		Generic vehicle = root.addInstance("Vehicle");
 		root.getCurrentCache().flush();
 		root.close();

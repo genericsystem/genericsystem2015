@@ -11,23 +11,23 @@ import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
-public class Engine extends AbstractRoot implements Generic {
+public class ClientEngine extends AbstractRoot implements Generic {
 
 	protected final FrontEnd server;
 
-	public Engine(Class<?>... userClasses) {
+	public ClientEngine(Class<?>... userClasses) {
 		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public Engine(String engineValue, Class<?>... userClasses) {
+	public ClientEngine(String engineValue, Class<?>... userClasses) {
 		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public Engine(String engineValue, String host, int port, Class<?>... userClasses) {
+	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
 		this(engineValue, host, port, null, userClasses);
 	}
 
-	public Engine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
+	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
 		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
 		server = new FrontEnd(host, port, "/" + engineValue);
 		startSystemCache(userClasses);
@@ -35,7 +35,7 @@ public class Engine extends AbstractRoot implements Generic {
 	}
 
 	@Override
-	public Engine getRoot() {
+	public ClientEngine getRoot() {
 		return this;
 	}
 
@@ -111,8 +111,8 @@ public class Engine extends AbstractRoot implements Generic {
 		}
 
 		@Override
-		protected Engine getRoot() {
-			return Engine.this;
+		protected ClientEngine getRoot() {
+			return ClientEngine.this;
 		}
 
 		@Override

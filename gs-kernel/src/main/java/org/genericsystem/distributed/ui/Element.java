@@ -1,22 +1,25 @@
 package org.genericsystem.distributed.ui;
 
 import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.distributed.ui.utils.Utils;
 
-public class Element<N> {
+public abstract class Element<N> {
 	public final Class<N> nodeClass;
 	public final List<MetaBinding<N, ?>> metaBindings = new ArrayList<>();
 	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
 	private final Element<?> parent;
 	private final List<Element<?>> children = new ArrayList<>();
-	final Function<?, List<?>> getGraphicChildren;
+	// final Function<?, List<?>> getGraphicChildren;
 	private List<Boot<N>> boots = new ArrayList<>();
 
 	@Override
@@ -24,19 +27,10 @@ public class Element<N> {
 		return "Element<" + nodeClass.getSimpleName() + ">";
 	}
 
-	protected <PARENTNODE> Element(Class<N> nodeClass, Function<PARENTNODE, List<?>> getGraphicChildren) {
-		this(null, nodeClass, getGraphicChildren);
-	}
-
-	// must be protected
-	protected <PARENTNODE> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
-		this(parent, nodeClass, Utils.getClassChildren(parent));
-	}
-
-	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass, Function<PARENTNODE, List<?>> getGraphicChildren) {
+	protected <PARENTNODE, W> Element(Element<PARENTNODE> parent, Class<N> nodeClass) {
 		this.nodeClass = nodeClass;
 		this.parent = parent;
-		this.getGraphicChildren = getGraphicChildren;
+		// this.getGraphicChildren = getGraphicChildren;
 		if (parent != null)
 			parent.<N> getChildren().add(this);
 		initChildren();
@@ -45,6 +39,12 @@ public class Element<N> {
 	protected void initChildren() {
 
 	}
+
+	protected <PARENTNODE> Function<PARENTNODE, List<N>> getGraphicChildren() {
+		return (Function) Utils.getClassChildren(parent);
+	}
+
+	// protected abstract Function<?, List<N>> getGraphicChildren();
 
 	protected <VALUE> Element<N> addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.setProperty(applyOnNode, value));
@@ -80,8 +80,7 @@ public class Element<N> {
 		return this;
 	}
 
-	// TODO : a mettre en protected
-	public <M, T> Element<N> addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
+	protected <M, T> Element<N> addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
 		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));
 		return this;
 	}
@@ -107,7 +106,6 @@ public class Element<N> {
 	}
 
 	protected N createNode(Object parent) {
-		System.out.println("Element createNode");
 		try {
 			return nodeClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -124,5 +122,7 @@ public class Element<N> {
 		return parent;
 	}
 
-	public void sendMessage(JsonObject jsonObj) {}
+	public void sendMessage(JsonObject jsonObj) {
+	}
+
 }

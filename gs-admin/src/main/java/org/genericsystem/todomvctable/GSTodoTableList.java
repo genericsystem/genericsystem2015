@@ -22,7 +22,7 @@ public class GSTodoTableList extends GSApplication {
 
 	@Override
 	protected void initChildren() {
-		GSVBox mainVBox = new GSVBox(this, Group::getChildren).setPrefHeight(600);
+		GSVBox mainVBox = new GSVBox(this).setPrefHeight(600);
 		{
 			GSHBox todoCreateHBox = new GSHBox(mainVBox);
 			{

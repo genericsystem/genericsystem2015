@@ -1,7 +1,7 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
@@ -14,9 +14,9 @@ public class MultipleRootsTest extends AbstractTest {
 	}
 
 	public void test001_Engine_name() {
-		Engine engine1 = new Engine();
+		ClientEngine engine1 = new ClientEngine();
 		String nameOfsecondEngine = "SecondEngine";
-		Engine engine2 = new Engine(nameOfsecondEngine);
+		ClientEngine engine2 = new ClientEngine(nameOfsecondEngine);
 		assert engine1.getMeta().equals(engine1);
 		assert engine1.getSupers().isEmpty();
 		assert engine1.getComponents().size() == 0;

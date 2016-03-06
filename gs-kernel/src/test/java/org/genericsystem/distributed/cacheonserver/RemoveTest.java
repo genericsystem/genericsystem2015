@@ -1,14 +1,14 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RemoveTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -23,7 +23,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test002_multipleHolders() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -42,7 +42,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test003_removeAndAdd() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -58,7 +58,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test004_removeAndAddAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -82,7 +82,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test005_removeConcret_withHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -97,7 +97,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test006_removeStructural_withHolder() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -110,7 +110,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test007_removeConcretAndAttribut() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -125,7 +125,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test008_removeInstanceAndAttribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -140,7 +140,7 @@ public class RemoveTest extends AbstractTest {
 	}
 
 	public void test009_removeConcret() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");

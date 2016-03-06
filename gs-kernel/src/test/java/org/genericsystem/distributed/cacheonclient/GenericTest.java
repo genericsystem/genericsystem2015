@@ -13,7 +13,7 @@ import org.testng.collections.Lists;
 public class GenericTest extends AbstractTest {
 
 	public void testEngine() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		assert engine.isAlive();
 		assert engine.getComponents().isEmpty();
 		assert engine.getLevel() == 0;
@@ -27,7 +27,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testGetInstances() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		// assert engine.getInstances().isEmpty();
 		Generic vehicleVertex = engine.addInstance("Vehicle");
 		Generic powerVehicleVertex = engine.addInstance("Power", vehicleVertex);
@@ -41,28 +41,28 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddInstance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert engine.getInstances().contains(vehicle) : engine.getInstances().stream().collect(Collectors.toList());
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);
 	}
 
 	public void testSetInstance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.setInstance("Vehicle");
 		assert engine.getInstances().contains(vehicle);
 		assert engine.setInstance("Vehicle").equals(vehicle);
 	}
 
 	public void testAddInheriting() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		assert vehicle.getInheritings().contains(car);
 	}
 
 	public void testAddAttribute() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		Generic car = engine.addInstance(vehicle, "Car");
@@ -73,7 +73,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic vehiclePower = engine.addInstance("VehiclePower", vehicle);
@@ -84,7 +84,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride2() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -96,7 +96,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testAddAttributeWithOverride3() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic sportCar = engine.addInstance(car, "SportCar");
@@ -110,7 +110,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
@@ -121,7 +121,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance2() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");
@@ -135,7 +135,7 @@ public class GenericTest extends AbstractTest {
 	}
 
 	public void testMultiInheritance3() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic robot = engine.addInstance("Robot");
 		Generic transformer = engine.addInstance(Lists.newArrayList(vehicle, robot), "transformer");

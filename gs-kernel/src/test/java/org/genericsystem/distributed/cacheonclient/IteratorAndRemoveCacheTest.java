@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		HeavyCache cache1 = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -42,7 +42,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test001_() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		HeavyCache cache1 = engine.getCurrentCache();
@@ -55,7 +55,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test002_() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
 		HeavyCache cache = engine.getCurrentCache();
@@ -77,7 +77,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	}
 
 	public void test003_IterateAndRemove() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		HeavyCache cache1 = engine.getCurrentCache();
 		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
@@ -143,7 +143,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 	// }
 
 	public void test009_IterateAndAdd() {
-		Engine engine = new Engine();
+		ClientEngine engine = new ClientEngine();
 		HeavyCache cache1 = engine.getCurrentCache();
 
 		Generic car = engine.addInstance("Car");

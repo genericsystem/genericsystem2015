@@ -2,6 +2,7 @@ package org.genericsystem.ui.components;
 
 import java.util.function.Function;
 
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -17,4 +18,10 @@ public class GSComboBox<G> extends GSRegion<GSComboBox<G>, ComboBox> {
 		super(parent, ComboBox.class);
 		this.addBinding(ComboBox::itemsProperty, options);
 	}
+
+	@Override
+	public <M, T> Element<ComboBox> addReversedBinding(Function<ComboBox, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
+		return super.addReversedBinding(applyOnNode, applyOnModel);
+	}
+
 }

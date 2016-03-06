@@ -1,6 +1,7 @@
 package org.genericsystem.distributed.ui.components;
 
 import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlNode;
 import org.genericsystem.distributed.ui.Model;
@@ -12,7 +13,7 @@ public class HtmlApp extends HtmlElement<HtmlApp, HtmlNode> {
 	private final RootViewContext<HtmlNode> rootViewContext;
 
 	public HtmlApp(Model model, ServerWebSocket webSocket) {
-		super(HtmlNode.class);
+		super(null, HtmlNode.class);
 		this.webSocket = webSocket;
 		initHtmlChildren();
 		rootViewContext = new RootViewContext<>(model, this, new HtmlNode(webSocket, "div"));

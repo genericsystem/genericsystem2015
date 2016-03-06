@@ -1,22 +1,19 @@
 package org.genericsystem.ui.components;
 
-import java.util.List;
 import java.util.function.Function;
+
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.layout.Region;
+
 import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.Model;
 
 public abstract class GSRegion<Component extends GSNode<Component, N>, N extends Region> extends GSNode<Component, N> {
 
-	public GSRegion(Element parent, Class<N> class1) {
-		super(parent, class1);
-	}
-
-	public <PARENTNODE> GSRegion(Element parent, Class<N> paneClass, Function<? super PARENTNODE, List<?>> getGraphicChildren) {
-		super(parent, paneClass, getGraphicChildren);
+	public GSRegion(Element<?> parent, Class<N> clazz) {
+		super(parent, clazz);
 	}
 
 	@SuppressWarnings("unchecked")

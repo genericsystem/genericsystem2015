@@ -16,7 +16,7 @@ import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.BackEnd;
-import org.genericsystem.distributed.cacheonclient.Engine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.genericsystem.kernel.Statics;
 
 public class App extends Application {
@@ -25,13 +25,13 @@ public class App extends Application {
 		launch(args);
 	}
 
-	static Engine engine;
+	static ClientEngine engine;
 	static BackEnd server;
 
-	private Engine initGS() {
+	private ClientEngine initGS() {
 		server = new BackEnd(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		engine = new Engine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
+		engine = new ClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 
