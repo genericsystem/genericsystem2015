@@ -42,24 +42,6 @@ public class TodoList extends Model {
 
 	public TodoList() {
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
-		// ObservableValue<String> items = Bindings.createStringBinding(()->completedCount.getValue().intValue()>1?"items":"item", completedCount);
-		//
-		// completedCount.addListener(new ChangeListener<Number>() {
-		//
-		// @Override
-		// public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-		// // TODO Auto-generated method stub
-		// System.out.println("ddfdfdffdf");
-		// }
-		// });
-		// items.addListener(new ChangeListener<String>() {
-		//
-		// @Override
-		// public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-		// // TODO Auto-generated method stub
-		// System.out.println(newValue);
-		// }
-		// });
 	}
 
 	public ObservableValue<String> getActiveCount() {

@@ -15,8 +15,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -48,29 +46,15 @@ public class HtmlDomNode {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.webSocket = webSocket;
 		this.tag = tag;
+		this.text.addListener((o, oldValue, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue)));
 
-		text.addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+		this.styleClasses.addListener((ListChangeListener<String>) change -> {
+			JsonArray arrayJS = new JsonArray();
+			styleClasses.forEach(clazz -> arrayJS.add(clazz));
 			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, UPDATE);
-			jsonObj.put("nodeId", id);
-			jsonObj.put("textContent", newValue);
-			GSBuffer bufferAdmin = new GSBuffer();
-			bufferAdmin.appendString(jsonObj.encode());
-			webSocket.write(bufferAdmin);
-		});
-
-		styleClasses.addListener(new ListChangeListener<String>() {
-
-			@Override
-			public void onChanged(javafx.collections.ListChangeListener.Change<? extends String> c) {
-				JsonArray arrayJS = new JsonArray();
-				styleClasses.forEach(clazz -> arrayJS.add(clazz));
-
-				JsonObject jsonObj = new JsonObject().put(MSG_TYPE, UPDATE);
-				jsonObj.put(ID, id);
-				jsonObj.put(STYLECLASS, arrayJS);
-
-				sendMessage(jsonObj);
-			}
+			jsonObj.put(ID, id);
+			jsonObj.put(STYLECLASS, arrayJS);
+			sendMessage(jsonObj);
 		});
 	}
 
@@ -102,7 +86,7 @@ public class HtmlDomNode {
 		@Override
 		public HtmlDomNode remove(int index) {
 			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, REMOVE);
-			jsonObj.put("nodeId", internal.get(index).id);
+			jsonObj.put(ID, internal.get(index).id);
 			sendMessage(jsonObj);
 			return internal.remove(index);
 		}
@@ -150,6 +134,16 @@ public class HtmlDomNode {
 		return tag;
 	}
 
+	public void handleMessage(JsonObject json) {
+		if (json.getString("msg_type").equals("A"))
+			getActionProperty().get().handle(new ActionEvent());
+
+		if (json.getString("msg_type").equals("U")) {
+			if (json.getString("eltType").equals("text"))
+				getText().setValue(json.getString("textContent"));
+		}
+	}
+
 	public static class InputHtmlDomNode extends HtmlDomNode {
 		private String type;
 
@@ -175,21 +169,17 @@ public class HtmlDomNode {
 	}
 
 	public static class CheckBoxHtmlDomNode extends InputHtmlDomNode {
+		private static final String MSG_TYPE = "checked";
 		private Property<Boolean> checked = new SimpleBooleanProperty(false);
 
 		public CheckBoxHtmlDomNode(ServerWebSocket webSocket) {
 			super(webSocket, "checkbox");
-			// TODO weak listener
-			checked.addListener(new ChangeListener<Boolean>() {
-
-				@Override
-				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-					// JsonObject jsonObj = new JsonObject().put("msg_type", "U");
-					// jsonObj.put("nodeId", id);
-					// jsonObj.put("ckecked", newValue);
-					// sendMessage(jsonObj);
-					System.out.println("checked");
-				}
+			checked.addListener(change -> {
+				// JsonObject jsonObj = new JsonObject().put("msg_type", "U");
+				// jsonObj.put("nodeId", id);
+				// jsonObj.put("ckecked", newValue);
+				// sendMessage(jsonObj);
+				System.out.println("checked");
 			});
 		}
 
@@ -200,7 +190,14 @@ public class HtmlDomNode {
 		@Override
 		public void fillJson(HtmlDomNode parentNodeJs, JsonObject jsonObj) {
 			super.fillJson(parentNodeJs, jsonObj);
-			jsonObj.put("checked", checked.getValue());
+			jsonObj.put(MSG_TYPE, checked.getValue());
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			super.handleMessage(json);
+			if ("checkbox".equals(json.getString("eltType")))
+				getChecked().setValue(json.getBoolean("checked"));
 		}
 	}
 

@@ -36,5 +36,4 @@ public class HtmlApp extends HtmlElement<HtmlApp, HtmlDomNode> {
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
 	}
-
 }

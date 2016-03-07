@@ -11,13 +11,12 @@
 	const 
 		MESSAGE_DO_ADD = 'A',
 		MESSAGE_DO_REMOVE = 'R',
-		MESSAGE_DO_UPDATE = 'U',
-		ELEMENT_TYPE = 'E'; //element 
+		MESSAGE_DO_UPDATE = 'U';
 	
 //-------------------------------------------------------------	
-	function getSubString(bytes, start, end) {
-		subString = '';
-		for (var i = start; i < end; i++) {
+	function getSubString(bytes) {
+		var subString = '';
+		for (var i = 0; i < bytes.length; i++) {
 			subString += String.fromCharCode(bytes[i]);
 		}
 		return subString;
@@ -26,7 +25,7 @@
 //-------------------------------------------------------------
 	function onMessageReceived(evt) {
 		var bytes = new Uint8Array(evt.data);
-		var message = jQuery.parseJSON(getSubString(bytes,0,bytes.length));
+		var message = jQuery.parseJSON(getSubString(bytes));
 		messageType = message.msg_type;
 		
 		switch(messageType) {
@@ -186,13 +185,6 @@
 		connect();
 	});
 
-	function sendMessage() {
-		var methodId = new Uint32Array(1);
-		methodId[0] = 19;
-		var opId = new Uint32Array(1);
-		opId[0] = 12789;
-		wsocket.send(new Blob([ methodId, opId ]));
-	}
 </script>
 </head>
 <body id="root">
