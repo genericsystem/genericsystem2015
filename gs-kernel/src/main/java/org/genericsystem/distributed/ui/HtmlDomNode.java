@@ -30,7 +30,7 @@ public class HtmlDomNode {
 	private static final String REMOVE = "R";
 
 	private static final String PARENT_ID = "parentId";
-	private static final String ID = "nodeId";
+	public static final String ID = "nodeId";
 	private static final String STYLECLASS = "styleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";
@@ -170,6 +170,7 @@ public class HtmlDomNode {
 
 	public static class CheckBoxHtmlDomNode extends InputHtmlDomNode {
 		private static final String MSG_TYPE = "checked";
+		private static final String ELT_TYPE = "eltType";
 		private Property<Boolean> checked = new SimpleBooleanProperty(false);
 
 		public CheckBoxHtmlDomNode(ServerWebSocket webSocket) {
@@ -196,7 +197,7 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			super.handleMessage(json);
-			if ("checkbox".equals(json.getString("eltType")))
+			if ("checkbox".equals(json.getString(ELT_TYPE)))
 				getChecked().setValue(json.getBoolean("checked"));
 		}
 	}

@@ -39,7 +39,7 @@ public class BackEnd extends AbstractBackEnd<Engine> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					String message = gsBuffer.getString(0, gsBuffer.length());
 					JsonObject json = new JsonObject(message);
-					HtmlDomNode node = todoListApp.getNodeById(json.getString("nodeId"));
+					HtmlDomNode node = todoListApp.getNodeById(json.getString(HtmlDomNode.ID));
 					if (node != null)
 						node.handleMessage(json);
 				};
