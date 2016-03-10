@@ -1,16 +1,15 @@
 package org.genericsystem.distributed.ui.components;
 
 import java.util.function.Consumer;
-
 import javafx.event.Event;
-
-import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlDomNode;
+import org.genericsystem.distributed.ui.HtmlDomNode.ActionHtmlNode;
+import org.genericsystem.distributed.ui.HtmlElement;
 
-public class HtmlHyperLink extends HtmlElement<HtmlHyperLink, HtmlDomNode> {
+public class HtmlHyperLink extends HtmlElement<HtmlHyperLink, ActionHtmlNode> {
 
 	public HtmlHyperLink(HtmlElement<?, ?> parent, String text) {
-		super(parent, HtmlDomNode.class);
+		super(parent, ActionHtmlNode.class);
 		addBoot(HtmlDomNode::getText, text);
 	}
 
@@ -20,13 +19,13 @@ public class HtmlHyperLink extends HtmlElement<HtmlHyperLink, HtmlDomNode> {
 	}
 
 	public <M, T extends Event> HtmlHyperLink setAction(Consumer<M> consumer) {
-		addActionBinding(HtmlDomNode::getActionProperty, consumer);
+		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 		return this;
 	}
 
 	@Override
-	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode(getWebSocket(), "a");
+	protected ActionHtmlNode createNode(Object parent) {
+		return new ActionHtmlNode(getWebSocket(), "a");
 	}
 
 }

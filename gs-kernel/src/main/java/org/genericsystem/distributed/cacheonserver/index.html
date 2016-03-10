@@ -7,7 +7,7 @@
 <LINK rel=stylesheet type="text/css" href="style.css">
 <script type="text/javascript">
 	var wsocket;
-	var serviceLocation = "ws://82.240.164.123:8082/Engine";
+	var serviceLocation = "ws://127.0.0.1:8082/Engine";
 	const 
 		MESSAGE_DO_ADD = 'A',
 		MESSAGE_DO_REMOVE = 'R',
@@ -26,7 +26,7 @@
 	function onMessageReceived(evt) {
 		var bytes = new Uint8Array(evt.data);
 		var message = jQuery.parseJSON(getSubString(bytes));
-		messageType = message.msg_type;
+		messageType = message.msgType;
 		
 		switch(messageType) {
 		 	case MESSAGE_DO_ADD:
@@ -63,30 +63,20 @@
 
 //-------------------------------------------------------------
 	function createElement(parent,message){
-		var
+		var elt = document.createElement(message.tagHtml);
+		elt.setAttribute("id", message.nodeId);
+		elt.textContent = message.textContent;
 		
-		id = message.nodeId,
-		tag = message.tagHtml,
-		textContentValue = message.textContent;	
-		styleClass=message.styleClass;
-		var elt = document.createElement(tag);
-		
-		elt.setAttribute("id", id);
-		
-
-	
-		elt.textContent = textContentValue;
-		
-		if(tag=="button" || tag=="a") {
+		if(message.tagHtml=="button" || message.tagHtml=="a") {
 			elt.onclick = function click(){sendMessageAction(elt)};
-			if(tag=="a") {
+			if(message.tagHtml=="a") {
 				elt.setAttribute("href", "#");
 			}
-		} else 	if(tag == "input") 	{
+		} else 	if(message.tagHtml == "input") 	{
 			elt.setAttribute("type", message.type);	
 			if(message.type='text')
 			{
-				elt.value = textContentValue;
+				elt.value = message.textContent;
 				elt.onkeyup = function keyup(e){
 					var code = (e.keyCode ? e.keyCode : e.which)
 					if(code== 13) {
@@ -105,16 +95,12 @@
 			}
 			
 		}
-		
+		var	styleClass=message.styleClass;
 		for(var i=0;i<styleClass.length;i++)
 			elt.className += " " + styleClass[i];
 		
 		parent.insertBefore(elt, null);
 		return elt;
-	}
-//-------------------------------------------------------------
-	function sendMessageCheckBoxValue(elt){
-		wsocket.send(JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,eltType:"checkbox",checked : elt.checked}));
 	}
 //-------------------------------------------------------------
 	function updateElement(message){
@@ -159,14 +145,19 @@
 	}
 	
 //-------------------------------------------------------------
+	function sendMessageCheckBoxValue(elt){
+		wsocket.send(JSON.stringify({msgType:"U",nodeId: elt.id,tag: elt.tagName,eltType:"checkbox",checked:elt.checked}));
+	}
+	
+//-------------------------------------------------------------
 	function sendMessageKeyup(elt){
-		var toto = JSON.stringify({msg_type:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value});
+		var toto = JSON.stringify({msgType:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value});
 		wsocket.send(toto);
 	}
 
 //-------------------------------------------------------------	
 	function sendMessageAction(elt){
-		wsocket.send(JSON.stringify({msg_type:"A",nodeId: elt.id,tag: elt.tagName}));
+		wsocket.send(JSON.stringify({msgType:"A",nodeId: elt.id,tag: elt.tagName}));
 	}
 	
 //-------------------------------------------------------------	

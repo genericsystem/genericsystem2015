@@ -4,11 +4,9 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,11 +18,10 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import org.genericsystem.distributed.GSBuffer;
 
 public class HtmlDomNode {
-	private static final String MSG_TYPE = "msg_type";
+	private static final String MSG_TYPE = "msgType";
 	private static final String ADD = "A";
 	private static final String UPDATE = "U";
 	private static final String REMOVE = "R";
@@ -34,9 +31,10 @@ public class HtmlDomNode {
 	private static final String STYLECLASS = "styleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";
+	private static final String ELT_TYPE = "eltType";
 
 	private final ServerWebSocket webSocket;
-	private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
+
 	private final String id;
 	private final String tag;
 	private final StringProperty text = new SimpleStringProperty();
@@ -122,10 +120,6 @@ public class HtmlDomNode {
 		return new GSBuffer().appendString(this.id + this.tag);
 	}
 
-	public ObjectProperty<EventHandler<ActionEvent>> getActionProperty() {
-		return actionProperty;
-	}
-
 	public String getId() {
 		return id;
 	}
@@ -135,53 +129,64 @@ public class HtmlDomNode {
 	}
 
 	public void handleMessage(JsonObject json) {
-		if (json.getString("msg_type").equals("A"))
-			getActionProperty().get().handle(new ActionEvent());
 
-		if (json.getString("msg_type").equals("U")) {
-			if (json.getString("eltType").equals("text"))
-				getText().setValue(json.getString("textContent"));
-		}
 	}
 
-	public static class InputHtmlDomNode extends HtmlDomNode {
-		private String type;
+	public static class ActionHtmlNode extends HtmlDomNode {
+		private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
 
-		public InputHtmlDomNode(ServerWebSocket webSocket) {
-			super(webSocket, "input");
-			this.type = "text";
+		public ActionHtmlNode(ServerWebSocket webSocket, String tag) {
+			super(webSocket, tag);
 		}
 
-		public InputHtmlDomNode(ServerWebSocket webSocket, String type) {
-			super(webSocket, "input");
-			this.type = type;
+		public ObjectProperty<EventHandler<ActionEvent>> getActionProperty() {
+			return actionProperty;
 		}
 
-		public String getType() {
-			return type;
+		@Override
+		public void handleMessage(JsonObject json) {
+			if (ADD.equals(json.getString(MSG_TYPE)))
+				getActionProperty().get().handle(new ActionEvent());
+			super.handleMessage(json);
+		}
+
+	}
+
+	public static class InputTextHtmlDomNode extends HtmlDomNode {
+		private final ObjectProperty<EventHandler<ActionEvent>> enterProperty = new SimpleObjectProperty<>();
+
+		public InputTextHtmlDomNode(ServerWebSocket webSocket) {
+			super(webSocket, "input");
 		}
 
 		@Override
 		public void fillJson(HtmlDomNode parentNodeJs, JsonObject jsonObj) {
 			super.fillJson(parentNodeJs, jsonObj);
-			jsonObj.put("type", type);
+			jsonObj.put("type", "text");
 		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			if (ADD.equals(json.getString(MSG_TYPE)))
+				getEnterProperty().get().handle(new ActionEvent());
+			if (UPDATE.equals(json.getString(MSG_TYPE)))
+				getText().setValue(json.getString("textContent"));
+			super.handleMessage(json);
+		}
+
+		public ObjectProperty<EventHandler<ActionEvent>> getEnterProperty() {
+			return enterProperty;
+		}
+
 	}
 
-	public static class CheckBoxHtmlDomNode extends InputHtmlDomNode {
-		private static final String MSG_TYPE = "checked";
-		private static final String ELT_TYPE = "eltType";
+	public static class CheckBoxHtmlDomNode extends HtmlDomNode {
+		private static final String CHECKED = "checked";
+
 		private Property<Boolean> checked = new SimpleBooleanProperty(false);
 
 		public CheckBoxHtmlDomNode(ServerWebSocket webSocket) {
-			super(webSocket, "checkbox");
-			checked.addListener(change -> {
-				// JsonObject jsonObj = new JsonObject().put("msg_type", "U");
-				// jsonObj.put("nodeId", id);
-				// jsonObj.put("ckecked", newValue);
-				// sendMessage(jsonObj);
-				System.out.println("checked");
-			});
+			super(webSocket, "input");
 		}
 
 		public Property<Boolean> getChecked() {
@@ -191,14 +196,15 @@ public class HtmlDomNode {
 		@Override
 		public void fillJson(HtmlDomNode parentNodeJs, JsonObject jsonObj) {
 			super.fillJson(parentNodeJs, jsonObj);
-			jsonObj.put(MSG_TYPE, checked.getValue());
+			jsonObj.put("type", "checkbox");
+			jsonObj.put(CHECKED, checked.getValue());
 		}
 
 		@Override
 		public void handleMessage(JsonObject json) {
-			super.handleMessage(json);
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
 				getChecked().setValue(json.getBoolean("checked"));
+			super.handleMessage(json);
 		}
 	}
 

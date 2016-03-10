@@ -3,7 +3,6 @@ package org.genericsystem.distributed.cacheonserver.todomvc;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-
 import org.genericsystem.distributed.ui.Model;
 
 public class Todo extends Model {

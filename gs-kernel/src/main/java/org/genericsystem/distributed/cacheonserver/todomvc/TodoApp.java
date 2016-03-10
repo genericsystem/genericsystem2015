@@ -46,7 +46,7 @@ public class TodoApp extends HtmlApp {
 							{
 								new HtmlCheckBox(todoDiv).setStyleClass("toggle").bindCheckedBidirectional(Todo::getCompleted);
 								new HtmlLabel(todoDiv).bindText(Todo::getTodoString);
-								new HtmlButton(todoDiv).setStyleClass("destroy").setAction(Todo::remove);
+								new HtmlButton(todoDiv).setStyleClass("destroy").bindAction(Todo::remove);
 							}
 						}
 					}
@@ -65,7 +65,7 @@ public class TodoApp extends HtmlApp {
 						new HtmlHyperLink(new HtmlLi(filters), "Actives", TodoList::showActive).bindOptionalStyleClass(TodoList::getActiveMode, "selected");
 						new HtmlHyperLink(new HtmlLi(filters), "Completes", TodoList::showCompleted).bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
 					}
-					new HtmlButton(footer).setAction(TodoList::removeCompleted).bindText(TodoList::getClearCompleted).setStyleClass("clear-completed").bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
+					new HtmlButton(footer).bindAction(TodoList::removeCompleted).bindText(TodoList::getClearCompleted).setStyleClass("clear-completed").bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
 
 				}
 			}
