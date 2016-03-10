@@ -17,7 +17,7 @@ public class HtmlInputText extends HtmlElement<HtmlInputText, HtmlDomNode> {
 		return new InputHtmlDomNode(getWebSocket());
 	}
 
-	public <M> HtmlInputText setAction(Consumer<M> applyOnModel) {
+	public <M> HtmlInputText bindAction(Consumer<M> applyOnModel) {
 		addActionBinding(HtmlDomNode::getActionProperty, applyOnModel);
 		return this;
 	}

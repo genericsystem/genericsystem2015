@@ -1,10 +1,8 @@
 package org.genericsystem.distributed.ui;
 
 import io.vertx.core.http.ServerWebSocket;
-
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -45,7 +43,7 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> COMPONENT setOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
+	public <M> COMPONENT bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
 		addObservableListBinding(HtmlDomNode::getStyleClasses, function, text);
 		return (COMPONENT) this;
 	}
@@ -57,19 +55,19 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> COMPONENT setRWText(Function<M, Property<String>> applyOnModel) {
+	public <M> COMPONENT bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
 		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <M> COMPONENT setWText(Function<M, Property<String>> applyOnModel) {
-		addReversedBinding(HtmlDomNode::getText, applyOnModel);
-		return (COMPONENT) this;
-	}
+	// @SuppressWarnings("unchecked")
+	// public <M> COMPONENT bindReverseText(Function<M, Property<String>> applyOnModel) {
+	// addReversedBinding(HtmlDomNode::getText, applyOnModel);
+	// return (COMPONENT) this;
+	// }
 
 	@SuppressWarnings("unchecked")
-	public <M> COMPONENT setText(Function<M, ObservableValue<String>> applyOnModel) {
+	public <M> COMPONENT bindText(Function<M, ObservableValue<String>> applyOnModel) {
 		addBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}

@@ -3,19 +3,16 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.distributed.cacheonclient.utils.TransitiveInvalidator;
-
 import com.sun.javafx.collections.ObservableListWrapper;
 
 public class FrontEndCache extends HeavyCache {
@@ -64,6 +61,7 @@ public class FrontEndCache extends HeavyCache {
 		return super.getTransactionProperty();
 	}
 
+	// TODO ClassCastException BUG
 	@Override
 	protected AsyncDifferential getDifferential() {
 		return (AsyncDifferential) super.getDifferential();

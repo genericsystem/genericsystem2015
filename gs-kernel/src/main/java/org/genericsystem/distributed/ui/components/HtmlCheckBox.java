@@ -18,7 +18,7 @@ public class HtmlCheckBox extends HtmlElement<HtmlCheckBox, CheckBoxHtmlDomNode>
 		return new CheckBoxHtmlDomNode(getWebSocket());
 	}
 
-	public <M> HtmlCheckBox setChecked(Function<M, Property<Boolean>> applyOnModel) {
+	public <M> HtmlCheckBox bindCheckedBidirectional(Function<M, Property<Boolean>> applyOnModel) {
 		addBidirectionalBinding(CheckBoxHtmlDomNode::getChecked, applyOnModel);
 		return this;
 	}
