@@ -137,9 +137,7 @@
 	
 //-------------------------------------------------------------
 	function removeElement(message){
-		var 
-		nodeId = message.nodeId;
-		var elt = document.getElementById(nodeId);
+		var elt = document.getElementById(message.nodeId);
 		if(elt!=null)
 			elt.parentNode.removeChild(elt);
 	}
@@ -151,8 +149,7 @@
 	
 //-------------------------------------------------------------
 	function sendMessageKeyup(elt){
-		var toto = JSON.stringify({msgType:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value});
-		wsocket.send(toto);
+		wsocket.send(JSON.stringify({msgType:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value}));
 	}
 
 //-------------------------------------------------------------	
