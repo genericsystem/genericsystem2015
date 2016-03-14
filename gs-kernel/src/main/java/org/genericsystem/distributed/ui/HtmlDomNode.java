@@ -1,12 +1,13 @@
 package org.genericsystem.distributed.ui;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,6 +19,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
 import org.genericsystem.distributed.GSBuffer;
 
 public class HtmlDomNode {
@@ -49,10 +51,7 @@ public class HtmlDomNode {
 		this.styleClasses.addListener((ListChangeListener<String>) change -> {
 			JsonArray arrayJS = new JsonArray();
 			styleClasses.forEach(clazz -> arrayJS.add(clazz));
-			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, UPDATE);
-			jsonObj.put(ID, id);
-			jsonObj.put(STYLECLASS, arrayJS);
-			sendMessage(jsonObj);
+			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLECLASS, arrayJS));
 		});
 	}
 
@@ -116,10 +115,6 @@ public class HtmlDomNode {
 		return text;
 	}
 
-	public Buffer getBuffer() {
-		return new GSBuffer().appendString(this.id + this.tag);
-	}
-
 	public String getId() {
 		return id;
 	}
@@ -170,7 +165,7 @@ public class HtmlDomNode {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().handle(new ActionEvent());
 			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				getText().setValue(json.getString("textContent"));
+				getText().setValue(json.getString(TEXT_CONTENT));
 			super.handleMessage(json);
 		}
 
@@ -203,7 +198,7 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				getChecked().setValue(json.getBoolean("checked"));
+				getChecked().setValue(json.getBoolean(CHECKED));
 			super.handleMessage(json);
 		}
 	}
