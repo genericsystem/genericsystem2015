@@ -3,11 +3,9 @@ package org.genericsystem.distributed.ui;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,7 +17,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import org.genericsystem.distributed.GSBuffer;
 
 public class HtmlDomNode {
@@ -30,6 +27,7 @@ public class HtmlDomNode {
 
 	private static final String PARENT_ID = "parentId";
 	public static final String ID = "nodeId";
+	public static final String NEXT_ID = "nextId";
 	private static final String STYLECLASS = "styleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";
@@ -47,7 +45,6 @@ public class HtmlDomNode {
 		this.webSocket = webSocket;
 		this.tag = tag;
 		this.text.addListener((o, oldValue, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue)));
-
 		this.styleClasses.addListener((ListChangeListener<String>) change -> {
 			JsonArray arrayJS = new JsonArray();
 			styleClasses.forEach(clazz -> arrayJS.add(clazz));
@@ -76,8 +73,9 @@ public class HtmlDomNode {
 		public void add(int index, HtmlDomNode childNode) {
 			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
 			childNode.fillJson(HtmlDomNode.this, jsonObj);
+			jsonObj.put(NEXT_ID, index < size() ? get(index).id : null);
 			sendMessage(jsonObj);
-			internal.add(childNode);
+			internal.add(index, childNode);
 		}
 
 		@Override

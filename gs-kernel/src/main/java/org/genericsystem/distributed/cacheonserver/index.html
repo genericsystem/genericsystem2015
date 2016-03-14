@@ -93,8 +93,7 @@
 			var styleClass = message.styleClass;
 			for (var i = 0; i < styleClass.length; i++)
 				elt.className += " " + styleClass[i];
-
-			parent.insertBefore(elt, null);
+			parent.insertBefore(elt, document.getElementById(message.nextId));
 			break;
 		case 'R':
 			var elt = document.getElementById(message.nodeId);
