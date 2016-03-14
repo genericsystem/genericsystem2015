@@ -8,12 +8,8 @@
 <script type="text/javascript">
 	var wsocket;
 	var serviceLocation = "ws://127.0.0.1:8082/Engine";
-	const 
-		MESSAGE_DO_ADD = 'A',
-		MESSAGE_DO_REMOVE = 'R',
-		MESSAGE_DO_UPDATE = 'U';
-	
-//-------------------------------------------------------------	
+
+	//-------------------------------------------------------------	
 	function getSubString(bytes) {
 		var subString = '';
 		for (var i = 0; i < bytes.length; i++) {
@@ -21,158 +17,125 @@
 		}
 		return subString;
 	}
-	
-//-------------------------------------------------------------
+
+	//-------------------------------------------------------------
 	function onMessageReceived(evt) {
-		var bytes = new Uint8Array(evt.data);
-		var message = jQuery.parseJSON(getSubString(bytes));
-		messageType = message.msgType;
-		
-		switch(messageType) {
-		 	case MESSAGE_DO_ADD:
-		 		addElement(message);
-		        break;
-		    case MESSAGE_DO_REMOVE:
-				removeElement(message);
-		        break;
-		    case MESSAGE_DO_UPDATE:
-				updateElement(message);
-		        break;
-		    default:
-		        alert("message d'erreur");
-		}
-	}
+		var message = jQuery.parseJSON(getSubString(new Uint8Array(evt.data)));
+		switch (message.msgType) {
+		case 'A':
+			var parent = document.getElementById(message.parentId);
+			if (parent == null) {
+				parent = document.getElementById("root");
+			}
+			var elt = document.createElement(message.tagHtml);
+			elt.setAttribute("id", message.nodeId);
+			elt.textContent = message.textContent;
 
-//-------------------------------------------------------------
-	function addElement(message){
-		var
-		parentId =  message.parentId, 
-		nodeId = message.nodeId,
-		tagHtml = message.tagHtml,
-		textContentValue = message.textContent;	
-	
-		var root = document.getElementById("root");
-		var parent = document.getElementById(parentId);
-		if (parent == null) {
-			parent = createElement(root,message);
-		}
-	
-		elt = createElement(parent,message);
-		
-	}
-
-//-------------------------------------------------------------
-	function createElement(parent,message){
-		var elt = document.createElement(message.tagHtml);
-		elt.setAttribute("id", message.nodeId);
-		elt.textContent = message.textContent;
-		
-		if(message.tagHtml=="button" || message.tagHtml=="a") {
-			elt.onclick = function click(){sendMessageAction(elt)};
-			if(message.tagHtml=="a") {
+			switch (message.tagHtml) {
+			case "button": {
+				elt.onclick = function click() {
+					wsocket.send(JSON.stringify({
+						msgType : "A",
+						nodeId : elt.id
+					}));
+				};
+				break;
+			}
+			case "a": {
+				elt.onclick = function click() {
+					wsocket.send(JSON.stringify({
+						msgType : "A",
+						nodeId : elt.id
+					}));
+				};
 				elt.setAttribute("href", "#");
+				break;
 			}
-		} else 	if(message.tagHtml == "input") 	{
-			elt.setAttribute("type", message.type);	
-			if(message.type='text')
-			{
-				elt.value = message.textContent;
-				elt.onkeyup = function keyup(e){
-					var code = (e.keyCode ? e.keyCode : e.which)
-					if(code== 13) {
-						sendMessageAction(elt);
-					} else {
-						sendMessageKeyup(elt)
+			case "input": {
+				elt.setAttribute("type", message.type);
+				switch (message.type) {
+				case "text": {
+					elt.value = message.textContent;
+					elt.onkeyup = function keyup(e) {
+						var code = (e.keyCode ? e.keyCode : e.which)
+						if (code == 13) {
+							wsocket.send(JSON.stringify({
+								msgType : "A",
+								nodeId : elt.id
+							}));
+						} else {
+							wsocket.send(JSON.stringify({
+								msgType : "U",
+								nodeId : elt.id,
+								textContent : elt.value
+							}));
+						}
 					}
+					break;
 				}
-			}
-			
-			if(elt.getAttribute("type") == 'checkbox'){
-				elt.onchange=function change(){
-					sendMessageCheckBoxValue(elt);
+				case "checkbox": {
+					elt.onchange = function change() {
+						wsocket.send(JSON.stringify({
+							msgType : "U",
+							nodeId : elt.id,
+							eltType : "checkbox",
+							checked : elt.checked
+						}));;
+					}
+					elt.checked = message.checked;
+					break;
 				}
-				elt.checked = message["checked"];
+				}
+				break;
 			}
-			
-		}
-		var	styleClass=message.styleClass;
-		for(var i=0;i<styleClass.length;i++)
-			elt.className += " " + styleClass[i];
-		
-		parent.insertBefore(elt, null);
-		return elt;
-	}
-//-------------------------------------------------------------
-	function updateElement(message){
-		var elt = document.getElementById(message.nodeId);
-		if(elt == null) 
-			return;
-		
-		updateText(message, elt);
-		updateClass(message, elt);
-	}
-	
-	function updateText(message, elt) {
-		if(typeof message.textContent === 'undefined')
-			return;
-		
-		if(elt.tagName == "INPUT" && elt.getAttribute("type") == "text") {
-			elt.value = message.textContent;
-			return;
-		}
-		
-		elt.textContent = message.textContent;
-		
-	}
-	
-	function updateClass(message, elt) {
-		if (typeof message.styleClass === 'undefined')
-			return;
-		
-		elt.className = "";
-		message.styleClass.forEach(function(element, index, array) {
-			elt.className += " " + element;
-		});
-	}
-	
-//-------------------------------------------------------------
-	function removeElement(message){
-		var elt = document.getElementById(message.nodeId);
-		if(elt!=null)
-			elt.parentNode.removeChild(elt);
-	}
-	
-//-------------------------------------------------------------
-	function sendMessageCheckBoxValue(elt){
-		wsocket.send(JSON.stringify({msgType:"U",nodeId: elt.id,tag: elt.tagName,eltType:"checkbox",checked:elt.checked}));
-	}
-	
-//-------------------------------------------------------------
-	function sendMessageKeyup(elt){
-		wsocket.send(JSON.stringify({msgType:"U",nodeId: elt.id,tag: elt.tagName,eltType:"text",textContent:elt.value}));
-	}
+			}
 
-//-------------------------------------------------------------	
-	function sendMessageAction(elt){
-		wsocket.send(JSON.stringify({msgType:"A",nodeId: elt.id,tag: elt.tagName}));
+			var styleClass = message.styleClass;
+			for (var i = 0; i < styleClass.length; i++)
+				elt.className += " " + styleClass[i];
+
+			parent.insertBefore(elt, null);
+			break;
+		case 'R':
+			var elt = document.getElementById(message.nodeId);
+			if (elt != null)
+				elt.parentNode.removeChild(elt);
+			break;
+		case 'U':
+			var elt = document.getElementById(message.nodeId);
+			if (typeof message.textContent !== 'undefined') {
+				if (elt.tagName == "INPUT" && elt.getAttribute("type") == "text") {
+					elt.value = message.textContent;
+				}
+				elt.textContent = message.textContent;
+			}
+			if (typeof message.styleClass !== 'undefined') {
+				elt.className = "";
+				message.styleClass.forEach(function(element, index, array) {
+					elt.className += " " + element;
+				});
+			}
+			break;
+		default:
+			alert("message d'erreur");
+		}
 	}
 	
-//-------------------------------------------------------------	
+	//-------------------------------------------------------------	
 	function connect() {
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
 		wsocket.onmessage = onMessageReceived;
 	}
-	
-//-------------------------------------------------------------
+
+	//-------------------------------------------------------------
 	function leave() {
-		//wsocket.close();
+		wsocket.close();
 	}
 
 	$(document).ready(function() {
 		connect();
 	});
-
 </script>
 </head>
 <body id="root">
