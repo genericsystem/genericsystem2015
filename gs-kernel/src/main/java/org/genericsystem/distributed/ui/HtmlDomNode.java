@@ -27,7 +27,7 @@ public class HtmlDomNode {
 
 	private static final String PARENT_ID = "parentId";
 	public static final String ID = "nodeId";
-	public static final String NEXT_ID = "nextId";
+	private static final String NEXT_ID = "nextId";
 	private static final String STYLECLASS = "styleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";

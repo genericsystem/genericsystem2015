@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -112,8 +111,5 @@ public abstract class Element<N> {
 	Element<?> getParent() {
 		return parent;
 	}
-
-	// public void sendMessage(JsonObject jsonObj) {
-	// }
 
 }
