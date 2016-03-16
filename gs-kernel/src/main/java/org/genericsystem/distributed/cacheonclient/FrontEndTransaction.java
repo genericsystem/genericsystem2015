@@ -4,21 +4,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.CheckedContext;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.ClientEngine.ClientEngineHandler;
 
-public class FrontEndTransaction extends CheckedContext implements AsyncITransaction {
+public class FrontEndTransaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
 
@@ -41,7 +40,7 @@ public class FrontEndTransaction extends CheckedContext implements AsyncITransac
 		assert adds.stream().allMatch(add -> add.getBirthTs() == Long.MAX_VALUE);
 		getRoot().getServer().apply(getTs(), removes.stream().mapToLong(g -> g.getTs()).toArray(), adds.stream().map(g -> g.getVertex()).toArray(Vertex[]::new));
 		removes.forEach(this::invalid);// Not efficient ! plug and unplug is
-										// better
+		// better
 		adds.forEach(this::invalid);// Not efficient !
 		adds.forEach(this::giveBirth);
 	}
@@ -103,25 +102,3 @@ public class FrontEndTransaction extends CheckedContext implements AsyncITransac
 		throw new UnsupportedOperationException();
 	}
 }
-
-// @Override
-// public ObservableSnapshot<Generic>
-// getDependenciesObservableSnapshot(Generic generic) {
-// return new
-// CompletableObservableSnapshot2<>(getRoot().getServer().getDependenciesPromise(getTs(),
-// generic.getTs()), vertex -> getRoot().getGenericByVertex(vertex));
-// }
-
-// @Override
-// public Observable getInvalidator(Generic generic) {
-// ObjectProperty<Snapshot<Generic>> objectProperty = new SimpleObjectProperty<Snapshot<Generic>>();
-// getDependenciesPromise(generic).thenAcceptAsync(snapshot -> {
-// try {
-// Thread.sleep(200);
-// } catch (Exception e) {
-// e.printStackTrace();
-// }
-// objectProperty.set(snapshot);
-// });
-// return objectProperty;
-// }

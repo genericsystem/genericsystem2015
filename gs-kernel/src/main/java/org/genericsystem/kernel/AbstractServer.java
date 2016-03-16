@@ -3,7 +3,6 @@ package org.genericsystem.kernel;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
@@ -29,7 +28,7 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((Engine) getRoot());
+				return new Transaction((AbstractServer) getRoot());
 			}
 
 			@Override

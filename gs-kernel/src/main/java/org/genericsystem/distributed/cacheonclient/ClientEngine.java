@@ -3,11 +3,12 @@ package org.genericsystem.distributed.cacheonclient;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.common.HeavyCache.ContextEventListener;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
@@ -40,17 +41,27 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	@Override
-	public FrontEndCache newCache() {
-		return new FrontEndCache(this);
+	public HeavyCache newCache() {
+		return new HeavyCache(this) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new FrontEndTransaction((ClientEngine) (getRoot()), getRoot().pickNewTs());
+			}
+		};
 	}
 
-	public FrontEndCache newCache(ContextEventListener<Generic> listener) {
-		return new FrontEndCache(this, listener);
+	public HeavyCache newCache(ContextEventListener<Generic> listener) {
+		return new HeavyCache(this, listener) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new FrontEndTransaction((ClientEngine) (getRoot()), getRoot().pickNewTs());
+			}
+		};
 	}
 
 	@Override
-	public FrontEndCache getCurrentCache() {
-		return (FrontEndCache) super.getCurrentCache();
+	public HeavyCache getCurrentCache() {
+		return (HeavyCache) super.getCurrentCache();
 	}
 
 	public Generic getGenericByVertex(Vertex vertex) {

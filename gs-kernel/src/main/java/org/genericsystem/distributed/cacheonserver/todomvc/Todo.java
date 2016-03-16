@@ -1,17 +1,21 @@
 package org.genericsystem.distributed.cacheonserver.todomvc;
 
+import java.util.Objects;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.Model;
 
 public class Todo extends Model {
 
+	private final Generic generic;
 	private Property<String> todoString;
 	private Property<Boolean> completed = new SimpleBooleanProperty(false);
 
-	Todo(TodoList parentModel, String text) {
-		todoString = new ReadOnlyObjectWrapper<>(text);
+	Todo(TodoList parentModel, Generic generic) {
+		this.generic = generic;
+		todoString = new ReadOnlyObjectWrapper<>(Objects.toString(generic));
 	}
 
 	/*********************************************************************************************************************************/
@@ -29,6 +33,6 @@ public class Todo extends Model {
 	}
 
 	public void remove() {
-		((TodoList) getParent()).getTodos().remove(this);
+		generic.remove();
 	}
 }

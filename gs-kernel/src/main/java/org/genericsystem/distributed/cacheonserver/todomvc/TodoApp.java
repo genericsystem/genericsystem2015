@@ -1,7 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.todomvc;
 
 import io.vertx.core.http.ServerWebSocket;
-import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlCheckBox;
@@ -17,11 +16,12 @@ import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.components.HtmlSpan;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
 import org.genericsystem.distributed.ui.components.HtmlUl;
+import org.genericsystem.kernel.Engine;
 
 public class TodoApp extends HtmlApp {
 
-	public TodoApp(Model model, ServerWebSocket webSocket) {
-		super(model, webSocket);
+	public TodoApp(Engine engine, ServerWebSocket webSocket) {
+		super(new TodoList(engine), webSocket);
 	}
 
 	@Override

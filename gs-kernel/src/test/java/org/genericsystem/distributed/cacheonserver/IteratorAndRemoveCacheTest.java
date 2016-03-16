@@ -1,13 +1,12 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.util.Iterator;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.distributed.cacheonclient.ClientEngine;
-import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
@@ -15,8 +14,8 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test002_IterateAndRemove() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache1 = engine.getCurrentCache();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache1 = engine.getCurrentCache();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Generic myCar2 = car.addInstance("myCar2");
@@ -46,11 +45,11 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
-		FrontEndCache cache1 = engine.getCurrentCache();
+		HeavyCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
 		cache1.flush();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		catchAndCheckCause(() -> myCar1.remove(), AliveConstraintViolationException.class);
 		cache2.flush();
 	}
@@ -59,9 +58,9 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
-		FrontEndCache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		cache.flush();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		myCar.remove();
 		cache.start();
 		cache.shiftTs();
@@ -74,8 +73,8 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test003_IterateAndRemove() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache1 = engine.getCurrentCache();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache1 = engine.getCurrentCache();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
 		Generic myCar2 = car.addInstance("myCar2");
@@ -140,7 +139,7 @@ public class IteratorAndRemoveCacheTest extends AbstractTest {
 
 	public void test009_IterateAndAdd() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache1 = engine.getCurrentCache();
+		HeavyCache cache1 = engine.getCurrentCache();
 
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");

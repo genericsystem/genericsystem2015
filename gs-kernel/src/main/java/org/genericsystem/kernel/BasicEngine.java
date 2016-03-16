@@ -2,15 +2,12 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
-import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocProtocol;
 
@@ -40,27 +37,27 @@ public class BasicEngine extends AbstractServer implements Generic, CocProtocol 
 		isInitialized = true;
 	}
 
-	@Override
-	public HeavyCache newCache() {
-		return new HeavyCache(this) {
-
-			@Override
-			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((BasicEngine) getRoot());
-			}
-
-			@Override
-			protected Generic plug(Generic generic) {
-				return ((Transaction) getTransaction()).plug(generic);
-			}
-
-			@Override
-			protected void unplug(Generic generic) {
-				((Transaction) getTransaction()).unplug(generic);
-			}
-
-		};
-	}
+	// @Override
+	// public HeavyCache newCache() {
+	// return new HeavyCache(this) {
+	//
+	// @Override
+	// protected IDifferential<Generic> buildTransaction() {
+	// return new Transaction((BasicEngine) getRoot());
+	// }
+	//
+	// @Override
+	// protected Generic plug(Generic generic) {
+	// return ((Transaction) getTransaction()).plug(generic);
+	// }
+	//
+	// @Override
+	// protected void unplug(Generic generic) {
+	// ((Transaction) getTransaction()).unplug(generic);
+	// }
+	//
+	// };
+	// }
 
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {

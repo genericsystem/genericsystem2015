@@ -1,17 +1,16 @@
 package org.genericsystem.distributed.cacheonserver;
 
 import java.util.stream.Collectors;
-
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.distributed.cacheonclient.ClientEngine;
-import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
 public class CacheTest extends AbstractTest {
 	public void test000() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle2");
 		assert vehicle.isAlive();
 		System.out.println("----------------------------------------------");
@@ -27,7 +26,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test001() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.clear();
@@ -137,8 +136,8 @@ public class CacheTest extends AbstractTest {
 
 	public void test002_mountNewCache() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.newCache().start();
-		FrontEndCache currentCache = engine.getCurrentCache();
+		HeavyCache cache = engine.newCache().start();
+		HeavyCache currentCache = engine.getCurrentCache();
 		assert cache == currentCache;
 		currentCache.mount();
 		engine.addInstance("Vehicle");
@@ -147,7 +146,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test005_TwoComponentsWithSameMetaInDifferentCaches_remove() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache currentCache = engine.getCurrentCache();
+		HeavyCache currentCache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = engine.addInstance("vehiclePower", vehicle);
 		assert currentCache.getCacheLevel() == 0;

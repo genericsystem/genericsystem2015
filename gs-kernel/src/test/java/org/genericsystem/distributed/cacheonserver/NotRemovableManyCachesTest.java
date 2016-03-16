@@ -4,8 +4,8 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.HeavyCache;
 import org.genericsystem.distributed.cacheonclient.ClientEngine;
-import org.genericsystem.distributed.cacheonclient.FrontEndCache;
 import org.testng.annotations.Test;
 
 @Test
@@ -13,8 +13,8 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test001_aliveEx() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.getCurrentCache();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache = engine.getCurrentCache();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -26,8 +26,8 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test003_aliveEx() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.getCurrentCache();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache = engine.getCurrentCache();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -41,10 +41,10 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test001_referenceEx() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		cache.flush();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
 		catchAndCheckCause(() -> car.remove(), ReferentialIntegrityConstraintViolationException.class);
@@ -52,9 +52,9 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 
 	public void test002_referenceEx() {
 		ClientEngine engine = new ClientEngine();
-		FrontEndCache cache = engine.getCurrentCache();
-		FrontEndCache cache2 = engine.newCache().start();
-		FrontEndCache cache3 = engine.newCache().start();
+		HeavyCache cache = engine.getCurrentCache();
+		HeavyCache cache2 = engine.newCache().start();
+		HeavyCache cache3 = engine.newCache().start();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		Generic myBmw = car.addInstance("myBmw");
@@ -72,11 +72,11 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar1 = car.addInstance("myCar1");
-		FrontEndCache cache1 = engine.getCurrentCache();
+		HeavyCache cache1 = engine.getCurrentCache();
 		cache1.flush();
 		myCar1.remove();
 		cache1.flush();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		catchAndCheckCause(() -> myCar1.remove(), AliveConstraintViolationException.class);
 		cache2.flush();
 	}
@@ -85,9 +85,9 @@ public class NotRemovableManyCachesTest extends AbstractTest {
 		ClientEngine engine = new ClientEngine();
 		Generic car = engine.addInstance("Car");
 		Generic myCar = car.addInstance("myCar");
-		FrontEndCache cache = engine.getCurrentCache();
+		HeavyCache cache = engine.getCurrentCache();
 		cache.flush();
-		FrontEndCache cache2 = engine.newCache().start();
+		HeavyCache cache2 = engine.newCache().start();
 		myCar.remove();
 		cache.start();
 		myCar.remove();

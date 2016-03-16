@@ -11,5 +11,4 @@ public abstract class Model {
 	public void afterParentConstruct() {
 
 	}
-
 }

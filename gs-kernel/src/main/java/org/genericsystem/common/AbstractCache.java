@@ -2,7 +2,6 @@ package org.genericsystem.common;
 
 import java.util.Arrays;
 import java.util.Collections;
-import javafx.collections.ObservableList;
 import org.genericsystem.defaults.DefaultCache;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
@@ -22,11 +21,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	public final void stop() {
 		getRoot().stop(this);
-	}
-
-	@Override
-	public ObservableList<Generic> getObservableDependencies(Generic generic) {
-		throw new UnsupportedOperationException();
 	}
 
 }

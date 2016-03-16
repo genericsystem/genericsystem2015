@@ -5,6 +5,8 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.HeavyCache.ContextEventListener;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.defaults.DefaultCache;
 
 public class Engine extends AbstractServer {
@@ -39,30 +41,24 @@ public class Engine extends AbstractServer {
 		return this;
 	}
 
-	// @Override
-	// public HeavyCache newCache() {
-	// HeavyCache cache = new HeavyCache(this) {
-	// @Override
-	// protected IDifferential<Generic> buildTransaction() {
-	// return new Transaction((AbstractServer) getRoot());
-	// }
-	// };
-	// HeavyCache result = (HeavyCache) map.putIfAbsent(cache.getCacheId(), cache);
-	// assert result == null;
-	// return cache;
-	// }
-	//
-	// public HeavyCache newCache(ContextEventListener<Generic> listener) {
-	// HeavyCache cache = new HeavyCache(this, listener) {
-	// @Override
-	// protected IDifferential<Generic> buildTransaction() {
-	// return new Transaction((AbstractServer) getRoot());
-	// }
-	// };
-	// HeavyCache result = (HeavyCache) map.putIfAbsent(cache.getCacheId(), cache);
-	// assert result == null;
-	// return cache;
-	// }
+	@Override
+	public HeavyCache newCache() {
+		return new HeavyCache(this) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction((AbstractServer) getRoot());
+			}
+		};
+	}
+
+	public HeavyCache newCache(ContextEventListener<Generic> listener) {
+		return new HeavyCache(this, listener) {
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction((AbstractServer) getRoot());
+			}
+		};
+	}
 
 	// @Override
 	// public long newCacheId() {

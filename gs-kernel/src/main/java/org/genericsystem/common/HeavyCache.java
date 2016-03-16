@@ -1,14 +1,18 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
+import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-
+import javafx.collections.ObservableList;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -19,16 +23,18 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.distributed.cacheonclient.utils.TransitiveInvalidator;
 import org.genericsystem.kernel.Statics;
+import com.sun.javafx.collections.ObservableListWrapper;
 
 public abstract class HeavyCache extends AbstractCache implements DefaultCache<Generic> {
 
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
-	protected final ObjectProperty<Differential> differentialProperty;
+	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();;
 	private IntegerBinding cacheLevelObservable;
 	private final ContextEventListener<Generic> listener;
-	private final long cacheId;
+	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
 	@Override
 	public long shiftTs() throws RollbackException {
@@ -41,8 +47,7 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected HeavyCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {
-		});
+		this(root, new ContextEventListener<Generic>() {});
 	}
 
 	protected Differential getDifferential() {
@@ -59,11 +64,9 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	protected HeavyCache(AbstractRoot root, long cacheId, ContextEventListener<Generic> listener) {
 		super(root);
-		this.cacheId = cacheId;
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
-		differentialProperty = new SimpleObjectProperty<Differential>();
 		cacheLevelObservable = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
 
 		initialize();
@@ -71,10 +74,6 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 
 	Restructurator getRestructurator() {
 		return restructurator;
-	}
-
-	public long getCacheId() {
-		return cacheId;
 	}
 
 	public ObservableValue<IDifferential<Generic>> getTransactionProperty() {
@@ -98,9 +97,30 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		return new Restructurator(this);
 	}
 
-	// long getBirthTs(Generic generic) {
-	// return differential.getBirthTs(generic);
-	// }
+	private Observable getInvalidator(Generic generic) {
+		return TransitiveInvalidator.create(differentialProperty, () -> differentialProperty.get().getInvalidator(generic));
+	}
+
+	@Override
+	public ObservableList<Generic> getObservableDependencies(Generic generic) {
+		ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
+		if (result == null) {
+			result = new ListBinding<Generic>() {
+				private final Observable invalidator = getInvalidator(generic);
+				{
+					bind(invalidator);
+				}
+
+				@SuppressWarnings("restriction")
+				@Override
+				protected ObservableList<Generic> computeValue() {
+					return new ObservableListWrapper<>(HeavyCache.this.getDependencies(generic).toList());
+				}
+			};
+			dependenciesAsOservableListCacheMap.put(generic, result);
+		}
+		return result;
+	}
 
 	protected void initialize() {
 		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubDifferential()));
@@ -283,21 +303,27 @@ public abstract class HeavyCache extends AbstractCache implements DefaultCache<G
 		public long getTs() {
 			return getTransaction().getTs();
 		}
+
+		@Override
+		public final Observable getInvalidator(Generic generic) {
+			return TransitiveInvalidator.create(transactionProperty, () -> transactionProperty.get().getInvalidator(generic));
+		}
+
+		@Override
+		public final CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+			return transactionProperty.get().getDependenciesPromise(generic);
+		}
 	}
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

@@ -4,13 +4,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.WebSocketsServer;
 import org.genericsystem.distributed.cacheonserver.todomvc.TodoApp;
-import org.genericsystem.distributed.cacheonserver.todomvc.TodoList;
 import org.genericsystem.distributed.ui.HtmlDomNode;
 import org.genericsystem.kernel.Engine;
 
@@ -34,7 +32,7 @@ public class BackEnd extends AbstractBackEnd<Engine> {
 		return new WebSocketsServer<Engine>(this, options.getHost(), options.getPort()) {
 			@Override
 			public Handler<Buffer> getHandler(Engine root, ServerWebSocket socket) {
-				TodoApp todoListApp = new TodoApp(new TodoList(), socket);
+				TodoApp todoListApp = new TodoApp(root, socket);
 				return buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					String message = gsBuffer.getString(0, gsBuffer.length());
