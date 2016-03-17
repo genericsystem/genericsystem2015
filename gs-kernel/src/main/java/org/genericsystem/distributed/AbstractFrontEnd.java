@@ -12,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.common.Protocole;
+import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
 import com.google.common.base.Supplier;
 
-public abstract class AbstractFrontEnd implements Protocole {
+public abstract class AbstractFrontEnd implements Protocol {
 
 	public static final int PICK_NEW_TS = 0;
 	public static final int GET_DEPENDENCIES = 1;

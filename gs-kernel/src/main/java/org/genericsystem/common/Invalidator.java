@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonclient.utils;
+package org.genericsystem.common;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -12,7 +12,7 @@ public class Invalidator<T> extends ObservableValueBase<T> {
 	private InvalidationListener listener = o -> super.fireValueChangedEvent();
 
 	public static <T> Invalidator<T> createInvalidator(Observable... observables) {
-		return new Invalidator<T>(observables);
+		return new Invalidator<>(observables);
 	}
 
 	private Invalidator(Observable... observables) {

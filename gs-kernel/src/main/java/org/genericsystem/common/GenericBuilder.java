@@ -3,12 +3,11 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.ExistsException;
 
 public abstract class GenericBuilder {
-	protected final HeavyCache context;
+	protected final AbstractCache context;
 	final Generic meta;
 	protected Generic adjustedMeta;
 	final List<Generic> overrides;
@@ -17,18 +16,17 @@ public abstract class GenericBuilder {
 	protected final List<Generic> components;
 	protected Generic gettable;
 
-	GenericBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+	GenericBuilder(AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 		assert overrides != null;
 		this.context = context;
 		this.meta = meta != null ? meta : (Generic) context.getRoot();
 		this.overrides = overrides;
 		this.components = components;
-		this.value = value;// generateValue(value);
+		this.value = generateValue(value);
 		check();
 		adjust();
 	}
 
-	// TODO remove this
 	Serializable generateValue(Serializable value) {
 		Class<? extends ValueGenerator> instanceValueGenerator = meta.getInstanceValueGenerator();
 		if (instanceValueGenerator != null) {
@@ -91,7 +89,7 @@ public abstract class GenericBuilder {
 
 	public static class AddBuilder extends GenericBuilder {
 
-		AddBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		AddBuilder(AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -105,7 +103,7 @@ public abstract class GenericBuilder {
 
 	static class SetBuilder extends GenericBuilder {
 
-		SetBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		SetBuilder(AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -122,7 +120,7 @@ public abstract class GenericBuilder {
 
 		private final Generic update;
 
-		UpdateBuilder(HeavyCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		UpdateBuilder(AbstractCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -140,7 +138,7 @@ public abstract class GenericBuilder {
 
 		private final Generic update;
 
-		MergeBuilder(HeavyCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		MergeBuilder(AbstractCache context, Generic update, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.update = update;
 		}
@@ -152,7 +150,7 @@ public abstract class GenericBuilder {
 
 	public static class AtomicBuilder extends GenericBuilder {
 
-		protected AtomicBuilder(HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		protected AtomicBuilder(AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 		}
 
@@ -165,7 +163,7 @@ public abstract class GenericBuilder {
 
 		private final Class<?> clazz;
 
-		SetSystemBuilder(HeavyCache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		SetSystemBuilder(AbstractCache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.clazz = clazz;
 		}

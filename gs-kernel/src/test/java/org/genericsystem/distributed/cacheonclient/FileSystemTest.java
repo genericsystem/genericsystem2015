@@ -1,9 +1,8 @@
 package org.genericsystem.distributed.cacheonclient;
 
 import java.util.Arrays;
-
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonclient.FileSystem.Directory;
@@ -81,7 +80,7 @@ public class FileSystemTest extends AbstractTest {
 		Directory directory1 = rootDirectory.addDirectory("directory1");
 		final Directory directory2 = rootDirectory.addDirectory("directory2");
 		assert !directory2.addDirectory("directory1").equals(directory1); // No Exception
-		HeavyCache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		engine.getCurrentCache().mount();
 
 		catchAndCheckCause(() -> directory2.addDirectory("directory1"), ExistsException.class); // Exception

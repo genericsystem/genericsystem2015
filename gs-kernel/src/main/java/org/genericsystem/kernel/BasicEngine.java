@@ -6,8 +6,10 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocProtocol;
 
@@ -35,6 +37,27 @@ public class BasicEngine extends AbstractServer implements Generic, CocProtocol 
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
 		isInitialized = true;
+	}
+
+	@Override
+	public AbstractCache newCache() {
+		return new AbstractCache(this) {
+
+			@Override
+			protected IDifferential<Generic> buildTransaction() {
+				return new Transaction(BasicEngine.this);
+			}
+
+			@Override
+			protected Generic plug(Generic generic) {
+				return ((Transaction) getTransaction()).plug(generic);
+			}
+
+			@Override
+			protected void unplug(Generic generic) {
+				((Transaction) getTransaction()).unplug(generic);
+			}
+		};
 	}
 
 	// @Override

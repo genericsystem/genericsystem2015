@@ -4,14 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
-import org.genericsystem.common.IDifferential;
-import org.genericsystem.common.Protocole;
+import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Vertex;
 
-public abstract class AbstractServer extends AbstractRoot implements Generic, Protocole {
+public abstract class AbstractServer extends AbstractRoot implements Generic, Protocol {
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
@@ -23,25 +22,7 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 	}
 
 	@Override
-	public HeavyCache newCache() {
-		return new HeavyCache(this) {
-
-			@Override
-			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((AbstractServer) getRoot());
-			}
-
-			@Override
-			protected Generic plug(Generic generic) {
-				return ((Transaction) getTransaction()).plug(generic);
-			}
-
-			@Override
-			protected void unplug(Generic generic) {
-				((Transaction) getTransaction()).unplug(generic);
-			}
-		};
-	}
+	public abstract AbstractCache newCache();
 
 	@Override
 	public void close() {

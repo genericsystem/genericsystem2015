@@ -1,7 +1,7 @@
 package org.genericsystem.distributed.cacheonserver;
 
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.testng.annotations.Test;
 
@@ -10,11 +10,11 @@ public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test001_simpleHolder() {
 		ClientEngine engine = new ClientEngine();
-		HeavyCache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		cache.flush();
-		HeavyCache cache2 = engine.newCache().start();
+		AbstractCache cache2 = engine.newCache().start();
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myBmwRed = myBmw.addHolder(color, "red");
 
@@ -28,11 +28,11 @@ public class RemoveManyCachesTest extends AbstractTest {
 
 	public void test002_simpleHolder() {
 		ClientEngine engine = new ClientEngine();
-		HeavyCache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		Generic car = engine.addInstance("Car");
 		Generic color = car.addAttribute("Color");
 		cache.flush();
-		HeavyCache cache2 = engine.newCache().start();
+		AbstractCache cache2 = engine.newCache().start();
 		Generic myBmw2 = car.addInstance("myBmw");
 		Generic myBmwRed2 = myBmw2.addHolder(color, "red");
 		cache.start();

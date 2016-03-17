@@ -30,9 +30,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
-import org.genericsystem.common.HeavyCache;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -262,7 +262,7 @@ public class Archiver {
 	protected class Loader {
 
 		protected final ObjectInputStream objectInputStream;
-		protected final HeavyCache context;
+		protected final AbstractCache context;
 
 		protected Loader(ObjectInputStream objectInputStream) {
 			this.objectInputStream = objectInputStream;
@@ -358,7 +358,7 @@ public class Archiver {
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
+		SetArchiverHandler(long ts, AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
 			this.otherTs = otherTs;

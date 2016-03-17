@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.api.core.IVertex;
 
 public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> {
@@ -98,7 +97,6 @@ public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> 
 	@Override
 	@SuppressWarnings("unchecked")
 	default T addHolder(T attribute, Serializable value, T... targets) {
-		System.out.println("def writ" + value);
 		return attribute.addInstance(value, addThisToTargets(targets));
 	}
 
