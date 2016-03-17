@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonclient.utils;
+package org.genericsystem.common;
 
 import java.util.function.Supplier;
 

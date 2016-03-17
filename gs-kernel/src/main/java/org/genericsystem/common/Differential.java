@@ -9,7 +9,6 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.distributed.cacheonclient.utils.Invalidator;
 
 public class Differential implements IDifferential<Generic> {
 

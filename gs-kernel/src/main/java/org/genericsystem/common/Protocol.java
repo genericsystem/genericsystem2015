@@ -1,7 +1,7 @@
 package org.genericsystem.common;
 
 
-public interface Protocole {
+public interface Protocol {
 
 	long pickNewTs();
 

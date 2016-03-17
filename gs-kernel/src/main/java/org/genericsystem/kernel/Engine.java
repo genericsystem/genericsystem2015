@@ -3,9 +3,8 @@ package org.genericsystem.kernel;
 import java.util.Collections;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
-import org.genericsystem.common.HeavyCache.ContextEventListener;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.defaults.DefaultCache;
 
@@ -42,8 +41,8 @@ public class Engine extends AbstractServer {
 	}
 
 	@Override
-	public HeavyCache newCache() {
-		return new HeavyCache(this) {
+	public AbstractCache newCache() {
+		return new AbstractCache(this) {
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
 				return new Transaction((AbstractServer) getRoot());
@@ -51,8 +50,8 @@ public class Engine extends AbstractServer {
 		};
 	}
 
-	public HeavyCache newCache(ContextEventListener<Generic> listener) {
-		return new HeavyCache(this, listener) {
+	public AbstractCache newCache(ContextEventListener<Generic> listener) {
+		return new AbstractCache(this, listener) {
 			@Override
 			protected IDifferential<Generic> buildTransaction() {
 				return new Transaction((AbstractServer) getRoot());
@@ -213,8 +212,8 @@ public class Engine extends AbstractServer {
 	// }
 
 	@Override
-	public HeavyCache getCurrentCache() {
-		return (HeavyCache) super.getCurrentCache();
+	public AbstractCache getCurrentCache() {
+		return super.getCurrentCache();
 	}
 
 	@Override
