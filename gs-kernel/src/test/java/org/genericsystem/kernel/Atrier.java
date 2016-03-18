@@ -1,14 +1,80 @@
 package org.genericsystem.kernel;
 
+import java.util.Arrays;
+import java.util.Map.Entry;
+
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.DefaultConfig.NoReferentialIntegrityProperty;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class Atrier extends AbstractTest {
+
+	public void test000() {
+		Diff<String> diff = new Diff<>(Arrays.asList("coucou0", "coucou1", "coucou5", "coucou6"), Arrays.asList("coucou5", "coucou7"));
+		int index = 0;
+		while (diff.hasNext()) {
+			Entry<String, Boolean> e = diff.next();
+			if (e.getValue() == null) {
+				System.out.println("Nop");
+				index++;
+			} else
+				System.out.println((e.getValue() ? "Add : " + e.getKey() : "Remove : " + e.getKey()) + " index : " + index);
+		}
+	}
+
+	public void test00001() {
+		final ObservableList<String>[] list = new ObservableList[1];
+		list[0] = FXCollections.observableArrayList();
+		ListBinding<String> test = new ListBinding<String>() {
+			@Override
+			protected ObservableList<String> computeValue() {
+				System.out.println("computevalue");
+				return list[0];
+			}
+		};
+		test.addListener((ListChangeListener<String>) c -> {
+			System.out.println("*******************");
+			while (c.next()) {
+				System.out.println("********next******");
+				if (c.wasPermutated()) {
+					for (int i = c.getFrom(); i < c.getTo(); ++i) {
+						System.out.println("$permutate");
+					}
+				} else if (c.wasUpdated()) {
+					System.out.println("$update");
+				} else {
+					for (String remitem : c.getRemoved()) {
+						System.out.println("$remove");
+					}
+					for (String additem : c.getAddedSubList()) {
+						System.out.println("$add");
+					}
+				}
+			}
+
+		});
+		System.out.println("GET----------------");
+		System.out.println(test.get());
+		System.out.println("INVALIDATE----------------");
+		test.invalidate();
+		System.out.println("GET2----------------");
+		test.get();
+		System.out.println("ADD----------------");
+		list[0].add("coucou0");
+		list[0].add("coucou1");
+		list[0].addAll("coucou2", "coucou3");
+		System.out.println("INVALIDATE----------------");
+		list[0] = FXCollections.observableArrayList();
+		list[0].addAll("coucou0", "coucou1", "coucou2");
+		test.invalidate();
+	}
 
 	public void test001() {
 		BasicEngine engine = new BasicEngine();

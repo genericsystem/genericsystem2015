@@ -7,14 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -26,7 +29,6 @@ import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.kernel.Statics;
-import com.sun.javafx.collections.ObservableListWrapper;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
 
@@ -46,7 +48,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	private final Restructurator restructurator;
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
 	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();;
-	private IntegerBinding cacheLevelObservable;
+	private ObservableIntegerValue cacheLevel;
 	private final ContextEventListener<Generic> listener;
 	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
@@ -61,7 +63,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected AbstractCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {});
+		this(root, new ContextEventListener<Generic>() {
+		});
 	}
 
 	protected AbstractCache(AbstractRoot root, ContextEventListener<Generic> listener) {
@@ -73,7 +76,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
-		cacheLevelObservable = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
+		cacheLevel = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
 
 		initialize();
 	}
@@ -125,10 +128,9 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 					bind(invalidator);
 				}
 
-				@SuppressWarnings("restriction")
 				@Override
 				protected ObservableList<Generic> computeValue() {
-					return new ObservableListWrapper<>(AbstractCache.this.getDependencies(generic).toList());
+					return FXCollections.observableList(AbstractCache.this.getDependencies(generic).toList());
 				}
 			};
 			dependenciesAsOservableListCacheMap.put(generic, result);
@@ -261,8 +263,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return getDifferential().getCacheLevel();
 	}
 
-	public IntegerBinding getCacheLevelObservable() {
-		return cacheLevelObservable;
+	public ObservableIntegerValue getCacheLevelObservableValue() {
+		return cacheLevel;
 	}
 
 	@Override
@@ -331,13 +333,17 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {
+		}
 
-		default void triggersRefreshEvent() {}
+		default void triggersRefreshEvent() {
+		}
 
-		default void triggersClearEvent() {}
+		default void triggersClearEvent() {
+		}
 
-		default void triggersFlushEvent() {}
+		default void triggersFlushEvent() {
+		}
 	}
 
 }

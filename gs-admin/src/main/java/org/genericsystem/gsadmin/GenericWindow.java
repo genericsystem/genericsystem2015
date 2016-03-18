@@ -58,8 +58,8 @@ public class GenericWindow extends Window {
 	}
 
 	public StringBinding getCacheLevel() {
-		return Bindings.createStringBinding(() -> "Cache level : " + engineCrud.getValue().<ClientEngine> getModel().getCurrentCache().getCacheLevelObservable().getValue(), engineCrud.getValue().<ClientEngine> getModel().getCurrentCache()
-				.getCacheLevelObservable());
+		return Bindings.createStringBinding(() -> "Cache level : " + engineCrud.getValue().<ClientEngine> getModel().getCurrentCache().getCacheLevelObservableValue().getValue(), engineCrud.getValue().<ClientEngine> getModel().getCurrentCache()
+				.getCacheLevelObservableValue());
 	}
 
 	public void unmount() {
