@@ -73,6 +73,8 @@ public class HtmlDomNode {
 		public void add(int index, HtmlDomNode childNode) {
 			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
 			childNode.fillJson(HtmlDomNode.this, jsonObj);
+			if ("li".equals(childNode.tag))
+				System.out.println("ADD : " + index + " size : " + size() + " tag : " + childNode.tag);
 			jsonObj.put(NEXT_ID, index < size() ? get(index).id : null);
 			sendMessage(jsonObj);
 			internal.add(index, childNode);
@@ -80,6 +82,7 @@ public class HtmlDomNode {
 
 		@Override
 		public HtmlDomNode remove(int index) {
+			System.out.println("REMOVE : " + index + " size : " + size());
 			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, REMOVE);
 			jsonObj.put(ID, internal.get(index).id);
 			sendMessage(jsonObj);
