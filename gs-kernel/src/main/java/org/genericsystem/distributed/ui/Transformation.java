@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
@@ -29,8 +28,9 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 				nextRemove(change.getFrom(), IntStream.range(change.getFrom(), change.getTo()).mapToObj(this::remove).collect(Collectors.toList()));
 				nextAdd(change.getFrom(), change.getTo());
 			} else {
-				if (change.wasRemoved())
+				if (change.wasRemoved()) {
 					nextRemove(change.getFrom(), change.getRemoved().stream().map(cache::remove).collect(Collectors.toList()));
+				}
 				if (change.wasAdded())
 					nextAdd(change.getFrom(), change.getAddedSize());
 			}

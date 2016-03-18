@@ -2,12 +2,10 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Map.Entry;
-
 import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
@@ -30,13 +28,12 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void test00001() {
-		final ObservableList<String>[] list = new ObservableList[1];
-		list[0] = FXCollections.observableArrayList();
+		final ObservableList<String> list = FXCollections.observableArrayList();
 		ListBinding<String> test = new ListBinding<String>() {
 			@Override
 			protected ObservableList<String> computeValue() {
 				System.out.println("computevalue");
-				return list[0];
+				return list;
 			}
 		};
 		test.addListener((ListChangeListener<String>) c -> {
@@ -60,20 +57,28 @@ public class Atrier extends AbstractTest {
 			}
 
 		});
-		System.out.println("GET----------------");
-		System.out.println(test.get());
-		System.out.println("INVALIDATE----------------");
-		test.invalidate();
-		System.out.println("GET2----------------");
-		test.get();
-		System.out.println("ADD----------------");
-		list[0].add("coucou0");
-		list[0].add("coucou1");
-		list[0].addAll("coucou2", "coucou3");
-		System.out.println("INVALIDATE----------------");
-		list[0] = FXCollections.observableArrayList();
-		list[0].addAll("coucou0", "coucou1", "coucou2");
-		test.invalidate();
+
+		System.out.println("ADDALL----------------");
+		list.addAll("coucou0", "coucou1", "coucou2", "coucou3");
+		System.out.println("BEFORE : " + list);
+		System.out.println("SETALL----------------");
+
+		Diff<String> diff = new Diff<>(list, Arrays.asList("coucou0", "coucou1", "coucou2"));
+		int index = 0;
+		while (diff.hasNext()) {
+			Entry<String, Boolean> e = diff.next();
+			if (e.getValue() == null) {
+				System.out.println("Nop");
+				index++;
+			} else {
+				System.out.println((e.getValue() ? "Add : " + e.getKey() : "Remove : " + e.getKey()) + " index : " + index);
+				if (e.getValue())
+					list.add(index, e.getKey());
+				else
+					list.remove(index);
+			}
+		}
+		System.out.println("AFTER : " + list);
 	}
 
 	public void test001() {

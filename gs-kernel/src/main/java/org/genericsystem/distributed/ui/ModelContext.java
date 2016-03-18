@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 
@@ -104,6 +103,7 @@ public class ModelContext {
 		};
 
 		public void delete(int index) {
+			System.out.println("delete : " + index);
 			internal.remove(index).destroy();
 		};
 
