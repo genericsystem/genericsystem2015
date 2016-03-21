@@ -2,10 +2,12 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Map.Entry;
+
 import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
@@ -15,7 +17,7 @@ import org.testng.annotations.Test;
 public class Atrier extends AbstractTest {
 
 	public void test000() {
-		Diff<String> diff = new Diff<>(Arrays.asList("coucou0", "coucou1", "coucou5", "coucou6"), Arrays.asList("coucou5", "coucou7"));
+		Diff<String> diff = new Diff<>(Arrays.asList("coucou0", "coucou1", "coucou2", "coucou3"), Arrays.asList("coucou0", "coucou1", "coucou2", "coucou3"));
 		int index = 0;
 		while (diff.hasNext()) {
 			Entry<String, Boolean> e = diff.next();

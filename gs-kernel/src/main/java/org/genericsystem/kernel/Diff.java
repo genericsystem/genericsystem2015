@@ -27,7 +27,7 @@ public class Diff<E> implements Iterator<Entry<E, Boolean>> {
 				for (int j = n - 1; j >= 0; j--) {
 					E x = elements1.get(i);
 					E y = elements2.get(j);
-					opt.set(i, j, x == y ? (opt.get(i + 1, j + 1) + 1) : Math.max(opt.get(i + 1, j), opt.get(i, j + 1)));
+					opt.set(i, j, x.equals(y) ? (opt.get(i + 1, j + 1) + 1) : Math.max(opt.get(i + 1, j), opt.get(i, j + 1)));
 				}
 			}
 		}
@@ -43,7 +43,7 @@ public class Diff<E> implements Iterator<Entry<E, Boolean>> {
 		if (i < m && j < n) {
 			E e1 = elements1.get(i);
 			E e2 = elements2.get(j);
-			if (e1 == e2) {
+			if (e1.equals(e2)) {
 				i++;
 				j++;
 				return new SimpleEntry<>(e1, null);
@@ -74,7 +74,7 @@ public class Diff<E> implements Iterator<Entry<E, Boolean>> {
 		return result;
 	}
 
-	class Matrix {
+	private class Matrix {
 		private final int[] state;
 
 		Matrix(Integer width, Integer height) {

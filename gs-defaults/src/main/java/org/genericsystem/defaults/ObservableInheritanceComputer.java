@@ -10,10 +10,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.beans.Observable;
-import javafx.beans.binding.ListBinding;
 import javafx.collections.ObservableList;
 
-import com.sun.javafx.collections.ObservableListWrapper;
+import org.genericsystem.defaults.tools.MinimalChangesListBinding;
 
 @SuppressWarnings("restriction")
 public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
@@ -39,7 +38,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 		return binding;
 	}
 
-	private class InheritenceComputerBinding extends ListBinding<T> {
+	private class InheritenceComputerBinding extends MinimalChangesListBinding<T> {
 
 		Set<Observable> observables = new HashSet<>();
 
@@ -55,12 +54,13 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 		}
 
 		@Override
-		protected ObservableList<T> computeValue() {
+		protected List<T> computeNewList() {
 			unbindAll();
 			inheritingsCache.clear();
 			set.clear();
-			return new ObservableListWrapper<>(getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()));
+			return getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList());
 		}
+
 	}
 
 	private Stream<T> getInheringsStream(T superVertex) {
