@@ -9,10 +9,10 @@ import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerPropertyBase;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableListValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-
 import com.sun.javafx.binding.BindingHelperObserver;
 import com.sun.javafx.binding.ListExpressionHelper;
 
@@ -30,7 +30,7 @@ public abstract class DiffListBinding<E> extends ListExpression<E> implements Bi
 	private ObservableList<E> value;
 	private boolean valid = false;
 	private BindingHelperObserver observer;
-	private ListExpressionHelper<E> helper = null;
+	private ListExpressionHelper<E> helper = new SingleListChange<E>(observable, listener) : helper.addListener(listener);;
 
 	private SizeProperty size0;
 	private EmptyProperty empty0;
@@ -118,12 +118,12 @@ public abstract class DiffListBinding<E> extends ListExpression<E> implements Bi
 
 	@Override
 	public void addListener(ListChangeListener<? super E> listener) {
-		helper = ListExpressionHelper.addListener(helper, this, listener);
+		helper = DiffListBinding.addListener(helper, (ObservableListValue<E>) this, listener);
 	}
 
 	@Override
 	public void removeListener(ListChangeListener<? super E> listener) {
-		helper = ListExpressionHelper.removeListener(helper, listener);
+		helper = DiffListBinding.removeListener(helper, listener);
 	}
 
 	/**
@@ -166,8 +166,7 @@ public abstract class DiffListBinding<E> extends ListExpression<E> implements Bi
 	 * A default implementation of {@code dispose()} that is empty.
 	 */
 	@Override
-	public void dispose() {
-	}
+	public void dispose() {}
 
 	/**
 	 * A default implementation of {@code getDependencies()} that returns an empty {@link javafx.collections.ObservableList}.
@@ -186,31 +185,31 @@ public abstract class DiffListBinding<E> extends ListExpression<E> implements Bi
 	 */
 	@Override
 	public final ObservableList<E> get() {
-		if (!valid) {
-			ObservableList<E> oldValue = value;
-			value = computeValue();
-			valid = true;
-			if (value != oldValue) {
-				if (oldValue != null) {
-					System.out.println("REMOVE LISTENER");
-					oldValue.removeListener(listChangeListener);
-				}
-				if (value != null) {
-					System.out.println("ADD LISTENER");
-					value.addListener(listChangeListener);
-				} else
-					throw new IllegalStateException();
-			}
-		}
-		return value;
 		// if (!valid) {
+		// ObservableList<E> oldValue = value;
 		// value = computeValue();
 		// valid = true;
+		// if (value != oldValue) {
+		// if (oldValue != null) {
+		// System.out.println("REMOVE LISTENER");
+		// oldValue.removeListener(listChangeListener);
+		// }
 		// if (value != null) {
+		// System.out.println("ADD LISTENER");
 		// value.addListener(listChangeListener);
+		// } else
+		// throw new IllegalStateException();
 		// }
 		// }
 		// return value;
+		if (!valid) {
+			value = computeValue();
+			valid = true;
+			if (value != null) {
+				value.addListener(listChangeListener);
+			}
+		}
+		return value;
 	}
 
 	/**
@@ -232,9 +231,9 @@ public abstract class DiffListBinding<E> extends ListExpression<E> implements Bi
 	@Override
 	public final void invalidate() {
 		if (valid) {
-			// if (value != null) {
-			// value.removeListener(listChangeListener);
-			// }
+			if (value != null) {
+				value.removeListener(listChangeListener);
+			}
 			valid = false;
 			invalidateProperties();
 			onInvalidating();
@@ -258,7 +257,7 @@ public abstract class DiffListBinding<E> extends ListExpression<E> implements Bi
 
 	/**
 	 * Returns a string representation of this {@code ListBinding} object.
-	 * 
+	 *
 	 * @return a string representation of this {@code ListBinding} object.
 	 */
 	@Override
