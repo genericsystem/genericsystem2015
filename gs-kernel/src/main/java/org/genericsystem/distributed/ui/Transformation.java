@@ -21,10 +21,12 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 
 	@Override
 	protected void sourceChanged(Change<? extends F> change) {
+		System.out.println("Transformation change : " + change);
 		while (change.next()) {
 			beginChange();
 
 			if (change.wasPermutated()) {
+				assert false;
 				nextRemove(change.getFrom(), IntStream.range(change.getFrom(), change.getTo()).mapToObj(this::remove).collect(Collectors.toList()));
 				nextAdd(change.getFrom(), change.getTo());
 			} else {

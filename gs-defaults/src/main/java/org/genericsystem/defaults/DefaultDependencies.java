@@ -9,10 +9,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.TransitiveObservableList;
@@ -144,17 +142,16 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 			@Override
 			protected void onMasterInvalidation() {
-				invalidate();
 				unbindAllSlaves();
+				invalidate();
 				for (T generic : master)
 					bindSlave(generic.getObservableSubInheritings());
 			}
 
 			@SuppressWarnings("unchecked")
 			@Override
-			protected ObservableList<T> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections.observableList(Stream
-						.concat(Stream.of((T) DefaultDependencies.this), getObservableInheritings().stream().flatMap(inheriting -> inheriting.getObservableSubInheritings().stream())).distinct().collect(Collectors.toList())));
+			protected List<T> computeValue() {
+				return Stream.concat(Stream.of((T) DefaultDependencies.this), getObservableInheritings().stream().flatMap(inheriting -> inheriting.getObservableSubInheritings().stream())).distinct().collect(Collectors.toList());
 			}
 		};
 	}
@@ -166,21 +163,24 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 	default ObservableList<T> getObservableSubInstances() {
 
-		return new TransitiveObservableList<T>(getObservableSubInheritings()) {
+		ObservableList<T> result = new TransitiveObservableList<T>(getObservableSubInheritings()) {
 
 			@Override
 			protected void onMasterInvalidation() {
-				invalidate();
 				unbindAllSlaves();
+				invalidate();
 				for (T generic : master)
 					bindSlave(generic.getObservableInstances());
 			}
 
 			@Override
-			protected ObservableList<T> computeValue() {
-				return FXCollections.unmodifiableObservableList(FXCollections.observableList(getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream()).collect(Collectors.toList())));
+			protected List<T> computeValue() {
+				System.out.println("COMPUTE VALUE");
+				return getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream()).collect(Collectors.toList());
 			}
 		};
+		result.addListener((ListChangeListener) c -> System.out.println("TransitiveObservableList CHANGE : " + c));
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")

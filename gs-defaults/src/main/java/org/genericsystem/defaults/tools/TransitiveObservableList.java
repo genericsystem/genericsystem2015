@@ -2,14 +2,12 @@ package org.genericsystem.defaults.tools;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
-import javafx.beans.binding.ListBinding;
 import javafx.collections.ObservableList;
 
-public abstract class TransitiveObservableList<T> extends ListBinding<T> {
+public abstract class TransitiveObservableList<T> extends MinimalChangesListBinding<T> {
 
 	private final List<ObservableList<T>> slaves = new ArrayList<>();
 	protected final ObservableList<T> master;

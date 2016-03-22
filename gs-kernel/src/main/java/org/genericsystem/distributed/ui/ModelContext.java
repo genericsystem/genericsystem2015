@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 
 public class ModelContext {
 
@@ -88,6 +86,7 @@ public class ModelContext {
 	public class ModelContextList {
 
 		private Element<?> childElement;
+
 		private List<ModelContext> internal = new ArrayList<>();
 
 		public ModelContextList(Element<?> childElement) {
@@ -107,38 +106,38 @@ public class ModelContext {
 			internal.remove(index).destroy();
 		};
 
-		public ListChangeListener<Model> getListChangeListener(ViewContext<?> viewContext) {
-			return change -> {
-				while (change.next()) {
-					if (change.wasPermutated()) {
-						for (int i = change.getFrom(); i < change.getTo(); i++)
-							delete(change.getFrom());
-						int index = change.getFrom();
-						for (Model model : change.getList().subList(change.getFrom(), change.getTo()))
-							insert(index++, model, viewContext);
-					} else {
-						if (change.wasRemoved())
-							for (int i = 0; i < change.getRemovedSize(); i++)
-								delete(change.getFrom());
-						if (change.wasAdded()) {
-							int index = change.getFrom();
-							for (Model model : change.getAddedSubList())
-								insert(index++, model, viewContext);
-						}
-					}
-				}
-			};
-		}
+		// public ListChangeListener<Model> getListChangeListener(ViewContext<?> viewContext) {
+		// return change -> {
+		// while (change.next()) {
+		// if (change.wasPermutated()) {
+		// for (int i = change.getFrom(); i < change.getTo(); i++)
+		// delete(change.getFrom());
+		// int index = change.getFrom();
+		// for (Model model : change.getList().subList(change.getFrom(), change.getTo()))
+		// insert(index++, model, viewContext);
+		// } else {
+		// if (change.wasRemoved())
+		// for (int i = 0; i < change.getRemovedSize(); i++)
+		// delete(change.getFrom());
+		// if (change.wasAdded()) {
+		// int index = change.getFrom();
+		// for (Model model : change.getAddedSubList())
+		// insert(index++, model, viewContext);
+		// }
+		// }
+		// }
+		// };
+		// }
 
-		public ChangeListener<Model> getChangeListener(ViewContext<?> viewContext) {
-			return (o, oldModel, newModel) -> {
-				if (oldModel == newModel)
-					return;
-				if (oldModel != null)
-					delete(0);
-				if (newModel != null)
-					insert(0, newModel, viewContext);
-			};
-		}
+		// public ChangeListener<Model> getChangeListener(ViewContext<?> viewContext) {
+		// return (o, oldModel, newModel) -> {
+		// if (oldModel == newModel)
+		// return;
+		// if (oldModel != null)
+		// delete(0);
+		// if (newModel != null)
+		// insert(0, newModel, viewContext);
+		// };
+		// }
 	}
 }

@@ -2,7 +2,6 @@ package org.genericsystem.distributed.cacheonserver.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,9 +11,9 @@ import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.Transformation;
 import org.genericsystem.kernel.Engine;
@@ -45,9 +44,9 @@ public class TodoList extends Model {
 		this.engine = engine;
 		todos = new Transformation<>(engine.getObservableSubInstances(), g -> {
 			Todo todo = new Todo(this, g);
-			System.out.println("ZZZZZZZZZZZZZZZZ");
 			return todo;
 		});
+		todos.addListener((ListChangeListener) c -> System.out.println("TRANSFORMATION CHANGE :::" + " " + c));
 		filtered = new FilteredList<>(todos);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(todos.filtered(COMPLETE));

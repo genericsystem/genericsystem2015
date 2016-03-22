@@ -48,7 +48,7 @@ public class ViewContext<N> {
 			nodeChildren.add(indexInChildren, node);
 			if (node instanceof HtmlDomNode)
 				getRootViewContext().add(((HtmlDomNode) node).getId(), (HtmlDomNode) node);
-			sizeByElement.put(template, indexInChildren);
+			// sizeByElement.put(template, indexInChildren);
 		}
 		for (Element<N> childElement : template.<N> getChildren()) {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)

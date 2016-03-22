@@ -7,17 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -28,6 +24,7 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
+import org.genericsystem.defaults.tools.MinimalChangesListBinding;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
@@ -63,8 +60,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected AbstractCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {
-		});
+		this(root, new ContextEventListener<Generic>() {});
 	}
 
 	protected AbstractCache(AbstractRoot root, ContextEventListener<Generic> listener) {
@@ -122,15 +118,15 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
 		ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
 		if (result == null) {
-			result = new ListBinding<Generic>() {
+			result = new MinimalChangesListBinding<Generic>() {
 				private final Observable invalidator = getInvalidator(generic);
 				{
 					bind(invalidator);
 				}
 
 				@Override
-				protected ObservableList<Generic> computeValue() {
-					return FXCollections.unmodifiableObservableList(FXCollections.observableList(AbstractCache.this.getDependencies(generic).toList()));
+				protected List<Generic> computeValue() {
+					return AbstractCache.this.getDependencies(generic).toList();
 				}
 			};
 			dependenciesAsOservableListCacheMap.put(generic, result);
@@ -333,17 +329,13 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

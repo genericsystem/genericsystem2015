@@ -1,8 +1,9 @@
 package org.genericsystem.distributed.ui;
 
 import java.util.function.Function;
-
+import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class MetaBinding<N, T> {
@@ -27,7 +28,20 @@ public class MetaBinding<N, T> {
 		return bind(applyOnModel, MetaBinder.<N, T> foreachBinder());
 	}
 
-	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableValue<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
-		return bind(applyOnModel, MetaBinder.selectorBinder());
+	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableList<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
+		Function<M, ObservableList<T>> applyOnModelList = m -> new ListBinding<T>() {
+			{
+				bind(applyOnModel.apply(m));
+			}
+
+			@Override
+			protected ObservableList<T> computeValue() {
+				T value = applyOnModel.apply(m).getValue();
+				return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
+			}
+
+		};
+		return forEach(applyOnModelList);
 	}
+
 }

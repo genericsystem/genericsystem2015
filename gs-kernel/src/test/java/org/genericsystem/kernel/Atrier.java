@@ -1,32 +1,40 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
-
 import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
+import org.genericsystem.defaults.tools.MinimalChangesListBinding;
 import org.testng.annotations.Test;
 
 @Test
 public class Atrier extends AbstractTest {
 
 	public void test000() {
-		Diff<String> diff = new Diff<>(Arrays.asList("coucou0", "coucou1", "coucou2", "coucou3"), Arrays.asList("coucou0", "coucou1", "coucou2", "coucou3"));
-		int index = 0;
-		while (diff.hasNext()) {
-			Entry<String, Boolean> e = diff.next();
-			if (e.getValue() == null) {
-				System.out.println("Nop");
-				index++;
-			} else
-				System.out.println((e.getValue() ? "Add : " + e.getKey() : "Remove : " + e.getKey()) + " index : " + index);
-		}
+		ObservableList<String> o1 = FXCollections.observableList(Arrays.asList("coucou1", "coucou4", "coucou3", "coucou5"));
+		ObservableList<String>[] o = new ObservableList[1];
+		o[0] = o1;
+		ObservableList<String> o2 = FXCollections.observableList(Arrays.asList("coucou1", "coucou2", "coucou3", "coucou6"));
+		MinimalChangesListBinding<String> o3 = new MinimalChangesListBinding() {
+
+			@Override
+			protected List<String> computeValue() {
+				return o[0];
+			}
+
+		};
+
+		o3.addListener((ListChangeListener) c -> System.out.println("zzzzzzzzzzzzzzzzz" + c.toString()));
+		o[0] = o2;
+		System.out.println("--------------------------------------");
+		o3.invalidate();
+		assert o3.get().equals(o2);
 	}
 
 	public void test00001() {
