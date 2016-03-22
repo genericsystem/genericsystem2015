@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.api.core.IVertex;
@@ -151,8 +152,9 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 			@SuppressWarnings("unchecked")
 			@Override
-			protected List<T> computeNewList() {
-				return Stream.concat(Stream.of((T) DefaultDependencies.this), getObservableInheritings().stream().flatMap(inheriting -> inheriting.getObservableSubInheritings().stream())).distinct().collect(Collectors.toList());
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(Stream
+						.concat(Stream.of((T) DefaultDependencies.this), getObservableInheritings().stream().flatMap(inheriting -> inheriting.getObservableSubInheritings().stream())).distinct().collect(Collectors.toList())));
 			}
 		};
 	}
@@ -175,8 +177,8 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 			}
 
 			@Override
-			protected List<T> computeNewList() {
-				return getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream()).collect(Collectors.toList());
+			protected ObservableList<T> computeValue() {
+				return FXCollections.unmodifiableObservableList(FXCollections.observableList(getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream()).collect(Collectors.toList())));
 			}
 		};
 	}

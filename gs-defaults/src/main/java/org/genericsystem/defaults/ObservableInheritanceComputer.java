@@ -3,16 +3,15 @@ package org.genericsystem.defaults;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.beans.Observable;
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.defaults.tools.MinimalChangesListBinding;
 
 @SuppressWarnings("restriction")
 public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
@@ -38,7 +37,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 		return binding;
 	}
 
-	private class InheritenceComputerBinding extends MinimalChangesListBinding<T> {
+	private class InheritenceComputerBinding extends ListBinding<T> {
 
 		Set<Observable> observables = new HashSet<>();
 
@@ -54,13 +53,12 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 		}
 
 		@Override
-		protected List<T> computeNewList() {
+		protected ObservableList<T> computeValue() {
 			unbindAll();
 			inheritingsCache.clear();
 			set.clear();
-			return getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList());
+			return FXCollections.unmodifiableObservableList(FXCollections.observableList((getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()))));
 		}
-
 	}
 
 	private Stream<T> getInheringsStream(T superVertex) {

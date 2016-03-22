@@ -6,13 +6,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
+import javafx.collections.ObservableList;
+
 import com.sun.javafx.collections.ObservableListWrapper;
 
 @SuppressWarnings("restriction")
 public abstract class MinimalChangesObservableList<E> extends ObservableListWrapper<E> {
+
+	private final ObservableList<E> internal;
 
 	private final InvalidationListener listener = o -> {
 		beginChange();
@@ -21,20 +25,15 @@ public abstract class MinimalChangesObservableList<E> extends ObservableListWrap
 		endChange();
 	};
 
-	MinimalChangesObservableList() {
+	MinimalChangesObservableList(ObservableList<E> internal) {
 		super(new ArrayList<>());
+		this.internal = internal;
+		this.internal.addListener(new WeakInvalidationListener(listener));
 	}
-
-	public void bind(Observable... observables) {
-		for (Observable observable : observables)
-			observable.addListener(new WeakInvalidationListener(listener));
-	}
-
-	protected abstract List<E> computeValue();
 
 	protected void doMinimalChanges() {
 		List<E> oldList = new ArrayList<>(this);
-		List<E> newList = computeValue();
+		List<E> newList = internal;
 		System.out.println("OLD" + oldList);
 		System.out.println("NEW" + newList);
 		Diff<E> diff = new Diff<>(oldList, newList);
