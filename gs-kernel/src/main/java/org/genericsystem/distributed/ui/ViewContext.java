@@ -16,25 +16,25 @@ public class ViewContext<N> {
 
 	private final List<N> nodeChildren;
 
-	private ViewContext(ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
+	private ViewContext(Integer index, ViewContext<?> parent, ModelContext modelContext, Element<N> template, N node) {
 		this.parent = parent;
 		this.template = template;
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
 		nodeChildren = this.parent != null ? (List<N>) ((Function) template.getParent().getGraphicChildren()).apply(parent.node) : null;
-		init();
+		init(index);
 	}
 
 	public ModelContext getModelContext() {
 		return modelContext;
 	}
 
-	public <SUBNODE> ViewContext<SUBNODE> createChildContext(ModelContext childModelContext, Element<SUBNODE> template) {
-		return new ViewContext<>(this, childModelContext, template, template.createNode(getNode()));
+	public <SUBNODE> ViewContext<SUBNODE> createChildContext(Integer index, ModelContext childModelContext, Element<SUBNODE> template) {
+		return new ViewContext<>(index, this, childModelContext, template, template.createNode(getNode()));
 	}
 
-	private void init() {
+	private void init(Integer index) {
 		// System.out.println("init");
 		modelContext.register(this);
 
@@ -43,7 +43,7 @@ public class ViewContext<N> {
 		for (Binding<N, ?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
 		if (parent != null) {
-			int indexInChildren = parent.computeIndex(template);
+			int indexInChildren = parent.computeIndex(index, template);
 			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
 			if (node instanceof HtmlDomNode)
@@ -54,7 +54,7 @@ public class ViewContext<N> {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
 				metaBinding.init(this, childElement);
 			if (childElement.metaBindings.isEmpty())
-				createChildContext(modelContext, childElement);
+				createChildContext(null, modelContext, childElement);
 		}
 	}
 
@@ -107,12 +107,12 @@ public class ViewContext<N> {
 			sizeByElement.put(child, size);
 	}
 
-	private int computeIndex(Element<?> childElement) {
-		int indexInChildren = 0;
+	private int computeIndex(Integer nullable, Element<?> childElement) {
+		int indexInChildren = nullable == null ? sizeByElement.get(childElement) : nullable;
 		for (Element<?> child : template.getChildren()) {
-			indexInChildren += sizeByElement.get(child);
 			if (child == childElement)
-				break;
+				return indexInChildren;
+			indexInChildren += sizeByElement.get(child);
 		}
 		return indexInChildren;
 	}
@@ -121,7 +121,7 @@ public class ViewContext<N> {
 		private Map<String, HtmlDomNode> nodeById;
 
 		public RootViewContext(Model model, Element<N> template, N node) {
-			super(null, new RootModelContext(model), template, node);
+			super(null, null, new RootModelContext(model), template, node);
 		}
 
 		private Map<String, HtmlDomNode> getMap() {

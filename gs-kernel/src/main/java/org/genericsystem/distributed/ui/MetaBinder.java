@@ -56,7 +56,7 @@ public interface MetaBinder<N, W> {
 								if (change.wasAdded()) {
 									int index = change.getFrom();
 									for (Model model : change.getAddedSubList())
-										children.insert(index, model, viewContext);
+										children.insert(index++, model, viewContext);
 								}
 							}
 						}

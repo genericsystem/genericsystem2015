@@ -15,7 +15,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import org.genericsystem.distributed.ui.Model;
-import org.genericsystem.distributed.ui.Transformation;
+import org.genericsystem.distributed.ui.Transformation2;
 import org.genericsystem.kernel.Engine;
 
 @SuppressWarnings("unchecked")
@@ -42,7 +42,7 @@ public class TodoList extends Model {
 
 	public TodoList(Engine engine) {
 		this.engine = engine;
-		todos = new Transformation<>(engine.getObservableSubInstances(), g -> {
+		todos = new Transformation2<>(engine.getObservableSubInstances(), g -> {
 			Todo todo = new Todo(this, g);
 			return todo;
 		});

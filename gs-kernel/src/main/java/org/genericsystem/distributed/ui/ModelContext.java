@@ -97,7 +97,7 @@ public class ModelContext {
 			ModelContext childModelContext = createChildContext(model);
 			model.parent = getModel();// inject parent
 			model.afterParentConstruct();
-			viewContext.createChildContext(childModelContext, childElement);
+			viewContext.createChildContext(index, childModelContext, childElement);
 			internal.add(index, childModelContext);
 		};
 
@@ -105,39 +105,5 @@ public class ModelContext {
 			System.out.println("delete : " + index);
 			internal.remove(index).destroy();
 		};
-
-		// public ListChangeListener<Model> getListChangeListener(ViewContext<?> viewContext) {
-		// return change -> {
-		// while (change.next()) {
-		// if (change.wasPermutated()) {
-		// for (int i = change.getFrom(); i < change.getTo(); i++)
-		// delete(change.getFrom());
-		// int index = change.getFrom();
-		// for (Model model : change.getList().subList(change.getFrom(), change.getTo()))
-		// insert(index++, model, viewContext);
-		// } else {
-		// if (change.wasRemoved())
-		// for (int i = 0; i < change.getRemovedSize(); i++)
-		// delete(change.getFrom());
-		// if (change.wasAdded()) {
-		// int index = change.getFrom();
-		// for (Model model : change.getAddedSubList())
-		// insert(index++, model, viewContext);
-		// }
-		// }
-		// }
-		// };
-		// }
-
-		// public ChangeListener<Model> getChangeListener(ViewContext<?> viewContext) {
-		// return (o, oldModel, newModel) -> {
-		// if (oldModel == newModel)
-		// return;
-		// if (oldModel != null)
-		// delete(0);
-		// if (newModel != null)
-		// insert(0, newModel, viewContext);
-		// };
-		// }
 	}
 }
