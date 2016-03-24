@@ -24,7 +24,7 @@ import org.genericsystem.common.GenericBuilder.MergeBuilder;
 import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
-import org.genericsystem.defaults.tools.MinimalChangesListBinding;
+import org.genericsystem.defaults.tools.MinimalChangesObservableList;
 import org.genericsystem.kernel.Statics;
 
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
@@ -118,7 +118,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
 		ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
 		if (result == null) {
-			result = new MinimalChangesListBinding<Generic>() {
+			result = new MinimalChangesObservableList<Generic>() {
 				private final Observable invalidator = getInvalidator(generic);
 				{
 					bind(invalidator);

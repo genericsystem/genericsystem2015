@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
@@ -175,11 +174,10 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 
 			@Override
 			protected List<T> computeValue() {
-				System.out.println("COMPUTE VALUE");
 				return getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream()).collect(Collectors.toList());
 			}
 		};
-		result.addListener((ListChangeListener) c -> System.out.println("TransitiveObservableList CHANGE : " + c));
+		// result.addListener((ListChangeListener) c -> System.out.println("TransitiveObservableList CHANGE : " + c));
 		return result;
 	}
 

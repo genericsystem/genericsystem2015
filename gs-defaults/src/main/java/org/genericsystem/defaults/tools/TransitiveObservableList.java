@@ -7,7 +7,7 @@ import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.collections.ObservableList;
 
-public abstract class TransitiveObservableList<T> extends MinimalChangesListBinding<T> {
+public abstract class TransitiveObservableList<T> extends MinimalChangesObservableList<T> {
 
 	private final List<ObservableList<T>> slaves = new ArrayList<>();
 	protected final ObservableList<T> master;

@@ -80,7 +80,8 @@
 							nodeId : elt.id,
 							eltType : "checkbox",
 							checked : elt.checked
-						}));;
+						}));
+						;
 					}
 					elt.checked = message.checked;
 					break;
@@ -102,29 +103,37 @@
 			break;
 		case 'U':
 			var elt = document.getElementById(message.nodeId);
-			if (typeof message.textContent !== 'undefined') {
-				if (elt.tagName == "INPUT" && elt.getAttribute("type") == "text") {
-					elt.value = message.textContent;
+			if (elt != null) {
+				if (typeof message.textContent !== 'undefined') {
+					if (elt.tagName == "INPUT"
+							&& elt.getAttribute("type") == "text") {
+						elt.value = message.textContent;
+					}
+					elt.textContent = message.textContent;
 				}
-				elt.textContent = message.textContent;
-			}
-			if (typeof message.styleClass !== 'undefined') {
-				elt.className = "";
-				message.styleClass.forEach(function(element, index, array) {
-					elt.className += " " + element;
-				});
+				if (typeof message.styleClass !== 'undefined') {
+					elt.className = "";
+					message.styleClass.forEach(function(element, index, array) {
+						elt.className += " " + element;
+					});
+				}
 			}
 			break;
 		default:
 			alert("message d'erreur");
 		}
 	}
-	
+
 	//-------------------------------------------------------------	
 	function connect() {
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
 		wsocket.onmessage = onMessageReceived;
+		wsocket.onclose = onclose;
+	}
+	
+	function onclose(evt) {
+		alert("Socket close with code : "+evt.code);
 	}
 
 	//-------------------------------------------------------------
