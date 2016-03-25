@@ -1,7 +1,7 @@
 package org.genericsystem.distributed.ui.components;
 
-import org.genericsystem.distributed.ui.HtmlDomNode;
 import org.genericsystem.distributed.ui.HtmlElement;
+import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -15,7 +15,7 @@ public class HtmlH1 extends HtmlElement<HtmlH1, HtmlDomNode> {
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode(getWebSocket(), "h1");
+		return new HtmlDomNode("h1");
 	}
 
 }

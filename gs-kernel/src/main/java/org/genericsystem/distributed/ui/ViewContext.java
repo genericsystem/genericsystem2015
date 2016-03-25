@@ -5,7 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
+import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 import org.genericsystem.distributed.ui.ModelContext.RootModelContext;
 
 /**
@@ -70,8 +70,7 @@ public class ViewContext<N> {
 
 			try {
 				return (RootViewContext<N>) parent;
-			} catch (ClassCastException ignore) {
-			}
+			} catch (ClassCastException ignore) {}
 			parent = parent.parent;
 		}
 		throw new IllegalStateException("parent null");

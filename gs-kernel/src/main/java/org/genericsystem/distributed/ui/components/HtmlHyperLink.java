@@ -1,12 +1,9 @@
 package org.genericsystem.distributed.ui.components;
 
 import java.util.function.Consumer;
-
 import javafx.event.Event;
-
-import org.genericsystem.distributed.ui.HtmlDomNode;
-import org.genericsystem.distributed.ui.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.distributed.ui.HtmlElement;
+import org.genericsystem.distributed.ui.HtmlElement.ActionHtmlNode;
 
 /**
  * @author Nicolas Feybesse
@@ -31,7 +28,7 @@ public class HtmlHyperLink extends HtmlElement<HtmlHyperLink, ActionHtmlNode> {
 
 	@Override
 	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode(getWebSocket(), "a");
+		return new ActionHtmlNode("a");
 	}
 
 }
