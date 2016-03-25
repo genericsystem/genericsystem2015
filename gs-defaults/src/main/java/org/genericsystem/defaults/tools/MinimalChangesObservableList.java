@@ -1,15 +1,14 @@
 package org.genericsystem.defaults.tools;
 
+import java.lang.ref.WeakReference;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-
 import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
@@ -20,23 +19,52 @@ import com.sun.javafx.collections.ObservableListWrapper;
 @SuppressWarnings("restriction")
 public abstract class MinimalChangesObservableList<E> extends ObservableListWrapper<E> {
 
-	private final InvalidationListener listener = o -> invalidate();
+	private BindingHelperObserver observer;
+
+	// private final InvalidationListener listener = o -> invalidate();
 
 	protected void invalidate() {
+
+		// ListBinding lb;
+
 		beginChange();
 		doMinimalChanges();
 		// System.out.println("invalidate");
 		endChange();
 	}
 
-	protected void bind(Observable... observables) {
-		for (Observable o : observables)
-			o.addListener(listener);
+	// protected void bind(Observable... observables) {
+	// for (Observable o : observables)
+	// o.addListener(listener);
+	// }
+	//
+	// protected void unbind(Observable... observables) {
+	// for (Observable o : observables)
+	// o.removeListener(listener);
+	// }
+
+	protected final void bind(Observable... dependencies) {
+		if ((dependencies != null) && (dependencies.length > 0)) {
+			if (observer == null) {
+				observer = new BindingHelperObserver(this);
+			}
+			for (final Observable dep : dependencies) {
+				if (dep != null) {
+					dep.addListener(observer);
+				}
+			}
+		}
 	}
 
-	protected void unbind(Observable... observables) {
-		for (Observable o : observables)
-			o.removeListener(listener);
+	protected final void unbind(Observable... dependencies) {
+		if (observer != null) {
+			for (final Observable dep : dependencies) {
+				if (dep != null) {
+					dep.removeListener(observer);
+				}
+			}
+			observer = null;
+		}
 	}
 
 	public MinimalChangesObservableList() {
@@ -63,6 +91,29 @@ public abstract class MinimalChangesObservableList<E> extends ObservableListWrap
 					remove(index);
 			}
 		}
+	}
+
+	private static class BindingHelperObserver implements InvalidationListener {
+
+		private final WeakReference<MinimalChangesObservableList<?>> ref;
+
+		public BindingHelperObserver(MinimalChangesObservableList<?> binding) {
+			if (binding == null) {
+				throw new NullPointerException("Binding has to be specified.");
+			}
+			ref = new WeakReference<>(binding);
+		}
+
+		@Override
+		public void invalidated(Observable observable) {
+			final MinimalChangesObservableList<?> binding = ref.get();
+			if (binding == null) {
+				observable.removeListener(this);
+			} else {
+				binding.invalidate();
+			}
+		}
+
 	}
 
 	private static class Diff<E> implements Iterator<Entry<E, Boolean>> {
