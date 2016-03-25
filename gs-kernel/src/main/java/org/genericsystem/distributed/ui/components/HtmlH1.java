@@ -1,8 +1,12 @@
 package org.genericsystem.distributed.ui.components;
 
-import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlDomNode;
+import org.genericsystem.distributed.ui.HtmlElement;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class HtmlH1 extends HtmlElement<HtmlH1, HtmlDomNode> {
 
 	public HtmlH1(HtmlElement<?, ?> parent) {

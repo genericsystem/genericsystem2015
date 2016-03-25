@@ -10,6 +10,10 @@ import org.genericsystem.distributed.AbstractFrontEnd;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.kernel.Statics;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class FrontEnd extends AbstractFrontEnd implements CocProtocol {
 
 	public FrontEnd(String host, int port, String path) {

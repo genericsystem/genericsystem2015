@@ -1,5 +1,9 @@
 package org.genericsystem.distributed.ui;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class Model {
 
 	Model parent;

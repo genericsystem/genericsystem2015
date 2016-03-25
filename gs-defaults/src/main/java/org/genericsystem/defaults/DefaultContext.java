@@ -18,6 +18,11 @@ import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViola
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> {
 
 	DefaultRoot<T> getRoot();

@@ -5,6 +5,10 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Vertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public interface CocProtocol extends Protocol {
 
 	Vertex[] getDependencies(long ts, long id);

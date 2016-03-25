@@ -13,7 +13,12 @@ import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-@SuppressWarnings("restriction")
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
+
 public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 
 	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
@@ -23,7 +28,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 	private final T base;
 	private final T origin;
 	private final int level;
-	private InheritenceComputerBinding binding;
+	private InheritanceComputerBinding binding;
 
 	public ObservableInheritanceComputer(T base, T origin, int level) {
 		this.base = base;
@@ -33,11 +38,11 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 
 	public ObservableList<T> observableInheritanceList() {
 		if (binding == null)
-			binding = new InheritenceComputerBinding();
+			binding = new InheritanceComputerBinding();
 		return binding;
 	}
 
-	private class InheritenceComputerBinding extends ListBinding<T> {
+	private class InheritanceComputerBinding extends ListBinding<T> {
 
 		Set<Observable> observables = new HashSet<>();
 

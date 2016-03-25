@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -33,6 +34,10 @@ import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.BasicEngine;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class SystemCache {
 
 	private final Map<Class<?>, Generic> systemCache = new HashMap<>();

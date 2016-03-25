@@ -2,11 +2,17 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.genericsystem.kernel.Statics;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class GSDeploymentConfig extends JsonObject {
 
 	public GSDeploymentConfig() {

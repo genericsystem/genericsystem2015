@@ -1,8 +1,12 @@
 package org.genericsystem.distributed.ui.components;
 
-import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlDomNode;
+import org.genericsystem.distributed.ui.HtmlElement;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class HtmlStrong extends HtmlElement<HtmlStrong, HtmlDomNode> {
 
 	public HtmlStrong(HtmlElement<?, ?> parent) {

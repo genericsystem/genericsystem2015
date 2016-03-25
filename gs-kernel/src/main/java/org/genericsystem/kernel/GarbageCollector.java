@@ -5,9 +5,14 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class GarbageCollector extends LinkedHashSet<Generic> {
 
 	private static final long serialVersionUID = -2021341943811568201L;

@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonserver.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -14,10 +15,15 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+
 import org.genericsystem.distributed.ui.Model;
-import org.genericsystem.distributed.ui.Transformation2;
+import org.genericsystem.distributed.ui.Transformation;
 import org.genericsystem.kernel.Engine;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 @SuppressWarnings("unchecked")
 public class TodoList extends Model {
 
@@ -42,7 +48,7 @@ public class TodoList extends Model {
 
 	public TodoList(Engine engine) {
 		this.engine = engine;
-		todos = new Transformation2<>(engine.getObservableSubInstances(), g -> {
+		todos = new Transformation<>(engine.getObservableSubInstances(), g -> {
 			Todo todo = new Todo(this, g);
 			return todo;
 		});

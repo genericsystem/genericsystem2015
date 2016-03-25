@@ -3,6 +3,7 @@ package org.genericsystem.distributed.cacheonclient;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
@@ -12,6 +13,10 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class ClientEngine extends AbstractRoot implements Generic {
 
 	protected final FrontEnd server;

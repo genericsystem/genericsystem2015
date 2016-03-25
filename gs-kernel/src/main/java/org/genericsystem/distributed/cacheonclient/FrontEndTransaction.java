@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -17,6 +19,10 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.ClientEngine.ClientEngineHandler;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class FrontEndTransaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;

@@ -2,6 +2,10 @@ package org.genericsystem.distributed;
 
 import java.util.Map;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class GSDeploymentOptions {
 
 	GSDeploymentConfig config;

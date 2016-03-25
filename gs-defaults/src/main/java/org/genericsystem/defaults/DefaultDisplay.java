@@ -19,6 +19,11 @@ import javax.json.stream.JsonGenerator;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IVertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultDisplay<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@Override

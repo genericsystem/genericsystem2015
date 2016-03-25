@@ -6,10 +6,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+
 import com.sun.javafx.collections.ObservableListWrapper;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <E>
+ */
 @SuppressWarnings("restriction")
 public abstract class MinimalChangesObservableList<E> extends ObservableListWrapper<E> {
 

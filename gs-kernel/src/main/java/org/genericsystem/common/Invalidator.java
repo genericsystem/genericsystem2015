@@ -5,6 +5,11 @@ import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.value.ObservableValueBase;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public class Invalidator<T> extends ObservableValueBase<T> {
 
 	@SuppressWarnings("unused")

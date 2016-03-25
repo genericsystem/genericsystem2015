@@ -1,11 +1,17 @@
 package org.genericsystem.distributed.ui.components;
 
 import java.util.function.Consumer;
+
 import javafx.event.Event;
+
 import org.genericsystem.distributed.ui.HtmlDomNode;
 import org.genericsystem.distributed.ui.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.distributed.ui.HtmlElement;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class HtmlHyperLink extends HtmlElement<HtmlHyperLink, ActionHtmlNode> {
 
 	public HtmlHyperLink(HtmlElement<?, ?> parent, String text) {

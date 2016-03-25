@@ -3,11 +3,19 @@ package org.genericsystem.distributed.ui;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <N>
+ * @param <X>
+ * @param <Y>
+ */
 public interface Binder<N, X, Y> {
 
 	default void init(Function<N, Y> applyOnNode, Function<Model, X> method, ModelContext modelContext, N node) {
@@ -18,7 +26,8 @@ public interface Binder<N, X, Y> {
 		init(nodeResult, applyOnModel.get());
 	}
 
-	default void init(Y nodeResult, X modelResult) {}
+	default void init(Y nodeResult, X modelResult) {
+	}
 
 	public static <N, W, Y> Binder<N, ObservableValue<W>, Property<W>> propertyBinder() {
 		return new Binder<N, ObservableValue<W>, Property<W>>() {

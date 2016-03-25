@@ -11,6 +11,10 @@ import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.WebSocketsServer;
 import org.genericsystem.kernel.BasicEngine;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class BackEnd extends AbstractBackEnd<BasicEngine> {
 
 	public static void main(String[] args) {

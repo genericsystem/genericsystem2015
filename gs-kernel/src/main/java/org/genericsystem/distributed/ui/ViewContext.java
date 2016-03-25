@@ -5,8 +5,14 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
 import org.genericsystem.distributed.ui.ModelContext.RootModelContext;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <N>
+ */
 public class ViewContext<N> {
 
 	private final ViewContext<?> parent;
@@ -35,7 +41,6 @@ public class ViewContext<N> {
 	}
 
 	private void init(Integer index) {
-		// System.out.println("init");
 		modelContext.register(this);
 
 		this.template.getBootList().forEach(boot -> boot.init(node));
@@ -65,7 +70,8 @@ public class ViewContext<N> {
 
 			try {
 				return (RootViewContext<N>) parent;
-			} catch (ClassCastException ignore) {}
+			} catch (ClassCastException ignore) {
+			}
 			parent = parent.parent;
 		}
 		throw new IllegalStateException("parent null");

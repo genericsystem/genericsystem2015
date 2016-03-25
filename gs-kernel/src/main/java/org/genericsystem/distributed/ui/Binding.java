@@ -2,10 +2,18 @@ package org.genericsystem.distributed.ui;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <N>
+ * @param <X>
+ * @param <Y>
+ */
 public class Binding<N, X, Y> {
 
 	private final Function<N, Y> applyOnNode;

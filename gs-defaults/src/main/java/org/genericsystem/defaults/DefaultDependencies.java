@@ -9,11 +9,18 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.TransitiveObservableList;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@SuppressWarnings("unchecked")

@@ -1,6 +1,7 @@
 package org.genericsystem.kernel;
 
 import java.util.Collections;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
@@ -8,6 +9,10 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.defaults.DefaultCache;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Engine extends AbstractServer {
 
 	// private ThreadLocal<Long> contextIds = new ThreadLocal<>();

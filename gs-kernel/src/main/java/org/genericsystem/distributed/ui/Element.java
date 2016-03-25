@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <N>
+ */
 public abstract class Element<N> {
 	private final Class<N> nodeClass;
 	private List<Boot<N>> boots = new ArrayList<>();

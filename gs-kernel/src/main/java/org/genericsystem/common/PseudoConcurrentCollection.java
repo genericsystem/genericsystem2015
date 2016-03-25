@@ -12,6 +12,11 @@ import javafx.beans.value.WeakChangeListener;
 
 import org.genericsystem.api.core.IteratorSnapshot;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 	// TODO size and get(index) !!!
@@ -42,7 +47,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		return false;
 	}
 
-	public class InternalIterator extends AbstractGeneralAwareIterator<Node<T>, T> implements Iterator<T> {
+	public class InternalIterator extends AbstractIterator<Node<T>, T> implements Iterator<T> {
 
 		private Node<T> last;
 

@@ -22,6 +22,10 @@ import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.constraints.Constraint;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Checker {
 
 	private final CheckedContext context;

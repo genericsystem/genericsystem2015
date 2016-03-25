@@ -2,6 +2,7 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -13,6 +14,10 @@ import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.cacheonclient.CocProtocol;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class BasicEngine extends AbstractServer implements Generic, CocProtocol {
 
 	@Override

@@ -4,9 +4,13 @@ import java.util.function.Function;
 
 import javafx.beans.property.Property;
 
-import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlDomNode.CheckBoxHtmlDomNode;
+import org.genericsystem.distributed.ui.HtmlElement;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class HtmlCheckBox extends HtmlElement<HtmlCheckBox, CheckBoxHtmlDomNode> {
 
 	public HtmlCheckBox(HtmlElement<?, ?> parent) {

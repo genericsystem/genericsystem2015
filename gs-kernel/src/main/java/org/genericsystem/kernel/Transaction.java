@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -18,6 +20,10 @@ import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Transaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;

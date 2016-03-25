@@ -1,9 +1,14 @@
 package org.genericsystem.distributed.ui.components;
 
 import java.util.function.Consumer;
+
 import org.genericsystem.distributed.ui.HtmlDomNode.InputTextHtmlDomNode;
 import org.genericsystem.distributed.ui.HtmlElement;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class HtmlInputText extends HtmlElement<HtmlInputText, InputTextHtmlDomNode> {
 
 	public HtmlInputText(HtmlElement<?, ?> parent) {

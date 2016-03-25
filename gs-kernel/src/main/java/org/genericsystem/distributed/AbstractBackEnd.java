@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Statics;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public abstract class AbstractBackEnd<T extends AbstractServer> {
 
 	protected Map<String, AbstractServer> roots;

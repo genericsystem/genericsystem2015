@@ -6,6 +6,11 @@ import org.genericsystem.defaults.DefaultConfig.MetaRelation;
 import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultRoot<T extends DefaultVertex<T>> extends IRoot<T>, DefaultVertex<T> {
 
 	@Override

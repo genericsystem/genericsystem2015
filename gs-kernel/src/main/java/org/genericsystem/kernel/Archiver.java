@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
- * @author Michael Ory
+ *
  */
 public class Archiver {
 
@@ -280,7 +281,8 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {}
+			} catch (EOFException ignore) {
+			}
 		}
 
 		protected long loadTs() throws IOException {

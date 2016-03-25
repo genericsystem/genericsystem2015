@@ -9,12 +9,12 @@ import java.util.NoSuchElementException;
  * @param <D>
  * @param <T>
  */
-public abstract class AbstractGeneralAwareIterator<D, T> implements Iterator<T> {
+public abstract class AbstractIterator<D, T> implements Iterator<T> {
 
 	public D next;
 	protected boolean toRead;
 
-	public AbstractGeneralAwareIterator() {
+	public AbstractIterator() {
 		this.next = null;
 		this.toRead = true;
 	}

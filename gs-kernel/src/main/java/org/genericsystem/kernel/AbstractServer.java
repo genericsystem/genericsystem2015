@@ -3,6 +3,7 @@ package org.genericsystem.kernel;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
@@ -10,6 +11,10 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Vertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class AbstractServer extends AbstractRoot implements Generic, Protocol {
 
 	protected Archiver archiver;

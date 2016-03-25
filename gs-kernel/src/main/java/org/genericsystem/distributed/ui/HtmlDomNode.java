@@ -3,9 +3,11 @@ package org.genericsystem.distributed.ui;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,8 +19,13 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
 import org.genericsystem.distributed.GSBuffer;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class HtmlDomNode {
 	private static final String MSG_TYPE = "msgType";
 	private static final String ADD = "A";

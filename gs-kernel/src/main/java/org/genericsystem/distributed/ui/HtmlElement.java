@@ -1,12 +1,20 @@
 package org.genericsystem.distributed.ui;
 
 import io.vertx.core.http.ServerWebSocket;
+
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <COMPONENT>
+ * @param <NODE>
+ */
 public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>, NODE extends HtmlDomNode> extends Element<NODE> {
 
 	protected <PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTNODE> parent, Class<NODE> nodeClass) {

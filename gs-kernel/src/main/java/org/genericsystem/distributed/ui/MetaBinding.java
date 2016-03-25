@@ -1,11 +1,18 @@
 package org.genericsystem.distributed.ui;
 
 import java.util.function.Function;
+
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <N>
+ * @param <T>
+ */
 public class MetaBinding<N, T> {
 
 	private final Function<Model, T> applyOnModel;

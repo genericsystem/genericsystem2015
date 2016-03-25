@@ -6,6 +6,11 @@ import java.util.function.Function;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <NODE>
+ */
 public class Boot<NODE> {
 
 	private final Consumer<NODE> consumer;

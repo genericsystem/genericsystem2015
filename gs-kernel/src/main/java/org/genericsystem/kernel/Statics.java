@@ -10,6 +10,10 @@ import org.genericsystem.defaults.DefaultVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Statics {
 
 	private static Logger log = LoggerFactory.getLogger(Statics.class);
@@ -35,7 +39,7 @@ public class Statics {
 	public final static int DEFAULT_PORT = 8082;
 
 	public final static Vertex[] EMPTY = new Vertex[] {};
-	
+
 	public static final long SERVER_TIMEOUT = 1000;
 	public static final TimeUnit SERVER_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
 

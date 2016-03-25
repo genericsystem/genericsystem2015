@@ -11,6 +11,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.genericsystem.kernel.Statics;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 class WebSocketClient {
 	private final HttpClient httpClient;
 	private CompletableFuture<WebSocket> webSocketPromise = new CompletableFuture<>();

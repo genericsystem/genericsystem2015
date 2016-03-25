@@ -1,12 +1,18 @@
 package org.genericsystem.common;
 
 import java.util.function.Supplier;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public class TransitiveInvalidator<T> extends ObservableValueBase<T> {
 
 	private Observable observableSlave;

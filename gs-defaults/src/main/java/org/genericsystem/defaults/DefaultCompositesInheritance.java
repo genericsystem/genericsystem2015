@@ -20,6 +20,11 @@ import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	// Remove

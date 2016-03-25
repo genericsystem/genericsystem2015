@@ -6,6 +6,10 @@ import java.util.List;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultContext;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class CheckedContext implements DefaultContext<Generic> {
 
 	private final AbstractRoot root;

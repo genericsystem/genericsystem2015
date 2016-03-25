@@ -13,6 +13,11 @@ import java.util.Map;
 
 import org.genericsystem.kernel.AbstractServer;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public abstract class WebSocketsServer<T extends AbstractServer> {
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;

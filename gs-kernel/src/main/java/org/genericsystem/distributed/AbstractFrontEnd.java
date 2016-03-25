@@ -18,6 +18,10 @@ import org.genericsystem.kernel.Statics;
 
 import com.google.common.base.Supplier;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class AbstractFrontEnd implements Protocol {
 
 	public static final int PICK_NEW_TS = 0;
@@ -25,21 +29,6 @@ public abstract class AbstractFrontEnd implements Protocol {
 	public static final int GET_VERTEX = 2;
 	public static final int APPLY = 3;
 	public static final int SHIFT_TS = 4;
-	// public static final int ADD_INSTANCE = 5;
-	// public static final int SET_INSTANCE = 6;
-	// public static final int MERGE = 7;
-	// public static final int UPDATE = 8;
-	// public static final int REMOVE = 9;
-	// public static final int FORCE_REMOVE = 10;
-	// public static final int CONSERVE_REMOVE = 11;
-	// public static final int TRY_FLUSH = 12;
-	// public static final int FLUSH = 13;
-	// public static final int MOUNT = 14;
-	// public static final int UNMOUNT = 15;
-	// public static final int GET_CACHE_LEVEL = 16;
-	// public static final int NEW_CACHE = 17;
-	// public static final int CLEAR = 18;
-	// public static final int SUBELEMENTS = 19;
 
 	protected WebSocketClient webSocketClient;
 

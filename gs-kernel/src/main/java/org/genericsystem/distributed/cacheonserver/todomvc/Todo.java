@@ -1,12 +1,18 @@
 package org.genericsystem.distributed.cacheonserver.todomvc;
 
 import java.util.Objects;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.Model;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Todo extends Model {
 
 	private final Generic generic;

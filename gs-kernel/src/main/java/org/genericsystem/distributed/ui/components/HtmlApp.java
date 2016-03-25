@@ -1,11 +1,16 @@
 package org.genericsystem.distributed.ui.components;
 
 import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.distributed.ui.HtmlDomNode;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.ViewContext.RootViewContext;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class HtmlApp extends HtmlElement<HtmlApp, HtmlDomNode> {
 
 	private final ServerWebSocket webSocket;

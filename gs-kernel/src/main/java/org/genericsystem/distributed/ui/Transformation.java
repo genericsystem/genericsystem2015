@@ -1,44 +1,45 @@
 package org.genericsystem.distributed.ui;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.TransformationList;
 
-public class Transformation<E, F> extends TransformationList<E, F> {
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <TARGET>
+ * @param <SRC>
+ */
+public class Transformation<TARGET, SRC> extends TransformationList<TARGET, SRC> {
 
-	private final Map<F, E> cache = new HashMap<>();
-	private final Function<F, E> function;
+	private final Function<SRC, TARGET> srcToTarget;
 
-	public Transformation(ObservableList<? extends F> source, Function<F, E> function) {
+	public Transformation(ObservableList<? extends SRC> source, Function<SRC, TARGET> srcToTarget) {
 		super(source);
-		this.function = function;
+		this.srcToTarget = srcToTarget;
 	}
 
 	@Override
-	protected void sourceChanged(Change<? extends F> change) {
+	protected void sourceChanged(Change<? extends SRC> change) {
 		System.out.println("Transformation change : " + change);
 		while (change.next()) {
 			beginChange();
 
 			if (change.wasPermutated()) {
 				assert false;
-				nextRemove(change.getFrom(), IntStream.range(change.getFrom(), change.getTo()).mapToObj(this::remove).collect(Collectors.toList()));
+				nextRemove(change.getFrom(), change.getRemoved().stream().map(srcToTarget::apply).collect(Collectors.toList()));
 				nextAdd(change.getFrom(), change.getTo());
 			} else {
 				if (change.wasRemoved()) {
-					nextRemove(change.getFrom(), change.getRemoved().stream().map(cache::remove).collect(Collectors.toList()));
+					nextRemove(change.getFrom(), change.getRemoved().stream().map(srcToTarget::apply).collect(Collectors.toList()));
 				}
 				if (change.wasAdded())
-					nextAdd(change.getFrom(), change.getAddedSize());
+					nextAdd(change.getFrom(), change.getTo());
 			}
-
 			endChange();
-
 		}
 	}
 
@@ -48,17 +49,10 @@ public class Transformation<E, F> extends TransformationList<E, F> {
 	}
 
 	@Override
-	public E get(int index) {
-		F f = getSource().get(index);
-		E e = cache.get(f);
-		if (e == null)
-			cache.put(f, e = function.apply(f));
+	public TARGET get(int index) {
+		SRC f = getSource().get(index);
+		return srcToTarget.apply(f);
 
-		return e;
-	}
-
-	public E removeFromCache(int index) {
-		return cache.remove(getSource().get(index));
 	}
 
 	@Override
