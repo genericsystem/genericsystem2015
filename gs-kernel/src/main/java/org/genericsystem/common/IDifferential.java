@@ -19,7 +19,7 @@ public interface IDifferential<T extends DefaultVertex<T>> {
 
 	void apply(Snapshot<T> removes, Snapshot<T> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException;
 
-	public Observable getInvalidator(Generic generic);
+	public Observable getObservable(Generic generic);
 
 	CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
 

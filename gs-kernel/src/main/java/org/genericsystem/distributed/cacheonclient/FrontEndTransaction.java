@@ -99,7 +99,7 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 	}
 
 	@Override
-	public Observable getInvalidator(Generic generic) {
+	public Observable getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 

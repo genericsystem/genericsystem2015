@@ -65,28 +65,6 @@ public class BasicEngine extends AbstractServer implements Generic, CocProtocol 
 		};
 	}
 
-	// @Override
-	// public HeavyCache newCache() {
-	// return new HeavyCache(this) {
-	//
-	// @Override
-	// protected IDifferential<Generic> buildTransaction() {
-	// return new Transaction((BasicEngine) getRoot());
-	// }
-	//
-	// @Override
-	// protected Generic plug(Generic generic) {
-	// return ((Transaction) getTransaction()).plug(generic);
-	// }
-	//
-	// @Override
-	// protected void unplug(Generic generic) {
-	// ((Transaction) getTransaction()).unplug(generic);
-	// }
-	//
-	// };
-	// }
-
 	@Override
 	public Vertex[] getDependencies(long ts, long id) {
 		Generic ancestor = this.getGenericById(id);

@@ -11,6 +11,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.defaults.tools.ObservableBase;
 
 /**
  * @author Nicolas Feybesse
@@ -96,8 +97,12 @@ public class Differential implements IDifferential<Generic> {
 	}
 
 	@Override
-	public final Observable getInvalidator(Generic generic) {
-		return Invalidator.createInvalidator(getSubDifferential().getInvalidator(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
+	public final Observable getObservable(Generic generic) {
+
+		return ObservableBase.createObservable(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
+		// result.addListener(o -> System.out.println("ZZZZZZZZZZZZZZZZZZZZZZ"));
+		// return result;
+
 	}
 
 	@Override

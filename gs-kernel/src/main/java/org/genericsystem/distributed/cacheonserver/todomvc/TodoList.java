@@ -12,12 +12,11 @@ import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
+import org.genericsystem.defaults.tools.Transformation;
 import org.genericsystem.distributed.ui.Model;
-import org.genericsystem.distributed.ui.Transformation;
 import org.genericsystem.kernel.Engine;
 
 /**
@@ -48,11 +47,7 @@ public class TodoList extends Model {
 
 	public TodoList(Engine engine) {
 		this.engine = engine;
-		todos = new Transformation<>(engine.getObservableSubInstances(), g -> {
-			Todo todo = new Todo(this, g);
-			return todo;
-		});
-		todos.addListener((ListChangeListener) c -> System.out.println("TRANSFORMATION CHANGE :::" + " " + c));
+		todos = new Transformation<>(engine.getObservableSubInstances(), g -> new Todo(this, g));
 		filtered = new FilteredList<>(todos);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(todos.filtered(COMPLETE));

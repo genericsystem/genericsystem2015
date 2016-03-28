@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.collections.ObservableList;
@@ -144,20 +143,10 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	default ObservableList<T> getObservableSubInheritings() {
-		return new TransitiveObservableList<T>(getObservableInheritings()) {
-
-			@Override
-			protected void onMasterInvalidation() {
-				unbindAllSlaves();
-				invalidate();
-				for (T generic : master)
-					bindSlave(generic.getObservableSubInheritings());
-			}
-
-			@SuppressWarnings("unchecked")
+		return new TransitiveObservableList<T>(getObservableInheritings(), g -> g.getObservableSubInheritings()) {
 			@Override
 			protected List<T> computeValue() {
-				return Stream.concat(Stream.of((T) DefaultDependencies.this), getObservableInheritings().stream().flatMap(inheriting -> inheriting.getObservableSubInheritings().stream())).distinct().collect(Collectors.toList());
+				return getSubInheritings().toList();
 			}
 		};
 	}
@@ -168,24 +157,12 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	default ObservableList<T> getObservableSubInstances() {
-
-		ObservableList<T> result = new TransitiveObservableList<T>(getObservableSubInheritings()) {
-
-			@Override
-			protected void onMasterInvalidation() {
-				unbindAllSlaves();
-				invalidate();
-				for (T generic : master)
-					bindSlave(generic.getObservableInstances());
-			}
-
+		return new TransitiveObservableList<T>(getObservableSubInheritings(), g -> g.getObservableInstances()) {
 			@Override
 			protected List<T> computeValue() {
-				return getSubInheritings().stream().flatMap(inheriting -> inheriting.getInstances().stream()).collect(Collectors.toList());
+				return getSubInstances().toList();
 			}
 		};
-		// result.addListener((ListChangeListener) c -> System.out.println("TransitiveObservableList CHANGE : " + c));
-		return result;
 	}
 
 	@SuppressWarnings("unchecked")

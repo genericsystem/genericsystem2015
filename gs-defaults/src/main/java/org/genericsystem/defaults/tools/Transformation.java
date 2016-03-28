@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.ui;
+package org.genericsystem.defaults.tools;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,7 +24,7 @@ public class Transformation<TARGET, SRC> extends TransformationList<TARGET, SRC>
 
 	@Override
 	protected void sourceChanged(Change<? extends SRC> change) {
-		System.out.println("Transformation change : " + change);
+		// System.out.println("Transformation change : " + change);
 		while (change.next()) {
 			beginChange();
 

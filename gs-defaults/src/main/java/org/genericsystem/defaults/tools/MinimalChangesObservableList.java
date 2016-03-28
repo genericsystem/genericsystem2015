@@ -7,8 +7,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+
 import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
@@ -21,27 +23,11 @@ public abstract class MinimalChangesObservableList<E> extends ObservableListWrap
 
 	private BindingHelperObserver observer;
 
-	// private final InvalidationListener listener = o -> invalidate();
-
 	protected void invalidate() {
-
-		// ListBinding lb;
-
 		beginChange();
 		doMinimalChanges();
-		// System.out.println("invalidate");
 		endChange();
 	}
-
-	// protected void bind(Observable... observables) {
-	// for (Observable o : observables)
-	// o.addListener(listener);
-	// }
-	//
-	// protected void unbind(Observable... observables) {
-	// for (Observable o : observables)
-	// o.removeListener(listener);
-	// }
 
 	protected final void bind(Observable... dependencies) {
 		if ((dependencies != null) && (dependencies.length > 0)) {

@@ -45,6 +45,7 @@ public class BackEnd extends AbstractBackEnd<Engine> {
 					HtmlDomNode node = todoListApp.getNodeById(json.getString(HtmlElement.ID));
 					if (node != null)
 						node.handleMessage(json);
+					System.gc();
 				};
 			};
 		};

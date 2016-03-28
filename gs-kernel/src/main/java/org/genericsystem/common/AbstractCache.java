@@ -27,6 +27,7 @@ import org.genericsystem.common.GenericBuilder.SetBuilder;
 import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.defaults.tools.MinimalChangesObservableList;
+import org.genericsystem.defaults.tools.TransitiveObservable;
 import org.genericsystem.kernel.Statics;
 
 /**
@@ -117,8 +118,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return new Restructurator(this);
 	}
 
-	private Observable getInvalidator(Generic generic) {
-		return TransitiveInvalidator.create(differentialProperty, () -> differentialProperty.get().getInvalidator(generic));
+	private Observable getObservable(Generic generic) {
+		return TransitiveObservable.create(differentialProperty, () -> new Observable[] { differentialProperty.get().getObservable(generic) });
 	}
 
 	@Override
@@ -126,7 +127,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		ObservableList<Generic> result = dependenciesAsOservableListCacheMap.get(generic);
 		if (result == null) {
 			result = new MinimalChangesObservableList<Generic>() {
-				private final Observable invalidator = getInvalidator(generic);
+				private final Observable invalidator = getObservable(generic);
 				{
 					bind(invalidator);
 				}
@@ -324,8 +325,8 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 
 		@Override
-		public final Observable getInvalidator(Generic generic) {
-			return TransitiveInvalidator.create(transactionProperty, () -> transactionProperty.get().getInvalidator(generic));
+		public final Observable getObservable(Generic generic) {
+			return TransitiveObservable.create(transactionProperty, () -> new Observable[] { transactionProperty.get().getObservable(generic) });
 		}
 
 		@Override

@@ -169,7 +169,7 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 	}
 
 	@Override
-	public Observable getInvalidator(Generic generic) {
+	public Observable getObservable(Generic generic) {
 		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 
