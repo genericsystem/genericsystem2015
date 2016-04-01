@@ -2,18 +2,16 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class SingularConstraintTest extends AbstractTest {
 
 	public void test000() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addAttribute("CarColor", color);
@@ -26,7 +24,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myCar");
 		Generic color = root.addInstance("Color");
@@ -41,7 +39,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -55,7 +53,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic red = color.addInstance("red");
@@ -68,7 +66,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");
@@ -86,7 +84,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -101,7 +99,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");
@@ -119,7 +117,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -139,7 +137,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -156,7 +154,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("myAudi");
@@ -176,7 +174,7 @@ public class SingularConstraintTest extends AbstractTest {
 
 	public void test010() {
 
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("myBmw");
@@ -191,7 +189,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test011() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");
@@ -208,7 +206,7 @@ public class SingularConstraintTest extends AbstractTest {
 	}
 
 	public void test012() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic color = root.addInstance("Color");

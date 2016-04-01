@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -15,7 +13,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -67,8 +64,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	protected AbstractCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {
-		});
+		this(root, new ContextEventListener<Generic>() {});
 	}
 
 	protected AbstractCache(AbstractRoot root, ContextEventListener<Generic> listener) {
@@ -329,25 +325,21 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			return TransitiveObservable.create(transactionProperty, () -> new Observable[] { transactionProperty.get().getObservable(generic) });
 		}
 
-		@Override
-		public final CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-			return transactionProperty.get().getDependenciesPromise(generic);
-		}
+		// @Override
+		// public final CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+		// return transactionProperty.get().getDependenciesPromise(generic);
+		// }
 	}
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

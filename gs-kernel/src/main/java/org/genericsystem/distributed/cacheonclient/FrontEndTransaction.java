@@ -3,12 +3,9 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -62,10 +59,10 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 		dependenciesMap.remove(generic.getMeta());
 		dependenciesMap.remove(generic);
 
-		generic.getComponents().forEach(component -> dependenciesPromiseMap.remove(component));
-		generic.getSupers().forEach(superG -> dependenciesPromiseMap.remove(superG));
-		dependenciesPromiseMap.remove(generic.getMeta());
-		dependenciesPromiseMap.remove(generic);
+		// generic.getComponents().forEach(component -> dependenciesPromiseMap.remove(component));
+		// generic.getSupers().forEach(superG -> dependenciesPromiseMap.remove(superG));
+		// dependenciesPromiseMap.remove(generic.getMeta());
+		// dependenciesPromiseMap.remove(generic);
 	}
 
 	@Override
@@ -86,17 +83,17 @@ public class FrontEndTransaction extends CheckedContext implements IDifferential
 		return dependencies;
 	}
 
-	private Map<Generic, CompletableFuture<Snapshot<Generic>>> dependenciesPromiseMap = new HashMap<>();
+	// private Map<Generic, CompletableFuture<Snapshot<Generic>>> dependenciesPromiseMap = new HashMap<>();
 
-	@Override
-	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-		CompletableFuture<Snapshot<Generic>> dependenciesPromise = dependenciesPromiseMap.get(generic);
-		if (dependenciesPromise == null) {
-			dependenciesPromise = getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()).thenApply(vertices -> new Container(Arrays.stream(vertices).map(vertex -> getRoot().getGenericByVertex(vertex))));
-			dependenciesPromiseMap.put(generic, dependenciesPromise);
-		}
-		return dependenciesPromise;
-	}
+	// @Override
+	// public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+	// CompletableFuture<Snapshot<Generic>> dependenciesPromise = dependenciesPromiseMap.get(generic);
+	// if (dependenciesPromise == null) {
+	// dependenciesPromise = getRoot().getServer().getDependenciesPromise(getTs(), generic.getTs()).thenApply(vertices -> new Container(Arrays.stream(vertices).map(vertex -> getRoot().getGenericByVertex(vertex))));
+	// dependenciesPromiseMap.put(generic, dependenciesPromise);
+	// }
+	// return dependenciesPromise;
+	// }
 
 	@Override
 	public Observable getObservable(Generic generic) {

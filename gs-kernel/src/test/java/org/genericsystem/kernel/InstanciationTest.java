@@ -4,18 +4,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
-import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
 public class InstanciationTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		assert root.getMeta().equals(root);
 		assert root.getComponents().isEmpty();
 		assert Statics.ENGINE_VALUE.equals(root.getValue());
@@ -24,7 +21,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		assert root.getInstance("Car") == car;
 		assert car.getMeta().equals(root);
@@ -38,7 +35,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.setInstance("Car");
 		assert root.getInstance("Car") == car;
 		assert car.getMeta().equals(root);
@@ -52,7 +49,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		assert car.getMeta().equals(root);
@@ -74,13 +71,13 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		root.addInstance("Car");
 		catchAndCheckCause(() -> root.addInstance("Car"), ExistsException.class);
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic otherCar = root.setInstance("Car");
 		assert car == otherCar;
@@ -95,7 +92,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		assert vehicle.getMeta().equals(root);
@@ -114,7 +111,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic otherCar = root.addInstance(car, "Car");
 		assert car.isAlive();
@@ -123,7 +120,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic robot = root.addInstance("Robot");
 		Generic transformer = root.addInstance(Arrays.asList(car, robot), "Transformer");
@@ -146,7 +143,7 @@ public class InstanciationTest extends AbstractTest {
 	}
 
 	public void test010() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic device = root.addInstance("Device");

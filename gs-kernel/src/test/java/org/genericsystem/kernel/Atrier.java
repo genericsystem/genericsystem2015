@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class Atrier extends AbstractTest {
 
 	public void test001() {
-		BasicEngine engine = new BasicEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		final Generic carColor = car.addRelation("CarColor", color);
@@ -42,7 +42,7 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void test002() {
-		final BasicEngine engine = new BasicEngine();
+		final Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		final Generic carColor = car.setRelation("CarColor", color);
@@ -62,7 +62,7 @@ public class Atrier extends AbstractTest {
 
 	public void test003() {
 
-		final BasicEngine engine = new BasicEngine();
+		final Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic time = engine.addInstance("Time");
@@ -127,7 +127,7 @@ public class Atrier extends AbstractTest {
 	// }
 
 	public void test006() {
-		BasicEngine engine = new BasicEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		final Generic carColor = car.setRelation("CarColor", color).enableSingularConstraint(ApiStatics.TARGET_POSITION);
@@ -141,7 +141,7 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void testMixin5() {
-		BasicEngine engine = new BasicEngine();
+		Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic carPower = car.addAttribute("Power");
 		car.addHolder(carPower, 123);
@@ -164,7 +164,7 @@ public class Atrier extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine engine = new BasicEngine();
+		Engine engine = new Engine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("Power");
 		Generic defaultVehiclePower = vehicle.addHolder(vehiclePower, 123);

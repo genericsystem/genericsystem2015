@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Identifies a class as managed by Generic System.
- * 
+ *
  * @author Nicolas Feybesse
  * @author Michael Ory
  */

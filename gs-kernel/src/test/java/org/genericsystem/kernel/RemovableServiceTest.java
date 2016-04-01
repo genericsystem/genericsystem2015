@@ -3,14 +3,13 @@ package org.genericsystem.kernel;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RemovableServiceTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		vehicle.remove();
 
@@ -19,7 +18,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myVehicle = root.addInstance("MyVehicle");
 		myVehicle.remove();
@@ -33,7 +32,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myFirstVehicle = vehicle.addInstance("myFirstVehicle");
 		Generic mySecondVehicle = vehicle.addInstance("MySecondVehicle");
@@ -56,14 +55,14 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		vehicle.addInstance("myVehicle");
 		catchAndCheckCause(() -> vehicle.remove(), ReferentialIntegrityConstraintViolationException.class);
 	}
 
 	public void test005() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		car.remove();
@@ -77,7 +76,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		car.remove();
@@ -88,7 +87,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		root.addInstance("Power", car);
 		car.addInstance("myBmw");
@@ -96,7 +95,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic unit = root.addInstance("Unit", power);
@@ -111,7 +110,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		root.addInstance(vehicle, "Car");
 
@@ -119,7 +118,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -131,7 +130,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test011() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -152,7 +151,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test012() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -164,7 +163,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test013() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -183,7 +182,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test014() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		vehicle.forceRemove();
 
@@ -192,7 +191,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test015() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");
 		vehicle.forceRemove();
@@ -203,7 +202,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test016() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 
@@ -215,7 +214,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test017() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		car.forceRemove();
@@ -229,7 +228,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test018() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -249,7 +248,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test019() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -268,7 +267,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test020() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -287,7 +286,7 @@ public class RemovableServiceTest extends AbstractTest {
 	}
 
 	public void test021() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic animals = root.addInstance("Animals");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");

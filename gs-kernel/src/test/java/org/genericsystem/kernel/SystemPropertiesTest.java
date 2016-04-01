@@ -1,14 +1,13 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class SystemPropertiesTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		power.enablePropertyConstraint();
@@ -29,7 +28,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = root.addInstance("Power", vehicle);
@@ -53,7 +52,7 @@ public class SystemPropertiesTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = root.addInstance("Power", vehicle);

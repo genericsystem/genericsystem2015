@@ -2,17 +2,15 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class GetInstanceTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("myBmw");
@@ -22,7 +20,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -33,7 +31,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -48,7 +46,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -66,20 +64,19 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
 		Generic children1 = tree.addInstance(Arrays.asList(father, mother), "children1");
 		tree.addInstance(Arrays.asList(father, mother), "children2");
 		tree.addInstance(children1, "children2");
-
-		catchAndCheckCause(() -> tree.getInstance("children2"), AmbiguousSelectionException.class);
 		assert tree.getInstance("children1") == children1;
+		catchAndCheckCause(() -> tree.getInstance("children2"), AmbiguousSelectionException.class);
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -99,7 +96,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -119,7 +116,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic carVehicle = root.addInstance(vehicle, "Car");
@@ -130,7 +127,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance("Car");
@@ -141,7 +138,7 @@ public class GetInstanceTest extends AbstractTest {
 
 		assert !carPower.inheritsFrom(vehiclePower);
 		assert carVehiclePower.inheritsFrom(vehiclePower);
-
+		root.getCurrentCache().flush();
 		catchAndCheckCause(() -> root.getRoot().getMetaAttribute().getInstance("power"), AmbiguousSelectionException.class);
 		assert root.getRoot().getMetaAttribute().getInstances("power").size() == 3;
 		assert root.getRoot().getMetaAttribute().getInstances("power").containsAll(Arrays.asList(vehiclePower, carPower, carVehiclePower));
@@ -152,7 +149,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test010() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -165,7 +162,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test011() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -184,7 +181,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test012() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance("Car");
@@ -204,7 +201,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test013() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -219,7 +216,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test014() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -237,7 +234,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test015() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -250,7 +247,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test016() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -269,7 +266,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test017() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -288,7 +285,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test018() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -306,7 +303,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test019() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance("Car");
@@ -323,7 +320,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test020() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
 		vehicle.addInstance("myAudi");
@@ -336,7 +333,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test021() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -349,7 +346,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test022() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -368,7 +365,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test023() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -387,7 +384,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test024() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -407,7 +404,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test025() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		Generic father = tree.addInstance("father");
 		Generic mother = tree.addInstance("mother");
@@ -420,7 +417,7 @@ public class GetInstanceTest extends AbstractTest {
 	}
 
 	public void test026() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 		Generic car = root.addInstance(vehicle, "Car");

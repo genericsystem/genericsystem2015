@@ -2,18 +2,16 @@ package org.genericsystem.kernel;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class AdjustMetaTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaAttribute = root.getMetaAttribute();
 		assert metaAttribute.equals(root.adjustMeta(root));
 		assert metaAttribute == root.adjustMeta(root);
@@ -25,25 +23,25 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		assert root == root.adjustMeta(Collections.emptyList());
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		assert root.getMetaAttribute() == root.adjustMeta(car);
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		assert root.getMetaRelation() == root.adjustMeta(car, color);
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		assert root.getMetaAttribute() == root.adjustMeta(root);
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
@@ -55,7 +53,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -65,7 +63,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		assert root.getMetaAttribute().equalsRegardlessSupers(root.getMetaAttribute(), root.getMetaAttribute().getValue(), Collections.singletonList(root));
 
 		Generic car = root.addInstance("Car");
@@ -77,7 +75,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = root.addInstance("CarColor", car, color);
@@ -87,7 +85,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -98,7 +96,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test010() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -109,7 +107,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test011() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -123,7 +121,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test012() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = root.addInstance("VehicleColor", vehicle, color);
@@ -138,7 +136,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test013() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		// TODO power n'est pas un attribut comme ça ? carPower n'a aucun rapport avec car ?
 		Generic power = root.addInstance("Power", root);
 		Generic car = root.addInstance("Car", root);
@@ -151,7 +149,7 @@ public class AdjustMetaTest extends AbstractTest {
 	 */
 
 	public void test014() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic bike = root.addInstance(vehicle, "Bike");
@@ -163,7 +161,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test015() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic bike = root.addInstance(vehicle, "Bike");
@@ -178,7 +176,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test016() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic bike = root.addInstance(vehicle, "Bike");
 		Generic vtt = root.addInstance(bike, "VTT");
@@ -192,7 +190,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test017() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic color = root.addInstance("Color");
@@ -209,7 +207,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test018() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic power = vehicle.addAttribute("Power");
@@ -223,7 +221,7 @@ public class AdjustMetaTest extends AbstractTest {
 	}
 
 	public void test019() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic systemMap = root.getMap();
 		assert systemMap.getMeta().equals(metaAttribute);

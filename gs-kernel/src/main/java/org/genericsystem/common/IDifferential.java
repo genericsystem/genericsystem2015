@@ -1,6 +1,5 @@
 package org.genericsystem.common;
 
-import java.util.concurrent.CompletableFuture;
 import javafx.beans.Observable;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -21,6 +20,6 @@ public interface IDifferential<T extends DefaultVertex<T>> {
 
 	public Observable getObservable(Generic generic);
 
-	CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
+	// CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic);
 
 }

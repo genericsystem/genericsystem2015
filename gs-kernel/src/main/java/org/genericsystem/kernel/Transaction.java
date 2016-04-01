@@ -4,13 +4,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -178,8 +175,8 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-		throw new UnsupportedOperationException();
-	}
+	// @Override
+	// public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+	// throw new UnsupportedOperationException();
+	// }
 }

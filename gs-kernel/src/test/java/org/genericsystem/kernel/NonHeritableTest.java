@@ -1,36 +1,34 @@
 package org.genericsystem.kernel;
 
 import java.util.Objects;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class NonHeritableTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		car.enableInheritance();
 		assert car.isInheritanceEnabled();
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		assert car.isInheritanceEnabled();
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		car.disableInheritance();
 		assert !car.isInheritanceEnabled();
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		assert car.isInheritanceEnabled();
 		car.disableInheritance();
@@ -40,7 +38,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		car.enableInheritance();
 		assert car.isInheritanceEnabled();
@@ -49,7 +47,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic defaultPower = car.addHolder(power, 233);
@@ -61,7 +59,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = vehicle.addAttribute("Power");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -79,7 +77,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
@@ -108,7 +106,7 @@ public class NonHeritableTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addAttribute("CarColor", color);

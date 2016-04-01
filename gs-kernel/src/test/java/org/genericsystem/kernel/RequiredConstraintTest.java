@@ -2,14 +2,13 @@ package org.genericsystem.kernel;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RequiredConstraintTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic numberDoors = root.addInstance("NumberDoors");

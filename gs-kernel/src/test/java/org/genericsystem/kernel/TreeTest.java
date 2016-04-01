@@ -3,25 +3,23 @@ package org.genericsystem.kernel;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.IVertex.Visitor;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class TreeTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		assert tree.getSupers().isEmpty();
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("Tree");
 		Generic rootNode = tree.addInstance("rootNode");
 
@@ -36,7 +34,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("tree");
 		Generic html = tree.addInstance("html");
 		assert html.getMeta().equals(tree);
@@ -44,7 +42,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("tree");
 		Generic html = tree.addInstance("html");
 		Generic head = tree.addInstance(html, "head");
@@ -73,7 +71,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic tree = root.addInstance("tree");
 		Generic rootNode = tree.addInstance("rootNode");
 		Generic htmlNode = tree.addInstance(rootNode, "htmlNode");
@@ -89,13 +87,13 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		root.addInstance("Tree");
 		catchAndCheckCause(() -> root.addInstance("Tree"), ExistsException.class);
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 
 		Generic tree = root.addInstance("Tree");
 		Generic color = root.addInstance("Color");
@@ -122,7 +120,7 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 
 		Generic html5Tags = root.addInstance("Html5Tags");
 
@@ -165,33 +163,34 @@ public class TreeTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic a1 = root.addInstance("A");
 		Generic b = root.addInstance(a1, "B");
 		Generic a2 = root.addInstance(b, "A");
 		assert root.getInstance(Collections.emptyList(), "A").equals(a1);
-		catchAndCheckCause(() -> root.getInstance("A"), AmbiguousSelectionException.class);
 		assert root.getInstance(Arrays.asList(b), "A").equals(a2);
+		catchAndCheckCause(() -> root.getInstance("A"), AmbiguousSelectionException.class);
+
 	}
 
 	public void test010() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic a1 = root.addInstance("A");
 		Generic b = root.addInstance("B");
 		Generic a2 = root.addInstance(b, "A");
 		assert root.getInstance(Collections.emptyList(), "A").equals(a1);
-		catchAndCheckCause(() -> root.getInstance("A"), AmbiguousSelectionException.class);
 		assert root.getInstance(Arrays.asList(b), "A").equals(a2);
+		catchAndCheckCause(() -> root.getInstance("A"), AmbiguousSelectionException.class);
 	}
 
 	public void test011() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic b = root.addInstance("B");
 		Generic c = root.addInstance("C");
 		Generic a1 = root.addInstance(b, "A");
 		root.addInstance(c, "A");
-		catchAndCheckCause(() -> root.getInstance("A"), AmbiguousSelectionException.class);
 		assert root.getInstance(Arrays.asList(b), "A").equals(a1);
+		catchAndCheckCause(() -> root.getInstance("A"), AmbiguousSelectionException.class);
 	}
 
 }
