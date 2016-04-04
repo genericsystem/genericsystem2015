@@ -54,7 +54,7 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected Function<NODE, List> getGraphicChildren() {
-		return NODE::getChildren;
+		return HtmlDomNode::getChildren;
 	}
 
 	@SuppressWarnings("unchecked")
