@@ -3,11 +3,8 @@ package org.genericsystem.mutability;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
-
 import javassist.util.proxy.MethodHandler;
-
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.kernel.Statics;
 
 public class Engine implements Generic, DefaultRoot<Generic>, MethodHandler {

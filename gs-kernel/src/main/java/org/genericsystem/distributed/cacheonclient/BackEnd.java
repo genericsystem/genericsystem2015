@@ -3,7 +3,6 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.GSBuffer;
@@ -28,7 +27,7 @@ public class BackEnd extends AbstractBackEnd<AbstractServer> {
 
 	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer root, GSBuffer gsBuffer) {
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
-		System.out.println("REPLY BUFFER : " + methodId + " " + op);
+		// System.out.println("REPLY BUFFER : " + methodId + " " + op);
 		switch (methodId) {
 		case FrontEnd.PICK_NEW_TS:
 			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
@@ -63,9 +62,9 @@ public class BackEnd extends AbstractBackEnd<AbstractServer> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
 					int op = gsBuffer.getInt();
-					// cache.start();
+					cache.start();
 					socket.writeBinaryMessage(getReplyBuffer(methodId, op, root, gsBuffer));
-					// cache.stop();
+					cache.stop();
 				};
 			}
 		};
