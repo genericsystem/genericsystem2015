@@ -71,7 +71,7 @@ public class SystemCache {
 		List<Generic> overrides = setOverrides(clazz);
 		Serializable value = findValue(clazz);
 		List<Generic> components = setComponents(clazz);
-		AbstractCache cache = root.getCurrentCache();
+		Cache cache = root.getCurrentCache();
 		if (root instanceof AbstractServer)
 			systemProperty = new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
 		else {

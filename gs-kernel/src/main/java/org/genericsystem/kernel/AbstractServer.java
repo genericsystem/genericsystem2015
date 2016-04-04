@@ -8,7 +8,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.Cache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
@@ -31,7 +31,7 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 	}
 
 	@Override
-	public abstract AbstractCache newCache();
+	public abstract Cache newCache();
 
 	@Override
 	public void close() {

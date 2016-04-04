@@ -3,6 +3,8 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
+
+import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -56,11 +58,14 @@ public class BackEnd extends AbstractBackEnd<AbstractServer> {
 		return new WebSocketsServer<AbstractServer>(this, options.getHost(), options.getPort()) {
 			@Override
 			public Handler<Buffer> getHandler(AbstractServer root, ServerWebSocket socket) {
+				Cache cache = root.newCache();
 				return buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					int methodId = gsBuffer.getInt();
 					int op = gsBuffer.getInt();
-					socket.writeBinaryMessage(BackEnd.this.getReplyBuffer(methodId, op, root, gsBuffer));
+					// cache.start();
+					socket.writeBinaryMessage(getReplyBuffer(methodId, op, root, gsBuffer));
+					// cache.stop();
 				};
 			}
 		};

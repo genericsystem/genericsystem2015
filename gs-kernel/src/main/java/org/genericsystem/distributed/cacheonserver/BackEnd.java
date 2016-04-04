@@ -4,6 +4,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+
+import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
@@ -37,14 +39,27 @@ public class BackEnd extends AbstractBackEnd<Engine> {
 		return new WebSocketsServer<Engine>(this, options.getHost(), options.getPort()) {
 			@Override
 			public Handler<Buffer> getHandler(Engine root, ServerWebSocket socket) {
-				TodoApp todoListApp = new TodoApp(root, socket);
+				Cache cache = root.newCache();
+				cache.start();
+				TodoApp todoListApp;
+				try {
+					todoListApp = new TodoApp(root, socket);
+				} finally {
+					cache.stop();
+				}
 				return buffer -> {
 					GSBuffer gsBuffer = new GSBuffer(buffer);
 					String message = gsBuffer.getString(0, gsBuffer.length());
 					JsonObject json = new JsonObject(message);
 					HtmlDomNode node = todoListApp.getNodeById(json.getString(HtmlElement.ID));
-					if (node != null)
-						node.handleMessage(json);
+					if (node != null) {
+						cache.start();
+						try {
+							node.handleMessage(json);
+						} finally {
+							cache.stop();
+						}
+					}
 				};
 			};
 		};

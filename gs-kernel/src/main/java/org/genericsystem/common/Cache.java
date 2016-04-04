@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -13,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -25,20 +27,22 @@ import org.genericsystem.common.GenericBuilder.UpdateBuilder;
 import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.defaults.tools.MinimalChangesObservableList;
 import org.genericsystem.defaults.tools.TransitiveObservable;
+import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Statics;
+import org.genericsystem.kernel.Transaction;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
+public class Cache extends CheckedContext implements DefaultCache<Generic> {
 
 	public Generic setMeta(int dim) {
 		return setInstance(null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim)));
 	}
 
 	@SuppressWarnings("unchecked")
-	public final <U extends AbstractCache> U start() {
+	public final <U extends Cache> U start() {
 		return (U) getRoot().start(this);
 	}
 
@@ -61,17 +65,16 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return getTs();
 	}
 
-	protected abstract IDifferential<Generic> buildTransaction();
-
-	protected AbstractCache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {});
+	protected IDifferential<Generic> buildTransaction() {
+		return new Transaction((AbstractServer) getRoot());
 	}
 
-	protected AbstractCache(AbstractRoot root, ContextEventListener<Generic> listener) {
-		this(root, root.pickNewTs(), listener);
+	public Cache(AbstractRoot root) {
+		this(root, new ContextEventListener<Generic>() {
+		});
 	}
 
-	protected AbstractCache(AbstractRoot root, long cacheId, ContextEventListener<Generic> listener) {
+	public Cache(AbstractRoot root, ContextEventListener<Generic> listener) {
 		super(root);
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
@@ -84,10 +87,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected Differential getDifferential() {
 		return differentialProperty.get();
 	}
-
-	// protected Cache(AbstractEngine root, long cacheId) {
-	// this(root, new ContextEventListener<Generic>() {});
-	// }
 
 	Restructurator getRestructurator() {
 		return restructurator;
@@ -130,7 +129,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 				@Override
 				protected List<Generic> computeValue() {
-					return AbstractCache.this.getDependencies(generic).toList();
+					return Cache.this.getDependencies(generic).toList();
 				}
 			};
 			dependenciesAsOservableListCacheMap.put(generic, result);
@@ -333,13 +332,17 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {
+		}
 
-		default void triggersRefreshEvent() {}
+		default void triggersRefreshEvent() {
+		}
 
-		default void triggersClearEvent() {}
+		default void triggersClearEvent() {
+		}
 
-		default void triggersFlushEvent() {}
+		default void triggersFlushEvent() {
+		}
 	}
 
 }

@@ -5,11 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.AbstractCache;
-import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.IDifferential;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.kernel.Statics;
 
@@ -46,30 +44,20 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	@Override
-	public AbstractCache newCache() {
-		return new AbstractCache(this) {
-			@Override
-			protected IDifferential<Generic> buildTransaction() {
-				return new FrontEndTransaction(ClientEngine.this, ClientEngine.this.pickNewTs());
-			}
-		};
+	public ClientCache newCache() {
+		return new ClientCache(this);
 	}
 
-	public AbstractCache newCache(ContextEventListener<Generic> listener) {
-		return new AbstractCache(this, listener) {
-			@Override
-			protected IDifferential<Generic> buildTransaction() {
-				return new FrontEndTransaction(ClientEngine.this, ClientEngine.this.pickNewTs());
-			}
-		};
+	public ClientCache newCache(ContextEventListener<Generic> listener) {
+		return new ClientCache(this, listener);
 	}
 
 	@Override
-	public AbstractCache getCurrentCache() {
-		return super.getCurrentCache();
+	public ClientCache getCurrentCache() {
+		return (ClientCache) super.getCurrentCache();
 	}
 
-	public Generic getGenericByVertex(Vertex vertex) {
+	Generic getGenericByVertex(Vertex vertex) {
 		Generic generic = super.getGenericById(vertex.getTs());
 		if (generic == null) {
 			generic = build(vertex);
@@ -78,7 +66,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	@Override
-	public Generic getGenericById(long ts) {
+	protected Generic getGenericById(long ts) {
 		Generic generic = super.getGenericById(ts);
 		if (generic == null) {
 			Vertex vertex = server.getVertex(ts);
