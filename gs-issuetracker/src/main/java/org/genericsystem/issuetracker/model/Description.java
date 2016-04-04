@@ -4,7 +4,7 @@ import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.common.Generic;
 
 @SystemGeneric
 @Components(Issue.class)

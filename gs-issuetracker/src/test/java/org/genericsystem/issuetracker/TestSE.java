@@ -1,8 +1,8 @@
 package org.genericsystem.issuetracker;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.mutability.Engine;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test

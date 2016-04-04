@@ -4,11 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-
+import org.genericsystem.common.Generic;
 import org.genericsystem.issuetracker.model.Description;
 import org.genericsystem.issuetracker.model.Issue;
 import org.genericsystem.issuetracker.model.IssuePriority;
@@ -16,7 +15,6 @@ import org.genericsystem.issuetracker.model.IssueStatut;
 import org.genericsystem.issuetracker.model.IssueVersion;
 import org.genericsystem.issuetracker.model.Version;
 import org.genericsystem.issuetracker.qualifier.Provide;
-import org.genericsystem.mutability.Generic;
 
 public class IssueBean extends AbstractBean implements Serializable {
 	private static final long serialVersionUID = 4142394683395145575L;

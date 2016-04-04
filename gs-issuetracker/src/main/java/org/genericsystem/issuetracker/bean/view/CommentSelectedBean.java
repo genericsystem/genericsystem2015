@@ -1,14 +1,12 @@
 package org.genericsystem.issuetracker.bean.view;
 
 import java.io.Serializable;
-
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
+import org.genericsystem.common.Generic;
 import org.genericsystem.issuetracker.bean.AbstractBean.ElStringWrapper;
 import org.genericsystem.issuetracker.bean.CommentBean;
-import org.genericsystem.mutability.Generic;
 
 @Named
 @SessionScoped
