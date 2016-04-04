@@ -92,6 +92,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
@@ -104,7 +105,22 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>${maven-eclipse-plugin.version}</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
+
+	<!-- <build> <finalName>${project.artifactId}</finalName> <plugins> <plugin> 
+		<groupId>org.apache.maven.plugins</groupId> <artifactId>maven-compiler-plugin</artifactId> 
+		<version>${maven-compiler-plugin.version}</version> <configuration> <source>${java.version}</source> 
+		<target>${java.version}</target> </configuration> </plugin> </plugins> </build> -->
 
 </project>

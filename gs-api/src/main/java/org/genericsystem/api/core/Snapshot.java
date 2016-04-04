@@ -99,7 +99,13 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * @return the first element of this snapshot or <code>null</code> if this snapshot is empty.
 	 */
 	default T first() {
-		return stream().findFirst().orElse(null);
+
+		if (iterator().hasNext()) {
+			return iterator().next();
+		}
+		// return stream().findFirst().orElse(null);}
+		else
+			return null;
 	}
 
 	default T getByIndex(int index) {
