@@ -15,9 +15,9 @@ import javax.enterprise.inject.Specializes;
 @Specializes
 @Alternative
 @ApplicationScoped
-public class MockPersistentDirectoryProvider extends PersistentDirectoryProvider {
+public class PersistentDirectoryConfig extends PersistentDirectoryProvider {
 	@Override
 	public String getDirectoryPath() {
-		return DIRECTORY_PATH;
+		return DEFAULT_DIRECTORY_PATH;
 	}
 }
