@@ -980,18 +980,6 @@ public interface IVertex<T extends IVertex<T>> extends ISignature<T> {
 	String detailedInfo();
 
 	/**
-	 * Returns a <code>String</code> pretty representation of the composites of this vertex.
-	 *
-	 * @return the <code>String</code> representation of the composites of this vertex.
-	 */
-
-	/**
-	 * Returns a <code>JSon</code> representation of the composites of this vertex.
-	 *
-	 * @return the <code>JSon</code> representation of the composites of this vertex.
-	 */
-
-	/**
 	 * Represents a system property in Generic System.
 	 */
 	public static interface SystemProperty {
