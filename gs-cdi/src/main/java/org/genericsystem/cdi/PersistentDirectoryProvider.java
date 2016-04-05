@@ -25,7 +25,7 @@ import org.genericsystem.kernel.Statics;
  */
 @ApplicationScoped
 public class PersistentDirectoryProvider {
-	public static final String DIRECTORY_PATH = System.getenv("HOME") + "/test/genericsystem";
+	public static final String DEFAULT_DIRECTORY_PATH = System.getenv("HOME") + "/test/genericsystem";
 
 	public String getEngineValue() {
 		return Statics.ENGINE_VALUE;
