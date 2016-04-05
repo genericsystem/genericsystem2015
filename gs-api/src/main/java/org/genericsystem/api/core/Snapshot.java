@@ -99,8 +99,6 @@ public interface Snapshot<T> extends Iterable<T> {
 	 * @return the first element of this snapshot or <code>null</code> if this snapshot is empty.
 	 */
 
-	// (link != null) ? (String) link.getTargetComponent().getValue() : null;
-
 	default T first() {
 
 		return (iterator().hasNext() ? iterator().next() : null);

@@ -5,7 +5,7 @@ import javax.enterprise.inject.Specializes;
 import org.genericsystem.cdi.PersistentDirectoryProvider;
 
 @Specializes
-public class PersistentDirectoryProviderExample extends PersistentDirectoryProvider {
+public class PersistentDirectoryConfig extends PersistentDirectoryProvider {
 
 	@Override
 	public String getDirectoryPath() {
