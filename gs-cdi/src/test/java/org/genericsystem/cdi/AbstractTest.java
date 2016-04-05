@@ -38,7 +38,7 @@ public abstract class AbstractTest extends Arquillian {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("<beans xmlns=\"http://java.sun.com/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\" http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/beans_1_0.xsd\">");
 		stringBuilder.append("<alternatives> ");
-		stringBuilder.append("<class>org.genericsystem.cdi.MockPersistentDirectoryProvider</class>");
+		stringBuilder.append("<class>org.genericsystem.cdi.PersistentDirectoryConfig</class>");
 		stringBuilder.append("</alternatives>");
 		stringBuilder.append("</beans>");
 		javaArchive.addAsManifestResource(new StringAsset(stringBuilder.toString()), "beans.xml");

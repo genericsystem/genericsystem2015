@@ -50,16 +50,9 @@ public interface ISignature<T extends ISignature<T>> {
 	 *
 	 * @return the <code>JSonObject</code> representing this signature.
 	 */
-	/*
-	 * default JsonObject toJSonId() { JsonObjectBuilder builder = Json.createObjectBuilder(); builder.add("Id", System.identityHashCode(this)); builder.add("Value", toString()); builder.add("Meta", System.identityHashCode(getMeta())); JsonArrayBuilder
-	 * supersBuilder = Json.createArrayBuilder(); for (T superVertex : getSupers()) supersBuilder.add(System.identityHashCode(superVertex)); builder.add("Supers", supersBuilder); JsonArrayBuilder arrayBuilder = Json.createArrayBuilder(); for (T composite :
-	 * getComponents()) arrayBuilder.add(System.identityHashCode(composite)); builder.add("Components", arrayBuilder); return builder.build(); }
-	 */
 
 	long getTs();
 
 	long getBirthTs();
-
-	// long getDeathTs();
 
 }

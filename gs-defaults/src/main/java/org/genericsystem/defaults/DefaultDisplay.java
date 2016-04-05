@@ -42,21 +42,6 @@ public interface DefaultDisplay<T extends DefaultVertex<T>> extends IVertex<T> {
 		return s;
 	}
 
-	/*
-	 * @Override default String toPrettyString() { StringWriter writer = new StringWriter(); JsonWriter jsonWriter = Json.createWriterFactory(new HashMap<String, JsonValue>() { private static final long serialVersionUID = -8719498570554805477L; {
-	 * put(JsonGenerator.PRETTY_PRINTING, JsonValue.TRUE); } }).createWriter(writer); // jsonWriter.write(toPrettyJSon()); jsonWriter.write(toPrettyJSon()); jsonWriter.close(); return writer.toString(); }
-	 * 
-	 * @Override
-	 * 
-	 * @SuppressWarnings("unchecked") default JsonObject toPrettyJSon() { JsonObjectBuilder builder = Json.createObjectBuilder(); builder.add("Value", toString()); for (T attribute : getAttributes()) { JsonArrayBuilder arrayBuilder =
-	 * Json.createArrayBuilder(); for (T holder : getHolders(attribute)) { if (holder.getComponents().get(0).isSpecializationOf((T) this)) arrayBuilder.add(holder.toPrettyJSon()); builder.add(attribute.toString(), arrayBuilder); } } return builder.build();
-	 * }
-	 * 
-	 * @Override default JsonObject toJSonId() { JsonObjectBuilder builder = Json.createObjectBuilder(); builder.add("Id", System.identityHashCode(this)); builder.add("Value", toString()); builder.add("Meta", System.identityHashCode(getMeta()));
-	 * JsonArrayBuilder arrayBuilder = Json.createArrayBuilder(); for (T superVertex : getSupers()) arrayBuilder.add(System.identityHashCode(superVertex)); builder.add("Supers", arrayBuilder);
-	 * 
-	 * for (T composite : getComponents()) arrayBuilder.add(System.identityHashCode(composite)); builder.add("Composites", arrayBuilder); return builder.build(); }
-	 */
 	public static String getMetaLevelString(int metaLevel) {
 		switch (metaLevel) {
 		case META:

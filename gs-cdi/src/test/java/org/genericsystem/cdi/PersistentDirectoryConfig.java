@@ -7,7 +7,7 @@ import javax.enterprise.inject.Specializes;
 /**
  * Persistence is not activated by default if you want to persist, you have to set a specialized mock persistentDirectoryProvider in your project :
  *
- * @Specializes public class MockPersitentDirectoryProvider extends PersitentDirectoryProvider { @Override String getDirectoryPath() { return DIRECTORY_PATH; } }
+ * @Specializes public class PersistentDirectoryConfig extends PersitentDirectoryProvider { @Override String getDirectoryPath() { return DIRECTORY_PATH; } }
  *
  * @author Nicolas Feybesse
  *
