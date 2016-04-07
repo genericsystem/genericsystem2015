@@ -2,51 +2,26 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.Collectors;
-
-import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-public abstract class AbstractBackEnd<T extends AbstractServer> {
+public abstract class AbstractBackEnd<T extends Closable> {
 
-	protected Map<String, AbstractServer> roots;
-	protected WebSocketsServer<T> webSocketsServer;
+	protected Map<String, T> roots = new HashMap<>();
+	protected AbstractWebSocketsServer<T> webSocketsServer;
 
 	public AbstractBackEnd(GSDeploymentOptions options) {
 		webSocketsServer = buildWebSocketsServer(options);
-		this.roots = Arrays.stream(getRoots(options)).collect(Collectors.toMap(root -> "/" + root.getValue(), root -> root));
 	}
 
-	abstract protected WebSocketsServer<T> buildWebSocketsServer(GSDeploymentOptions options);
-
-	private AbstractServer[] getRoots(GSDeploymentOptions options) {
-		Set<AbstractServer> roots = new HashSet<>();
-		if (options.getEngines().isEmpty()) {
-			AbstractServer defaultRoot = buildRoot(Statics.ENGINE_VALUE, null, options.getClasses());
-			roots.add(defaultRoot);
-			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
-		} else
-			for (Entry<String, String> entry : options.getEngines().entrySet()) {
-				roots.add(buildRoot(entry.getKey(), entry.getValue(), options.getClasses()));
-				System.out.println("Starts engine : " + "/" + entry.getKey());
-			}
-		return roots.toArray(new AbstractServer[roots.size()]);
-	}
-
-	abstract protected T buildRoot(String value, String persistentDirectoryPath, Class<?>[] userClasses);
+	abstract protected AbstractWebSocketsServer<T> buildWebSocketsServer(GSDeploymentOptions options);
 
 	public void start() {
 		webSocketsServer.start(roots);
@@ -56,11 +31,11 @@ public abstract class AbstractBackEnd<T extends AbstractServer> {
 		webSocketsServer.stop(roots);
 	}
 
-	public WebSocketsServer<T> getwebSocket() {
+	public AbstractWebSocketsServer<T> getwebSocket() {
 		return this.webSocketsServer;
 	}
 
-	protected static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
+	public static <T> T synchronizeTask(Handler<Handler<AsyncResult<T>>> consumer) {
 		BlockingQueue<AsyncResult<T>> blockingQueue = new ArrayBlockingQueue<>(1);
 		consumer.handle(res -> {
 			try {
