@@ -1,0 +1,101 @@
+body {
+    margin-left: auto;
+    margin-right: auto;
+    width: 550px;
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 1.4em;
+	color: #4d4d4d;
+	
+}
+
+table.maTable{
+	background: #d6caca;
+	border-collapse: collapse;
+	width: 200;
+}
+
+.customHeader{
+	  color: #0066FF;
+  font-family:arial;
+  font-size: 6px; 
+}
+
+tfoot.footerStyle {
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font-size: 14px;
+	
+}
+
+.text-output{
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 14px;
+}
+
+.selectedItem option{
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	
+}
+
+.todoapp h1 {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 70px;
+    font-weight: bold;
+    position: absolute;
+    text-align: center;
+    text-rendering: optimizelegibility;
+    text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
+    top: -120px;
+    width: 100%;
+}
+
+.bouton {
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	background: #d6caca;
+	font-size: 14px;
+	border-top: 5px #f8f9ff;
+	border-left: 5px #ebecf5;
+	border-bottom: 5px #7f7f86;
+	border-right: 5px #a2a3ab;
+        padding-left: 4px;
+        padding-right: 2px;
+        margin-bottom: 1px;
+        overflow: visible;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+
+.bouton:hover {
+	background: #d6caca;
+    color: blue;
+    border: 2px #555555;
+}
+
+
+.xBouton{
+	background: #d6caca;
+    border: none;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+	
+}
+
+.xBouton:hover {
+	background: #d6caca;
+    color: red;
+    border: 2px #555555;
+}
+

@@ -5,8 +5,4 @@
 	version="2.0">
 
 
-	<lifecycle>
-		<phase-listener>org.genericsystem.examplejsf.phase.MyPhaseListener</phase-listener>
-	</lifecycle>
-
 </faces-config>
