@@ -20,7 +20,7 @@ public abstract class HtmlApp extends HtmlElement<HtmlApp, HtmlDomNode> {
 		super(null, HtmlDomNode.class);
 		this.webSocket = webSocket;
 		initHtmlChildren();
-		rootViewContext = new RootViewContext<HtmlDomNode>(model, (Element) this, new HtmlDomNode("div"));
+		rootViewContext = new RootViewContext<>(model, (Element) this, new HtmlDomNode("div"));
 	}
 
 	@Override
@@ -40,4 +40,5 @@ public abstract class HtmlApp extends HtmlElement<HtmlApp, HtmlDomNode> {
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
 	}
+
 }
