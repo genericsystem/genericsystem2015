@@ -11,7 +11,6 @@ import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse
@@ -26,19 +25,19 @@ public class EngineServer extends AbstractBackEnd<AbstractServer> {
 	public EngineServer(GSDeploymentOptions options) {
 		super(options);
 		if (options.getEngines().isEmpty()) {
-			AbstractServer defaultRoot = buildRoot(Statics.ENGINE_VALUE, null, options.getClasses());
+			AbstractServer defaultRoot = buildRoot(null, options.getClasses());
 			roots.put("/" + defaultRoot.getValue(), defaultRoot);
-			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
+			System.out.println("Starts engine : " + "/" + defaultRoot.getValue());
 		} else
 			for (Entry<String, String> entry : options.getEngines().entrySet()) {
-				AbstractServer root = buildRoot(entry.getKey(), entry.getValue(), options.getClasses());
-				roots.put("/" + root.getValue(), root);
-				System.out.println("Starts engine : " + "/" + entry.getKey());
+				AbstractServer root = buildRoot(entry.getValue(), options.getClasses());
+				roots.put("/" + entry.getValue(), root);
+				System.out.println("Starts engine : " + "/" + entry.getValue());
 			}
 	}
 
-	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class[] userClasses) {
-		return new Engine(value, persistentDirectoryPath, userClasses);
+	protected AbstractServer buildRoot(String persistentDirectoryPath, Class[] userClasses) {
+		return new Engine(persistentDirectoryPath, userClasses);
 	}
 
 	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer root, GSBuffer gsBuffer) {
