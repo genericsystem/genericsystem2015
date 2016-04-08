@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.function.Consumer;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -14,7 +14,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -30,6 +29,7 @@ import org.genericsystem.defaults.tools.TransitiveObservable;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Statics;
 import org.genericsystem.kernel.Transaction;
+import com.google.common.base.Supplier;
 
 /**
  * @author Nicolas Feybesse
@@ -39,6 +39,24 @@ public class Cache extends CheckedContext implements DefaultCache<Generic> {
 
 	public Generic setMeta(int dim) {
 		return setInstance(null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim)));
+	}
+
+	public <U> U safeSupply(Supplier<U> safeExecution) {
+		start();
+		try {
+			return safeExecution.get();
+		} finally {
+			stop();
+		}
+	}
+
+	public <U> void safeConsum(Consumer<U> safeExecution) {
+		start();
+		try {
+			safeExecution.accept(null);
+		} finally {
+			stop();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,8 +88,7 @@ public class Cache extends CheckedContext implements DefaultCache<Generic> {
 	}
 
 	public Cache(AbstractRoot root) {
-		this(root, new ContextEventListener<Generic>() {
-		});
+		this(root, new ContextEventListener<Generic>() {});
 	}
 
 	public Cache(AbstractRoot root, ContextEventListener<Generic> listener) {
@@ -332,17 +349,13 @@ public class Cache extends CheckedContext implements DefaultCache<Generic> {
 
 	public static interface ContextEventListener<X> {
 
-		default void triggersMutationEvent(X oldDependency, X newDependency) {
-		}
+		default void triggersMutationEvent(X oldDependency, X newDependency) {}
 
-		default void triggersRefreshEvent() {
-		}
+		default void triggersRefreshEvent() {}
 
-		default void triggersClearEvent() {
-		}
+		default void triggersClearEvent() {}
 
-		default void triggersFlushEvent() {
-		}
+		default void triggersFlushEvent() {}
 	}
 
 }

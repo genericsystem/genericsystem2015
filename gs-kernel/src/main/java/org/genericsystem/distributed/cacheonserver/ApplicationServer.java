@@ -4,7 +4,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map.Entry;
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
@@ -55,28 +54,15 @@ public class ApplicationServer extends AbstractBackEnd<PersistantApplication> {
 		@Override
 		public Handler<Buffer> getHandler(PersistantApplication application, ServerWebSocket socket) {
 			Cache cache = application.getEngine().newCache();
-			cache.start();
-			HtmlApp app;
-			try {
-				app = application.getApplicationClass().getConstructor(Engine.class, ServerWebSocket.class).newInstance(application.getEngine(), socket);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalStateException(e);
-			} finally {
-				cache.stop();
-			}
+
+			HtmlApp app = cache.safeSupply(() -> application.newHtmlApp(socket));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
 				HtmlDomNode node = app.getNodeById(json.getString(HtmlElement.ID));
-				if (node != null) {
-					cache.start();
-					try {
-						node.handleMessage(json);
-					} finally {
-						cache.stop();
-					}
-				}
+				if (node != null)
+					cache.safeConsum((x) -> node.handleMessage(json));
 			};
 		}
 	}
