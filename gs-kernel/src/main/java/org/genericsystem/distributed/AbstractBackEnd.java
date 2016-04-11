@@ -2,36 +2,39 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import org.genericsystem.kernel.AbstractServer;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-public abstract class AbstractBackEnd<T extends Closable> {
+public abstract class AbstractBackEnd {
 
-	protected Map<String, T> roots = new HashMap<>();
-	protected AbstractWebSocketsServer<T> webSocketsServer;
+	protected Map<String, AbstractServer> roots = new HashMap<>();
+	protected AbstractWebSocketsServer webSocketsServer;
 
-	public AbstractBackEnd(GSDeploymentOptions options) {
-		webSocketsServer = buildWebSocketsServer(options);
+	public AbstractBackEnd(String host, int port) {
+		webSocketsServer = buildWebSocketsServer(host, port);
 	}
 
-	abstract protected AbstractWebSocketsServer<T> buildWebSocketsServer(GSDeploymentOptions options);
+	abstract protected AbstractWebSocketsServer buildWebSocketsServer(String host, int port);
 
 	public void start() {
-		webSocketsServer.start(roots);
+		webSocketsServer.start();
 	}
 
 	public void stop() {
 		webSocketsServer.stop(roots);
 	}
 
-	public AbstractWebSocketsServer<T> getwebSocket() {
+	public AbstractWebSocketsServer getwebSocket() {
 		return this.webSocketsServer;
 	}
 

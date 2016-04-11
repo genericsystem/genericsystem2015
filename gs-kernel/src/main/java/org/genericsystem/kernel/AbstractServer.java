@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
@@ -14,13 +15,12 @@ import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.Closable;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public abstract class AbstractServer extends AbstractRoot implements Generic, Protocol, Closable {
+public abstract class AbstractServer extends AbstractRoot implements Generic, Protocol {
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
@@ -16,22 +17,22 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test00() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
 			}
 		};
 		root.close();
-		compareGraph(root, new Engine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new Engine(snapshot));
 	}
 
 	public void test001() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot);
+		Engine root = new Engine(snapshot);
 		// root.close();
 		try {
-			Engine root2 = new Engine(Statics.ENGINE_VALUE, snapshot);
+			Engine root2 = new Engine(snapshot);
 			assert false;
 		} catch (Exception e) {
 			// ignore
@@ -40,7 +41,7 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test002() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -49,14 +50,14 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance("Vehicle");
 		root.getCurrentCache().flush();
 		root.close();
-		Engine root2 = new Engine(Statics.ENGINE_VALUE, snapshot);
+		Engine root2 = new Engine(snapshot);
 		compareGraph(root, root2);
 		assert null != root2.getInstance("Vehicle");
 	}
 
 	public void test003() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		Engine root = new Engine(snapshot, Vehicle.class);
 		Generic vehicle = root.find(Vehicle.class);
 		vehicle.addInstance("myVehicle");
 		assert vehicle.getBirthTs() == ApiStatics.TS_SYSTEM;
@@ -65,13 +66,13 @@ public class PersistenceTest extends AbstractTest {
 		root.getCurrentCache().flush();
 		root.close();
 
-		Engine root2 = new Engine(Statics.ENGINE_VALUE, snapshot);
+		Engine root2 = new Engine(snapshot);
 		Generic vehicle2 = root2.getInstance(Vehicle.class);
 		assert vehicle2.getInstance("myVehicle").getBirthTs() > vehicle2.getBirthTs();
 		assert !vehicle2.isSystem();
 		root2.close();
 
-		Engine root3 = new Engine(Statics.ENGINE_VALUE, snapshot, Vehicle.class);
+		Engine root3 = new Engine(snapshot, Vehicle.class);
 		Generic vehicle3 = root3.find(Vehicle.class);
 		assert vehicle3.getBirthTs() == ApiStatics.TS_SYSTEM;
 		assert vehicle3.getInstance("myVehicle").getBirthTs() > vehicle3.getBirthTs();
@@ -81,7 +82,7 @@ public class PersistenceTest extends AbstractTest {
 
 	public void test004() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -93,12 +94,12 @@ public class PersistenceTest extends AbstractTest {
 		myVehicle.setHolder(vehiclePower, "123");
 		root.getCurrentCache().flush();
 		root.close();
-		compareGraph(root, new Engine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new Engine(snapshot));
 	}
 
 	public void test005() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -110,13 +111,13 @@ public class PersistenceTest extends AbstractTest {
 		car.remove();
 		root.getCurrentCache().flush();
 		root.close();
-		Engine root2 = new Engine(Statics.ENGINE_VALUE, snapshot);
+		Engine root2 = new Engine(snapshot);
 		compareGraph(root, root2);
 	}
 
 	public void test006() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -130,12 +131,12 @@ public class PersistenceTest extends AbstractTest {
 		myCar.setHolder(carColor, "myCarRed", red);
 		root.getCurrentCache().flush();
 		root.close();
-		compareGraph(root, new Engine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new Engine(snapshot));
 	}
 
 	public void test007() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -146,12 +147,12 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance(Arrays.asList(car, robot), "Transformer");
 		root.getCurrentCache().flush();
 		root.close();
-		compareGraph(root, new Engine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new Engine(snapshot));
 	}
 
 	public void test008() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -163,12 +164,12 @@ public class PersistenceTest extends AbstractTest {
 		root.addInstance(Arrays.asList(car, robot), "Transformer");
 		root.getCurrentCache().flush();
 		root.close();
-		compareGraph(root, new Engine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new Engine(snapshot));
 	}
 
 	public void test009() {
 		String snapshot = cleanDirectory(directoryPath + new Random().nextInt());
-		Engine root = new Engine(Statics.ENGINE_VALUE, snapshot) {
+		Engine root = new Engine(snapshot) {
 			@Override
 			public void close() {
 				archiver.close();
@@ -181,7 +182,7 @@ public class PersistenceTest extends AbstractTest {
 		vehicle.addInstance(electriccar, "Hybrid");
 		root.getCurrentCache().flush();
 		root.close();
-		compareGraph(root, new Engine(Statics.ENGINE_VALUE, snapshot));
+		compareGraph(root, new Engine(snapshot));
 	}
 
 	private static String cleanDirectory(String directoryPath) {

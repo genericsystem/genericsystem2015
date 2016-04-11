@@ -4,55 +4,70 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-import java.util.Map.Entry;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
+import org.genericsystem.distributed.ApplicationsDeploymentConfig;
+import org.genericsystem.distributed.ApplicationsDeploymentConfig.DefaultPathSingleWebAppDeployment;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.distributed.cacheonserver.todomvc.TodoApp;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 import org.genericsystem.distributed.ui.components.HtmlApp;
+import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class ApplicationServer extends AbstractBackEnd<PersistantApplication> {
+public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
-		new ApplicationServer(new GSDeploymentOptions()).start();
+		new ApplicationServer(new DefaultPathSingleWebAppDeployment(TodoApp.class, null)).start();
 	}
 
-	public ApplicationServer(GSDeploymentOptions options) {
-		super(options);
-		if (options.getEngines().isEmpty()) {
-			PersistantApplication defaultRoot = buildApp(TodoApp.class, null, options.getClasses());
-			roots.put("/" + TodoApp.class.getSimpleName(), defaultRoot);
-			System.out.println("Starts application : " + "/" + Statics.ENGINE_VALUE);
-		} else
-			for (Entry<String, String> entry : options.getEngines().entrySet()) {
-				PersistantApplication root = buildApp(TodoApp.class, entry.getValue(), options.getClasses());
-				roots.put("/" + entry.getKey(), root);
-				System.out.println("Starts application : " + "/" + entry.getKey());
-			}
+	protected Map<String, PersistentApplication> apps = new HashMap<>();
+
+	public ApplicationServer(ApplicationsDeploymentConfig options) {
+		super(options.getHost(), options.getPort());
+		System.out.println("Load config : \n" + options.encodePrettily());
+		for (String directoryPath : options.getPersistentDirectoryPaths()) {
+			AbstractServer root = buildRoot(directoryPath, options.getClasses(directoryPath));
+			roots.put(directoryPath, root);
+			System.out.println("Starts engine with path : " + "/" + directoryPath + "and persistence directory path : " + directoryPath);
+		}
+		for (String applicationPath : options.getApplicationsPaths()) {
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(options.getPersistentDirectoryPath(applicationPath))));
+			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath);
+		}
 	}
 
-	protected PersistantApplication buildApp(Class<? extends HtmlApp> applicationClass, String persistentDirectoryPath, Class[] userClasses) {
-		return new PersistantApplication(applicationClass, new Engine(persistentDirectoryPath, userClasses));
+	protected AbstractServer buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses) {
+		return new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new));
 	}
 
-	public class WebSocketsServer extends AbstractWebSocketsServer<PersistantApplication> {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses) {
+		return new PersistentApplication(applicationClass, new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)));
+	}
+
+	private class WebSocketsServer extends AbstractWebSocketsServer {
 
 		public WebSocketsServer(String host, int port) {
 			super(host, port);
 		}
 
 		@Override
-		public Handler<Buffer> getHandler(PersistantApplication application, ServerWebSocket socket) {
+		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
+			PersistentApplication application = apps.get(path);
+			if (application == null)
+				throw new IllegalStateException("Unable to load an application with path : " + path);
 			Cache cache = application.getEngine().newCache();
 			HtmlApp app = cache.safeSupply(() -> application.newHtmlApp(socket));
 			return buffer -> {
@@ -64,10 +79,11 @@ public class ApplicationServer extends AbstractBackEnd<PersistantApplication> {
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};
 		}
+
 	}
 
 	@Override
-	protected WebSocketsServer buildWebSocketsServer(GSDeploymentOptions options) {
-		return new WebSocketsServer(options.getHost(), options.getPort());
+	protected WebSocketsServer buildWebSocketsServer(String host, int port) {
+		return new WebSocketsServer(host, port);
 	}
 }
