@@ -3,42 +3,46 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
-import java.util.Map.Entry;
+
+import java.util.Collections;
+import java.util.List;
+
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
+import org.genericsystem.distributed.EnginesDeploymentConfig;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.distributed.GSDeploymentOptions;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class EngineServer extends AbstractBackEnd<AbstractServer> {
+public class EngineServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
-		new EngineServer(new GSDeploymentOptions()).start();
+		new EngineServer(new DefaultPathSingleEngineDeployment("/", null)).start();
 	}
 
-	public EngineServer(GSDeploymentOptions options) {
-		super(options);
-		if (options.getEngines().isEmpty()) {
-			AbstractServer defaultRoot = buildRoot(Statics.ENGINE_VALUE, null, options.getClasses());
-			roots.put("/" + defaultRoot.getValue(), defaultRoot);
-			System.out.println("Starts engine : " + "/" + Statics.ENGINE_VALUE);
+	public EngineServer(EnginesDeploymentConfig options) {
+		super(options.getHost(), options.getPort());
+		System.out.println("Load config : \n" + options.encodePrettily());
+		if (options.getEnginePaths().isEmpty()) {
+			AbstractServer defaultRoot = buildRoot(null, Collections.emptyList());
+			roots.put("/", defaultRoot);
+			System.out.println("Starts engine with path : / and persistence repository path : null");
 		} else
-			for (Entry<String, String> entry : options.getEngines().entrySet()) {
-				AbstractServer root = buildRoot(entry.getKey(), entry.getValue(), options.getClasses());
-				roots.put("/" + root.getValue(), root);
-				System.out.println("Starts engine : " + "/" + entry.getKey());
+			for (String path : options.getEnginePaths()) {
+				AbstractServer root = buildRoot(options.getPersistentDirectoryPath(path), options.getClasses(path));
+				roots.put(path, root);
+				System.out.println("Starts engine with path : " + path + "and persistence repository path : " + options.getPersistentDirectoryPath(path));
 			}
 	}
 
-	protected AbstractServer buildRoot(String value, String persistentDirectoryPath, Class[] userClasses) {
-		return new Engine(value, persistentDirectoryPath, userClasses);
+	protected AbstractServer buildRoot(String persistentDirectoryPath, List<Class<?>> userClasses) {
+		return new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new));
 	}
 
 	protected Buffer getReplyBuffer(int methodId, int op, AbstractServer root, GSBuffer gsBuffer) {
@@ -63,14 +67,18 @@ public class EngineServer extends AbstractBackEnd<AbstractServer> {
 		}
 	}
 
-	public class WebSocketsServer extends AbstractWebSocketsServer<AbstractServer> {
+	private class WebSocketsServer extends AbstractWebSocketsServer {
 
 		public WebSocketsServer(String host, int port) {
 			super(host, port);
 		}
 
 		@Override
-		public Handler<Buffer> getHandler(AbstractServer root, ServerWebSocket socket) {
+		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
+			AbstractServer root = roots.get(path);
+			if (root == null)
+				throw new IllegalStateException("Unable to find database :" + path);
+
 			Cache cache = root.newCache();
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
@@ -82,7 +90,7 @@ public class EngineServer extends AbstractBackEnd<AbstractServer> {
 	}
 
 	@Override
-	protected WebSocketsServer buildWebSocketsServer(GSDeploymentOptions options) {
-		return new WebSocketsServer(options.getHost(), options.getPort());
+	protected WebSocketsServer buildWebSocketsServer(String host, int port) {
+		return new WebSocketsServer(host, port);
 	}
 }

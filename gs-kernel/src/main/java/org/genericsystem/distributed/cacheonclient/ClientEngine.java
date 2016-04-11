@@ -20,20 +20,21 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	protected final FrontEnd server;
 
 	public ClientEngine(Class<?>... userClasses) {
-		this(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, userClasses);
+		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT, userClasses);
 	}
 
-	public ClientEngine(String engineValue, Class<?>... userClasses) {
-		this(engineValue, null, Statics.DEFAULT_PORT, userClasses);
+	public ClientEngine(String path, Class<?>... userClasses) {
+		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT, path, userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port, Class<?>... userClasses) {
-		this(engineValue, host, port, null, userClasses);
+	public ClientEngine(String host, int port, Class<?>... userClasses) {
+		this(host, port, "/", userClasses);
 	}
 
-	public ClientEngine(String engineValue, String host, int port, String persistentDirectoryPath, Class<?>... userClasses) {
-		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), engineValue, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
-		server = new FrontEnd(host, port, "/" + engineValue);
+	public ClientEngine(String host, int port, String path, Class<?>... userClasses) {
+		assert path != null;
+		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
+		server = new FrontEnd(host, port, path);
 		startSystemCache(userClasses);
 		isInitialized = true;
 	}

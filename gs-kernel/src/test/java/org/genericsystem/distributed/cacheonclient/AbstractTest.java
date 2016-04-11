@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.distributed.EnginesDeploymentConfig;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -30,8 +30,8 @@ public abstract class AbstractTest {
 			}
 	}
 
-	public GSDeploymentOptions getDeploymentOptions() {
-		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath);
+	public EnginesDeploymentConfig getDeploymentOptions() {
+		return new DefaultPathSingleEngineDeployment(directoryPath);
 	}
 
 	@BeforeMethod
