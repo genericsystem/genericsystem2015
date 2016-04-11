@@ -1,10 +1,12 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.json.JsonObject;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.genericsystem.distributed.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.kernel.Statics;
@@ -15,7 +17,7 @@ import org.genericsystem.kernel.Statics;
  */
 public class ApplicationsDeploymentConfig extends JsonObject {
 
-	protected ApplicationsDeploymentConfig() {
+	public ApplicationsDeploymentConfig() {
 		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT);
 	}
 
@@ -49,8 +51,9 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return new ApplicationDeploymentConfig(json.getMap());
 	}
 
-	public void addApplication(String path, Class<? extends HtmlApp> clazz, String persistentDirectoryPath, Class<?>... classes) {
+	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends HtmlApp> clazz, String persistentDirectoryPath, Class<?>... classes) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(clazz, persistentDirectoryPath, classes));
+		return this;
 	}
 
 	public void removeApplication(String path) {

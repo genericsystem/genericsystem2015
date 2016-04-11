@@ -28,7 +28,7 @@ public class App extends Application {
 	static EngineServer server;
 
 	private ClientEngine initGS() {
-		server = new EngineServer(new DefaultPathSingleEngineDeployment("/home/middleware/test/", Car.class, Power.class, CarColor.class, Color.class));
+		server = new EngineServer(new DefaultPathSingleEngineDeployment("/home/middleware/test2/", Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		engine = new ClientEngine(null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 

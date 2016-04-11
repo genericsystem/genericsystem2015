@@ -101,8 +101,8 @@ public class CarListModel extends Model {
 	}
 
 	public void removeCompleted() {
-		for (CarModel CarModel : new ArrayList<>(carModels.filtered(COMPLETE)))
-			carModels.remove(CarModel);
+		for (CarModel carModel : new ArrayList<>(carModels.filtered(COMPLETE)))
+			carModel.remove();
 	}
 
 	static Predicate<CarModel> ALL = CarModel -> true;

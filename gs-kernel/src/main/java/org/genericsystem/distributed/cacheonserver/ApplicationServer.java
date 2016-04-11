@@ -4,16 +4,19 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
 import org.genericsystem.distributed.ApplicationsDeploymentConfig;
-import org.genericsystem.distributed.ApplicationsDeploymentConfig.DefaultPathSingleWebAppDeployment;
 import org.genericsystem.distributed.GSBuffer;
+import org.genericsystem.distributed.cacheonserver.todocarmvc.Car;
+import org.genericsystem.distributed.cacheonserver.todocarmvc.CarApp;
 import org.genericsystem.distributed.cacheonserver.todomvc.TodoApp;
 import org.genericsystem.distributed.cacheonserver.todomvc.Todos;
 import org.genericsystem.distributed.ui.HtmlElement;
@@ -29,7 +32,10 @@ import org.genericsystem.kernel.Engine;
 public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
-		new ApplicationServer(new DefaultPathSingleWebAppDeployment(TodoApp.class, "/home/middleware/todos/", Todos.class)).start();
+		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
+		apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Car.class);
+		apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
+		new ApplicationServer(apps).start();
 	}
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
