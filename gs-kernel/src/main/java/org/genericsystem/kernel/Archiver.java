@@ -167,7 +167,9 @@ public class Archiver {
 			lockFile = new FileOutputStream(directoryPath + File.separator + LOCK_FILE_NAME).getChannel().tryLock();
 			if (lockFile == null)
 				throw new IllegalStateException("Locked directory : " + directoryPath);
-		} catch (OverlappingFileLockException | IOException e) {
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} catch (OverlappingFileLockException e) {
 			throw new IllegalStateException("Locked directory : " + directoryPath);
 		}
 		return directory;
