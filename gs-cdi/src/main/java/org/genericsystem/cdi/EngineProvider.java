@@ -49,7 +49,7 @@ public class EngineProvider {
 		log.info("-  userClasses : " + Arrays.toString(userClassesProvider.getUserClassesArray()));
 		log.info("-----------------------------------------------------------------------------------------------");
 
-		engine = new Engine(() -> cacheRequestProvider.getCurrentCache(), persistentDirectoryProvider.getEngineValue(), persistentDirectoryProvider.getDirectoryPath(), userClassesProvider.getUserClassesArray());
+		engine = new Engine(() -> cacheRequestProvider.getCurrentCache(), persistentDirectoryProvider.getDirectoryPath(), userClassesProvider.getUserClassesArray());
 	}
 
 	@Produces

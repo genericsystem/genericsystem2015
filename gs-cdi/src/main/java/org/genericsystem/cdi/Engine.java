@@ -11,8 +11,8 @@ public class Engine extends org.genericsystem.kernel.Engine {
 
 	private final Supplier<Cache> cacheSupplier;
 
-	public Engine(Supplier<Cache> cacheSupplier, String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(engineValue, persistentDirectoryPath, userClasses);
+	public Engine(Supplier<Cache> cacheSupplier, String persistentDirectoryPath, Class<?>... userClasses) {
+		super(persistentDirectoryPath, userClasses);
 		assert cacheSupplier != null : "Unable to find the current cache. Did you miss to call start() method on it ?";
 		this.cacheSupplier = cacheSupplier;
 	}
