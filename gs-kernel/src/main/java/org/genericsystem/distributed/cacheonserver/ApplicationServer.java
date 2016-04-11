@@ -29,7 +29,7 @@ import org.genericsystem.kernel.Engine;
 public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
-		new ApplicationServer(new DefaultPathSingleWebAppDeployment(TodoApp.class, (String) null, Todos.class)).start();
+		new ApplicationServer(new DefaultPathSingleWebAppDeployment(TodoApp.class, "/home/middleware/todos/", Todos.class)).start();
 	}
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
@@ -38,18 +38,18 @@ public class ApplicationServer extends AbstractBackEnd {
 		super(options.getHost(), options.getPort());
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
+			String path = directoryPath != null ? directoryPath : "/";
 			AbstractServer root = buildRoot(directoryPath, options.getClasses(directoryPath));
+			System.out.println("Starts engine with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
-			roots.put(directoryPath, root);
-			System.out.println("Starts engine with path : " + directoryPath + " and persistence directory path : " + directoryPath);
+			roots.put(path, root);
 		}
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
-			if (directoryPath == null)
-				directoryPath = "/";
-			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(directoryPath)));
-			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath);
+			String path = directoryPath != null ? directoryPath : "/";
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(path)));
+			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
 		}
 	}
 
