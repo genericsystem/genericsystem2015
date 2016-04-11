@@ -11,7 +11,7 @@ import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation;
+import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.ui.table.Crud;
 import org.genericsystem.ui.table.Table;
 
@@ -44,7 +44,7 @@ public class GenericCrud extends Crud {
 
 	@Override
 	public void add() {
-		generic.addInstance(getInstanceValue(), new Transformation<Generic, GenericCombobox>(listCombobox, combo -> combo.getSelectedItem().getValue()).toArray(new Generic[listCombobox.size()]));
+		generic.addInstance(getInstanceValue(), new Transformation2<>(listCombobox, combo -> combo.getSelectedItem().getValue()).toArray(new Generic[listCombobox.size()]));
 	}
 
 	private Serializable getInstanceValue() {

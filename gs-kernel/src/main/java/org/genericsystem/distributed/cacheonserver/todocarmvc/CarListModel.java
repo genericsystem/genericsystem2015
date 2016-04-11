@@ -13,16 +13,12 @@ import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.kernel.Engine;
-
-import com.sun.javafx.collections.ObservableListWrapper;
-import com.sun.javafx.collections.SourceAdapterChange;
 
 /**
  * @author Nicolas Feybesse
@@ -52,23 +48,17 @@ public class CarListModel extends Model {
 
 	public CarListModel(Engine engine) {
 		this.engine = engine;
-		// carModels = new Transformation<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g));
-		// Cache myCurrentInstance = engine.getCurrentCache();
-
-		// engine.getAttributes();
-		// engine.find(Car.class).getObservableInstances();
-		// Snapshot<Generic> e = engine.getInstances(Car.class);
-
-		// FXCollections.observableSet(new Transformation<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g)), CarModel -> new Observable[] { CarModel.getCompleted() });
-
-		// carModels = FXCollections.observableList(new Transformation<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g)), CarModel -> new Observable[] { CarModel.getCompleted() });
 		ObservableList<CarModel> instances = new Transformation2<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g));
+		carModels = new Transformation2<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g), carModel -> new Observable[] { carModel.getCompleted() });
+		// todos = new Transformation2<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g), todo -> new Observable[] { todo.getCompleted() });
+		//
+		// carModels = new ObservableListWrapper<CarModel>(instances, carModel -> new Observable[] { carModel.getCompleted() }) {
+		// {
+		// instances.addListener((ListChangeListener<CarModel>) c -> fireChange(new SourceAdapterChange(this, c)));
+		// }
+		// };
+		//
 
-		carModels = new ObservableListWrapper<CarModel>(instances, carModel -> new Observable[] { carModel.getCompleted() }) {
-			{
-				instances.addListener((ListChangeListener<CarModel>) c -> fireChange(new SourceAdapterChange(this, c)));
-			}
-		};
 		filtered = new FilteredList<>(carModels);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(carModels.filtered(COMPLETE));

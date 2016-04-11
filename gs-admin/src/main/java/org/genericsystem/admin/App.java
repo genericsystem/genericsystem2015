@@ -17,7 +17,7 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.genericsystem.distributed.cacheonclient.EngineServer;
 import org.genericsystem.kernel.Statics;
@@ -29,7 +29,7 @@ import org.genericsystem.kernel.Statics;
 public class App extends Application {
 
 	public static void main(String args[]) {
-		EngineServer server = new EngineServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		EngineServer server = new EngineServer(new DefaultPathSingleEngineDeployment("/home/middleware/test/", Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
 		launch(args);
 		// server.stop();
@@ -41,7 +41,7 @@ public class App extends Application {
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System JavaFx Example");
 
-		ClientEngine engine = new ClientEngine(Statics.ENGINE_VALUE, null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
+		ClientEngine engine = new ClientEngine(null, Statics.DEFAULT_PORT, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 		Generic base = type.setInstance("myBmw");

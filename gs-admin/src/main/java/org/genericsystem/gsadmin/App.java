@@ -14,10 +14,9 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.EngineServer;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.distributed.cacheonclient.ClientEngine;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.distributed.cacheonclient.EngineServer;
 
 public class App extends Application {
 
@@ -29,9 +28,9 @@ public class App extends Application {
 	static EngineServer server;
 
 	private ClientEngine initGS() {
-		server = new EngineServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+		server = new EngineServer(new DefaultPathSingleEngineDeployment("/home/middleware/test/", Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		engine = new ClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
+		engine = new ClientEngine(null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 

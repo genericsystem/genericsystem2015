@@ -10,7 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation;
+import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.ui.table.Cell;
 import org.genericsystem.ui.table.Row;
 import org.genericsystem.ui.table.Stylable.TableStyle;
@@ -55,7 +55,7 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	protected ObservableList<Row> buildRows() {
-		return new Transformation<>(items, item -> buildRow(item));
+		return new Transformation2<>(items, item -> buildRow(item));
 	}
 
 	protected Row buildRow(ITEM item) {
@@ -85,7 +85,7 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	protected ObservableList<Cell<?>> buildFirstRowCells(ObservableList<COL> columns, Function<COL, ObservableValue<String>> columnExtractor, ObservableValue<String> cellStyle) {
-		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> new Cell<>(columnExtractor.apply(column), cellStyle));
+		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation2<>(columns, column -> new Cell<>(columnExtractor.apply(column), cellStyle));
 	}
 
 	protected ObservableValue<Cell<?>> buildfirstCell(ObservableValue<T> firstColumnString, ObservableValue<String> cellStyle) {
@@ -93,7 +93,7 @@ public abstract class TableBuilder<ITEM, COL, T> {
 	}
 
 	protected ObservableList<Cell<?>> buildCells(ObservableList<COL> columns, Function<COL, ObservableValue<T>> columnExtractor, ObservableValue<String> cellStyle) {
-		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation<>(columns, column -> {
+		return columnExtractor == null ? FXCollections.emptyObservableList() : new Transformation2<>(columns, column -> {
 			return new Cell<>(columnExtractor.apply(column), cellStyle);
 		});
 	}
