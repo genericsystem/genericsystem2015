@@ -28,6 +28,7 @@ import org.genericsystem.kernel.Engine;
 public class CarListModel extends Model {
 
 	private final Engine engine;
+	private final Property<?> engineCrud = new SimpleObjectProperty<>();
 
 	private final Property<String> name = new SimpleStringProperty();
 	private final Property<Predicate<CarModel>> mode = new SimpleObjectProperty<>(ALL);
@@ -50,15 +51,6 @@ public class CarListModel extends Model {
 		this.engine = engine;
 		ObservableList<CarModel> instances = new Transformation2<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g));
 		carModels = new Transformation2<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g), carModel -> new Observable[] { carModel.getCompleted() });
-		// todos = new Transformation2<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g), todo -> new Observable[] { todo.getCompleted() });
-		//
-		// carModels = new ObservableListWrapper<CarModel>(instances, carModel -> new Observable[] { carModel.getCompleted() }) {
-		// {
-		// instances.addListener((ListChangeListener<CarModel>) c -> fireChange(new SourceAdapterChange(this, c)));
-		// }
-		// };
-		//
-
 		filtered = new FilteredList<>(carModels);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(carModels.filtered(COMPLETE));
@@ -104,6 +96,17 @@ public class CarListModel extends Model {
 		for (CarModel carModel : new ArrayList<>(carModels.filtered(COMPLETE)))
 			carModel.remove();
 	}
+
+	/********************/
+	public void flush() {
+		engine.getCurrentCache().flush();
+	}
+
+	public void cancel() {
+		engine.getCurrentCache().clear();
+	}
+
+	/***********************/
 
 	static Predicate<CarModel> ALL = CarModel -> true;
 	static Predicate<CarModel> ACTIVE = CarModel -> !CarModel.getCompleted().getValue();

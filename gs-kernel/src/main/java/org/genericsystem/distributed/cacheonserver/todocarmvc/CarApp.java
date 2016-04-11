@@ -66,6 +66,10 @@ public class CarApp extends HtmlApp {
 					new HtmlHyperLink(new HtmlLi(filters), "All", CarListModel::showAll).bindOptionalStyleClass(CarListModel::getAllMode, "selected");
 					new HtmlHyperLink(new HtmlLi(filters), "Actives", CarListModel::showActive).bindOptionalStyleClass(CarListModel::getActiveMode, "selected");
 					new HtmlHyperLink(new HtmlLi(filters), "Completes", CarListModel::showCompleted).bindOptionalStyleClass(CarListModel::getCompletedMode, "selected");
+
+					new HtmlHyperLink(new HtmlLi(filters), "Flush", CarListModel::flush);
+					new HtmlHyperLink(new HtmlLi(filters), "Cancel", CarListModel::cancel);
+
 				}
 				new HtmlButton(footer).bindAction(CarListModel::removeCompleted).bindText(CarListModel::getClearCompleted).setStyleClass("clear-completed").bindOptionalStyleClass(CarListModel::getHasNoCompleted, "hide");
 
