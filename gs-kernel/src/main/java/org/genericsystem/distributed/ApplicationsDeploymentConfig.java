@@ -1,11 +1,10 @@
 package org.genericsystem.distributed;
 
 import io.vertx.core.json.JsonObject;
-
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.genericsystem.distributed.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.kernel.Statics;
@@ -43,10 +42,10 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	}
 
 	private ApplicationDeploymentConfig getApplicationDeploymentConfig(String applicationPath) {
-		return getApplicationDeploymentConfig(getJsonObject("apps").getJsonObject(applicationPath));
+		return applicationDeploymentConfig(getJsonObject("apps").getJsonObject(applicationPath));
 	}
 
-	private ApplicationDeploymentConfig getApplicationDeploymentConfig(JsonObject json) {
+	private ApplicationDeploymentConfig applicationDeploymentConfig(JsonObject json) {
 		return new ApplicationDeploymentConfig(json.getMap());
 	}
 
@@ -59,8 +58,8 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	}
 
 	public Set<Class<?>> getClasses(String persistentDirectoryPath) {
-		return getJsonObject("apps").getMap().values().stream().map(json -> getApplicationDeploymentConfig((JsonObject) json)).filter(conf -> persistentDirectoryPath.equals(conf.getPersistentDirectoryPath())).flatMap(conf -> conf.getClasses().stream())
-				.collect(Collectors.toSet());
+		return getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json)).filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath()))
+				.flatMap(conf -> conf.getClasses().stream()).collect(Collectors.toSet());
 	}
 
 	public Set<String> getPersistentDirectoryPaths() {
@@ -74,6 +73,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	public static class ApplicationDeploymentConfig extends EngineDeploymentConfig {
 		public ApplicationDeploymentConfig(Map<String, Object> map) {
 			super(map);
+			assert getString("applicationClass") != null;
 		}
 
 		public ApplicationDeploymentConfig(Class<? extends HtmlApp> applicationClass, String repositoryPath, Class<?>... classes) {
@@ -84,7 +84,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		@SuppressWarnings("unchecked")
 		public Class<? extends HtmlApp> getApplicationClass() {
 			try {
-				return (Class<? extends HtmlApp>) Class.forName(getString("applicationClass)"));
+				return (Class<? extends HtmlApp>) Class.forName(getString("applicationClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}

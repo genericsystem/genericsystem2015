@@ -4,12 +4,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
@@ -17,6 +15,7 @@ import org.genericsystem.distributed.ApplicationsDeploymentConfig;
 import org.genericsystem.distributed.ApplicationsDeploymentConfig.DefaultPathSingleWebAppDeployment;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.cacheonserver.todomvc.TodoApp;
+import org.genericsystem.distributed.cacheonserver.todomvc.Todos;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 import org.genericsystem.distributed.ui.components.HtmlApp;
@@ -30,7 +29,7 @@ import org.genericsystem.kernel.Engine;
 public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
-		new ApplicationServer(new DefaultPathSingleWebAppDeployment(TodoApp.class, null)).start();
+		new ApplicationServer(new DefaultPathSingleWebAppDeployment(TodoApp.class, (String) null, Todos.class)).start();
 	}
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
@@ -40,11 +39,16 @@ public class ApplicationServer extends AbstractBackEnd {
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			AbstractServer root = buildRoot(directoryPath, options.getClasses(directoryPath));
+			if (directoryPath == null)
+				directoryPath = "/";
 			roots.put(directoryPath, root);
-			System.out.println("Starts engine with path : " + "/" + directoryPath + "and persistence directory path : " + directoryPath);
+			System.out.println("Starts engine with path : " + directoryPath + " and persistence directory path : " + directoryPath);
 		}
 		for (String applicationPath : options.getApplicationsPaths()) {
-			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(options.getPersistentDirectoryPath(applicationPath))));
+			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
+			if (directoryPath == null)
+				directoryPath = "/";
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(directoryPath)));
 			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath);
 		}
 	}

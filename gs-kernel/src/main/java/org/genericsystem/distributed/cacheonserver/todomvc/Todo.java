@@ -1,11 +1,9 @@
 package org.genericsystem.distributed.cacheonserver.todomvc;
 
 import java.util.Objects;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.Model;
 
