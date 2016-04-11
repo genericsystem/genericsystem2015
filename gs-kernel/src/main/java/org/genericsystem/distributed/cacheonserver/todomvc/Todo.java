@@ -32,10 +32,6 @@ public class Todo extends Model {
 		return completed;
 	}
 
-	public void select() {
-		((TodoList) getParent()).getSelection().setValue(this);
-	}
-
 	public void remove() {
 		generic.remove();
 	}

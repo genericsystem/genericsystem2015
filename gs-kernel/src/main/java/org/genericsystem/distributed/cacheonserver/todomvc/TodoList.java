@@ -29,20 +29,19 @@ public class TodoList extends Model {
 
 	private final Property<String> name = new SimpleStringProperty();
 	private final Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
-	private final ObservableList<Todo> todos;// = FXCollections.<Todo> observableArrayList(todo -> new Observable[] { todo.getCompleted() });
-	private final FilteredList<Todo> filtered;// = new FilteredList<>(todos);
-	private final ObservableNumberValue completedCount;// = Bindings.size(todos.filtered(COMPLETE));
-	private final ObservableNumberValue activeCount;// = Bindings.size(todos.filtered(ACTIVE));
-	private final ObservableValue<String> clearButtonText;// = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue() + ")", completedCount);
-	private final ObservableValue<Boolean> hasNoCompleted;// = Bindings.equal(0, completedCount);
-	private final ObservableBooleanValue hasTodo;// = Bindings.lessThan(0, Bindings.size(todos));
-	private final ObservableValue<Boolean> hasNoTodo;// = Bindings.not(hasTodo);
+	private final ObservableList<Todo> todos;
+	private final FilteredList<Todo> filtered;
+	private final ObservableNumberValue completedCount;
+	private final ObservableNumberValue activeCount;
+	private final ObservableValue<String> clearButtonText;
+	private final ObservableValue<Boolean> hasNoCompleted;
+	private final ObservableBooleanValue hasTodo;
+	private final ObservableValue<Boolean> hasNoTodo;
 	private final ObservableValue<Boolean> allMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, ALL);
 	private final ObservableValue<Boolean> activeMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, ACTIVE);
 	private final ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, COMPLETE);
-	private final Property<Todo> selection = new SimpleObjectProperty<>();
-	private final ObservableStringValue items;// = Bindings.createStringBinding(() -> " " + (activeCount.getValue().intValue() > 1 ? "items" : "item") + " left", activeCount);
-	private final ObservableStringValue clearCompleted;// = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue().intValue() + ")", completedCount);
+	private final ObservableStringValue items;
+	private final ObservableStringValue clearCompleted;
 
 	public TodoList(Engine engine) {
 		this.engine = engine;
@@ -146,10 +145,6 @@ public class TodoList extends Model {
 
 	public ObservableValue<Boolean> getCompletedMode() {
 		return completedMode;
-	}
-
-	public Property<Todo> getSelection() {
-		return selection;
 	}
 
 	public ObservableValue<String> getClearCompleted() {
