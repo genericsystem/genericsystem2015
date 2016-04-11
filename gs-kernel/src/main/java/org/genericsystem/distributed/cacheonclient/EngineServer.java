@@ -3,10 +3,8 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
-
 import java.util.Collections;
 import java.util.List;
-
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
@@ -37,7 +35,7 @@ public class EngineServer extends AbstractBackEnd {
 			for (String path : options.getEnginePaths()) {
 				AbstractServer root = buildRoot(options.getPersistentDirectoryPath(path), options.getClasses(path));
 				roots.put(path, root);
-				System.out.println("Starts engine with path : " + path + "and persistence repository path : " + options.getPersistentDirectoryPath(path));
+				System.out.println("Starts engine with path : " + path + " and persistence repository path : " + options.getPersistentDirectoryPath(path));
 			}
 	}
 
