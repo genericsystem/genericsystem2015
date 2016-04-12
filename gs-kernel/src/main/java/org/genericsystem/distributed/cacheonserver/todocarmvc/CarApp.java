@@ -37,6 +37,7 @@ public class CarApp extends HtmlApp {
 				{
 					new HtmlH1(header).setText("MyCars");
 					new HtmlInputText(header).setStyleClass("new-todo").bindAction(CarListModel::create).bindTextBidirectional(CarListModel::getName);
+					new HtmlInputText(header).setStyleClass("new-todo").bindAction(PowerListModel::create).bindTextBidirectional(PowerListModel::getName);
 				}
 				HtmlSection main = new HtmlSection(carapp).setStyleClass("main");
 				{
@@ -52,6 +53,7 @@ public class CarApp extends HtmlApp {
 						}
 					}
 				}
+
 			}
 			HtmlFooter footer = new HtmlFooter(carapp).setStyleClass("footer").bindOptionalStyleClass(CarListModel::getHasNoCarModel, "hide");
 			{
