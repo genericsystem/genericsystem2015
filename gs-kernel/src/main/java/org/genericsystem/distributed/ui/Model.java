@@ -1,5 +1,7 @@
 package org.genericsystem.distributed.ui;
 
+import org.genericsystem.kernel.Engine;
+
 /**
  * @author Nicolas Feybesse
  *
@@ -13,6 +15,14 @@ public abstract class Model {
 	}
 
 	public void afterParentConstruct() {
+
+	}
+
+	public static class EngineModel extends Model {
+
+		public Engine getEngine() {
+			return ((EngineModel) getParent()).getEngine();
+		}
 
 	}
 }

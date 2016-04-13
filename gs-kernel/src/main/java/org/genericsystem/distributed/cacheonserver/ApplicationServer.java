@@ -17,8 +17,7 @@ import org.genericsystem.distributed.ApplicationsDeploymentConfig;
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.cacheonserver.todocarmvc.Car;
 import org.genericsystem.distributed.cacheonserver.todocarmvc.CarApp;
-import org.genericsystem.distributed.cacheonserver.todomvc.TodoApp;
-import org.genericsystem.distributed.cacheonserver.todomvc.Todos;
+import org.genericsystem.distributed.cacheonserver.todocarmvc.Power;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 import org.genericsystem.distributed.ui.components.HtmlApp;
@@ -33,8 +32,9 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-		apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Car.class);
-		apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
+		apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Car.class, Power.class);
+		// apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Power.class);
+		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(apps).start();
 	}
 

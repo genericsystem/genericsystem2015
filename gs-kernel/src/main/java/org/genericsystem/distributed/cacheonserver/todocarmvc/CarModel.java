@@ -4,35 +4,45 @@ import java.util.Objects;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.distributed.ui.Model.EngineModel;
 
-public class CarModel extends Model {
+public class CarModel extends EngineModel {
 
-	private final Generic generic;
-	private Property<String> todoString;
-	private Property<Boolean> completed = new SimpleBooleanProperty(false);
+	private Generic car;
 
-	CarModel(CarListModel parentModel, Generic generic) {
-		this.generic = generic;
-		todoString = new ReadOnlyObjectWrapper<>(Objects.toString(generic));
+	private Property<String> carString;
+	private ObservableValue<PowerValueModel> powerModel;
+
+	CarModel(CarListModel parentModel, Generic car) {
+		this.car = car;
+		carString = new ReadOnlyObjectWrapper<>(Objects.toString(car));
 	}
 
-	public Property<String> getTodoString() {
-		return todoString;
+	/*
+	 * public String addCar() { carModel.setInstance(newCarName).setHolder(power, newCarPower); return "#"; }
+	 */
+
+	public Property<String> getCarString() {
+		return carString;
 	}
 
-	public Property<Boolean> getCompleted() {
-		return completed;
+	public ObservableValue<PowerValueModel> getPowerModel() {
+		return powerModel;
 	}
 
-	public void select() {
-		((CarListModel) getParent()).getSelection().setValue(this);
-	}
+	/*
+	 * public void select() { ((CarListModel) getParent()).getSelection().setValue(this); }
+	 */
 
 	public void remove() {
-		generic.remove();
+		car.remove();
 	}
+
+	public Generic getCar() {
+		return car;
+	}
+
 }
