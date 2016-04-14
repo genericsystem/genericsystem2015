@@ -8,7 +8,7 @@ public class MultipleDeploymentsTest extends AbstractTest {
 
 	@Override
 	public EnginesDeploymentConfig getDeploymentOptions() {
-		return new EnginesDeploymentConfig().addEngine("/FirstEngine", directoryPath).addEngine("/SecondEngine", directoryPath);
+		return new EnginesDeploymentConfig().addEngine("/FirstEngine", directoryPath + "1").addEngine("/SecondEngine", directoryPath);
 	}
 
 	public void test001_Engine_name() {

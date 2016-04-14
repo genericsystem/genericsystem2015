@@ -13,23 +13,24 @@ import org.genericsystem.kernel.Engine;
  * @author Nicolas Feybesse
  *
  */
-@SuppressWarnings("unchecked")
+
 public class CarListModel extends EngineModel {
 
 	private final Engine engine;
 	private final Property<String> name = new SimpleStringProperty();
-	private final ObservableList<CarModel> carModels;// = FXCollections.<CarModel> observableArrayList(CarModel -> new Observable[] { CarModel.getCompleted() });
-	private Property<String> powerValue;
+	private final ObservableList<CarModel> carModels;
+	private Property<String> powerValue = new SimpleStringProperty();
 	private final Property<CarListModel> selection = new SimpleObjectProperty<>();
 
 	public CarListModel(Engine engine) {
 		this.engine = engine;
-		ObservableList<CarModel> instances = new Transformation2<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g));
 		carModels = new Transformation2<>(engine.find(Car.class).getObservableSubInstances(), g -> new CarModel(this, g) /* , carModel -> new Observable[] { CarModel.() } */);
 	}
 
 	public void create() {
-		engine.find(Car.class).addInstance(getName().getValue()).addHolder(engine.find(Power.class), getPowerValue().getValue());
+		assert engine.find(Car.class) != null;
+		assert engine.find(Power.class) != null;
+		engine.find(Car.class).addInstance(getName().getValue()).addHolder(engine.find(Power.class), 333/* getPowerValue().getValue() */);
 		System.out.println("Add instance : " + getName().getValue());
 		name.setValue(null);
 	}

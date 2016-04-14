@@ -32,7 +32,7 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-		apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Car.class, Power.class);
+		apps.addApplication("/", CarApp.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class);
 		// apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Power.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(apps).start();

@@ -3,10 +3,12 @@ package org.genericsystem.distributed.ui;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,6 +21,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 
@@ -61,6 +64,13 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	@Override
 	public <M extends Model, T extends Model> COMPONENT forEach(Function<M, ObservableList<T>> applyOnModel) {
 		super.forEach(applyOnModel);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <M extends Model, T extends Model> COMPONENT select(Function<M, ObservableValue<T>> function) {
+		super.select(function);
 		return (COMPONENT) this;
 	}
 

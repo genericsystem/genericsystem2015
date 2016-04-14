@@ -104,6 +104,13 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
+	public <M extends Model, T extends Model> Component select(Function<M, ObservableValue<T>> function) {
+		super.select(function);
+		return (Component) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public Component setPadding(Insets inset) {
 		addBoot(Region::paddingProperty, inset);
 		return (Component) this;
