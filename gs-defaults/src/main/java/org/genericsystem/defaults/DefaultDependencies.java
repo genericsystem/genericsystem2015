@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.TransitiveObservableList;

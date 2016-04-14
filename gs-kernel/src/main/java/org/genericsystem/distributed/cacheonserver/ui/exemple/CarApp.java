@@ -1,7 +1,6 @@
-package org.genericsystem.distributed.cacheonserver.todocarmvc;
+package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
@@ -35,8 +34,18 @@ public class CarApp extends HtmlApp {
 				HtmlHeader header = new HtmlHeader(carapp).setStyleClass("header");
 				{
 					new HtmlH1(header).setText("MyCars");
-					new HtmlInputText(header).setStyleClass("new-todo").bindAction(CarListModel::create).bindTextBidirectional(CarListModel::getName);
-					// new HtmlInputText(header).setStyleClass("new-todo").bindAction(CarListModel::create).bindTextBidirectional(CarListModel::getPowerValue);
+					HtmlUl inputs = new HtmlUl(header).setStyleClass("inputs");
+					{
+						HtmlLi li = new HtmlLi(inputs);
+						{
+							new HtmlInputText(li).setStyleClass("new-todo").bindTextBidirectional(CarListModel::getCarString);
+						}
+						HtmlLi li2 = new HtmlLi(inputs);
+						{
+							new HtmlInputText(li2).setStyleClass("new-todo").bindAction(CarListModel::create).bindTextBidirectional(CarListModel::getPowerString);
+
+						}
+					}
 				}
 
 				HtmlSection main = new HtmlSection(carapp).setStyleClass("main");
@@ -49,10 +58,9 @@ public class CarApp extends HtmlApp {
 						{
 							// new HtmlCheckBox(todoDiv).setStyleClass("toggle");
 							new HtmlLabel(carDiv).bindText(CarModel::getCarString);
-							HtmlDiv powerDiv = new HtmlDiv(carDiv).setStyleClass("view").select(CarModel::getPowerValueModel);
-							{
-								new HtmlLabel(powerDiv).bindText(PowerValueModel::getPowerValueString);
-							}
+
+							new HtmlLabel(carDiv).bindText(PowerValueModel::getPowerValueString).select(CarModel::getPowerValueModel);
+
 							new HtmlButton(carDiv).setStyleClass("destroy").bindAction(CarModel::remove);
 						}
 					}
@@ -71,7 +79,6 @@ public class CarApp extends HtmlApp {
 				{
 					new HtmlHyperLink(new HtmlLi(filters), "Flush", CarListModel::flush);
 					new HtmlHyperLink(new HtmlLi(filters), "Cancel", CarListModel::cancel);
-
 				}
 
 			}

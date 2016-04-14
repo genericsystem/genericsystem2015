@@ -38,6 +38,15 @@ input[type="checkbox"] {
   outline: none;
 }
 
+.inputs {
+	list-style: none;
+}
+
+.inputs li {
+	display: inline;
+}
+
+
 .todoapp {
 	background: #fff;
 	background: rgba(255, 255, 255, 0.9);
@@ -114,8 +123,8 @@ input[type="checkbox"] {
 .edit {
 	position: relative;
 	margin: 0;
-	width: 100%;
-	font-size: 24px;
+	/*width: 100%;*/
+	font-size: 18px;
 	font-family: inherit;
 	line-height: 1.4em;
 	border: 0;
@@ -136,7 +145,7 @@ input[type="checkbox"] {
 }
 
 .new-todo {
-	padding: 16px 16px 16px 60px;
+	padding: 4px 4px 4px 4px;
 	border: none;
 	background: rgba(0, 0, 0, 0.02);
 	z-index: 2;

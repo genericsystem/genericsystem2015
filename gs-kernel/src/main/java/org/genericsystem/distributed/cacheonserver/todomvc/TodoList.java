@@ -69,7 +69,6 @@ public class TodoList extends Model {
 	public void create() {
 		engine.find(Todos.class).addInstance(getName().getValue());
 		System.out.println("Add instance : " + getName().getValue());
-		// todos.add(new Todo(this, getName().getValue()));
 		name.setValue(null);
 	}
 

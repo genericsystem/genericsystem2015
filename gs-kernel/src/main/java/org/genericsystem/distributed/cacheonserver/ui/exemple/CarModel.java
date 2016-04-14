@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.todocarmvc;
+package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import java.util.Objects;
 

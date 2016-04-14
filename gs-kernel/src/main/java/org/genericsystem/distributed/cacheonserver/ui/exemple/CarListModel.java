@@ -1,10 +1,8 @@
-package org.genericsystem.distributed.cacheonserver.todocarmvc;
+package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.Model.EngineModel;
 import org.genericsystem.kernel.Engine;
@@ -17,10 +15,9 @@ import org.genericsystem.kernel.Engine;
 public class CarListModel extends EngineModel {
 
 	private final Engine engine;
-	private final Property<String> name = new SimpleStringProperty();
+	private final Property<String> carString = new SimpleStringProperty();
+	private final Property<String> powerString = new SimpleStringProperty();
 	private final ObservableList<CarModel> carModels;
-	private Property<String> powerValue = new SimpleStringProperty();
-	private final Property<CarListModel> selection = new SimpleObjectProperty<>();
 
 	public CarListModel(Engine engine) {
 		this.engine = engine;
@@ -28,11 +25,9 @@ public class CarListModel extends EngineModel {
 	}
 
 	public void create() {
-		assert engine.find(Car.class) != null;
-		assert engine.find(Power.class) != null;
-		engine.find(Car.class).addInstance(getName().getValue()).addHolder(engine.find(Power.class), 333/* getPowerValue().getValue() */);
-		System.out.println("Add instance : " + getName().getValue());
-		name.setValue(null);
+		engine.find(Car.class).addInstance(getCarString().getValue()).addHolder(engine.find(Power.class), getPowerString().getValue());
+		carString.setValue(null);
+		powerString.setValue(null);
 	}
 
 	/********************/
@@ -51,20 +46,15 @@ public class CarListModel extends EngineModel {
 		return engine;
 	}
 
-	public Property<String> getName() {
-		return name;
+	public Property<String> getCarString() {
+		return carString;
 	}
 
 	public ObservableList<CarModel> getCarModels() {
 		return carModels;
 	}
 
-	public Property<CarListModel> getSelection() {
-		return selection;
+	public Property<String> getPowerString() {
+		return powerString;
 	}
-
-	public Property<String> getPowerValue() {
-		return powerValue;
-	}
-
 }
