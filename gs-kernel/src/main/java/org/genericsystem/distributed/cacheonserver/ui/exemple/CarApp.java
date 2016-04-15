@@ -1,6 +1,9 @@
 package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
+
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
@@ -20,7 +23,7 @@ import org.genericsystem.kernel.Engine;
 public class CarApp extends HtmlApp {
 
 	public CarApp(Engine engine, ServerWebSocket webSocket) {
-		super(new CarListModel(engine), webSocket);
+		super(new CarListModel(engine, Car.class, Power.class), webSocket);
 	}
 
 	@Override
@@ -34,38 +37,32 @@ public class CarApp extends HtmlApp {
 				HtmlHeader header = new HtmlHeader(carapp).setStyleClass("header");
 				{
 					new HtmlH1(header).setText("MyCars");
-					HtmlUl inputs = new HtmlUl(header).setStyleClass("inputs");
-					{
-						HtmlLi li = new HtmlLi(inputs);
-						{
-							new HtmlInputText(li).setStyleClass("new-todo").bindTextBidirectional(CarListModel::getCarString);
-						}
-						HtmlLi li2 = new HtmlLi(inputs);
-						{
-							new HtmlInputText(li2).setStyleClass("new-todo").bindAction(CarListModel::create).bindTextBidirectional(CarListModel::getPowerString);
 
-						}
-					}
+					new HtmlInputText(header).setStyleClass("new-todo").bindTextBidirectional(CarListModel::getCarString);
+
+					new HtmlInputText(header).setStyleClass("new-todo").bindAction(CarListModel::create).bindTextBidirectional(CarListModel::getPowerString);
+
 				}
+			}
 
-				HtmlSection main = new HtmlSection(carapp).setStyleClass("main");
+			HtmlSection main = new HtmlSection(carapp).setStyleClass("main");
+			{
+				HtmlUl carlist = new HtmlUl(main).setStyleClass("todo-list");
+
+				HtmlLi li = new HtmlLi(carlist).forEach(CarListModel::getCarInstanceModels);
 				{
-					HtmlUl carlist = new HtmlUl(main).setStyleClass("todo-list");
-
-					HtmlLi li = new HtmlLi(carlist).forEach(CarListModel::getCarModels);
+					HtmlDiv carDiv = new HtmlDiv(li).setStyleClass("view");
 					{
-						HtmlDiv carDiv = new HtmlDiv(li).setStyleClass("view");
+						// new HtmlCheckBox(todoDiv).setStyleClass("toggle");
+						new HtmlLabel(carDiv).bindText(CarInstanceModel::getCarString);
+
+						HtmlSection section = new HtmlSection(carDiv).select(CarInstanceModel::getCarInstancePowerModel);
 						{
-							// new HtmlCheckBox(todoDiv).setStyleClass("toggle");
-							new HtmlLabel(carDiv).bindText(CarModel::getCarString);
-
-							new HtmlLabel(carDiv).bindText(PowerValueModel::getPowerValueString).select(CarModel::getPowerValueModel);
-
-							new HtmlButton(carDiv).setStyleClass("destroy").bindAction(CarModel::remove);
+							new HtmlLabel(section).bindText(PowerValueModel::getPowerValueString).forEach(CarInstancePowerModel::getPowerValueModels);
 						}
+						new HtmlButton(carDiv).setStyleClass("destroy").bindAction(CarInstanceModel::remove);
 					}
 				}
-
 			}
 			HtmlFooter footer = new HtmlFooter(carapp).setStyleClass("footer");
 			{

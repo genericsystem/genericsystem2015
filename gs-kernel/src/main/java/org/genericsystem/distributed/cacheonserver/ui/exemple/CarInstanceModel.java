@@ -7,27 +7,27 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.Model.EngineModel;
+import org.genericsystem.distributed.ui.Model;
 
-public class CarModel extends EngineModel {
+public class CarInstanceModel extends Model {
 
 	private Generic car;
 
 	private Property<String> carString;
-	private ObservableValue<PowerValueModel> powerValueModel;
+	private ObservableValue<CarInstancePowerModel> carInstancePowerModel;
 
-	CarModel(CarListModel parentModel, Generic car) {
+	public CarInstanceModel(Generic car, Class clazz) {
 		this.car = car;
-		carString = new ReadOnlyObjectWrapper<>(Objects.toString(car));
-		powerValueModel = new ReadOnlyObjectWrapper<PowerValueModel>(new PowerValueModel());
+		carString = new ReadOnlyObjectWrapper<>(Objects.toString(car.getValue()));
+		carInstancePowerModel = new ReadOnlyObjectWrapper<>(new CarInstancePowerModel(car, clazz));
 	}
 
 	public Property<String> getCarString() {
 		return carString;
 	}
 
-	public ObservableValue<PowerValueModel> getPowerValueModel() {
-		return powerValueModel;
+	public ObservableValue<CarInstancePowerModel> getCarInstancePowerModel() {
+		return carInstancePowerModel;
 	}
 
 	public void remove() {

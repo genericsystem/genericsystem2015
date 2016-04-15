@@ -4,18 +4,20 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
 import org.genericsystem.distributed.ApplicationsDeploymentConfig;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.distributed.cacheonserver.ui.exemple.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.CarApp;
-import org.genericsystem.distributed.cacheonserver.ui.exemple.Power;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 import org.genericsystem.distributed.ui.components.HtmlApp;

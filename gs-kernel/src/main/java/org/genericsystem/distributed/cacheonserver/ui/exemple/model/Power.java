@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.ui.exemple;
+package org.genericsystem.distributed.cacheonserver.ui.exemple.model;
 
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.SystemGeneric;
