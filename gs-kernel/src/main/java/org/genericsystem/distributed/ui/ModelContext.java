@@ -106,7 +106,7 @@ public class ModelContext {
 		};
 
 		public void delete(int index) {
-			System.out.println("delete : " + index);
+			// System.out.println("delete : " + index);
 			internal.remove(index).destroy();
 		};
 	}

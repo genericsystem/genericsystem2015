@@ -13,8 +13,8 @@ public class InstanceRowHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(this).bindText(InstanceRowModel::getString);
-		new HtmlSection(this).forEach(InstanceRowModel::getInstanceAttributeModels);
-		new HtmlButton(this).setStyleClass("destroy").bindAction(InstanceRowModel::remove);
+		new HtmlLabel(this).bindText(InstanceRowModel::getString).setStyleClass("gscell");
+		new InstanceAttributeCellHtml(this).forEach(InstanceRowModel::getInstanceAttributeModels);
+		new HtmlButton(this).bindAction(InstanceRowModel::remove).setText("Remove").setStyleClass("gscell");
 	}
 }

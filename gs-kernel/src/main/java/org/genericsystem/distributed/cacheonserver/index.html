@@ -93,7 +93,7 @@
 
 			var styleClass = message.styleClass;
 			for (var i = 0; i < styleClass.length; i++)
-				elt.className += " " + styleClass[i];
+				elt.className += styleClass[i] + " ";
 			parent.insertBefore(elt, document.getElementById(message.nextId));
 			break;
 		case 'R':
@@ -114,7 +114,7 @@
 				if (typeof message.styleClass !== 'undefined') {
 					elt.className = "";
 					message.styleClass.forEach(function(element, index, array) {
-						elt.className += " " + element;
+						elt.className += element + " ";
 					});
 				}
 			}
@@ -131,9 +131,9 @@
 		wsocket.onmessage = onMessageReceived;
 		wsocket.onclose = onclose;
 	}
-	
+
 	function onclose(evt) {
-		alert("Socket close with code : "+evt.code);
+		alert("Socket close with code : " + evt.code);
 	}
 
 	//-------------------------------------------------------------

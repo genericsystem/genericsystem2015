@@ -2,7 +2,7 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
-
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.ui.components.HtmlApp;
@@ -13,42 +13,24 @@ public class AppHtml extends HtmlApp {
 
 	public AppHtml(Engine engine, ServerWebSocket webSocket) {
 		super(new AppModel(engine, engine.find(Car.class), FXCollections.observableArrayList(engine.find(Power.class))), webSocket);
+		Generic car = engine.find(Car.class);
+		Generic power = engine.find(Power.class);
+		car.setInstance("Audi S4").setHolder(power, 333);
+		car.setInstance("BMW M3").setHolder(power, 450);
+		car.setInstance("Ferrari F40").setHolder(power, 478);
+		car.setInstance("Mini Cooper").setHolder(power, 175);
+		car.setInstance("Audi A4 3.0 TDI").setHolder(power, 233);
+		car.setInstance("Peugeot 106 GTI").setHolder(power, 120);
+		car.setInstance("Peugeot 206 S16").setHolder(power, 136);
 	}
 
 	@Override
 	protected void initChildren() {
-
-		HtmlDiv div = new HtmlDiv(this);
+		HtmlDiv div = new HtmlDiv(this).setStyleClass("gsapp");
 		{
-			new AppHeaderHtml(this);
-			// HtmlSection carapp = new HtmlSection(div).setStyleClass("todoapp");
-			// {
-			// HtmlHeader header = new HtmlHeader(carapp).setStyleClass("header");
-			// {
-			// new HtmlH1(header).setText("Cars");
-			// new HtmlInputText(header).setStyleClass("new-todo").bindTextBidirectional(AppModel::getCarString);
-			// new HtmlInputText(header).setStyleClass("new-todo").bindAction(AppModel::create).bindTextBidirectional(AppModel::getPowerString);
-			//
-			// }
-			// }
-
+			new AppHeaderHtml(div);
 			new TypeTableHtml(div).select(AppModel::getTypeModel);
-
-			// HtmlFooter footer = new HtmlFooter(carapp).setStyleClass("footer");
-			// {
-			// HtmlSpan span = new HtmlSpan(footer).setStyleClass("todo-count");
-			// {
-			// new HtmlStrong(span);
-			// new HtmlSpan(span);
-			// }
-			//
-			// HtmlUl filters = new HtmlUl(footer).setStyleClass("filters");
-			// {
-			// new HtmlHyperLink(new HtmlLi(filters), "Flush", AppModel::flush);
-			// new HtmlHyperLink(new HtmlLi(filters), "Cancel", AppModel::cancel);
-			// }
-			//
-			// }
+			new AppFooterHtml(div);
 		}
 	}
 }

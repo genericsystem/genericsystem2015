@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
-
 import org.genericsystem.distributed.ui.ModelContext.ModelContextList;
 
 /**
@@ -27,8 +25,7 @@ public interface MetaBinder<N, W> {
 		init(applyOnModel.get(), viewContext, childElement);
 	}
 
-	default void init(W wrapper, ViewContext<N> viewContext, Element<?> childElement) {
-	}
+	default void init(W wrapper, ViewContext<N> viewContext, Element<?> childElement) {}
 
 	public static <N, T extends Model> MetaBinder<N, ObservableList<T>> foreachBinder() {
 		return new MetaBinder<N, ObservableList<T>>() {

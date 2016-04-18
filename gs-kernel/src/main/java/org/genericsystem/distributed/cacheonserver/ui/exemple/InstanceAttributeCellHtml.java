@@ -1,6 +1,5 @@
 package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
-import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 
 public class InstanceAttributeCellHtml extends HtmlSection {
@@ -12,6 +11,6 @@ public class InstanceAttributeCellHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(this).bindText(HolderSubCellModel::getString).forEach(InstanceAttributeCellModel::getHolderModels);
+		new HolderSubCellHtml(this).forEach(InstanceAttributeCellModel::getHolderModels);
 	}
 }

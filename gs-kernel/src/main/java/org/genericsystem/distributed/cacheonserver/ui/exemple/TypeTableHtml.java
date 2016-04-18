@@ -12,6 +12,8 @@ public class TypeTableHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
+		new TitleRowHtml(this).select(TypeTableModel::getTitleRowModel);
+		new InsertRowHtml(this).select(TypeTableModel::getInsertRowModel);
 		new InstanceRowHtml(this).forEach(TypeTableModel::getInstanceModels);
 	}
 }

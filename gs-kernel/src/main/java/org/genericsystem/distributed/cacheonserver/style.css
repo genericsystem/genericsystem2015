@@ -3,63 +3,94 @@ html, body {
 	padding: 0;
 }
 
-button {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	background: none;
-	font-size: 100%;
-	vertical-align: baseline;
-	font-family: inherit;
-	color: inherit;
-	-webkit-appearance: none;
-	-ms-appearance: none;
-	-o-appearance: none;
-	appearance: none;
-}
-
 body {
 	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 1.4em;
 	background: #eaeaea;
 	color: #4d4d4d;
-	width: 550px;
+	width: 800px;
 	margin: 0 auto;
 	-webkit-font-smoothing: antialiased;
 	-moz-font-smoothing: antialiased;
 	-ms-font-smoothing: antialiased;
 	-o-font-smoothing: antialiased;
 	font-smoothing: antialiased;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
 }
 
-#gsapp {
-	
+.gsapp {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
 }
 
-#gstable {
+.gsheader {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	background-color: #ffa500;
+}
+
+.gsfooter {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	background-color: #ffa500;
+}
+
+.gstable {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	justify-content: flex-start;
 }
 
-#gsrow {
+.gsrow {
+	margin-bottom : 1px;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	justify-content: flex-start;
+	justify-content: space-between;
+	background-color: #ffc0cb;
 }
 
-#gscell {
+.gsrow:nth-child(1) {
+	justify-content: center;
+}
+
+/* .gsrow:nth-child(2) {
+	justify-content: center;
+} */
+
+.gscell {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
+	color : #ffffff;
 	justify-content: flex-start;
+	padding : 2px;
 }
 
-#gssubcell {
+.gscell:nth-child(1) {
+	width: 100px;
+	background-color: #e4788b;
+}
+
+.gscell:nth-last-child(1) {
+	width: 80px;
+	background-color: #b4868e;
+}
+
+.gssubcell {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	justify-content: flex-start;
+	background-color: #927a7e;
 }

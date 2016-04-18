@@ -1,13 +1,11 @@
 package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
 
 public class InstanceRowModel extends GenericModel {
 
-	private Generic instance;
 	private ObservableList<InstanceAttributeCellModel> instanceAttributesModels;
 
 	public InstanceRowModel(Generic instance, ObservableList<Generic> attributes) {
@@ -20,6 +18,6 @@ public class InstanceRowModel extends GenericModel {
 	}
 
 	public void remove() {
-		instance.remove();
+		getGeneric().remove();
 	}
 }
