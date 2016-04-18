@@ -15,7 +15,7 @@ import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
 import org.genericsystem.distributed.ApplicationsDeploymentConfig;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.distributed.cacheonserver.ui.exemple.CarApp;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.AppHtml;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.ui.HtmlElement;
@@ -32,7 +32,7 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-		apps.addApplication("/", CarApp.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class);
+		apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class);
 		// apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Power.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(apps).start();
