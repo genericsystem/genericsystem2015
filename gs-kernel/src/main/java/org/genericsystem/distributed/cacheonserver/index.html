@@ -25,6 +25,7 @@
 		case 'A':
 			var parent = document.getElementById(message.parentId);
 			if (parent == null) {
+				console.log("Unreached parent element id on add : "+message.nodeId)
 				parent = document.getElementById("root");
 			}
 			var elt = document.createElement(message.tagHtml);
@@ -98,8 +99,12 @@
 			break;
 		case 'R':
 			var elt = document.getElementById(message.nodeId);
-			if (elt != null)
+			if (elt != null) {
 				elt.parentNode.removeChild(elt);
+			}
+			else {
+				console.log("Unreached removed element id : "+message.nodeId)
+			}
 			break;
 		case 'U':
 			var elt = document.getElementById(message.nodeId);
@@ -117,10 +122,12 @@
 						elt.className += element + " ";
 					});
 				}
+			} else {
+				console.log("Unreached update element id : "+message.nodeId)
 			}
 			break;
 		default:
-			alert("message d'erreur");
+			alert("Unknown message received");
 		}
 	}
 
