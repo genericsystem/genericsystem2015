@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.ui.exemple;
+package org.genericsystem.distributed.cacheonserver.ui.table;
 
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlLabel;
@@ -8,13 +8,13 @@ public class InstanceRowHtml extends HtmlSection {
 
 	public InstanceRowHtml(TypeTableHtml parent) {
 		super(parent);
-		setStyleClass("gsrow");
+		addStyleClass("gsrow");
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(this).bindText(InstanceRowModel::getString).setStyleClass("gscell");
+		new HtmlLabel(new HtmlSection(this).addStyleClass("gscell")).bindText(InstanceRowModel::getString);
 		new InstanceAttributeCellHtml(this).forEach(InstanceRowModel::getInstanceAttributeModels);
-		new HtmlButton(this).bindAction(InstanceRowModel::remove).setText("Remove").setStyleClass("gscell");
+		new HtmlButton(new HtmlSection(this).addStyleClass("gscell")).bindAction(InstanceRowModel::remove).setText("Remove");
 	}
 }

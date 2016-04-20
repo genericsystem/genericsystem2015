@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.ui.exemple;
+package org.genericsystem.distributed.cacheonserver.ui.table;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;

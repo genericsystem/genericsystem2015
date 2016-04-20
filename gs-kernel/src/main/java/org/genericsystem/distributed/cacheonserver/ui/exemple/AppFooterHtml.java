@@ -7,7 +7,7 @@ import org.genericsystem.distributed.ui.components.HtmlSection;
 public class AppFooterHtml extends HtmlSection {
 	public AppFooterHtml(HtmlElement<?, ?> parent) {
 		super(parent);
-		setStyleClass("gsfooter");
+		addStyleClass("gsfooter");
 	}
 
 	@Override

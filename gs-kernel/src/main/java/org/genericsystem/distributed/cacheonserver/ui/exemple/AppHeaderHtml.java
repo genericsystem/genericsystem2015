@@ -7,11 +7,11 @@ import org.genericsystem.distributed.ui.components.HtmlSection;
 public class AppHeaderHtml extends HtmlSection {
 	public AppHeaderHtml(HtmlElement<?, ?> parent) {
 		super(parent);
-		setStyleClass("gsheader");
+		addStyleClass("gsheader");
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlH1(this).setText("Header");
+		new HtmlH1(this).setText("Reactive System Live Demo");
 	}
 }

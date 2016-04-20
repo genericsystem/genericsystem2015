@@ -1,6 +1,9 @@
-package org.genericsystem.distributed.cacheonserver.ui.exemple;
+package org.genericsystem.distributed.cacheonserver.ui.table;
+
+import java.util.function.Function;
 
 import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.Model;
@@ -11,10 +14,10 @@ public class InstanceAttributeCellModel extends Model {
 	private final Generic attribute;
 	private final ObservableList<HolderSubCellModel> holderModels;
 
-	public InstanceAttributeCellModel(Generic instance, Generic attribute) {
+	public InstanceAttributeCellModel(Generic instance, Generic attribute, Function<Generic, HolderSubCellModel> cellBuilder) {
 		this.instance = instance;
 		this.attribute = attribute;
-		holderModels = new Transformation2<>(instance.getObservableHolders(attribute), HolderSubCellModel::new /* , carModel -> new Observable[] { CarModel.() } */);
+		holderModels = new Transformation2<>(instance.getObservableHolders(attribute), cellBuilder/* , carModel -> new Observable[] { CarModel.() } */);
 	}
 
 	public ObservableList<HolderSubCellModel> getHolderModels() {

@@ -74,14 +74,14 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 		return (COMPONENT) this;
 	}
 
-	@SuppressWarnings({ "unchecked" })
-	public <M> COMPONENT setStyleClass(Function<M, ObservableValue<String>> function) {
-		addObservableListToObservableValueBinding(HtmlDomNode::getStyleClasses, function);
-		return (COMPONENT) this;
-	}
+	// @SuppressWarnings({ "unchecked" })
+	// public <M> COMPONENT bindStyleClass(Function<M, ObservableValue<String>> function) {
+	// addObservableListToObservableValueBinding(HtmlDomNode::getStyleClasses, function);
+	// return (COMPONENT) this;
+	// }
 
 	@SuppressWarnings("unchecked")
-	public COMPONENT setStyleClass(String text) {
+	public COMPONENT addStyleClass(String text) {
 		addObservableListBoot(HtmlDomNode::getStyleClasses, text);
 		return (COMPONENT) this;
 	}

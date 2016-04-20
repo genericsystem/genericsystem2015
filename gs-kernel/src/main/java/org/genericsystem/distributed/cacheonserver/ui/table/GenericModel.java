@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.ui.exemple;
+package org.genericsystem.distributed.cacheonserver.ui.table;
 
 import java.util.Objects;
 

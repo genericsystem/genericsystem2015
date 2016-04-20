@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonserver.ui.exemple;
+package org.genericsystem.distributed.cacheonserver.ui.table;
 
 import org.genericsystem.distributed.ui.components.HtmlInputText;
 import org.genericsystem.distributed.ui.components.HtmlSection;
@@ -7,7 +7,7 @@ public class AttributeCellHtml extends HtmlSection {
 
 	public AttributeCellHtml(InsertRowHtml parent) {
 		super(parent);
-		setStyleClass("gscell");
+		addStyleClass("gscell");
 	}
 
 	@Override
