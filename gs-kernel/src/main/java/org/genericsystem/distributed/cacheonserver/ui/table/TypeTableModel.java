@@ -9,7 +9,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertRowModel;
 import org.genericsystem.distributed.ui.models.CompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
@@ -21,11 +20,6 @@ import org.genericsystem.distributed.ui.models.GenericModel;
 public class TypeTableModel extends GenericModel {
 
 	private final ObservableList<InstanceRowModel> subModels;
-
-	public final static Function<Generic, String> STRING_EXTRACTOR = g -> {
-		Serializable value = g.getValue();
-		return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
-	};
 
 	public TypeTableModel(Generic type, ObservableList<Generic> attributes) {
 		super(type);
@@ -39,20 +33,8 @@ public class TypeTableModel extends GenericModel {
 		return new Transformation2<>(external, srcToTarget);
 	}
 
-	protected BiFunction<Generic, ObservableList<AttributeCellModel>, InsertRowModel> getInsertRowBuilder() {
-		return InsertRowModel::new;
-	}
-
 	protected BiFunction<Generic, ObservableList<CompositeModel<GenericModel>>, InstanceRowModel> getInstanceRowBuilder() {
 		return InstanceRowModel::new;
-	}
-
-	protected BiFunction<Generic, Function<Generic, String>, GenericModel> getTitleCellBuilder() {
-		return GenericModel::new;
-	}
-
-	protected Function<Generic, AttributeCellModel> getInsertCellBuilder() {
-		return AttributeCellModel::new;
 	}
 
 	protected Function<ObservableList<GenericModel>, CompositeModel<GenericModel>> getInstanceCellBuilder() {
@@ -61,11 +43,6 @@ public class TypeTableModel extends GenericModel {
 
 	private Function<Generic, GenericModel> getHolderSubCellBuilder() {
 		return GenericModel::new;
-	}
-
-	@FunctionalInterface
-	public interface TriFunction<T, U, V, R> {
-		R apply(T t, U u, V v);
 	}
 
 	/**********************************************************************/

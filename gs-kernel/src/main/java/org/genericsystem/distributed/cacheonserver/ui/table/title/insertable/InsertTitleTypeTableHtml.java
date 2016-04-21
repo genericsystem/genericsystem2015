@@ -7,18 +7,18 @@ import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.components.HtmlH1;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 
-public class InsertableTitleTypeTableHtml extends TitleTypeTableHtml {
+public class InsertTitleTypeTableHtml extends TitleTypeTableHtml {
 
-	public InsertableTitleTypeTableHtml(HtmlElement<?, ?> parent) {
+	public InsertTitleTypeTableHtml(HtmlElement<?, ?> parent) {
 		super(parent);
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlH1(new HtmlSection(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(InsertableTitleTypeTableModel::getTableString);
-		new TitleRowHtml(this).select(InsertableTitleTypeTableModel::getTitleRowModel);
-		new InsertRowHtml(this).select(InsertableTitleTypeTableModel::getInsertRowModel);
-		new InstanceRowHtml(this).forEach(InsertableTitleTypeTableModel::getSubModels);
+		new HtmlH1(new HtmlSection(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(InsertTitleTypeTableModel::getTableString);
+		new TitleRowHtml(this).select(InsertTitleTypeTableModel::getTitleRowModel);
+		new InsertRowHtml(this).select(InsertTitleTypeTableModel::getInsertRowModel);
+		new InstanceRowHtml(this).forEach(InsertTitleTypeTableModel::getSubModels);
 	}
 
 }

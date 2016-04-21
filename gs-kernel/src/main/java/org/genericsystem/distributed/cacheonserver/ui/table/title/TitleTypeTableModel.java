@@ -1,5 +1,7 @@
 package org.genericsystem.distributed.cacheonserver.ui.table.title;
 
+import java.io.Serializable;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -14,6 +16,11 @@ import org.genericsystem.distributed.ui.models.GenericModel;
  *
  */
 public class TitleTypeTableModel extends TypeTableModel {
+
+	public final static Function<Generic, String> STRING_EXTRACTOR = g -> {
+		Serializable value = g.getValue();
+		return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
+	};
 
 	private final ObservableValue<TitleRowModel> titleRowModel;
 
@@ -33,6 +40,10 @@ public class TitleTypeTableModel extends TypeTableModel {
 
 	protected Function<Generic, String> getTitleCellStringExtractor() {
 		return STRING_EXTRACTOR;
+	}
+
+	protected BiFunction<Generic, Function<Generic, String>, GenericModel> getTitleCellBuilder() {
+		return GenericModel::new;
 	}
 
 }

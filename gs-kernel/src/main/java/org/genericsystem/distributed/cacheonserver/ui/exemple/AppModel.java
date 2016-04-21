@@ -10,7 +10,7 @@ import org.genericsystem.distributed.cacheonserver.ui.list.TypeListModel;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeListModel.TitleTypeListModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableModel;
-import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertableTitleTypeTableModel;
+import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertTitleTypeTableModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
 import org.genericsystem.kernel.Engine;
 
@@ -30,8 +30,8 @@ public class AppModel extends GenericModel {
 		titleTypeListModel = new ReadOnlyObjectWrapper<>(new TitleTypeListModel(type));
 		typeTableModel = new ReadOnlyObjectWrapper<>(new TypeTableModel(type, attributes));
 		titleTypeTableModel = new ReadOnlyObjectWrapper<>(new TitleTypeTableModel(type, attributes));
-		insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertableTitleTypeTableModel(type, attributes));
-		colorsInsertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertableTitleTypeTableModel(engine.find(Color.class), FXCollections.emptyObservableList()));
+		insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(type, attributes));
+		colorsInsertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(engine.find(Color.class), FXCollections.emptyObservableList()));
 	}
 
 	public void flush() {

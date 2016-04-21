@@ -1,15 +1,15 @@
-package org.genericsystem.distributed.cacheonserver.ui.table;
+package org.genericsystem.distributed.cacheonserver.ui.table.title.insertable;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class AttributeCellModel extends GenericModel {
+public class InsertAttributeCellModel extends GenericModel {
 
 	private Property<String> inputString = new SimpleStringProperty();
 
-	public AttributeCellModel(Generic attribute) {
+	public InsertAttributeCellModel(Generic attribute) {
 		super(attribute);
 	}
 

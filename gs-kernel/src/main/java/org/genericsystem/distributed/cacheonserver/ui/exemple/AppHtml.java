@@ -10,7 +10,7 @@ import org.genericsystem.distributed.cacheonserver.ui.list.TypeListHtml;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeListHtml.TitleTypeListHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableHtml;
-import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertableTitleTypeTableHtml;
+import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertTitleTypeTableHtml;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
 import org.genericsystem.kernel.Engine;
@@ -39,8 +39,8 @@ public class AppHtml extends HtmlApp {
 			new TitleTypeListHtml(div).select(AppModel::getTitleTypeListModel);
 			new TypeTableHtml(div).select(AppModel::getTypeTableModel);
 			new TitleTypeTableHtml(div).select(AppModel::getTitleTypeTableModel);
-			new InsertableTitleTypeTableHtml(div).select(AppModel::getInsertableTitleTypeTableModel);
-			new InsertableTitleTypeTableHtml(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
+			new InsertTitleTypeTableHtml(div).select(AppModel::getInsertableTitleTypeTableModel);
+			new InsertTitleTypeTableHtml(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
 			new AppFooterHtml(div);
 		}
 	}
