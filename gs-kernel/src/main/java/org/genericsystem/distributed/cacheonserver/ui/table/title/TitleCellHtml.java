@@ -1,10 +1,11 @@
-package org.genericsystem.distributed.cacheonserver.ui.table;
+package org.genericsystem.distributed.cacheonserver.ui.table.title;
 
 import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
+import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class TitleCellHtml extends HtmlSection {
+class TitleCellHtml extends HtmlSection {
 
 	public TitleCellHtml(TitleRowHtml parent) {
 		super(parent);
@@ -13,6 +14,6 @@ public class TitleCellHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(new HtmlStrong(this)).bindText(TitleCellModel::getString);
+		new HtmlLabel(new HtmlStrong(this)).bindText(GenericModel::getString);
 	}
 }

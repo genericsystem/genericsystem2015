@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
+import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertRowHtml;
 import org.genericsystem.distributed.ui.components.HtmlInputText;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 

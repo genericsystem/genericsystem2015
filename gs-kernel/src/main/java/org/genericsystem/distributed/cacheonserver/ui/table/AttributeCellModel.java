@@ -3,6 +3,7 @@ package org.genericsystem.distributed.cacheonserver.ui.table;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class AttributeCellModel extends GenericModel {
 

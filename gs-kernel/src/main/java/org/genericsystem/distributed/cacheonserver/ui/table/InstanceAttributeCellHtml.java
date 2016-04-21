@@ -1,6 +1,8 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
 import org.genericsystem.distributed.ui.components.HtmlSection;
+import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class InstanceAttributeCellHtml extends HtmlSection {
 
@@ -11,6 +13,6 @@ public class InstanceAttributeCellHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
-		new HolderSubCellHtml(this).forEach(InstanceAttributeCellModel::getHolderModels);
+		new HolderSubCellHtml(this).forEach(CompositeModel<GenericModel>::getSubModels);
 	}
 }
