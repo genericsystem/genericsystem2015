@@ -1,23 +1,19 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
-import java.util.function.Function;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.distributed.ui.models.CompositeGenericModel;
+import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class InstanceRowModel extends GenericModel {
+/**
+ * @author Nicolas Feybesse
+ *
+ */
+public class InstanceRowModel extends CompositeGenericModel<CompositeModel<GenericModel>> {
 
-	private ObservableList<InstanceAttributeCellModel> instanceAttributesModels;
-
-	public InstanceRowModel(Generic instance, ObservableList<Generic> attributes, Function<Generic, InstanceAttributeCellModel> cellBuilder) {
-		super(instance);
-		instanceAttributesModels = new Transformation2<>(attributes, cellBuilder);
-	}
-
-	public ObservableList<InstanceAttributeCellModel> getInstanceAttributeModels() {
-		return instanceAttributesModels;
+	public InstanceRowModel(Generic instance, ObservableList<CompositeModel<GenericModel>> instanceAttributesModels) {
+		super(instance, instanceAttributesModels);
 	}
 
 	public void remove() {

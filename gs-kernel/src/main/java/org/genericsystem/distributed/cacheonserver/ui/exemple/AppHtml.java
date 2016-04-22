@@ -2,11 +2,15 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
+import org.genericsystem.distributed.cacheonserver.ui.list.TypeListHtml;
+import org.genericsystem.distributed.cacheonserver.ui.list.TypeListHtml.TitleTypeListHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableHtml;
+import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableHtml;
+import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertTitleTypeTableHtml;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
 import org.genericsystem.kernel.Engine;
@@ -14,7 +18,7 @@ import org.genericsystem.kernel.Engine;
 public class AppHtml extends HtmlApp {
 
 	public AppHtml(Engine engine, ServerWebSocket webSocket) {
-		super(new AppModel(engine, engine.find(Car.class), FXCollections.observableArrayList(engine.find(Power.class), engine.find(Power.class))), webSocket);
+		super(new AppModel(engine, engine.find(Car.class), FXCollections.observableArrayList(engine.find(Power.class), engine.find(CarColor.class))), webSocket);
 		Generic car = engine.find(Car.class);
 		Generic power = engine.find(Power.class);
 		car.setInstance("Audi S4").setHolder(power, 333);
@@ -31,7 +35,12 @@ public class AppHtml extends HtmlApp {
 		HtmlDiv div = new HtmlDiv(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
+			new TypeListHtml(div).select(AppModel::getTypeListModel);
+			new TitleTypeListHtml(div).select(AppModel::getTitleTypeListModel);
 			new TypeTableHtml(div).select(AppModel::getTypeTableModel);
+			new TitleTypeTableHtml(div).select(AppModel::getTitleTypeTableModel);
+			new InsertTitleTypeTableHtml(div).select(AppModel::getInsertableTitleTypeTableModel);
+			new InsertTitleTypeTableHtml(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
 			new AppFooterHtml(div);
 		}
 	}

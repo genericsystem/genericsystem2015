@@ -56,23 +56,26 @@ body {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	
 }
 
-.gsrow:nth-child(1) {
+.gstitlerow {
 	background-color: #91a692;
 	justify-content: center;
 }
 
-.gsrow:nth-child(2) {
-	
+.gssubtitlerow {
+	background-color: #91a692;
+	justify-content: center;
 }
 
-.gsrow:nth-child(2) .gscell {
+.gssubtitlerow .gscell {
 	background-color: #538255;
 	margin-right : 1px;
 	justify-content : center;
-	flex-direction: row;
+}
+
+.gsinsertrow {
+	
 }
 
 .gscell {
@@ -85,13 +88,13 @@ body {
 	background-color: #ffc0cb;
 }
 
-.gscell:nth-child(1) {
-	flex: 0;
+.gstitlecell {
+	flex: 1;
 	min-width: 200px;
 	background-color: #e4788b;
 }
 
-.gscell:nth-last-child(1) {
+.gsbuttoncell {
 	flex: 0;
 	min-width: 80px;
 	background-color: #b4868e;
