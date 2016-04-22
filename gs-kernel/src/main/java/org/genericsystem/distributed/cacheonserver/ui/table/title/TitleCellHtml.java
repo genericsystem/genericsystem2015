@@ -5,15 +5,15 @@ import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
-class TitleCellHtml extends HtmlSection {
+class TitleCellHtml<M extends GenericModel> extends HtmlSection<M> {
 
-	public TitleCellHtml(TitleRowHtml parent) {
+	public TitleCellHtml(TitleRowHtml<?> parent) {
 		super(parent);
 		addStyleClass("gscell");
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(new HtmlStrong(this)).bindText(GenericModel::getString);
+		new HtmlLabel<GenericModel>(new HtmlStrong<>(this)).bindText(GenericModel::getString);
 	}
 }

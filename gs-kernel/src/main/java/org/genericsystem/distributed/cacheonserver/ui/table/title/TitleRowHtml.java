@@ -5,9 +5,9 @@ import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
 
-public class TitleRowHtml extends HtmlSection {
+public class TitleRowHtml<M extends TitleRowModel> extends HtmlSection<M> {
 
-	public TitleRowHtml(TypeTableHtml parent) {
+	public TitleRowHtml(TypeTableHtml<?> parent) {
 		super(parent);
 		addStyleClass("gsrow");
 		addStyleClass("gssubtitlerow");
@@ -15,8 +15,8 @@ public class TitleRowHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(new HtmlStrong(new HtmlSection(this).addStyleClass("gscell").addStyleClass("gstitlecell"))).bindText(TitleRowModel::getFirstCellString);
-		new TitleCellHtml(this).forEach(TitleRowModel::getSubModels);
-		new HtmlSection(this).addStyleClass("gscell").addStyleClass("gsbuttoncell");
+		new HtmlLabel<TitleRowModel>(new HtmlStrong<>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gstitlecell"))).bindText(TitleRowModel::getFirstCellString);
+		new TitleCellHtml<>(this).forEach(TitleRowModel::getSubModels);
+		new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gsbuttoncell");
 	}
 }

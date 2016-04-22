@@ -4,7 +4,7 @@ import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class HolderSubCellHtml extends HtmlSection {
+public class HolderSubCellHtml extends HtmlSection<GenericModel> {
 
 	public HolderSubCellHtml(InstanceAttributeCellHtml parent) {
 		super(parent);
@@ -13,6 +13,6 @@ public class HolderSubCellHtml extends HtmlSection {
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(this).bindText(GenericModel::getString);
+		new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
 	}
 }

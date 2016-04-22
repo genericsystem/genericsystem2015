@@ -2,7 +2,6 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
@@ -36,12 +35,12 @@ public class AppHtml extends HtmlApp<AppModel> {
 		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
-			new TypeListHtml(div).select(AppModel::getTypeListModel);
-			new TitleTypeListHtml(div).select(AppModel::getTitleTypeListModel);
-			new TypeTableHtml(div).select(AppModel::getTypeTableModel);
-			new TitleTypeTableHtml(div).select(AppModel::getTitleTypeTableModel);
-			new InsertTitleTypeTableHtml(div).select(AppModel::getInsertableTitleTypeTableModel);
-			new InsertTitleTypeTableHtml(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
+			new TypeListHtml<>(div).select(AppModel::getTypeListModel);
+			new TitleTypeListHtml<>(div).select(AppModel::getTitleTypeListModel);
+			new TypeTableHtml<>(div).select(AppModel::getTypeTableModel);
+			new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
+			new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
+			new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
 			new AppFooterHtml(div);
 		}
 	}

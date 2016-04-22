@@ -4,15 +4,15 @@ import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class InstanceElementHtml extends HtmlSection {
+public class InstanceElementHtml<M extends GenericModel> extends HtmlSection<M> {
 
-	public InstanceElementHtml(TypeListHtml parent) {
+	public InstanceElementHtml(TypeListHtml<?> parent) {
 		super(parent);
 		addStyleClass("gsrow");
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel(new HtmlSection(this).addStyleClass("gscell").addStyleClass("gstitlecell")).bindText(GenericModel::getString);
+		new HtmlLabel<M>(new HtmlSection<M>(this).addStyleClass("gscell").addStyleClass("gstitlecell")).bindText(GenericModel::getString);
 	}
 }
