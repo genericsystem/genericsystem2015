@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Color;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeListModel;
@@ -20,9 +21,9 @@ public class AppModel extends GenericModel {
 	private final ObservableValue<TitleTypeListModel> titleTypeListModel;
 
 	private final ObservableValue<TypeTableModel> typeTableModel;
-	private final ObservableValue<TypeTableModel> titleTypeTableModel;
-	private final ObservableValue<TypeTableModel> insertableTitleTypeTableModel;
-	private final ObservableValue<TypeTableModel> colorsInsertableTitleTypeTableModel;
+	private final ObservableValue<TitleTypeTableModel> titleTypeTableModel;
+	private final ObservableValue<InsertTitleTypeTableModel> insertableTitleTypeTableModel;
+	private final ObservableValue<InsertTitleTypeTableModel> colorsInsertableTitleTypeTableModel;
 
 	public AppModel(Engine engine, Generic type, ObservableList<Generic> attributes) {
 		super(engine);
@@ -56,15 +57,15 @@ public class AppModel extends GenericModel {
 		return typeTableModel;
 	}
 
-	public ObservableValue<TypeTableModel> getTitleTypeTableModel() {
+	public ObservableValue<TitleTypeTableModel> getTitleTypeTableModel() {
 		return titleTypeTableModel;
 	}
 
-	public ObservableValue<TypeTableModel> getInsertableTitleTypeTableModel() {
+	public ObservableValue<InsertTitleTypeTableModel> getInsertableTitleTypeTableModel() {
 		return insertableTitleTypeTableModel;
 	}
 
-	public ObservableValue<TypeTableModel> getColorsInsertableTitleTypeTableModel() {
+	public ObservableValue<InsertTitleTypeTableModel> getColorsInsertableTitleTypeTableModel() {
 		return colorsInsertableTitleTypeTableModel;
 	}
 }

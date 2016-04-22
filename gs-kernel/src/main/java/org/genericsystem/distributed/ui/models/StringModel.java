@@ -2,6 +2,7 @@ package org.genericsystem.distributed.ui.models;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.distributed.ui.Model;
 
 /**

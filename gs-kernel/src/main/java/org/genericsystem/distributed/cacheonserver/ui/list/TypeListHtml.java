@@ -29,4 +29,16 @@ public class TypeListHtml<M extends TypeListModel> extends HtmlSection<M> {
 			super.initChildren();
 		}
 	}
+
+	public static class TypeComboboxHtml<M extends TypeListModel> extends TypeListHtml<M> {
+
+		public TypeComboboxHtml(HtmlElement<?, ?, ?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected void initChildren() {
+			new InstanceElementHtml<>(this).forEach(TypeListModel::getSubModels);
+		}
+	}
 }

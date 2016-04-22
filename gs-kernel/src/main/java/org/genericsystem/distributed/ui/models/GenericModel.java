@@ -2,7 +2,9 @@ package org.genericsystem.distributed.ui.models;
 
 import java.util.Objects;
 import java.util.function.Function;
+
 import javafx.beans.property.ReadOnlyStringWrapper;
+
 import org.genericsystem.common.Generic;
 
 public class GenericModel extends StringModel {
