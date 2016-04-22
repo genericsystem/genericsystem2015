@@ -32,7 +32,7 @@ import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
  * @param <NODE>
  */
 
-public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>, NODE extends HtmlDomNode> extends Element<NODE> {
+public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement<M, COMPONENT, NODE>, NODE extends HtmlDomNode> extends Element<M, NODE> {
 	private static final String MSG_TYPE = "msgType";
 	private static final String ADD = "A";
 	private static final String UPDATE = "U";
@@ -46,12 +46,12 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	private static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
 
-	protected <PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTNODE> parent, Class<NODE> nodeClass) {
+	protected <PARENTMODEL extends Model, PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTMODEL, PARENTNODE> parent, Class<NODE> nodeClass) {
 		super(parent, nodeClass);
 	}
 
 	public ServerWebSocket getWebSocket() {
-		return ((HtmlElement<?, ?>) getParent()).getWebSocket();
+		return ((HtmlElement<?, ?, ?>) getParent()).getWebSocket();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -62,14 +62,14 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M extends Model, T extends Model> COMPONENT forEach(Function<M, ObservableList<T>> applyOnModel) {
+	public <T extends Model> COMPONENT forEach(Function<T, ObservableList<M>> applyOnModel) {
 		super.forEach(applyOnModel);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M extends Model, T extends Model> COMPONENT select(Function<M, ObservableValue<T>> function) {
+	public <T extends Model> COMPONENT select(Function<T, ObservableValue<M>> function) {
 		super.select(function);
 		return (COMPONENT) this;
 	}
@@ -87,7 +87,7 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> COMPONENT bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
+	public COMPONENT bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
 		addObservableListBinding(HtmlDomNode::getStyleClasses, function, text);
 		return (COMPONENT) this;
 	}
@@ -99,7 +99,7 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> COMPONENT bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
+	public COMPONENT bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
 		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}
@@ -111,7 +111,7 @@ public abstract class HtmlElement<COMPONENT extends HtmlElement<COMPONENT, NODE>
 	// }
 
 	@SuppressWarnings("unchecked")
-	public <M> COMPONENT bindText(Function<M, ObservableValue<String>> applyOnModel) {
+	public COMPONENT bindText(Function<M, ObservableValue<String>> applyOnModel) {
 		addBinding(HtmlDomNode::getText, applyOnModel);
 		return (COMPONENT) this;
 	}

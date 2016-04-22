@@ -2,14 +2,15 @@ package org.genericsystem.distributed.ui.components;
 
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
+import org.genericsystem.distributed.ui.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlSection extends HtmlElement<HtmlSection, HtmlDomNode> {
+public class HtmlSection<M extends Model> extends HtmlElement<M, HtmlSection<M>, HtmlDomNode> {
 
-	public HtmlSection(HtmlElement<?, ?> parent) {
+	public HtmlSection(HtmlElement<?, ?, ?> parent) {
 		super(parent, HtmlDomNode.class);
 	}
 

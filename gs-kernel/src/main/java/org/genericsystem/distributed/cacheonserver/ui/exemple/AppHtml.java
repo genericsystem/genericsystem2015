@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
@@ -15,7 +16,7 @@ import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
 import org.genericsystem.kernel.Engine;
 
-public class AppHtml extends HtmlApp {
+public class AppHtml extends HtmlApp<AppModel> {
 
 	public AppHtml(Engine engine, ServerWebSocket webSocket) {
 		super(new AppModel(engine, engine.find(Car.class), FXCollections.observableArrayList(engine.find(Power.class), engine.find(CarColor.class))), webSocket);
@@ -32,7 +33,7 @@ public class AppHtml extends HtmlApp {
 
 	@Override
 	protected void initChildren() {
-		HtmlDiv div = new HtmlDiv(this).addStyleClass("gsapp");
+		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
 			new TypeListHtml(div).select(AppModel::getTypeListModel);
