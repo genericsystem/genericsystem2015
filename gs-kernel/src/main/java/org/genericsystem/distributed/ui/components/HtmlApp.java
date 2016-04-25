@@ -20,17 +20,7 @@ public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>
 	public HtmlApp(M model, ServerWebSocket webSocket) {
 		super(null, HtmlDomNode.class);
 		this.webSocket = webSocket;
-		initHtmlChildren();
 		rootViewContext = new RootViewContext<>(model, (Element) this, new HtmlDomNode("div"));
-	}
-
-	@Override
-	protected void initChildren() {
-
-	}
-
-	protected void initHtmlChildren() {
-		super.initChildren();
 	}
 
 	@Override

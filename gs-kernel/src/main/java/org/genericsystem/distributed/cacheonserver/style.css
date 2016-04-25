@@ -72,6 +72,7 @@ body {
 	background-color: #538255;
 	margin-right : 1px;
 	justify-content : center;
+	flex-direction: row;
 }
 
 .gsinsertrow {

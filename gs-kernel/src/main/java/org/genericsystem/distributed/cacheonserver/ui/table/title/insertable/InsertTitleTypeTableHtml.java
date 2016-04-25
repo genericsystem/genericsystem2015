@@ -15,7 +15,7 @@ public class InsertTitleTypeTableHtml<M extends InsertTitleTypeTableModel> exten
 
 	@Override
 	protected void initChildren() {
-		new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(InsertTitleTypeTableModel::getTableString);
+		new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(InsertTitleTypeTableModel::getString);
 		new TitleRowHtml<>(this).select(InsertTitleTypeTableModel::getTitleRowModel);
 		new InsertRowHtml<>(this).select(InsertTitleTypeTableModel::getInsertRowModel);
 		new InstanceRowHtml<>(this).forEach(InsertTitleTypeTableModel::getSubModels);

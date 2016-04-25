@@ -6,7 +6,7 @@ import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class HolderSubCellHtml extends HtmlSection<GenericModel> {
 
-	public HolderSubCellHtml(InstanceAttributeCellHtml parent) {
+	public HolderSubCellHtml(InstanceAttributeCellHtml<?> parent) {
 		super(parent);
 		addStyleClass("gssubcell");
 	}

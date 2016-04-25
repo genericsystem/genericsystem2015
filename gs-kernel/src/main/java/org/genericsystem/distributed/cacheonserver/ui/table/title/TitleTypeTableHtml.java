@@ -13,7 +13,7 @@ public class TitleTypeTableHtml<M extends TitleTypeTableModel> extends TypeTable
 
 	@Override
 	protected void initChildren() {
-		new HtmlH1<TitleTypeTableModel>(new HtmlSection<>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(TitleTypeTableModel::getTableString);
+		new HtmlH1<M>(new HtmlSection<>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(TitleTypeTableModel::getString);
 		new TitleRowHtml<>(this).select(TitleTypeTableModel::getTitleRowModel);
 		new InstanceRowHtml<>(this).forEach(TitleTypeTableModel::getSubModels);
 	}

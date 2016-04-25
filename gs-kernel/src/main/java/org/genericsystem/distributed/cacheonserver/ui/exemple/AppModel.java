@@ -7,18 +7,19 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Color;
-import org.genericsystem.distributed.cacheonserver.ui.list.TypeListModel;
-import org.genericsystem.distributed.cacheonserver.ui.list.TypeListModel.TitleTypeListModel;
+import org.genericsystem.distributed.cacheonserver.ui.list.TitleGenericCompositeModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertTitleTypeTableModel;
+import org.genericsystem.distributed.ui.models.CompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
+import org.genericsystem.distributed.ui.models.StringModel;
 import org.genericsystem.kernel.Engine;
 
 public class AppModel extends GenericModel {
 
-	private final ObservableValue<TypeListModel> typeListModel;
-	private final ObservableValue<TitleTypeListModel> titleTypeListModel;
+	private final ObservableValue<CompositeModel<StringModel>> typeListModel;
+	private final ObservableValue<TitleGenericCompositeModel> titleTypeListModel;
 
 	private final ObservableValue<TypeTableModel> typeTableModel;
 	private final ObservableValue<TitleTypeTableModel> titleTypeTableModel;
@@ -27,12 +28,12 @@ public class AppModel extends GenericModel {
 
 	public AppModel(Engine engine, Generic type, ObservableList<Generic> attributes) {
 		super(engine);
-		typeListModel = new ReadOnlyObjectWrapper<>(new TypeListModel(type));
-		titleTypeListModel = new ReadOnlyObjectWrapper<>(new TitleTypeListModel(type));
-		typeTableModel = new ReadOnlyObjectWrapper<>(new TypeTableModel(type, attributes));
-		titleTypeTableModel = new ReadOnlyObjectWrapper<>(new TitleTypeTableModel(type, attributes));
-		insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(type, attributes));
-		colorsInsertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(engine.find(Color.class), FXCollections.emptyObservableList()));
+		typeListModel = new ReadOnlyObjectWrapper<>(new CompositeModel<StringModel>(type, Generic::getObservableSubInstances, GenericModel::new));
+		titleTypeListModel = new ReadOnlyObjectWrapper<>(new TitleGenericCompositeModel(type, Generic::getObservableSubInstances, GenericModel::new));
+		typeTableModel = new ReadOnlyObjectWrapper<>(new TypeTableModel(type, typ -> attributes));
+		titleTypeTableModel = new ReadOnlyObjectWrapper<>(new TitleTypeTableModel(type, typ -> attributes));
+		insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(type, typ -> attributes));
+		colorsInsertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(engine.find(Color.class), typ -> FXCollections.emptyObservableList()));
 	}
 
 	public void flush() {
@@ -45,11 +46,11 @@ public class AppModel extends GenericModel {
 
 	/*********************************************************************************************************************************/
 
-	public ObservableValue<TypeListModel> getTypeListModel() {
+	public ObservableValue<CompositeModel<StringModel>> getTypeListModel() {
 		return typeListModel;
 	}
 
-	public ObservableValue<TitleTypeListModel> getTitleTypeListModel() {
+	public ObservableValue<TitleGenericCompositeModel> getTitleTypeListModel() {
 		return titleTypeListModel;
 	}
 
