@@ -1,22 +1,16 @@
 package org.genericsystem.distributed.cacheonserver.ui.table.title.insertable;
 
-import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.GenericCompositeModel;
 
-public class InsertRowModel extends CompositeModel<InsertAttributeCellModel> {
+public class InsertRowModel extends GenericCompositeModel<InsertAttributeCellModel> {
 
 	private final Property<String> inputString = new SimpleStringProperty();
-	private final Generic generic;
 
-	public InsertRowModel(Generic generic, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<Generic, InsertAttributeCellModel> elementBuilder) {
-		super(generic, observableListExtractor, elementBuilder);
-		this.generic = generic;
+	public InsertRowModel(CompositeConf<InsertAttributeCellModel> conf) {
+		super(conf);
 	}
 
 	public Property<String> getInputString() {
@@ -24,7 +18,7 @@ public class InsertRowModel extends CompositeModel<InsertAttributeCellModel> {
 	}
 
 	public void create() {
-		Generic instance = generic.setInstance(inputString.getValue());
+		Generic instance = getGeneric().setInstance(inputString.getValue());
 		for (InsertAttributeCellModel model : getSubModels())
 			instance.setHolder(model.getGeneric(), model.getInputString().getValue());
 	}

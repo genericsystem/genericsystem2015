@@ -1,9 +1,7 @@
 package org.genericsystem.distributed.ui.models;
 
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.distributed.ui.Model;
 
 /**
