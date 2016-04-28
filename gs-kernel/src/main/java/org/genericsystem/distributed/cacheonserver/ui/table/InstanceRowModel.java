@@ -1,15 +1,19 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
-import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.GenericCompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class InstanceRowModel extends CompositeModel<CompositeModel<GenericModel>> {
+public class InstanceRowModel extends GenericCompositeModel<GenericCompositeModel<GenericModel>> {
 
-	public InstanceRowModel(Conf conf) {
+	// public InstanceRowModel(Generic generic, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<Generic, CompositeModel<GenericModel>> elementBuilder) {
+	// this(new CompositeConf<>(generic, observableListExtractor, elementBuilder));
+	// }
+
+	public InstanceRowModel(CompositeConf<GenericCompositeModel<GenericModel>> conf) {
 		super(conf);
 	}
 

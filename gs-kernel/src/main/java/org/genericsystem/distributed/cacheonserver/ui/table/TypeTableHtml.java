@@ -14,6 +14,6 @@ public class TypeTableHtml<M extends TypeTableModel> extends HtmlSection<M> {
 	@Override
 	protected void initChildren() {
 		new HtmlH1<M>(new HtmlSection<>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(TypeTableModel::getString);
-		new InstanceRowHtml<InstanceRowModel>(this).forEach(TypeTableModel::getSubModels);
+		new InstanceRowHtml<>(this).forEach(TypeTableModel::getSubModels);
 	}
 }

@@ -2,7 +2,6 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;

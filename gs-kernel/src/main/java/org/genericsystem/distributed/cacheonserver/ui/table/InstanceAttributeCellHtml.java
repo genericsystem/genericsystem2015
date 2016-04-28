@@ -1,10 +1,10 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.GenericCompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class InstanceAttributeCellHtml<M extends CompositeModel<GenericModel>> extends HtmlSection<M> {
+public class InstanceAttributeCellHtml<M extends GenericCompositeModel<GenericModel>> extends HtmlSection<M> {
 
 	public InstanceAttributeCellHtml(InstanceRowHtml<?> parent) {
 		super(parent);
@@ -13,6 +13,6 @@ public class InstanceAttributeCellHtml<M extends CompositeModel<GenericModel>> e
 
 	@Override
 	protected void initChildren() {
-		new HolderSubCellHtml(this).forEach(CompositeModel<GenericModel>::getSubModels);
+		new HolderSubCellHtml(this).forEach(GenericCompositeModel<GenericModel>::getSubModels);
 	}
 }
