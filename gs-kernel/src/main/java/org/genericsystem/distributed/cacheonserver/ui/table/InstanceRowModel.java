@@ -7,6 +7,7 @@ import org.genericsystem.distributed.ui.models.GenericModel;
  * @author Nicolas Feybesse
  *
  */
+
 public class InstanceRowModel extends GenericCompositeModel<GenericCompositeModel<GenericModel>> {
 
 	// public InstanceRowModel(Generic generic, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<Generic, CompositeModel<GenericModel>> elementBuilder) {
@@ -14,6 +15,7 @@ public class InstanceRowModel extends GenericCompositeModel<GenericCompositeMode
 	// }
 
 	public InstanceRowModel(CompositeConf<GenericCompositeModel<GenericModel>> conf) {
+
 		super(conf);
 	}
 

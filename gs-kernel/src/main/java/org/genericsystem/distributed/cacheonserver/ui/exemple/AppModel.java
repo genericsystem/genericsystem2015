@@ -27,9 +27,11 @@ public class AppModel extends GenericModel {
 
 	public AppModel(Engine engine, Generic type, ObservableList<Generic> attributes) {
 		super(engine);
+
 		typeListModel = new ReadOnlyObjectWrapper<>(new GenericCompositeModel<>(new CompositeConf<>(type, null, generics -> generics[0].getObservableSubInstances(), GenericModel::new)));
 		titleTypeListModel = new ReadOnlyObjectWrapper<>(new TitleGenericCompositeModel(new CompositeConf<>(type, null, generics -> generics[0].getObservableSubInstances(), GenericModel::new)));
 		typeTableModel = new ReadOnlyObjectWrapper<>(new TypeTableModel(type, Collections.singletonList(typ -> attributes)));
+
 		titleTypeTableModel = new ReadOnlyObjectWrapper<>(new TitleTypeTableModel(type, typ -> attributes));
 		insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(type, typ -> attributes));
 		colorsInsertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(engine.find(Color.class), typ -> FXCollections.emptyObservableList()));

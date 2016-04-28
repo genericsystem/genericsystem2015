@@ -10,6 +10,7 @@ public class TitleGenericCompositeModel extends GenericCompositeModel<GenericMod
 
 	public TitleGenericCompositeModel(Generic generic, Function<Generic[], ObservableList<Generic>> observableListExtractor) {
 		this(new CompositeConf<>(generic, g -> GenericModel.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management", observableListExtractor, GenericModel::new));
+
 	}
 
 	public TitleGenericCompositeModel(Generic generic, Function<Generic[], ObservableList<Generic>> observableListExtractor, Function<Generic, GenericModel> elementBuilder) {
@@ -18,5 +19,6 @@ public class TitleGenericCompositeModel extends GenericCompositeModel<GenericMod
 
 	public TitleGenericCompositeModel(CompositeConf<GenericModel> compositeConf) {
 		super(compositeConf);
+
 	}
 }

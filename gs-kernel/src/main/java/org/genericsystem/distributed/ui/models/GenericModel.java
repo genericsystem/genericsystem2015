@@ -19,7 +19,7 @@ public class GenericModel extends GenericCompositeModel<Model> {
 	}
 
 	public GenericModel(Generic generic, Function<Generic, String> stringExtractor) {
-		this(new CompositeConf<>(generic, stringExtractor, null));
+		this(new CompositeConf<>(generic, stringExtractor, null, null));
 	}
 
 	public GenericModel(CompositeConf<Model> conf) {

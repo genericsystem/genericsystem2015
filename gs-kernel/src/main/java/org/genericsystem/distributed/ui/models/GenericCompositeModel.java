@@ -19,7 +19,7 @@ public class GenericCompositeModel<M extends Model> extends Model {
 	private ObservableList<M> subModels;
 
 	private Generic[] getGenerics() {
-		KK
+
 		return null;
 	}
 
