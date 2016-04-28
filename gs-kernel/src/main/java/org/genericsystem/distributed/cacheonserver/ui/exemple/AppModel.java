@@ -29,7 +29,7 @@ public class AppModel extends GenericModel {
 	public AppModel(Engine engine, Generic type, ObservableList<Generic> attributes) {
 		super(engine);
 		typeListModel = new ReadOnlyObjectWrapper<>(new CompositeModel<StringModel>(type, Generic::getObservableSubInstances, GenericModel::new));
-		titleTypeListModel = new ReadOnlyObjectWrapper<>(new TitleGenericCompositeModel(type, Generic::getObservableSubInstances, GenericModel::new));
+		titleTypeListModel = new ReadOnlyObjectWrapper<>(new TitleGenericCompositeModel(type, Generic::getObservableSubInstances));
 		typeTableModel = new ReadOnlyObjectWrapper<>(new TypeTableModel(type, typ -> attributes));
 		titleTypeTableModel = new ReadOnlyObjectWrapper<>(new TitleTypeTableModel(type, typ -> attributes));
 		insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(type, typ -> attributes));

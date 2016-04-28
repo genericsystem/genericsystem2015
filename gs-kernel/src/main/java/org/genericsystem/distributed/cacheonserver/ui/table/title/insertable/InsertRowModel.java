@@ -2,14 +2,15 @@ package org.genericsystem.distributed.cacheonserver.ui.table.title.insertable;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
-import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.models.GenericCompositeModel;
 
-public class InsertRowModel extends GenericCompositeModel<InsertAttributeCellModel> {
+import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.ui.models.CompositeModel;
+
+public class InsertRowModel extends CompositeModel<InsertAttributeCellModel> {
 
 	private final Property<String> inputString = new SimpleStringProperty();
 
-	public InsertRowModel(CompositeConf<InsertAttributeCellModel> conf) {
+	public InsertRowModel(Conf conf) {
 		super(conf);
 	}
 
