@@ -10,7 +10,7 @@ public class InsertRowModel extends CompositeModel<InsertAttributeCellModel> {
 
 	private final Property<String> inputString = new SimpleStringProperty();
 
-	public InsertRowModel(Conf conf) {
+	public InsertRowModel(MetaConf conf) {
 		super(conf);
 	}
 

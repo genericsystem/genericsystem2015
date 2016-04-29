@@ -11,7 +11,7 @@ import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class TitleRowModel extends CompositeModel<GenericModel> {
 
-	public TitleRowModel(Conf conf) {
+	public TitleRowModel(MetaConf conf) {
 		super(conf);
 	}
 

@@ -1,9 +1,11 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
 import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.models.GenericCompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
@@ -15,33 +17,55 @@ import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class TypeTableModel extends GenericCompositeModel<InstanceRowModel> {
 
-	public TypeTableModel(Generic generic, List<Function<Generic[], ObservableList<Generic>>> observableListExtractors) {
-		this(generic, observableListExtractors, InstanceRowModel::new, GenericCompositeModel<GenericModel>::new, GenericModel::new);
+	public TypeTableModel(CompositeConf<InstanceRowModel> compositeConf) {
+		super(compositeConf);
 	}
 
-	public TypeTableModel(Generic generic, Function<Generic, String> stringExtractor, ObservableList<Generic> attributes) {
-		this(generic, stringExtractor, Arrays.<Function<Generic[], ObservableList<Generic>>> asList(generics -> generics[0].getObservableSubInstances(), generics -> attributes, generics -> generics[0].getObservableHolders(generics[1])),
-				InstanceRowModel::new, GenericCompositeModel<GenericModel>::new, GenericModel::new);
+	public static Function<Generic, GenericCompositeModel<?>> getBuilder(List<MetaConf> confs) {
+		Function<Generic, GenericCompositeModel<?>> builder = null;
+		for (MetaConf conf : confs) {
+			final Function<Generic, GenericCompositeModel<?>> leafBuilder = builder;
+			builder = generic -> conf.build(generic, leafBuilder);
+		}
+		return builder;
 	}
 
-	public TypeTableModel(Generic generic, List<Function<Generic[], ObservableList<Generic>>> observableListExtractors, Function<CompositeConf<GenericCompositeModel<GenericModel>>, InstanceRowModel> rowBuilder,
-			Function<CompositeConf<GenericModel>, GenericCompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder) {
-		this(generic, g -> GenericModel.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management", observableListExtractors, rowBuilder, cellBuilder, subCellBuilder);
+	public static TypeTableModel build(Generic generic) {
+		List<MetaConf> confs = new ArrayList<MetaConf>();
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), GenericModel::new));
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), GenericCompositeModel::new));
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), InstanceRowModel::new));
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), TypeTableModel::new));
+		return (TypeTableModel) getBuilder(confs).apply(generic);
 	}
 
-	public TypeTableModel(Generic generic, List<Function<Generic, String>> stringExtractors, List<Function<Generic[], ObservableList<Generic>>> observableListExtractors,
-			Function<CompositeConf<GenericCompositeModel<GenericModel>>, InstanceRowModel> rowBuilder, Function<CompositeConf<GenericModel>, GenericCompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder) {
-		super(new CompositeConf<>(generic, stringExtractors.get(0), observableListExtractors.get(0)));
-		init(buildBuilder(rowBuilder, cellBuilder, stringExtractors, observableListExtractors, subCellBuilder));
-	}
+	public static class MetaConf {
 
-	public static Function<Generic, GenericCompositeModel<?>> getBuilder(List<Function<CompositeConf<GenericCompositeModel<?>>, GenericCompositeModel<?>>> builders, List<Function<Generic, String>> stringExtractors,
-			List<Function<Generic[], ObservableList<Generic>>> observableListExtractors) {
-		Function<Generic, GenericCompositeModel<?>> subCellBuild = holder -> builders.get(3).apply(new CompositeConf<>(holder, stringExtractors.get(3), observableListExtractors.get(3), null));
-		Function<Generic, GenericCompositeModel<?>> cellBuild = attribute -> builders.get(2).apply(new CompositeConf<>(attribute, stringExtractors.get(2), observableListExtractors.get(2), subCellBuild));
-		Function<Generic, GenericCompositeModel<?>> rowBuild = instance -> builders.get(1).apply(new CompositeConf<>(instance, stringExtractors.get(1), observableListExtractors.get(1), cellBuild));
-		Function<Generic, GenericCompositeModel<?>> tableBuild = type -> builders.get(0).apply(new CompositeConf<>(type, stringExtractors.get(0), observableListExtractors.get(0), rowBuild));
-		return tableBuild;
+		private final Function<Generic, String> stringExtractor;
+		private final Function<Generic[], ObservableList<Generic>> observableListExtractor;
+		private final Function<CompositeConf, GenericCompositeModel<?>> modelConstructor;
+
+		public MetaConf(Function<Generic, String> stringExtractor, Function<Generic[], ObservableList<Generic>> observableListExtractor, Function<CompositeConf, GenericCompositeModel<?>> modelConstructor) {
+			this.stringExtractor = stringExtractor;
+			this.observableListExtractor = observableListExtractor;
+			this.modelConstructor = modelConstructor;
+		}
+
+		public Function<Generic, String> getStringExtractor() {
+			return stringExtractor;
+		}
+
+		public Function<Generic[], ObservableList<Generic>> getObservableListExtractor() {
+			return observableListExtractor;
+		}
+
+		public Function<CompositeConf, GenericCompositeModel<?>> getModelConstructor() {
+			return modelConstructor;
+		}
+
+		public GenericCompositeModel<?> build(Generic generic, Function<Generic, GenericCompositeModel<?>> leafBuilder) {
+			return getModelConstructor().apply(new CompositeConf<>(generic, getStringExtractor(), getObservableListExtractor(), leafBuilder));
+		}
 	}
 
 }

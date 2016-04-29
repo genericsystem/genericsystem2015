@@ -20,14 +20,14 @@ public class InsertTitleTypeTableModel extends TitleTypeTableModel {
 
 	public InsertTitleTypeTableModel(Generic generic, Function<Generic, ObservableList<Generic>> observableListExtractor) {
 		this(generic, GenericModel.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, InstanceRowModel::new, CompositeModel<GenericModel>::new, GenericModel::new, TitleRowModel::new, GenericModel::new,
-				(Function<Conf, InsertRowModel>) InsertRowModel::new, (BiFunction<Generic, Function<Generic, String>, InsertAttributeCellModel>) InsertAttributeCellModel::new);
+				(Function<MetaConf, InsertRowModel>) InsertRowModel::new, (BiFunction<Generic, Function<Generic, String>, InsertAttributeCellModel>) InsertAttributeCellModel::new);
 	}
 
-	public InsertTitleTypeTableModel(Generic generic, Function<Generic, String> stringExtractor, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<Conf, InstanceRowModel> rowBuilder,
-			Function<Conf, CompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder, Function<Conf, TitleRowModel> titleRowBuilder,
-			BiFunction<Generic, Function<Generic, String>, GenericModel> titleCellBuilder, Function<Conf, InsertRowModel> insertRowBuilder, BiFunction<Generic, Function<Generic, String>, InsertAttributeCellModel> insertCellBuilder) {
+	public InsertTitleTypeTableModel(Generic generic, Function<Generic, String> stringExtractor, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<MetaConf, InstanceRowModel> rowBuilder,
+			Function<MetaConf, CompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder, Function<MetaConf, TitleRowModel> titleRowBuilder,
+			BiFunction<Generic, Function<Generic, String>, GenericModel> titleCellBuilder, Function<MetaConf, InsertRowModel> insertRowBuilder, BiFunction<Generic, Function<Generic, String>, InsertAttributeCellModel> insertCellBuilder) {
 		super(generic, stringExtractor, observableListExtractor, rowBuilder, cellBuilder, subCellBuilder, titleRowBuilder, titleCellBuilder);
-		insertRowModel = new ReadOnlyObjectWrapper<>(insertRowBuilder.apply(new Conf(generic, observableListExtractor, attribute -> insertCellBuilder.apply(attribute, GenericModel.SIMPLE_CLASS_EXTRACTOR))));
+		insertRowModel = new ReadOnlyObjectWrapper<>(insertRowBuilder.apply(new MetaConf(generic, observableListExtractor, attribute -> insertCellBuilder.apply(attribute, GenericModel.SIMPLE_CLASS_EXTRACTOR))));
 	}
 
 	public ObservableValue<InsertRowModel> getInsertRowModel() {
