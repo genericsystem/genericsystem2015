@@ -3,9 +3,7 @@ package org.genericsystem.distributed.cacheonserver.ui.table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.models.GenericCompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
@@ -30,11 +28,11 @@ public class TypeTableModel extends GenericCompositeModel<InstanceRowModel> {
 		return builder;
 	}
 
-	public static TypeTableModel build(Generic generic) {
-		List<MetaConf> confs = new ArrayList<MetaConf>();
-		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), GenericModel::new));
-		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), GenericCompositeModel::new));
-		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), InstanceRowModel::new));
+	public static TypeTableModel build(Generic generic, Function<Generic[], ObservableList<Generic>> attributesExtractor) {
+		List<MetaConf> confs = new ArrayList<>();
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, null, GenericModel::new));
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableHolders(generics[1]), GenericCompositeModel::new));
+		confs.add(new MetaConf(GenericModel.EXTRACTOR, attributesExtractor, InstanceRowModel::new));
 		confs.add(new MetaConf(GenericModel.EXTRACTOR, generics -> generics[0].getObservableSubInstances(), TypeTableModel::new));
 		return (TypeTableModel) getBuilder(confs).apply(generic);
 	}
