@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
@@ -10,8 +11,6 @@ import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeSectionHtml.TitleTypeListHtml;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeSelectHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableHtml;
-import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableHtml;
-import org.genericsystem.distributed.cacheonserver.ui.table.title.insertable.InsertTitleTypeTableHtml;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
 import org.genericsystem.kernel.Engine;
@@ -56,9 +55,9 @@ public class AppHtml extends HtmlApp<AppModel> {
 			new TypeSelectHtml<>(div).select(AppModel::getTypeListModel);
 			new TitleTypeListHtml<>(div).select(AppModel::getTitleTypeListModel);
 			new TypeTableHtml<>(div).select(AppModel::getTypeTableModel);
-			new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
-			new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
-			new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
+			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
+			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
+			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
 			new AppFooterHtml(div);
 		}
 	}

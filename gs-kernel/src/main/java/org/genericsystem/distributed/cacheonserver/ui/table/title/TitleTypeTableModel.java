@@ -25,11 +25,11 @@ public class TitleTypeTableModel extends TypeTableModel {
 		this(generic, GenericModel.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, InstanceRowModel::new, CompositeModel<GenericModel>::new, GenericModel::new, TitleRowModel::new, GenericModel::new);
 	}
 
-	public TitleTypeTableModel(Generic generic, Function<Generic, String> stringExtractor, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<MetaConf, InstanceRowModel> rowBuilder,
-			Function<MetaConf, CompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder, Function<MetaConf, TitleRowModel> titleRowBuilder,
+	public TitleTypeTableModel(Generic generic, Function<Generic, String> stringExtractor, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<Step, InstanceRowModel> rowBuilder,
+			Function<Step, CompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder, Function<Step, TitleRowModel> titleRowBuilder,
 			BiFunction<Generic, Function<Generic, String>, GenericModel> titleCellBuilder) {
 		super(generic, observableListExtractor, rowBuilder, cellBuilder, subCellBuilder);
-		titleRowModel = new ReadOnlyObjectWrapper<>(titleRowBuilder.apply(new MetaConf(generic, observableListExtractor, attribute -> titleCellBuilder.apply(attribute, GenericModel.SIMPLE_CLASS_EXTRACTOR))));
+		titleRowModel = new ReadOnlyObjectWrapper<>(titleRowBuilder.apply(new Step(generic, observableListExtractor, attribute -> titleCellBuilder.apply(attribute, GenericModel.SIMPLE_CLASS_EXTRACTOR))));
 	}
 
 	public ObservableValue<TitleRowModel> getTitleRowModel() {
