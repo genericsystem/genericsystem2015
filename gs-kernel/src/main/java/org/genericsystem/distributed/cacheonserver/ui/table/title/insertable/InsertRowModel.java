@@ -4,9 +4,10 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.models.GenericCompositeModel;
+import org.genericsystem.distributed.ui.models.CompositeConf;
+import org.genericsystem.distributed.ui.models.CompositeModel;
 
-public class InsertRowModel extends GenericCompositeModel<InsertAttributeCellModel> {
+public class InsertRowModel extends CompositeModel<InsertAttributeCellModel> {
 
 	private final Property<String> inputString = new SimpleStringProperty();
 

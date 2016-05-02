@@ -11,7 +11,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.table.InstanceRowModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleRowModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableModel;
-import org.genericsystem.distributed.ui.models.GenericCompositeModel;
+import org.genericsystem.distributed.ui.models.CompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class InsertTitleTypeTableModel extends TitleTypeTableModel {
@@ -24,7 +24,7 @@ public class InsertTitleTypeTableModel extends TitleTypeTableModel {
 	}
 
 	public InsertTitleTypeTableModel(Generic generic, Function<Generic, String> stringExtractor, Function<Generic, ObservableList<Generic>> observableListExtractor, Function<Step, InstanceRowModel> rowBuilder,
-			Function<Step, GenericCompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder, Function<Step, TitleRowModel> titleRowBuilder,
+			Function<Step, CompositeModel<GenericModel>> cellBuilder, Function<Generic, GenericModel> subCellBuilder, Function<Step, TitleRowModel> titleRowBuilder,
 			BiFunction<Generic, Function<Generic, String>, GenericModel> titleCellBuilder, Function<Step, InsertRowModel> insertRowBuilder, BiFunction<Generic, Function<Generic, String>, InsertAttributeCellModel> insertCellBuilder) {
 		super(generic, stringExtractor, observableListExtractor, rowBuilder, cellBuilder, subCellBuilder, titleRowBuilder, titleCellBuilder);
 		insertRowModel = new ReadOnlyObjectWrapper<>(insertRowBuilder.apply(new Step(generic, observableListExtractor, attribute -> insertCellBuilder.apply(attribute, GenericModel.SIMPLE_CLASS_EXTRACTOR))));
