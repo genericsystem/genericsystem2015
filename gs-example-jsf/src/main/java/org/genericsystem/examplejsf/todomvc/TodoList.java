@@ -15,7 +15,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
-import org.genericsystem.defaults.tools.Transformation;
+import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.kernel.Engine;
 
@@ -47,7 +47,7 @@ public class TodoList extends Model {
 
 	public TodoList(Engine engine) {
 		this.engine = engine;
-		todos = new Transformation<>(engine.getObservableSubInstances(), g -> new Todo(this, g));
+		todos = new Transformation2<>(engine.getObservableSubInstances(), g -> new Todo(this, g));
 		filtered = new FilteredList<>(todos);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(todos.filtered(COMPLETE));

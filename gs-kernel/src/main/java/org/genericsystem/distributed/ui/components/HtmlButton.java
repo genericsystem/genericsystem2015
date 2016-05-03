@@ -1,16 +1,18 @@
 package org.genericsystem.distributed.ui.components;
 
 import java.util.function.Consumer;
+
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.ActionHtmlNode;
+import org.genericsystem.distributed.ui.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlButton extends HtmlElement<HtmlButton, ActionHtmlNode> {
+public class HtmlButton<M extends Model> extends HtmlElement<M, HtmlButton<M>, ActionHtmlNode> {
 
-	public HtmlButton(HtmlElement<?, ?> parent) {
+	public HtmlButton(HtmlElement<?, ?, ?> parent) {
 		super(parent, ActionHtmlNode.class);
 	}
 
@@ -19,7 +21,7 @@ public class HtmlButton extends HtmlElement<HtmlButton, ActionHtmlNode> {
 		return new ActionHtmlNode("button");
 	}
 
-	public <M> HtmlButton bindAction(Consumer<M> applyOnModel) {
+	public HtmlButton<M> bindAction(Consumer<M> applyOnModel) {
 		addActionBinding(ActionHtmlNode::getActionProperty, applyOnModel);
 		return this;
 	}

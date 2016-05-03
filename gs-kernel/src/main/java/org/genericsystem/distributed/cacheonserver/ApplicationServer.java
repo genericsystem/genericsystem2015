@@ -4,20 +4,20 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.genericsystem.common.Cache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
 import org.genericsystem.distributed.ApplicationsDeploymentConfig;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.distributed.cacheonserver.todocarmvc.Car;
-import org.genericsystem.distributed.cacheonserver.todocarmvc.CarApp;
-import org.genericsystem.distributed.cacheonserver.todocarmvc.Power;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.AppHtml;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Color;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 import org.genericsystem.distributed.ui.components.HtmlApp;
@@ -32,7 +32,7 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-		apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Car.class, Power.class);
+		apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		// apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Power.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(apps).start();

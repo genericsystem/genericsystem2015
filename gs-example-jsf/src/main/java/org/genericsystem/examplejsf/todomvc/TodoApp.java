@@ -32,43 +32,43 @@ public class TodoApp extends HtmlApp {
 
 		HtmlDiv div = new HtmlDiv(this);
 		{
-			HtmlSection todoapp = new HtmlSection(div).setStyleClass("todoapp");
+			HtmlSection todoapp = new HtmlSection(div).addStyleClass("todoapp");
 			{
-				HtmlHeader header = new HtmlHeader(todoapp).setStyleClass("header");
+				HtmlHeader header = new HtmlHeader(todoapp).addStyleClass("header");
 				{
 					new HtmlH1(header).setText("todos");
-					new HtmlInputText(header).setStyleClass("new-todo").bindAction(TodoList::create).bindTextBidirectional(TodoList::getName);
+					new HtmlInputText(header).addStyleClass("new-todo").bindAction(TodoList::create).bindTextBidirectional(TodoList::getName);
 				}
-				HtmlSection main = new HtmlSection(todoapp).setStyleClass("main");
+				HtmlSection main = new HtmlSection(todoapp).addStyleClass("main");
 				{
-					HtmlUl todoList = new HtmlUl(main).setStyleClass("todo-list");
+					HtmlUl todoList = new HtmlUl(main).addStyleClass("todo-list");
 					{
 						HtmlLi li = new HtmlLi(todoList).forEach(TodoList::getFiltered).bindOptionalStyleClass(Todo::getCompleted, "completed");
 						{
-							HtmlDiv todoDiv = new HtmlDiv(li).setStyleClass("view");
+							HtmlDiv todoDiv = new HtmlDiv(li).addStyleClass("view");
 							{
-								new HtmlCheckBox(todoDiv).setStyleClass("toggle").bindCheckedBidirectional(Todo::getCompleted);
+								new HtmlCheckBox(todoDiv).addStyleClass("toggle").bindCheckedBidirectional(Todo::getCompleted);
 								new HtmlLabel(todoDiv).bindText(Todo::getTodoString);
-								new HtmlButton(todoDiv).setStyleClass("destroy").bindAction(Todo::remove);
+								new HtmlButton(todoDiv).addStyleClass("destroy").bindAction(Todo::remove);
 							}
 						}
 					}
 				}
-				HtmlFooter footer = new HtmlFooter(todoapp).setStyleClass("footer").bindOptionalStyleClass(TodoList::getHasNoTodo, "hide");
+				HtmlFooter footer = new HtmlFooter(todoapp).addStyleClass("footer").bindOptionalStyleClass(TodoList::getHasNoTodo, "hide");
 				{
-					HtmlSpan span = new HtmlSpan(footer).setStyleClass("todo-count");
+					HtmlSpan span = new HtmlSpan(footer).addStyleClass("todo-count");
 					{
 						new HtmlStrong(span).bindText(TodoList::getActiveCount);
 						new HtmlSpan(span).bindText(TodoList::getItems);
 					}
 
-					HtmlUl filters = new HtmlUl(footer).setStyleClass("filters");
+					HtmlUl filters = new HtmlUl(footer).addStyleClass("filters");
 					{
 						new HtmlHyperLink(new HtmlLi(filters), "All", TodoList::showAll).bindOptionalStyleClass(TodoList::getAllMode, "selected");
 						new HtmlHyperLink(new HtmlLi(filters), "Actives", TodoList::showActive).bindOptionalStyleClass(TodoList::getActiveMode, "selected");
 						new HtmlHyperLink(new HtmlLi(filters), "Completes", TodoList::showCompleted).bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
 					}
-					new HtmlButton(footer).bindAction(TodoList::removeCompleted).bindText(TodoList::getClearCompleted).setStyleClass("clear-completed").bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
+					new HtmlButton(footer).bindAction(TodoList::removeCompleted).bindText(TodoList::getClearCompleted).addStyleClass("clear-completed").bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
 
 				}
 			}

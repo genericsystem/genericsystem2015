@@ -95,11 +95,7 @@ public class Differential implements IDifferential<Generic> {
 
 	@Override
 	public final Observable getObservable(Generic generic) {
-
 		return ObservableBase.createObservable(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
-		// result.addListener(o -> System.out.println("ZZZZZZZZZZZZZZZZZZZZZZ"));
-		// return result;
-
 	}
 
 	// @Override

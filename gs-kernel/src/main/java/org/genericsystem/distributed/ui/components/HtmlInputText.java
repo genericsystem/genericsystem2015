@@ -1,16 +1,18 @@
 package org.genericsystem.distributed.ui.components;
 
 import java.util.function.Consumer;
+
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.HtmlElement.InputTextHtmlDomNode;
+import org.genericsystem.distributed.ui.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlInputText extends HtmlElement<HtmlInputText, InputTextHtmlDomNode> {
+public class HtmlInputText<M extends Model> extends HtmlElement<M, HtmlInputText<M>, InputTextHtmlDomNode> {
 
-	public HtmlInputText(HtmlElement<?, ?> parent) {
+	public HtmlInputText(HtmlElement<?, ?, ?> parent) {
 		super(parent, InputTextHtmlDomNode.class);
 	}
 
@@ -19,7 +21,7 @@ public class HtmlInputText extends HtmlElement<HtmlInputText, InputTextHtmlDomNo
 		return new InputTextHtmlDomNode();
 	}
 
-	public <M> HtmlInputText bindAction(Consumer<M> applyOnModel) {
+	public HtmlInputText<M> bindAction(Consumer<M> applyOnModel) {
 		addActionBinding(InputTextHtmlDomNode::getEnterProperty, applyOnModel);
 		return this;
 	}

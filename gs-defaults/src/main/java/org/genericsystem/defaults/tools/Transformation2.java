@@ -18,36 +18,39 @@ import com.sun.javafx.collections.ObservableListWrapper;
 @SuppressWarnings("restriction")
 public class Transformation2<SOURCE, TARGET> extends ObservableListWrapper<TARGET> {
 
-	private final ListChangeListener<SOURCE> listener = new WeakListChangeListener<>(change -> {
+	private final ListChangeListener<SOURCE> listener = change -> {
 		while (change.next()) {
 			beginChange();
 			if (change.wasPermutated()) {
 				assert false;// Not tested after
-			for (int i = change.getFrom(); i < change.getTo(); i++)
-				removeSource(change.getFrom());
-			int index = change.getFrom();
-			for (SOURCE source : change.getList().subList(change.getFrom(), change.getTo()))
-				addSource(index, source);
-		} else {
-			if (change.wasRemoved()) {
-				for (int i = 0; i < change.getRemovedSize(); i++)
+				for (int i = change.getFrom(); i < change.getTo(); i++)
 					removeSource(change.getFrom());
-			}
-			if (change.wasAdded()) {
 				int index = change.getFrom();
-				for (SOURCE source : change.getAddedSubList())
-					addSource(index++, source);
+				for (SOURCE source : change.getList().subList(change.getFrom(), change.getTo()))
+					addSource(index, source);
+			} else {
+				if (change.wasRemoved()) {
+					for (int i = 0; i < change.getRemovedSize(); i++)
+						removeSource(change.getFrom());
+				}
+				if (change.wasAdded()) {
+					int index = change.getFrom();
+					for (SOURCE source : change.getAddedSubList())
+						addSource(index++, source);
+				}
 			}
+			endChange();
 		}
-		endChange();
-	}
-}	);
+	};
+
 	private final Function<SOURCE, TARGET> srcToTarget;
+	private final ObservableList<SOURCE> external;
 
 	public Transformation2(ObservableList<SOURCE> external, Function<SOURCE, TARGET> srcToTarget) {
 		super(new ArrayList<>());
+		this.external = external; // prevent of listener garbage collection
 		this.srcToTarget = srcToTarget;
-		external.addListener(listener);
+		external.addListener(new WeakListChangeListener<>(listener));
 		beginChange();
 		for (SOURCE element : external)
 			add(srcToTarget.apply(element));
@@ -56,8 +59,9 @@ public class Transformation2<SOURCE, TARGET> extends ObservableListWrapper<TARGE
 
 	public Transformation2(ObservableList<SOURCE> external, Function<SOURCE, TARGET> srcToTarget, Callback<TARGET, Observable[]> extractor) {
 		super(new ArrayList<>(), extractor);
+		this.external = external; // prevents of listener garbage collection
 		this.srcToTarget = srcToTarget;
-		external.addListener(listener);
+		external.addListener(new WeakListChangeListener<>(listener));
 		beginChange();
 		for (SOURCE element : external)
 			add(srcToTarget.apply(element));
