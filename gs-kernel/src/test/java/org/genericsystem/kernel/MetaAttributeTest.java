@@ -1,14 +1,13 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class MetaAttributeTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaAttribute = root.getMetaAttribute();
 		assert metaAttribute != null;
 		assert root.getLevel() == 0;
@@ -25,7 +24,7 @@ public class MetaAttributeTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
@@ -34,7 +33,7 @@ public class MetaAttributeTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic option = root.addInstance("Option", vehicle);
@@ -45,7 +44,7 @@ public class MetaAttributeTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaAttribute = root.getMetaAttribute();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic options = root.addInstance("Options", vehicle);

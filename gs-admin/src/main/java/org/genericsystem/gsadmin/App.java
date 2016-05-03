@@ -1,8 +1,10 @@
 package org.genericsystem.gsadmin;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import org.genericsystem.admin.model.Car;
@@ -12,11 +14,9 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.distributed.cacheonclient.CocServer;
-import org.genericsystem.kernel.Statics;
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
+import org.genericsystem.distributed.cacheonclient.EngineServer;
 
 public class App extends Application {
 
@@ -24,12 +24,13 @@ public class App extends Application {
 		launch(args);
 	}
 
-	static CocClientEngine engine;
-	static CocServer server;
-	private CocClientEngine initGS() {
-		server = new CocServer(new GSDeploymentOptions(Statics.ENGINE_VALUE, 8082, "test").addClasses(Car.class, Power.class, CarColor.class, Color.class));
+	static ClientEngine engine;
+	static EngineServer server;
+
+	private ClientEngine initGS() {
+		server = new EngineServer(new DefaultPathSingleEngineDeployment("/home/middleware/test2/", Car.class, Power.class, CarColor.class, Color.class));
 		server.start();
-		engine = new CocClientEngine(Statics.ENGINE_VALUE, null, 8082, Car.class, Power.class, CarColor.class, Color.class);
+		engine = new ClientEngine(null, 8082, Car.class, Power.class, CarColor.class, Color.class);
 
 		Generic type = engine.find(Car.class);
 
@@ -50,23 +51,25 @@ public class App extends Application {
 		return engine;
 	}
 
-	int i = 0;
-
 	@Override
 	public void start(Stage stage) throws Exception {
 
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Generic System Reactive Example");
 		scene.getStylesheets().add(getClass().getResource("css/stylesheet.css").toExternalForm());
-		Element<Group> elt = new Element<>(Group.class);
-		WindowBuilder builder = new WindowBuilder();
-		builder.init(elt);// Do this only one time
-		GenericWindow window = builder.buildWithGeneric(scene.widthProperty(), scene.heightProperty(), initGS());
-		elt.apply(window, scene.getRoot());// Do this only one time
+
 		stage.setScene(scene);
-		stage.setWidth(800);
-		stage.setHeight(600);
+		stage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
+		stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+
+		new GSAdmin(GenericWindow.createWindow(stage.widthProperty(), stage.heightProperty(), initGS()), (Group) scene.getRoot());
+
 		stage.show();
-		stage.setOnCloseRequest(e->server.stop());
+		stage.setOnCloseRequest(e -> {
+			server.stop();
+			Platform.exit();
+			System.exit(0);
+		});
+
 	}
 }

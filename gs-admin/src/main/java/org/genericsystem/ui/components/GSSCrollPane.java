@@ -1,21 +1,62 @@
 package org.genericsystem.ui.components;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
+import javafx.collections.ModifiableObservableListBase;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 
 public class GSSCrollPane extends Element<ScrollPane> {
 
-	public GSSCrollPane(Element<?> parent) {
+	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent) {
 		super(parent, ScrollPane.class);
 	}
 
-	public <PARENTNODE> GSSCrollPane(Element<PARENTNODE> parent, Function<PARENTNODE, ObservableList<?>> getGraphicChildren) {
-		super(parent, ScrollPane.class, getGraphicChildren);
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected Function<ScrollPane, List> getGraphicChildren() {
+		// TODO change to AbstractList!!!
+		Function<ScrollPane, List> scrollChildren = scrollPane -> new ModifiableObservableListBase<Node>() {
+
+			@Override
+			public Node get(int index) {
+				assert size() == 1 && index == 0;
+				return scrollPane.getContent();
+			}
+
+			@Override
+			public int size() {
+				return scrollPane.getContent() == null ? 0 : 1;
+			}
+
+			@Override
+			protected void doAdd(int index, Node element) {
+				if (size() != 0)
+					throw new IllegalStateException("Only one element is supported in a GSScrollPane !");
+				scrollPane.setContent(element);
+			}
+
+			@Override
+			protected Node doSet(int index, Node element) {
+				Node result = doRemove(index);
+				doAdd(index, element);
+				return result;
+			}
+
+			@Override
+			protected Node doRemove(int index) {
+				if (size() == 0)
+					throw new IllegalStateException();
+				Node result = scrollPane.getContent();
+				scrollPane.setContent(null);
+				return result;
+			}
+		};
+		return scrollChildren;
 	}
 
 	public GSSCrollPane setPrefWidth(Number prefWidth) {
@@ -84,7 +125,7 @@ public class GSSCrollPane extends Element<ScrollPane> {
 	}
 
 	public <M> GSSCrollPane setStyleClass(Function<M, ObservableValue<String>> function) {
-		addObservableListBinding(ScrollPane::getStyleClass, function);
+		addObservableListToObservableValueBinding(ScrollPane::getStyleClass, function);
 		return this;
 	}
 
@@ -100,6 +141,31 @@ public class GSSCrollPane extends Element<ScrollPane> {
 
 	public <M> GSSCrollPane setVisibility(Function<M, ObservableValue<Boolean>> observableVisibility) {
 		addBinding(ScrollPane::visibleProperty, observableVisibility);
+		return this;
+	}
+
+	public <M> GSSCrollPane setMinViewPortHeight(Double height) {
+		addBoot(ScrollPane::minViewportHeightProperty, height);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortHeight(Double height) {
+		addBoot(ScrollPane::prefViewportHeightProperty, height);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortWidth(Double width) {
+		addBoot(ScrollPane::prefViewportWidthProperty, width);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortHeight(Function<M, ObservableValue<Number>> height) {
+		addBinding(ScrollPane::prefViewportHeightProperty, height);
+		return this;
+	}
+
+	public <M> GSSCrollPane setPrefViewPortWidth(Function<M, ObservableValue<Number>> width) {
+		addBinding(ScrollPane::prefViewportWidthProperty, width);
 		return this;
 	}
 

@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 public class HolderTest extends AbstractTest {
 
 	public void testHolder1Attribut() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
@@ -32,7 +32,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolder1AttributWith2LevelsInheritance1AttributOnParent() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -57,7 +57,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue1AttributWith2LevelsInheritance1AttributOnParent() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -88,7 +88,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithSameValue1AttributWith2LevelsInheritance1AttributOnParent() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -119,7 +119,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolder1AttributWith2LevelsInheritance1AttributOnFirstChild() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		Generic power = engine.addInstance("Power", car);
@@ -140,7 +140,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolder1AttributWith2LevelsInheritance2children1AttributOnParent() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
 		Generic bike = engine.addInstance(Arrays.asList(vehicle), "bike");
@@ -169,7 +169,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue1AttributWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -209,7 +209,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue1AttributWith3LevelsInheritance1AttributOnParentOverrideOnSecondChild() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic car = engine.addInstance(Arrays.asList(vehicle), "Car");
@@ -250,7 +250,7 @@ public class HolderTest extends AbstractTest {
 
 	public void test2ChainedAttributs() {
 
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power);
@@ -289,7 +289,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue2ChainedAttributWith2LevelsInheritance2AttributsOnParent() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power);
@@ -340,7 +340,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void testHolderOverrideWithDifferentValue2ChainedAttributsWith3LevelsInheritance1AttributOnParentOverrideOnFirstChild() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic power1 = engine.addInstance("Power", vehicle);
 		Generic unit = engine.addInstance("Unit", power1);

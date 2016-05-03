@@ -35,7 +35,7 @@ public class GsPropertiesFactory<S, T> extends HashMap<S, Property<T>> implement
 			observable.addListener(new ChangeListener<T>() {
 				@Override
 				public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
-					System.out.println("Change : " + oldValue + " " + newValue);
+					//System.out.println("Change : " + oldValue + " " + newValue);
 					setter.accept((S) key, newValue);
 				}
 			});

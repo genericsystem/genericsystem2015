@@ -16,7 +16,7 @@ import com.lmax.disruptor.TimeoutException;
 public class ObservableDefaultTest extends AbstractTest {
 
 	public void basicObservableAttributesTest() throws InterruptedException {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 
 		Generic vehicle = engine.addInstance("vehicle");
 
@@ -27,7 +27,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void basicObservableAttributesTest2() throws InterruptedException {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 
 		Generic vehicle = engine.addInstance("vehicle");
 		ObservableList<Generic> vehicleObservableAttributes = vehicle.getObservableAttributes();
@@ -47,7 +47,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void basicObservableAttributesTest3() throws InterruptedException {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 
 		Generic vehicle = engine.addInstance("vehicle");
 
@@ -70,7 +70,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_relationTest10() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -106,7 +106,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	// --------------------------
 
 	public void test_holderTest1() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -137,7 +137,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_IteratorAndRemoveTest1() throws InterruptedException, ExecutionException, TimeoutException {
-		Generic root = new CocClientEngine();
+		Generic root = new ClientEngine();
 		Generic car = root.addInstance("Car");
 		ObservableList<Generic> myCars = car.getObservableInstances();
 
@@ -160,7 +160,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest13() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehiclePower = vehicle.addAttribute("power");
 
@@ -179,7 +179,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest14() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -202,7 +202,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest15() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic tree = root.addInstance("Tree");
 
 		ObservableList<Generic> children2ObservableInstances = tree.getObservableInstances("children2");
@@ -221,7 +221,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest16() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -248,7 +248,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest17() throws InterruptedException, ExecutionException, TimeoutException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic color = root.addInstance("Color");
 		Generic vehicleColor = vehicle.addRelation("vehicleColor", color);
@@ -275,7 +275,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest20() throws InterruptedException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myBmw = vehicle.addInstance("myBmw");
 		ObservableList<Generic> myBmwObservableSubInstancesByVehicle = vehicle.getObservableSubInstances("myBmw");
@@ -299,7 +299,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest21() throws InterruptedException, ExecutionException, TimeoutException {//
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 
 		Generic tree = root.addInstance("Tree");
 		ObservableList<Generic> treeObservableSubInstances = tree.getObservableSubInstances("children2");
@@ -324,7 +324,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	//
 
 	public void test_BindingServiceTest3() throws InterruptedException, ExecutionException, TimeoutException {
-		Generic engine = new CocClientEngine();
+		Generic engine = new ClientEngine();
 		ObservableList<Generic> engineSubInheritings = engine.getObservableSubInheritings();
 		engineSubInheritings.size();
 
@@ -398,7 +398,7 @@ public class ObservableDefaultTest extends AbstractTest {
 	}
 
 	public void test_getInstanceTest24() throws InterruptedException {
-		CocClientEngine root = new CocClientEngine();
+		ClientEngine root = new ClientEngine();
 
 		ObservableList<Generic> rootSubInstancesPower = root.getRoot().getMetaAttribute().getObservableSubInstances(Collections.emptyList(), "power");
 

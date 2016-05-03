@@ -1,14 +1,13 @@
 package org.genericsystem.kernel;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class MetaRelationTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaRelation = root.getMetaRelation();
 		assert metaRelation != null;
 		assert root.getLevel() == 0;
@@ -23,7 +22,7 @@ public class MetaRelationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic metaRelation = root.getMetaRelation();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");

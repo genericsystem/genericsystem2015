@@ -3,12 +3,10 @@ package org.genericsystem.issuetracker.bean;
 import java.io.Serializable;
 import java.util.List;
 import java.util.function.Predicate;
-
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.common.Generic;
 
 @Named
 @SessionScoped

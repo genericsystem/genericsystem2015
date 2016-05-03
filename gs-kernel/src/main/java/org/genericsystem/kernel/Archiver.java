@@ -29,8 +29,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
- * @author Michael Ory
+ *
  */
 public class Archiver {
 
@@ -74,6 +75,7 @@ public class Archiver {
 		this.root = root;
 		directory = prepareAndLockDirectory(directoryPath);
 		if (directory != null) {
+			log.info("Start archiver in repository : " + directory.getAbsolutePath());
 			String snapshotPath = getSnapshotPath(directory);
 			if (snapshotPath != null) {
 				try {
@@ -163,10 +165,14 @@ public class Archiver {
 			throw new IllegalStateException("Can't make directory : " + directoryPath);
 		try {
 			lockFile = new FileOutputStream(directoryPath + File.separator + LOCK_FILE_NAME).getChannel().tryLock();
-			return directory;
-		} catch (OverlappingFileLockException | IOException e) {
+			if (lockFile == null)
+				throw new IllegalStateException("Locked directory : " + directoryPath);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} catch (OverlappingFileLockException e) {
 			throw new IllegalStateException("Locked directory : " + directoryPath);
 		}
+		return directory;
 	}
 
 	private String getSnapshotPath(File directory) {
@@ -259,7 +265,7 @@ public class Archiver {
 	protected class Loader {
 
 		protected final ObjectInputStream objectInputStream;
-		protected final HeavyCache context;
+		protected final Cache context;
 
 		protected Loader(ObjectInputStream objectInputStream) {
 			this.objectInputStream = objectInputStream;
@@ -277,7 +283,8 @@ public class Archiver {
 				// };
 				for (;;)
 					loadDependency(vertexMap);
-			} catch (EOFException ignore) {}
+			} catch (EOFException ignore) {
+			}
 		}
 
 		protected long loadTs() throws IOException {
@@ -355,7 +362,7 @@ public class Archiver {
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, HeavyCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
+		SetArchiverHandler(long ts, Cache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
 			this.otherTs = otherTs;

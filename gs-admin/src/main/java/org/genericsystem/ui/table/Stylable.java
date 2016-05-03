@@ -4,8 +4,10 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-public class Stylable {
-	private ObservableValue<String> styleClass;
+import org.genericsystem.distributed.ui.Model;
+
+public class Stylable extends Model {
+	private final ObservableValue<String> styleClass;
 
 	public Stylable(ObservableValue<String> styleClass) {
 		this.styleClass = styleClass;
@@ -13,10 +15,6 @@ public class Stylable {
 
 	public ObservableValue<String> getStyleClass() {
 		return styleClass;
-	}
-
-	public void setStyleClass(ObservableValue<String> styleClass) {
-		this.styleClass = styleClass;
 	}
 
 	public static class TableStyle {
@@ -28,6 +26,7 @@ public class Stylable {
 		public ObservableValue<String> firstCell = new ReadOnlyStringWrapper("firstcell");
 		public ObservableValue<String> firstRowLastCell = new ReadOnlyStringWrapper("firstrowlastcell");
 		public ObservableValue<String> lastCell = new ReadOnlyStringWrapper("lastcell");
+		public ObservableValue<String> secondCell = new ReadOnlyStringWrapper("secondCell");
 		public ObservableValue<String> cell = new ReadOnlyStringWrapper("cell");
 	}
 
@@ -55,6 +54,5 @@ public class Stylable {
 		public ObservableValue<Element> getLastElement() {
 			return lastElement;
 		}
-
 	}
 }

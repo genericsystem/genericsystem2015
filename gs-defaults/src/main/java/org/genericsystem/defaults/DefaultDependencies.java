@@ -7,18 +7,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.IVertex;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.TransitiveObservableList;
 
-import com.sun.javafx.collections.ObservableListWrapper;
-
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@SuppressWarnings("unchecked")
@@ -142,21 +141,10 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	default ObservableList<T> getObservableSubInheritings() {
-		return new TransitiveObservableList<T>(getObservableInheritings()) {
-
-			@SuppressWarnings({ "unchecked", "restriction" })
+		return new TransitiveObservableList<T>(getObservableInheritings(), g -> g.getObservableSubInheritings()) {
 			@Override
-			protected ObservableList<T> computeValue() {
-				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(Stream
-						.concat(Stream.of((T) DefaultDependencies.this), getObservableInheritings().stream().flatMap(inheriting -> inheriting.getObservableSubInheritings().stream())).distinct().collect(Collectors.toList())));
-			}
-
-			@Override
-			protected void onMasterInvalidation() {
-				unbindAllSlaves();
-				for (T generic : master)
-					bindSlave(generic.getObservableSubInheritings());
-				invalidate();
+			protected List<T> computeValue() {
+				return getSubInheritings().toList();
 			}
 		};
 	}
@@ -167,19 +155,10 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 	}
 
 	default ObservableList<T> getObservableSubInstances() {
-		return new TransitiveObservableList<T>(getObservableSubInheritings()) {
-			@SuppressWarnings({ "restriction" })
+		return new TransitiveObservableList<T>(getObservableSubInheritings(), g -> g.getObservableInstances()) {
 			@Override
-			protected ObservableList<T> computeValue() {
-				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(getObservableSubInheritings().stream().flatMap(inheriting -> inheriting.getObservableInstances().stream()).collect(Collectors.toList())));
-			}
-
-			@Override
-			protected void onMasterInvalidation() {
-				unbindAllSlaves();
-				for (T generic : master)
-					bindSlave(generic.getObservableInstances());
-				invalidate();
+			protected List<T> computeValue() {
+				return getSubInstances().toList();
 			}
 		};
 	}

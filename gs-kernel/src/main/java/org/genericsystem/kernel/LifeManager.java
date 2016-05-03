@@ -9,6 +9,10 @@ import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 class LifeManager {
 
 	protected static Logger log = LoggerFactory.getLogger(LifeManager.class);

@@ -22,6 +22,10 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Vertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class GSBuffer implements Buffer {
 	private int index = 0;
 	private final Buffer internal;
@@ -282,7 +286,7 @@ public class GSBuffer implements Buffer {
 		appendGSString(clazz != null ? clazz.getName() : "");
 		return this;
 	}
-	
+
 	public Object getIntThrowException() {
 		return getInt() == 1 ? getInt() : getGSSerializable();
 	}

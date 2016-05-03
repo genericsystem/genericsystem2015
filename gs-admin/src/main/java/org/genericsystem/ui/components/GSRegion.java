@@ -1,21 +1,27 @@
 package org.genericsystem.ui.components;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.layout.Region;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.distributed.ui.Model;
 
 public abstract class GSRegion<Component extends GSNode<Component, N>, N extends Region> extends GSNode<Component, N> {
 
-	public GSRegion(Element parent, Class<N> class1) {
-		super(parent, class1);
+	public GSRegion(Element<?> parent, Class<N> clazz) {
+		super(parent, clazz);
 	}
 
-	public <PARENTNODE> GSRegion(Element parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
-		super(parent, paneClass, getGraphicChildren);
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected Function<N, List> getGraphicChildren() {
+		return parentNode -> Collections.emptyList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,29 +96,24 @@ public abstract class GSRegion<Component extends GSNode<Component, N>, N extends
 		return (Component) this;
 	}
 
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public <M, T> Component forEach(Function<M, ObservableList<T>> function, Function<T, Property<M>> injectedProperty) {
-	// super.forEach(function, injectedProperty);
-	// return (Component) this;
-	// }
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component forEach(Function<M, ObservableList<T>> function) {
+	public <M extends Model, T extends Model> Component forEach(Function<M, ObservableList<T>> function) {
 		super.forEach(function);
 		return (Component) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setSuperPrefWidth(Function<M, ObservableValue<Number>> observablePrefWidth) {
-		addSuperBinding(N::prefWidthProperty, observablePrefWidth);
+	@Override
+	public <M extends Model, T extends Model> Component select(Function<M, ObservableValue<T>> function) {
+		super.select(function);
 		return (Component) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M> Component setSuperPrefHeight(Function<M, ObservableValue<Number>> observablePrefHeight) {
-		addSuperBinding(N::prefHeightProperty, observablePrefHeight);
+	public Component setPadding(Insets inset) {
+		addBoot(Region::paddingProperty, inset);
 		return (Component) this;
 	}
+
 }

@@ -1,119 +1,97 @@
 package org.genericsystem.gsadmin;
 
-import java.util.Arrays;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
-import org.genericsystem.gsadmin.Crud.GenericCrud;
-import org.genericsystem.gsadmin.TableBuilderModel.TableCellTableModel;
-import org.genericsystem.gsadmin.TableBuilderModel.TextTableModel;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
+import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
+import org.genericsystem.gsadmin.TableBuilder.TextTableBuilder;
+import org.genericsystem.kernel.Statics;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Window;
 
-import com.sun.javafx.collections.ObservableListWrapper;
-
-@SuppressWarnings("restriction")
 public class GenericWindow extends Window {
 
-	private Property<Crud> tableCrud = new SimpleObjectProperty<>();
-	private Property<Crud> tableCrudSelectedRow = new SimpleObjectProperty<>();
-	private Property<Crud> editTableCrudSelectedRow = new SimpleObjectProperty<>();
+	private final Property<GenericCrud> engineCrud = new SimpleObjectProperty<>();
+	private final Property<GenericCrud> genericCrud = new SimpleObjectProperty<>();
 
-	public Property<Crud> getEditTableCrudSelectedRow() {
-		return editTableCrudSelectedRow;
-	}
-
-	public Property<Crud> getTableCrud() {
-		return tableCrud;
-	}
-
-	public Property<Crud> getTableCrudSelectedRow() {
-		return tableCrudSelectedRow;
-	}
-
-	public GenericWindow(CocClientEngine engine, Property<Table> table, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
+	public GenericWindow(GenericCrud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
 		super(width, height);
-		// this.table = table;
-		// this.engine = engine;
+		this.engineCrud.setValue(tableCrud);
 	}
 
-	public GenericWindow(Crud tableCrud, ObservableValue<? extends Number> width, ObservableValue<? extends Number> height) {
-		super(width, height);
-		this.tableCrud.setValue(tableCrud);
+	public Property<GenericCrud> getFirstCrud() {
+		return engineCrud;
+	}
+
+	public Property<GenericCrud> getSecondCrud() {
+		return genericCrud;
 	}
 
 	public void flush() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().flush();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().flush();
 	}
 
 	public void shiftTs() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().shiftTs();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().shiftTs();
+	}
+
+	public StringBinding getTs() {
+		return Bindings.createStringBinding(() -> "TS : " + new SimpleDateFormat("dd:MM:YY / HH:mm:ss").format(new Date(engineCrud.getValue().<ClientEngine> getModel().getCurrentCache().getTransaction().getTs() / Statics.MILLI_TO_NANOSECONDS)), engineCrud
+				.getValue().<ClientEngine> getModel().getCurrentCache().getTransactionProperty());
 	}
 
 	public void cancel() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().clear();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().clear();
 	}
 
 	public void mount() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().mount();
+		engineCrud.getValue().<Generic> getModel().getCurrentCache().mount();
+	}
+
+	public StringBinding getCacheLevel() {
+		return Bindings.createStringBinding(() -> "Cache level : " + engineCrud.getValue().<ClientEngine> getModel().getCurrentCache().getCacheLevelObservableValue().getValue(), engineCrud.getValue().<ClientEngine> getModel().getCurrentCache()
+				.getCacheLevelObservableValue());
 	}
 
 	public void unmount() {
-		tableCrud.getValue().<CocClientEngine> getModel().getCurrentCache().unmount();
+		engineCrud.getValue().<ClientEngine> getModel().getCurrentCache().unmount();
 	}
 
-	public void selectRow(GenericRow row) {
-		tableCrud.getValue().getTable().getValue().getSelectedRow().setValue(row);
-		System.out.println("item :: ");
-		TableCellTableModel<Generic, Generic> tableModel = new TableCellTableModel<>(row.getItem().getObservableSubInstances(), row.getItem().getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(row.getItem())),
-				itemTableCell -> columnTableCell -> {
-					System.out.println(itemTableCell);
-					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(itemTableCell.getObservableHolders(columnTableCell), FXCollections.observableArrayList(),
-					// item->col->{
-					// TextTableModel<Integer, Integer> textTableModel2 = new TextTableModel<>(FXCollections.observableArrayList(1,2,3,4), FXCollections.observableArrayList(0,0,0,0),
-					// item2 -> column -> new ReadOnlyStringWrapper("Cell : " + item2 + " " + column), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
-					// return new ReadOnlyObjectWrapper<Table>(textTableModel2.createTable());
-					// }
-
-							item2 -> column -> new ReadOnlyStringWrapper("" + item2.getComponent(0)), null, firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
-					Table tab = textTableModel.createTable();
-					tab.getColumnWidth().setValue(300);
-					return new ReadOnlyObjectWrapper<Table>(tab);
-
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), column -> new ReadOnlyStringWrapper("Delete"));
-
-		Table table = tableModel.createTable();
-		table.getFirstRowHeight().setValue(25);
-		table.getFirstColumnWidth().setValue(200);
-		table.getRowHeight().setValue(22);
-		table.getColumnWidth().setValue(310);
-		tableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(table), row.getItem()));
-
-		CocClientEngine engine = tableCrud.getValue().<CocClientEngine> getModel();
-
-		// Edit table model
-		TableCellTableModel<Generic, Generic> editTableModel = new TableCellTableModel<>(engine.getObservableAttributes()/* .filtered(attribute -> attribute.isCompositeForInstances(engine)) */, new ObservableListWrapper<>(Arrays.asList(row.getItem())),
-				itemTableCell -> columnTableCell -> {
-					TextTableModel<Generic, Generic> textTableModel = new TextTableModel<>(columnTableCell.getObservableHolders(itemTableCell), FXCollections.observableArrayList(columnTableCell.getComponents()),
-							item2 -> column -> new ReadOnlyStringWrapper("" + item2), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
-					Table tab = textTableModel.createTable();
-					return new ReadOnlyObjectWrapper<Table>(tab);
-				}, firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), firstColumnString -> new ReadOnlyStringWrapper("" + firstColumnString), null);
-		Table editTable = editTableModel.createTable();
-		editTable.getFirstColumnWidth().setValue(200);
-		editTable.getColumnWidth().setValue(310);
-		editTable.getRowHeight().setValue(45);
-		editTableCrudSelectedRow.setValue(new GenericCrud(new SimpleObjectProperty<Table>(editTable), row.getItem()));
+	static ReadOnlyObjectWrapper<Table> createCellContent(Generic itemTableCell, Generic columnTableCell) {
+		TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), itemTableCell.getObservableHolders(columnTableCell),
+				FXCollections.observableArrayList(itemTableCell.getComponents()), null, null, currentGeneric -> new ReadOnlyStringWrapper("" + currentGeneric), null);
+		Table tab = textTableModel.buildTable(0, 0);
+		return new ReadOnlyObjectWrapper<>(tab);
 	}
-	
-	public void test(GenericRow row){
-		System.out.println("test");
+
+	static ReadOnlyObjectWrapper<Table> createFirstColumnTable(Generic item) {
+		TextTableBuilder<Generic, Generic> textTableModel = new TextTableBuilder<>(new ReadOnlyStringWrapper("Table"), new ReadOnlyStringWrapper("Action"), FXCollections.observableArrayList(item), FXCollections.observableArrayList(item.getComponents()),
+				item2 -> col2 -> new ReadOnlyStringWrapper("" + col2), null, firstColumString -> new ReadOnlyStringWrapper("" + firstColumString), null);
+		Table tab = textTableModel.buildTableFirstColumn();
+		return new ReadOnlyObjectWrapper<>(tab);
+
+	}
+
+	public static GenericWindow createWindow(ObservableValue<? extends Number> width, ObservableValue<? extends Number> height, ClientEngine engine) {
+		TableCellTableBuilder<Generic, Generic> tableModel = new TableCellTableBuilder<>(new ReadOnlyStringWrapper("Structurals"), new ReadOnlyStringWrapper("Action"), engine.getObservableSubInstances(), engine.getObservableAttributes().filtered(
+				attribute -> attribute.isCompositeForInstances(engine)), item -> col -> createCellContent(item, col), firstRowString -> new ReadOnlyStringWrapper("" + firstRowString), itemTableCell -> createFirstColumnTable(itemTableCell),
+				column -> new ReadOnlyStringWrapper("Delete"));
+
+		Table table = tableModel.buildTable(900, 400);
+		table.getFirstRowHeight().setValue(30);
+		table.getFirstColumnWidth().setValue(207);
+		table.getRowHeight().setValue(50);
+		table.getColumnWidth().setValue(94);
+		GenericCrud crud = new GenericCrud(new SimpleObjectProperty<>(table), engine);
+		return new GenericWindow(crud, width, height);
 	}
 }

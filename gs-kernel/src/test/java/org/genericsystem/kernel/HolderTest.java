@@ -1,17 +1,15 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
-
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class HolderTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -33,7 +31,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -60,7 +58,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -87,7 +85,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic power = root.addInstance("Power", car);
@@ -106,7 +104,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
 		Generic bike = root.addInstance(Arrays.asList(vehicle), "bike");
@@ -130,7 +128,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test006() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -162,7 +160,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test007() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic car = root.addInstance(Arrays.asList(vehicle), "Car");
@@ -196,7 +194,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test008() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power);
@@ -228,7 +226,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test009() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power);
@@ -269,7 +267,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test010() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic power1 = root.addInstance("Power", vehicle);
 		Generic unit = root.addInstance("Unit", power1);
@@ -339,7 +337,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test011() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("myCar");
@@ -348,7 +346,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test012() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic maxSpeed = car.addAttribute("MaxSpeed");
@@ -361,7 +359,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test013() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myCar = car.addInstance("myCar");
@@ -371,7 +369,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test014() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic carDefaultPower = car.setHolder(power, 200);
@@ -380,7 +378,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test015() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power").enablePropertyConstraint();
 		car.setHolder(power, 200);
@@ -390,7 +388,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test016() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		car.setHolder(power, 200);
@@ -400,7 +398,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test017() {
-		final BasicEngine engine = new BasicEngine();
+		final Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic carDefaultPower = car.setHolder(power, 200);
@@ -410,7 +408,7 @@ public class HolderTest extends AbstractTest {
 	}
 
 	public void test018() {
-		final BasicEngine engine = new BasicEngine();
+		final Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		car.setHolder(power, 200);

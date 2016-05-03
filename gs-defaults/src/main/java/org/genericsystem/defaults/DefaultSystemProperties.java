@@ -19,6 +19,11 @@ import org.genericsystem.defaults.constraints.RequiredConstraint;
 import org.genericsystem.defaults.constraints.SingularConstraint;
 import org.genericsystem.defaults.constraints.UniqueValueConstraint;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@Override

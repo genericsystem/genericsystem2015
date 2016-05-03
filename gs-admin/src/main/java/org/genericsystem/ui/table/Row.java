@@ -1,13 +1,22 @@
 package org.genericsystem.ui.table;
 
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.ui.table.Stylable.Listable;
 
 public class Row extends Listable<Cell<?>> {
-	
-	public Row(ObservableValue<Cell<?>> firstCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
-		super(firstCell, cells, lastCell, styleClass);
+
+	public Row(ObservableValue<Cell<?>> secondCell, ObservableList<Cell<?>> cells, ObservableValue<Cell<?>> lastCell, ObservableValue<String> styleClass) {
+		super(secondCell, cells, lastCell, styleClass);
+	}
+
+	public Property<Number> getFirstRowHeight() {
+		return ((Table) getParent()).getFirstRowHeight();
+	}
+
+	public Property<Number> getRowHeight() {
+		return ((Table) getParent()).getRowHeight();
 	}
 }

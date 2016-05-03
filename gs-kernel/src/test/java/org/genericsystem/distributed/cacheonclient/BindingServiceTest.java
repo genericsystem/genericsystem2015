@@ -9,7 +9,7 @@ public class BindingServiceTest extends AbstractTest {
 
 	public void test001_addInstance() {
 		// given
-		Generic engine = new CocClientEngine();
+		Generic engine = new ClientEngine();
 
 		// when
 		Generic vehicle = engine.addInstance("Vehicle");
@@ -21,7 +21,7 @@ public class BindingServiceTest extends AbstractTest {
 
 	public void test002_addSameValueKO() {
 		// given
-		Generic engine = new CocClientEngine();
+		Generic engine = new ClientEngine();
 		engine.addInstance("Vehicle");
 
 		catchAndCheckCause(() -> engine.addInstance("Vehicle"), ExistsException.class);

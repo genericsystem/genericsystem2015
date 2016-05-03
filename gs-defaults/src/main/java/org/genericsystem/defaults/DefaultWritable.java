@@ -8,6 +8,11 @@ import java.util.List;
 
 import org.genericsystem.api.core.IVertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@Override
@@ -98,7 +103,6 @@ public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> 
 	@Override
 	@SuppressWarnings("unchecked")
 	default T addHolder(T attribute, Serializable value, T... targets) {
-		System.out.println("def writ" + value);
 		return attribute.addInstance(value, addThisToTargets(targets));
 	}
 

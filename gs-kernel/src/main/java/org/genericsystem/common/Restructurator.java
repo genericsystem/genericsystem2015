@@ -9,11 +9,15 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Restructurator {
 
-	private final HeavyCache context;
+	private final Cache context;
 
-	Restructurator(HeavyCache context) {
+	Restructurator(Cache context) {
 		this.context = context;
 	}
 

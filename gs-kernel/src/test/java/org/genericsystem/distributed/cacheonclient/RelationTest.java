@@ -18,7 +18,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test001_addInstance_NotAliveException() throws InterruptedException {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		// engine.close();
 		System.out.println("-------------------------------");
 		engine.close();
@@ -31,7 +31,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test001_addInstance_NotAliveException_withMetaRelation() {
-		final CocClientEngine Engine = new CocClientEngine();
+		final ClientEngine Engine = new ClientEngine();
 		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
 		Generic car = Engine.addInstance("Car");
 		Generic color = Engine.addInstance("Color");
@@ -45,7 +45,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_2composites() {
-		final CocClientEngine cache = new CocClientEngine();
+		final ClientEngine cache = new ClientEngine();
 		Generic car = cache.addInstance("Car");
 		Generic color = cache.addInstance("Color");
 		final Generic carColor = cache.addInstance("CarColor", car, color);
@@ -56,7 +56,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002_addInstance_2composites_MetaRelation() {
-		final CocClientEngine Engine = new CocClientEngine();
+		final ClientEngine Engine = new ClientEngine();
 		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
 		Generic car = Engine.addInstance("Car");
 		Generic color = Engine.addInstance("Color");
@@ -69,7 +69,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_reflexiveRelation() {
-		final CocClientEngine Engine = new CocClientEngine();
+		final ClientEngine Engine = new ClientEngine();
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
 		Generic caravane = vehicle.addInstance("Caravane");
@@ -82,7 +82,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003_addInstance_reflexiveRelation_MetaRelation() {
-		final CocClientEngine Engine = new CocClientEngine();
+		final ClientEngine Engine = new ClientEngine();
 		Generic metaRelation = Engine.setInstance(Engine.getValue(), Engine, Engine);
 		Generic vehicle = Engine.addInstance("Vehicle");
 		Generic car = vehicle.addInstance("Car");
@@ -97,7 +97,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test004_addInheritsRelation() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -113,7 +113,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test005_addInheritsRelations_OnSameStructural() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -126,7 +126,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test006_inherits_different_than_instance() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -145,7 +145,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test007_addInstance_ofSubRelation() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -165,7 +165,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test008() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -184,7 +184,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test009() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);
@@ -208,7 +208,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test010() {
-		CocClientEngine engine = new CocClientEngine();
+		ClientEngine engine = new ClientEngine();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic color = engine.addInstance("Color");
 		Generic vehicleColor = vehicle.addAttribute("vehicleColor", color);

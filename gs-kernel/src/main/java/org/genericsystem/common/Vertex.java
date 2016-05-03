@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Vertex implements Serializable {
 
 	private static final long serialVersionUID = 8227404973479376042L;

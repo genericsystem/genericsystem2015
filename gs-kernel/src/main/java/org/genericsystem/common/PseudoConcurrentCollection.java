@@ -12,6 +12,11 @@ import javafx.beans.value.WeakChangeListener;
 
 import org.genericsystem.api.core.IteratorSnapshot;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 	// TODO size and get(index) !!!
@@ -42,7 +47,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		return false;
 	}
 
-	public class InternalIterator extends AbstractGeneralAwareIterator<Node<T>, T> implements Iterator<T> {
+	public class InternalIterator extends AbstractIterator<Node<T>, T> implements Iterator<T> {
 
 		private Node<T> last;
 
@@ -108,7 +113,8 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 		private FilteredInvalidator(Predicate<T> predicate) {
 			this.predicate = predicate;
-			addProperty.addListener(new WeakChangeListener<T>(listener));
+			addProperty.addListener(listener);
+			// addProperty.addListener(new WeakChangeListener<T>((a, b, c) -> System.out.println("changeevent")));
 			removeProperty.addListener(new WeakChangeListener<T>(listener));
 		}
 

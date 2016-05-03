@@ -16,6 +16,7 @@
 		<jsf.version>2.1.19</jsf.version>
 		<jstl.version>1.2</jstl.version>
 		<weld.core.version>2.2.6.Final</weld.core.version>
+		<wildfly-maven-plugin.version>1.0.1.Final</wildfly-maven-plugin.version>
 	</properties>
 
 	<repositories>
@@ -92,6 +93,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
@@ -104,7 +106,27 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.wildfly.plugins</groupId>
+				<artifactId>wildfly-maven-plugin</artifactId>
+				<version>${wildfly-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+
+
+	<!-- <build> <finalName>${project.artifactId}</finalName> <plugins> <plugin> 
+		<groupId>org.apache.maven.plugins</groupId> <artifactId>maven-compiler-plugin</artifactId> 
+		<version>${maven-compiler-plugin.version}</version> <configuration> <source>${java.version}</source> 
+		<target>${java.version}</target> </configuration> </plugin> </plugins> </build> -->
 
 </project>

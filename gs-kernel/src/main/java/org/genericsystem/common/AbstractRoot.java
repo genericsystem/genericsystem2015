@@ -3,7 +3,6 @@ package org.genericsystem.common;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +16,6 @@ import javassist.util.proxy.ProxyObject;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.annotations.InstanceClass;
-import org.genericsystem.defaults.DefaultCache;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.MetaRelation;
 import org.genericsystem.defaults.DefaultConfig.Sequence;
@@ -25,16 +23,16 @@ import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
 import org.genericsystem.defaults.DefaultVertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject, Generic {
 
-	protected final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
+	private final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = new SystemCache(this);
 	protected boolean isInitialized = false;
-	protected volatile AbstractCache context;
-
-	public Iterator<Map.Entry<Long, Generic>> genericsByIdIterator() {
-		return genericsById.entrySet().iterator();
-	}
+	private final ThreadLocal<Cache> cacheLocal = new ThreadLocal<Cache>();
 
 	@Override
 	public AbstractRoot getRoot() {
@@ -61,43 +59,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 	}
 
 	@Override
-	public abstract AbstractCache newCache();
-
-	public static interface Wrapper {
-
-		HeavyCache get();
-
-		void set(HeavyCache context);
-	}
-
-	// public class ContextWrapper implements Wrapper {
-	//
-	//
-	//
-	// @Override
-	// public Cache get() {
-	// return context;
-	// }
-	//
-	// @Override
-	// public void set(Cache context) {
-	// this.context = context;
-	//
-	// }
-	// }
-
-	//
-	// protected final Wrapper buildContextWrapper() {
-	// return new ContextWrapper();
-	// }
-
-	@Override
-	public AbstractCache getCurrentCache() {
-		// Cache context = contextWrapper.get();
-		if (context == null)
-			throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
-		return context;
-	}
+	public abstract Cache newCache();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -116,7 +78,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 		return systemCache.getClassByVertex(generic);
 	}
 
-	public Generic getGenericById(long ts) {
+	protected Generic getGenericById(long ts) {
 		return genericsById.get(ts);
 	}
 
@@ -262,19 +224,28 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 
 	};
 
-	protected AbstractCache start(AbstractCache context) {
-		this.context = context;
+	@Override
+	public Cache getCurrentCache() {
+		Cache context = cacheLocal.get();
+		if (context == null)
+			throw new IllegalStateException("Unable to find the current cache, thread context is not defined. Did you miss to call start() method on your cache ? or perhaps have you accidentaly closed your engine ?");
 		return context;
 	}
 
-	protected void stop(DefaultCache<Generic> context) {
-		assert this.context == context;
-		context = null;
+	protected Cache start(Cache cache) {
+		if (cache == null)
+			throw new NullPointerException();
+		cacheLocal.set(cache);
+		return cache;
+	}
+
+	protected void stop(Cache cache) {
+		cacheLocal.remove();
 	}
 
 	@Override
 	public void close() {
-		context = null;
+		cacheLocal.remove();
 	}
 
 	@Override

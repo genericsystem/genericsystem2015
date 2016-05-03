@@ -1,16 +1,14 @@
 package org.genericsystem.issuetracker.bean.view;
 
 import java.util.List;
-
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
+import org.genericsystem.common.Generic;
 import org.genericsystem.issuetracker.bean.AbstractBean.ElStringWrapper;
 import org.genericsystem.issuetracker.bean.IssueBean;
 import org.genericsystem.issuetracker.bean.PriorityBean;
 import org.genericsystem.issuetracker.bean.StatutBean;
-import org.genericsystem.mutability.Generic;
 
 @Named
 @RequestScoped

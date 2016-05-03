@@ -4,10 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-
 import org.genericsystem.issuetracker.model.Version;
 import org.genericsystem.issuetracker.qualifier.Provide;
 

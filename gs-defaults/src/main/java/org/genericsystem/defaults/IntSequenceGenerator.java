@@ -6,6 +6,11 @@ import java.util.Objects;
 
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public class IntSequenceGenerator<T extends DefaultVertex<T>> implements ValueGenerator<T> {
 
 	@Override

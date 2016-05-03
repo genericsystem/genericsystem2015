@@ -3,6 +3,11 @@ package org.genericsystem.defaults;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IVertex;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultAncestors<T extends DefaultVertex<T>> extends IVertex<T> {
 
 	@Override

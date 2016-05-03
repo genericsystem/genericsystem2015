@@ -3,7 +3,6 @@ package org.genericsystem.issuetracker.model;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-
 import org.genericsystem.cdi.Engine;
 import org.genericsystem.issuetracker.qualifier.Provide;
 

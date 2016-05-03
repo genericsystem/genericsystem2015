@@ -5,7 +5,7 @@ import java.util.function.Function;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
 
 public class GSTableView extends GSRegion<GSTableView, TableView> {
 
@@ -14,7 +14,7 @@ public class GSTableView extends GSRegion<GSTableView, TableView> {
 	}
 
 	public <M, T> GSTableView setObservableListItems(Function<M, ObservableList<T>> function) {
-		setObservableList(TableView::itemsProperty, function);
+		setObservableListBinding(TableView::itemsProperty, function);
 		return this;
 	}
 }

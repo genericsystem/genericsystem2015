@@ -1,17 +1,15 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class PropertyConstraintTest extends AbstractTest {
 
 	public void test001() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -26,7 +24,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test002() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic myCar = car.addInstance("myCar");
@@ -43,7 +41,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test003() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		Generic myCar = car.addInstance("myCar");
@@ -55,7 +53,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine Root = new BasicEngine();
+		Engine Root = new Engine();
 		Generic car = Root.addInstance("Car");
 		Generic power = Root.addInstance("Power", car);
 		power.enablePropertyConstraint();
@@ -67,7 +65,7 @@ public class PropertyConstraintTest extends AbstractTest {
 	}
 
 	public void test005() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = root.addInstance("Power", car);
 		power.enablePropertyConstraint();

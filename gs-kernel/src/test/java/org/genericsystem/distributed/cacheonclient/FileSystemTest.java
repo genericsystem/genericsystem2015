@@ -3,25 +3,25 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.Cache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.distributed.GSDeploymentOptions;
+import org.genericsystem.distributed.EnginesDeploymentConfig;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.distributed.cacheonclient.FileSystem.Directory;
 import org.genericsystem.distributed.cacheonclient.FileSystem.File;
 import org.genericsystem.distributed.cacheonclient.FileSystem.FileType;
-import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test
 public class FileSystemTest extends AbstractTest {
 
 	@Override
-	public GSDeploymentOptions getDeploymentOptions() {
-		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath).addClasses(FileSystem.class, FileType.class);
+	public EnginesDeploymentConfig getDeploymentOptions() {
+		return new DefaultPathSingleEngineDeployment("/" + directoryPath, FileSystem.class, FileType.class);
 	}
 
 	public void testUpdateRootDirectory() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		assert rootDirectory.isAlive();
@@ -33,7 +33,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateRootDirectoryWithFile() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		rootDirectory.addFile("file");
@@ -44,7 +44,7 @@ public class FileSystemTest extends AbstractTest {
 
 	//
 	public void testUpdateDirectory() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory = rootDirectory.addDirectory("directory");
@@ -54,7 +54,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateDirectoryWithFile() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory = rootDirectory.addDirectory("directory");
@@ -65,7 +65,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testUpdateFile() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		File file = rootDirectory.addFile("file");
@@ -75,13 +75,13 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testDirectoryNameNotUniqueInDifferentDirectories() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
 		Directory directory1 = rootDirectory.addDirectory("directory1");
 		final Directory directory2 = rootDirectory.addDirectory("directory2");
 		assert !directory2.addDirectory("directory1").equals(directory1); // No Exception
-		HeavyCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		engine.getCurrentCache().mount();
 
 		catchAndCheckCause(() -> directory2.addDirectory("directory1"), ExistsException.class); // Exception
@@ -92,7 +92,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testFileNameNotUniqueInDifferentDirectories() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		Directory rootDirectory = fileSystem.addRootDirectory("rootDirectory");
@@ -104,7 +104,7 @@ public class FileSystemTest extends AbstractTest {
 	}
 
 	public void testFileNameValueClassViolation() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem directoryTree = engine.find(FileSystem.class);
 		final Directory rootDirectory = directoryTree.addRootDirectory("rootDirectory");
 		final FileType fileSystem = engine.find(FileType.class);
@@ -114,7 +114,7 @@ public class FileSystemTest extends AbstractTest {
 
 	// Modifier par rapport au test d'origine
 	public void testGetRootDirectories() {
-		CocClientEngine engine = new CocClientEngine(FileSystem.class);
+		ClientEngine engine = new ClientEngine(FileSystem.class);
 		FileSystem fileSystem = engine.find(FileSystem.class);
 		// System.out.println("fileSystem " + fileSystem.info());
 		Directory root = fileSystem.addRootDirectory("root");

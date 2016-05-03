@@ -14,7 +14,7 @@ import org.genericsystem.admin.javafx.AbstractColumn;
 import org.genericsystem.admin.javafx.LinksTableView.TriConsumer;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.CocClientEngine;
+import org.genericsystem.distributed.cacheonclient.ClientEngine;
 
 public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions<G>> {
 	public Function<G, Serializable> genericGetter;
@@ -78,19 +78,19 @@ public abstract class UiFunctions<G> implements Function<G, AttributeUiFunctions
 			};
 
 			clearConsumer = generic -> {
-				((CocClientEngine) generic).getCurrentCache().clear();
+				((ClientEngine) generic).getCurrentCache().clear();
 			};
 
 			shiftTsConsumer = generic -> {
-				((CocClientEngine) generic).getCurrentCache().shiftTs();
+				((ClientEngine) generic).getCurrentCache().shiftTs();
 			};
 
 			mountConsumer = generic -> {
-				((CocClientEngine) generic).getCurrentCache().mount();
+				((ClientEngine) generic).getCurrentCache().mount();
 			};
 
 			unmountConsumer = generic -> {
-				((CocClientEngine) generic).getCurrentCache().unmount();
+				((ClientEngine) generic).getCurrentCache().unmount();
 			};
 
 		}

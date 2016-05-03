@@ -6,14 +6,13 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class NotRemovableTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("myBmw");
@@ -24,7 +23,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		car.addAttribute("Color");
 		car.addInstance("myBmw");
@@ -33,7 +32,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic power = car.addAttribute("Power");
 		Generic myBmw = car.addInstance("myBmw");
@@ -43,7 +42,7 @@ public class NotRemovableTest extends AbstractTest {
 	}
 
 	public void test004() {
-		BasicEngine root = new BasicEngine(Power.class);
+		Engine root = new Engine(Power.class);
 		Generic power = root.find(Power.class);
 		assert power.isPropertyConstraintEnabled();
 		catchAndCheckCause(() -> power.disablePropertyConstraint(), IllegalAccessException.class);

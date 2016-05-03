@@ -3,7 +3,6 @@ package org.genericsystem.defaults;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,11 +10,15 @@ import java.util.stream.Stream;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import com.sun.javafx.collections.ObservableListWrapper;
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 
-@SuppressWarnings("restriction")
 public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 
 	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
@@ -25,7 +28,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 	private final T base;
 	private final T origin;
 	private final int level;
-	private InheritenceComputerBinding binding;
+	private InheritanceComputerBinding binding;
 
 	public ObservableInheritanceComputer(T base, T origin, int level) {
 		this.base = base;
@@ -35,11 +38,11 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 
 	public ObservableList<T> observableInheritanceList() {
 		if (binding == null)
-			binding = new InheritenceComputerBinding();
+			binding = new InheritanceComputerBinding();
 		return binding;
 	}
 
-	private class InheritenceComputerBinding extends ListBinding<T> {
+	private class InheritanceComputerBinding extends ListBinding<T> {
 
 		Set<Observable> observables = new HashSet<>();
 
@@ -59,7 +62,7 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 			unbindAll();
 			inheritingsCache.clear();
 			set.clear();
-			return new ObservableListWrapper<>(getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()));
+			return FXCollections.unmodifiableObservableList(FXCollections.observableList((getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()))));
 		}
 	}
 

@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.json.JsonObject;
-
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.RollbackException;
 
@@ -980,20 +978,6 @@ public interface IVertex<T extends IVertex<T>> extends ISignature<T> {
 	 * @return the <code>String</code> detailed representation of this vertex.
 	 */
 	String detailedInfo();
-
-	/**
-	 * Returns a <code>String</code> pretty representation of the composites of this vertex.
-	 *
-	 * @return the <code>String</code> representation of the composites of this vertex.
-	 */
-	String toPrettyString();
-
-	/**
-	 * Returns a <code>JSon</code> representation of the composites of this vertex.
-	 *
-	 * @return the <code>JSon</code> representation of the composites of this vertex.
-	 */
-	JsonObject toPrettyJSon();
 
 	/**
 	 * Represents a system property in Generic System.

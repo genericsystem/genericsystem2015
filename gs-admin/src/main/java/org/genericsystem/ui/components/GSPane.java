@@ -1,13 +1,13 @@
 package org.genericsystem.ui.components;
 
-import java.util.function.Consumer;
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.scene.layout.Pane;
 
-import org.genericsystem.ui.Element;
+import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.distributed.ui.Model;
 
 public class GSPane<Component extends GSPane<Component, N>, N extends Pane> extends GSRegion<Component, N> {
 
@@ -15,21 +15,16 @@ public class GSPane<Component extends GSPane<Component, N>, N extends Pane> exte
 		super(parent, paneClass);
 	}
 
-	public <PARENTNODE> GSPane(Element<?> parent, Class<N> paneClass, Function<? super PARENTNODE, ObservableList<?>> getGraphicChildren) {
-		super(parent, paneClass, getGraphicChildren);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public <M, T> Component select(Function<M, ObservableValue<T>> function) {
+	public <M extends Model, T extends Model> Component select(Function<M, ObservableValue<T>> function) {
 		super.select(function);
 		return (Component) this;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Component include(Consumer<Element<N>> subModelInit) {
-		subModelInit.accept(this);
-		return (Component) this;
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected Function<N, List> getGraphicChildren() {
+		return Pane::getChildren;
 	}
-
 }

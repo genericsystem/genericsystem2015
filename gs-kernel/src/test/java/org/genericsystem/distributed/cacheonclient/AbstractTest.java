@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSDeploymentOptions;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.distributed.EnginesDeploymentConfig;
+import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -19,7 +19,7 @@ public abstract class AbstractTest {
 	protected static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 	String ServerVerticleId;
 	protected final String directoryPath = System.getenv("HOME") + "/test/Vertx_tests/snapshot_save";
-	private CocServer httpGsServer;
+	private EngineServer httpGsServer;
 
 	private void cleanDirectory(String directoryPath) {
 		File file = new File(directoryPath);
@@ -30,14 +30,14 @@ public abstract class AbstractTest {
 			}
 	}
 
-	public GSDeploymentOptions getDeploymentOptions() {
-		return new GSDeploymentOptions().addEngine(Statics.ENGINE_VALUE, directoryPath);
+	public EnginesDeploymentConfig getDeploymentOptions() {
+		return new DefaultPathSingleEngineDeployment(directoryPath);
 	}
 
 	@BeforeMethod
 	public void beforeClass() {
 		cleanDirectory(directoryPath);
-		httpGsServer = new CocServer(getDeploymentOptions());
+		httpGsServer = new EngineServer(getDeploymentOptions());
 		httpGsServer.start();
 	}
 

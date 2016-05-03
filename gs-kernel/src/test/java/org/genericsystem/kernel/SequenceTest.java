@@ -6,14 +6,13 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.IntSequenceGenerator;
 import org.genericsystem.defaults.IntSequenceGenerator.StringSequenceGenerator;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class SequenceTest extends AbstractTest {
 
 	public void testFindSequence() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic sequence = root.getSequence();
 		assert sequence != null;
 		assert sequence.getMeta() == root.getMetaAttribute();
@@ -27,7 +26,7 @@ public class SequenceTest extends AbstractTest {
 		// assert myBmw.getValue() instanceof String;
 		// assert ((String) myBmw.getValue()).contains(Car.class.getSimpleName());
 
-		BasicEngine root = new BasicEngine(Car.class);
+		Engine root = new Engine(Car.class);
 		Generic car = root.find(Car.class);
 		Generic myBmw = car.addInstance(null);
 		assert myBmw.getValue() instanceof String;
@@ -35,7 +34,7 @@ public class SequenceTest extends AbstractTest {
 	}
 
 	public void testIntAutoIncrementGenerator() {
-		BasicEngine root = new BasicEngine(CarInt.class);
+		Engine root = new Engine(CarInt.class);
 		Generic car = root.find(CarInt.class);
 		Generic myBmw = car.addInstance(null);
 		assert myBmw.getValue() instanceof Integer;
@@ -43,7 +42,7 @@ public class SequenceTest extends AbstractTest {
 	}
 
 	public void testHolderIntAutoIncrementGenerator() {
-		BasicEngine root = new BasicEngine(Id.class);
+		Engine root = new Engine(Id.class);
 		Generic id = root.find(Id.class);
 		Generic vehicle = root.find(Vehicle.class);
 		Generic myVehicle = vehicle.addInstance("myVehicle");

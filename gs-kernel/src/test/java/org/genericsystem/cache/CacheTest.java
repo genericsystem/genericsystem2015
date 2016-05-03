@@ -2,7 +2,7 @@ package org.genericsystem.cache;
 
 import java.util.stream.Collectors;
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
-import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.Cache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 public class CacheTest extends AbstractTest {
 	public void test000() {
 		Engine engine = new Engine();
-		HeavyCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.flush();
@@ -26,7 +26,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test001() {
 		Engine engine = new Engine();
-		HeavyCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.clear();
@@ -127,7 +127,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test001_mountNewCache_nostarted() {
 		Engine engine = new Engine();
-		HeavyCache currentCache = engine.getCurrentCache();
+		Cache currentCache = engine.getCurrentCache();
 		currentCache.mount();
 		engine.newCache().start();
 		catchAndCheckCause(() -> currentCache.flush(), CacheNoStartedException.class);
@@ -135,8 +135,8 @@ public class CacheTest extends AbstractTest {
 
 	public void test002_mountNewCache() {
 		Engine engine = new Engine();
-		HeavyCache cache = engine.newCache().start();
-		HeavyCache currentCache = engine.getCurrentCache();
+		Cache cache = engine.newCache().start();
+		Cache currentCache = engine.getCurrentCache();
 		assert cache == currentCache;
 		currentCache.mount();
 		engine.addInstance("Vehicle");
@@ -145,7 +145,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test005_TwoComponentsWithSameMetaInDifferentCaches_remove() {
 		Engine engine = new Engine();
-		HeavyCache currentCache = engine.getCurrentCache();
+		Cache currentCache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = engine.addInstance("vehiclePower", vehicle);
 		assert currentCache.getCacheLevel() == 0;

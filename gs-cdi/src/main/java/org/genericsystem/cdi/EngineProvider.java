@@ -29,8 +29,6 @@ public class EngineProvider {
 
 	@PostConstruct
 	public void init() {
-		log.info("$$$$$$$$$$$$$$ START GS ENGINE V3 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-
 		String logo = "\n";
 		logo += ("____________________________________________________________________________________________________________\n");
 		logo += ("|___________________________________________________________________________________________________________|\n");
@@ -51,7 +49,7 @@ public class EngineProvider {
 		log.info("-  userClasses : " + Arrays.toString(userClassesProvider.getUserClassesArray()));
 		log.info("-----------------------------------------------------------------------------------------------");
 
-		engine = new Engine(() -> cacheRequestProvider.getCurrentCache(), persistentDirectoryProvider.getEngineValue(), persistentDirectoryProvider.getDirectoryPath(), userClassesProvider.getUserClassesArray());
+		engine = new Engine(() -> cacheRequestProvider.getCurrentCache(), persistentDirectoryProvider.getDirectoryPath(), userClassesProvider.getUserClassesArray());
 	}
 
 	@Produces
@@ -61,8 +59,9 @@ public class EngineProvider {
 
 	@PreDestroy
 	public void destroy() {
-		log.info("$$$$$$$$$$$$$$ STOP GS ENGINE $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+		log.info("Generic System is currently stopping...");
 		engine.close();
 		engine = null;
+		log.info("Generic System is stopped");
 	}
 }

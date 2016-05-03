@@ -3,11 +3,10 @@ package org.genericsystem.issuetracker;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-
+import org.genericsystem.cdi.Engine;
 import org.genericsystem.issuetracker.model.Issue;
 import org.genericsystem.issuetracker.model.IssuePriority;
 import org.genericsystem.issuetracker.model.IssueStatut;
-import org.genericsystem.mutability.Engine;
 import org.testng.annotations.Test;
 
 @Test

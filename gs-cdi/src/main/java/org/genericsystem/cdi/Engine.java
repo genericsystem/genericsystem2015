@@ -1,28 +1,28 @@
 package org.genericsystem.cdi;
 
 import java.util.function.Supplier;
+
 import javax.enterprise.inject.Vetoed;
-import org.genericsystem.common.HeavyCache;
+
+import org.genericsystem.common.Cache;
 
 @Vetoed
 public class Engine extends org.genericsystem.kernel.Engine {
 
-	private final Supplier<HeavyCache> cacheSupplier;
+	private final Supplier<Cache> cacheSupplier;
 
-	public Engine(Supplier<HeavyCache> cacheSupplier, String engineValue, String persistentDirectoryPath, Class<?>... userClasses) {
-		super(engineValue, persistentDirectoryPath, userClasses);
+	public Engine(Supplier<Cache> cacheSupplier, String persistentDirectoryPath, Class<?>... userClasses) {
+		super(persistentDirectoryPath, userClasses);
 		assert cacheSupplier != null : "Unable to find the current cache. Did you miss to call start() method on it ?";
 		this.cacheSupplier = cacheSupplier;
-		context = null;
 	}
 
 	@Override
-	public HeavyCache getCurrentCache() {
-
+	public Cache getCurrentCache() {
 		if (!isInitialized())
 			return super.getCurrentCache();
 		else {
-			HeavyCache cache = cacheSupplier.get();
+			Cache cache = cacheSupplier.get();
 			if (cache == null)
 				throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
 			return cache;

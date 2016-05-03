@@ -2,6 +2,10 @@ package org.genericsystem.distributed;
 
 import io.vertx.core.Vertx;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class GSVertx {
 
 	private static GSVertx instance = new GSVertx();

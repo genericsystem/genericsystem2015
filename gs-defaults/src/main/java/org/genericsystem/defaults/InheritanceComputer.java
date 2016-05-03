@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 class InheritanceComputer<T extends DefaultVertex<T>> extends HashSet<T> {
 
 	private static final long serialVersionUID = 1877502935577170921L;
@@ -60,7 +65,7 @@ class InheritanceComputer<T extends DefaultVertex<T>> extends HashSet<T> {
 		}
 
 		private Stream<T> getStream(final T holder) {
-			if(compositesBySuper(localBase, holder).count() != 0)
+			if (compositesBySuper(localBase, holder).count() != 0)
 				add(holder);
 			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(localBase, holder) : Stream.empty(), compositesBySuper(localBase, holder));
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());

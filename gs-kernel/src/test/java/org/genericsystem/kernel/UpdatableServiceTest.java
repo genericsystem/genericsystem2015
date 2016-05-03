@@ -4,17 +4,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class UpdatableServiceTest extends AbstractTest {
 
 	public void test001() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic vehicle2 = vehicle.updateValue("Vehicle2");
 		assert "Vehicle2".equals(vehicle2.getValue());
@@ -23,7 +21,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test002() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		String valueCar = "myBmw";
 		Generic myBmw = car.addInstance(valueCar);
@@ -40,7 +38,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test003() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		car.addInstance("myBmw");
 		String robotValue = "Robot";
@@ -53,7 +51,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test004() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic bike = root.addInstance("Bike");
 		Generic car = root.addInstance("Car");
 		Generic myBmwBike = bike.addInstance("myBmwBike");
@@ -74,7 +72,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test005() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myNewBeetle = car.addInstance("myNewBeetle");
 		Generic myBmw = car.updateValue("myBmw");
@@ -94,7 +92,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test006() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic options = root.addInstance(car, "Options");
 
@@ -122,7 +120,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test007() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic car = root.addInstance("Car");
 		String valuePower = "Power";
 		Generic power = root.addInstance(valuePower, car);
@@ -142,7 +140,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test008() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		String valuePower = "Power";
@@ -193,7 +191,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test009() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance("Car");
 
@@ -211,7 +209,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test010() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic fourWheels = root.addInstance(vehicle, "FourWheels");
@@ -241,7 +239,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test011() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 
@@ -262,7 +260,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test012() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic animals = root.addInstance("Animals");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");
@@ -312,7 +310,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test013() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic myVehicle = vehicle.addInstance("MyVehicle");
 		Generic car = root.addInstance(vehicle, "Car");
@@ -348,7 +346,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test014() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myCar = car.addInstance("MyCar");
@@ -362,7 +360,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test015() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("MyBmw");
@@ -386,7 +384,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test016() {
-		Generic root = new BasicEngine();
+		Generic root = new Engine();
 		Generic vehicle = root.addInstance("Vehicle");
 		Generic car = root.addInstance(vehicle, "Car");
 		Generic myBmw = car.addInstance("MyBmw");
@@ -403,7 +401,7 @@ public class UpdatableServiceTest extends AbstractTest {
 	}
 
 	public void test017() {
-		BasicEngine root = new BasicEngine();
+		Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic carPower = root.setInstance("Power", car);
 		Generic power = root.addInstance("Power");

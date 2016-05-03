@@ -1,8 +1,0 @@
-.completed  .text {
-	-fx-strikethrough: true;
-}
-
-
-.overrun  .text {
-	-fx-font-weight: bold;
-}

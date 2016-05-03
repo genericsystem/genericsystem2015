@@ -13,6 +13,10 @@ import org.genericsystem.api.core.annotations.value.AxedPropertyClassValue;
 import org.genericsystem.api.core.annotations.value.BooleanValue;
 import org.genericsystem.api.core.annotations.value.EngineValue;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class DefaultConfig {
 	@SystemGeneric
 	@Meta(MetaAttribute.class)

@@ -30,8 +30,12 @@ import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.BasicEngine;
+import org.genericsystem.kernel.AbstractServer;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class SystemCache {
 
 	private final Map<Class<?>, Generic> systemCache = new HashMap<>();
@@ -40,12 +44,10 @@ public class SystemCache {
 
 	protected final AbstractRoot root;
 
-	@SuppressWarnings("unchecked")
 	public SystemCache(AbstractRoot root) {
 		this.root = root;
-		put(DefaultRoot.class, (Generic) root);
-		put(BasicEngine.class, (Generic) root);
-		put(root.getClass(), (Generic) root);
+		put(DefaultRoot.class, root);
+		put(root.getClass(), root);
 	}
 
 	public void mount(List<Class<?>> systemClasses, Class<?>... userClasses) {
@@ -69,9 +71,9 @@ public class SystemCache {
 		List<Generic> overrides = setOverrides(clazz);
 		Serializable value = findValue(clazz);
 		List<Generic> components = setComponents(clazz);
-		AbstractCache cache = root.getCurrentCache();
-		if (cache instanceof HeavyCache)
-			systemProperty = new SetSystemBuilder((HeavyCache) cache, clazz, meta, overrides, value, components).resolve();
+		Cache cache = root.getCurrentCache();
+		if (root instanceof AbstractServer)
+			systemProperty = new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
 		else {
 			systemProperty = cache.get(meta, overrides, value, components);
 			if (systemProperty == null)
@@ -90,7 +92,7 @@ public class SystemCache {
 
 	public Generic find(Class<?> clazz) {
 		if (IRoot.class.isAssignableFrom(clazz))
-			return (Generic) root;
+			return root;
 		return systemCache.get(clazz);
 	}
 
@@ -146,11 +148,10 @@ public class SystemCache {
 				bind(dependencyClass);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Generic setMeta(Class<?> clazz) {
 		Meta meta = clazz.getAnnotation(Meta.class);
 		if (meta == null)
-			return (Generic) root;
+			return root;
 		if (meta.value() == clazz)
 			return null;
 		return bind(meta.value());

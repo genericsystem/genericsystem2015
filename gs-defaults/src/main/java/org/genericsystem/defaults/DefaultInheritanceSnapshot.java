@@ -5,11 +5,15 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.Snapshot;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultInheritanceSnapshot<T extends DefaultVertex<T>> extends Snapshot<T> {
 
-	
 	@Override
-	default DefaultInheritanceSnapshot<T> filter(Predicate<T> predicate){
+	default DefaultInheritanceSnapshot<T> filter(Predicate<T> predicate) {
 		return new DefaultInheritanceSnapshot<T>() {
 
 			@Override
@@ -24,9 +28,8 @@ public interface DefaultInheritanceSnapshot<T extends DefaultVertex<T>> extends 
 			}
 		};
 	}
-	
-	
-	default DefaultInheritanceSnapshot<T> filterDefaultsFromMeta(T attibute,int pos){
-		return filter(t->t.getComponent(pos).inheritsFrom(attibute.getComponent(pos)));
+
+	default DefaultInheritanceSnapshot<T> filterDefaultsFromMeta(T attibute, int pos) {
+		return filter(t -> t.getComponent(pos).inheritsFrom(attibute.getComponent(pos)));
 	}
 }

@@ -5,10 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
@@ -18,6 +17,10 @@ import org.genericsystem.common.IDependencies;
 import org.genericsystem.common.IDifferential;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public class Transaction extends CheckedContext implements IDifferential<Generic> {
 
 	private final long ts;
@@ -162,12 +165,18 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		}
 	}
 
-	public Observable getInvalidator(Generic generic) {
-		throw new UnsupportedOperationException();
+	@Override
+	public Observable getObservable(Generic generic) {
+		return new SimpleObjectProperty<Snapshot<Generic>>();
 	}
 
 	@Override
 	public ObservableList<Generic> getObservableDependencies(Generic generic) {
 		throw new UnsupportedOperationException();
 	}
+
+	// @Override
+	// public CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
+	// throw new UnsupportedOperationException();
+	// }
 }

@@ -5,7 +5,7 @@ import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.cache.FileSystem.Directory;
 import org.genericsystem.cache.FileSystem.File;
 import org.genericsystem.cache.FileSystem.FileType;
-import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.Cache;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
@@ -74,7 +74,7 @@ public class FileSystemTest extends AbstractTest {
 		Directory directory1 = rootDirectory.addDirectory("directory1");
 		final Directory directory2 = rootDirectory.addDirectory("directory2");
 		assert !directory2.addDirectory("directory1").equals(directory1); // No Exception
-		HeavyCache cache = engine.getCurrentCache();
+		Cache cache = engine.getCurrentCache();
 		engine.getCurrentCache().mount();
 
 		catchAndCheckCause(() -> directory2.addDirectory("directory1"), ExistsException.class); // Exception

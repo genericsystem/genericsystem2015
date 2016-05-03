@@ -6,7 +6,7 @@
 }
 
 .scrollable {
-	-fx-background-color: transparent;
+	-fx-background-color: #ddffdd;
 	-fx-control-inner-background: transparent;
 	-fx-fit-to-height: true;
 	-fx-fit-to-width: true;	
@@ -16,6 +16,20 @@
 .firstrow {
 	-fx-spacing: 1px;
 	-fx-padding: 1px;
+}
+
+
+.tablePadding{
+	-fx-padding: 1px;
+}
+
+.blackBorder{
+	-fx-border-width: 1px;
+	-fx-border-color : black;
+}
+
+.ComboBox .list-cell{
+  -fx-text-fill: #a0522d; 
 }
 
 .row {
@@ -36,15 +50,15 @@
 	-fx-background-color: #ffeebb;
 }
 
+.secondCell {
+	-fx-background-color: #ffeebb;
+}
+
 .firstcell {
 	-fx-background-color: #ddccdd;
 }
 .cell {
 	-fx-background-color: #ddffdd;
-}
-
-.lastcell {
-	
 }
 
 

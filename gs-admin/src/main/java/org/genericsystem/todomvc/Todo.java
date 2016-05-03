@@ -4,29 +4,16 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.layout.HBox;
 
-import org.genericsystem.ui.Element;
-import org.genericsystem.ui.components.GSButton;
-import org.genericsystem.ui.components.GSCheckBox;
-import org.genericsystem.ui.components.GSLabel;
+import org.genericsystem.distributed.ui.Model;
 
-public class Todo {
+public class Todo extends Model {
 
 	private ObservableValue<String> todoString;
 	private Property<Boolean> completed = new SimpleBooleanProperty(false);
 
-	Todo(String text) {
+	Todo(TodoList parentModel, String text) {
 		todoString = new ReadOnlyObjectWrapper<>(text);
-	}
-
-	/*********************************************************************************************************************************/
-
-	public static void init(Element<HBox> todoHBox) {
-		new GSCheckBox(todoHBox, Todo::getCompleted);
-		new GSLabel(todoHBox, Todo::getTodoString).setPrefWidth(141).setOptionalStyleClass(Todo::getCompleted, "completed");
-		new GSButton(todoHBox, "select").setMetaAction((todoList, todo) -> ((TodoList) todoList).getSelection().setValue((Todo) todo)).setPrefWidth(90);
-		new GSButton(todoHBox, "remove").setMetaAction((todoList, todo) -> ((TodoList) todoList).getTodos().remove(todo)).setPrefWidth(90);
 	}
 
 	/*********************************************************************************************************************************/
@@ -37,5 +24,13 @@ public class Todo {
 
 	public Property<Boolean> getCompleted() {
 		return completed;
+	}
+
+	public void select() {
+		((TodoList) getParent()).getSelection().setValue(this);
+	}
+
+	public void remove() {
+		((TodoList) getParent()).getTodos().remove(this);
 	}
 }

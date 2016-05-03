@@ -1,17 +1,15 @@
 package org.genericsystem.kernel;
 
 import java.util.List;
-
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.BasicEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class RelationTest extends AbstractTest {
 
 	public void test001() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -25,7 +23,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test002() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		final Generic carColor = root.addInstance("CarColor", car, color);
@@ -37,7 +35,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test003() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic color = root.addInstance("Color");
 		Generic carColor = car.addRelation("carColor", color);
@@ -47,7 +45,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test004() {
-		final BasicEngine engine = new BasicEngine();
+		final Engine engine = new Engine();
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
 		Generic door = engine.addInstance("Door");
@@ -58,7 +56,7 @@ public class RelationTest extends AbstractTest {
 	}
 
 	public void test005() {
-		final BasicEngine root = new BasicEngine();
+		final Engine root = new Engine();
 		Generic car = root.addInstance("Car");
 		Generic myBmw = car.addInstance("myBmw");
 		Generic myAudi = car.addInstance("MyAudi");

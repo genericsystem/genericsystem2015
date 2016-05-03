@@ -1,11 +1,13 @@
 package org.genericsystem.cdi;
 
 import java.io.Serializable;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
-import org.genericsystem.common.HeavyCache;
+
+import org.genericsystem.common.Cache;
 
 @SessionScoped
 public class CacheSessionProvider implements Serializable {
@@ -15,14 +17,14 @@ public class CacheSessionProvider implements Serializable {
 	@Inject
 	private transient Engine engine;
 
-	private transient HeavyCache currentCache;
+	private transient Cache currentCache;
 
 	@PostConstruct
 	public void init() {
 		currentCache = engine.newCache();
 	}
 
-	public HeavyCache getCurrentCache() {
+	public Cache getCurrentCache() {
 		return currentCache;
 	}
 

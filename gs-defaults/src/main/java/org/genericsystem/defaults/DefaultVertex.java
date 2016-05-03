@@ -21,16 +21,17 @@ import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <T>
+ */
 public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
-
-	// Remove
 
 	@Override
 	default ObservableList<T> getObservableComposites() {
 		return DefaultDependencies.super.getObservableComposites();
 	}
-
-	//
 
 	@Override
 	default DefaultCache<T> getCurrentCache() {

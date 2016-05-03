@@ -1,11 +1,13 @@
 package org.genericsystem.cdi;
 
 import java.util.function.Supplier;
+
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.cdi.PersistenceTest.Count;
-import org.genericsystem.common.HeavyCache;
+import org.genericsystem.common.Cache;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -22,12 +24,12 @@ public abstract class AbstractTest extends Arquillian {
 	Engine engine;
 
 	@Inject
-	Instance<HeavyCache> cacheProvider;
+	Instance<Cache> cacheProvider;
 
 	@Deployment
 	public static JavaArchive createDeployment() {
 		JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class);
-		javaArchive.addClasses(UserClassesProvider.class, PersistentDirectoryProvider.class, MockPersistentDirectoryProvider.class, /* EventLauncher.class, */CacheSessionProvider.class, CacheRequestProvider.class, EngineProvider.class, Count.class);
+		javaArchive.addClasses(UserClassesProvider.class, PersistentDirectoryProvider.class, PersistentDirectoryConfig.class, /* EventLauncher.class, */CacheSessionProvider.class, CacheRequestProvider.class, EngineProvider.class, Count.class);
 		createBeansXml(javaArchive);
 		return javaArchive;
 	}
@@ -36,7 +38,7 @@ public abstract class AbstractTest extends Arquillian {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("<beans xmlns=\"http://java.sun.com/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\" http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/beans_1_0.xsd\">");
 		stringBuilder.append("<alternatives> ");
-		stringBuilder.append("<class>org.genericsystem.cdi.MockPersistentDirectoryProvider</class>");
+		stringBuilder.append("<class>org.genericsystem.cdi.PersistentDirectoryConfig</class>");
 		stringBuilder.append("</alternatives>");
 		stringBuilder.append("</beans>");
 		javaArchive.addAsManifestResource(new StringAsset(stringBuilder.toString()), "beans.xml");

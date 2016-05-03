@@ -3,9 +3,8 @@ package org.genericsystem.issuetracker.bean;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.common.Generic;
 
 public abstract class AbstractBean {
 
@@ -26,7 +25,7 @@ public abstract class AbstractBean {
 				Generic link = issue.getLinks(attribute).first();
 				if (link != null)
 					return (link.getTargetComponent() != null) ? Objects.toString(link.getTargetComponent().getValue()) : Objects.toString(link.getValue());
-				return null;
+					return null;
 			}
 
 			@Override

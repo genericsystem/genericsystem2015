@@ -1,18 +1,26 @@
 package org.genericsystem.kernel;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
+import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Cache;
+import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.HeavyCache;
-import org.genericsystem.common.IDifferential;
-import org.genericsystem.common.Protocole;
+import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Vertex;
 
-public abstract class AbstractServer extends AbstractRoot implements Generic, Protocole {
+/**
+ * @author Nicolas Feybesse
+ *
+ */
+public abstract class AbstractServer extends AbstractRoot implements Generic, Protocol {
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
@@ -24,25 +32,7 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 	}
 
 	@Override
-	public HeavyCache newCache() {
-		return new HeavyCache(this) {
-
-			@Override
-			protected IDifferential<Generic> buildTransaction() {
-				return new Transaction((BasicEngine) getRoot());
-			}
-
-			@Override
-			protected Generic plug(Generic generic) {
-				return ((Transaction) getTransaction()).plug(generic);
-			}
-
-			@Override
-			protected void unplug(Generic generic) {
-				((Transaction) getTransaction()).unplug(generic);
-			}
-		};
-	}
+	public abstract Cache newCache();
 
 	@Override
 	public void close() {
@@ -121,6 +111,26 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 	@Override
 	public Vertex getVertex(long id) {
 		return this.getGenericById(id).getVertex();
+	}
+
+	@Override
+	public Vertex[] getDependencies(long ts, long id) {
+		Generic ancestor = this.getGenericById(id);
+		return ancestor != null ? ((RootServerHandler) ancestor.getProxyHandler()).getDependencies().stream(ts).map(generic -> generic.getVertex()).toArray(Vertex[]::new) : Statics.EMPTY;
+	}
+
+	@Override
+	public void apply(long ts, long[] removeIds, Vertex[] addVertices) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		assert Arrays.stream(addVertices).allMatch(addVertex -> getRoot().getGenericById(addVertex.getTs()) == null);
+		assert Arrays.stream(addVertices).allMatch(addVertex -> addVertex.getBirthTs() == Long.MAX_VALUE);
+		Snapshot<Generic> removes = new Container(Arrays.stream(removeIds).mapToObj(removeId -> getRoot().getGenericById(removeId)));
+		Snapshot<Generic> adds = new Container(Arrays.stream(addVertices).map(addVertex -> getRoot().build(addVertex)));
+		try {
+			new Transaction(this, ts).apply(removes, adds);
+		} catch (ConcurrencyControlException | OptimisticLockConstraintViolationException e) {
+			adds.forEach(add -> getRoot().release(add.getTs()));
+			throw e;
+		}
 	}
 
 	private static class TsGenerator {

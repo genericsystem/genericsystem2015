@@ -14,17 +14,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.scene.Group;
 
-import org.genericsystem.ui.Element;
-import org.genericsystem.ui.components.GSButton;
-import org.genericsystem.ui.components.GSHBox;
-import org.genericsystem.ui.components.GSHyperLink;
-import org.genericsystem.ui.components.GSLabel;
-import org.genericsystem.ui.components.GSTextField;
-import org.genericsystem.ui.components.GSVBox;
+import org.genericsystem.distributed.ui.Model;
 
-public class TodoList {
+public class TodoList extends Model {
 
 	private Property<String> name = new SimpleStringProperty();
 	private Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
@@ -39,43 +32,12 @@ public class TodoList {
 	private ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, COMPLETE);
 	private Property<Todo> selection = new SimpleObjectProperty<>();
 
-	/*********************************************************************************************************************************/
-
-	public static void init(Element<Group> sceneElt) {
-		GSVBox mainVBox = new GSVBox(sceneElt, Group::getChildren).setPrefHeight(600);// .setStyleClass("overrun");
-		{
-			GSHBox todosCreation = new GSHBox(mainVBox);
-			{
-				new GSTextField(todosCreation, TodoList::getName).setPrefWidth(200).bindTextProperty(TodoList::getName);
-				new GSButton(todosCreation, "Create Todo", TodoList::create).setPrefWidth(160);
-			}
-
-			new GSHBox(mainVBox).include(Todo::init).forEach(TodoList::getFiltered);
-
-			GSHBox todosFiltrage = new GSHBox(mainVBox).setOptionalVisibility(TodoList::getHasTodo);
-			{
-				new GSHyperLink(todosFiltrage, "All", TodoList::showAll).setOptionalStyleClass(TodoList::getAllMode, "overrun");
-				new GSHyperLink(todosFiltrage, "Actives", TodoList::showActive).setOptionalStyleClass(TodoList::getActiveMode, "overrun");
-				new GSHyperLink(todosFiltrage, "Completes", TodoList::showCompleted).setOptionalStyleClass(TodoList::getCompletedMode, "overrun");
-				new GSButton(todosFiltrage, TodoList::getClearButtonText, TodoList::removeCompleted).setOptionalVisibility(TodoList::getHasCompleted).setPrefWidth(160);
-			}
-
-			GSHBox selectionContext = new GSHBox(mainVBox).select(TodoList::getSelection);
-			{
-				new GSLabel(selectionContext, Todo::getTodoString);
-			}
-		}
-	}
-
-	/*********************************************************************************************************************************/
-
 	public TodoList() {
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 	}
 
 	public void create() {
-		System.out.println("kjjjjjjjj");
-		todos.add(new Todo(getName().getValue()));
+		todos.add(new Todo(this, getName().getValue()));
 	}
 
 	public void showAll() {

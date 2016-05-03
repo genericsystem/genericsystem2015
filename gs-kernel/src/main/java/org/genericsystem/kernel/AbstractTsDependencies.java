@@ -4,10 +4,15 @@ import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.genericsystem.common.AbstractGeneralAwareIterator;
+
+import org.genericsystem.common.AbstractIterator;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 abstract class AbstractTsDependencies {
 
 	private Node head = null;
@@ -82,7 +87,7 @@ abstract class AbstractTsDependencies {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new InternalIterator(ts), 0), false);
 	}
 
-	private class InternalIterator extends AbstractGeneralAwareIterator<Node, Generic> {
+	private class InternalIterator extends AbstractIterator<Node, Generic> {
 
 		private final long ts;
 
