@@ -1,11 +1,10 @@
 package org.genericsystem.distributed.ui.models;
 
 import java.util.function.Function;
-
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.Model;
@@ -19,13 +18,19 @@ public class CompositeModel<M extends Model> extends Model {
 
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
-	private final ObservableListExtractor observableListExtractor;
-	private final Builder<?> builder;
 
 	private final ObservableList<M> subModels;
 
 	public ObservableList<M> getSubModels() {
 		return subModels;
+	}
+
+	public ObservableValue<M> getFirstSubModel() {
+		return Bindings.valueAt(subModels, 0);
+	}
+
+	public ObservableValue<M> getSecondSubModel() {
+		return Bindings.valueAt(subModels, 1);
 	}
 
 	public CompositeModel(Generic[] generics, ObservableListExtractor observableListExtractor) {
@@ -37,22 +42,24 @@ public class CompositeModel<M extends Model> extends Model {
 	}
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder) {
+		this(generics, stringExtractor, new Transformation2<>(observableListExtractor.apply(generics), generic -> (M) builder.apply(addToGenerics(generic, generics))));
+	}
+
+	public CompositeModel(Generic[] generics, StringExtractor stringExtractor, ObservableList<M> subModels) {
 		assert stringExtractor != null;
 		this.generics = generics;
 		this.stringExtractor = stringExtractor;
-		this.observableListExtractor = observableListExtractor;
-		this.builder = builder;
-		this.subModels = observableListExtractor != null ? new Transformation2<>(observableListExtractor.apply(getGenerics()), generic -> (M) builder.apply(addToGenerics(generic))) : null;
+		this.subModels = subModels;
 	}
 
 	private Generic[] getGenerics() {
 		return generics;
 	}
 
-	private Generic[] addToGenerics(Generic generic) {
-		Generic[] result = new Generic[getGenerics().length + 1];
+	static Generic[] addToGenerics(Generic generic, Generic[] generics) {
+		Generic[] result = new Generic[generics.length + 1];
 		result[0] = generic;
-		System.arraycopy(getGenerics(), 0, result, 1, getGenerics().length);
+		System.arraycopy(generics, 0, result, 1, generics.length);
 		return result;
 	}
 
@@ -78,4 +85,15 @@ public class CompositeModel<M extends Model> extends Model {
 	public static interface Builder<M extends CompositeModel<?>> extends Function<Generic[], M> {
 
 	}
+
+	@FunctionalInterface
+	public interface CompositeConstructor<M extends CompositeModel<?>> {
+		M build(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder);
+	}
+
+	@FunctionalInterface
+	public interface CompositeGenericConstructor<M extends CompositeModel<?>> {
+		M build(Generic[] generics, StringExtractor stringExtractor, ObservableList<M> subModels);
+	}
+
 }

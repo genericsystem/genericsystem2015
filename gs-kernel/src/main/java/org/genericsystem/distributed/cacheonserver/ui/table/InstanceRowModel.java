@@ -1,5 +1,6 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
+import javafx.collections.ObservableList;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.models.CompositeModel;
 import org.genericsystem.distributed.ui.models.GenericModel;
@@ -11,8 +12,8 @@ import org.genericsystem.distributed.ui.models.GenericModel;
 
 public class InstanceRowModel extends CompositeModel<CompositeModel<GenericModel>> {
 
-	public InstanceRowModel(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder) {
-		super(generics, stringExtractor, observableListExtractor, builder);
+	public InstanceRowModel(Generic[] generics, StringExtractor stringExtractor, ObservableList<CompositeModel<GenericModel>> subModels) {
+		super(generics, stringExtractor, subModels);
 	}
 
 	public void remove() {
