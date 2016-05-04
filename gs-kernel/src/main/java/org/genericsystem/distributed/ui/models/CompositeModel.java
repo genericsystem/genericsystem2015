@@ -56,7 +56,7 @@ public class CompositeModel<M extends Model> extends Model {
 		return generics;
 	}
 
-	static Generic[] addToGenerics(Generic generic, Generic[] generics) {
+	public static Generic[] addToGenerics(Generic generic, Generic[] generics) {
 		Generic[] result = new Generic[generics.length + 1];
 		result[0] = generic;
 		System.arraycopy(generics, 0, result, 1, generics.length);
@@ -86,14 +86,14 @@ public class CompositeModel<M extends Model> extends Model {
 
 	}
 
-	@FunctionalInterface
-	public interface CompositeConstructor<M extends CompositeModel<?>> {
-		M build(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder);
-	}
+	// @FunctionalInterface
+	// public interface CompositeCdonstructor<M extends CompositeModel<?>> {
+	// M build(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder);
+	// }
 
 	@FunctionalInterface
-	public interface CompositeGenericConstructor<M extends CompositeModel<?>> {
-		M build(Generic[] generics, StringExtractor stringExtractor, ObservableList<M> subModels);
+	public interface CompositeGenericConstructor<M extends CompositeModel<?>, SUBMODEL extends Model> {
+		M build(Generic[] generics, StringExtractor stringExtractor, ObservableList<SUBMODEL> subModels);
 	}
 
 }

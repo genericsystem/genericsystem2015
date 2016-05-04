@@ -58,7 +58,7 @@ public class SimpleStep {
 					final Builder<?> leafBuilder = step.makeModelBuilder();
 					subModels.add(leafBuilder.apply(generics));
 				}
-				return compositeconstructor.build(generics, getStringExtractor(), subModels);
+				return getModelConstructor().build(generics, getStringExtractor(), subModels);
 			};
 		}
 
