@@ -5,12 +5,10 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
-import org.genericsystem.mutability.Engine;
+import org.genericsystem.kernel.Engine;
 
 class CacheManager extends JPanel implements ActionListener {
 

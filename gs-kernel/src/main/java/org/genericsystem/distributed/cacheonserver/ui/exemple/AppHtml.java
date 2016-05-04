@@ -2,7 +2,6 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
@@ -11,8 +10,12 @@ import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeSectionHtml.TitleTypeListHtml;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeSelectHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableHtml;
+import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableModel;
+import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
+import org.genericsystem.distributed.ui.components.HtmlSection;
+import org.genericsystem.distributed.ui.models.CompositeModel;
 import org.genericsystem.kernel.Engine;
 
 public class AppHtml extends HtmlApp<AppModel> {
@@ -54,7 +57,12 @@ public class AppHtml extends HtmlApp<AppModel> {
 			new AppHeaderHtml(div);
 			new TypeSelectHtml<>(div).select(AppModel::getTypeListModel);
 			new TitleTypeListHtml<>(div).select(AppModel::getTitleTypeListModel);
-			new TypeTableHtml<>(div).select(AppModel::getTypeTableModel);
+
+			HtmlSection<CompositeModel<Model>> section = new HtmlSection<CompositeModel<Model>>(div).select(AppModel::getTypeTableModel);
+			{
+				new TypeTableHtml<>(section).select(CompositeModel<TypeTableModel>::getFirstSubModel);
+				new TypeTableHtml<>(section).select(CompositeModel<TypeTableModel>::getSecondSubModel);
+			}
 			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
