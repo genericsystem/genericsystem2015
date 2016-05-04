@@ -20,12 +20,12 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import org.genericsystem.common.Generic;
 import org.genericsystem.exampleswing.application.CacheManager.Refreshable;
 import org.genericsystem.exampleswing.model.Car;
 import org.genericsystem.exampleswing.model.CarColor;
 import org.genericsystem.exampleswing.model.Power;
-import org.genericsystem.mutability.Engine;
-import org.genericsystem.mutability.Generic;
+import org.genericsystem.kernel.Engine;
 
 public class InstancesEditor extends JFrame implements Refreshable {
 	private static final long serialVersionUID = 5868325769001340979L;
@@ -37,7 +37,7 @@ public class InstancesEditor extends JFrame implements Refreshable {
 
 	public InstancesEditor(Generic type) {
 		this.type = type;
-		engine = type.getRoot();
+		engine = (Engine) type.getRoot();
 		setTitle(Objects.toString(type.getValue()) + "(s) Management");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

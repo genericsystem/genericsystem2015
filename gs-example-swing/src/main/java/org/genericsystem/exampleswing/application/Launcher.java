@@ -1,11 +1,10 @@
 package org.genericsystem.exampleswing.application;
 
 import javax.swing.SwingUtilities;
-
 import org.genericsystem.exampleswing.model.Car;
 import org.genericsystem.exampleswing.model.CarColor;
 import org.genericsystem.exampleswing.model.Power;
-import org.genericsystem.mutability.Engine;
+import org.genericsystem.kernel.Engine;
 
 public class Launcher {
 

@@ -2,6 +2,7 @@ package org.genericsystem.distributed.ui.models;
 
 import java.util.function.Function;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -26,6 +27,14 @@ public class CompositeModel<M extends Model> extends Model {
 		return subModels;
 	}
 
+	public ObservableValue<M> getFirstSubModel() {
+		return Bindings.valueAt(subModels, 0);
+	}
+
+	public ObservableValue<M> getSecondSubModel() {
+		return Bindings.valueAt(subModels, 1);
+	}
+
 	public CompositeModel(Generic[] generics, ObservableListExtractor observableListExtractor) {
 		this(generics, GenericModel.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
 	}
@@ -35,6 +44,7 @@ public class CompositeModel<M extends Model> extends Model {
 	}
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder) {
+
 		this(generics, stringExtractor, observableListExtractor != null ? new Transformation2<>(observableListExtractor.apply(generics), generic -> (M) builder.apply(addToGenerics(generic, generics))) : null);
 	}
 
@@ -50,6 +60,7 @@ public class CompositeModel<M extends Model> extends Model {
 	}
 
 	private static Generic[] addToGenerics(Generic generic, Generic... generics) {
+
 		Generic[] result = new Generic[generics.length + 1];
 		result[0] = generic;
 		System.arraycopy(generics, 0, result, 1, generics.length);
@@ -78,4 +89,15 @@ public class CompositeModel<M extends Model> extends Model {
 	public static interface Builder<M extends CompositeModel<?>> extends Function<Generic[], M> {
 
 	}
+
+	@FunctionalInterface
+	public interface CompositeConstructor<M extends CompositeModel<?>> {
+		M build(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder);
+	}
+
+	@FunctionalInterface
+	public interface CompositeGenericConstructor<M extends CompositeModel<?>> {
+		M build(Generic[] generics, StringExtractor stringExtractor, ObservableList<M> subModels);
+	}
+
 }
