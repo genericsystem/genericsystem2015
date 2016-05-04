@@ -34,11 +34,13 @@ public abstract class AbstractWebSocketsServer {
 		System.out.println("Generic System Server is starting...!");
 		Vertx vertx = GSVertx.vertx().getVertx();
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
+			//SLE
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
-			// httpServer.requestHandler(request-> {
-			// request.path();
-			//
-			// });
+			httpServer.requestHandler(request-> {
+			 request.path();
+			
+		    });
+			//SLE
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
 				webSocket.handler(getHandler(path, webSocket));
