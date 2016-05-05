@@ -1,12 +1,10 @@
 package org.genericsystem.distributed.ui.models;
 
 import java.util.function.Function;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.Model;
@@ -44,8 +42,7 @@ public class CompositeModel<M extends Model> extends Model {
 	}
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder) {
-
-		this(generics, stringExtractor, observableListExtractor != null ? new Transformation2<>(observableListExtractor.apply(generics), generic -> (M) builder.apply(addToGenerics(generic, generics))) : null);
+		this(generics, stringExtractor, new Transformation2<>(observableListExtractor.apply(generics), generic -> (M) builder.apply(addToGenerics(generic, generics))));
 	}
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor, ObservableList<M> subModels) {
@@ -59,8 +56,7 @@ public class CompositeModel<M extends Model> extends Model {
 		return generics;
 	}
 
-	private static Generic[] addToGenerics(Generic generic, Generic... generics) {
-
+	public static Generic[] addToGenerics(Generic generic, Generic[] generics) {
 		Generic[] result = new Generic[generics.length + 1];
 		result[0] = generic;
 		System.arraycopy(generics, 0, result, 1, generics.length);
@@ -90,14 +86,14 @@ public class CompositeModel<M extends Model> extends Model {
 
 	}
 
-	@FunctionalInterface
-	public interface CompositeConstructor<M extends CompositeModel<?>> {
-		M build(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder);
-	}
+	// @FunctionalInterface
+	// public interface CompositeCdonstructor<M extends CompositeModel<?>> {
+	// M build(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder);
+	// }
 
 	@FunctionalInterface
-	public interface CompositeGenericConstructor<M extends CompositeModel<?>> {
-		M build(Generic[] generics, StringExtractor stringExtractor, ObservableList<M> subModels);
+	public interface CompositeGenericConstructor<M extends CompositeModel<?>, SUBMODEL extends Model> {
+		M build(Generic[] generics, StringExtractor stringExtractor, ObservableList<SUBMODEL> subModels);
 	}
 
 }

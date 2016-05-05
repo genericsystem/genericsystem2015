@@ -11,6 +11,10 @@ import org.genericsystem.distributed.ui.models.CompositeModel;
 
 public class TypeTableModel extends CompositeModel<InstanceRowModel> {
 
+	public TypeTableModel(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder) {
+		super(generics, stringExtractor, observableListExtractor, builder);
+	}
+
 	public TypeTableModel(Generic[] generics, StringExtractor stringExtractor, ObservableList<InstanceRowModel> subModels) {
 		super(generics, stringExtractor, subModels);
 	}

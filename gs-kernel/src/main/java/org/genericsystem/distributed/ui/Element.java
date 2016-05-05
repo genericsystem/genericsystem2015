@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -110,7 +109,7 @@ public abstract class Element<M extends Model, N> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	<CHILDNODE> List<Element<?, CHILDNODE>> getChildren() {
+	protected <CHILDNODE> List<Element<?, CHILDNODE>> getChildren() {
 		return (List) children;
 	}
 
