@@ -16,6 +16,7 @@ import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.GenericModel;
 import org.genericsystem.kernel.Engine;
 
 public class AppHtml extends HtmlApp<AppModel> {
@@ -60,8 +61,8 @@ public class AppHtml extends HtmlApp<AppModel> {
 
 			HtmlSection<CompositeModel<Model>> section = new HtmlSection<CompositeModel<Model>>(div).select(AppModel::getTypeTableModel);
 			{
-				new TypeTableHtml<>(section).select(CompositeModel<TypeTableModel>::getFirstSubModel);
-				new TypeTableHtml<>(section).select(CompositeModel<TypeTableModel>::getSecondSubModel);
+				new TypeTableHtml<>(section, g -> GenericModel.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management", TypeTableModel::new).select(CompositeModel<TypeTableModel>::getFirstSubModel);
+				new TypeTableHtml<>(section, g -> GenericModel.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management", TypeTableModel::new).select(CompositeModel<TypeTableModel>::getSecondSubModel);
 			}
 			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
