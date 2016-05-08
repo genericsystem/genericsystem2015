@@ -24,6 +24,9 @@ import javafx.event.EventHandler;
 
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
+import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -69,8 +72,22 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public <T extends Model> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<?> constructor) {
+		super.forEach(stringExtractor, observableListExtractor, constructor);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public <T extends Model> COMPONENT select(Function<T, ObservableValue<M>> function) {
 		super.select(function);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Model> COMPONENT select(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<?> constructor) {
+		super.select(stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
 

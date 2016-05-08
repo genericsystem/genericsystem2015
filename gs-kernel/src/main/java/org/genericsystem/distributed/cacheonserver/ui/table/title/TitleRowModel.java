@@ -2,16 +2,17 @@ package org.genericsystem.distributed.cacheonserver.ui.table.title;
 
 import java.io.Serializable;
 import java.util.Objects;
+
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class TitleRowModel extends CompositeModel<GenericModel> {
+public class TitleRowModel extends CompositeModel<CompositeModel> {
 
-	public TitleRowModel(Generic[] generics, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, Builder<?> builder) {
-		super(generics, stringExtractor, observableListExtractor, builder);
+	public TitleRowModel(Generic[] generics, StringExtractor stringExtractor) {
+		super(generics, stringExtractor);
 	}
 
 	public ObservableValue<String> getFirstCellString() {

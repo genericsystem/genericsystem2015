@@ -15,12 +15,18 @@ import org.genericsystem.distributed.ui.ViewContext.RootViewContext;
 public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>, HtmlDomNode> {
 
 	private final ServerWebSocket webSocket;
-	private final RootViewContext<?, HtmlDomNode> rootViewContext;
+	private RootViewContext<?, HtmlDomNode> rootViewContext;
+	private M model;
 
 	public HtmlApp(M model, ServerWebSocket webSocket) {
 		super(null, HtmlDomNode.class);
+		this.model = model;
 		this.webSocket = webSocket;
+	}
+
+	public HtmlApp<M> init() {
 		rootViewContext = new RootViewContext<>(model, (Element) this, new HtmlDomNode("div"));
+		return this;
 	}
 
 	@Override

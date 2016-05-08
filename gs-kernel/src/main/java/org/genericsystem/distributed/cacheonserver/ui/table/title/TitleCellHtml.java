@@ -3,9 +3,9 @@ package org.genericsystem.distributed.cacheonserver.ui.table.title;
 import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
 import org.genericsystem.distributed.ui.components.HtmlStrong;
-import org.genericsystem.distributed.ui.models.GenericModel;
+import org.genericsystem.distributed.ui.models.CompositeModel;
 
-class TitleCellHtml<M extends GenericModel> extends HtmlSection<M> {
+class TitleCellHtml<M extends CompositeModel> extends HtmlSection<M> {
 
 	public TitleCellHtml(TitleRowHtml<?> parent) {
 		super(parent);

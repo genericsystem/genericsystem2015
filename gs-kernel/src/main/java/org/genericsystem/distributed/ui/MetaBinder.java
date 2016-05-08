@@ -10,6 +10,10 @@ import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 
 import org.genericsystem.distributed.ui.ModelContext.ModelContextList;
+import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -17,7 +21,7 @@ import org.genericsystem.distributed.ui.ModelContext.ModelContextList;
  * @param <N>
  * @param <W>
  */
-public interface MetaBinder<N, W> {
+public interface MetaBinder<N, W extends ObservableList<?>> {
 
 	default void init(Function<Model, W> method, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
 		init(viewContext.getModelContext().applyOnModel(method), viewContext, childElement);
@@ -34,6 +38,53 @@ public interface MetaBinder<N, W> {
 		return new MetaBinder<N, ObservableList<T>>() {
 
 			private List<ListChangeListener<Model>> listeners = new ArrayList<>();
+
+			@Override
+			public void init(ObservableList<T> wrapper, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+				ModelContextList children = viewContext.getModelContext().getChildren(childElement);
+
+				ListChangeListener<Model> listener = (ListChangeListener<Model>) change -> {
+					while (change.next()) {
+						if (change.wasPermutated()) {
+							for (int i = change.getFrom(); i < change.getTo(); i++)
+								children.delete(change.getFrom());
+							int index = change.getFrom();
+							for (Model model : change.getList().subList(change.getFrom(), change.getTo()))
+								children.insert(index++, model, viewContext);
+						} else {
+							if (change.wasRemoved())
+								for (int i = 0; i < change.getRemovedSize(); i++)
+									children.delete(change.getFrom());
+							if (change.wasAdded()) {
+								int index = change.getFrom();
+								for (Model model : change.getAddedSubList())
+									children.insert(index++, model, viewContext);
+							}
+						}
+					}
+				};
+				listeners.add(listener);
+				wrapper.addListener(new WeakListChangeListener<>(listener));
+				int index = 0;
+				for (T model : wrapper)
+					children.insert(index++, model, viewContext);
+			}
+		};
+	}
+
+	public static <N, T extends Model> MetaBinder<N, ObservableList<T>> foreachBinder(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<T> constructor) {
+		return new MetaBinder<N, ObservableList<T>>() {
+
+			private List<ListChangeListener<Model>> listeners = new ArrayList<>();
+
+			@Override
+			public void init(Function<Model, ObservableList<T>> method, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+				assert stringExtractor != null;
+				assert observableListExtractor != null;
+				assert constructor != null;
+				((CompositeModel<T>) viewContext.getModelContext().getModel()).initSubModels(observableListExtractor, gs -> constructor.build(gs, stringExtractor));
+				MetaBinder.super.init(method, viewContext, childElement);
+			}
 
 			@Override
 			public void init(ObservableList<T> wrapper, ViewContext<?, N> viewContext, Element<?, ?> childElement) {

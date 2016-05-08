@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -90,14 +95,26 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	protected <T extends Model> Element<M, N> forEach(Function<T, ObservableList<M>> applyOnModel) {
+	public <T extends Model> Element<M, N> forEach(Function<T, ObservableList<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
 		return this;
 	}
 
-	protected <T extends Model> Element<M, N> select(Function<T, ObservableValue<M>> applyOnModel) {
+	public <T extends Model> Element<M, N> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<?> constructor) {
+		metaBindings.add(MetaBinding.forEach(stringExtractor, observableListExtractor, constructor));
+		return this;
+	}
+
+	public <T extends Model> Element<M, N> select(Function<T, ObservableValue<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
 		return this;
+	}
+
+	public <T extends Model> Element<M, N> select(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<?> constructor) {
+		// metaBindings.add(MetaBinding.selector(stringExtractor, observableListExtractor, constructor));
+		// return this;
+		// TODO
+		throw new IllegalStateException();
 	}
 
 	protected N createNode(Object parent) {
@@ -113,8 +130,7 @@ public abstract class Element<M extends Model, N> {
 		return (List) children;
 	}
 
-	Element<?, ?> getParent() {
-		return parent;
+	protected <COMPONENT extends Element<?, ?>> COMPONENT getParent() {
+		return (COMPONENT) parent;
 	}
-
 }

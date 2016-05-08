@@ -2,6 +2,8 @@ package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Car;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.model.CarColor;
@@ -10,19 +12,18 @@ import org.genericsystem.distributed.cacheonserver.ui.exemple.model.Power;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeSectionHtml.TitleTypeListHtml;
 import org.genericsystem.distributed.cacheonserver.ui.list.TypeSelectHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableHtml;
-import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableModel;
-import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.distributed.ui.components.HtmlDiv;
-import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.GenericModel;
+import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 import org.genericsystem.kernel.Engine;
 
 public class AppHtml extends HtmlApp<AppModel> {
 
+	private final ObservableList<Generic> attributes;
+
 	public AppHtml(Engine engine, ServerWebSocket webSocket) {
-		super(new AppModel(engine, engine.find(Car.class), FXCollections.observableArrayList(engine.find(Power.class), engine.find(CarColor.class))), webSocket);
+		super(new AppModel(engine, engine.find(Car.class)), webSocket);
+		attributes = FXCollections.observableArrayList(engine.find(Power.class), engine.find(CarColor.class));
 		Generic car = engine.find(Car.class);
 		Generic power = engine.find(Power.class);
 		Generic carColor = engine.find(CarColor.class);
@@ -58,12 +59,7 @@ public class AppHtml extends HtmlApp<AppModel> {
 			new AppHeaderHtml(div);
 			new TypeSelectHtml<>(div).select(AppModel::getTypeListModel);
 			new TitleTypeListHtml<>(div).select(AppModel::getTitleTypeListModel);
-
-			HtmlSection<CompositeModel<Model>> section = new HtmlSection<CompositeModel<Model>>(div).select(AppModel::getTypeTableModel);
-			{
-				new TypeTableHtml<>(section, g -> GenericModel.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management", TypeTableModel::new).select(CompositeModel<TypeTableModel>::getFirstSubModel);
-				new TypeTableHtml<>(section, g -> GenericModel.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management", TypeTableModel::new).select(CompositeModel<TypeTableModel>::getSecondSubModel);
-			}
+			new TypeTableHtml<>(div, g -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management").setAttributesExtractor(type -> attributes).select(AppModel::getTypeTableModel);
 			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);

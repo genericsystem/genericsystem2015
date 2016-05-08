@@ -7,12 +7,12 @@ import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTable
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.components.HtmlH1;
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel.CompositeGenericConstructor;
+import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
 import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
 public class InsertTitleTypeTableHtml<M extends InsertTitleTypeTableModel> extends TitleTypeTableHtml<M> {
 
-	public InsertTitleTypeTableHtml(HtmlElement<?, ?, ?> parent, StringExtractor extractor, CompositeGenericConstructor<M, InstanceRowModel> constructor) {
+	public InsertTitleTypeTableHtml(HtmlElement<?, ?, ?> parent, StringExtractor extractor, ModelConstructor<M, InstanceRowModel> constructor) {
 		super(parent, extractor, constructor);
 	}
 
