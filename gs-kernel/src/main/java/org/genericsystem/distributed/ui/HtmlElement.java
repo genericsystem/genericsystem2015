@@ -8,6 +8,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -22,7 +23,11 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.GSBuffer;
+import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;
 import org.genericsystem.distributed.ui.HtmlElement.HtmlDomNode;
 
 /**
@@ -69,8 +74,28 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		super.forEach(stringExtractor, observableListExtractor, constructor);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public <T extends Model> COMPONENT select(Function<T, ObservableValue<M>> function) {
 		super.select(function);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
+		super.select(function, stringExtractor, generic, constructor);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor, Supplier<Generic> generic) {
+		select(function, stringExtractor, generic, CompositeModel::new);
 		return (COMPONENT) this;
 	}
 

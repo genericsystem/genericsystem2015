@@ -100,6 +100,7 @@ public class ModelContext {
 		public <N> void insert(int index, Model model, ViewContext<?, N> viewContext) {
 			ModelContext childModelContext = createChildContext(model);
 			model.parent = getModel();// inject parent
+			model.element = childElement;
 			model.afterParentConstruct();
 			viewContext.createChildContext(index, childModelContext, childElement);
 			internal.add(index, childModelContext);

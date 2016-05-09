@@ -1,22 +1,33 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
+import org.genericsystem.distributed.cacheonserver.ui.list.GSCompositeHtml.GSTitleCompositeHtml;
+import org.genericsystem.distributed.ui.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
 import org.genericsystem.distributed.ui.HtmlElement;
-import org.genericsystem.distributed.ui.components.HtmlH1;
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeHtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel.CompositeGenericConstructor;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
-public class TypeTableHtml<M extends TypeTableModel> extends CompositeHtmlSection<M> {
+public class TypeTableHtml<M extends CompositeModel> extends GSTitleCompositeHtml<M> {
 
-	public TypeTableHtml(HtmlElement<?, ?, ?> parent, StringExtractor extractor, CompositeGenericConstructor<M, InstanceRowModel> constructor) {
-		super(parent, extractor, constructor);
+	private ObservableListExtractor attributesExtractor = ObservableListExtractor.ATTRIBUTES;
+
+	public TypeTableHtml(HtmlElement<?, ?, ?> parent) {
+		super(parent);
 		addStyleClass("gstable");
+		setObservableListExtractor(ObservableListExtractor.INSTANCES);
+	}
+
+	public ObservableListExtractor getAttributesExtractor() {
+		return attributesExtractor;
+	}
+
+	public TypeTableHtml<M> setAttributesExtractor(ObservableListExtractor attributesExtractor) {
+		this.attributesExtractor = attributesExtractor;
+		return this;
 	}
 
 	@Override
-	protected void initChildren() {
-		new HtmlH1<M>(new HtmlSection<>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(TypeTableModel::getString);
-		new InstanceRowHtml<>(this).forEach(TypeTableModel::getSubModels);
+	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
+		new InstanceRowHtml<>(parentSection);
 	}
+
 }
