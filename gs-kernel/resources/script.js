@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
 
-<script src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
-<LINK rel=stylesheet type="text/css" href="style.css">
-<script type="text/javascript">
 	var wsocket;
-	var serviceLocation = "ws://127.0.0.1:8082/";
-
+	//var serviceLocation = "ws://127.0.0.1:8082/second/";
 	//-------------------------------------------------------------	
 	function getSubString(bytes) {
 		var subString = '';
@@ -31,7 +23,7 @@
 			var elt = document.createElement(message.tagHtml);
 			elt.setAttribute("id", message.nodeId);
 			elt.textContent = message.textContent;
-
+			
 			switch (message.tagHtml) {
 			case "button": {
 				elt.onclick = function click() {
@@ -88,6 +80,15 @@
 					break;
 				}
 				}
+				break;
+			}
+			case "option": {
+				elt.onclick = function () {
+					wsocket.send(JSON.stringify({
+						msgType : "A",
+						nodeId : elt.id
+					}));
+				};
 				break;
 			}
 			}
@@ -150,10 +151,5 @@
 
 	$(document).ready(function() {
 		connect();
+		console.log("connecte");
 	});
-</script>
-</head>
-<body id="root">
-
-</body>
-</html>
