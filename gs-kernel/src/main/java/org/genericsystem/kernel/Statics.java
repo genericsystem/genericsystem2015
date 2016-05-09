@@ -35,13 +35,14 @@ public class Statics {
 	public static final long GARBAGE_PERIOD = 1000L;
 	public static final long GARBAGE_INITIAL_DELAY = 1000L;
 	public static final long LIFE_TIMEOUT = 1386174608777L;// 30 minutes
-	public final static String DEFAULT_HOST = "0.0.0.0";
+	public final static String DEFAULT_HOST = "127.0.0.1";
 	public final static int DEFAULT_PORT = 8082;
 
 	public final static Vertex[] EMPTY = new Vertex[] {};
 
 	public static final long SERVER_TIMEOUT = 1000;
 	public static final TimeUnit SERVER_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
+
 
 	public static void debugCurrentThread() {
 		threadDebugged.set(System.currentTimeMillis());

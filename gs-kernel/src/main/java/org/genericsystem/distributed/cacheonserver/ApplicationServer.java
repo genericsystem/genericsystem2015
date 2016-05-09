@@ -33,7 +33,7 @@ public class ApplicationServer extends AbstractBackEnd {
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
 		apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
-		// apps.addApplication("/", CarApp.class, "/home/middleware/cars/", Power.class);
+		apps.addApplication("/second", AppHtml.class, "/home/middleware/cars/",  Car.class, Power.class, Color.class, CarColor.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(apps).start();
 	}
@@ -75,6 +75,7 @@ public class ApplicationServer extends AbstractBackEnd {
 
 		@Override
 		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
+			System.out.println("socket path: "+path);
 			PersistentApplication application = apps.get(path);
 			if (application == null)
 				throw new IllegalStateException("Unable to load an application with path : " + path);

@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
 
-<script src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
-<LINK rel=stylesheet type="text/css" href="style.css">
-<script type="text/javascript">
 	var wsocket;
-	var serviceLocation = "ws://127.0.0.1:8082/";
-
+	//var serviceLocation = "ws://127.0.0.1:8082/second/";
 	//-------------------------------------------------------------	
 	function getSubString(bytes) {
 		var subString = '';
@@ -150,10 +142,5 @@
 
 	$(document).ready(function() {
 		connect();
+		console.log("connecte");
 	});
-</script>
-</head>
-<body id="root">
-
-</body>
-</html>
