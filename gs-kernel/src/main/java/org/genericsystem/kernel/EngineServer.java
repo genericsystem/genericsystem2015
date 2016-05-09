@@ -13,7 +13,7 @@ import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.EnginesDeploymentConfig;
 import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.common.GSBuffer;
-import org.genericsystem.remote.FrontEnd;
+import org.genericsystem.common.Protocol;
 
 /**
  * @author Nicolas Feybesse
@@ -48,13 +48,13 @@ public class EngineServer extends AbstractBackEnd {
 		GSBuffer replyBuffer = new GSBuffer().appendInt(op);
 		// System.out.println("REPLY BUFFER : " + methodId + " " + op);
 		switch (methodId) {
-		case FrontEnd.PICK_NEW_TS:
+		case Protocol.PICK_NEW_TS:
 			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
-		case FrontEnd.GET_DEPENDENCIES:
+		case Protocol.GET_DEPENDENCIES:
 			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
-		case FrontEnd.GET_VERTEX:
+		case Protocol.GET_VERTEX:
 			return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
-		case FrontEnd.APPLY:
+		case Protocol.APPLY:
 			return replyBuffer.appendLongThrowException(() -> {
 				root.apply(gsBuffer.getLong(), gsBuffer.getGSLongArray(), gsBuffer.getGSVertexArray());
 				return 0L;

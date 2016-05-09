@@ -9,6 +9,7 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.common.Statics;
 import org.genericsystem.common.SystemCache;
 
@@ -37,7 +38,7 @@ public class Engine extends AbstractServer {
 			@Override
 			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 				// TODO Auto-generated method stub
-				return null;
+				return new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
 			}
 		};
 	}

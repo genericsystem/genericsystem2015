@@ -27,12 +27,6 @@ import org.genericsystem.common.Vertex;
  */
 public class FrontEnd implements Protocol {
 
-	public static final int PICK_NEW_TS = 0;
-	public static final int GET_DEPENDENCIES = 1;
-	public static final int GET_VERTEX = 2;
-	public static final int APPLY = 3;
-	public static final int SHIFT_TS = 4;
-
 	protected WebSocketClient webSocketClient;
 
 	public FrontEnd(String host, int port, String path) {

@@ -164,11 +164,11 @@ public abstract class GenericBuilder {
 		}
 	}
 
-	protected static class SetSystemBuilder extends AtomicBuilder {
+	public static class SetSystemBuilder extends AtomicBuilder {
 
 		private final Class<?> clazz;
 
-		SetSystemBuilder(AbstractCache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+		public SetSystemBuilder(AbstractCache context, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
 			super(context, meta, overrides, value, components);
 			this.clazz = clazz;
 		}
