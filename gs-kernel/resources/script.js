@@ -23,7 +23,7 @@
 			var elt = document.createElement(message.tagHtml);
 			elt.setAttribute("id", message.nodeId);
 			elt.textContent = message.textContent;
-
+			
 			switch (message.tagHtml) {
 			case "button": {
 				elt.onclick = function click() {
@@ -80,6 +80,15 @@
 					break;
 				}
 				}
+				break;
+			}
+			case "option": {
+				elt.onclick = function () {
+					wsocket.send(JSON.stringify({
+						msgType : "A",
+						nodeId : elt.id
+					}));
+				};
 				break;
 			}
 			}

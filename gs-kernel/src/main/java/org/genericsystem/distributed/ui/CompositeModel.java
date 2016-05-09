@@ -3,6 +3,7 @@ package org.genericsystem.distributed.ui;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.binding.Bindings;
@@ -76,6 +77,11 @@ public class CompositeModel extends Model {
 
 	public void remove() {
 		getGeneric().remove();
+	}
+	
+	public void select(){
+		
+		System.out.println("select click!!!");
 	}
 
 	@FunctionalInterface
