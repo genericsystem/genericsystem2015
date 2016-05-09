@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.EnginesDeploymentConfig;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.EnginesDeploymentConfig;
-import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.kernel.EngineServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;

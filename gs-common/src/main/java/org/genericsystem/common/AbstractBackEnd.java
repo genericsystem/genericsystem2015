@@ -1,4 +1,4 @@
-package org.genericsystem.distributed;
+package org.genericsystem.common;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.genericsystem.kernel.AbstractServer;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -17,7 +15,7 @@ import org.genericsystem.kernel.AbstractServer;
  */
 public abstract class AbstractBackEnd {
 
-	protected Map<String, AbstractServer> roots = new HashMap<>();
+	protected Map<String, AbstractRoot> roots = new HashMap<>();
 	protected AbstractWebSocketsServer webSocketsServer;
 
 	public AbstractBackEnd(String host, int port) {

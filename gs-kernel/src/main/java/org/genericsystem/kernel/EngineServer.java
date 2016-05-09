@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.kernel;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -7,14 +7,12 @@ import io.vertx.core.http.ServerWebSocket;
 import java.util.Collections;
 import java.util.List;
 
+import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
-import org.genericsystem.distributed.AbstractBackEnd;
-import org.genericsystem.distributed.AbstractWebSocketsServer;
-import org.genericsystem.distributed.EnginesDeploymentConfig;
-import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
-import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.Engine;
+import org.genericsystem.common.AbstractWebSocketsServer;
+import org.genericsystem.common.EnginesDeploymentConfig;
+import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.common.GSBuffer;
 import org.genericsystem.remote.FrontEnd;
 
 /**
@@ -76,7 +74,7 @@ public class EngineServer extends AbstractBackEnd {
 
 		@Override
 		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
-			AbstractServer root = roots.get(path);
+			AbstractServer root = (AbstractServer) roots.get(path);
 			if (root == null)
 				throw new IllegalStateException("Unable to find database :" + path);
 

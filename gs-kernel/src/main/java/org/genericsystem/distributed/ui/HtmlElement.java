@@ -23,8 +23,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
+import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
 import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
 import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;

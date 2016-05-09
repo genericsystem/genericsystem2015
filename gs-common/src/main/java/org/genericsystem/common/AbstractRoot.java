@@ -34,6 +34,8 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 	protected boolean isInitialized = false;
 	private final ThreadLocal<AbstractCache> cacheLocal = new ThreadLocal<AbstractCache>();
 
+	protected abstract SystemCache buildSystemCache(AbstractRoot root);
+
 	@Override
 	public AbstractRoot getRoot() {
 		return this;

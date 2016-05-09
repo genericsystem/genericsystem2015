@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.Statics;
-import org.genericsystem.distributed.EnginesDeploymentConfig.EngineDeploymentConfig;
+import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.distributed.cacheonserver.ui.exemple.AppHtml;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.components.HtmlApp;

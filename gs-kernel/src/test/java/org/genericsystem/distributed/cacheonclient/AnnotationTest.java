@@ -13,9 +13,9 @@ import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 import org.genericsystem.api.core.annotations.value.IntValue;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
+import org.genericsystem.common.EnginesDeploymentConfig;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.EnginesDeploymentConfig;
-import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 

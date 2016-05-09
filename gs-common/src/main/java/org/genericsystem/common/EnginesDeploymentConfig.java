@@ -1,4 +1,4 @@
-package org.genericsystem.distributed;
+package org.genericsystem.common;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.genericsystem.common.Statics;
 
 public class EnginesDeploymentConfig extends JsonObject {
 
@@ -55,7 +53,7 @@ public class EnginesDeploymentConfig extends JsonObject {
 	}
 
 	public static class EngineDeploymentConfig extends JsonObject {
-		EngineDeploymentConfig(Map<String, Object> map) {
+		protected EngineDeploymentConfig(Map<String, Object> map) {
 			super(map);
 		}
 

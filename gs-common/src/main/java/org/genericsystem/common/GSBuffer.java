@@ -1,4 +1,4 @@
-package org.genericsystem.distributed;
+package org.genericsystem.common;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.CharsetUtil;
@@ -20,7 +20,6 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.common.Vertex;
 
 /**
  * @author Nicolas Feybesse

@@ -1,6 +1,6 @@
 package org.genericsystem.distributed.cacheonclient;
 
-import org.genericsystem.distributed.EnginesDeploymentConfig;
+import org.genericsystem.common.EnginesDeploymentConfig;
 import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 

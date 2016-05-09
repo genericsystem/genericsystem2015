@@ -1,4 +1,4 @@
-package org.genericsystem.distributed;
+package org.genericsystem.common;
 
 import io.vertx.core.Vertx;
 

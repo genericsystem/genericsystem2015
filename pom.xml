@@ -41,9 +41,8 @@
 		<module>gs-kernel</module>
 		<module>gs-mutability</module>
 		<module>gs-cdi</module>
-    <module>gs-common</module>
-    <module>remote</module>
-    <module>gs-remote</module>
+    	<module>gs-common</module>
+    	<module>gs-remote</module>
   </modules>
 
 	<distributionManagement>

@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.EnginesDeploymentConfig;
+import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
-import org.genericsystem.distributed.EnginesDeploymentConfig;
-import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
 import org.genericsystem.distributed.cacheonclient.FileSystem.Directory;
 import org.genericsystem.distributed.cacheonclient.FileSystem.File;
 import org.genericsystem.distributed.cacheonclient.FileSystem.FileType;

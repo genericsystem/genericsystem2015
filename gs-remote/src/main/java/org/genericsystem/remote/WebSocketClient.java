@@ -7,7 +7,7 @@ import io.vertx.core.http.WebSocket;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.genericsystem.distributed.GSVertx;
+import org.genericsystem.common.GSVertx;
 
 /**
  * @author Nicolas Feybesse

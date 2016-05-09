@@ -12,15 +12,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Protocol;
 import org.genericsystem.common.Statics;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.distributed.GSBuffer;
-
-import com.google.common.base.Supplier;
 
 /**
  * @author Nicolas Feybesse
