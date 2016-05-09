@@ -1,33 +1,34 @@
 package org.genericsystem.distributed.cacheonserver.ui.list;
 
+import org.genericsystem.distributed.ui.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.components.HtmlH1;
 import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
-import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
-public class TypeSectionHtml<M extends CompositeModel> extends HtmlSection<M> {
+public class GSCompositeHtml<M extends CompositeModel> extends HtmlSection<M> {
 
 	private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;
-	private ObservableListExtractor observableListExtractor = generics -> generics[0].getObservableSubInstances();
-	private ModelConstructor<?> modelConstructor = CompositeModel::new;
+	private ObservableListExtractor observableListExtractor;
+	private ModelConstructor<CompositeModel> modelConstructor = CompositeModel::new;
 
-	public TypeSectionHtml(HtmlElement<?, ?, ?> parent) {
+	public GSCompositeHtml(HtmlElement<?, ?, ?> parent) {
 		super(parent);
 		addStyleClass("gstable");
+		setObservableListExtractor(ObservableListExtractor.INSTANCES);
 	}
 
 	@Override
 	protected void initChildren() {
-		HtmlSection<?> htmlSection = new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gstitlecell");
-		htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b));
+		HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyleClass("gscell").addStyleClass("gstitlecell");
+		htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b)).addStyleClass("gscell");
 		initSubChildren(htmlSection);
 	}
 
-	protected void initSubChildren(HtmlSection<?> parentSection) {
+	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
 		new HtmlLabel<CompositeModel>(parentSection).bindText(CompositeModel::getString);
 	}
 
@@ -47,17 +48,17 @@ public class TypeSectionHtml<M extends CompositeModel> extends HtmlSection<M> {
 		this.observableListExtractor = observableListExtractor;
 	}
 
-	public ModelConstructor<?> getModelConstructor() {
+	public ModelConstructor<CompositeModel> getModelConstructor() {
 		return modelConstructor;
 	}
 
-	public void setModelConstructor(ModelConstructor<?> modelConstructor) {
+	public void setModelConstructor(ModelConstructor<CompositeModel> modelConstructor) {
 		this.modelConstructor = modelConstructor;
 	}
 
-	public static class TitleTypeListHtml<M extends CompositeModel> extends TypeSectionHtml<M> {
+	public static class GSTitleCompositeHtml<M extends CompositeModel> extends GSCompositeHtml<M> {
 
-		public TitleTypeListHtml(HtmlElement<?, ?, ?> parent) {
+		public GSTitleCompositeHtml(HtmlElement<?, ?, ?> parent) {
 			super(parent);
 		}
 

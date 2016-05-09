@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
-import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
+import org.genericsystem.common.Generic;
+import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -100,7 +102,7 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	public <T extends Model> Element<M, N> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<?> constructor) {
+	public Element<M, N> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.forEach(stringExtractor, observableListExtractor, constructor));
 		return this;
 	}
@@ -110,11 +112,9 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	public <T extends Model> Element<M, N> select(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<?> constructor) {
-		// metaBindings.add(MetaBinding.selector(stringExtractor, observableListExtractor, constructor));
-		// return this;
-		// TODO
-		throw new IllegalStateException();
+	public <T extends CompositeModel> Element<M, N> select(Function<T, Property<CompositeModel>> applyOnModel, StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.selector(applyOnModel, stringExtractor, generic, constructor));
+		return this;
 	}
 
 	protected N createNode(Object parent) {
@@ -130,7 +130,7 @@ public abstract class Element<M extends Model, N> {
 		return (List) children;
 	}
 
-	protected <COMPONENT extends Element<?, ?>> COMPONENT getParent() {
+	public <COMPONENT extends Element<?, ?>> COMPONENT getParent() {
 		return (COMPONENT) parent;
 	}
 }

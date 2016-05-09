@@ -7,7 +7,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel;
 
 public class TitleRowModel extends CompositeModel<CompositeModel> {
 

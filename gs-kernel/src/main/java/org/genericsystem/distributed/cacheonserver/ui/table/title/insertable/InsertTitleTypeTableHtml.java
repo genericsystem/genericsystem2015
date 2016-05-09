@@ -5,10 +5,10 @@ import org.genericsystem.distributed.cacheonserver.ui.table.InstanceRowModel;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleRowHtml;
 import org.genericsystem.distributed.cacheonserver.ui.table.title.TitleTypeTableHtml;
 import org.genericsystem.distributed.ui.HtmlElement;
+import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;
 import org.genericsystem.distributed.ui.components.HtmlH1;
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
 public class InsertTitleTypeTableHtml<M extends InsertTitleTypeTableModel> extends TitleTypeTableHtml<M> {
 

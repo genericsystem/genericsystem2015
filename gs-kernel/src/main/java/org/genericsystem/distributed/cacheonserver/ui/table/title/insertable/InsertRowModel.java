@@ -2,8 +2,9 @@ package org.genericsystem.distributed.cacheonserver.ui.table.title.insertable;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel;
 
 public class InsertRowModel extends CompositeModel<InsertAttributeCellModel> {
 

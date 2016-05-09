@@ -1,19 +1,20 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
+import org.genericsystem.distributed.ui.CompositeModel;
+import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.distributed.ui.components.HtmlLabel;
-import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
-import org.genericsystem.distributed.ui.models.GenericHtmlSection;
+import org.genericsystem.distributed.ui.components.HtmlSection;
 
-public class HolderSubCellHtml extends GenericHtmlSection<CompositeModel> {
+public class HolderSubCellHtml extends HtmlSection<Model> {
 
-	public HolderSubCellHtml(InstanceAttributeCellHtml<?> parent, StringExtractor stringExtractor) {
-		super(parent, stringExtractor);
-		// TODO Auto-generated constructor stub
+	public HolderSubCellHtml(HtmlSection<?> parent) {
+		super(parent);
+		addStyleClass("subcell");
 	}
 
 	@Override
 	protected void initChildren() {
 		new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 	}
+
 }

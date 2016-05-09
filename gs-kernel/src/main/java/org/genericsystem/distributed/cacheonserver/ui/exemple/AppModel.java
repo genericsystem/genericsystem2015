@@ -1,33 +1,25 @@
 package org.genericsystem.distributed.cacheonserver.ui.exemple;
 
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonserver.ui.table.TypeTableModel;
-import org.genericsystem.distributed.ui.models.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel;
 import org.genericsystem.kernel.Engine;
 
 public class AppModel extends CompositeModel {
 
-	private final ObservableValue<CompositeModel> typeListModel;
-	private final ObservableValue<CompositeModel> titleTypeListModel;
+	private final Property<CompositeModel> typeListModel = new SimpleObjectProperty<>();;
+	private final Property<CompositeModel> titleTypeListModel = new SimpleObjectProperty<>();;
 
-	private final ObservableValue<TypeTableModel> typeTableModel;
+	private final Property<CompositeModel> typeTableModel = new SimpleObjectProperty<>();;
 
 	// private final ObservableValue<TitleTypeTableModel> titleTypeTableModel;
 	// private final ObservableValue<InsertTitleTypeTableModel> insertableTitleTypeTableModel;
 	// private final ObservableValue<InsertTitleTypeTableModel> colorsInsertableTitleTypeTableModel;
 
-	public AppModel(Engine engine, Generic type) {
+	public AppModel(Engine engine) {
 		super(new Generic[] { engine }, StringExtractor.SIMPLE_CLASS_EXTRACTOR);
-		typeListModel = new ReadOnlyObjectWrapper<>(new CompositeModel<>(new Generic[] { type }, StringExtractor.SIMPLE_CLASS_EXTRACTOR));
-		titleTypeListModel = new ReadOnlyObjectWrapper<>(new CompositeModel<>(new Generic[] { type }, g -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management"));
-		typeTableModel = new ReadOnlyObjectWrapper<>(new TypeTableModel(new Generic[] { type }, g -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management"));
-
-		// titleTypeTableModel = new ReadOnlyObjectWrapper<>(new TitleTypeTableModel(type, typ -> attributes));
-		// insertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(type, typ -> attributes));
-		// colorsInsertableTitleTypeTableModel = new ReadOnlyObjectWrapper<>(new InsertTitleTypeTableModel(engine.find(Color.class), typ -> FXCollections.emptyObservableList()));
 	}
 
 	public void flush() {
@@ -40,15 +32,15 @@ public class AppModel extends CompositeModel {
 
 	/*********************************************************************************************************************************/
 
-	public ObservableValue<CompositeModel> getTypeListModel() {
+	public Property<CompositeModel> getTypeListModel() {
 		return typeListModel;
 	}
 
-	public ObservableValue<CompositeModel> getTitleTypeListModel() {
+	public Property<CompositeModel> getTitleTypeListModel() {
 		return titleTypeListModel;
 	}
 
-	public ObservableValue<TypeTableModel> getTypeTableModel() {
+	public Property<CompositeModel> getTypeTableModel() {
 		return typeTableModel;
 	}
 

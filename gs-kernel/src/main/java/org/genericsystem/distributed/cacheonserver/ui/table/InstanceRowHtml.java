@@ -1,28 +1,33 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
+import org.genericsystem.distributed.cacheonserver.ui.list.GSCompositeHtml;
+import org.genericsystem.distributed.ui.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
 import org.genericsystem.distributed.ui.components.HtmlButton;
 import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeHtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
-public class InstanceRowHtml<M extends InstanceRowModel> extends CompositeHtmlSection<M> {
+public class InstanceRowHtml<M extends CompositeModel> extends GSCompositeHtml<M> {
 
-	public InstanceRowHtml(TypeTableHtml<?> parent, StringExtractor extractor) {
-		super(parent, extractor);
+	public InstanceRowHtml(HtmlSection<CompositeModel> parent) {
+		super(parent);
 		addStyleClass("gsrow");
+		setObservableListExtractor(generics -> getAttributesExtractor().apply(generics));
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel<InstanceRowModel>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gstitlecell")).bindText(InstanceRowModel::getString);
-		new InstanceAttributeCellHtml<CompositeModel>(this, StringExtractor.SIMPLE_CLASS_EXTRACTOR).forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generics -> getAttributesExtractor().apply(generics), CompositeModel::new);
-		new HtmlButton<InstanceRowModel>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gsbuttoncell")).bindAction(InstanceRowModel::remove).setText("Remove");
+		new HtmlLabel<M>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gstitlecell")).bindText(CompositeModel::getString);
+		super.initChildren();
+		new HtmlButton<M>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gsbuttoncell")).bindAction(CompositeModel::remove).setText("Remove");
+	}
+
+	@Override
+	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
+		new InstanceAttributeCellHtml<CompositeModel>(parentSection);
 	}
 
 	ObservableListExtractor getAttributesExtractor() {
-		return this.<TypeTableHtml<?>> getParent().getAttributesExtractor();
+		return this.getParent().<TypeTableHtml<?>> getParent().getAttributesExtractor();
 	}
 }

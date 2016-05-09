@@ -9,11 +9,10 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 
+import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;
 import org.genericsystem.distributed.ui.ModelContext.ModelContextList;
-import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.CompositeModel.ModelConstructor;
-import org.genericsystem.distributed.ui.models.CompositeModel.ObservableListExtractor;
-import org.genericsystem.distributed.ui.models.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -72,22 +71,22 @@ public interface MetaBinder<N, W extends ObservableList<?>> {
 		};
 	}
 
-	public static <N, T extends Model> MetaBinder<N, ObservableList<T>> foreachBinder(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<T> constructor) {
-		return new MetaBinder<N, ObservableList<T>>() {
+	public static <N> MetaBinder<N, ObservableList<CompositeModel>> foreachBinder(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		return new MetaBinder<N, ObservableList<CompositeModel>>() {
 
 			private List<ListChangeListener<Model>> listeners = new ArrayList<>();
 
 			@Override
-			public void init(Function<Model, ObservableList<T>> method, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+			public void init(Function<Model, ObservableList<CompositeModel>> method, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
 				assert stringExtractor != null;
 				assert observableListExtractor != null;
 				assert constructor != null;
-				((CompositeModel<T>) viewContext.getModelContext().getModel()).initSubModels(observableListExtractor, gs -> constructor.build(gs, stringExtractor));
+				((CompositeModel) viewContext.getModelContext().getModel()).initSubModels(observableListExtractor, gs -> constructor.build(gs, stringExtractor));
 				MetaBinder.super.init(method, viewContext, childElement);
 			}
 
 			@Override
-			public void init(ObservableList<T> wrapper, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+			public void init(ObservableList<CompositeModel> wrapper, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
 				ModelContextList children = viewContext.getModelContext().getChildren(childElement);
 
 				ListChangeListener<Model> listener = (ListChangeListener<Model>) change -> {
@@ -113,7 +112,7 @@ public interface MetaBinder<N, W extends ObservableList<?>> {
 				listeners.add(listener);
 				wrapper.addListener(new WeakListChangeListener<>(listener));
 				int index = 0;
-				for (T model : wrapper)
+				for (CompositeModel model : wrapper)
 					children.insert(index++, model, viewContext);
 			}
 		};
