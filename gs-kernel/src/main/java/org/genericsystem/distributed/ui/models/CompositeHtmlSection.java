@@ -2,6 +2,7 @@ package org.genericsystem.distributed.ui.models;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.models.CompositeModel.Builder;
@@ -19,6 +20,10 @@ public class CompositeHtmlSection<M extends CompositeModel<?>> extends GenericHt
 
 	public CompositeGenericConstructor<M, ?> getModelConstructor() {
 		return modelConstructor;
+	}
+
+	public CompositeModel<?> build(Generic... generics) {
+		return makeModelBuilder().apply(generics);
 	}
 
 	@Override
