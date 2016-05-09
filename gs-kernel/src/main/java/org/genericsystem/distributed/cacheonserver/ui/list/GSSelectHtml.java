@@ -20,7 +20,7 @@ public class GSSelectHtml<M extends CompositeModel> extends HtmlSelect<M> {
 
 	@Override
 	protected void initChildren() {
-		new HtmlOption<CompositeModel>(this).forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b)).bindText(CompositeModel::getString);
+		new HtmlOption<CompositeModel>(this).forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b)).bindText(CompositeModel::getString).bindAction(CompositeModel::select);
 	}
 
 	public StringExtractor getStringExtractor() {
