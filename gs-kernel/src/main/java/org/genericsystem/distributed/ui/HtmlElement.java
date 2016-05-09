@@ -23,8 +23,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
+import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.distributed.ui.CompositeModel.ModelConstructor;
 import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
 import org.genericsystem.distributed.ui.CompositeModel.StringExtractor;
@@ -151,6 +151,9 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		public HtmlDomNode(String tag) {
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 			this.tag = tag;
+		}
+
+		public void initListener(){
 			this.text.addListener((o, oldValue, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue)));
 			this.styleClasses.addListener((ListChangeListener<String>) change -> {
 				JsonArray arrayJS = new JsonArray();
@@ -158,7 +161,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLECLASS, arrayJS));
 			});
 		}
-
+		
 		List<HtmlDomNode> getChildren() {
 			return children;
 		}
