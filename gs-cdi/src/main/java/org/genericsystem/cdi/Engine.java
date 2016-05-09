@@ -4,25 +4,25 @@ import java.util.function.Supplier;
 
 import javax.enterprise.inject.Vetoed;
 
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.AbstractCache;
 
 @Vetoed
 public class Engine extends org.genericsystem.kernel.Engine {
 
-	private final Supplier<Cache> cacheSupplier;
+	private final Supplier<AbstractCache> cacheSupplier;
 
-	public Engine(Supplier<Cache> cacheSupplier, String persistentDirectoryPath, Class<?>... userClasses) {
+	public Engine(Supplier<AbstractCache> cacheSupplier, String persistentDirectoryPath, Class<?>... userClasses) {
 		super(persistentDirectoryPath, userClasses);
 		assert cacheSupplier != null : "Unable to find the current cache. Did you miss to call start() method on it ?";
 		this.cacheSupplier = cacheSupplier;
 	}
 
 	@Override
-	public Cache getCurrentCache() {
+	public AbstractCache getCurrentCache() {
 		if (!isInitialized())
 			return super.getCurrentCache();
 		else {
-			Cache cache = cacheSupplier.get();
+			AbstractCache cache = cacheSupplier.get();
 			if (cache == null)
 				throw new IllegalStateException("Unable to find the current cache. Did you miss to call start() method on it ?");
 			return cache;

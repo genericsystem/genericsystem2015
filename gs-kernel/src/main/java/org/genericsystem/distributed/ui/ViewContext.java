@@ -52,9 +52,11 @@ public class ViewContext<M extends Model, N> {
 			int indexInChildren = parent.computeIndex(index, template);
 			parent.incrementSize(template);
 			nodeChildren.add(indexInChildren, node);
-			if (node instanceof HtmlDomNode)
+			if (node instanceof HtmlDomNode){
 				getRootViewContext().add(((HtmlDomNode) node).getId(), (HtmlDomNode) node);
+				((HtmlDomNode) node).initListener();
 			// sizeByElement.put(template, indexInChildren);
+			}
 		}
 		for (Element<?, N> childElement : template.<N> getChildren()) {
 			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
