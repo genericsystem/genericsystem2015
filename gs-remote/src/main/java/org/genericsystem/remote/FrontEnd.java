@@ -1,7 +1,8 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.remote;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,12 +12,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.Protocol;
+import org.genericsystem.common.Statics;
 import org.genericsystem.common.Vertex;
 import org.genericsystem.distributed.GSBuffer;
-import org.genericsystem.kernel.Statics;
+
 import com.google.common.base.Supplier;
 
 /**

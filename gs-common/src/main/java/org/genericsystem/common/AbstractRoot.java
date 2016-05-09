@@ -30,9 +30,9 @@ import org.genericsystem.defaults.DefaultVertex;
 public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject, Generic {
 
 	private final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
-	private final SystemCache systemCache = new SystemCache(this);
+	private final SystemCache systemCache = buildSystemCache(this);
 	protected boolean isInitialized = false;
-	private final ThreadLocal<Cache> cacheLocal = new ThreadLocal<Cache>();
+	private final ThreadLocal<AbstractCache> cacheLocal = new ThreadLocal<AbstractCache>();
 
 	@Override
 	public AbstractRoot getRoot() {
@@ -59,7 +59,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 	}
 
 	@Override
-	public abstract Cache newCache();
+	public abstract AbstractCache newCache();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -225,21 +225,21 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 	};
 
 	@Override
-	public Cache getCurrentCache() {
-		Cache context = cacheLocal.get();
+	public AbstractCache getCurrentCache() {
+		AbstractCache context = cacheLocal.get();
 		if (context == null)
 			throw new IllegalStateException("Unable to find the current cache, thread context is not defined. Did you miss to call start() method on your cache ? or perhaps have you accidentaly closed your engine ?");
 		return context;
 	}
 
-	protected Cache start(Cache cache) {
+	protected AbstractCache start(AbstractCache cache) {
 		if (cache == null)
 			throw new NullPointerException();
 		cacheLocal.set(cache);
 		return cache;
 	}
 
-	protected void stop(Cache cache) {
+	protected void stop(AbstractCache cache) {
 		cacheLocal.remove();
 	}
 

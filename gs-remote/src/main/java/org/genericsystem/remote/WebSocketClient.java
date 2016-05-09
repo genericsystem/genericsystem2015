@@ -1,4 +1,4 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.remote;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;

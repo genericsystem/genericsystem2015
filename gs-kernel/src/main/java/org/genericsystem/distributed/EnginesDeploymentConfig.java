@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.common.Statics;
 
 public class EnginesDeploymentConfig extends JsonObject {
 

@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonclient;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

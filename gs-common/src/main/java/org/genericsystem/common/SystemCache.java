@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -28,15 +29,13 @@ import org.genericsystem.api.core.annotations.value.LongValue;
 import org.genericsystem.api.core.annotations.value.ShortValue;
 import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.api.core.exceptions.CyclicException;
-import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.kernel.AbstractServer;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class SystemCache {
+public abstract class SystemCache {
 
 	private final Map<Class<?>, Generic> systemCache = new HashMap<>();
 
@@ -71,19 +70,19 @@ public class SystemCache {
 		List<Generic> overrides = setOverrides(clazz);
 		Serializable value = findValue(clazz);
 		List<Generic> components = setComponents(clazz);
-		Cache cache = root.getCurrentCache();
-		if (root instanceof AbstractServer)
-			systemProperty = new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
-		else {
-			systemProperty = cache.get(meta, overrides, value, components);
-			if (systemProperty == null)
-				throw new IllegalStateException("Unable to find class on server : " + clazz.getName());
-		}
+		AbstractCache cache = root.getCurrentCache();
+		/*
+		 * if (root instanceof AbstractServer) systemProperty = new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve(); else { systemProperty = cache.get(meta, overrides, value, components); if (systemProperty == null) throw new
+		 * IllegalStateException("Unable to find class on server : " + clazz.getName()); }
+		 */
+		systemProperty = getOrBuild(cache, clazz, meta, overrides, value, components);
 		put(clazz, systemProperty);
 		mountConstraints(clazz, systemProperty);
 		triggersDependencies(clazz);
 		return systemProperty;
 	}
+
+	protected abstract Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components);
 
 	private void put(Class<?> clazz, Generic vertex) {
 		systemCache.put(clazz, vertex);

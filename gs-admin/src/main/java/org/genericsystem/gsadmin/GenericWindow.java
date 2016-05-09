@@ -2,6 +2,7 @@ package org.genericsystem.gsadmin;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
@@ -10,11 +11,12 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.cacheonclient.ClientEngine;
+import org.genericsystem.common.Statics;
 import org.genericsystem.gsadmin.TableBuilder.TableCellTableBuilder;
 import org.genericsystem.gsadmin.TableBuilder.TextTableBuilder;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.remote.ClientEngine;
 import org.genericsystem.ui.table.Table;
 import org.genericsystem.ui.table.Window;
 

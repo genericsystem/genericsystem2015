@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

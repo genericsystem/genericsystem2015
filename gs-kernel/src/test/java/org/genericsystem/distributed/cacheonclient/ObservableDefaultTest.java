@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 import com.lmax.disruptor.TimeoutException;

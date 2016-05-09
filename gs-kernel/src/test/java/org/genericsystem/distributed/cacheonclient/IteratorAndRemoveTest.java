@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

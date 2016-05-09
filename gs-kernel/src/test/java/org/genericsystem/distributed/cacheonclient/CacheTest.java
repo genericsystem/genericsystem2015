@@ -1,16 +1,18 @@
 package org.genericsystem.distributed.cacheonclient;
 
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.exceptions.CacheNoStartedException;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test
 public class CacheTest extends AbstractTest {
 	public void test000() {
 		ClientEngine engine = new ClientEngine();
-		Cache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle2");
 		assert vehicle.isAlive();
 		System.out.println("----------------------------------------------");
@@ -26,7 +28,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test001() {
 		ClientEngine engine = new ClientEngine();
-		Cache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		assert vehicle.isAlive();
 		cache.clear();
@@ -127,7 +129,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test001_mountNewCache_nostarted() {
 		ClientEngine engine = new ClientEngine();
-		Cache currentCache = engine.getCurrentCache();
+		AbstractCache currentCache = engine.getCurrentCache();
 		currentCache.mount();
 		engine.newCache().start();
 		catchAndCheckCause(() -> currentCache.flush(), CacheNoStartedException.class);
@@ -135,8 +137,8 @@ public class CacheTest extends AbstractTest {
 
 	public void test002_mountNewCache() {
 		ClientEngine engine = new ClientEngine();
-		Cache cache = engine.newCache().start();
-		Cache currentCache = engine.getCurrentCache();
+		AbstractCache cache = engine.newCache().start();
+		AbstractCache currentCache = engine.getCurrentCache();
 		assert cache == currentCache;
 		currentCache.mount();
 		engine.addInstance("Vehicle");
@@ -145,7 +147,7 @@ public class CacheTest extends AbstractTest {
 
 	public void test005_TwoComponentsWithSameMetaInDifferentCaches_remove() {
 		ClientEngine engine = new ClientEngine();
-		Cache currentCache = engine.getCurrentCache();
+		AbstractCache currentCache = engine.getCurrentCache();
 		Generic vehicle = engine.addInstance("Vehicle");
 		Generic vehiclePower = engine.addInstance("vehiclePower", vehicle);
 		assert currentCache.getCacheLevel() == 0;

@@ -2,6 +2,7 @@ package org.genericsystem.distributed.cacheonclient;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

@@ -1,9 +1,11 @@
 package org.genericsystem.kernel;
 
 import java.util.Collections;
+
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Cache;
-import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.Statics;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.Generic;
 
 /**
@@ -35,11 +37,11 @@ public class Engine extends AbstractServer {
 	}
 
 	@Override
-	public Cache newCache() {
-		return new Cache(this);
+	public AbstractCache newCache() {
+		return new AbstractCache(this);
 	}
 
-	public Cache newCache(ContextEventListener<Generic> listener) {
-		return new Cache(this, listener);
+	public AbstractCache newCache(ContextEventListener<Generic> listener) {
+		return new AbstractCache(this, listener);
 	}
 }

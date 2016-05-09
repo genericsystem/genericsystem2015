@@ -6,7 +6,8 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.common.Statics;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

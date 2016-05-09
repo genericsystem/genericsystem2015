@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
 import org.genericsystem.distributed.ApplicationsDeploymentConfig;
@@ -80,7 +80,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			PersistentApplication application = apps.get(path);
 			if (application == null)
 				throw new IllegalStateException("Unable to load an application with path : " + path);
-			Cache cache = application.getEngine().newCache();
+			AbstractCache cache = application.getEngine().newCache();
 			HtmlElement app = cache.safeSupply(() -> application.newHtmlApp(socket));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);

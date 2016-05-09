@@ -8,6 +8,7 @@ import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.EnginesDeploymentConfig;
 import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

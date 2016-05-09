@@ -1,10 +1,10 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.remote;
 
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.IDifferential;
 
-public class ClientCache extends Cache {
+public class ClientCache extends AbstractCache {
 
 	protected ClientCache(ClientEngine root) {
 		super(root);

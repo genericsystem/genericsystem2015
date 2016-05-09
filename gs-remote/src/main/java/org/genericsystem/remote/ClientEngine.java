@@ -1,15 +1,17 @@
-package org.genericsystem.distributed.cacheonclient;
+package org.genericsystem.remote;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.Cache.ContextEventListener;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Statics;
+import org.genericsystem.common.SystemCache;
 import org.genericsystem.common.Vertex;
-import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse
@@ -42,6 +44,22 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	@Override
 	public ClientEngine getRoot() {
 		return this;
+	}
+
+	@Override
+	protected SystemCache buildSystemCache(AbstractRoot root) {
+		return new SystemCache(root) {
+
+			@Override
+			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+				// TODO Auto-generated method stub
+				Generic systemProperty = cache.get(meta, overrides, value, components);
+				if (systemProperty == null)
+					throw new IllegalStateException("Unable to find class on server : " + clazz.getName());
+				return systemProperty;
+			}
+
+		};
 	}
 
 	@Override

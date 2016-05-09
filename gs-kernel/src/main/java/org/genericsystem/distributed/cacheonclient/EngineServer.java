@@ -3,9 +3,11 @@ package org.genericsystem.distributed.cacheonclient;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
+
 import java.util.Collections;
 import java.util.List;
-import org.genericsystem.common.Cache;
+
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.distributed.AbstractBackEnd;
 import org.genericsystem.distributed.AbstractWebSocketsServer;
 import org.genericsystem.distributed.EnginesDeploymentConfig;
@@ -13,6 +15,7 @@ import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEn
 import org.genericsystem.distributed.GSBuffer;
 import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.remote.FrontEnd;
 
 /**
  * @author Nicolas Feybesse
@@ -77,7 +80,7 @@ public class EngineServer extends AbstractBackEnd {
 			if (root == null)
 				throw new IllegalStateException("Unable to find database :" + path);
 
-			Cache cache = root.newCache();
+			AbstractCache cache = root.newCache();
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				int methodId = gsBuffer.getInt();

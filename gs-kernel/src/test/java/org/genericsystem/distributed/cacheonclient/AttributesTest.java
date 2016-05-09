@@ -3,6 +3,7 @@ package org.genericsystem.distributed.cacheonclient;
 import java.util.Arrays;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.remote.ClientEngine;
 import org.testng.annotations.Test;
 
 @Test

@@ -15,6 +15,9 @@
         <dependent-module archiveName="gs-api-4.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gs-api/gs-api">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="gs-common-4.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gs-common/gs-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="gs-example-jsf"/>
         <property name="java-output-path" value="/gs-example-jsf/target/classes"/>
     </wb-module>

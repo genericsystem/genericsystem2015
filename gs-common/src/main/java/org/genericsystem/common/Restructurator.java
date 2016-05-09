@@ -15,9 +15,9 @@ import org.genericsystem.common.GenericBuilder.AtomicBuilder;
  */
 public class Restructurator {
 
-	private final Cache context;
+	private final AbstractCache context;
 
-	Restructurator(Cache context) {
+	Restructurator(AbstractCache context) {
 		this.context = context;
 	}
 

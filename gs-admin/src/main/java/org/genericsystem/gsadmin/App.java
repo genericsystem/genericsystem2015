@@ -15,8 +15,8 @@ import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
-import org.genericsystem.distributed.cacheonclient.ClientEngine;
 import org.genericsystem.distributed.cacheonclient.EngineServer;
+import org.genericsystem.remote.ClientEngine;
 
 public class App extends Application {
 
