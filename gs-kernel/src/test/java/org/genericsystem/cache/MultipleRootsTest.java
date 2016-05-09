@@ -1,10 +1,11 @@
 package org.genericsystem.cache;
 
 import java.util.Arrays;
+
 import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.kernel.Statics;
 import org.testng.annotations.Test;
 
 @Test

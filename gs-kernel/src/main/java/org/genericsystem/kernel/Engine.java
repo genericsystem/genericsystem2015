@@ -1,10 +1,17 @@
 package org.genericsystem.kernel;
 
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Cache;
-import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
+import org.genericsystem.common.Statics;
+import org.genericsystem.common.SystemCache;
 
 /**
  * @author Nicolas Feybesse
@@ -22,6 +29,18 @@ public class Engine extends AbstractServer {
 		archiver = new Archiver(this, persistentDirectoryPath);
 		isInitialized = true;
 		newCache().start();
+	}
+
+	@Override
+	protected SystemCache buildSystemCache(AbstractRoot root) {
+		return new SystemCache(root) {
+
+			@Override
+			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+				return new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
+
+			}
+		};
 	}
 
 	@Override

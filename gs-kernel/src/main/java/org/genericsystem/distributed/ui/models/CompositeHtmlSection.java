@@ -2,6 +2,7 @@ package org.genericsystem.distributed.ui.models;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.models.CompositeModel.Builder;
@@ -17,19 +18,19 @@ public class CompositeHtmlSection<M extends CompositeModel<?>> extends GenericHt
 		this.modelConstructor = modelConstructor;
 	}
 
-	public CompositeGenericConstructor<M, ?> getModelConstructor() {
+	public CompositeGenericConstructor getModelConstructor() {
 		return modelConstructor;
 	}
 
 	@Override
 	protected Builder<M> makeModelBuilder() {
-		ObservableList<CompositeModel<?>> subModels = FXCollections.observableArrayList();
+		ObservableList<CompositeModel> subModels = FXCollections.observableArrayList();
 		return generics -> {
 			for (Element<?, ?> elt : getChildren()) {
 				final Builder<?> leafBuilder = ((GenericHtmlSection) elt).makeModelBuilder();
 				subModels.add(leafBuilder.apply(generics));
 			}
-			return getModelConstructor().build(generics, getStringExtractor(), subModels);
+			return (M) getModelConstructor().build(generics, getStringExtractor(), subModels);
 		};
 	}
 }

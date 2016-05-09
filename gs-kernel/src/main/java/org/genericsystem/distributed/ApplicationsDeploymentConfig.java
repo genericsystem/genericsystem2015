@@ -7,9 +7,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.genericsystem.distributed.EnginesDeploymentConfig.EngineDeploymentConfig;
+import org.genericsystem.common.Statics;
+import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.distributed.ui.components.HtmlApp;
-import org.genericsystem.kernel.Statics;
 
 /**
  * @author Nicolas Feybesse

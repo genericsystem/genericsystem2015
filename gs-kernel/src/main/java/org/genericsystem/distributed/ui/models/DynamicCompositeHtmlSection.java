@@ -1,6 +1,5 @@
 package org.genericsystem.distributed.ui.models;
 
-import javafx.collections.ObservableList;
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.models.CompositeModel.Builder;
@@ -22,6 +21,6 @@ public class DynamicCompositeHtmlSection<M extends CompositeModel<?>> extends Co
 		assert getChildren().size() == 1;
 		GenericHtmlSection<?> element = (GenericHtmlSection) getChildren().get(0);
 		final Builder<?> leafBuilder = element.makeModelBuilder();
-		return generics -> getModelConstructor().build(generics, getStringExtractor(), (ObservableList) new Transformation2<>(observableListExtractor.apply(generics), generic -> leafBuilder.apply(CompositeModel.addToGenerics(generic, generics))));
+		return generics -> (M) getModelConstructor().build(generics, getStringExtractor(), new Transformation2<>(observableListExtractor.apply(generics), generic -> leafBuilder.apply(CompositeModel.addToGenerics(generic, generics))));
 	}
 }

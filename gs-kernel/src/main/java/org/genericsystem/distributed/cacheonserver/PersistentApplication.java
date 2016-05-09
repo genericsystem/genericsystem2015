@@ -4,21 +4,21 @@ import io.vertx.core.http.ServerWebSocket;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.distributed.ui.components.HtmlApp;
-import org.genericsystem.kernel.AbstractServer;
 import org.genericsystem.kernel.Engine;
 
 public class PersistentApplication {
 	private final Class<? extends HtmlApp> clazz;
-	private AbstractServer engine;
+	private AbstractRoot engine;
 
-	public PersistentApplication(Class<? extends HtmlApp> clazz, AbstractServer engine) {
+	public PersistentApplication(Class<? extends HtmlApp> clazz, AbstractRoot engine) {
 		this.clazz = clazz;
 		this.engine = engine;
 		assert engine != null;
 	}
 
-	public AbstractServer getEngine() {
+	public AbstractRoot getEngine() {
 		return engine;
 	}
 

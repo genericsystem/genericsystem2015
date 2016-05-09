@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.common.Statics;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 

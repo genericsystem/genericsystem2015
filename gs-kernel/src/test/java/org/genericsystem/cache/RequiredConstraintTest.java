@@ -2,8 +2,9 @@ package org.genericsystem.cache;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Cache;
+import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.exceptions.RequiredConstraintViolationException;
 import org.genericsystem.kernel.Engine;
@@ -87,7 +88,7 @@ public class RequiredConstraintTest extends AbstractTest {
 		Generic myBmw = car.addInstance("myBmw");
 		Generic v236 = myBmw.addHolder(power, 236);
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-		Cache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		assert myBmw.getHolders(power).contains(v236);
 		cache.flush();
 		v236.remove();
@@ -105,7 +106,7 @@ public class RequiredConstraintTest extends AbstractTest {
 		Generic myBmw = car.addInstance("myBmw");
 		Generic v236 = myBmw.addHolder(power, 236);
 		assert power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-		Cache cache = engine.getCurrentCache();
+		AbstractCache cache = engine.getCurrentCache();
 		// power.getComponents().stream().forEach(x -> System.out.println(x.detailedInfo()));
 		cache.flush();
 		v236.remove();
