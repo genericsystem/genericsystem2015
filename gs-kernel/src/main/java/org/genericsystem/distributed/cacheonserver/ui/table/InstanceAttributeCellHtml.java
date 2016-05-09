@@ -1,18 +1,22 @@
 package org.genericsystem.distributed.cacheonserver.ui.table;
 
+import org.genericsystem.distributed.cacheonserver.ui.list.GSCompositeHtml;
+import org.genericsystem.distributed.ui.CompositeModel;
+import org.genericsystem.distributed.ui.CompositeModel.ObservableListExtractor;
+import org.genericsystem.distributed.ui.HtmlElement;
+import org.genericsystem.distributed.ui.components.HtmlLabel;
 import org.genericsystem.distributed.ui.components.HtmlSection;
-import org.genericsystem.distributed.ui.models.CompositeModel;
-import org.genericsystem.distributed.ui.models.GenericModel;
 
-public class InstanceAttributeCellHtml<M extends CompositeModel<GenericModel>> extends HtmlSection<M> {
+public class InstanceAttributeCellHtml<M extends CompositeModel> extends GSCompositeHtml<M> {
 
-	public InstanceAttributeCellHtml(InstanceRowHtml<?> parent) {
+	public InstanceAttributeCellHtml(HtmlElement<?, ?, ?> parent) {
 		super(parent);
 		addStyleClass("gscell");
+		setObservableListExtractor(ObservableListExtractor.HOLDERS);
 	}
 
 	@Override
-	protected void initChildren() {
-		new HolderSubCellHtml(this).forEach(CompositeModel<GenericModel>::getSubModels);
+	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
+		new HtmlLabel<CompositeModel>(parentSection).bindText(CompositeModel::getString);
 	}
 }

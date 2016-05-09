@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.genericsystem.distributed.EnginesDeploymentConfig.EngineDeploymentConfig;
+import org.genericsystem.distributed.cacheonserver.ui.exemple.AppHtml;
+import org.genericsystem.distributed.ui.HtmlElement;
 import org.genericsystem.distributed.ui.components.HtmlApp;
 import org.genericsystem.kernel.Statics;
 
@@ -39,7 +41,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return getJsonObject("apps").getMap().keySet();
 	}
 
-	public Class<? extends HtmlApp> getApplicationClass(String applicationPath) {
+	public Class<? extends AppHtml> getApplicationClass(String applicationPath) {
 		return getApplicationDeploymentConfig(applicationPath).getApplicationClass();
 	}
 
@@ -51,7 +53,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return new ApplicationDeploymentConfig(json.getMap());
 	}
 
-	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends HtmlApp> clazz, String persistentDirectoryPath, Class<?>... classes) {
+	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends HtmlElement> clazz, String persistentDirectoryPath, Class<?>... classes) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(clazz, persistentDirectoryPath, classes));
 		return this;
 	}
@@ -79,15 +81,15 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends HtmlApp> applicationClass, String repositoryPath, Class<?>... classes) {
+		public ApplicationDeploymentConfig(Class<? extends HtmlElement> applicationClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends HtmlApp> getApplicationClass() {
+		public Class<? extends AppHtml> getApplicationClass() {
 			try {
-				return (Class<? extends HtmlApp>) Class.forName(getString("applicationClass"));
+				return (Class<? extends AppHtml>) Class.forName(getString("applicationClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
