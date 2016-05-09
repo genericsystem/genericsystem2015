@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 
 /**

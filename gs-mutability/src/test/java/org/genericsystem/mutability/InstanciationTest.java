@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.common.Statics;
 import org.testng.annotations.Test;
 
 @Test

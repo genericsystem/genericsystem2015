@@ -1,8 +1,10 @@
 package org.genericsystem.kernel;
 
 import java.util.Arrays;
+
 import org.genericsystem.api.core.exceptions.CrossEnginesAssignementsException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Statics;
 import org.testng.annotations.Test;
 
 @Test

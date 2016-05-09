@@ -4,8 +4,8 @@ import org.genericsystem.admin.model.Car;
 import org.genericsystem.admin.model.CarColor;
 import org.genericsystem.admin.model.Color;
 import org.genericsystem.admin.model.Power;
-import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
-import org.genericsystem.distributed.cacheonclient.EngineServer;
+import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.kernel.EngineServer;
 
 public class Server {
 	public static void main(String[] args) {
