@@ -2,8 +2,9 @@ package org.genericsystem.api.core;
 
 /**
  * Represents the root of Generic System.
- * 
+ *
  * @author Nicolas Feybesse
+ *
  *
  * @param <T>
  *            the implementation of IRoot used for engine.
@@ -11,20 +12,24 @@ package org.genericsystem.api.core;
 public interface IRoot<T extends IVertex<T>> extends IVertex<T> {
 
 	/**
-	 * Return a vertex built during new Root.
+	 * This Method returns a node reference of the generic system graph which
+	 * corresponds to the class given as parameter. The node is statically
+	 * created at startup should the java annotation @SystemGeneric has been
+	 * positioned in the given Class. Thus the nodes created are permanently and
+	 * fastly accessible through this method and are not removable.
 	 *
 	 * @param <Custom>
 	 *            an implementation of a customizable subtype of T.
 	 * @param clazz
-	 *            the expected vertex.
-	 * @return a vertex.
+	 *            the expected class that should have @SystemGeneric annotation.
+	 * @return the vertex.
 	 */
 	<Custom extends T> Custom find(Class<?> clazz);
-	
+
 	/**
-	 * Return a vertex built during new Root.
-	 * If called during Root initialization, mount system node if nesscessary
-	 * 
+	 * Return a vertex built during new Root. If called during Root
+	 * initialization, mount system node if nesscessary
+	 *
 	 * @param <Custom>
 	 *            an implementation of a customizable subtype of T.
 	 * @param clazz
@@ -50,21 +55,24 @@ public interface IRoot<T extends IVertex<T>> extends IVertex<T> {
 	 */
 
 	/**
-	 * Return the meta attribute. The meta attribute is the super of all attributes.
-	 * 
+	 * Return the meta attribute. The meta attribute is the super of all
+	 * attributes.
+	 *
 	 * @return the meta attribute.
 	 */
 	T getMetaAttribute();
 
 	/**
-	 * Return the meta relation. The meta relation is the super of all relations.
-	 * 
+	 * Return the meta relation. The meta relation is the super of all
+	 * relations.
+	 *
 	 * @return the meta relation.
 	 */
 	T getMetaRelation();
 
 	/**
-	 * Close the root. All changes done in the cache but not committed are automatically rollbacked. Persist the last state of the engine.
+	 * Close the root. All changes done in the cache but not committed are
+	 * automatically rollbacked. Persist the last state of the engine.
 	 */
 	void close();
 
