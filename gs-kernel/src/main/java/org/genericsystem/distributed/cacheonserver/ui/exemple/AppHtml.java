@@ -25,10 +25,12 @@ import org.genericsystem.kernel.Engine;
 public class AppHtml extends HtmlApp<AppModel> {
 
 	private final Generic car;
+	private final Engine engine;
 	private final ObservableList<Generic> attributes;
 
 	public AppHtml(Engine engine, ServerWebSocket webSocket) {
 		super(new AppModel(engine), webSocket);
+		this.engine = engine;
 		car = engine.find(Car.class);
 		attributes = FXCollections.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find).collect(Collectors.toList()));
 		runScript(engine);
@@ -39,7 +41,7 @@ public class AppHtml extends HtmlApp<AppModel> {
 		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
-			new GSSelectHtml<>(div).select(AppModel::getTypeListModel, StringExtractor.MANAGEMENT, () -> car);
+			new GSSelectHtml<>(div).select(AppModel::getTypeListModel, StringExtractor.MANAGEMENT, () -> engine);
 			new GSTitleCompositeHtml<>(div).select(AppModel::getTitleTypeListModel, StringExtractor.MANAGEMENT, () -> car);
 			((TypeTableHtml<CompositeModel>) new TypeTableHtml<CompositeModel>(div).select(AppModel::getTypeTableModel, StringExtractor.MANAGEMENT, () -> car)).setAttributesExtractor(instance -> attributes);
 			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
