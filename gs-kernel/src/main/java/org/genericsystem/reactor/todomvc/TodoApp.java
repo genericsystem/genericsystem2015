@@ -2,21 +2,21 @@ package org.genericsystem.reactor.todomvc;
 
 import io.vertx.core.http.ServerWebSocket;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.reactor.components.HtmlApp;
-import org.genericsystem.reactor.components.HtmlButton;
-import org.genericsystem.reactor.components.HtmlCheckBox;
-import org.genericsystem.reactor.components.HtmlDiv;
-import org.genericsystem.reactor.components.HtmlFooter;
-import org.genericsystem.reactor.components.HtmlH1;
-import org.genericsystem.reactor.components.HtmlHeader;
-import org.genericsystem.reactor.components.HtmlHyperLink;
-import org.genericsystem.reactor.components.HtmlInputText;
-import org.genericsystem.reactor.components.HtmlLabel;
-import org.genericsystem.reactor.components.HtmlLi;
-import org.genericsystem.reactor.components.HtmlSection;
-import org.genericsystem.reactor.components.HtmlSpan;
-import org.genericsystem.reactor.components.HtmlStrong;
-import org.genericsystem.reactor.components.HtmlUl;
+import org.genericsystem.reactor.html.HtmlApp;
+import org.genericsystem.reactor.html.HtmlButton;
+import org.genericsystem.reactor.html.HtmlCheckBox;
+import org.genericsystem.reactor.html.HtmlDiv;
+import org.genericsystem.reactor.html.HtmlFooter;
+import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.html.HtmlHeader;
+import org.genericsystem.reactor.html.HtmlHyperLink;
+import org.genericsystem.reactor.html.HtmlInputText;
+import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.html.HtmlLi;
+import org.genericsystem.reactor.html.HtmlSection;
+import org.genericsystem.reactor.html.HtmlSpan;
+import org.genericsystem.reactor.html.HtmlStrong;
+import org.genericsystem.reactor.html.HtmlUl;
 
 /**
  * @author Nicolas Feybesse

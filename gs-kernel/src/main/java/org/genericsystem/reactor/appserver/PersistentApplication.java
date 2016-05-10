@@ -32,7 +32,8 @@ public class PersistentApplication {
 	public HtmlElement newHtmlApp(ServerWebSocket socket) {
 		try {
 			return getApplicationClass().getConstructor(Engine.class, ServerWebSocket.class).newInstance(getEngine(), socket).init();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
 			throw new IllegalStateException(e);
 		}
 	}

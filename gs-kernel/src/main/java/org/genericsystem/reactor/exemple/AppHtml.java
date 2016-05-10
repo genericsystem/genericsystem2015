@@ -13,11 +13,11 @@ import org.genericsystem.model.carcolor.Color;
 import org.genericsystem.model.carcolor.Power;
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.components.HtmlApp;
-import org.genericsystem.reactor.components.HtmlDiv;
-import org.genericsystem.reactor.list.GSSelectHtml;
-import org.genericsystem.reactor.list.GSCompositeHtml.GSTitleCompositeHtml;
-import org.genericsystem.reactor.table.TypeTableHtml;
+import org.genericsystem.reactor.composite.CompositeSectionHtml.TitleCompositeSectionHtml;
+import org.genericsystem.reactor.composite.CompositeSelectHtml;
+import org.genericsystem.reactor.composite.table.TypeTableHtml;
+import org.genericsystem.reactor.html.HtmlApp;
+import org.genericsystem.reactor.html.HtmlDiv;
 
 public class AppHtml extends HtmlApp<AppModel> {
 
@@ -29,7 +29,8 @@ public class AppHtml extends HtmlApp<AppModel> {
 		super(new AppModel(engine), webSocket);
 		this.engine = engine;
 		car = engine.find(Car.class);
-		attributes = FXCollections.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find).collect(Collectors.toList()));
+		attributes = FXCollections.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find)
+				.collect(Collectors.toList()));
 		runScript(engine);
 	}
 
@@ -38,9 +39,10 @@ public class AppHtml extends HtmlApp<AppModel> {
 		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
-			new GSSelectHtml<>(div).select(AppModel::getTypeListModel, StringExtractor.MANAGEMENT, () -> engine);
-			new GSTitleCompositeHtml<>(div).select(AppModel::getTitleTypeListModel, StringExtractor.MANAGEMENT, () -> car);
-			((TypeTableHtml<CompositeModel>) new TypeTableHtml<CompositeModel>(div).select(AppModel::getTypeTableModel, StringExtractor.MANAGEMENT, () -> car)).setAttributesExtractor(instance -> attributes);
+			new CompositeSelectHtml<>(div).select(AppModel::getTypeListModel, StringExtractor.MANAGEMENT, () -> engine);
+			new TitleCompositeSectionHtml<>(div).select(AppModel::getTitleTypeListModel, StringExtractor.MANAGEMENT, () -> car);
+			((TypeTableHtml<CompositeModel>) new TypeTableHtml<CompositeModel>(div).select(AppModel::getTypeTableModel, StringExtractor.MANAGEMENT, () -> car))
+					.setAttributesExtractor(instance -> attributes);
 			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);

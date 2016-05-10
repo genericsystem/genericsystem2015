@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.Statics;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.components.HtmlApp;
 import org.genericsystem.reactor.exemple.AppHtml;
+import org.genericsystem.reactor.html.HtmlApp;
 
 /**
  * @author Nicolas Feybesse
