@@ -2,12 +2,10 @@ package org.genericsystem.ui.components;
 
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.scene.Group;
-
-import org.genericsystem.distributed.ui.Element;
-import org.genericsystem.distributed.ui.Model;
-import org.genericsystem.distributed.ui.ViewContext.RootViewContext;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.ViewContext.RootViewContext;
 
 public class GSApplication extends Element<Group> {
 

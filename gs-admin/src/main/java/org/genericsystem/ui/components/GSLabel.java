@@ -1,11 +1,9 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSLabel extends GSRegion<GSLabel, Label> {
 	public GSLabel(Element<?> parent, String text) {

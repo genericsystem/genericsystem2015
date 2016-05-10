@@ -1,11 +1,9 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSTableView extends GSRegion<GSTableView, TableView> {
 

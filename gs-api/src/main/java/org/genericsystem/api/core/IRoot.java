@@ -12,12 +12,13 @@ package org.genericsystem.api.core;
 public interface IRoot<T extends IVertex<T>> extends IVertex<T> {
 
 	/**
-	 * This Method returns a node reference in the Generic System graph which
+	 * This Method returns a node reference from the Generic System graph which
 	 * corresponds to the class given as parameter. The node is statically
 	 * created at startup should the java annotation @SystemGeneric has been
 	 * positioned in the given Class. Thus the nodes created are permanently
 	 * accessible through this method and are not removable. It's a secure and
-	 * extremely fast way to a get a reference on a specific node.
+	 * extremely fast way to a get a reference on a specific node. The
+	 * specialization of implementation class can improve the standard behavior.
 	 *
 	 * @param <Custom>
 	 *            a customizable subtype of T.

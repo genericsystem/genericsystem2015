@@ -2,7 +2,6 @@ package org.genericsystem.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -14,8 +13,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.todomvc.Todo;
 
 public class TodoList extends Model {
 

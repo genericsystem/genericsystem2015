@@ -1,9 +1,8 @@
 package org.genericsystem.gsadmin;
 
 import javafx.scene.Group;
-
-import org.genericsystem.distributed.ui.Model;
 import org.genericsystem.gsadmin.GSCrud.GSEngineCrud;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.ui.components.GSApplication;
 import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;

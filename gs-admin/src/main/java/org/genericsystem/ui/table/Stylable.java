@@ -3,8 +3,7 @@ package org.genericsystem.ui.table;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Model;
 
 public class Stylable extends Model {
 	private final ObservableValue<String> styleClass;

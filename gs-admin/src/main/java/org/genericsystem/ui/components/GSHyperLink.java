@@ -1,11 +1,9 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Consumer;
-
 import javafx.event.Event;
 import javafx.scene.control.Hyperlink;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSHyperLink extends GSRegion<GSHyperLink, Hyperlink> {
 

@@ -4,8 +4,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Model;
 
 public abstract class Crud extends Model {
 	protected final Property<Table> table;

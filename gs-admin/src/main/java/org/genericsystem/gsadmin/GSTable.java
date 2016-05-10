@@ -1,11 +1,11 @@
 package org.genericsystem.gsadmin;
 
-import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.gsadmin.GSRow.GSEditableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSEditableCellTableRow;
 import org.genericsystem.gsadmin.GSRow.GSTableCellRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellFirstRow;
 import org.genericsystem.gsadmin.GSRow.GSTextCellRow;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSSCrollPane;
 import org.genericsystem.ui.components.GSVBox;

@@ -1,8 +1,9 @@
 package org.genericsystem.todomvc;
 
 import javafx.scene.Group;
-
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.todomvc.Todo;
+import org.genericsystem.reactor.todomvc.TodoList;
 import org.genericsystem.ui.components.GSApplication;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
