@@ -5,9 +5,9 @@ import java.util.List;
 
 import javassist.util.proxy.ProxyObject;
 
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 
-public interface GenericProxy extends DefaultVertex<Generic> {
+public interface GenericProxy extends DefaultGeneric<Generic> {
 	@Override
 	default AbstractRoot getRoot() {
 		return getProxyHandler().getRoot();

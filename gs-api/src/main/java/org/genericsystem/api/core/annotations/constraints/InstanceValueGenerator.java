@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Iterator;
 import java.util.List;
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 
 /**
  * The generator to compute the instances values.
@@ -26,7 +26,7 @@ public @interface InstanceValueGenerator {
 	 */
 	Class<? extends ValueGenerator> value() default DefaultInstanceValueGenerator.class;
 
-	public static interface ValueGenerator<T extends IVertex<T>> {
+	public static interface ValueGenerator<T extends IGeneric<T>> {
 		/**
 		 * @param meta
 		 * @param supers
@@ -37,7 +37,7 @@ public @interface InstanceValueGenerator {
 		Serializable generateInstanceValue(T meta, List<T> supers, Serializable value, List<T> components);
 	}
 
-	public static class DefaultInstanceValueGenerator<T extends IVertex<T>> implements ValueGenerator<T> {
+	public static class DefaultInstanceValueGenerator<T extends IGeneric<T>> implements ValueGenerator<T> {
 		/**
 		 * @return the generate value for new instances
 		 */

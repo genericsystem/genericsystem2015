@@ -1,11 +1,9 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.scene.control.TextField;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSTextField extends GSRegion<GSTextField, TextField> {
 

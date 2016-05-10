@@ -1,10 +1,8 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Consumer;
-
 import javafx.scene.layout.HBox;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSHBox extends GSPane<GSHBox, HBox> {
 

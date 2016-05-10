@@ -11,7 +11,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueClassCons
 import org.genericsystem.api.core.exceptions.ConstraintViolationException;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.constraints.Constraint.CheckableConstraint;
 import org.genericsystem.defaults.exceptions.PropertyConstraintViolationException;
 
@@ -29,7 +29,7 @@ import org.genericsystem.defaults.exceptions.PropertyConstraintViolationExceptio
 @Components(MetaAttribute.class)
 @InstanceValueClassConstraint(Boolean.class)
 @org.genericsystem.api.core.annotations.constraints.PropertyConstraint
-public class PropertyConstraint<T extends DefaultVertex<T>> implements CheckableConstraint<T> {
+public class PropertyConstraint<T extends DefaultGeneric<T>> implements CheckableConstraint<T> {
 	@Override
 	public void check(T modified, T attribute, Serializable value) throws ConstraintViolationException {
 		T base = modified.getBaseComponent();

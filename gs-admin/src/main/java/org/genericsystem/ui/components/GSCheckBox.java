@@ -1,12 +1,10 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.CheckBox;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSCheckBox extends GSRegion<GSCheckBox, CheckBox> {
 

@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class Statics {
 			log.info(message + " : " + (System.currentTimeMillis() - threadDebugged.get()));
 	}
 
-	public static class Supers<T extends DefaultVertex<T>> extends ArrayList<T> {
+	public static class Supers<T extends DefaultGeneric<T>> extends ArrayList<T> {
 		private static final long serialVersionUID = 6163099887384346235L;
 
 		public Supers(List<T> adds) {

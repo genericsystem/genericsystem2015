@@ -1,13 +1,11 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSComboBox<G> extends GSRegion<GSComboBox<G>, ComboBox> {
 	public GSComboBox(Element<?> parent) {

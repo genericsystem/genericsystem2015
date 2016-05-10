@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javafx.collections.ObservableList;
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.TransitiveObservableList;
 
@@ -18,7 +18,7 @@ import org.genericsystem.defaults.tools.TransitiveObservableList;
  *
  * @param <T>
  */
-public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex<T> {
+public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGeneric<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -320,20 +320,20 @@ public interface DefaultDependencies<T extends DefaultVertex<T>> extends IVertex
 		return getCurrentCache().getObservableComposites((T) this);
 	}
 
-	static <T extends DefaultVertex<T>> Predicate<T> valueFilter(Serializable value) {
+	static <T extends DefaultGeneric<T>> Predicate<T> valueFilter(Serializable value) {
 		return attribute -> Objects.equals(attribute.getValue(), value);
 	}
 
-	static <T extends DefaultVertex<T>> Predicate<T> overridesFilter(List<T> overrides) {
+	static <T extends DefaultGeneric<T>> Predicate<T> overridesFilter(List<T> overrides) {
 		return x -> overrides.isEmpty() ? x.getSupers().isEmpty() : filter(x.getSupers(), overrides).test(x);
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T extends DefaultVertex<T>> Predicate<T> componentsFilter(T... components) {
+	static <T extends DefaultGeneric<T>> Predicate<T> componentsFilter(T... components) {
 		return x -> filter(x.getComponents(), Arrays.asList(components)).test(x);
 	}
 
-	static <T extends DefaultVertex<T>> Predicate<T> filter(List<T> ancestors, List<T> ancestorsReached) {
+	static <T extends DefaultGeneric<T>> Predicate<T> filter(List<T> ancestors, List<T> ancestorsReached) {
 		return attribute -> {
 			List<T> attributeAncestors = new ArrayList<>(ancestors);
 			for (T ancestorsReach : ancestorsReached) {

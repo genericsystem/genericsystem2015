@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.api.core.IVertex.SystemProperty;
+import org.genericsystem.api.core.IGeneric.SystemProperty;
 
 /**
  * Indicates the <code>Class</code> value for an axed property.

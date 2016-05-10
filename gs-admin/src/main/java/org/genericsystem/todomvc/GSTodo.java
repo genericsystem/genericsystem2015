@@ -1,6 +1,7 @@
 package org.genericsystem.todomvc;
 
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.todomvc.Todo;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSCheckBox;
 import org.genericsystem.ui.components.GSHBox;

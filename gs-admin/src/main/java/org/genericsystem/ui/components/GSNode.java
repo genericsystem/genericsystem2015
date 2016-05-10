@@ -1,11 +1,9 @@
 package org.genericsystem.ui.components;
 
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public abstract class GSNode<Component extends GSNode<Component, N>, N extends Node> extends Element<N> {
 

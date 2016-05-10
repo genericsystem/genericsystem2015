@@ -19,7 +19,7 @@ import javafx.collections.ObservableList;
  * @param <T>
  */
 
-public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
+public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> {
 
 	private final Map<T, Collection<T>> inheritingsCache = new HashMap<>();
 
@@ -107,14 +107,14 @@ public class ObservableInheritanceComputer<T extends DefaultVertex<T>> {
 	}
 
 	@SuppressWarnings("hiding")
-	private <T extends DefaultVertex<T>> Stream<T> compositesByMeta(T localBase, T holder) {
+	private <T extends DefaultGeneric<T>> Stream<T> compositesByMeta(T localBase, T holder) {
 		ObservableList<T> composites = localBase.getObservableComposites().filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
 		binding.toBind(composites);
 		return composites.stream();
 	}
 
 	@SuppressWarnings("hiding")
-	private <T extends DefaultVertex<T>> Stream<T> compositesBySuper(T localBase, T holder) {
+	private <T extends DefaultGeneric<T>> Stream<T> compositesBySuper(T localBase, T holder) {
 		ObservableList<T> composites = localBase.getObservableComposites().filtered(x -> x.getSupers().contains(holder));
 		binding.toBind(composites);
 		return composites.stream();

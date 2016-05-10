@@ -1,6 +1,6 @@
 package org.genericsystem.gsadmin;
 
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;

@@ -4,13 +4,13 @@ import javafx.beans.Observable;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public interface IDifferential<T extends DefaultVertex<T>> {
+public interface IDifferential<T extends DefaultGeneric<T>> {
 
 	long getTs();
 

@@ -3,9 +3,8 @@ package org.genericsystem.gsadmin;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Model;
 
 public class GenericCombobox extends Model {
 

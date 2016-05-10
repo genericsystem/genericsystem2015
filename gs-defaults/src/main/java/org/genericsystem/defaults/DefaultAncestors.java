@@ -1,14 +1,14 @@
 package org.genericsystem.defaults;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-public interface DefaultAncestors<T extends DefaultVertex<T>> extends IVertex<T> {
+public interface DefaultAncestors<T extends DefaultGeneric<T>> extends IGeneric<T> {
 
 	@Override
 	default boolean isRoot() {

@@ -23,7 +23,7 @@ import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
  *
  * @param <T>
  */
-public interface DefaultContext<T extends DefaultVertex<T>> extends IContext<T> {
+public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T> {
 
 	DefaultRoot<T> getRoot();
 

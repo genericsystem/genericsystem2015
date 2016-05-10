@@ -1,5 +1,6 @@
 package org.genericsystem.todomvc;
 
+import org.genericsystem.reactor.todomvc.TodoList;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
