@@ -1,10 +1,17 @@
 package org.genericsystem.kernel;
 
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Cache;
-import org.genericsystem.common.Cache.ContextEventListener;
+import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.AbstractCache.ContextEventListener;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
+import org.genericsystem.common.Statics;
+import org.genericsystem.common.SystemCache;
 
 /**
  * @author Nicolas Feybesse
@@ -25,6 +32,18 @@ public class Engine extends AbstractServer {
 	}
 
 	@Override
+	protected SystemCache buildSystemCache(AbstractRoot root) {
+		return new SystemCache(root) {
+
+			@Override
+			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+				// TODO Auto-generated method stub
+				return new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
+			}
+		};
+	}
+
+	@Override
 	protected Generic init(Generic generic, DefaultHandler handler) {
 		return super.init(generic, handler);
 	}
@@ -35,11 +54,11 @@ public class Engine extends AbstractServer {
 	}
 
 	@Override
-	public Cache newCache() {
+	public AbstractCache newCache() {
 		return new Cache(this);
 	}
 
-	public Cache newCache(ContextEventListener<Generic> listener) {
+	public AbstractCache newCache(ContextEventListener<Generic> listener) {
 		return new Cache(this, listener);
 	}
 }

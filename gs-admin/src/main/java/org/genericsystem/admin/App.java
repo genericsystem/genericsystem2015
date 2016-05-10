@@ -17,10 +17,10 @@ import org.genericsystem.admin.model.Color.Red;
 import org.genericsystem.admin.model.Color.Yellow;
 import org.genericsystem.admin.model.Power;
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
-import org.genericsystem.distributed.cacheonclient.ClientEngine;
-import org.genericsystem.distributed.cacheonclient.EngineServer;
-import org.genericsystem.kernel.Statics;
+import org.genericsystem.common.Statics;
+import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineDeployment;
+import org.genericsystem.kernel.EngineServer;
+import org.genericsystem.remote.ClientEngine;
 
 /**
  * @author Nicolas Feybesse
