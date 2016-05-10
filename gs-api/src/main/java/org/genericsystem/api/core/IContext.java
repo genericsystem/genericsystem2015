@@ -6,6 +6,6 @@ package org.genericsystem.api.core;
  * @param <T>
  *            the implementation of IVertex used for all nodes.
  */
-public interface IContext<T extends IVertex<T>> {
+public interface IContext<T extends IGeneric<T>> {
 
 }

@@ -11,7 +11,7 @@ import org.genericsystem.defaults.DefaultConfig.SystemMap;
  *
  * @param <T>
  */
-public interface DefaultRoot<T extends DefaultVertex<T>> extends IRoot<T>, DefaultVertex<T> {
+public interface DefaultRoot<T extends DefaultGeneric<T>> extends IRoot<T>, DefaultGeneric<T> {
 
 	@Override
 	DefaultCache<T> getCurrentCache();

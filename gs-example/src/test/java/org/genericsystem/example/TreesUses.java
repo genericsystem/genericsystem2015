@@ -2,7 +2,7 @@ package org.genericsystem.example;
 
 import java.util.Arrays;
 
-import org.genericsystem.api.core.IVertex.Visitor;
+import org.genericsystem.api.core.IGeneric.Visitor;
 import org.genericsystem.mutability.Engine;
 import org.genericsystem.mutability.Generic;
 

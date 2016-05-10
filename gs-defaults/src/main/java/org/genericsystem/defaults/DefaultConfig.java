@@ -1,7 +1,7 @@
 package org.genericsystem.defaults;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.IVertex.SystemProperty;
+import org.genericsystem.api.core.IGeneric.SystemProperty;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.api.core.annotations.Meta;

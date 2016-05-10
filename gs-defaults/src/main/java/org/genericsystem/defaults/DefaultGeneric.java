@@ -26,7 +26,7 @@ import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationExceptio
  *
  * @param <T>
  */
-public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
+public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
 
 	@Override
 	default ObservableList<T> getObservableComposites() {
@@ -85,7 +85,7 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return getCurrentCache().update((T) this, overrides, newValue, Arrays.asList(newComponents));
 	}
 
-	static <T extends DefaultVertex<T>> boolean isSuperOf(T subMeta, Serializable subValue, List<T> subComponents, T superMeta, Serializable superValue, List<T> superComponents) {
+	static <T extends DefaultGeneric<T>> boolean isSuperOf(T subMeta, Serializable subValue, List<T> subComponents, T superMeta, Serializable superValue, List<T> superComponents) {
 		if (subMeta == null) {
 			if (!superMeta.isMeta())
 				return false;
@@ -241,11 +241,11 @@ public interface DefaultVertex<T extends DefaultVertex<T>> extends DefaultAncest
 		return true;
 	}
 
-	public static <T extends DefaultVertex<T>> boolean genericEquals(T component, ISignature<?> compare) {
+	public static <T extends DefaultGeneric<T>> boolean genericEquals(T component, ISignature<?> compare) {
 		return (component == compare) || (component != null && component.genericEquals(compare));
 	}
 
-	public static <T extends DefaultVertex<T>> boolean equiv(T component, ISignature<?> compare) {
+	public static <T extends DefaultGeneric<T>> boolean equiv(T component, ISignature<?> compare) {
 		return (component == compare) || (component != null && component.equiv(compare));
 	}
 

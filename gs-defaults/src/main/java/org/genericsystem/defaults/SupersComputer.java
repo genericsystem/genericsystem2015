@@ -14,7 +14,7 @@ import org.genericsystem.api.core.ApiStatics;
  *
  * @param <T>
  */
-public class SupersComputer<T extends DefaultVertex<T>> extends LinkedHashSet<T> {
+public class SupersComputer<T extends DefaultGeneric<T>> extends LinkedHashSet<T> {
 
 	private static final long serialVersionUID = -1078004898524170057L;
 

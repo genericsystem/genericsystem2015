@@ -9,7 +9,7 @@ package org.genericsystem.api.core;
  * @param <T>
  *            the implementation of IRoot used for engine.
  */
-public interface IRoot<T extends IVertex<T>> extends IVertex<T> {
+public interface IRoot<T extends IGeneric<T>> extends IGeneric<T> {
 
 	/**
 	 * This Method returns a node reference from the Generic System graph which

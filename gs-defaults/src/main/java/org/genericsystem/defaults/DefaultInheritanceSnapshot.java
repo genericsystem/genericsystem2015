@@ -10,7 +10,7 @@ import org.genericsystem.api.core.Snapshot;
  *
  * @param <T>
  */
-public interface DefaultInheritanceSnapshot<T extends DefaultVertex<T>> extends Snapshot<T> {
+public interface DefaultInheritanceSnapshot<T extends DefaultGeneric<T>> extends Snapshot<T> {
 
 	@Override
 	default DefaultInheritanceSnapshot<T> filter(Predicate<T> predicate) {

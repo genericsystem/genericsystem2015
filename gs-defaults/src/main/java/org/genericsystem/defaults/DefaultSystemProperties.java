@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.NotFoundException;
 import org.genericsystem.defaults.DefaultConfig.CascadeRemoveProperty;
@@ -24,7 +24,7 @@ import org.genericsystem.defaults.constraints.UniqueValueConstraint;
  *
  * @param <T>
  */
-public interface DefaultSystemProperties<T extends DefaultVertex<T>> extends IVertex<T> {
+public interface DefaultSystemProperties<T extends DefaultGeneric<T>> extends IGeneric<T> {
 
 	@Override
 	default Serializable getSystemPropertyValue(Class<? extends SystemProperty> propertyClass, int pos) {

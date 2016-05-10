@@ -11,7 +11,7 @@ import org.genericsystem.api.core.exceptions.ConstraintViolationException;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.constraints.Constraint.CheckedConstraint;
 import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolationException;
 
@@ -29,7 +29,7 @@ import org.genericsystem.defaults.exceptions.InstanceValueClassConstraintViolati
 @Components(DefaultRoot.class)
 @PropertyConstraint
 @org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint(Class.class)
-public class InstanceValueClassConstraint<T extends DefaultVertex<T>> implements CheckedConstraint<T> {
+public class InstanceValueClassConstraint<T extends DefaultGeneric<T>> implements CheckedConstraint<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void check(T modified, T attribute, Serializable value) throws ConstraintViolationException {

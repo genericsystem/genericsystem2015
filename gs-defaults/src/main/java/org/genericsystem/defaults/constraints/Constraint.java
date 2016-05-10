@@ -2,9 +2,9 @@ package org.genericsystem.defaults.constraints;
 
 import java.io.Serializable;
 
-import org.genericsystem.api.core.IVertex.SystemProperty;
+import org.genericsystem.api.core.IGeneric.SystemProperty;
 import org.genericsystem.api.core.exceptions.ConstraintViolationException;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 
 /**
  * Represents a constraint in Generic System. A constraint is special form of system property which constrains Generic System.
@@ -14,7 +14,7 @@ import org.genericsystem.defaults.DefaultVertex;
  * @param <T>
  *            the implementation of DefaultVertex.
  */
-public interface Constraint<T extends DefaultVertex<T>> extends SystemProperty {
+public interface Constraint<T extends DefaultGeneric<T>> extends SystemProperty {
 	/**
 	 * Checks this constraint.
 	 * 
@@ -43,7 +43,7 @@ public interface Constraint<T extends DefaultVertex<T>> extends SystemProperty {
 	 * @param <T>
 	 *            the implementation of DefaultVertex.
 	 */
-	public static interface AxedCheckedConstraint<T extends DefaultVertex<T>> extends Constraint<T> {
+	public static interface AxedCheckedConstraint<T extends DefaultGeneric<T>> extends Constraint<T> {
 		/**
 		 * Checks this constraint.
 		 * 
@@ -74,7 +74,7 @@ public interface Constraint<T extends DefaultVertex<T>> extends SystemProperty {
 	 * @param <T>
 	 *            the implementation of DefaultVertex.
 	 */
-	public static interface CheckedConstraint<T extends DefaultVertex<T>> extends AxedCheckedConstraint<T> {
+	public static interface CheckedConstraint<T extends DefaultGeneric<T>> extends AxedCheckedConstraint<T> {
 		/**
 		 * Checks this constraint.
 		 * 
@@ -101,7 +101,7 @@ public interface Constraint<T extends DefaultVertex<T>> extends SystemProperty {
 	 * @param <T>
 	 *            the implementation of DefaultVertex.
 	 */
-	public static interface AxedCheckableConstraint<T extends DefaultVertex<T>> extends Constraint<T> {
+	public static interface AxedCheckableConstraint<T extends DefaultGeneric<T>> extends Constraint<T> {
 		/**
 		 * Checks this constraint.
 		 * 
@@ -149,7 +149,7 @@ public interface Constraint<T extends DefaultVertex<T>> extends SystemProperty {
 	 * @param <T>
 	 *            the implementation of DefaultVertex.
 	 */
-	public static interface CheckableConstraint<T extends DefaultVertex<T>> extends AxedCheckableConstraint<T> {
+	public static interface CheckableConstraint<T extends DefaultGeneric<T>> extends AxedCheckableConstraint<T> {
 		/**
 		 * Checks this constraint.
 		 * 

@@ -16,7 +16,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
  * @param <T>
  *            the implementation of IVertex used for all nodes.
  */
-public interface IVertex<T extends IVertex<T>> extends ISignature<T> {
+public interface IGeneric<T extends IGeneric<T>> extends ISignature<T> {
 
 	/**
 	 * Indicates whether this vertex is the root of the graph.
@@ -1390,7 +1390,7 @@ public interface IVertex<T extends IVertex<T>> extends ISignature<T> {
 	 * @param <T>
 	 *            the implementation of IVertex used for all nodes.
 	 */
-	public abstract static class Visitor<T extends IVertex<T>> {
+	public abstract static class Visitor<T extends IGeneric<T>> {
 		private final Set<T> alreadyVisited = new HashSet<>();
 
 		/**

@@ -2,13 +2,13 @@ package org.genericsystem.api.core;
 
 import java.io.Serializable;
 
-import org.genericsystem.api.core.IVertex.SystemProperty;
+import org.genericsystem.api.core.IGeneric.SystemProperty;
 
 /**
  * Represents the <code>Class</code> for an axed property.
  * 
  * @author Nicolas Feybesse
- * @see org.genericsystem.api.core.IVertex.SystemProperty
+ * @see org.genericsystem.api.core.IGeneric.SystemProperty
  */
 public class AxedPropertyClass implements Serializable {
 	private static final long serialVersionUID = -2631066712866842794L;

@@ -10,7 +10,7 @@ import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
  *
  * @param <T>
  */
-public interface DefaultCache<T extends DefaultVertex<T>> extends DefaultContext<T> {
+public interface DefaultCache<T extends DefaultGeneric<T>> extends DefaultContext<T> {
 
 	T addInstance(T meta, List<T> overrides, Serializable value, List<T> components);
 

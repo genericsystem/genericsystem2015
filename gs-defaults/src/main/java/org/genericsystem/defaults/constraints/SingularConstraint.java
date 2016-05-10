@@ -10,7 +10,7 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.exceptions.ConstraintViolationException;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.constraints.Constraint.AxedCheckedConstraint;
 import org.genericsystem.defaults.exceptions.SingularConstraintViolationException;
 
@@ -28,7 +28,7 @@ import org.genericsystem.defaults.exceptions.SingularConstraintViolationExceptio
 @Components(MetaAttribute.class)
 @InstanceValueClassConstraint(Boolean.class)
 @PropertyConstraint
-public class SingularConstraint<T extends DefaultVertex<T>> implements AxedCheckedConstraint<T> {
+public class SingularConstraint<T extends DefaultGeneric<T>> implements AxedCheckedConstraint<T> {
 	@Override
 	public void check(T modified, T attribute, Serializable value, int axe, boolean isRevert) throws ConstraintViolationException {
 		T base = isRevert ? modified : modified.getComponents().get(axe);
