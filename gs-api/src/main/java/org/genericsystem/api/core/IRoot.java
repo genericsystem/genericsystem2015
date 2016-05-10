@@ -12,14 +12,15 @@ package org.genericsystem.api.core;
 public interface IRoot<T extends IVertex<T>> extends IVertex<T> {
 
 	/**
-	 * This Method returns a node reference of the generic system graph which
+	 * This Method returns a node reference in the Generic System graph which
 	 * corresponds to the class given as parameter. The node is statically
 	 * created at startup should the java annotation @SystemGeneric has been
-	 * positioned in the given Class. Thus the nodes created are permanently and
-	 * fastly accessible through this method and are not removable.
+	 * positioned in the given Class. Thus the nodes created are permanently
+	 * accessible through this method and are not removable. It's a secure and
+	 * extremely fast way to a get a reference on a specific node.
 	 *
 	 * @param <Custom>
-	 *            an implementation of a customizable subtype of T.
+	 *            a customizable subtype of T.
 	 * @param clazz
 	 *            the expected class that should have @SystemGeneric annotation.
 	 * @return the vertex.
@@ -42,15 +43,15 @@ public interface IRoot<T extends IVertex<T>> extends IVertex<T> {
 
 	/*
 	 * T addType(Serializable value);
-	 * 
+	 *
 	 * T addType(T override, Serializable value);
-	 * 
+	 *
 	 * T addType(List<T> overrides, Serializable value);
-	 * 
+	 *
 	 * T setType(Serializable value);
-	 * 
+	 *
 	 * T setType(T override, Serializable value);
-	 * 
+	 *
 	 * T setType(List<T> overrides, Serializable value);
 	 */
 
