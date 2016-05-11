@@ -17,6 +17,7 @@ import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
 
 /**
@@ -24,15 +25,6 @@ import org.genericsystem.reactor.html.HtmlApp;
  *
  */
 public class ApplicationServer extends AbstractBackEnd {
-
-	// TODO move example
-	// public static void main(String[] args) {
-	// ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-	// apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
-	// apps.addApplication("/second", AppHtml.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
-	// // apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
-	// new ApplicationServer(apps).start();
-	// }
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
 
@@ -50,7 +42,8 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(path)));
+			apps.put(applicationPath,
+					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
 			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
 					+ " and persistence directory path : " + directoryPath);
 		}
@@ -62,8 +55,8 @@ public class ApplicationServer extends AbstractBackEnd {
 	}
 
 	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
-			BiFunction<String, Class<? extends Generic>[], AbstractRoot> engineBuilder) {
-		return new PersistentApplication(applicationClass, engineBuilder.apply(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)));
+			Class<? extends Model> modelClass, AbstractRoot engine) {
+		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {

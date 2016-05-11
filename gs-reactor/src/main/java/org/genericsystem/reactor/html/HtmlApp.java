@@ -15,15 +15,13 @@ public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>
 
 	private final ServerWebSocket webSocket;
 	private RootViewContext<?, HtmlDomNode> rootViewContext;
-	private M model;
 
-	public HtmlApp(M model, ServerWebSocket webSocket) {
+	public HtmlApp(ServerWebSocket webSocket) {
 		super(null, HtmlDomNode.class);
-		this.model = model;
 		this.webSocket = webSocket;
 	}
 
-	public HtmlApp<M> init() {
+	public HtmlApp<M> init(M model) {
 		rootViewContext = new RootViewContext<>(model, (Element) this, new HtmlDomNode("div"));
 		return this;
 	}
@@ -36,5 +34,4 @@ public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
 	}
-
 }

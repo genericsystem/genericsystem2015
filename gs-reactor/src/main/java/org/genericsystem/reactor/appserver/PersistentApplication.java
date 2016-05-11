@@ -8,30 +8,33 @@ import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
 
 public class PersistentApplication {
-	private final Class<? extends HtmlApp<?>> clazz;
-	private AbstractRoot engine;
+	private final Class<? extends HtmlApp<?>> htmlAppClass;
+	private final AbstractRoot engine;
+	private final Class<? extends Model> modelClass;
 
-	public PersistentApplication(Class<? extends HtmlApp<?>> clazz, AbstractRoot engine) {
-		this.clazz = clazz;
+	public PersistentApplication(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, AbstractRoot engine) {
+		this.htmlAppClass = htmlAppClass;
+		this.modelClass = modelClass;
 		this.engine = engine;
-		assert engine != null;
 	}
 
 	public AbstractRoot getEngine() {
 		return engine;
 	}
 
-	public Class<? extends HtmlApp> getApplicationClass() {
-		return clazz;
+	public Class<? extends HtmlApp<?>> getApplicationClass() {
+		return htmlAppClass;
 	}
 
 	public void close() {
 		engine.close();
 	}
 
-	public HtmlElement newHtmlApp(ServerWebSocket socket) {
-		try { KK
-			return getApplicationClass().getConstructor(Model.class, ServerWebSocket.class).newInstance(getEngine(), socket).init();
+	@SuppressWarnings("unchecked")
+	public HtmlElement<?, ?, ?> newHtmlApp(ServerWebSocket socket) {
+		try {
+			return ((HtmlApp<Model>) getApplicationClass().getConstructor(ServerWebSocket.class).newInstance(getEngine(), socket)).init(modelClass
+					.getConstructor(AbstractRoot.class).newInstance(engine));
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 			throw new IllegalStateException(e);
