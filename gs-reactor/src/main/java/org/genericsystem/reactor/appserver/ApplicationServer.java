@@ -4,18 +4,17 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.function.BiFunction;
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
-import org.genericsystem.kernel.AbstractServer;
-import org.genericsystem.kernel.Engine;
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 import org.genericsystem.reactor.html.HtmlApp;
@@ -26,13 +25,14 @@ import org.genericsystem.reactor.html.HtmlApp;
  */
 public class ApplicationServer extends AbstractBackEnd {
 
-	public static void main(String[] args) {
-		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-		apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
-		apps.addApplication("/second", AppHtml.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
-		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
-		new ApplicationServer(apps).start();
-	}
+	// TODO move example
+	// public static void main(String[] args) {
+	// ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
+	// apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+	// apps.addApplication("/second", AppHtml.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
+	// // apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
+	// new ApplicationServer(apps).start();
+	// }
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
 
@@ -41,7 +41,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
-			AbstractServer root = buildRoot(directoryPath, options.getClasses(directoryPath));
+			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineBuilder(applicationPath));
 			System.out.println("Starts engine with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
@@ -56,12 +56,14 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	protected AbstractServer buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses) {
-		return new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new));
+	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses,
+			BiFunction<String, Class<? extends Generic>[], AbstractRoot> engineBuilder) {
+		return engineBuilder.apply(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new));
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses) {
-		return new PersistentApplication(applicationClass, new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)));
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
+			BiFunction<String, Class<? extends Generic>[], AbstractRoot> engineBuilder) {
+		return new PersistentApplication(applicationClass, engineBuilder.apply(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)));
 	}
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
@@ -82,7 +84,7 @@ public class ApplicationServer extends AbstractBackEnd {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = ((AppHtml) app).getNodeById(json.getString(HtmlElement.ID));
+				HtmlDomNode node = ((HtmlApp) app).getNodeById(json.getString(HtmlElement.ID));
 				if (node != null)
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};

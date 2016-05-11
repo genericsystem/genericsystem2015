@@ -1,13 +1,14 @@
 package org.genericsystem.reactor.appserver;
 
 import io.vertx.core.json.JsonObject;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.html.HtmlApp;
@@ -26,6 +27,10 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		put("apps", new JsonObject());
 		put("host", host);
 		put("port", port);
+	}
+
+	public BiFunction<String, Class<? extends Generic>[], AbstractRoot> getEngineBuilder(String applicationPath) {
+
 	}
 
 	public String getHost() {
