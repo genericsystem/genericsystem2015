@@ -2,8 +2,8 @@ package org.genericsystem.exemple;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.CompositeModel;
 
 public class AppModel extends CompositeModel {
@@ -17,7 +17,7 @@ public class AppModel extends CompositeModel {
 	// private final ObservableValue<InsertTitleTypeTableModel> insertableTitleTypeTableModel;
 	// private final ObservableValue<InsertTitleTypeTableModel> colorsInsertableTitleTypeTableModel;
 
-	public AppModel(Engine engine) {
+	public AppModel(AbstractRoot engine) {
 		super(new Generic[] { engine }, StringExtractor.SIMPLE_CLASS_EXTRACTOR);
 	}
 

@@ -1,19 +1,16 @@
 package org.genericsystem.exemple;
 
 import io.vertx.core.http.ServerWebSocket;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.composite.CompositeSectionHtml.TitleCompositeSectionHtml;
@@ -25,10 +22,10 @@ import org.genericsystem.reactor.html.HtmlDiv;
 public class AppHtml extends HtmlApp<AppModel> {
 
 	private final Generic car;
-	private final Engine engine;
+	private final AbstractRoot engine;
 	private final ObservableList<Generic> attributes;
 
-	public AppHtml(Engine engine, ServerWebSocket webSocket) {
+	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(new AppModel(engine), webSocket);
 		this.engine = engine;
 		car = engine.find(Car.class);
@@ -53,7 +50,7 @@ public class AppHtml extends HtmlApp<AppModel> {
 		}
 	}
 
-	void runScript(Engine engine) {
+	void runScript(AbstractRoot engine) {
 		Generic power = engine.find(Power.class);
 		Generic carColor = engine.find(CarColor.class);
 		Generic color = engine.find(Color.class);
