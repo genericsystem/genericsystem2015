@@ -3,6 +3,8 @@ package org.genericsystem.mutability;
 import java.util.Arrays;
 
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test

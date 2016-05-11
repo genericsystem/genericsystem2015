@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test
@@ -73,7 +75,8 @@ public class RequiredConstraintTest extends AbstractTest {
 		assert !car.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 		List<Generic> list = power.getHolders(engine).stream().collect(Collectors.toList());
 
-		assert !power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) : power.getHolders(engine).stream().map(x -> x.info()).collect(Collectors.toList()).toString();
+		assert !power.isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) : power.getHolders(engine).stream().map(x -> x.info()).collect(Collectors.toList())
+				.toString();
 	}
 
 	//
