@@ -11,6 +11,7 @@ import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
 
 /**
@@ -29,10 +30,6 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		put("port", port);
 	}
 
-	public BiFunction<String, Class<? extends Generic>[], AbstractRoot> getEngineBuilder(String applicationPath) {
-
-	}
-
 	public String getHost() {
 		return getString("host");
 	}
@@ -46,7 +43,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	}
 
 	public Class<? extends HtmlApp<?>> getApplicationClass(String applicationPath) {
-		return getApplicationDeploymentConfig(applicationPath).getApplicationClass();
+		return getApplicationDeploymentConfig(applicationPath).getHtmlAppClass();
 	}
 
 	private ApplicationDeploymentConfig getApplicationDeploymentConfig(String applicationPath) {
@@ -93,7 +90,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends HtmlApp<?>> getApplicationClass() {
+		public Class<? extends HtmlApp<?>> getHtmlAppClass() {
 			try {
 				return (Class<? extends HtmlApp<?>>) Class.forName(getString("applicationClass"));
 			} catch (ClassNotFoundException e) {
@@ -112,4 +109,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		}
 	}
 
+	public Class<? extends Model> getModelClass(String applicationPath) {
+		TODO
+	}
 }

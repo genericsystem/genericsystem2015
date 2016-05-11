@@ -13,6 +13,8 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.appserver.ApplicationServer;
+import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSectionHtml.TitleCompositeSectionHtml;
 import org.genericsystem.reactor.composite.CompositeSelectHtml;
 import org.genericsystem.reactor.composite.table.TypeTableHtml;
@@ -25,13 +27,24 @@ public class AppHtml extends HtmlApp<AppModel> {
 	private final AbstractRoot engine;
 	private final ObservableList<Generic> attributes;
 
+	public static void main(String[] args) {
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
+		appsConfig.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/second", AppHtml.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
+		new ApplicationServer(appsConfig).start();
+	}
+
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
-		super(new AppModel(engine), webSocket);
+		super(webSocket);
 		this.engine = engine;
 		car = engine.find(Car.class);
 		attributes = FXCollections.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find)
 				.collect(Collectors.toList()));
 		runScript(engine);
+
+		new AppModel(engine);
+
 	}
 
 	@Override
