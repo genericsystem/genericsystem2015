@@ -4,17 +4,19 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
+
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
-import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 import org.genericsystem.reactor.Model;
@@ -33,7 +35,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
-			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineBuilder(applicationPath));
+			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getApplicationClass());
 			System.out.println("Starts engine with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
@@ -49,9 +51,28 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses,
-			BiFunction<String, Class<? extends Generic>[], AbstractRoot> engineBuilder) {
-		return engineBuilder.apply(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new));
+	/*
+	 * protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, BiFunction<String, Class<? extends Generic>[], AbstractRoot>
+	 * engineBuilder) { return engineBuilder.apply(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)); }
+	 */
+
+	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
+
+		Constructor constructeur = null;
+		try {
+			constructeur = applicationClass.getConstructor(new Class[] { applicationClass });
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			return (AbstractRoot) constructeur.newInstance(persistentDirectoryPath, userClasses);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,

@@ -44,9 +44,7 @@
     	<module>gs-common</module>
     	<module>gs-remote</module>
     <module>gs-reactor</module>
-    <module>gs-carcolormodel</module>
     <module>gs-carcolor-model</module>
-    <module>gs-exemple</module>
     <module>gs-todomvc</module>
     <module>gs-example-reactor</module>
 	</modules>
