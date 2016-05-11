@@ -2,6 +2,8 @@ package org.genericsystem.mutability;
 
 import java.util.Arrays;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test
@@ -88,8 +90,8 @@ public class AttributesTest extends AbstractTest {
 	}
 
 	/*
-	 * public void testSimple1MetaAttribut() { Engine engine = new Engine(); Generic car = engine.addInstance("Car"); Generic power = engine.addInstance("Power", car); assert power.getCompositesStream().count() == 1; assert
-	 * car.equals(power.getComposites()[0]); assert power.isAlive(); }
+	 * public void testSimple1MetaAttribut() { Engine engine = new Engine(); Generic car = engine.addInstance("Car"); Generic power =
+	 * engine.addInstance("Power", car); assert power.getCompositesStream().count() == 1; assert car.equals(power.getComposites()[0]); assert power.isAlive(); }
 	 */
 	public void test2Attributs() {
 

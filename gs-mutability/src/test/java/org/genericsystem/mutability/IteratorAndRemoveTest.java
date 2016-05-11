@@ -3,6 +3,8 @@ package org.genericsystem.mutability;
 import java.util.Iterator;
 
 import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test

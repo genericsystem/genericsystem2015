@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.ExistsException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
@@ -31,7 +33,8 @@ public class GenericTest extends AbstractTest {
 		Generic vehicleVertex = engine.addInstance("Vehicle");
 		Generic powerVehicleVertex = engine.addInstance("Power", vehicleVertex);
 		Generic vehicle = engine.getInstances().stream().filter(g -> g.getValue().equals("Vehicle")).findFirst().get();
-		// Generic metaAttribut = engine.getInstances().filter(g -> g.getValue().equals("Engine") && g.getCompositesStream().count() == 1).stream().findFirst().get();
+		// Generic metaAttribut = engine.getInstances().filter(g -> g.getValue().equals("Engine") && g.getCompositesStream().count() ==
+		// 1).stream().findFirst().get();
 		Generic powerVehicle = engine.getMetaAttribute().getInstances().stream().filter(g -> g.getValue().equals("Power")).findFirst().get();
 		assert vehicle.isAlive();
 		assert vehicleVertex.isAlive();

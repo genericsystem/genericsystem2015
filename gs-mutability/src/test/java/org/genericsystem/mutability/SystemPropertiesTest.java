@@ -1,5 +1,7 @@
 package org.genericsystem.mutability;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test

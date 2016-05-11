@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.genericsystem.api.core.IGeneric.Visitor;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.ExistsException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test

@@ -2,6 +2,9 @@ package org.genericsystem.mutability;
 
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Cache;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test
