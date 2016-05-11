@@ -123,4 +123,5 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 			addApplication("/", htmlAppClass, modelClass, persistentDirectoryPath, classes);
 		}
 	}
+
 }

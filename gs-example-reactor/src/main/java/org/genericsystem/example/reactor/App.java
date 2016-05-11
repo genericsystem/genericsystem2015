@@ -1,4 +1,4 @@
-package org.genericsystem.exemple;
+package org.genericsystem.example.reactor;
 
 /**
  * Hello world!

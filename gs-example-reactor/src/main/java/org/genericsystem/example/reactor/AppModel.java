@@ -1,4 +1,4 @@
-package org.genericsystem.exemple;
+package org.genericsystem.example.reactor;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;

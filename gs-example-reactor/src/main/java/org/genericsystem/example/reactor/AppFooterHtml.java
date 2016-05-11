@@ -1,4 +1,4 @@
-package org.genericsystem.exemple;
+package org.genericsystem.example.reactor;
 
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.html.HtmlH1;
