@@ -5,7 +5,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.ServerWebSocket;
 
 import java.util.ArrayList;
@@ -30,9 +29,13 @@ public abstract class AbstractWebSocketsServer {
 		System.out.println("url: " + this.url);
 	}
 
+	public String getUrl() {
+		return this.url;
+	}
+
 	public abstract Handler<Buffer> getHandler(String path, ServerWebSocket socket);
 
-	public abstract Handler<Buffer> getHttpHandler(HttpServerRequest request);
+	// public abstract Handler<Buffer> getHttpHandler(String path, HttpServerRequest request, String url);
 
 	public void start() {
 		System.out.println("Generic System Server is starting...!");
@@ -40,47 +43,28 @@ public abstract class AbstractWebSocketsServer {
 
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
 			// SLE
-			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
-			httpServer.requestHandler(request -> getHttpHandler(request));
 
-			// request -> {
-			//
-			// String[] items = request.path().split("/");
-			// if ((items.length > 1) && ("resources".equals(items[1]))) {
-			// request.response().sendFile(Paths.get("").toAbsolutePath().toString() + request.path());
-			// } else {
-			// String indexHtml = "<!DOCTYPE html>";
-			// indexHtml += "<html>";
-			// indexHtml += "<head>";
-			// indexHtml += "<meta charset=\"UTF-8\">";
-			// indexHtml += "<script src=\"http://code.jquery.com/jquery-2.2.0.min.js\"></script>";
-			// indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"resources/style.css\"/>";
-			// indexHtml += "<script>";
-			// indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
-			// indexHtml += "</script>";
-			// indexHtml += "<script type=\"text/javascript\" src=\"resources/script.js\"></script>";
-			// indexHtml += "</head>";
-			// indexHtml += "<body id=\"root\">";
-			// indexHtml += "</body>";
-			// indexHtml += "</html>";
-			// request.response().end(indexHtml);
-			// }
-			// });
+			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
-				System.out.println("--- socket path: " + path);
 				webSocket.handler(getHandler(path, webSocket));
 				webSocket.exceptionHandler(e -> {
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
 			});
+
+			addHttpHandler(httpServer, getUrl());
+
 			AbstractBackEnd.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
+
 		}
 		System.out.println("Generic System Server is ready!");
 	}
+
+	public abstract void addHttpHandler(HttpServer httpServer, String url);
 
 	public void stop(Map<String, AbstractRoot> roots) {
 		System.out.println("Generic System Server is stopping...");
@@ -89,4 +73,5 @@ public abstract class AbstractWebSocketsServer {
 		roots = null;
 		System.out.println("Generic System Server is stopped");
 	}
+
 }
