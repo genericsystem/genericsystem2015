@@ -2,6 +2,8 @@ package org.genericsystem.mutability;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test

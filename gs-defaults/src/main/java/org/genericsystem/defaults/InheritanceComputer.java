@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  *
  * @param <T>
  */
-class InheritanceComputer<T extends DefaultVertex<T>> extends HashSet<T> {
+class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T> {
 
 	private static final long serialVersionUID = 1877502935577170921L;
 
@@ -73,11 +73,11 @@ class InheritanceComputer<T extends DefaultVertex<T>> extends HashSet<T> {
 
 	}
 
-	private static <T extends DefaultVertex<T>> Stream<T> compositesByMeta(T localBase, T holder) {
+	private static <T extends DefaultGeneric<T>> Stream<T> compositesByMeta(T localBase, T holder) {
 		return localBase.getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
 	}
 
-	private static <T extends DefaultVertex<T>> Stream<T> compositesBySuper(T localBase, T holder) {
+	private static <T extends DefaultGeneric<T>> Stream<T> compositesBySuper(T localBase, T holder) {
 		return localBase.getComposites().stream().filter(x -> x.getSupers().contains(holder));
 	}
 }

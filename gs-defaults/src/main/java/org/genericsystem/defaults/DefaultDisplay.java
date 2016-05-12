@@ -6,14 +6,14 @@ import static org.genericsystem.api.core.ApiStatics.SENSOR;
 import static org.genericsystem.api.core.ApiStatics.STRUCTURAL;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-public interface DefaultDisplay<T extends DefaultVertex<T>> extends IVertex<T> {
+public interface DefaultDisplay<T extends DefaultGeneric<T>> extends IGeneric<T> {
 
 	@Override
 	default String info() {

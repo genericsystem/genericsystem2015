@@ -6,14 +6,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-public interface DefaultWritable<T extends DefaultVertex<T>> extends IVertex<T> {
+public interface DefaultWritable<T extends DefaultGeneric<T>> extends IGeneric<T> {
 
 	@Override
 	default T updateValue(Serializable newValue) {

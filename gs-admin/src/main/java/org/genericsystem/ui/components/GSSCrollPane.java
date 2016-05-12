@@ -2,13 +2,11 @@ package org.genericsystem.ui.components;
 
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
-
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Element;
 
 public class GSSCrollPane extends Element<ScrollPane> {
 

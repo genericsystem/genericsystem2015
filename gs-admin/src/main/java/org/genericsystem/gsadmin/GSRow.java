@@ -1,11 +1,10 @@
 package org.genericsystem.gsadmin;
 
 import javafx.geometry.Insets;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.distributed.ui.Element;
 import org.genericsystem.gsadmin.GSTable.GSEditTableCell;
 import org.genericsystem.gsadmin.GSTable.GSTextCellTable;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.ui.components.GSButton;
 import org.genericsystem.ui.components.GSHBox;
 import org.genericsystem.ui.components.GSLabel;

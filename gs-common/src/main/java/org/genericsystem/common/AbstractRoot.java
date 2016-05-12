@@ -21,7 +21,7 @@ import org.genericsystem.defaults.DefaultConfig.MetaRelation;
 import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultRoot;
-import org.genericsystem.defaults.DefaultVertex;
+import org.genericsystem.defaults.DefaultGeneric;
 
 /**
  * @author Nicolas Feybesse
@@ -185,7 +185,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 
 		@Override
 		public Object invoke(Object self, Method m, Method proceed, Object[] args) throws Throwable {
-			return ((DefaultVertex<?>) self).defaultToString();
+			return ((DefaultGeneric<?>) self).defaultToString();
 		}
 
 		abstract protected AbstractRoot getRoot();

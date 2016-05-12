@@ -2,12 +2,10 @@ package org.genericsystem.ui.components;
 
 import java.util.List;
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
-
-import org.genericsystem.distributed.ui.Element;
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
 
 public class GSPane<Component extends GSPane<Component, N>, N extends Pane> extends GSRegion<Component, N> {
 

@@ -3,8 +3,7 @@ package org.genericsystem.ui.table;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.beans.value.ObservableValue;
-
-import org.genericsystem.distributed.ui.Model;
+import org.genericsystem.reactor.Model;
 
 public abstract class Window extends Model {
 	private final ObservableValue<Number> width;

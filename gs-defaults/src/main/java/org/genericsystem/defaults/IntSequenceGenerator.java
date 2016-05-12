@@ -11,7 +11,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
  *
  * @param <T>
  */
-public class IntSequenceGenerator<T extends DefaultVertex<T>> implements ValueGenerator<T> {
+public class IntSequenceGenerator<T extends DefaultGeneric<T>> implements ValueGenerator<T> {
 
 	@Override
 	public Serializable generateInstanceValue(T meta, List<T> supers, Serializable value, List<T> components) {
@@ -26,7 +26,7 @@ public class IntSequenceGenerator<T extends DefaultVertex<T>> implements ValueGe
 		return newValue;
 	}
 
-	public static class StringSequenceGenerator<T extends DefaultVertex<T>> extends IntSequenceGenerator<T> {
+	public static class StringSequenceGenerator<T extends DefaultGeneric<T>> extends IntSequenceGenerator<T> {
 		@Override
 		public Serializable generateInstanceValue(T meta, List<T> supers, Serializable value, List<T> components) {
 			Serializable newValue = incrementedValue(meta);

@@ -1,6 +1,8 @@
 package org.genericsystem.mutability;
 
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
 @Test
@@ -98,7 +100,8 @@ public class UpdateWithCacheTest extends AbstractTest {
 
 		assert vehicleUpdate.getInheritings().stream().allMatch(x -> "Car".equals(x.getValue()));
 		assert vehicleUpdate.getInheritings().stream().allMatch(x -> x.getInstances().stream().allMatch(y -> "myCar".equals(y.getValue())));
-		assert vehicleUpdate.getInheritings().stream().allMatch(x -> x.getInstances().stream().allMatch(y -> y.getHolders(power).stream().allMatch(z -> z.getValue().equals(233))));
+		assert vehicleUpdate.getInheritings().stream()
+				.allMatch(x -> x.getInstances().stream().allMatch(y -> y.getHolders(power).stream().allMatch(z -> z.getValue().equals(233))));
 
 		engine.getCurrentCache().flush();
 

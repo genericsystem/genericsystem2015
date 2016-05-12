@@ -12,7 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.IVertex;
+import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 import com.sun.javafx.collections.ObservableListWrapper;
@@ -22,7 +22,7 @@ import com.sun.javafx.collections.ObservableListWrapper;
  *
  * @param <T>
  */
-public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extends IVertex<T> {
+public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> extends IGeneric<T> {
 
 	// Remove
 
@@ -429,7 +429,7 @@ public interface DefaultCompositesInheritance<T extends DefaultVertex<T>> extend
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T extends DefaultVertex<T>> Predicate<T> componentsFilter(T... componentsReached) {
+	static <T extends DefaultGeneric<T>> Predicate<T> componentsFilter(T... componentsReached) {
 		return attribute -> {
 			List<T> attributeComps = new ArrayList<>(attribute.getComponents());
 			for (T componentReach : componentsReached) {

@@ -2,12 +2,10 @@ package org.genericsystem.ui.components;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
-
-import org.genericsystem.distributed.ui.Binding;
-import org.genericsystem.distributed.ui.Element;
+import org.genericsystem.reactor.Binding;
+import org.genericsystem.reactor.Element;
 
 public class GSButton extends GSRegion<GSButton, Button> {
 
