@@ -2,6 +2,7 @@ package org.genericsystem.todomvc;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -14,8 +15,9 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.Model;
 
 /**
@@ -25,7 +27,7 @@ import org.genericsystem.reactor.Model;
 @SuppressWarnings("unchecked")
 public class TodoList extends Model {
 
-	private final Engine engine;
+	private final AbstractRoot engine;
 
 	private final Property<String> name = new SimpleStringProperty();
 	private final Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
@@ -43,9 +45,10 @@ public class TodoList extends Model {
 	private final ObservableStringValue items;
 	private final ObservableStringValue clearCompleted;
 
-	public TodoList(Engine engine) {
+	public TodoList(AbstractRoot engine) {
 		this.engine = engine;
-		todos = new Transformation2<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g), todo -> new Observable[] { todo.getCompleted() });
+		todos = new Transformation2<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g),
+				todo -> new Observable[] { todo.getCompleted() });
 		filtered = new FilteredList<>(todos);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(todos.filtered(COMPLETE));
@@ -94,7 +97,7 @@ public class TodoList extends Model {
 	static Predicate<Todo> COMPLETE = todo -> todo.getCompleted().getValue();
 
 	/*********************************************************************************************************************************/
-	public Engine getEngine() {
+	public AbstractRoot getEngine() {
 		return engine;
 	}
 
