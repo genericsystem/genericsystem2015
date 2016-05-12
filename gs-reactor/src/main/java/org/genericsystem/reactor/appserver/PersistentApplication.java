@@ -1,7 +1,9 @@
 package org.genericsystem.reactor.appserver;
 
 import io.vertx.core.http.ServerWebSocket;
+
 import java.lang.reflect.InvocationTargetException;
+
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.Model;
@@ -33,8 +35,8 @@ public class PersistentApplication {
 	@SuppressWarnings("unchecked")
 	public HtmlElement<?, ?, ?> newHtmlApp(ServerWebSocket socket) {
 		try {
-			return ((HtmlApp<Model>) getApplicationClass().getConstructor(ServerWebSocket.class).newInstance(getEngine(), socket)).init(modelClass
-					.getConstructor(AbstractRoot.class).newInstance(engine));
+			return ((HtmlApp<Model>) getApplicationClass().getConstructor(ServerWebSocket.class).newInstance(socket)).init(modelClass.getConstructor(
+					AbstractRoot.class).newInstance(engine));
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 			throw new IllegalStateException(e);

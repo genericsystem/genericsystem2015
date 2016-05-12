@@ -101,7 +101,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 				Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
-			put("modelClass", applicationClass.getName());
+			put("modelClass", modelClass.getName());
 		}
 
 		@SuppressWarnings("unchecked")
