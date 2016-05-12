@@ -16,7 +16,6 @@ public class PersistentApplication {
 
 	public PersistentApplication(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, AbstractRoot engine) {
 		this.htmlAppClass = htmlAppClass;
-		System.out.println("modelClass" + modelClass.getName());
 		this.modelClass = modelClass;
 		this.engine = engine;
 	}
@@ -36,7 +35,6 @@ public class PersistentApplication {
 	@SuppressWarnings("unchecked")
 	public HtmlElement<?, ?, ?> newHtmlApp(ServerWebSocket socket) {
 		try {
-			System.out.println(modelClass);
 			return ((HtmlApp<Model>) getApplicationClass().getConstructor(ServerWebSocket.class).newInstance(socket)).init(modelClass.getConstructor(
 					AbstractRoot.class).newInstance(engine));
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
