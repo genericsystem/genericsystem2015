@@ -5,6 +5,11 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +38,10 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig apps = new ApplicationsDeploymentConfig();
-		apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
-		apps.addApplication("/second", AppHtml.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		apps.addApplication("/", AppHtml.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
+				Color.class, CarColor.class);
+		apps.addApplication("/second", AppHtml.class, "/home/middleware/cars/", Car.class, Power.class, Color.class,
+				CarColor.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(apps).start();
 	}
@@ -43,11 +50,19 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public ApplicationServer(ApplicationsDeploymentConfig options) {
 		super(options.getHost(), options.getPort());
+		try {
+			getIPAddress();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// System.out.println("Load IP : " + getLocalIp() + "\n");
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
 			AbstractServer root = buildRoot(directoryPath, options.getClasses(directoryPath));
-			System.out.println("Starts engine with path : " + path + " and persistence directory path : " + directoryPath);
+			System.out.println("Starts engine with path : " + path + " and persistence directory path : "
+					+ directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
 			roots.put(path, root);
@@ -55,8 +70,10 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
+			apps.put(applicationPath,
+					new PersistentApplication(options.getApplicationClass(applicationPath), roots.get(path)));
+			System.out.println("Starts application : " + options.getApplicationClass(applicationPath).getSimpleName()
+					+ " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
 		}
 	}
 
@@ -64,8 +81,10 @@ public class ApplicationServer extends AbstractBackEnd {
 		return new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new));
 	}
 
-	protected PersistentApplication buildApp(Class<? extends AppHtml> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses) {
-		return new PersistentApplication(applicationClass, new Engine(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)));
+	protected PersistentApplication buildApp(Class<? extends AppHtml> applicationClass, String persistentDirectoryPath,
+			List<Class<?>> userClasses) {
+		return new PersistentApplication(applicationClass, new Engine(persistentDirectoryPath, userClasses.stream()
+				.toArray(Class[]::new)));
 	}
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
@@ -91,11 +110,37 @@ public class ApplicationServer extends AbstractBackEnd {
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};
 		}
-
 	}
 
 	@Override
 	protected WebSocketsServer buildWebSocketsServer(String host, int port) {
 		return new WebSocketsServer(host, port);
+	}
+
+	public String getLocalIp() {
+		String hostAdr = null;
+		try {
+			InetAddress thisIp = InetAddress.getLocalHost();
+			// System.out.println("IP:" + thisIp.getHostAddress());
+			hostAdr = thisIp.getHostAddress();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return hostAdr;
+	}
+
+	public void getIPAddress() throws SocketException {
+		char[] s = null;
+		Enumeration e = NetworkInterface.getNetworkInterfaces();
+		while (e.hasMoreElements()) {
+			NetworkInterface n = (NetworkInterface) e.nextElement();
+			Enumeration ee = n.getInetAddresses();
+			while (ee.hasMoreElements()) {
+				InetAddress i = (InetAddress) ee.nextElement();
+				s = i.getHostAddress().toCharArray();
+				System.out.println(s);
+				// System.out.println(s[0] + "." + s[1] + "." + s[2]);
+			}
+		}
 	}
 }
