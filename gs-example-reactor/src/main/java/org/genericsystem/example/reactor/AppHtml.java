@@ -14,6 +14,7 @@ import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -31,10 +32,10 @@ public class AppHtml extends HtmlApp<AppModel> {
 	private final ObservableList<Generic> attributes;
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Engine.class);
 		appsConfig.addApplication("/", AppHtml.class, AppModel.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class,
 				CarColor.class);
-		appsConfig.addApplication("/second", AppHtml.class, AppModel.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		// appsConfig.addApplication("/second", AppHtml.class, AppModel.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(appsConfig).start();
 	}

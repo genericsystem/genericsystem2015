@@ -51,26 +51,18 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	/*
-	 * protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, BiFunction<String, Class<? extends Generic>[], AbstractRoot>
-	 * engineBuilder) { return engineBuilder.apply(persistentDirectoryPath, userClasses.stream().toArray(Class[]::new)); }
-	 */
-
 	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
 
 		Constructor constructeur = null;
 		try {
-			constructeur = applicationClass.getConstructor(new Class[] { applicationClass });
-		} catch (NoSuchMethodException | SecurityException e) {
+			constructeur = applicationClass.getConstructor(String.class, Class[].class);
+			return (AbstractRoot) constructeur.newInstance(persistentDirectoryPath, userClasses.toArray(new Class[userClasses.size()]));
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			return (AbstractRoot) constructeur.newInstance(persistentDirectoryPath, userClasses);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		return null;
 
 	}
