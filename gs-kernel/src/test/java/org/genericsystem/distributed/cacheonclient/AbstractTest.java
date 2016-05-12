@@ -86,7 +86,8 @@ public abstract class AbstractTest {
 			assert persistVisit.get(i).genericEquals(readVisit.get(i));
 			Generic persitedGeneric = persistVisit.get(i);
 			Generic readGeneric = readVisit.get(i);
-			assert persitedGeneric.getBirthTs() == readGeneric.getBirthTs() : persistVisit.get(i).info() + " " + persitedGeneric.getBirthTs() + "  " + readGeneric.getBirthTs();
+			assert persitedGeneric.getBirthTs() == readGeneric.getBirthTs() : persistVisit.get(i).info() + " " + persitedGeneric.getBirthTs() + "  "
+					+ readGeneric.getBirthTs();
 			assert persistVisit.get(i).genericEquals(readVisit.get(i)) : persistVisit.get(i).info() + " " + readVisit.get(i).info();
 		}
 	}
