@@ -50,12 +50,14 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	public ApplicationServer(ApplicationsDeploymentConfig options) {
 		super(options.getHost(), options.getPort());
+		options.getApplicationClass();
 		try {
 			getIPAddress();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		// System.out.println("Load IP : " + getLocalIp() + "\n");
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
@@ -117,6 +119,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		return new WebSocketsServer(host, port);
 	}
 
+	// SLE
 	public String getLocalIp() {
 		String hostAdr = null;
 		try {
