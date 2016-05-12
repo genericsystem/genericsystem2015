@@ -1,10 +1,13 @@
 package org.genericsystem.reactor.appserver;
 
 import io.vertx.core.json.JsonObject;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Statics;
 import org.genericsystem.reactor.HtmlElement;
@@ -17,14 +20,15 @@ import org.genericsystem.reactor.html.HtmlApp;
  */
 public class ApplicationsDeploymentConfig extends JsonObject {
 
-	public ApplicationsDeploymentConfig() {
-		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT);
+	public ApplicationsDeploymentConfig(Class<? extends AbstractRoot> applicationClass) {
+		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT, applicationClass);
 	}
 
-	public ApplicationsDeploymentConfig(String host, int port) {
+	public ApplicationsDeploymentConfig(String host, int port, Class<? extends AbstractRoot> applicationClass) {
 		put("apps", new JsonObject());
 		put("host", host);
 		put("port", port);
+		put("applicationClass", applicationClass.getName());
 	}
 
 	public String getHost() {
@@ -33,6 +37,14 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 
 	public int getPort() {
 		return getInteger("port");
+	}
+
+	public Class<? extends AbstractRoot> getApplicationClass() {
+		try {
+			return (Class<? extends AbstractRoot>) Class.forName(getString("applicationClass"));
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public Set<String> getApplicationsPaths() {
@@ -112,13 +124,18 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	}
 
 	public static class DefaultPathSingleWebAppDeployment extends ApplicationsDeploymentConfig {
-		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, Class<?>... classes) {
+
+		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass,
+				Class<? extends Model> modelClass, Class<?>... classes) {
+			super(applicationClass);
 			addApplication("/", htmlAppClass, modelClass, null, classes);
 		}
 
-		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, String persistentDirectoryPath,
-				Class<?>... classes) {
+		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass,
+				Class<? extends Model> modelClass, String persistentDirectoryPath, Class<?>... classes) {
+			super(applicationClass);
 			addApplication("/", htmlAppClass, modelClass, persistentDirectoryPath, classes);
 		}
 	}
+
 }
