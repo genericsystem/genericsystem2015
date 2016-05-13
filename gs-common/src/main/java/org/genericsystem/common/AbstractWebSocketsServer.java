@@ -35,6 +35,8 @@ public abstract class AbstractWebSocketsServer {
 
 	public abstract Handler<Buffer> getHandler(String path, ServerWebSocket socket);
 
+	public abstract void addHttpHandler(HttpServer httpServer, String url);
+
 	// public abstract Handler<Buffer> getHttpHandler(String path, HttpServerRequest request, String url);
 
 	public void start() {
@@ -48,6 +50,8 @@ public abstract class AbstractWebSocketsServer {
 
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
+				System.out.println("---> path: " + path);
+				System.out.println("---> webSocket: " + webSocket.getClass().getName());
 				webSocket.handler(getHandler(path, webSocket));
 				webSocket.exceptionHandler(e -> {
 					e.printStackTrace();
@@ -63,8 +67,6 @@ public abstract class AbstractWebSocketsServer {
 		}
 		System.out.println("Generic System Server is ready!");
 	}
-
-	public abstract void addHttpHandler(HttpServer httpServer, String url);
 
 	public void stop(Map<String, AbstractRoot> roots) {
 		System.out.println("Generic System Server is stopping...");

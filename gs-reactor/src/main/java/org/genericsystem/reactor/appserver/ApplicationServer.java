@@ -125,15 +125,18 @@ public class ApplicationServer extends AbstractBackEnd {
 			System.out.println("IN request : " + request.toString());
 			System.out.println("IN url : " + url);
 			PersistentApplication application = apps.get(path);
-			if (application == null)
-				throw new IllegalStateException("Unable to load an application with path : " + path);
-
-			String nameClass = application.getClass().getSimpleName();
+			// if (application == null)
+			// throw new IllegalStateException("Unable to load an application with path : " + path);
 
 			String[] items = request.path().split("/");
 			if ((items.length > 1) && ("resources".equals(items[1]))) {
 				request.response().sendFile(Paths.get("").toAbsolutePath().toString() + request.path());
 			} else {
+				if (application == null)
+					throw new IllegalStateException("Unable to load an application with path : " + path);
+
+				String nameClass = application.getApplicationClass().getSimpleName();
+
 				String indexHtml = "<!DOCTYPE html>";
 				indexHtml += "<html>";
 				indexHtml += "<head>";
