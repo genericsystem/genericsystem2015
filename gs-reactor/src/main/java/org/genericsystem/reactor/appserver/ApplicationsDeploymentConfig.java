@@ -1,12 +1,10 @@
 package org.genericsystem.reactor.appserver;
 
 import io.vertx.core.json.JsonObject;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Statics;
@@ -20,15 +18,14 @@ import org.genericsystem.reactor.html.HtmlApp;
  */
 public class ApplicationsDeploymentConfig extends JsonObject {
 
-	public ApplicationsDeploymentConfig(Class<? extends AbstractRoot> applicationClass) {
-		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT, applicationClass);
+	public ApplicationsDeploymentConfig() {
+		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT);
 	}
 
-	public ApplicationsDeploymentConfig(String host, int port, Class<? extends AbstractRoot> applicationClass) {
+	public ApplicationsDeploymentConfig(String host, int port) {
 		put("apps", new JsonObject());
 		put("host", host);
 		put("port", port);
-		put("applicationClass", applicationClass.getName());
 	}
 
 	public String getHost() {
@@ -39,20 +36,12 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return getInteger("port");
 	}
 
-	public Class<? extends AbstractRoot> getApplicationClass() {
-		try {
-			return (Class<? extends AbstractRoot>) Class.forName(getString("applicationClass"));
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 	public Set<String> getApplicationsPaths() {
 		return getJsonObject("apps").getMap().keySet();
 	}
 
 	public Class<? extends HtmlApp<?>> getApplicationClass(String applicationPath) {
-		return getApplicationDeploymentConfig(applicationPath).getHtmlAppClass();
+		return getApplicationDeploymentConfig(applicationPath).getApplicationClass();
 	}
 
 	public Class<? extends Model> getModelClass(String applicationPath) {
@@ -68,8 +57,8 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	}
 
 	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends HtmlElement<?, ?, ?>> htmlAppClass, Class<? extends Model> modelClass,
-			String persistentDirectoryPath, Class<?>... classes) {
-		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, persistentDirectoryPath, classes));
+			Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
+		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes));
 		return this;
 	}
 
@@ -81,6 +70,14 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json))
 				.filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath())).flatMap(conf -> conf.getClasses().stream())
 				.collect(Collectors.toSet());
+	}
+
+	public Class<? extends AbstractRoot> getEngineClass(String persistentDirectoryPath) {
+		Set<Class<? extends AbstractRoot>> set = getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json))
+				.filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath())).map(conf -> conf.getEngineClass())
+				.collect(Collectors.toSet());
+		assert set.size() == 1;
+		return set.iterator().next();
 	}
 
 	public Set<String> getPersistentDirectoryPaths() {
@@ -97,17 +94,27 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends HtmlElement<?, ?, ?>> applicationClass, Class<? extends Model> modelClass, String repositoryPath,
-				Class<?>... classes) {
+		public ApplicationDeploymentConfig(Class<? extends HtmlElement<?, ?, ?>> applicationClass, Class<? extends Model> modelClass,
+				Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
-			put("modelClass", applicationClass.getName());
+			put("modelClass", modelClass.getName());
+			put("engineClass", engineClass.getName());
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends HtmlApp<?>> getHtmlAppClass() {
+		public Class<? extends HtmlApp<?>> getApplicationClass() {
 			try {
 				return (Class<? extends HtmlApp<?>>) Class.forName(getString("applicationClass"));
+			} catch (ClassNotFoundException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public Class<? extends AbstractRoot> getEngineClass() {
+			try {
+				return (Class<? extends AbstractRoot>) Class.forName(getString("engineClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
@@ -125,16 +132,14 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 
 	public static class DefaultPathSingleWebAppDeployment extends ApplicationsDeploymentConfig {
 
-		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass,
-				Class<? extends Model> modelClass, Class<?>... classes) {
-			super(applicationClass);
-			addApplication("/", htmlAppClass, modelClass, null, classes);
+		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass,
+				Class<? extends AbstractRoot> engineClass, Class<?>... classes) {
+			addApplication("/", htmlAppClass, modelClass, engineClass, null, classes);
 		}
 
 		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass,
-				Class<? extends Model> modelClass, String persistentDirectoryPath, Class<?>... classes) {
-			super(applicationClass);
-			addApplication("/", htmlAppClass, modelClass, persistentDirectoryPath, classes);
+				Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
+			addApplication("/", htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes);
 		}
 	}
 

@@ -33,8 +33,8 @@ public class PersistentApplication {
 	@SuppressWarnings("unchecked")
 	public HtmlElement<?, ?, ?> newHtmlApp(ServerWebSocket socket) {
 		try {
-			return ((HtmlApp<Model>) getApplicationClass().getConstructor(ServerWebSocket.class).newInstance(getEngine(), socket)).init(modelClass
-					.getConstructor(AbstractRoot.class).newInstance(engine));
+			return ((HtmlApp<Model>) getApplicationClass().getConstructor(AbstractRoot.class, ServerWebSocket.class).newInstance(getEngine(), socket))
+					.init(modelClass.getConstructor(AbstractRoot.class).newInstance(engine));
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
 			throw new IllegalStateException(e);

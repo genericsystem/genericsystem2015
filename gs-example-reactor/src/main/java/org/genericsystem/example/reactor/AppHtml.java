@@ -1,13 +1,10 @@
 package org.genericsystem.example.reactor;
 
 import io.vertx.core.http.ServerWebSocket;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -32,9 +29,9 @@ public class AppHtml extends HtmlApp<AppModel> {
 	private final ObservableList<Generic> attributes;
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Engine.class);
-		appsConfig.addApplication("/", AppHtml.class, AppModel.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class,
-				CarColor.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
+		appsConfig.addApplication("/", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
+				Color.class, CarColor.class);
 		// appsConfig.addApplication("/second", AppHtml.class, AppModel.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(appsConfig).start();
@@ -60,7 +57,7 @@ public class AppHtml extends HtmlApp<AppModel> {
 			new CompositeSelectHtml<>(div).select(AppModel::getTypeListModel, StringExtractor.MANAGEMENT, () -> engine);
 			new TitleCompositeSectionHtml<>(div).select(AppModel::getTitleTypeListModel, StringExtractor.MANAGEMENT, () -> car);
 			((TypeTableHtml<CompositeModel>) new TypeTableHtml<CompositeModel>(div).select(AppModel::getTypeTableModel, StringExtractor.MANAGEMENT, () -> car))
-					.setAttributesExtractor(instance -> attributes);
+			.setAttributesExtractor(instance -> attributes);
 			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
 			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
