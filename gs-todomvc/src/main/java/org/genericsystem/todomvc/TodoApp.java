@@ -1,7 +1,7 @@
 package org.genericsystem.todomvc;
 
 import io.vertx.core.http.ServerWebSocket;
-
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
@@ -28,14 +28,14 @@ import org.genericsystem.reactor.html.HtmlUl;
 public class TodoApp extends HtmlApp<TodoList> {
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Engine.class);
-		appsConfig.addApplication("/", TodoApp.class, TodoList.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
+		appsConfig.addApplication("/", TodoApp.class, TodoList.class, Engine.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
 		// appsConfig.addApplication("/second", AppHtml.class, AppModel.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
-	public TodoApp(ServerWebSocket webSocket) {
+	public TodoApp(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 	}
 
