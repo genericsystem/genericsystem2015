@@ -26,7 +26,7 @@ public abstract class AbstractWebSocketsServer {
 		this.port = port;
 		this.host = host;
 		this.url = "ws://" + host + ":" + port;
-		System.out.println("url: " + this.url);
+		// System.out.println("url: " + this.url);
 	}
 
 	public String getUrl() {
@@ -50,14 +50,14 @@ public abstract class AbstractWebSocketsServer {
 
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
-				System.out.println("---> path: " + path);
-				System.out.println("---> webSocket: " + webSocket.getClass().getName());
-				webSocket.handler(getHandler(path, webSocket));
-				webSocket.exceptionHandler(e -> {
-					e.printStackTrace();
-					throw new IllegalStateException(e);
+				// System.out.println("---> path: " + path);
+				// System.out.println("---> webSocket: " + webSocket.getClass().getSimpleName());
+					webSocket.handler(getHandler(path, webSocket));
+					webSocket.exceptionHandler(e -> {
+						e.printStackTrace();
+						throw new IllegalStateException(e);
+					});
 				});
-			});
 
 			addHttpHandler(httpServer, getUrl());
 

@@ -38,8 +38,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
-			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath),
-					options.getApplicationClass());
+			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getApplicationClass());
 			System.out.println("Starts engine with path : " + path + " and persistence directory path : "
 					+ directoryPath);
 			if (directoryPath == null)
@@ -96,7 +95,9 @@ public class ApplicationServer extends AbstractBackEnd {
 			if (application == null)
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			AbstractCache cache = application.getEngine().newCache();
+
 			HtmlElement app = cache.safeSupply(() -> application.newHtmlApp(socket));
+
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
