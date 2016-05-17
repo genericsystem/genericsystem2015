@@ -94,8 +94,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		this.restructurator = buildRestructurator();
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
-		cacheLevel = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(),
-				differentialProperty);
+		cacheLevel = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
 
 		initialize();
 	}
@@ -130,8 +129,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	private Observable getObservable(Generic generic) {
-		return TransitiveObservable.create(differentialProperty, () -> new Observable[] { differentialProperty.get()
-				.getObservable(generic) });
+		return TransitiveObservable.create(differentialProperty, () -> new Observable[] { differentialProperty.get().getObservable(generic) });
 	}
 
 	@Override
@@ -155,8 +153,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	}
 
 	protected void initialize() {
-		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential()
-				: getDifferential().getSubDifferential()));
+		differentialProperty.set(buildDifferential(getDifferential() == null ? buildTransactionDifferential() : getDifferential().getSubDifferential()));
 	}
 
 	protected Differential buildDifferential(IDifferential<Generic> subCache) {
@@ -190,8 +187,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 				// System.out.println("TRYFLUSH");
 				// TODO reactivate this
 				// if (getEngine().pickNewTs() - getTs() >= timeOut)
-				// throw new ConcurrencyControlException("The timestamp cache (" + getTs() +
-				// ") is bigger than the life time out : " + Statics.LIFE_TIMEOUT);
+				// throw new ConcurrencyControlException("The timestamp cache (" + getTs() + ") is bigger than the life time out : " + Statics.LIFE_TIMEOUT);
 
 				tryFlush();
 				return;
@@ -208,8 +204,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		discardWithException(cause);
 	}
 
-	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException,
-			OptimisticLockConstraintViolationException {
+	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		Differential originalCacheElement = getDifferential();
 		if (getDifferential().getSubDifferential() instanceof Differential)
 			this.differentialProperty.set((Differential) getDifferential().getSubDifferential());
@@ -220,8 +215,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		}
 	}
 
-	private void synchronizedApply(Differential cacheElement) throws ConcurrencyControlException,
-			OptimisticLockConstraintViolationException {
+	private void synchronizedApply(Differential cacheElement) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		synchronized (getRoot()) {
 			cacheElement.apply();
 		}
@@ -242,8 +236,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	@Override
 	public void unmount() {
 		IDifferential<Generic> subCache = getDifferential().getSubDifferential();
-		differentialProperty.set(subCache instanceof Differential ? (Differential) subCache
-				: new Differential(subCache));
+		differentialProperty.set(subCache instanceof Differential ? (Differential) subCache : new Differential(subCache));
 		listener.triggersClearEvent();
 		listener.triggersRefreshEvent();
 	}
@@ -254,14 +247,12 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 			listener.triggersMutationEvent(oldDependency, newDependency);
 	}
 
-	Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value,
-			List<Generic> components) {
+	Generic buildAndPlug(Class<?> clazz, Generic meta, List<Generic> supers, Serializable value, List<Generic> components) {
 		return plug(getRoot().build(null, clazz, meta, supers, value, components));
 	}
 
 	protected Generic plug(Generic generic) {
-		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info()
-				+ generic.getBirthTs();
+		assert generic.getBirthTs() == Long.MAX_VALUE || generic.getBirthTs() == 0L : generic.info() + generic.getBirthTs();
 		getDifferential().plug(generic);
 		getChecker().checkAfterBuild(true, false, generic);
 		return generic;
@@ -329,8 +320,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected class TransactionDifferential implements IDifferential<Generic> {
 
 		@Override
-		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException,
-				OptimisticLockConstraintViolationException {
+		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 			getTransaction().apply(removes, adds);
 		}
 
@@ -346,8 +336,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 		@Override
 		public final Observable getObservable(Generic generic) {
-			return TransitiveObservable.create(transactionProperty, () -> new Observable[] { transactionProperty.get()
-					.getObservable(generic) });
+			return TransitiveObservable.create(transactionProperty, () -> new Observable[] { transactionProperty.get().getObservable(generic) });
 		}
 
 		// @Override
