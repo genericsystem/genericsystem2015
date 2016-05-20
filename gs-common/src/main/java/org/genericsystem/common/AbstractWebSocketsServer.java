@@ -6,7 +6,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.ServerWebSocket;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +28,9 @@ public abstract class AbstractWebSocketsServer {
 		System.out.println("url: " + this.url);
 	}
 
-	public String getUrl() {
-		return this.url;
-	}
-
 	public abstract Handler<Buffer> getHandler(String path, ServerWebSocket socket);
 
-	// public abstract Handler<Buffer> getHttpHandler(String path, HttpServerRequest request, String url);
+	public abstract void addHttpHandler(HttpServer httpServer, String url);
 
 	public void start() {
 		System.out.println("Generic System Server is starting...!");
@@ -43,11 +38,11 @@ public abstract class AbstractWebSocketsServer {
 
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
 			// SLE
-
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
+				System.out.println("--- socket path: " + path);
 				webSocket.handler(getHandler(path, webSocket));
 				webSocket.exceptionHandler(e -> {
 					e.printStackTrace();
@@ -59,12 +54,13 @@ public abstract class AbstractWebSocketsServer {
 
 			AbstractBackEnd.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
-
 		}
 		System.out.println("Generic System Server is ready!");
 	}
 
-	public abstract void addHttpHandler(HttpServer httpServer, String url);
+	public String getUrl() {
+		return url;
+	}
 
 	public void stop(Map<String, AbstractRoot> roots) {
 		System.out.println("Generic System Server is stopping...");
@@ -73,5 +69,4 @@ public abstract class AbstractWebSocketsServer {
 		roots = null;
 		System.out.println("Generic System Server is stopped");
 	}
-
 }
