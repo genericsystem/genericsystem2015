@@ -1,4 +1,4 @@
-package org.genericsystem.kernel;
+/*package org.genericsystem.kernel;
 
 import java.util.Arrays;
 
@@ -58,4 +58,4 @@ public class MultipleRootsTest extends AbstractTest {
 		Generic robot = root2.addInstance("Robot");
 		catchAndCheckCause(() -> root1.addInstance(Arrays.asList(car, robot), "Transformer"), CrossEnginesAssignementsException.class);
 	}
-}
+}*/
