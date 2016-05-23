@@ -39,7 +39,7 @@
 		<module>gs-api</module>
 		<module>gs-defaults</module>
 		<module>gs-kernel</module>
-		<module>gs-mutability</module>
+		
 		<module>gs-cdi</module>
     	<module>gs-common</module>
 	    <module>gs-reactor</module>
