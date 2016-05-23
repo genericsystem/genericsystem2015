@@ -5,12 +5,14 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
@@ -34,8 +36,10 @@ public class ApplicationServer extends AbstractBackEnd {
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
-			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
-			System.out.println("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
+			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath),
+					options.getEngineClass(directoryPath));
+			System.out.println("Starts " + root.getClass().getSimpleName() + " with path : " + path
+					+ " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
 			roots.put(path, root);
@@ -43,25 +47,29 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath,
-					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
-					+ " and persistence directory path : " + directoryPath);
+			apps.put(
+					applicationPath,
+					new PersistentApplication(options.getApplicationClass(applicationPath), options
+							.getModelClass(applicationPath), roots.get(path)));
+			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName()
+					+ " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
 		}
 	}
 
-	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
+	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses,
+			Class<? extends AbstractRoot> applicationClass) {
 		try {
 			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath,
 					userClasses.toArray(new Class[userClasses.size()]));
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
-			Class<? extends Model> modelClass, AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass,
+			String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass,
+			AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
@@ -92,6 +100,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public void addHttpHandler(HttpServer httpServer, String url) {
 			httpServer.requestHandler(request -> {
+				System.out.println("url path: " + url + request.path());
 				String[] items = request.path().split("/");
 				if ((items.length > 1) && ("resources".equals(items[1]))) {
 					request.response().sendFile(Paths.get("").toAbsolutePath().toString() + request.path());
@@ -105,7 +114,8 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
 					indexHtml += "</script>";
-					indexHtml += "<script type=\"text/javascript\" src=\"resources/script.js\"></script>";
+					// indexHtml += "<script type=\"text/javascript\" src=\"/resources/script.js\"></script>";
+					indexHtml += "<script type=\"text/javascript\" src=\"../gs-todomvc/resources/script.js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body id=\"root\">";
 					indexHtml += "</body>";
@@ -115,7 +125,6 @@ public class ApplicationServer extends AbstractBackEnd {
 			});
 
 		}
-
 	}
 
 	@Override
