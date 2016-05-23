@@ -1,15 +1,20 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,13 +28,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-import org.genericsystem.common.GSBuffer;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -37,8 +35,7 @@ import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
  * @param <NODE>
  */
 
-public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement<M, COMPONENT, NODE>, NODE extends HtmlDomNode>
-		extends Element<M, NODE> {
+public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement<M, COMPONENT, NODE>, NODE extends HtmlDomNode> extends Element<M, NODE> {
 	private static final String MSG_TYPE = "msgType";
 	private static final String ADD = "A";
 	private static final String UPDATE = "U";
@@ -52,8 +49,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	private static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
 
-	protected <PARENTMODEL extends Model, PARENTNODE extends HtmlDomNode> HtmlElement(
-			Element<PARENTMODEL, PARENTNODE> parent, Class<NODE> nodeClass) {
+	protected <PARENTMODEL extends Model, PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTMODEL, PARENTNODE> parent, Class<NODE> nodeClass) {
 		super(parent, nodeClass);
 	}
 
@@ -76,8 +72,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
+	public COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		super.forEach(stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
@@ -91,15 +86,15 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function,
-			StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor,
+			Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
 		super.select(function, stringExtractor, generic, constructor);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function,
-			StringExtractor stringExtractor, Supplier<Generic> generic) {
+	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor,
+			Supplier<Generic> generic) {
 		select(function, stringExtractor, generic, CompositeModel::new);
 		return (COMPONENT) this;
 	}
@@ -160,10 +155,9 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 		public void initListener() {
 			this.text.addListener((o, oldValue, newValue) -> {
+				System.out.println("NEWVALUE : " + new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue).encodePrettily());
 				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue));
-				System.out.println("newValue : " + newValue);
 			});
-
 			this.styleClasses.addListener((ListChangeListener<String>) change -> {
 				JsonArray arrayJS = new JsonArray();
 				styleClasses.forEach(clazz -> arrayJS.add(clazz));
@@ -207,7 +201,8 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		};
 
 		public void sendMessage(JsonObject jsonObj) {
-			getWebSocket().write(new GSBuffer().appendString(jsonObj.encode()));
+			// Buffer littleBuffer = new BufferFactoryImpl().buffer(Buffer.buffer().appendString(jsonObj.encode()).getByteBuf().order(ByteOrder.BIG_ENDIAN));
+			getWebSocket().writeFinalTextFrame(jsonObj.encode());
 		}
 
 		void fillJson(HtmlDomNode parentNodeJs, JsonObject jsonObj) {
@@ -215,7 +210,6 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 			jsonObj.put(ID, id);
 			jsonObj.put(TAG_HTML, tag);
 			jsonObj.put(TEXT_CONTENT, text.getValue());
-			System.out.print("--text value : " + text.getValue());
 			JsonArray arrayJS = new JsonArray();
 			styleClasses.forEach(arrayJS::add);
 			jsonObj.put(STYLECLASS, arrayJS);
@@ -280,11 +274,8 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().handle(new ActionEvent());
-			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				System.out.println("MSG_TYPE : " + json.getString(MSG_TYPE));
+			if (UPDATE.equals(json.getString(MSG_TYPE)))
 				getText().setValue(json.getString(TEXT_CONTENT));
-				System.out.println("TEXT_CONTENT : " + json.getString(TEXT_CONTENT));
-			}
 			super.handleMessage(json);
 		}
 

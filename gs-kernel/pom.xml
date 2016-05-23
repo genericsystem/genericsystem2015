@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -12,11 +13,6 @@
 	<packaging>jar</packaging>
 
 	<dependencies>
-		<!-- dependency>
-			<groupId>org.genericsystem</groupId>
-			<artifactId>gs-defaults</artifactId>
-			<version>4.0-SNAPSHOT</version>
-		</dependency-->
 		
 		<dependency>
 			<groupId>org.genericsystem</groupId>
@@ -72,13 +68,6 @@
 			<version>${vertx.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-		</dependency>
-
-
 		<!-- <dependency> <groupId>io.vertx</groupId> <artifactId>vertx-hazelcast</artifactId> 
 			<version>${vertx.version}</version> </dependency> <dependency> <groupId>com.hazelcast</groupId> 
 			<artifactId>hazelcast</artifactId> <version>3.4</version> <exclusions> <exclusion> 
@@ -86,4 +75,7 @@
 			</exclusion> </exclusions> </dependency> -->
 
 	</dependencies>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 </project>
