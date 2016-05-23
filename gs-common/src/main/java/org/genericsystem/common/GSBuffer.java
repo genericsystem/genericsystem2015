@@ -1,9 +1,5 @@
 package org.genericsystem.common;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.util.CharsetUtil;
-import io.vertx.core.buffer.Buffer;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
@@ -20,6 +17,12 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.util.CharsetUtil;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -674,5 +677,20 @@ public class GSBuffer implements Buffer {
 	@Override
 	public GSBuffer getBytes(int arg0, int arg1, byte[] arg2, int arg3) {
 		return new GSBuffer(internal.getBytes(arg0, arg1, arg2, arg3));
+	}
+
+	@Override
+	public JsonArray toJsonArray() {
+		return internal.toJsonArray();
+	}
+
+	@Override
+	public JsonObject toJsonObject() {
+		return internal.toJsonObject();
+	}
+
+	@Override
+	public String toString(Charset arg0) {
+		return internal.toString();
 	}
 }

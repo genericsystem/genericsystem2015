@@ -1,13 +1,20 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,12 +27,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import org.genericsystem.common.GSBuffer;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -85,13 +86,15 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor,
+			Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
 		super.select(function, stringExtractor, generic, constructor);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor, Supplier<Generic> generic) {
+	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor,
+			Supplier<Generic> generic) {
 		select(function, stringExtractor, generic, CompositeModel::new);
 		return (COMPONENT) this;
 	}
@@ -150,15 +153,18 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 			this.tag = tag;
 		}
 
-		public void initListener(){
-			this.text.addListener((o, oldValue, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue)));
+		public void initListener() {
+			this.text.addListener((o, oldValue, newValue) -> {
+				System.out.println("NEWVALUE : " + new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue).encodePrettily());
+				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue));
+			});
 			this.styleClasses.addListener((ListChangeListener<String>) change -> {
 				JsonArray arrayJS = new JsonArray();
 				styleClasses.forEach(clazz -> arrayJS.add(clazz));
 				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLECLASS, arrayJS));
 			});
 		}
-		
+
 		List<HtmlDomNode> getChildren() {
 			return children;
 		}
@@ -195,7 +201,8 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		};
 
 		public void sendMessage(JsonObject jsonObj) {
-			getWebSocket().write(new GSBuffer().appendString(jsonObj.encode()));
+			// Buffer littleBuffer = new BufferFactoryImpl().buffer(Buffer.buffer().appendString(jsonObj.encode()).getByteBuf().order(ByteOrder.BIG_ENDIAN));
+			getWebSocket().writeFinalTextFrame(jsonObj.encode());
 		}
 
 		void fillJson(HtmlDomNode parentNodeJs, JsonObject jsonObj) {
