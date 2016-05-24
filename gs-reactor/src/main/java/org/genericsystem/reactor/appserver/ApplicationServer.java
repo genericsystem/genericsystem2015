@@ -116,23 +116,20 @@ public class ApplicationServer extends AbstractBackEnd {
 						request.response().sendFile(Paths.get("").toAbsolutePath().toString() + request.path());
 					}
 					if ("javascript".equals(items[1])) {
-						System.out.println("+++ path :" + request.path().toString());
 						request.response().sendFile(getFile("resources/script.js"));
 					}
 				} else {
-					System.out.println("--items.length : " + items.length);
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<script src=\"http://code.jquery.com/jquery-2.2.0.min.js\"></script>";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"resources/style.css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
 					indexHtml += "</script>";
 					indexHtml += "<script type=\"text/javascript\" src=\"/javascript/script.js\"></script>";
 					indexHtml += "</head>";
-					indexHtml += "<body id=\"root\">";
+					indexHtml += "<body onload=\"connect();\" id=\"root\">";
 					indexHtml += "</body>";
 					indexHtml += "</html>";
 					request.response().end(indexHtml);

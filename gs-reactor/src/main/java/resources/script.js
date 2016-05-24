@@ -136,6 +136,7 @@
 
 	//-------------------------------------------------------------	
 	function connect() {
+		console.log("connecte");
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
 		wsocket.onmessage = onMessageReceived;
@@ -151,7 +152,4 @@
 		wsocket.close();
 	}
 
-	$(document).ready(function() {
-		connect();
-		console.log("connecte");
-	});
+	
