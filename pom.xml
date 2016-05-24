@@ -46,7 +46,8 @@
 	    <module>gs-carcolor-model</module>
 	    <module>gs-todomvc</module>
 	    <module>gs-example-reactor</module>
-	</modules>
+    <module>gs-resources</module>
+  </modules>
 
 	<distributionManagement>
 		<repository>

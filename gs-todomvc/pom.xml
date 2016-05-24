@@ -26,5 +26,18 @@
 		<version>4.0-SNAPSHOT</version>
 	</dependency>
 	
+
+
+		<resources>
+
+		<resource>
+	
+			<directory>/gs-reactor/resourcesJavascript</directory>
+	
+		</resource>
+
+	</resources>
+
+	
   </dependencies>
 </project>
