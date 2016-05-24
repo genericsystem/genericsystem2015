@@ -38,15 +38,13 @@
 	<modules>
 		<module>gs-api</module>
 		<module>gs-defaults</module>
-		<module>gs-kernel</module>
-		
+		<module>gs-kernel</module>		
 		<module>gs-cdi</module>
     	<module>gs-common</module>
 	    <module>gs-reactor</module>
 	    <module>gs-carcolor-model</module>
 	    <module>gs-todomvc</module>
 	    <module>gs-example-reactor</module>
-    <module>gs-resources</module>
   </modules>
 
 	<distributionManagement>
