@@ -6,7 +6,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
-import org.genericsystem.common.AbstractCache;
+import org.genericsystem.kernel.Cache;
 
 @RequestScoped
 public class CacheRequestProvider {
@@ -20,7 +20,7 @@ public class CacheRequestProvider {
 	}
 
 	@Produces
-	public AbstractCache getCurrentCache() {
+	public Cache getCurrentCache() {
 		return cacheSessionProvider.getCurrentCache();
 	}
 

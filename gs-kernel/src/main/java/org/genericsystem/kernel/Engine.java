@@ -24,7 +24,9 @@ public class Engine extends AbstractServer {
 	}
 
 	public Engine(String persistentDirectoryPath, Class<?>... userClasses) {
-		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
+		init(this,
+				buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE,
+						Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.SYSTEM_TS));
 		startSystemCache(userClasses);
 		archiver = new Archiver(this, persistentDirectoryPath);
 		isInitialized = true;
@@ -36,7 +38,8 @@ public class Engine extends AbstractServer {
 		return new SystemCache(root) {
 
 			@Override
-			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides,
+					Serializable value, List<Generic> components) {
 				// TODO Auto-generated method stub
 				return new SetSystemBuilder(cache, clazz, meta, overrides, value, components).resolve();
 			}
@@ -49,16 +52,21 @@ public class Engine extends AbstractServer {
 	}
 
 	@Override
+	public Cache getCurrentCache() {
+		return (Cache) super.getCurrentCache();
+	}
+
+	@Override
 	public Engine getRoot() {
 		return this;
 	}
 
 	@Override
-	public AbstractCache newCache() {
+	public Cache newCache() {
 		return new Cache(this);
 	}
 
-	public AbstractCache newCache(ContextEventListener<Generic> listener) {
+	public Cache newCache(ContextEventListener<Generic> listener) {
 		return new Cache(this, listener);
 	}
 }

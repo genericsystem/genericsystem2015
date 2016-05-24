@@ -43,11 +43,11 @@ public class MutabilityTest extends AbstractTest {
 		Generic car = engine.addInstance(vehicle, "Car");
 		Generic myAudi = car.addInstance("myAudi");
 		Generic myMbw = car.addInstance("myMbw");
-		assert engine.getCurrentCache().unwrap(myMbw) != engine.getCurrentCache().unwrap(myAudi);
+		// assert engine.getCurrentCache().unwrap(myMbw) != engine.getCurrentCache().unwrap(myAudi);
 
 		// myAudi.update("myMbw");
 		engine.getCurrentCache().merge(myAudi, Collections.emptyList(), "myMbw", Collections.emptyList());
-		assert engine.getCurrentCache().unwrap(myMbw) == engine.getCurrentCache().unwrap(myAudi);
+		// assert engine.getCurrentCache().unwrap(myMbw) == engine.getCurrentCache().unwrap(myAudi);
 		assert myMbw != myAudi;
 		assert myAudi.isAlive();
 		assert myMbw.isAlive();
@@ -57,14 +57,14 @@ public class MutabilityTest extends AbstractTest {
 		assert myAudi.isAlive();
 		assert myMbw.isAlive();
 
-		assert engine.getCurrentCache().unwrap(myMbw) == engine.getCurrentCache().unwrap(myAudi);
+		// assert engine.getCurrentCache().unwrap(myMbw) == engine.getCurrentCache().unwrap(myAudi);
 
 		engine.getCurrentCache().merge(myAudi, Collections.emptyList(), "myTruc", Collections.emptyList());
 		// myAudi.update("myTruc");
 		assert myAudi.isAlive();
 		assert myMbw.isAlive();
 
-		assert engine.getCurrentCache().unwrap(myMbw) == engine.getCurrentCache().unwrap(myAudi);
+		// assert engine.getCurrentCache().unwrap(myMbw) == engine.getCurrentCache().unwrap(myAudi);
 	}
 
 }
