@@ -99,6 +99,24 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic,
+			ModelConstructor<CompositeModel> constructor) {
+		select(model -> model.getSelection(this), stringExtractor, generic, constructor);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic) {
+		select(stringExtractor, generic, CompositeModel::new);
+		return (COMPONENT) this;
+	}
+
+	public <T extends CompositeModel> COMPONENT select(Supplier<Generic> generic) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generic, CompositeModel::new);
+		return (COMPONENT) this;
+	}
+
 	// @SuppressWarnings({ "unchecked" })
 	// public <M> COMPONENT bindStyleClass(Function<M, ObservableValue<String>> function) {
 	// addObservableListToObservableValueBinding(HtmlDomNode::getStyleClasses, function);

@@ -1,11 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
@@ -24,6 +18,12 @@ import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
 
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 /**
  * @author Nicolas Feybesse
  *
@@ -37,10 +37,8 @@ public class ApplicationServer extends AbstractBackEnd {
 		System.out.println("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
-			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath),
-					options.getEngineClass(directoryPath));
-			System.out.println("Starts " + root.getClass().getSimpleName() + " with path : " + path
-					+ " and persistence directory path : " + directoryPath);
+			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
+			System.out.println("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
 			roots.put(path, root);
@@ -48,29 +46,25 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(
-					applicationPath,
-					new PersistentApplication(options.getApplicationClass(applicationPath), options
-							.getModelClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName()
-					+ " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
+			apps.put(applicationPath,
+					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
+			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
+					+ " and persistence directory path : " + directoryPath);
 		}
 	}
 
-	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses,
-			Class<? extends AbstractRoot> applicationClass) {
+	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
 		try {
 			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath,
 					userClasses.toArray(new Class[userClasses.size()]));
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException e) {
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass,
-			String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass,
-			AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
+			Class<? extends Model> modelClass, AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
