@@ -21,8 +21,6 @@ import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<AppModel> {
 
-	private final AbstractRoot engine;
-
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
 		appsConfig.addApplication("/", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
@@ -32,7 +30,6 @@ public class AppHtml extends HtmlApp<AppModel> {
 
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
-		this.engine = engine;
 		runScript(engine);
 	}
 
