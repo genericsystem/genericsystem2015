@@ -4,10 +4,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.reactor.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -39,11 +41,14 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 		return new MetaBinding<>(model -> applyOnModel.apply((M) model), MetaBinder.<N, SUBMODEL> foreachBinder());
 	}
 
-	public static <N> MetaBinding<N, ObservableList<CompositeModel>> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(Function<M, ObservableList<CompositeModel>> applyOnModel,
+			StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		return forEach(model -> {
-			((CompositeModel) model).initSubModels(stringExtractor, observableListExtractor, constructor);
-			return ((CompositeModel) model).getSubModels();
+			ObservableList<CompositeModel> observableList = applyOnModel.apply((M) model);
+			Generic[] generics = ((M) model).getGenerics();
+			Bindings.bindContent(observableList, new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics),
+					generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor)));
+			return observableList;
 		});
 	}
 
@@ -70,6 +75,16 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 		return selector(model -> {
 			Property<CompositeModel> property = applyOnModel.apply((M) model);
 			property.setValue(constructor.build(CompositeModel.addToGenerics(generic.get(), ((CompositeModel) model).getGenerics()), stringExtractor));
+			return property;
+		});
+	}
+
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Function<M, Property<CompositeModel>> applyOnModel,
+			StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+		return selector(model -> {
+			Property<CompositeModel> property = applyOnModel.apply((M) model);
+			Generic[] generics = ((M) model).getGenerics();
+			property.setValue(constructor.build(CompositeModel.addToGenerics(generics[0].getRoot().find(genericClass), generics), stringExtractor));
 			return property;
 		});
 	}

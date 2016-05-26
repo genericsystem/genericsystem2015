@@ -6,7 +6,8 @@ import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
 import org.genericsystem.reactor.html.HtmlLabel;
 
-public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceAttributeCellHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceAttributeCellHtmlTemplate<M, COMPONENT>>
+		extends CompositeSectionHtmlTemplate<M, COMPONENT> {
 
 	public InstanceAttributeCellHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 		super(parent);
@@ -19,7 +20,7 @@ public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel
 		new HtmlLabel<CompositeModel>(parentSection).bindText(CompositeModel::getString);
 	}
 
-	public static class InstanceAttributeCellHtml<M extends CompositeModel> extends CompositeSectionHtmlTemplate<M, InstanceAttributeCellHtml<M>> {
+	public static class InstanceAttributeCellHtml<M extends CompositeModel> extends InstanceAttributeCellHtmlTemplate<M, InstanceAttributeCellHtml<M>> {
 		public InstanceAttributeCellHtml(HtmlElement<?, ?, ?> parent) {
 			super(parent);
 		}

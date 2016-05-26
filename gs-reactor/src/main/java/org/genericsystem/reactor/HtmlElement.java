@@ -72,8 +72,16 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		super.forEach(stringExtractor, observableListExtractor, constructor);
+	public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
+			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		super.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+			ModelConstructor<CompositeModel> constructor) {
+		forEach(model -> model.getObservableList(this), stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
 
@@ -102,7 +110,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	@SuppressWarnings("unchecked")
 	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic,
 			ModelConstructor<CompositeModel> constructor) {
-		select(model -> model.getSelection(this), stringExtractor, generic, constructor);
+		select(model -> model.getProperty(this), stringExtractor, generic, constructor);
 		return (COMPONENT) this;
 	}
 
@@ -112,8 +120,21 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T extends CompositeModel> COMPONENT select(Supplier<Generic> generic) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generic, CompositeModel::new);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Class<?> genericClass) {
+		super.select(model -> model.getProperty(this), stringExtractor, genericClass, CompositeModel::new);
+		return (COMPONENT) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends CompositeModel> COMPONENT select(Class<?> genericClass) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericClass);
 		return (COMPONENT) this;
 	}
 

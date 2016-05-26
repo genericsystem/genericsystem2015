@@ -9,7 +9,8 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSectionTemplate;
 
-public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends CompositeSectionHtmlTemplate<M, COMPONENT>> extends HtmlSectionTemplate<M, COMPONENT> {
+public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends CompositeSectionHtmlTemplate<M, COMPONENT>>
+		extends HtmlSectionTemplate<M, COMPONENT> {
 
 	private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;
 	private ObservableListExtractor observableListExtractor;
@@ -24,7 +25,8 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 	@Override
 	protected void initChildren() {
 		HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyleClass("gscell").addStyleClass("gstitlecell");
-		htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b)).addStyleClass("gscell");
+		htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b))
+				.addStyleClass("gscell");
 		initSubChildren(htmlSection);
 	}
 
@@ -36,24 +38,30 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 		return stringExtractor;
 	}
 
-	public void setStringExtractor(StringExtractor stringExtractor) {
+	@SuppressWarnings("unchecked")
+	public COMPONENT setStringExtractor(StringExtractor stringExtractor) {
 		this.stringExtractor = stringExtractor;
+		return (COMPONENT) this;
 	}
 
 	public ObservableListExtractor getObservableListExtractor() {
 		return observableListExtractor;
 	}
 
-	public void setObservableListExtractor(ObservableListExtractor observableListExtractor) {
+	@SuppressWarnings("unchecked")
+	public COMPONENT setObservableListExtractor(ObservableListExtractor observableListExtractor) {
 		this.observableListExtractor = observableListExtractor;
+		return (COMPONENT) this;
 	}
 
 	public ModelConstructor<CompositeModel> getModelConstructor() {
 		return modelConstructor;
 	}
 
-	public void setModelConstructor(ModelConstructor<CompositeModel> modelConstructor) {
+	@SuppressWarnings("unchecked")
+	public COMPONENT setModelConstructor(ModelConstructor<CompositeModel> modelConstructor) {
 		this.modelConstructor = modelConstructor;
+		return (COMPONENT) this;
 	}
 
 	public static class CompositeSectionHtml<M extends CompositeModel> extends CompositeSectionHtmlTemplate<M, CompositeSectionHtml<M>> {
@@ -62,7 +70,8 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 		}
 	}
 
-	public static abstract class TitleCompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends TitleCompositeSectionHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+	public static abstract class TitleCompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends TitleCompositeSectionHtmlTemplate<M, COMPONENT>>
+			extends CompositeSectionHtmlTemplate<M, COMPONENT> {
 
 		public TitleCompositeSectionHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 			super(parent);

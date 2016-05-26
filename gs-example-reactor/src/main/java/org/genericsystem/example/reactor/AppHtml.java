@@ -1,12 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import javafx.collections.FXCollections;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -19,10 +12,12 @@ import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtml;
-import org.genericsystem.reactor.composite.CompositeSelectHtml;
+import org.genericsystem.reactor.composite.CompositeSelectHtmlTemplate.CompositeSelectHtml;
 import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlDiv;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<AppModel> {
 
@@ -30,7 +25,8 @@ public class AppHtml extends HtmlApp<AppModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
+				Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
@@ -45,10 +41,9 @@ public class AppHtml extends HtmlApp<AppModel> {
 		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
-			new CompositeSelectHtml<>(div).select(() -> engine);
-			new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, () -> engine.find(Car.class));
-			new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, () -> engine.find(Car.class)).setAttributesExtractor(
-					instance -> FXCollections.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find).collect(Collectors.toList())));
+			new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
+			new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, Car.class);
+			new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
 			new AppFooterHtml(div);
 		}
 	}

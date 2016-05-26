@@ -104,9 +104,9 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	public Element<M, N> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		metaBindings.add(MetaBinding.forEach(stringExtractor, observableListExtractor, constructor));
+	public <T extends CompositeModel> Element<M, N> forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
+			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor));
 		return this;
 	}
 
@@ -116,8 +116,14 @@ public abstract class Element<M extends Model, N> {
 	}
 
 	public <T extends CompositeModel> Element<M, N> select(Function<T, Property<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
-			Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
-		metaBindings.add(MetaBinding.selector(applyOnModel, stringExtractor, generic, constructor));
+			Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.selector(applyOnModel, stringExtractor, genericSupplier, constructor));
+		return this;
+	}
+
+	public <T extends CompositeModel> Element<M, N> select(Function<T, Property<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
+			Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.selector(applyOnModel, stringExtractor, genericClass, constructor));
 		return this;
 	}
 

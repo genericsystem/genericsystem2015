@@ -8,13 +8,12 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
@@ -26,34 +25,34 @@ public class CompositeModel extends Model {
 
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
-	private ObservableList<CompositeModel> subModels;
+	// private ObservableList<CompositeModel> subModels;
 
-	public <C extends CompositeModel> C initSubModels(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		return initSubModels(observableListExtractor, gs -> constructor.build(gs, stringExtractor));
-	}
+	// public <C extends CompositeModel> C initSubModels(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+	// ModelConstructor<CompositeModel> constructor) {
+	// return initSubModels(observableListExtractor, gs -> constructor.build(gs, stringExtractor));
+	// }
 
-	public <C extends CompositeModel> C initSubModels(ObservableListExtractor observableListExtractor, Builder<CompositeModel> leafBuilder) {
-		return initSubModels(
-				new Transformation2<>(observableListExtractor.apply(generics), generic -> leafBuilder.apply(CompositeModel.addToGenerics(generic, generics))));
-	}
+	// public <C extends CompositeModel> C initSubModels(ObservableListExtractor observableListExtractor, Builder<CompositeModel> leafBuilder) {
+	// return initSubModels(
+	// new Transformation2<>(observableListExtractor.apply(generics), generic -> leafBuilder.apply(CompositeModel.addToGenerics(generic, generics))));
+	// }
 
-	public <C extends CompositeModel> C initSubModels(ObservableList<CompositeModel> subModels) {
-		this.subModels = subModels;
-		return (C) this;
-	}
+	// public <C extends CompositeModel> C initSubModels(ObservableList<CompositeModel> subModels) {
+	// this.subModels = subModels;
+	// return (C) this;
+	// }
+	//
+	// public ObservableList<CompositeModel> getSubModels() {
+	// return subModels;
+	// }
 
-	public ObservableList<CompositeModel> getSubModels() {
-		return subModels;
-	}
-
-	public ObservableValue<CompositeModel> getFirstSubModel() {
-		return Bindings.valueAt(subModels, 0);
-	}
-
-	public ObservableValue<CompositeModel> getSecondSubModel() {
-		return Bindings.valueAt(subModels, 1);
-	}
+	// public ObservableValue<CompositeModel> getFirstSubModel() {
+	// return Bindings.valueAt(subModels, 0);
+	// }
+	//
+	// public ObservableValue<CompositeModel> getSecondSubModel() {
+	// return Bindings.valueAt(subModels, 1);
+	// }
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor) {
 		assert stringExtractor != null;
@@ -91,13 +90,16 @@ public class CompositeModel extends Model {
 	@FunctionalInterface
 	public static interface ObservableListExtractor extends Function<Generic[], ObservableList<Generic>> {
 		public static final ObservableListExtractor INSTANCES = generics -> {
-			System.out.println("INSTANCES : " + Arrays.toString(generics));
+			System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getObservableSubInstances());
 			return generics[0].getObservableSubInstances();
 		};
 
-		public static final ObservableListExtractor ATTRIBUTES = gs -> gs[0].getObservableAttributes();
+		public static final ObservableListExtractor ATTRIBUTES = generics -> {
+			System.out.println("ATTRIBUTES : " + Arrays.toString(generics) + " " + generics[0].getObservableAttributes());
+			return generics[0].getObservableAttributes();
+		};
 		public static final ObservableListExtractor HOLDERS = generics -> {
-			System.out.println("HOLDERS : " + Arrays.toString(generics));
+			System.out.println("HOLDERS : " + Arrays.toString(generics) + " " + generics[1].getObservableHolders(generics[0]));
 			return generics[1].getObservableHolders(generics[0]);
 		};
 	}
@@ -122,7 +124,7 @@ public class CompositeModel extends Model {
 		M build(Generic[] generics, StringExtractor stringExtractor);
 	}
 
-	private Map<Element<?, ?>, Property<CompositeModel>> selections = new HashMap<Element<?, ?>, Property<CompositeModel>>() {
+	private Map<Element<?, ?>, Property<CompositeModel>> properties = new HashMap<Element<?, ?>, Property<CompositeModel>>() {
 		private static final long serialVersionUID = 7982904777429420269L;
 
 		@Override
@@ -135,8 +137,24 @@ public class CompositeModel extends Model {
 
 	};
 
-	public Property<CompositeModel> getSelection(Element<?, ?> element) {
-		return selections.get(element);
+	public Property<CompositeModel> getProperty(Element<?, ?> element) {
+		return properties.get(element);
+	}
+
+	private Map<Element<?, ?>, ObservableList<CompositeModel>> observableLists = new HashMap<Element<?, ?>, ObservableList<CompositeModel>>() {
+		private static final long serialVersionUID = 7982904777429420269L;
+
+		@Override
+		public ObservableList<CompositeModel> get(Object key) {
+			ObservableList<CompositeModel> result = super.get(key);
+			if (result == null)
+				put((Element<?, ?>) key, result = FXCollections.observableArrayList());
+			return result;
+		};
+	};
+
+	public ObservableList<CompositeModel> getObservableList(Element<?, ?> element) {
+		return observableLists.get(element);
 	}
 
 	public void flush() {
