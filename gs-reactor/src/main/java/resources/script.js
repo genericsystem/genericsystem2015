@@ -1,18 +1,9 @@
 
 	var wsocket;
 	//var serviceLocation = "ws://127.0.0.1:8082/second/";
-	//-------------------------------------------------------------	
-	function getSubString(bytes) {
-		var subString = '';
-		for (var i = 0; i < bytes.length; i++) {
-			subString += String.fromCharCode(bytes[i]);
-		}
-		return subString;
-	}
 
-	//-------------------------------------------------------------
 	function onMessageReceived(evt) {
-		var message = jQuery.parseJSON(getSubString(new Uint8Array(evt.data)));
+		var message = JSON.parse(evt.data);
 		switch (message.msgType) {
 		case 'A':
 			var parent = document.getElementById(message.parentId);
@@ -113,6 +104,7 @@
 				if (typeof message.textContent !== 'undefined') {
 					if (elt.tagName == "INPUT"
 							&& elt.getAttribute("type") == "text") {
+						console.log("Receive : "+message.textContent);
 						elt.value = message.textContent;
 					}
 					elt.textContent = message.textContent;
@@ -134,6 +126,7 @@
 
 	//-------------------------------------------------------------	
 	function connect() {
+		console.log("connecte");
 		wsocket = new WebSocket(serviceLocation);
 		wsocket.binaryType = "arraybuffer";
 		wsocket.onmessage = onMessageReceived;
@@ -149,7 +142,4 @@
 		wsocket.close();
 	}
 
-	$(document).ready(function() {
-		connect();
-		console.log("connecte");
-	});
+	

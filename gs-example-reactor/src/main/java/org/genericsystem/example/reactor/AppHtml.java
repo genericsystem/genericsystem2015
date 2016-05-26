@@ -1,10 +1,8 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -22,31 +20,24 @@ import org.genericsystem.reactor.composite.table.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlDiv;
 
+import io.vertx.core.http.ServerWebSocket;
+import javafx.collections.FXCollections;
+
 public class AppHtml extends HtmlApp<AppModel> {
 
-	private final Generic car;
 	private final AbstractRoot engine;
-	private final ObservableList<Generic> attributes;
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
 		appsConfig.addApplication("/", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
 				Color.class, CarColor.class);
-		// appsConfig.addApplication("/second", AppHtml.class, AppModel.class, "/home/middleware/cars/", Car.class, Power.class, Color.class, CarColor.class);
-		// apps.addApplication("/todos", TodoApp.class, "/home/middleware/todos/", Todos.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		this.engine = engine;
-		car = engine.find(Car.class);
-		attributes = FXCollections.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find)
-				.collect(Collectors.toList()));
 		runScript(engine);
-
-		new AppModel(engine);
-
 	}
 
 	@Override
@@ -54,18 +45,17 @@ public class AppHtml extends HtmlApp<AppModel> {
 		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
 		{
 			new AppHeaderHtml(div);
-			new CompositeSelectHtml<>(div).select(AppModel::getTypeListModel, StringExtractor.MANAGEMENT, () -> engine);
-			new TitleCompositeSectionHtml<>(div).select(AppModel::getTitleTypeListModel, StringExtractor.MANAGEMENT, () -> car);
-			((TypeTableHtml<CompositeModel>) new TypeTableHtml<CompositeModel>(div).select(AppModel::getTypeTableModel, StringExtractor.MANAGEMENT, () -> car))
-					.setAttributesExtractor(instance -> attributes);
-			// new TitleTypeTableHtml<>(div).select(AppModel::getTitleTypeTableModel);
-			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getInsertableTitleTypeTableModel);
-			// new InsertTitleTypeTableHtml<>(div).select(AppModel::getColorsInsertableTitleTypeTableModel);
+			new CompositeSelectHtml<>(div).select(() -> engine);
+			new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, () -> engine.find(Car.class));
+			((TypeTableHtml<CompositeModel>) new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, () -> engine.find(Car.class)))
+					.setAttributesExtractor(instance -> FXCollections
+							.observableArrayList(Arrays.asList(Power.class, CarColor.class).stream().map(engine::<Generic> find).collect(Collectors.toList())));
 			new AppFooterHtml(div);
 		}
 	}
 
 	void runScript(AbstractRoot engine) {
+		Generic car = engine.find(Car.class);
 		Generic power = engine.find(Power.class);
 		Generic carColor = engine.find(CarColor.class);
 		Generic color = engine.find(Color.class);

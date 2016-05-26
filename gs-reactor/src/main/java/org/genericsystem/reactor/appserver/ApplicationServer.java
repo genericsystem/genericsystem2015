@@ -1,16 +1,13 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
@@ -20,6 +17,12 @@ import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -89,25 +92,38 @@ public class ApplicationServer extends AbstractBackEnd {
 			};
 		}
 
+		private String getFile(String fileName) {
+
+			// Get file from resources folder
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource(fileName).getFile());
+			return file.toPath().toString();
+		}
+
 		@Override
 		public void addHttpHandler(HttpServer httpServer, String url) {
 			httpServer.requestHandler(request -> {
 				String[] items = request.path().split("/");
-				if ((items.length > 1) && ("resources".equals(items[1]))) {
-					request.response().sendFile(Paths.get("").toAbsolutePath().toString() + request.path());
+
+				if (items.length > 1) {
+					if ("resources".equals(items[1])) {
+						request.response().sendFile(Paths.get("").toAbsolutePath().toString() + request.path());
+					}
+					if ("javascript".equals(items[1])) {
+						request.response().sendFile(getFile("resources/script.js"));
+					}
 				} else {
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<script src=\"http://code.jquery.com/jquery-2.2.0.min.js\"></script>";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"resources/style.css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
 					indexHtml += "</script>";
-					indexHtml += "<script type=\"text/javascript\" src=\"resources/script.js\"></script>";
+					indexHtml += "<script type=\"text/javascript\" src=\"/javascript/script.js\"></script>";
 					indexHtml += "</head>";
-					indexHtml += "<body id=\"root\">";
+					indexHtml += "<body onload=\"connect();\" id=\"root\">";
 					indexHtml += "</body>";
 					indexHtml += "</html>";
 					request.response().end(indexHtml);
@@ -115,7 +131,6 @@ public class ApplicationServer extends AbstractBackEnd {
 			});
 
 		}
-
 	}
 
 	@Override
