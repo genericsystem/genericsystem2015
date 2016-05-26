@@ -25,7 +25,7 @@ public abstract class AbstractWebSocketsServer {
 	public AbstractWebSocketsServer(String host, int port) {
 		this.port = port;
 		this.host = host;
-		this.url = "wss://" + host + ":" + port;
+		this.url = "ws://" + host + ":" + port;
 		System.out.println("url: " + this.url);
 	}
 
