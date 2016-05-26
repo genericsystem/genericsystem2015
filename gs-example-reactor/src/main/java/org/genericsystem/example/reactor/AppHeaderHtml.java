@@ -2,7 +2,7 @@ package org.genericsystem.example.reactor;
 
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.html.HtmlSection;
+import org.genericsystem.reactor.html.HtmlSectionTemplate.HtmlSection;
 
 public class AppHeaderHtml extends HtmlSection<AppModel> {
 	public AppHeaderHtml(HtmlElement<?, ?, ?> parent) {

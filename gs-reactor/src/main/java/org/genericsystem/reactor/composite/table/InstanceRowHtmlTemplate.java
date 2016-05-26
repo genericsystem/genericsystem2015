@@ -2,14 +2,15 @@ package org.genericsystem.reactor.composite.table;
 
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeSectionHtml;
+import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
+import org.genericsystem.reactor.composite.table.InstanceAttributeCellHtmlTemplate.InstanceAttributeCellHtml;
+import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlLabel;
-import org.genericsystem.reactor.html.HtmlSection;
 
-public class InstanceRowHtml<M extends CompositeModel> extends CompositeSectionHtml<M> {
+public abstract class InstanceRowHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceRowHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
 
-	public InstanceRowHtml(HtmlSection<CompositeModel> parent) {
+	public InstanceRowHtmlTemplate(HtmlSection<CompositeModel> parent) {
 		super(parent);
 		addStyleClass("gsrow");
 		setObservableListExtractor(generics -> getAttributesExtractor().apply(generics));
@@ -29,5 +30,12 @@ public class InstanceRowHtml<M extends CompositeModel> extends CompositeSectionH
 
 	ObservableListExtractor getAttributesExtractor() {
 		return this.getParent().<TypeTableHtml<?>> getParent().getAttributesExtractor();
+	}
+
+	public static class InstanceRowHtml<M extends CompositeModel> extends InstanceRowHtmlTemplate<M, InstanceRowHtml<M>> {
+
+		public InstanceRowHtml(org.genericsystem.reactor.html.HtmlSectionTemplate.HtmlSection<CompositeModel> parent) {
+			super(parent);
+		}
 	}
 }
