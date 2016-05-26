@@ -13,6 +13,7 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtml;
 import org.genericsystem.reactor.composite.CompositeSelectHtmlTemplate.CompositeSelectHtml;
+import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.ColumnTitleTypeTableHtml;
 import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlDiv;
@@ -41,6 +42,7 @@ public class AppHtml extends HtmlApp<AppModel> {
 			new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
 			new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, Car.class);
 			new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
+			new ColumnTitleTypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
 			new AppFooterHtml(div);
 		}
 	}

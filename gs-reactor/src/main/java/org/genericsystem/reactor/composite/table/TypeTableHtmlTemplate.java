@@ -9,6 +9,7 @@ import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtmlTemplate;
 import org.genericsystem.reactor.composite.table.InstanceRowHtmlTemplate.InstanceRowHtml;
+import org.genericsystem.reactor.html.HtmlH1;
 
 import javafx.collections.FXCollections;
 
@@ -45,9 +46,24 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 	}
 
 	public static class TypeTableHtml<M extends CompositeModel> extends TypeTableHtmlTemplate<M, TypeTableHtml<M>> {
-
 		public TypeTableHtml(HtmlElement<?, ?, ?> parent) {
 			super(parent);
+		}
+	}
+
+	public static class ColumnTitleTypeTableHtml<M extends CompositeModel> extends TypeTableHtmlTemplate<M, ColumnTitleTypeTableHtml<M>> {
+		public ColumnTitleTypeTableHtml(HtmlElement<?, ?, ?> parent) {
+			super(parent);
+		}
+
+		@Override
+		protected void initChildren() {
+			new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(CompositeModel::getString);
+			new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(CompositeModel::getString);
+			HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyleClass("gscell").addStyleClass("gstitlecell");
+			htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
+					(gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyleClass("gscell");
+			initSubChildren(htmlSection);
 		}
 	}
 

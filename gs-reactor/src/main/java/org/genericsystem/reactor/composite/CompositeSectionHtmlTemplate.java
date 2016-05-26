@@ -25,8 +25,8 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 	@Override
 	protected void initChildren() {
 		HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyleClass("gscell").addStyleClass("gstitlecell");
-		htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b))
-				.addStyleClass("gscell");
+		htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
+				(gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyleClass("gscell");
 		initSubChildren(htmlSection);
 	}
 

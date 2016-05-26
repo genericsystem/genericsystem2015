@@ -4,11 +4,11 @@ import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
 import org.genericsystem.reactor.composite.table.InstanceAttributeCellHtmlTemplate.InstanceAttributeCellHtml;
-import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlLabel;
 
-public abstract class InstanceRowHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceRowHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+public abstract class InstanceRowHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceRowHtmlTemplate<M, COMPONENT>>
+		extends CompositeSectionHtmlTemplate<M, COMPONENT> {
 
 	public InstanceRowHtmlTemplate(HtmlSection<CompositeModel> parent) {
 		super(parent);
@@ -29,7 +29,7 @@ public abstract class InstanceRowHtmlTemplate<M extends CompositeModel, COMPONEN
 	}
 
 	ObservableListExtractor getAttributesExtractor() {
-		return this.getParent().<TypeTableHtml<?>> getParent().getAttributesExtractor();
+		return this.getParent().<TypeTableHtmlTemplate<?, ?>> getParent().getAttributesExtractor();
 	}
 
 	public static class InstanceRowHtml<M extends CompositeModel> extends InstanceRowHtmlTemplate<M, InstanceRowHtml<M>> {
