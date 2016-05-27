@@ -1,9 +1,9 @@
 package org.genericsystem.reactor.composite.table;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.HtmlElement;
@@ -34,10 +34,15 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 		return (COMPONENT) this;
 	}
 
-	@SuppressWarnings("unchecked")
 	public COMPONENT setAttributesExtractor(Class<?>... classes) {
-		return setAttributesExtractor(
-				gs -> FXCollections.observableArrayList((List) Arrays.stream(classes).map(gs[0].getRoot()::find).collect(Collectors.toList())));
+		// ObservableListExtractor o = gs -> {
+		// Stream<Class<?>> stream = Arrays.stream(classes);
+		// Stream<Generic> stream2 = stream.map(clazz->gs[0].getRoot().find(clazz));//projection
+		// List<Generic> list = stream2.collect(Collectors.toList());//collection
+		// return FXCollections.observableArrayList(list);
+		// };
+		return this.setAttributesExtractor(
+				gs -> FXCollections.observableArrayList(Arrays.stream(classes).map(gs[0].getRoot()::<Generic> find).collect(Collectors.toList())));
 	}
 
 	@Override
