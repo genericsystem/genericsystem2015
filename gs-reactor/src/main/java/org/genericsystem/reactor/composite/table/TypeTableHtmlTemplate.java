@@ -35,12 +35,6 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 	}
 
 	public COMPONENT setAttributesExtractor(Class<?>... classes) {
-		// ObservableListExtractor o = gs -> {
-		// Stream<Class<?>> stream = Arrays.stream(classes);
-		// Stream<Generic> stream2 = stream.map(clazz->gs[0].getRoot().find(clazz));//projection
-		// List<Generic> list = stream2.collect(Collectors.toList());//collection
-		// return FXCollections.observableArrayList(list);
-		// };
 		return this.setAttributesExtractor(
 				gs -> FXCollections.observableArrayList(Arrays.stream(classes).map(gs[0].getRoot()::<Generic> find).collect(Collectors.toList())));
 	}
