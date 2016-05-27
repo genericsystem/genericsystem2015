@@ -21,6 +21,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 	public TypeTableHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 		super(parent);
 		addStyleClass("gstable");
+
 		setObservableListExtractor(ObservableListExtractor.INSTANCES);
 	}
 
