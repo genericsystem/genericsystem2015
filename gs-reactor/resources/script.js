@@ -1,6 +1,5 @@
 
 	var wsocket;
-	//var serviceLocation = "ws://127.0.0.1:8082/second/";
 
 	function onMessageReceived(evt) {
 		var message = JSON.parse(evt.data);
