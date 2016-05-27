@@ -41,7 +41,9 @@ public class AppHtml extends HtmlApp<AppModel> {
 			new AppHeaderHtml(div);
 			new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
 			new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, Car.class);
+
 			new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
+
 			new ColumnTitleTypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
 			new AppFooterHtml(div);
 		}
