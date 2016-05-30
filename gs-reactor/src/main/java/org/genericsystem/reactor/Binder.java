@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 
 /**
@@ -75,10 +77,10 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N> Binder<N, ObservableValue<String>, ObservableList<String>> observableListBinder() {
-		return new Binder<N, ObservableValue<String>, ObservableList<String>>() {
+	public static <N> Binder<N, ObservableValue<String>, ObservableSet<String>> observableSetBinder() {
+		return new Binder<N, ObservableValue<String>, ObservableSet<String>>() {
 			@Override
-			public void init(ObservableList<String> nodeResult, ObservableValue<String> modelResult) {
+			public void init(ObservableSet<String> nodeResult, ObservableValue<String> modelResult) {
 				nodeResult.add(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> {
 					nodeResult.remove(ov);
@@ -88,15 +90,32 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableList<W>> observableListBinder(Function<N, ObservableList<W>> applyOnNode, W styleClass) {
-		return new Binder<N, ObservableValue<Boolean>, ObservableList<W>>() {
+	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableSet<W>> observableSetBinder(Function<N, ObservableSet<W>> applyOnNode, W styleClass) {
+		return new Binder<N, ObservableValue<Boolean>, ObservableSet<W>>() {
 			@Override
-			public void init(ObservableList<W> nodeResult, ObservableValue<Boolean> modelResult) {
+			public void init(ObservableSet<W> nodeResult, ObservableValue<Boolean> modelResult) {
 				Consumer<Boolean> consumer = bool -> {
 					if (bool)
 						nodeResult.add(styleClass);
 					else
 						nodeResult.remove(styleClass);
+				};
+				consumer.accept(modelResult.getValue());
+				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
+			}
+		};
+	}
+
+	public static <N> Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>> observableMapBinder(
+			Function<N, ObservableMap<String, String>> applyOnNode, String attr, String value) {
+		return new Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>>() {
+			@Override
+			public void init(ObservableMap<String, String> nodeResult, ObservableValue<Boolean> modelResult) {
+				Consumer<Boolean> consumer = bool -> {
+					if (bool)
+						nodeResult.put(attr, value);
+					else
+						nodeResult.put(attr, "");
 				};
 				consumer.accept(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));

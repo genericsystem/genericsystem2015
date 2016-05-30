@@ -6,14 +6,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
-
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -53,8 +55,13 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	protected <VALUE> Element<M, N> addObservableListBoot(Function<N, ObservableList<VALUE>> applyOnNode, VALUE value) {
+	protected <VALUE> Element<M, N> addObservableSetBoot(Function<N, ObservableSet<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.addProperty(applyOnNode, value));
+		return this;
+	}
+
+	protected <VALUE> Element<M, N> addObservableMapBoot(Function<N, ObservableMap<VALUE, VALUE>> applyOnNode, VALUE attr, VALUE value) {
+		this.boots.add(Boot.addProperty(applyOnNode, attr, value));
 		return this;
 	}
 
@@ -87,15 +94,21 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	protected Element<M, N> addObservableListToObservableValueBinding(Function<N, ObservableList<String>> applyOnNode,
+	protected Element<M, N> addObservableSetToObservableValueBinding(Function<N, ObservableSet<String>> applyOnNode,
 			Function<M, ObservableValue<String>> applyOnModel) {
-		bindings.add(Binding.bindObservableListToObservableValue(applyOnModel, applyOnNode));
+		bindings.add(Binding.bindObservableSetToObservableValue(applyOnModel, applyOnNode));
 		return this;
 	}
 
-	protected <T> Element<M, N> addObservableListBinding(Function<N, ObservableList<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel,
+	protected <T> Element<M, N> addObservableSetBinding(Function<N, ObservableSet<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel,
 			T styleClass) {
-		bindings.add(Binding.bindObservableList(applyOnModel, styleClass, applyOnNode));
+		bindings.add(Binding.bindObservableSet(applyOnModel, styleClass, applyOnNode));
+		return this;
+	}
+
+	protected <T> Element<M, N> addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
+			Function<M, ObservableValue<Boolean>> applyOnModel, String attr, String value) {
+		bindings.add(Binding.bindObservableMap(applyOnModel, attr, value, applyOnNode));
 		return this;
 	}
 
