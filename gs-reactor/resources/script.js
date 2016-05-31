@@ -1,5 +1,13 @@
 
 	var wsocket;
+	
+	function connect() {
+		console.log("connecte");
+		wsocket = new WebSocket(serviceLocation);
+		wsocket.binaryType = "arraybuffer";
+		wsocket.onmessage = onMessageReceived;
+		wsocket.onclose = onclose;
+	}
 
 	function onMessageReceived(evt) {
 		console.log("JSON : "+evt.data);
@@ -13,79 +21,28 @@
 					parent = document.getElementById("root");
 				}
 				var elt = document.createElement(message.tagHtml);
-				elt.setAttribute("id", message.nodeId);
+				elt.id = message.nodeId;
 				elt.textContent = message.textContent;
 				
-				switch (message.tagHtml) {
-					case "button": {
-						elt.onclick = function click() {
-							wsocket.send(JSON.stringify({
-								msgType : "A",
-								nodeId : elt.id
-							}));
-						};
+				switch (message.tagHtml) 
+				{						
+					case "a": 		
+						elt.href="#";						
+						
+					case "button":						
+						buttonProcess(elt);	
 						break;
-					}
-					case "a": {
-						elt.onclick = function click() {
-							wsocket.send(JSON.stringify({
-								msgType : "A",
-								nodeId : elt.id
-							}));
-						};
-						elt.setAttribute("href", "#");
+						
+					case "input": 
+						inputProcess(elt,message);
+						break;	
+						
+					case "option": 
+						optionProcess(elt);
 						break;
-					}
-					case "input": {
-						elt.setAttribute("type", message.type);
-						switch (message.type) {
-						case "text": {
-							elt.value = message.textContent;
-							elt.onkeyup = function keyup(e) {
-								var code = (e.keyCode ? e.keyCode : e.which)
-								if (code == 13) {
-									wsocket.send(JSON.stringify({
-										msgType : "A",
-										nodeId : elt.id
-									}));
-								} else {
-									wsocket.send(JSON.stringify({
-										msgType : "U",
-										nodeId : elt.id,
-										textContent : elt.value
-									}));
-								}
-							}
-							break;
-						}
-						case "checkbox": {
-							elt.onchange = function change() {
-								wsocket.send(JSON.stringify({
-									msgType : "U",
-									nodeId : elt.id,
-									eltType : "checkbox",
-									checked : elt.checked
-								}));
-								;
-							}
-							elt.checked = message.checked;
-							break;
-						}
-						}
-						break;
-					}
-					case "option": {
-						elt.onclick = function () {
-							wsocket.send(JSON.stringify({
-								msgType : "A",
-								nodeId : elt.id
-							}));
-						};
-						break;
-					}
-					}
+				}
 	
-				setEltStylesCLass(elt, message.styleClass);
+				setEltStylesCLass(elt, message.styleClasses);
 				setEltStyles(elt, message.style);
 				parent.insertBefore(elt, document.getElementById(message.nextId));
 				break;
@@ -115,7 +72,7 @@
 					}
 					else if (typeof message.RemovedStyleClass !== 'undefined') {
 			
-							elt.classList.remove(message.RemovedStyleClass);
+						elt.classList.remove(message.RemovedStyleClass);
 					}
 					if (typeof message.style !== 'undefined') 
 					{
@@ -128,44 +85,93 @@
 			default:
 				alert("Unknown message received");
 			}
-	}
-
-	//-------------------------------------------------------------	
-	function connect() {
-		console.log("connecte");
-		wsocket = new WebSocket(serviceLocation);
-		wsocket.binaryType = "arraybuffer";
-		wsocket.onmessage = onMessageReceived;
-		wsocket.onclose = onclose;
-	}
+	}	
 
 	function onclose(evt) {
 		alert("Socket close with code : " + evt.code);
 	}
 	
-	function setEltStylesCLass(elt, styleClass) {
-		for (var i = 0; i < styleClass.length; i++)
-			elt.classList.add(styleClass[i]);
+	function setEltStylesCLass(elt, styleClasses) {
+		for (var i = 0; i < styleClasses.length; i++)
+			elt.classList.add(styleClasses[i]);
 	}
 	
 	function setEltStyles(elt, styles) {
 		for (var attr in styles) {
 			if(styles[attr]=="")
-				{
-				 	if (elt.style.removeProperty) {
-				 		elt.style.removeProperty (attr);
-		            } 
-		            else {
-		            	elt.style.removeAttribute (attr);
-		            }
-					
-				}
+			{
+			 	if (elt.style.removeProperty) 
+			 	{
+			 		elt.style.removeProperty (attr);
+	            } 
+	            else 
+	            {
+	            	elt.style.removeAttribute (attr);
+	            }					
+			}
 			else
-				{
-					elt.style[attr]=styles[attr];
-				}
-		    
+			{
+				elt.style[attr]=styles[attr];
+			}		    
 		}
+	}
+	
+	function buttonProcess(elt)
+	{
+		elt.onclick = function () {
+			wsocket.send(JSON.stringify({
+				msgType : "A",
+				nodeId : elt.id
+			}));
+		};
+	}
+	
+	function inputProcess(elt,message)
+	{
+		elt.type = message.type;
+		switch (message.type) 
+		{
+			case "text": 
+				elt.value = message.textContent;
+				elt.onkeyup = function (e) {
+					var code = (e.keyCode ? e.keyCode : e.which)
+					if (code == 13) {
+						wsocket.send(JSON.stringify({
+							msgType : "A",
+							nodeId : elt.id
+						}));
+					} else {
+						wsocket.send(JSON.stringify({
+							msgType : "U",
+							nodeId : elt.id,
+							textContent : elt.value
+						}));
+					}
+				}
+				break;
+		
+			case "checkbox": 
+				elt.onchange = function () {
+					wsocket.send(JSON.stringify({
+						msgType : "U",
+						nodeId : elt.id,
+						eltType : "checkbox",
+						checked : elt.checked
+					}));
+				}
+				elt.checked = message.checked;
+				break;
+		}
+	}
+	
+	function optionProcess(elt)
+	{
+		elt.onclick = function () {
+			wsocket.send(JSON.stringify({
+				msgType : "A",
+				nodeId : elt.id
+			}));
+		};
 	}
 
 

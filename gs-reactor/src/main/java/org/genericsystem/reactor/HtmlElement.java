@@ -169,7 +169,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	}
 
 	@SuppressWarnings("unchecked")
-	public COMPONENT bindOptionalStyle(Function<M, ObservableValue<Boolean>> function, String attr, String value) {
+	public COMPONENT bindOptionalStyle(Function<M, ObservableValue<Number>> function, String attr, String[] value) {
 		addObservableMapBinding(HtmlDomNode::getStyles, function, attr, value);
 		return (COMPONENT) this;
 	}
@@ -287,7 +287,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 			jsonObj.put(TEXT_CONTENT, text.getValue());
 			JsonArray arrayJS = new JsonArray();
 			styleClasses.forEach(arrayJS::add);
-			jsonObj.put(STYLECLASS, arrayJS);
+			jsonObj.put(STYLECLASSES, arrayJS);
 			JsonObject mapJS = new JsonObject();
 			styles.forEach((key, value) -> mapJS.put(key, value));
 			jsonObj.put(STYLE, mapJS);

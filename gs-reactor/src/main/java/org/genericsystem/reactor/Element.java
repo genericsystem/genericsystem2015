@@ -107,7 +107,7 @@ public abstract class Element<M extends Model, N> {
 	}
 
 	protected <T> Element<M, N> addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
-			Function<M, ObservableValue<Boolean>> applyOnModel, String attr, String value) {
+			Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value) {
 		bindings.add(Binding.bindObservableMap(applyOnModel, attr, value, applyOnNode));
 		return this;
 	}

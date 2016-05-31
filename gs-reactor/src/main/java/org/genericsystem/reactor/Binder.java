@@ -106,20 +106,37 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N> Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>> observableMapBinder(
-			Function<N, ObservableMap<String, String>> applyOnNode, String attr, String value) {
+	public static <N> Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>> observableMapBinder1(
+			Function<N, ObservableMap<String, String>> applyOnNode, String attr, String[] value) {
 		return new Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>>() {
 			@Override
 			public void init(ObservableMap<String, String> nodeResult, ObservableValue<Boolean> modelResult) {
 				Consumer<Boolean> consumer = bool -> {
 					if (bool)
-						nodeResult.put(attr, value);
+						nodeResult.put(attr, value[0]);
 					else
-						nodeResult.put(attr, "");
+						nodeResult.put(attr, value[1]);
 				};
 				consumer.accept(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
 			}
 		};
 	}
+
+	public static <N> Binder<N, ObservableValue<Number>, ObservableMap<String, String>> observableMapBinder(
+			Function<N, ObservableMap<String, String>> applyOnNode, String attr, String[] value) {
+		return new Binder<N, ObservableValue<Number>, ObservableMap<String, String>>() {
+			@Override
+			public void init(ObservableMap<String, String> nodeResult, ObservableValue<Number> modelResult) {
+				Consumer<Number> consumer = number -> {
+
+					if (number.intValue() < value.length)
+						nodeResult.put(attr, value[number.intValue()]);
+				};
+				consumer.accept(modelResult.getValue());
+				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
+			}
+		};
+	}
+
 }

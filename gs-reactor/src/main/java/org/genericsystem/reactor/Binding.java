@@ -69,8 +69,8 @@ public class Binding<N, X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder(applyOnNode, styleClass));
 	}
 
-	public static <N, M, W> Binding<N, ObservableValue<Boolean>, ObservableMap<String, String>> bindObservableMap(
-			Function<M, ObservableValue<Boolean>> applyOnModel, String attr, String value, Function<N, ObservableMap<String, String>> applyOnNode) {
+	public static <N, M, W> Binding<N, ObservableValue<Number>, ObservableMap<String, String>> bindObservableMap(
+			Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value, Function<N, ObservableMap<String, String>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder(applyOnNode, attr, value));
 	}
 
