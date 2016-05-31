@@ -3,15 +3,16 @@ Generic System
 
 What is Generic System ?
 ------------------------
-Generic System (GS) est un moteur d’information **open-source** développé par la société [Middleware Factory](http://www.middlewarefactory.com/).
-Ce moteur innovant implémenté en Java est à la fois persistant, transactionnel, concurrentiel et restructurable.
-Generic System vient s’intégrer dans l’écosystème des bases de données NoSQL, en mettant en œuvre une logique tout objet, et sans **aucune dépendance à une base de données relationnelle**.
+Generic System (GS) is an innovative **open source** information engine implemented in Java 
+and is at once persistent, transactional, concurrenciel and flexible.
+Generic System  fits into the NoSQL databases ecosystem by implementing a full Object Logic
+and **with no dependency to a relational database**.
 
-Examples
---------
+Check the example below :
+-------------------------
 
 ### First example
-    // Create an engine named myDataBase and which is persistent
+    // Create a persistent engine named myDataBase
 	Engine engine = new Engine("myDataBase", System.getenv("HOME") + "/my_directory_path");
 	
     // Create a Vehicle with a Power
@@ -25,39 +26,35 @@ Examples
     // Persist changes
     engine.getCurrentCache().flush();
 
-To see other examples, report to the page of the [Example project](https://github.com/genericsystem/genericsystem2014/tree/master/gs-example).
+More examples are available here: [Example project](https://github.com/genericsystem/genericsystem2014/tree/master/gs-example).
 
-Key highlights
---------------
+Outstanding facts :
+-------------------
 Some of the key highlights include:
-* Persistant : Generic System est exécuté en mémoire et possède son propre mécanisme de persistance.
-Au démarrage, le moteur de Generic System récupère l’image archivée la plus récente (dans un répertoire prévu à cet effet) et construit le système d’information.
-Périodiquement, Generic System crée des images du système qui constituent des points de restauration.
-Enfin, lorsque le moteur s’arrête, il archive une dernière image du système à l’instant d’arrêt.
-* Transactionnel : Generic System est un système d’information transactionnel.
-La transaction Generic System peut être comparée à la transaction d’une base de données relationnelle.
-Elle sait lire, écrire, modifier et supprimer les données.  
-Toutes les écritures sont exécutées au travers d’une transaction qui veille à ce qu’elles s’exécutent toutes à un même instant t.
-La conception interne de Generic System garantit que toute lecture d’un objet ou d’un ensemble d’objets, faite à un instant t, est reproductible.
-Cette disposition a permis de garantir l’isolation des transactions au sens des lectures sales, des lectures non reproductibles et des lectures fantômes.  
-Pour information les opérations de lecture sont globalement prioritaires sur les opérations d’écritures afin d’améliorer la disponibilité du système.
-* Concurrentiel : Generic System permet à plusieurs personnes de travailler en parallèle.
-Les algorithmes sont inspirés de ceux dits [MVCC (MultiVersion Concurrency Control)](http://en.wikipedia.org/wiki/Multiversion_concurrency_control).
-Ils assurent aux utilisateurs de Generic System des transactions correctement isolées et des données requêtées parfaitement cohérentes.
-* Souple et personnalisable : Generic System est dit fortement restructurable car il offre la possibilité de modifier la structure de l’information de la même manière que l’information elle-même (c’est à dire de manière transactionnelle et concurrentielle).
-Ainsi, et contrairement aux bases de données relationnelles, Generic System permet de modifier à chaud la structure de l’information.  
-Un des défauts majeurs des bases de données relationnelles est que la structure de la base de données n’est pas adressée de la même manière que les données elles-mêmes.
-Bien que ce choix soit raisonnable du point de vue de la complexité des développements et de la sécurité au sens large, il dégrade irrémédiablement la flexibilité et l’évolutivité des applications en figeant la structure des données sur laquelle elles reposent.
-Ce choix est tout simplement en contradiction directe avec ce que préconisent les méthodologies modernes de développement d’applications, dans lesquelles on a besoin de faire évoluer le cahier des charges au cours d’un projet.  
-Encore une fois, Generic System fait ici le choix d’adresser la structure de l’information comme n’importe quelle autre information, c’est à dire de manière transactionnelle et concurrentielle, ce qui permet une grande souplesse.
+* Persistent : Generic System is running in memory and has its own persistence mechanism. At startup, the GS Engine retrieve the most recent archived image
+in a directory for this purpose and build the information system. Periodically GS creates images of the system that establishes a restore points.
+Finally, when the engine stops, it archives a final image of the system to stop time.
+* Transactional : Generic System is a transactional information system. The GS transaction can be compared to the relational database transaction.
+ It can read, write, edit and delete data. All Writings are performed through a transaction which ensures they all run at the same time t. 
+ The internal design of Generic System ensures that any reading of an object or set of objects done at a time t is reproducible. This arrangement guarantees transaction 
+ isolation within the meaning of dirty reads, non-reproducible reads and phantom reads. For information,  to improve system availability, Read operations have generally 
+ priority over Writing operations.
+* Concurrentiel : Generic System allows multiple work in parallel. Algorithms are based on those called MVCC (multi-version Concurrency Control). They provide to GS users
+ correctly isolated transactions and perfectly coherent requested data.
+* Flexible : Generic System is recognized as highly restructurable as it provides the ability of changing the information structure in the same way that the information itself,
+i.e. transactional and concurrentiel. Thus and unlike relational databases, GS allows to change the information  structure on the spot. 
+A major shortcoming of relational databases is that the structure of the database is not treated in the same way that the data itself. 
+It irremediably deteriorates the agility and evolutivity of applications by freezing the data structure on which they depend on.
+This alternative is inconsistent  with the trend of modern application development methodologies  when specifications of a project have to evolve. 
+Again, GS  favors to address the information structure as any other information, i.e. transactional and concurrentiel, allowing great flexibility.
 
 Prerequisites
 -------------
 
-Pour faire fonctionner Generic System, il est nécessaire :
-* d'installer Java 8 (JRE)
+To operate generic system, it is essential to observe the instructions detailed below:
+*  Install Java 8 (JRE)
 
-* de configurer dans le pom.xml de votre projet, le repository Generic System :
+* Set in the pom.xml of your project, the Generic Repository System:
 <pre>
     &lt;repository&gt;
     	&lt;id&gt;middlewarefactory&lt;/id&gt;
@@ -69,7 +66,7 @@ Pour faire fonctionner Generic System, il est nécessaire :
     &lt;/repository&gt;
 </pre>
 
-* d'ajouter la dépendance à Generic System, toujours dans le pom.xml de votre projet :
+* Add dependency to Generic System in the pom.xml of your project:
 <pre>
     &lt;dependency&gt;
     	&lt;groupId&gt;org.genericsystem&lt;/groupId&gt;
@@ -78,7 +75,7 @@ Pour faire fonctionner Generic System, il est nécessaire :
     &lt;/dependency&gt;
 </pre>
 
-Licence
+License
 -------
 
-The content of this repository is released under the Licence Apache version 2.0 as provided in the LICENSE file that accompanied this code.
+The content of this repository is released under the License Apache version 2.0 as provided in the LICENSE file that accompanied this code.
