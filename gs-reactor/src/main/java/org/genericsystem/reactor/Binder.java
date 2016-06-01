@@ -90,7 +90,7 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableSet<W>> observableSetBinder(Function<N, ObservableSet<W>> applyOnNode, W styleClass) {
+	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableSet<W>> observableSetBinder(W styleClass) {
 		return new Binder<N, ObservableValue<Boolean>, ObservableSet<W>>() {
 			@Override
 			public void init(ObservableSet<W> nodeResult, ObservableValue<Boolean> modelResult) {
@@ -106,25 +106,7 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	// public static <N> Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>> observableMapBinder(
-	// Function<N, ObservableMap<String, String>> applyOnNode, String attr, String[] value) {
-	// return new Binder<N, ObservableValue<Boolean>, ObservableMap<String, String>>() {
-	// @Override
-	// public void init(ObservableMap<String, String> nodeResult, ObservableValue<Boolean> modelResult) {
-	// Consumer<Boolean> consumer = bool -> {
-	// if (bool)
-	// nodeResult.put(attr, value[0]);
-	// else
-	// nodeResult.put(attr, value[1]);
-	// };
-	// consumer.accept(modelResult.getValue());
-	// modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
-	// }
-	// };
-	// }
-
-	public static <N> Binder<N, ObservableValue<Number>, ObservableMap<String, String>> observableMapBinder(
-			Function<N, ObservableMap<String, String>> applyOnNode, String attr, String[] value) {
+	public static <N> Binder<N, ObservableValue<Number>, ObservableMap<String, String>> observableMapBinder(String attr, String[] value) {
 		return new Binder<N, ObservableValue<Number>, ObservableMap<String, String>>() {
 			@Override
 			public void init(ObservableMap<String, String> nodeResult, ObservableValue<Number> modelResult) {
