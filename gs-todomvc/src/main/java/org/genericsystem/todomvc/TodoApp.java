@@ -86,7 +86,10 @@ public class TodoApp extends HtmlApp<TodoList> {
 								TodoList::getCompletedMode, "selected");
 					}
 					new HtmlButton<TodoList>(footer).bindAction(TodoList::removeCompleted).bindText(TodoList::getClearCompleted)
-							.addStyleClass("clear-completed").bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
+							.addStyleClass("clear-completed")
+							.bindOptionalStyle(TodoList::getCompletedCount, "color", new String[] { "gray", "red", "blue", "black", "green", "yellow" });
+					// .bindOptionalStyle(TodoList::getHasNoCompleted, "font", "26px 'Helvetica Neue', Helvetica, Arial, sans-serif");
+					// .bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
 
 				}
 			}

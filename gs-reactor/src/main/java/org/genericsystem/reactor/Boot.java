@@ -4,7 +4,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.property.Property;
-import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -27,8 +28,12 @@ public class Boot<NODE> {
 		return new Boot<>(node -> applyOnNode.apply(node).setValue(value));
 	}
 
-	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableList<VALUE>> applyOnNode, VALUE value) {
+	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableSet<VALUE>> applyOnNode, VALUE value) {
 		return new Boot<>(node -> applyOnNode.apply(node).add(value));
+	}
+
+	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, ObservableMap<VALUE, VALUE>> applyOnNode, VALUE attr, VALUE value) {
+		return new Boot<>(node -> applyOnNode.apply(node).put(attr, value));
 	}
 
 	public static <NODE> Boot<NODE> apply(Consumer<NODE> applyOnNode) {

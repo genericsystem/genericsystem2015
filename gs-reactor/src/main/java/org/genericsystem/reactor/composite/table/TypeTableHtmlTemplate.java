@@ -3,6 +3,8 @@ package org.genericsystem.reactor.composite.table;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import javafx.collections.FXCollections;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
@@ -11,10 +13,8 @@ import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCom
 import org.genericsystem.reactor.composite.table.InstanceRowHtmlTemplate.InstanceRowHtml;
 import org.genericsystem.reactor.html.HtmlH1;
 
-import javafx.collections.FXCollections;
-
-public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT extends TypeTableHtmlTemplate<M, COMPONENT>>
-		extends TitleCompositeSectionHtmlTemplate<M, COMPONENT> {
+public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT extends TypeTableHtmlTemplate<M, COMPONENT>> extends
+		TitleCompositeSectionHtmlTemplate<M, COMPONENT> {
 
 	private ObservableListExtractor attributesExtractor = ObservableListExtractor.ATTRIBUTES;
 
@@ -23,6 +23,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 		addStyleClass("gstable");
 
 		setObservableListExtractor(ObservableListExtractor.INSTANCES);
+
 	}
 
 	public ObservableListExtractor getAttributesExtractor() {
@@ -36,8 +37,8 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 	}
 
 	public COMPONENT setAttributesExtractor(Class<?>... classes) {
-		return this.setAttributesExtractor(
-				gs -> FXCollections.observableArrayList(Arrays.stream(classes).map(gs[0].getRoot()::<Generic> find).collect(Collectors.toList())));
+		return this.setAttributesExtractor(gs -> FXCollections.observableArrayList(Arrays.stream(classes).map(gs[0].getRoot()::<Generic> find)
+				.collect(Collectors.toList())));
 	}
 
 	@Override

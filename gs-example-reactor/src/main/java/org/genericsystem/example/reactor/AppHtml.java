@@ -36,7 +36,7 @@ public class AppHtml extends HtmlApp<AppModel> {
 
 	@Override
 	protected void initChildren() {
-		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp");
+		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp").addStyle("color", "red");
 		{
 			new AppHeaderHtml(div);
 			new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
