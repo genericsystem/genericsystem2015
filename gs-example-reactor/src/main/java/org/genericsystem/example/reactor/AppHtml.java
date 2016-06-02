@@ -1,5 +1,7 @@
 package org.genericsystem.example.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -11,21 +13,16 @@ import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
-import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtml;
-import org.genericsystem.reactor.composite.CompositeSelectHtmlTemplate.CompositeSelectHtml;
-import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.ColumnTitleTypeTableHtml;
 import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlDiv;
-
-import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<AppModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
-				Color.class, CarColor.class);
+		appsConfig.addApplication("/apphtml", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
+				Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
@@ -36,16 +33,19 @@ public class AppHtml extends HtmlApp<AppModel> {
 
 	@Override
 	protected void initChildren() {
-		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this).addStyleClass("gsapp").addStyle("color", "red");
+
+		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this)// .addStyleClass("gsapp");
+				.addStyle("display", "flex").addStyle("flex-direction", "column").addStyle("flex-wrap", "nowrap").addStyle("justify-content", "center");
 		{
-			new AppHeaderHtml(div);
-			new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
-			new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, Car.class);
+			// new AppHeaderHtml(div);
+			// new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
+			// new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, Car.class);
 
 			new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
 
-			new ColumnTitleTypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
-			new AppFooterHtml(div);
+			// new ColumnTitleTypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class,
+			// CarColor.class);
+			// new AppFooterHtml(div);
 		}
 	}
 
