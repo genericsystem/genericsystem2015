@@ -20,8 +20,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 
 	public TypeTableHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 		super(parent);
-		addStyleClass("gstable");
-
+		this.addStyle("flex-direction", "column");
 		setObservableListExtractor(ObservableListExtractor.INSTANCES);
 
 	}
@@ -59,6 +58,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT 
 
 		@Override
 		protected void initChildren() {
+
 			new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(CompositeModel::getString);
 			new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(CompositeModel::getString);
 			HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyleClass("gscell").addStyleClass("gstitlecell");

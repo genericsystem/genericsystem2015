@@ -4,11 +4,13 @@ import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSectionTemplate;
 
-public class HolderSubCellHtmlTemplate<M extends CompositeModel, COMPONENT extends HolderSubCellHtmlTemplate<M, COMPONENT>> extends HtmlSectionTemplate<M, COMPONENT> {
+public class HolderSubCellHtmlTemplate<M extends CompositeModel, COMPONENT extends HolderSubCellHtmlTemplate<M, COMPONENT>> extends
+		HtmlSectionTemplate<M, COMPONENT> {
 
 	public HolderSubCellHtmlTemplate(HtmlSection<?> parent) {
 		super(parent);
-		addStyleClass("subcell");
+		this.addStyle("flex-direction", "row");
+
 	}
 
 	@Override

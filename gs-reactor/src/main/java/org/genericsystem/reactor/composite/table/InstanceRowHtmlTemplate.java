@@ -7,20 +7,24 @@ import org.genericsystem.reactor.composite.table.InstanceAttributeCellHtmlTempla
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlLabel;
 
-public abstract class InstanceRowHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceRowHtmlTemplate<M, COMPONENT>>
-		extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+public abstract class InstanceRowHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceRowHtmlTemplate<M, COMPONENT>> extends
+		CompositeSectionHtmlTemplate<M, COMPONENT> {
 
 	public InstanceRowHtmlTemplate(HtmlSection<CompositeModel> parent) {
 		super(parent);
-		addStyleClass("gsrow");
+		this.addStyle("flex-direction", "row");
 		setObservableListExtractor(generics -> getAttributesExtractor().apply(generics));
 	}
 
 	@Override
 	protected void initChildren() {
-		new HtmlLabel<M>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gstitlecell")).bindText(CompositeModel::getString);
+		new HtmlLabel<M>(new HtmlSection<>(this).addStyle("display", "flex").addStyle("flex", "1").addStyle("min-width", "200px")
+				.addStyle("background-color", "#e4788b").addStyle("margin-right", "1px").addStyle("color", "#ffffff").addStyle("padding", "2px"))
+				.bindText(CompositeModel::getString);
 		super.initChildren();
-		new HtmlButton<M>(new HtmlSection<>(this).addStyleClass("gscell").addStyleClass("gsbuttoncell")).bindAction(CompositeModel::remove).setText("Remove");
+		new HtmlButton<M>(new HtmlSection<>(this).addStyle("display", "flex").addStyle("flex", "0").addStyle("min-width", "80px")
+				.addStyle("background-color", "#b4868e").addStyle("flex-direction", "column").addStyle("color", "#ffffff").addStyle("padding", "2px"))
+				.bindAction(CompositeModel::remove).setText("Remove");
 	}
 
 	@Override
