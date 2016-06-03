@@ -1,21 +1,15 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -31,6 +25,13 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -51,7 +52,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	private static final String STYLE = "style";
 	private static final String STYLECLASSES = "styleClasses";
 	private static final String STYLECLASS = "styleClass";
-	private static final String REMOVEDSTYLECLASS = "RemovedStyleClass";
+	private static final String REMOVEDSTYLECLASS = "removedStyleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
