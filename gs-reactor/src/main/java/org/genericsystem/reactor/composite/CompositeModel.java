@@ -100,15 +100,11 @@ public class CompositeModel extends Model {
 
 	private Map<Element<?, ?>, ObservableList<CompositeModel>> observableLists = new HashMap<Element<?, ?>, ObservableList<CompositeModel>>();
 
-	public ObservableList<CompositeModel> getObservableList(Element<?, ?> element) {
-		return observableLists.get(element);
-	}
-
 	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor,
 			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		ObservableList<CompositeModel> observableList = new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics),
 				generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
-		observableLists.put(element, observableList);
+		observableLists.put(element, observableList);// Prevents garbaging
 		return observableList;
 	}
 
