@@ -85,9 +85,10 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> model.getObservableList(this), stringExtractor, observableListExtractor, constructor);
+		super.forEach(stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
 

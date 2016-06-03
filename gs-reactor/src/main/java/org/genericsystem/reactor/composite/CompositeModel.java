@@ -146,6 +146,12 @@ public class CompositeModel extends Model {
 		return property;
 	}
 
+	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		ObservableList<CompositeModel> observableList = getObservableList(element);
+		Bindings.bindContent(observableList, new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics), generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor)));
+		return observableList;
+	}
+
 	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Function<M, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
 			ModelConstructor<CompositeModel> constructor) {
 		ObservableList<CompositeModel> observableList = applyOnModel.apply((M) this);

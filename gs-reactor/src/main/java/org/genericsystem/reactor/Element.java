@@ -120,6 +120,11 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
+	public <T extends CompositeModel> Element<M, N> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.forEach(this, stringExtractor, observableListExtractor, constructor));
+		return this;
+	}
+
 	public <T extends Model> Element<M, N> select(Function<T, ObservableValue<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
 		return this;
