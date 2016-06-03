@@ -27,10 +27,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -79,16 +80,15 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
-			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		super.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> model.getObservableList(this), stringExtractor, observableListExtractor, constructor);
+	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		super.forEach(stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
 
@@ -99,24 +99,10 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor,
-			Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
-		super.select(function, stringExtractor, generic, constructor);
-		return (COMPONENT) this;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(Function<T, Property<CompositeModel>> function, StringExtractor stringExtractor,
-			Supplier<Generic> generic) {
-		select(function, stringExtractor, generic, CompositeModel::new);
-		return (COMPONENT) this;
-	}
-
 	@SuppressWarnings("unchecked")
 	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
-		select(model -> model.getProperty(this), stringExtractor, generic, constructor);
+		select(stringExtractor, generic, constructor);
 		return (COMPONENT) this;
 	}
 
@@ -134,7 +120,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 
 	@SuppressWarnings("unchecked")
 	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Class<?> genericClass) {
-		super.select(model -> model.getProperty(this), stringExtractor, genericClass, CompositeModel::new);
+		super.select(stringExtractor, genericClass, CompositeModel::new);
 		return (COMPONENT) this;
 	}
 

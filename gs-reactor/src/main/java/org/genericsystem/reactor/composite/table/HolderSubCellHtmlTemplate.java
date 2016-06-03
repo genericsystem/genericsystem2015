@@ -1,6 +1,6 @@
 package org.genericsystem.reactor.composite.table;
 
-import org.genericsystem.reactor.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSectionTemplate;
 

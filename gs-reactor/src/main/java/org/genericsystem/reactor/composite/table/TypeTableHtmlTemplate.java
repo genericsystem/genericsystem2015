@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.CompositeModel;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtmlTemplate;
 import org.genericsystem.reactor.composite.table.InstanceRowHtmlTemplate.InstanceRowHtml;
 import org.genericsystem.reactor.html.HtmlH1;
