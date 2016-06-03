@@ -1,10 +1,9 @@
 package org.genericsystem.reactor.composite;
 
-import org.genericsystem.reactor.CompositeModel;
-import org.genericsystem.reactor.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelectTemplate;
 

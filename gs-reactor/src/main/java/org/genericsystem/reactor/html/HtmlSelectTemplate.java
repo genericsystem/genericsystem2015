@@ -1,8 +1,8 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.CompositeModel;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
 
 /**
  * @author Nicolas Feybesse

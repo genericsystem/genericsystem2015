@@ -1,4 +1,4 @@
-package org.genericsystem.reactor;
+package org.genericsystem.reactor.composite;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -6,15 +6,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.genericsystem.common.Generic;
-
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -25,34 +30,6 @@ public class CompositeModel extends Model {
 
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
-	// private ObservableList<CompositeModel> subModels;
-
-	// public <C extends CompositeModel> C initSubModels(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-	// ModelConstructor<CompositeModel> constructor) {
-	// return initSubModels(observableListExtractor, gs -> constructor.build(gs, stringExtractor));
-	// }
-
-	// public <C extends CompositeModel> C initSubModels(ObservableListExtractor observableListExtractor, Builder<CompositeModel> leafBuilder) {
-	// return initSubModels(
-	// new Transformation2<>(observableListExtractor.apply(generics), generic -> leafBuilder.apply(CompositeModel.addToGenerics(generic, generics))));
-	// }
-
-	// public <C extends CompositeModel> C initSubModels(ObservableList<CompositeModel> subModels) {
-	// this.subModels = subModels;
-	// return (C) this;
-	// }
-	//
-	// public ObservableList<CompositeModel> getSubModels() {
-	// return subModels;
-	// }
-
-	// public ObservableValue<CompositeModel> getFirstSubModel() {
-	// return Bindings.valueAt(subModels, 0);
-	// }
-	//
-	// public ObservableValue<CompositeModel> getSecondSubModel() {
-	// return Bindings.valueAt(subModels, 1);
-	// }
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor) {
 		assert stringExtractor != null;
@@ -155,6 +132,25 @@ public class CompositeModel extends Model {
 
 	public ObservableList<CompositeModel> getObservableList(Element<?, ?> element) {
 		return observableLists.get(element);
+	}
+
+	public <M extends CompositeModel> Property<CompositeModel> getBoundProperty(Element<?, ?> element, StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		Property<CompositeModel> property = getProperty(element);
+		property.setValue(constructor.build(CompositeModel.addToGenerics(genericSupplier.get(), getGenerics()), stringExtractor));
+		return property;
+	}
+
+	public <M extends CompositeModel> Property<CompositeModel> getBoundProperty(Element<?, ?> element, StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+		Property<CompositeModel> property = getProperty(element);
+		property.setValue(constructor.build(CompositeModel.addToGenerics(getGenerics()[0].getRoot().find(genericClass), getGenerics()), stringExtractor));
+		return property;
+	}
+
+	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Function<M, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+			ModelConstructor<CompositeModel> constructor) {
+		ObservableList<CompositeModel> observableList = applyOnModel.apply((M) this);
+		Bindings.bindContent(observableList, new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics), generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor)));
+		return observableList;
 	}
 
 	public void flush() {

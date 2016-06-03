@@ -1,8 +1,8 @@
 package org.genericsystem.reactor.composite.table;
 
-import org.genericsystem.reactor.CompositeModel;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.table.InstanceAttributeCellHtmlTemplate.InstanceAttributeCellHtml;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlLabel;

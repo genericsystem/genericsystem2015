@@ -1,9 +1,9 @@
 package org.genericsystem.reactor.composite.table;
 
-import org.genericsystem.reactor.CompositeModel;
-import org.genericsystem.reactor.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.html.HtmlLabel;
 
 public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceAttributeCellHtmlTemplate<M, COMPONENT>> extends
