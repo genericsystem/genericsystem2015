@@ -74,6 +74,11 @@ public class Binding<N, X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder(attr, value));
 	}
 
+	public static <N, M, W> Binding<N, ObservableMap<String, String>, ObservableMap<String, String>> bindObservableMap(
+			Function<M, ObservableMap<String, String>> applyOnModel, Function<N, ObservableMap<String, String>> applyOnNode) {
+		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
+	}
+
 	public static <N, M> Binding<N, ObservableValue<String>, ObservableSet<String>> bindObservableSetToObservableValue(
 			Function<M, ObservableValue<String>> applyOnModel, Function<N, ObservableSet<String>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder());

@@ -8,15 +8,16 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -28,10 +29,16 @@ public class CompositeModel extends Model {
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
 
+	private final ObservableMap<String, String> flexStyles = FXCollections.observableHashMap();
+
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor) {
 		assert stringExtractor != null;
 		this.generics = generics;
 		this.stringExtractor = stringExtractor;
+		flexStyles.put("flex-direction", "column");
+		flexStyles.put("display", "flex");
+		// flexStyles.put("margin-bottom", "7px");//non héritable
+
 	}
 
 	Generic[] getGenerics() {
@@ -51,6 +58,10 @@ public class CompositeModel extends Model {
 
 	public ObservableValue<String> getString() {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
+	}
+
+	public ObservableMap<String, String> getFlexStyles() {
+		return flexStyles;
 	}
 
 	public void remove() {

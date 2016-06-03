@@ -186,6 +186,12 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public COMPONENT bindStyles(Function<M, ObservableMap<String, String>> function) {
+		addObservableMapBinding(HtmlDomNode::getStyles, function);
+		return (COMPONENT) this;
+	}
+
 	public class HtmlDomNode {
 
 		private final String id;
@@ -220,11 +226,19 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 			});
 
 			this.styles.addListener((MapChangeListener<String, String>) change -> {
-				JsonObject mapJS = new JsonObject();
-				styles.forEach((key, value) -> mapJS.put(key, value));
-				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
-				System.out.println("CHANGE IN STYLES");
-			});
+				// JsonObject mapJS = new JsonObject();
+				// String value = "";
+				// if (change.getValueAdded() != null) {
+				// value = change.getValueAdded();
+				// }
+				// mapJS.put(change.getKey(), value);
+				// sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+
+					JsonObject mapJS = new JsonObject();
+					styles.forEach((key, value) -> mapJS.put(key, value));
+					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+					System.out.println("CHANGE IN STYLES");
+				});
 
 		}
 

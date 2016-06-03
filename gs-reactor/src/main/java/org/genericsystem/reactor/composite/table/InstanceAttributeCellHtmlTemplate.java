@@ -2,8 +2,8 @@ package org.genericsystem.reactor.composite.table;
 
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
 import org.genericsystem.reactor.html.HtmlLabel;
 
 public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceAttributeCellHtmlTemplate<M, COMPONENT>> extends
@@ -11,7 +11,6 @@ public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel
 
 	public InstanceAttributeCellHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 		super(parent);
-		// addStyleClass("gscell");
 		this.addStyle("display", "flex").addStyle("flex", "1").addStyle("flex-direction", "column").addStyle("margin-bottom", "3px")
 				.addStyle("margin-right", "1px").addStyle("color", "#ffffff").addStyle("padding", "2px").addStyle("background-color", "#ffc0cb");
 		setObservableListExtractor(ObservableListExtractor.HOLDERS);

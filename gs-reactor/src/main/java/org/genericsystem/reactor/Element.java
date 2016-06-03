@@ -6,17 +6,17 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -113,6 +113,12 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
+	protected <T> Element<M, N> addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
+			Function<M, ObservableMap<String, String>> applyOnModel) {
+		bindings.add(Binding.bindObservableMap(applyOnModel, applyOnNode));
+		return this;
+	}
+
 	public <T extends Model> Element<M, N> forEach(Function<T, ObservableList<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
 		return this;
@@ -141,8 +147,7 @@ public abstract class Element<M extends Model, N> {
 		return this;
 	}
 
-	public <T extends CompositeModel> Element<M, N> select(StringExtractor stringExtractor, Class<?> genericClass,
-			ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> Element<M, N> select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.selector(this, stringExtractor, genericClass, constructor));
 		return this;
 	}
