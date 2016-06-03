@@ -100,23 +100,23 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic,
-			ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
 		select(stringExtractor, generic, constructor);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic) {
-		select(stringExtractor, generic, CompositeModel::new);
+	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier) {
+		select(stringExtractor, genericSupplier, CompositeModel::new);
 		return (COMPONENT) this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(Supplier<Generic> generic) {
-		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generic, CompositeModel::new);
+	public <T extends CompositeModel> COMPONENT select(Supplier<Generic> genericSupplier) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, CompositeModel::new);
 		return (COMPONENT) this;
 	}
 
@@ -157,8 +157,8 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	}
 
 	@SuppressWarnings("unchecked")
-	public COMPONENT bindOptionalStyle(Function<M, ObservableValue<Number>> function, String attr, String[] value) {
-		addObservableMapBinding(HtmlDomNode::getStyles, function, attr, value);
+	public COMPONENT bindOptionalStyle(Function<M, ObservableValue<Number>> function, String attr, String[] values) {
+		addObservableMapBinding(HtmlDomNode::getStyles, function, attr, values);
 		return (COMPONENT) this;
 	}
 
