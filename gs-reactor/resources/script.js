@@ -70,9 +70,9 @@
 
 						elt.classList.add(message.styleClass);
 					}
-					else if (typeof message.RemovedStyleClass !== 'undefined') {
+					else if (typeof message.removedStyleClass !== 'undefined') {
 			
-						elt.classList.remove(message.RemovedStyleClass);
+						elt.classList.remove(message.removedStyleClass);
 					}
 					if (typeof message.style !== 'undefined') 
 					{
