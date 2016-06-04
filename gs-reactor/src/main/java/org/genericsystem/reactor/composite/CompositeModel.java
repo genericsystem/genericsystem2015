@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
@@ -26,24 +26,30 @@ import org.genericsystem.reactor.Model;
  */
 public class CompositeModel extends Model {
 
+	private static Generic[] addToGenerics(Generic generic, Generic[] generics) {
+		Generic[] result = new Generic[generics.length + 1];
+		result[0] = generic;
+		System.arraycopy(generics, 0, result, 1, generics.length);
+		return result;
+	}
+
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
+
+	private final ObservableMap<String, String> flexStyles = FXCollections.observableHashMap();
 
 	public CompositeModel(Generic[] generics, StringExtractor stringExtractor) {
 		assert stringExtractor != null;
 		this.generics = generics;
 		this.stringExtractor = stringExtractor;
+		flexStyles.put("flex-direction", "column");
+		flexStyles.put("display", "flex");
+		// flexStyles.put("margin-bottom", "7px");//non héritable
+
 	}
 
 	Generic[] getGenerics() {
 		return generics;
-	}
-
-	public static Generic[] addToGenerics(Generic generic, Generic[] generics) {
-		Generic[] result = new Generic[generics.length + 1];
-		result[0] = generic;
-		System.arraycopy(generics, 0, result, 1, generics.length);
-		return result;
 	}
 
 	public Generic getGeneric() {
@@ -54,12 +60,44 @@ public class CompositeModel extends Model {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
 	}
 
+	public ObservableMap<String, String> getFlexStyles() {
+		return flexStyles;
+	}
+
 	public void remove() {
 		getGeneric().remove();
 	}
 
 	public void select() {
 		System.out.println("select click!!!");
+	}
+
+	private Map<Element<?, ?>, ObservableList<CompositeModel>> observableLists = new HashMap<Element<?, ?>, ObservableList<CompositeModel>>();
+
+	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor,
+			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		ObservableList<CompositeModel> observableList = new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics),
+				generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
+		observableLists.put(element, observableList);// Prevents garbaging
+		return observableList;
+	}
+
+	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor,
+			Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		return getBoundObservableList(element, stringExtractor, gs -> FXCollections.singletonObservableList(genericSupplier.get()), constructor);
+	}
+
+	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor,
+			Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+		return getBoundObservableList(element, stringExtractor, () -> getGenerics()[0].getRoot().find(genericClass), constructor);
+	}
+
+	public void flush() {
+		getGeneric().getCurrentCache().flush();
+	}
+
+	public void cancel() {
+		getGeneric().getCurrentCache().clear();
 	}
 
 	@FunctionalInterface
@@ -97,82 +135,6 @@ public class CompositeModel extends Model {
 	@FunctionalInterface
 	public interface ModelConstructor<M extends Model> {
 		M build(Generic[] generics, StringExtractor stringExtractor);
-	}
-
-	// private Map<Element<?, ?>, Property<CompositeModel>> properties = new HashMap<Element<?, ?>, Property<CompositeModel>>() {
-	// private static final long serialVersionUID = 7982904777429420269L;
-	//
-	// @Override
-	// public Property<CompositeModel> get(Object key) {
-	// Property<CompositeModel> result = super.get(key);
-	// if (result == null)
-	// put((Element<?, ?>) key, result = new SimpleObjectProperty<>());
-	// return result;
-	// };
-	//
-	// };
-
-	// public Property<CompositeModel> getProperty(Element<?, ?> element) {
-	// return properties.get(element);
-	// }
-
-	private Map<Element<?, ?>, ObservableList<CompositeModel>> observableLists = new HashMap<Element<?, ?>, ObservableList<CompositeModel>>() {
-		private static final long serialVersionUID = 7982904777429420269L;
-
-		@Override
-		public ObservableList<CompositeModel> get(Object key) {
-			ObservableList<CompositeModel> result = super.get(key);
-			if (result == null)
-				put((Element<?, ?>) key, result = FXCollections.observableArrayList());
-			return result;
-		};
-	};
-
-	public ObservableList<CompositeModel> getObservableList(Element<?, ?> element) {
-		return observableLists.get(element);
-	}
-
-	// public <M extends CompositeModel> Property<CompositeModel> getBoundProperty(Element<?, ?> element, StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-	// Property<CompositeModel> property = getProperty(element);
-	// property.setValue(constructor.build(CompositeModel.addToGenerics(genericSupplier.get(), getGenerics()), stringExtractor));
-	// return property;
-	// }
-	//
-	// public <M extends CompositeModel> Property<CompositeModel> getBoundProperty(Element<?, ?> element, StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-	// Property<CompositeModel> property = getProperty(element);
-	// property.setValue(constructor.build(CompositeModel.addToGenerics(getGenerics()[0].getRoot().find(genericClass), getGenerics()), stringExtractor));
-	// return property;
-	// }
-
-	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		ObservableList<CompositeModel> observableList = getObservableList(element);
-		Bindings.bindContent(observableList, new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics), generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor)));
-		return observableList;
-	}
-
-	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Function<M, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		ObservableList<CompositeModel> observableList = applyOnModel.apply((M) this);
-		Bindings.bindContent(observableList, new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(getGenerics()), generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor)));
-		return observableList;
-	}
-
-	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		ObservableList<CompositeModel> observableList = getObservableList(element);
-		Bindings.bindContent(observableList, new Transformation2<Generic, CompositeModel>(FXCollections.singletonObservableList(genericSupplier.get()), generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor)));
-		return observableList;
-	}
-
-	public <M extends CompositeModel> ObservableList<CompositeModel> getBoundObservableList(Element<?, ?> element, StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		return getBoundObservableList(element, stringExtractor, () -> getGenerics()[0].getRoot().find(genericClass), constructor);
-	}
-
-	public void flush() {
-		getGeneric().getCurrentCache().flush();
-	}
-
-	public void cancel() {
-		getGeneric().getCurrentCache().clear();
 	}
 
 }
