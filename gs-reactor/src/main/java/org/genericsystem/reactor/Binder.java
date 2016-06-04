@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -117,6 +118,15 @@ public interface Binder<N, X, Y> {
 				};
 				consumer.accept(modelResult.getValue());
 				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
+			}
+		};
+	}
+
+	public static <N> Binder<N, ObservableMap<String, String>, ObservableMap<String, String>> observableMapBinder() {
+		return new Binder<N, ObservableMap<String, String>, ObservableMap<String, String>>() {
+			@Override
+			public void init(ObservableMap<String, String> nodeResult, ObservableMap<String, String> modelResult) {
+				Bindings.bindContent(nodeResult, modelResult);
 			}
 		};
 	}

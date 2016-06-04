@@ -3,16 +3,16 @@ package org.genericsystem.reactor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javafx.beans.binding.ListBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+
+import javafx.beans.binding.ListBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -34,24 +34,34 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 		binder.init(applyOnModel, viewContext, childElement);
 	}
 
-	public static <N, M extends Model, SUBMODEL extends Model> MetaBinding<N, ObservableList<SUBMODEL>> forEach(Function<M, ObservableList<SUBMODEL>> applyOnModel) {
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALIZE22222222222222222222222222");
+	};
+
+	public static <N, M extends Model, SUBMODEL extends Model> MetaBinding<N, ObservableList<SUBMODEL>> forEach(
+			Function<M, ObservableList<SUBMODEL>> applyOnModel) {
 		return new MetaBinding<>(model -> applyOnModel.apply((M) model), MetaBinder.<N, SUBMODEL> foreachBinder());
 	}
 
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(Function<M, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((M) model).getBoundObservableList(applyOnModel, stringExtractor, observableListExtractor, constructor));
+	// public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(Function<M, ObservableList<CompositeModel>>
+	// applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+	// ModelConstructor<CompositeModel> constructor) {
+	// return forEach(model -> ((M) model).getBoundObservableList(applyOnModel, stringExtractor, observableListExtractor, constructor));
+	// }
+
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(Element<?, ?> element, StringExtractor stringExtractor,
+			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		return forEach(model -> ((CompositeModel) model).getBoundObservableList(element, stringExtractor, observableListExtractor, constructor));
 	}
 
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(Element<?, ?> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((M) model).getBoundObservableList(element, stringExtractor, observableListExtractor, constructor));
-	}
-
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor,
+			Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
 		return forEach(model -> ((CompositeModel) model).getBoundObservableList(element, stringExtractor, genericSupplier, constructor));
 	}
 
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor,
+			Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
 		return forEach(model -> ((CompositeModel) model).getBoundObservableList(element, stringExtractor, genericClass, constructor));
 	}
 

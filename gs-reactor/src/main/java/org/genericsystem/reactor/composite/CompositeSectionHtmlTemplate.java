@@ -17,19 +17,29 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 
 	public CompositeSectionHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 		super(parent);
-		this.addStyle("display", "flex").addStyle("margin-bottom", "1px").addStyle("flex-direction", "column").addStyle("flex-wrap", "nowrap");
+		this.bindStyles(CompositeModel::getFlexStyles);
+		this.addStyle("flex-wrap", "nowrap");// .addStyle("flex-direction", "column").addStyle("display", "flex").addStyle("margin-bottom", "11px");
 		setObservableListExtractor(ObservableListExtractor.INSTANCES);
 	}
 
 	@Override
 	protected void initChildren() {
-		HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyle("flex", "1").addStyle("min-width", "200px")
-				.addStyle("background-color", "#e4788b");
-		htmlSection
+		HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this)
+				.addStyle("flex", "1")
+				.addStyle("min-width", "200px")
+				.addStyle("background-color", "#e4788b")
 				.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
 						(gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyle("margin-right", "1px").addStyle("display", "flex")
 				.addStyle("flex-direction", "column").addStyle("flex", "1 1 0%").addStyle("color", "#ffffff").addStyle("padding", "2px");
 		initSubChildren(htmlSection);
+
+		/*
+		 * HtmlSection<CompositeModel> htmlSection2 = new HtmlSection<CompositeModel>(this).addStyle("flex", "1").addStyle("min-width", "200px")
+		 * .addStyle("background-color", "#e4789b"); htmlSection2 .forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
+		 * (gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyle("margin-right", "1px").addStyle("display", "flex")
+		 * .addStyle("flex-direction", "column").addStyle("flex", "1 1 0%").addStyle("color", "#ffffff").addStyle("padding", "2px");
+		 * initSubChildren(htmlSection2);
+		 */
 	}
 
 	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {

@@ -3,6 +3,10 @@ package org.genericsystem.todomvc;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
+import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.reactor.Model;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -15,10 +19,6 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
-import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse

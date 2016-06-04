@@ -52,7 +52,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	private static final String STYLE = "style";
 	private static final String STYLECLASSES = "styleClasses";
 	private static final String STYLECLASS = "styleClass";
-	private static final String REMOVEDSTYLECLASS = "RemovedStyleClass";
+	private static final String REMOVEDSTYLECLASS = "removedStyleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
@@ -78,16 +78,18 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		super.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor);
-		return (COMPONENT) this;
-	}
+	// @SuppressWarnings("unchecked")
+	// @Override
+	// public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
+	// ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+	// super.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor);
+	// return (COMPONENT) this;
+	// }
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+			ModelConstructor<CompositeModel> constructor) {
 		super.forEach(stringExtractor, observableListExtractor, constructor);
 		return (COMPONENT) this;
 	}
@@ -184,6 +186,12 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return (COMPONENT) this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public COMPONENT bindStyles(Function<M, ObservableMap<String, String>> function) {
+		addObservableMapBinding(HtmlDomNode::getStyles, function);
+		return (COMPONENT) this;
+	}
+
 	public class HtmlDomNode {
 
 		private final String id;
@@ -218,11 +226,19 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 			});
 
 			this.styles.addListener((MapChangeListener<String, String>) change -> {
-				JsonObject mapJS = new JsonObject();
-				styles.forEach((key, value) -> mapJS.put(key, value));
-				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
-				System.out.println("CHANGE IN STYLES");
-			});
+				// JsonObject mapJS = new JsonObject();
+				// String value = "";
+				// if (change.getValueAdded() != null) {
+				// value = change.getValueAdded();
+				// }
+				// mapJS.put(change.getKey(), value);
+				// sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+
+					JsonObject mapJS = new JsonObject();
+					styles.forEach((key, value) -> mapJS.put(key, value));
+					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+					System.out.println("CHANGE IN STYLES");
+				});
 
 		}
 
