@@ -23,6 +23,29 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Co
 				new HtmlH1<M>(this);
 			}
 		};
+		new CompositeSectionHtmlTemplate<CompositeModel>(this) {
+			{
+				addStyle("flex-direction", "row");
+				setObservableListExtractor(gs -> getSubObservableListExtractor().apply(gs));
+				new HtmlSection<M>(this) {
+					{
+						addStyle("min-width", "200px");
+					}
+				};
+				new HtmlSection<CompositeModel>(this) {
+					{
+						addStyle("flex", "1");
+						forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, stringExtractor) -> getModelConstructor().build(gs, stringExtractor));
+						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+					}
+				};
+				new HtmlSection<M>(this) {
+					{
+						addStyle("min-width", "80px");
+					}
+				};
+			}
+		};
 		new HtmlSection<CompositeModel>(this) {
 			{
 				addStyle("flex", "1");
