@@ -1,30 +1,29 @@
-package org.genericsystem.reactor.composite.table;
-
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
-import org.genericsystem.reactor.html.HtmlLabel;
-
-public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceAttributeCellHtmlTemplate<M, COMPONENT>> extends
-		CompositeSectionHtmlTemplate<M, COMPONENT> {
-
-	public InstanceAttributeCellHtmlTemplate(HtmlElement<?, ?, ?> parent) {
-		super(parent);
-		this.addStyle("display", "flex").addStyle("flex", "1").addStyle("flex-direction", "column").addStyle("margin-bottom", "3px")
-				.addStyle("margin-right", "1px").addStyle("color", "#ffffff").addStyle("padding", "2px").addStyle("background-color", "#ffc0cb");
-		setObservableListExtractor(ObservableListExtractor.HOLDERS);
-
-	}
-
-	@Override
-	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
-		new HtmlLabel<CompositeModel>(parentSection).bindText(CompositeModel::getString);
-	}
-
-	public static class InstanceAttributeCellHtml<M extends CompositeModel> extends InstanceAttributeCellHtmlTemplate<M, InstanceAttributeCellHtml<M>> {
-		public InstanceAttributeCellHtml(HtmlElement<?, ?, ?> parent) {
-			super(parent);
-		}
-	}
-}
+//package org.genericsystem.reactor.composite.table;
+//
+//import org.genericsystem.reactor.HtmlElement;
+//import org.genericsystem.reactor.composite.CompositeModel;
+//import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate;
+//import org.genericsystem.reactor.html.HtmlLabel;
+//
+//public abstract class InstanceAttributeCellHtmlTemplate<M extends CompositeModel, COMPONENT extends InstanceAttributeCellHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+//
+//	public InstanceAttributeCellHtmlTemplate(HtmlElement<?, ?, ?> parent) {
+//		super(parent);
+//	}
+//
+//	@Override
+//	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
+//		new HtmlSection<CompositeModel>(parentSection) {
+//			@Override
+//			protected void initChildren() {
+//				new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+//			}
+//		}.addStyle("flex-direction", "row");
+//	}
+//
+//	public static class InstanceAttributeCellHtml<M extends CompositeModel> extends InstanceAttributeCellHtmlTemplate<M, InstanceAttributeCellHtml<M>> {
+//		public InstanceAttributeCellHtml(HtmlElement<?, ?, ?> parent) {
+//			super(parent);
+//		}
+//	}
+// }

@@ -8,8 +8,7 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSectionTemplate;
 
-public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends CompositeSectionHtmlTemplate<M, COMPONENT>> extends
-		HtmlSectionTemplate<M, COMPONENT> {
+public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends CompositeSectionHtmlTemplate<M, COMPONENT>> extends HtmlSectionTemplate<M, COMPONENT> {
 
 	private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;
 	private ObservableListExtractor observableListExtractor;
@@ -17,33 +16,24 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 
 	public CompositeSectionHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 		super(parent);
-		this.bindStyles(CompositeModel::getFlexStyles);
-		this.addStyle("flex-wrap", "nowrap");// .addStyle("flex-direction", "column").addStyle("display", "flex").addStyle("margin-bottom", "11px");
+		// this.bindStyles(CompositeModel::getFlexStyles);
+		addStyle("display", "flex");
+		addStyle("flex-direction", "column");
+		addStyle("flex-wrap", "nowrap");
+		// addStyle("margin-bottom", "11px");
 		setObservableListExtractor(ObservableListExtractor.INSTANCES);
 	}
 
 	@Override
 	protected void initChildren() {
-		HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this)
-				.addStyle("flex", "1")
-				.addStyle("min-width", "200px")
-				.addStyle("background-color", "#e4788b")
-				.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-						(gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyle("margin-right", "1px").addStyle("display", "flex")
-				.addStyle("flex-direction", "column").addStyle("flex", "1 1 0%").addStyle("color", "#ffffff").addStyle("padding", "2px");
-		initSubChildren(htmlSection);
-
-		/*
-		 * HtmlSection<CompositeModel> htmlSection2 = new HtmlSection<CompositeModel>(this).addStyle("flex", "1").addStyle("min-width", "200px")
-		 * .addStyle("background-color", "#e4789b"); htmlSection2 .forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-		 * (gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyle("margin-right", "1px").addStyle("display", "flex")
-		 * .addStyle("flex-direction", "column").addStyle("flex", "1 1 0%").addStyle("color", "#ffffff").addStyle("padding", "2px");
-		 * initSubChildren(htmlSection2);
-		 */
+		HtmlSection<CompositeModel> subSection = new HtmlSection<CompositeModel>(this);
+		subSection.addStyle("flex", "1");
+		subSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, stringExtractor) -> getModelConstructor().build(gs, stringExtractor));
+		initSubChildren(subSection);
 	}
 
-	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
-		new HtmlLabel<CompositeModel>(parentSection).bindText(CompositeModel::getString);
+	protected void initSubChildren(HtmlSection<CompositeModel> subSection) {
+		new HtmlLabel<CompositeModel>(subSection).bindText(CompositeModel::getString);
 	}
 
 	public StringExtractor getStringExtractor() {
@@ -82,8 +72,7 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 		}
 	}
 
-	public static abstract class TitleCompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends TitleCompositeSectionHtmlTemplate<M, COMPONENT>>
-			extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+	public static abstract class TitleCompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends TitleCompositeSectionHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
 
 		public TitleCompositeSectionHtmlTemplate(HtmlElement<?, ?, ?> parent) {
 			super(parent);
@@ -91,8 +80,7 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 
 		@Override
 		protected void initChildren() {
-			new HtmlH1<M>(new HtmlSection<M>(this).addStyle("display", "flex").addStyle("margin-bottom", "1px").addStyle("background-color", "#91a692")
-					.addStyle("justify-content", "center")).bindText(CompositeModel::getString);
+			new HtmlH1<M>(new HtmlSection<M>(this)).bindText(CompositeModel::getString);
 			super.initChildren();
 		}
 	}
