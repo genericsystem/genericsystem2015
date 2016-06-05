@@ -6,15 +6,15 @@ import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtracto
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
-import org.genericsystem.reactor.html.HtmlSectionTemplate;
+import org.genericsystem.reactor.html.HtmlSection;
 
-public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends CompositeSectionHtmlTemplate<M, COMPONENT>> extends HtmlSectionTemplate<M, COMPONENT> {
+public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel> extends HtmlSection<M> {
 
 	private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;
 	private ObservableListExtractor observableListExtractor;
 	private ModelConstructor<CompositeModel> modelConstructor = CompositeModel::new;
 
-	public CompositeSectionHtmlTemplate(HtmlElement<?, ?, ?> parent) {
+	public CompositeSectionHtmlTemplate(HtmlElement<?, ?> parent) {
 		super(parent);
 		// this.bindStyles(CompositeModel::getFlexStyles);
 		addStyle("display", "flex");
@@ -22,14 +22,6 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 		addStyle("flex-wrap", "nowrap");
 		// addStyle("margin-bottom", "11px");
 		setObservableListExtractor(ObservableListExtractor.INSTANCES);
-	}
-
-	@Override
-	protected void initChildren() {
-		HtmlSection<CompositeModel> subSection = new HtmlSection<CompositeModel>(this);
-		subSection.addStyle("flex", "1");
-		subSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, stringExtractor) -> getModelConstructor().build(gs, stringExtractor));
-		initSubChildren(subSection);
 	}
 
 	protected void initSubChildren(HtmlSection<CompositeModel> subSection) {
@@ -40,54 +32,62 @@ public abstract class CompositeSectionHtmlTemplate<M extends CompositeModel, COM
 		return stringExtractor;
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT setStringExtractor(StringExtractor stringExtractor) {
+	public void setStringExtractor(StringExtractor stringExtractor) {
 		this.stringExtractor = stringExtractor;
-		return (COMPONENT) this;
 	}
 
 	public ObservableListExtractor getObservableListExtractor() {
 		return observableListExtractor;
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT setObservableListExtractor(ObservableListExtractor observableListExtractor) {
+	public void setObservableListExtractor(ObservableListExtractor observableListExtractor) {
 		this.observableListExtractor = observableListExtractor;
-		return (COMPONENT) this;
 	}
 
 	public ModelConstructor<CompositeModel> getModelConstructor() {
 		return modelConstructor;
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT setModelConstructor(ModelConstructor<CompositeModel> modelConstructor) {
+	public void setModelConstructor(ModelConstructor<CompositeModel> modelConstructor) {
 		this.modelConstructor = modelConstructor;
-		return (COMPONENT) this;
 	}
 
-	public static class CompositeSectionHtml<M extends CompositeModel> extends CompositeSectionHtmlTemplate<M, CompositeSectionHtml<M>> {
-		public CompositeSectionHtml(HtmlElement<?, ?, ?> parent) {
+	public static class CompositeSectionHtml<M extends CompositeModel> extends CompositeSectionHtmlTemplate<M> {
+		public CompositeSectionHtml(HtmlElement<?, ?> parent) {
 			super(parent);
+			HtmlSection<CompositeModel> subSection = new HtmlSection<CompositeModel>(this) {
+				{
+					addStyle("flex", "1");
+					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, stringExtractor) -> getModelConstructor().build(gs, stringExtractor));
+					new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+				}
+			};
+			new HtmlLabel<CompositeModel>(subSection).bindText(CompositeModel::getString);
 		}
 	}
 
-	public static abstract class TitleCompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends TitleCompositeSectionHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M, COMPONENT> {
+	public static abstract class TitleCompositeSectionHtmlTemplate<M extends CompositeModel, COMPONENT extends TitleCompositeSectionHtmlTemplate<M, COMPONENT>> extends CompositeSectionHtmlTemplate<M> {
 
-		public TitleCompositeSectionHtmlTemplate(HtmlElement<?, ?, ?> parent) {
+		public TitleCompositeSectionHtmlTemplate(HtmlElement<?, ?> parent) {
 			super(parent);
-		}
-
-		@Override
-		protected void initChildren() {
-			new HtmlH1<M>(new HtmlSection<M>(this)).bindText(CompositeModel::getString);
-			super.initChildren();
 		}
 	}
 
 	public static class TitleCompositeSectionHtml<M extends CompositeModel> extends TitleCompositeSectionHtmlTemplate<M, TitleCompositeSectionHtml<M>> {
-		public TitleCompositeSectionHtml(HtmlElement<?, ?, ?> parent) {
+		public TitleCompositeSectionHtml(HtmlElement<?, ?> parent) {
 			super(parent);
+			new HtmlSection<CompositeModel>(this) {
+				{
+					new HtmlH1<M>(this);
+				}
+			};
+			new HtmlSection<CompositeModel>(this) {
+				{
+					addStyle("flex", "1");
+					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, stringExtractor) -> getModelConstructor().build(gs, stringExtractor));
+					new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+				}
+			};
 		}
 	}
 }

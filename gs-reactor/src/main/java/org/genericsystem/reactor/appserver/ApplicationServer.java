@@ -26,6 +26,7 @@ import org.genericsystem.reactor.html.HtmlApp;
  * @author Nicolas Feybesse
  *
  */
+
 public class ApplicationServer extends AbstractBackEnd {
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
@@ -44,25 +45,20 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath,
-					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
-					+ " and persistence directory path : " + directoryPath);
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
+			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
 		}
 	}
 
 	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
 		try {
-			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath,
-					userClasses.toArray(new Class[userClasses.size()]));
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
+			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath, userClasses.toArray(new Class[userClasses.size()]));
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
-			Class<? extends Model> modelClass, AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 

@@ -2,21 +2,20 @@ package org.genericsystem.reactor.html;
 
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
-import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.composite.CompositeModel;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlP<M extends Model> extends HtmlElement<M, HtmlDomNode> {
+public abstract class HtmlSelect<M extends CompositeModel> extends HtmlElement<M, HtmlDomNode> {
 
-	public HtmlP(HtmlElement<?, ?> parent) {
+	public HtmlSelect(HtmlElement<?, ?> parent) {
 		super(parent, HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("p");
+		return new HtmlDomNode("select");
 	}
-
 }

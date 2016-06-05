@@ -36,11 +36,10 @@ import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 /**
  * @author Nicolas Feybesse
  *
- * @param <COMPONENT>
+ * @param <M>
  * @param <NODE>
  */
-
-public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement<M, COMPONENT, NODE>, NODE extends HtmlDomNode> extends Element<M, NODE> {
+public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> extends Element<M, NODE> {
 	private static final String MSG_TYPE = "msgType";
 	private static final String ADD = "A";
 	private static final String UPDATE = "U";
@@ -62,7 +61,7 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	}
 
 	public ServerWebSocket getWebSocket() {
-		return ((HtmlElement<?, ?, ?>) getParent()).getWebSocket();
+		return ((HtmlElement<?, ?>) getParent()).getWebSocket();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -71,11 +70,10 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 		return HtmlDomNode::getChildren;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Model> COMPONENT forEach(Function<T, ObservableList<M>> applyOnModel) {
+	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
 		super.forEach(applyOnModel);
-		return (COMPONENT) this;
+
 	}
 
 	// @SuppressWarnings("unchecked")
@@ -83,113 +81,97 @@ public abstract class HtmlElement<M extends Model, COMPONENT extends HtmlElement
 	// public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
 	// ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 	// super.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor);
-	// return (COMPONENT) this;
+	//
 	// }
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		super.forEach(stringExtractor, observableListExtractor, constructor);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Model> COMPONENT select(Function<T, ObservableValue<M>> function) {
+	public <T extends Model> void select(Function<T, ObservableValue<M>> function) {
 		super.select(function);
-		return (COMPONENT) this;
+
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
 		select(stringExtractor, generic, constructor);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Supplier<Generic> generic) {
+	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> generic) {
 		select(stringExtractor, generic, CompositeModel::new);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(Supplier<Generic> generic) {
+	public <T extends CompositeModel> void select(Supplier<Generic> generic) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generic, CompositeModel::new);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(StringExtractor stringExtractor, Class<?> genericClass) {
+	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Class<?> genericClass) {
 		super.select(stringExtractor, genericClass, CompositeModel::new);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends CompositeModel> COMPONENT select(Class<?> genericClass) {
+	public <T extends CompositeModel> void select(Class<?> genericClass) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericClass);
-		return (COMPONENT) this;
+
 	}
 
 	// @SuppressWarnings({ "unchecked" })
-	// public <M> COMPONENT bindStyleClass(Function<M, ObservableValue<String>> function) {
+	// public <M> void bindStyleClass(Function<M, ObservableValue<String>> function) {
 	// addObservableListToObservableValueBinding(HtmlDomNode::getStyleClasses, function);
-	// return (COMPONENT) this;
+	//
 	// }
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT addStyleClass(String text) {
+	public void addStyleClass(String text) {
 		addObservableSetBoot(HtmlDomNode::getStyleClasses, text);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT addStyle(String attr, String value) {
+	public void addStyle(String attr, String value) {
 		addObservableMapBoot(HtmlDomNode::getStyles, attr, value);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
+	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
 		addObservableSetBinding(HtmlDomNode::getStyleClasses, function, text);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT bindOptionalStyle(Function<M, ObservableValue<Number>> function, String attr, String[] value) {
+	public void bindOptionalStyle(Function<M, ObservableValue<Number>> function, String attr, String[] value) {
 		addObservableMapBinding(HtmlDomNode::getStyles, function, attr, value);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT setText(String text) {
+	public void setText(String text) {
 		addBoot(HtmlDomNode::getText, text);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
+	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
 		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
-		return (COMPONENT) this;
+
 	}
 
 	// @SuppressWarnings("unchecked")
-	// public <M> COMPONENT bindReverseText(Function<M, Property<String>> applyOnModel) {
+	// public <M> void bindReverseText(Function<M, Property<String>> applyOnModel) {
 	// addReversedBinding(HtmlDomNode::getText, applyOnModel);
-	// return (COMPONENT) this;
+	//
 	// }
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT bindText(Function<M, ObservableValue<String>> applyOnModel) {
+	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
 		addBinding(HtmlDomNode::getText, applyOnModel);
-		return (COMPONENT) this;
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT bindStyles(Function<M, ObservableMap<String, String>> function) {
+	public void bindStyles(Function<M, ObservableMap<String, String>> function) {
 		addObservableMapBinding(HtmlDomNode::getStyles, function);
-		return (COMPONENT) this;
+
 	}
 
 	public class HtmlDomNode {

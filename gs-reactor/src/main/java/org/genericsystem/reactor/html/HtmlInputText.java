@@ -1,17 +1,18 @@
 package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
+
 import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.HtmlElement.InputTextHtmlDomNode;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlInputText<M extends Model> extends HtmlElement<M, HtmlInputText<M>, InputTextHtmlDomNode> {
+public class HtmlInputText<M extends Model> extends HtmlElement<M, InputTextHtmlDomNode> {
 
-	public HtmlInputText(HtmlElement<?, ?, ?> parent) {
+	public HtmlInputText(HtmlElement<?, ?> parent) {
 		super(parent, InputTextHtmlDomNode.class);
 	}
 

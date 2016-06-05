@@ -41,115 +41,104 @@ public abstract class Element<M extends Model, N> {
 		this.parent = parent;
 		if (parent != null)
 			parent.<N> getChildren().add(this);
-		initChildren();
-	}
-
-	protected void initChildren() {
-
 	}
 
 	@SuppressWarnings("rawtypes")
 	protected abstract Function<N, List> getGraphicChildren();
 
-	protected <VALUE> Element<M, N> addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
+	protected <VALUE> void addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.setProperty(applyOnNode, value));
-		return this;
+
 	}
 
-	protected <VALUE> Element<M, N> addObservableSetBoot(Function<N, ObservableSet<VALUE>> applyOnNode, VALUE value) {
+	protected <VALUE> void addObservableSetBoot(Function<N, ObservableSet<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.addProperty(applyOnNode, value));
-		return this;
+
 	}
 
-	protected <VALUE> Element<M, N> addObservableMapBoot(Function<N, ObservableMap<VALUE, VALUE>> applyOnNode, VALUE attr, VALUE value) {
+	protected <VALUE> void addObservableMapBoot(Function<N, ObservableMap<VALUE, VALUE>> applyOnNode, VALUE attr, VALUE value) {
 		this.boots.add(Boot.addProperty(applyOnNode, attr, value));
-		return this;
+
 	}
 
 	protected List<Boot<N>> getBootList() {
 		return boots;
 	}
 
-	protected <W> Element<M, N> addBidirectionalBinding(Function<N, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
+	protected <W> void addBidirectionalBinding(Function<N, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
 		bindings.add(Binding.bindBiDirectionalProperty(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> addBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
+	protected <T> void addBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
 		bindings.add(Binding.bindProperty(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> setObservableListBinding(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
+	protected <T> void setObservableListBinding(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
 		bindings.add(Binding.bindObservableList(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> addActionBinding(Function<N, Property<T>> applyOnNode, Consumer<M> applyOnModel) {
+	protected <T> void addActionBinding(Function<N, Property<T>> applyOnNode, Consumer<M> applyOnModel) {
 		bindings.add(Binding.bindAction(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
+	protected <T> void addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
 		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	protected Element<M, N> addObservableSetToObservableValueBinding(Function<N, ObservableSet<String>> applyOnNode,
-			Function<M, ObservableValue<String>> applyOnModel) {
+	protected void addObservableSetToObservableValueBinding(Function<N, ObservableSet<String>> applyOnNode, Function<M, ObservableValue<String>> applyOnModel) {
 		bindings.add(Binding.bindObservableSetToObservableValue(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> addObservableSetBinding(Function<N, ObservableSet<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel,
-			T styleClass) {
+	protected <T> void addObservableSetBinding(Function<N, ObservableSet<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
 		bindings.add(Binding.bindObservableSet(applyOnModel, styleClass, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
-			Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value) {
+	protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value) {
 		bindings.add(Binding.bindObservableMap(applyOnModel, attr, value, applyOnNode));
-		return this;
+
 	}
 
-	protected <T> Element<M, N> addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
-			Function<M, ObservableMap<String, String>> applyOnModel) {
+	protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
 		bindings.add(Binding.bindObservableMap(applyOnModel, applyOnNode));
-		return this;
+
 	}
 
-	public <T extends Model> Element<M, N> forEach(Function<T, ObservableList<M>> applyOnModel) {
+	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
-		return this;
+
 	}
 
-	// public <T extends CompositeModel> Element<M, N> forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
+	// public <T extends CompositeModel> void forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
 	// ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 	// metaBindings.add(MetaBinding.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor));
-	// return this;
+	//
 	// }
 
-	public <T extends CompositeModel> Element<M, N> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.forEach(this, stringExtractor, observableListExtractor, constructor));
-		return this;
+
 	}
 
-	public <T extends Model> Element<M, N> select(Function<T, ObservableValue<M>> applyOnModel) {
+	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
-		return this;
+
 	}
 
-	public <T extends CompositeModel> Element<M, N> select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier,
-			ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.selector(this, stringExtractor, genericSupplier, constructor));
-		return this;
+
 	}
 
-	public <T extends CompositeModel> Element<M, N> select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.selector(this, stringExtractor, genericClass, constructor));
-		return this;
+
 	}
 
 	protected N createNode(Object parent) {
@@ -165,6 +154,7 @@ public abstract class Element<M extends Model, N> {
 		return (List) children;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <COMPONENT extends Element<?, ?>> COMPONENT getParent() {
 		return (COMPONENT) parent;
 	}
