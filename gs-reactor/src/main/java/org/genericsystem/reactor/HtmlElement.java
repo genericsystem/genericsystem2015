@@ -2,7 +2,12 @@ package org.genericsystem.reactor;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -23,12 +28,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -127,29 +127,18 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	}
 
-	// @SuppressWarnings({ "unchecked" })
-	// public <M> void bindStyleClass(Function<M, ObservableValue<String>> function) {
-	// addObservableListToObservableValueBinding(HtmlDomNode::getStyleClasses, function);
-	//
-	// }
-
-	public void addStyleClass(String text) {
-		addObservableSetBoot(HtmlDomNode::getStyleClasses, text);
+	public void addStyleClass(String styleClass) {
+		// addBoot(domNode -> domNode.addStyleClasses(styleClass), styleClass);
+		addSetBoot(HtmlDomNode::getStyleClasses, styleClass);
 
 	}
 
-	public void addStyle(String attr, String value) {
-		addObservableMapBoot(HtmlDomNode::getStyles, attr, value);
+	public void addStyle(String propertyName, String value) {
+		addBoot(domNode -> ((HtmlDomNode) domNode).getStyle(propertyName), value);
 	}
 
 	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
-		addObservableSetBinding(HtmlDomNode::getStyleClasses, function, text);
-
-	}
-
-	public void bindOptionalStyle(Function<M, ObservableValue<Number>> function, String attr, String[] value) {
-		addObservableMapBinding(HtmlDomNode::getStyles, function, attr, value);
-
+		addSetBinding(HtmlDomNode::getStyleClasses, function, text);
 	}
 
 	public void setText(String text) {
@@ -162,29 +151,61 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	}
 
-	// @SuppressWarnings("unchecked")
-	// public <M> void bindReverseText(Function<M, Property<String>> applyOnModel) {
-	// addReversedBinding(HtmlDomNode::getText, applyOnModel);
-	//
-	// }
-
 	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
 		addBinding(HtmlDomNode::getText, applyOnModel);
-
 	}
 
-	public void bindStyles(Function<M, ObservableMap<String, String>> function) {
-		addObservableMapBinding(HtmlDomNode::getStyles, function);
-
+	public void bindStyle(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
+		addBinding(domNode -> domNode.getStyle(propertyName), applyOnModel);
 	}
+
+	public void bindStyle(String propertyName, String initialValue) {
+		bindStyle(propertyName, model -> ((CompositeModel) model).getObservableStyle(this, propertyName, initialValue));
+	}
+
+	// public void bindStyles(Function<M, ObservableMap<String, String>> function) {
+	// addObservableMapBinding(HtmlDomNode::getStyles, function);
+	//
+	// }
 
 	public class HtmlDomNode {
 
 		private final String id;
 		private final String tag;
 		private final StringProperty text = new SimpleStringProperty();
-		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
-		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
+
+		private final Set<String> styleClasses = new HashSet<String>() {
+			@Override
+			public boolean add(String styleClass) {
+				boolean result = super.add(styleClass);
+				if (result) {
+					System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz" + styleClass);
+					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLECLASS, styleClass));
+				}
+				return result;
+			};
+
+			@Override
+			public boolean remove(Object styleClass) {
+				boolean result = super.remove(styleClass);
+				if (result)
+					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(REMOVEDSTYLECLASS, styleClass));
+				return result;
+			};
+		};
+
+		private final Map<String, String> styles = new HashMap<String, String>() {
+			@Override
+			public String put(String propertyName, String value) {
+				String result = super.put(propertyName, value);
+				if (!Objects.equals(value, result)) {
+					JsonObject mapJS = new JsonObject();
+					mapJS.put(propertyName, value);
+					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+				}
+				return result;
+			}
+		};
 
 		public HtmlDomNode(String tag) {
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
@@ -198,37 +219,36 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue));
 			});
 
-			this.styleClasses.addListener((SetChangeListener<String>) change -> {
+			// this.styleClasses.addListener((SetChangeListener<String>) change -> {
+			//
+			// JsonObject jsonMessage = new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id);
+			//
+			// if (change.getElementAdded() != null) {
+			// jsonMessage.put(STYLECLASS, change.getElementAdded());
+			// } else {
+			// jsonMessage.put(REMOVEDSTYLECLASS, change.getElementRemoved());
+			// }
+			// sendMessage(jsonMessage);
+			//
+			// });
 
-				JsonObject jsonMessage = new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id);
-
-				if (change.getElementAdded() != null) {
-					jsonMessage.put(STYLECLASS, change.getElementAdded());
-				} else {
-					jsonMessage.put(REMOVEDSTYLECLASS, change.getElementRemoved());
-				}
-				sendMessage(jsonMessage);
-
-			});
-
-			this.styles.addListener((MapChangeListener<String, String>) change -> {
-				// JsonObject mapJS = new JsonObject();
-				// String value = "";
-				// if (change.getValueAdded() != null) {
-				// value = change.getValueAdded();
-				// }
-				// mapJS.put(change.getKey(), value);
-				// sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
-
-				JsonObject mapJS = new JsonObject();
-				styles.forEach((key, value) -> mapJS.put(key, value));
-				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
-				System.out.println("CHANGE IN STYLES");
-			});
-
+			// this.styles.addListener((MapChangeListener<String, String>) change -> {
+			// // JsonObject mapJS = new JsonObject();
+			// // String value = "";
+			// // if (change.getValueAdded() != null) {
+			// // value = change.getValueAdded();
+			// // }
+			// // mapJS.put(change.getKey(), value);
+			// // sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+			//
+			// JsonObject mapJS = new JsonObject();
+			// styles.forEach((key, value) -> mapJS.put(key, value));
+			// sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+			// System.out.println("CHANGE IN STYLES");
+			// });
 		}
 
-		List<HtmlDomNode> getChildren() {
+		protected List<HtmlDomNode> getChildren() {
 			return children;
 		}
 
@@ -281,12 +301,20 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 			jsonObj.put(STYLE, mapJS);
 		}
 
-		public ObservableSet<String> getStyleClasses() {
+		public Set<String> getStyleClasses() {
 			return styleClasses;
 		}
 
-		public ObservableMap<String, String> getStyles() {
-			return styles;
+		// public ObservableMap<String, String> getStyles() {
+		// return styles;
+		// }
+
+		public Property<String> getStyle(String propertyName) {
+			Property<String> property = new SimpleStringProperty(styles.get(propertyName));
+			property.addListener((change, old, newValue) -> {
+				styles.put(propertyName, newValue);
+			});
+			return property;
 		}
 
 		public StringProperty getText() {

@@ -19,20 +19,35 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 		addStyle("display", "flex");
 		addStyle("flex-wrap", "nowrap");
 		addStyle("flex-direction", "column");
+		// bindStyle("color", CompositeModel::getColor);
 		new HtmlSection<CompositeModel>(this) {
 			{
 				addStyle("display", "flex");
-				addStyle("flex-directionflex", "row");
+				addStyle("flex-direction", "row");
 				addStyle("flex-wrap", "nowrap");
 				addStyle("justify-content", "center");
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
-				new HtmlH1<M>(this) {
+				HtmlH1 h1 = new HtmlH1<CompositeModel>(this) {
 					{
+						bindStyle("color", "red");
 						bindText(CompositeModel::getString);
 					}
 				};
+				new HtmlButton<CompositeModel>(this) {
+					{
+						setText("red");
+						bindAction(model -> model.getStyleProperty(h1, "color").setValue("red"));
+					}
+				};
+				new HtmlButton<CompositeModel>(this) {
+					{
+						setText("blue");
+						bindAction(model -> model.getStyleProperty(h1, "color").setValue("blue"));
+					}
+				};
+
 			}
 		};
 		new HtmlSection<CompositeModel>(this) {

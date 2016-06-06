@@ -2,21 +2,20 @@ package org.genericsystem.reactor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -48,17 +47,10 @@ public abstract class Element<M extends Model, N> {
 
 	protected <VALUE> void addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.setProperty(applyOnNode, value));
-
 	}
 
-	protected <VALUE> void addObservableSetBoot(Function<N, ObservableSet<VALUE>> applyOnNode, VALUE value) {
+	protected <VALUE> void addSetBoot(Function<N, Set<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.addProperty(applyOnNode, value));
-
-	}
-
-	protected <VALUE> void addObservableMapBoot(Function<N, ObservableMap<VALUE, VALUE>> applyOnNode, VALUE attr, VALUE value) {
-		this.boots.add(Boot.addProperty(applyOnNode, attr, value));
-
 	}
 
 	protected List<Boot<N>> getBootList() {
@@ -90,40 +82,36 @@ public abstract class Element<M extends Model, N> {
 
 	}
 
-	protected void addObservableSetToObservableValueBinding(Function<N, ObservableSet<String>> applyOnNode, Function<M, ObservableValue<String>> applyOnModel) {
-		bindings.add(Binding.bindObservableSetToObservableValue(applyOnModel, applyOnNode));
+	// protected void addObservableSetToObservableValueBinding(Function<N, ObservableSet<String>> applyOnNode, Function<M, ObservableValue<String>>
+	// applyOnModel) {
+	// bindings.add(Binding.bindObservableSetToObservableValue(applyOnModel, applyOnNode));
+	// }
+
+	protected <T> void addSetBinding(Function<N, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
+		bindings.add(Binding.bindSet(applyOnModel, styleClass, applyOnNode));
 
 	}
 
-	protected <T> void addObservableSetBinding(Function<N, ObservableSet<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
-		bindings.add(Binding.bindObservableSet(applyOnModel, styleClass, applyOnNode));
-
-	}
-
-	protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value) {
-		bindings.add(Binding.bindObservableMap(applyOnModel, attr, value, applyOnNode));
-
-	}
-
-	protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
-		bindings.add(Binding.bindObservableMap(applyOnModel, applyOnNode));
-
-	}
+	// protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableValue<Number>> applyOnModel,
+	// String attr, String[] value) {
+	// bindings.add(Binding.bindObservableMap(applyOnModel, attr, value, applyOnNode));
+	//
+	// }
+	//
+	// protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
+	// Function<M, ObservableMap<String, String>> applyOnModel) {
+	// bindings.add(Binding.bindObservableMap(applyOnModel, applyOnNode));
+	//
+	// }
 
 	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
 
 	}
 
-	// public <T extends CompositeModel> void forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
-	// ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-	// metaBindings.add(MetaBinding.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor));
-	//
-	// }
-
-	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		metaBindings.add(MetaBinding.forEach(this, stringExtractor, observableListExtractor, constructor));
-
+	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+			ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.forEach(stringExtractor, observableListExtractor, constructor));
 	}
 
 	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
@@ -131,8 +119,9 @@ public abstract class Element<M extends Model, N> {
 
 	}
 
-	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		metaBindings.add(MetaBinding.selector(this, stringExtractor, genericSupplier, constructor));
+	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier,
+			ModelConstructor<CompositeModel> constructor) {
+		metaBindings.add(MetaBinding.selector(stringExtractor, genericSupplier, constructor));
 
 	}
 

@@ -50,19 +50,19 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 	// return forEach(model -> ((M) model).getBoundObservableList(applyOnModel, stringExtractor, observableListExtractor, constructor));
 	// }
 
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(Element<?, ?> element, StringExtractor stringExtractor,
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(StringExtractor stringExtractor,
 			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((CompositeModel) model).getBoundObservableList(element, stringExtractor, observableListExtractor, constructor));
+		return forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, observableListExtractor, constructor));
 	}
 
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor,
+	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(StringExtractor stringExtractor,
 			Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((CompositeModel) model).getBoundObservableList(element, stringExtractor, genericSupplier, constructor));
+		return forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, genericSupplier, constructor));
 	}
 
 	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor,
 			Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((CompositeModel) model).getBoundObservableList(element, stringExtractor, genericClass, constructor));
+		return forEach(model -> ((CompositeModel) model).getObservableList(element, stringExtractor, genericClass, constructor));
 	}
 
 	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableList<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
