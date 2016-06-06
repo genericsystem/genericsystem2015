@@ -14,7 +14,7 @@ import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtml;
+import org.genericsystem.reactor.composite.CompositeSectionHtml.TitleCompositeSectionHtml;
 import org.genericsystem.reactor.composite.CompositeSelectHtmlTemplate.CompositeSelectHtml;
 import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
 import org.genericsystem.reactor.html.HtmlApp;
