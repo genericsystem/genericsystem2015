@@ -34,6 +34,11 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 		binder.init(applyOnModel, viewContext, childElement);
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("FINALIZE22222222222222222222222222");
+	};
+
 	public static <N, M extends Model, SUBMODEL extends Model> MetaBinding<N, ObservableList<SUBMODEL>> forEach(
 			Function<M, ObservableList<SUBMODEL>> applyOnModel) {
 		return new MetaBinding<>(model -> applyOnModel.apply((M) model), MetaBinder.<N, SUBMODEL> foreachBinder());

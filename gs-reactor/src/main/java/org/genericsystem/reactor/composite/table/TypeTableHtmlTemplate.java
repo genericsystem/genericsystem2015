@@ -1,71 +1,137 @@
 package org.genericsystem.reactor.composite.table;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import javafx.collections.FXCollections;
-
-import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeSectionHtmlTemplate.TitleCompositeSectionHtmlTemplate;
-import org.genericsystem.reactor.composite.table.InstanceRowHtmlTemplate.InstanceRowHtml;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.html.HtmlSection;
 
-public abstract class TypeTableHtmlTemplate<M extends CompositeModel, COMPONENT extends TypeTableHtmlTemplate<M, COMPONENT>> extends
-		TitleCompositeSectionHtmlTemplate<M, COMPONENT> {
+public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends HtmlSection<M> {
 
-	private ObservableListExtractor attributesExtractor = ObservableListExtractor.ATTRIBUTES;
+	private ObservableListExtractor subObservableListExtractor = ObservableListExtractor.ATTRIBUTES;
+	private ObservableListExtractor subSubObservableListExtractor = ObservableListExtractor.HOLDERS;
 
-	public TypeTableHtmlTemplate(HtmlElement<?, ?, ?> parent) {
+	public TypeTableHtmlTemplate(HtmlElement<?, ?> parent) {
 		super(parent);
-		this.addStyle("flex-direction", "column");
-		setObservableListExtractor(ObservableListExtractor.INSTANCES);
+		addStyle("display", "flex");
+		addStyle("flex-wrap", "nowrap");
+		addStyle("flex-direction", "column");
+		new HtmlSection<CompositeModel>(this) {
+			{
+				addStyle("display", "flex");
+				addStyle("flex-directionflex", "row");
+				addStyle("flex-wrap", "nowrap");
+				addStyle("justify-content", "center");
+				addStyle("background-color", "#ffa500");
+				new HtmlH1<M>(this) {
+					{
+						bindText(CompositeModel::getString);
+					}
+				};
+			}
+		};
+		new HtmlSection<CompositeModel>(this) {
+			{
+				addStyle("display", "flex");
+				addStyle("flex-wrap", "nowrap");
+				addStyle("flex-direction", "row");
+				new HtmlSection<M>(this) {
+					{
+						addStyle("min-width", "200px");
+					}
+				};
+				new HtmlSection<CompositeModel>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex", "1");
+						addStyle("justify-content", "center");
+						addStyle("background-color", "#538255");
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs), CompositeModel::new);
+						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+					}
+				};
+				new HtmlSection<M>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex", "0");
+						addStyle("min-width", "100px");
+					}
+				};
+			}
+		};
+		new HtmlSection<CompositeModel>(this) {
+			{
+				addStyle("display", "flex");
+				addStyle("flex-wrap", "nowrap");
+				addStyle("flex-direction", "row");
+				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.INSTANCES, CompositeModel::new);
+				new HtmlSection<M>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex", "0");
+						addStyle("min-width", "200px");
+						bindText(CompositeModel::getString);
+						new HtmlLabel<M>(this);
+					}
+				};
+				new HtmlSection<CompositeModel>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex-direction", "column");
+						addStyle("flex", "1");
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs), CompositeModel::new);
+						new HtmlSection<CompositeModel>(this) {
+							{
+								addStyle("flex", "1");
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS, CompositeModel::new);
+								new HtmlSection<CompositeModel>(this) {
+									{
+										addStyle("flex-direction", "row");
+										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+									}
+								};
+							}
+						};
+					}
+				};
+				new HtmlSection<M>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex", "0");
+						addStyle("min-width", "100px");
+						new HtmlButton<M>(this).bindAction(CompositeModel::remove).setText("Remove");
+					}
+				};
+
+			}
+		};
 
 	}
 
-	public ObservableListExtractor getAttributesExtractor() {
-		return attributesExtractor;
+	public ObservableListExtractor getSubObservableListExtractor() {
+		return subObservableListExtractor;
 	}
 
-	@SuppressWarnings("unchecked")
-	public COMPONENT setAttributesExtractor(ObservableListExtractor attributesExtractor) {
-		this.attributesExtractor = attributesExtractor;
-		return (COMPONENT) this;
+	public ObservableListExtractor getSubSubObservableListExtractor() {
+		return subSubObservableListExtractor;
 	}
 
-	public COMPONENT setAttributesExtractor(Class<?>... classes) {
-		return this.setAttributesExtractor(gs -> FXCollections.observableArrayList(Arrays.stream(classes).map(gs[0].getRoot()::<Generic> find)
-				.collect(Collectors.toList())));
+	public TypeTableHtmlTemplate<M> setSubObservableListExtractor(ObservableListExtractor subObservableListExtractor) {
+		this.subObservableListExtractor = subObservableListExtractor;
+		return this;
 	}
 
-	@Override
-	protected void initSubChildren(HtmlSection<CompositeModel> parentSection) {
-		new InstanceRowHtml<>(parentSection);
-	}
-
-	public static class TypeTableHtml<M extends CompositeModel> extends TypeTableHtmlTemplate<M, TypeTableHtml<M>> {
-		public TypeTableHtml(HtmlElement<?, ?, ?> parent) {
+	public static class TypeTableHtml<M extends CompositeModel> extends TypeTableHtmlTemplate<M> {
+		public TypeTableHtml(HtmlElement<?, ?> parent) {
 			super(parent);
 		}
 	}
-
-	public static class ColumnTitleTypeTableHtml<M extends CompositeModel> extends TypeTableHtmlTemplate<M, ColumnTitleTypeTableHtml<M>> {
-		public ColumnTitleTypeTableHtml(HtmlElement<?, ?, ?> parent) {
-			super(parent);
-		}
-
-		@Override
-		protected void initChildren() {
-
-			new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(CompositeModel::getString);
-			new HtmlH1<M>(new HtmlSection<M>(this).addStyleClass("gsrow").addStyleClass("gstitlerow")).bindText(CompositeModel::getString);
-			HtmlSection<CompositeModel> htmlSection = new HtmlSection<CompositeModel>(this).addStyleClass("gscell").addStyleClass("gstitlecell");
-			htmlSection.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-					(gs, constructor) -> getModelConstructor().build(gs, constructor)).addStyleClass("gscell");
-			initSubChildren(htmlSection);
-		}
-	}
-
 }

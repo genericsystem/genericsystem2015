@@ -1,16 +1,16 @@
 package org.genericsystem.reactor.html;
 
 import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlStrong<M extends Model> extends HtmlElement<M, HtmlStrong<M>, HtmlDomNode> {
+public class HtmlStrong<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
-	public HtmlStrong(HtmlElement<?, ?, ?> parent) {
+	public HtmlStrong(HtmlElement<?, ?> parent) {
 		super(parent, HtmlDomNode.class);
 	}
 

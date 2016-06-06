@@ -8,15 +8,14 @@ import org.genericsystem.reactor.Model;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlP<M extends Model> extends HtmlElement<M, HtmlDomNode> {
+public class HtmlSection<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
-	public HtmlP(HtmlElement<?, ?> parent) {
+	public HtmlSection(HtmlElement<?, ?> parent) {
 		super(parent, HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("p");
+		return new HtmlDomNode("section");
 	}
-
 }

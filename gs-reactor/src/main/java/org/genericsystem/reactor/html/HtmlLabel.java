@@ -1,16 +1,16 @@
 package org.genericsystem.reactor.html;
 
 import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlLabel<M extends Model> extends HtmlElement<M, HtmlLabel<M>, HtmlDomNode> {
+public class HtmlLabel<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
-	public HtmlLabel(HtmlElement<?, ?, ?> parent) {
+	public HtmlLabel(HtmlElement<?, ?> parent) {
 		super(parent, HtmlDomNode.class);
 	}
 

@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.html;
 
 import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
@@ -11,7 +12,7 @@ import org.genericsystem.reactor.ViewContext.RootViewContext;
  * @author Nicolas Feybesse
  *
  */
-public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>, HtmlDomNode> {
+public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	private final ServerWebSocket webSocket;
 	private RootViewContext<?, HtmlDomNode> rootViewContext;

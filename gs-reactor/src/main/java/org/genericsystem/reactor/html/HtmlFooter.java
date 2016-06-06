@@ -1,16 +1,16 @@
 package org.genericsystem.reactor.html;
 
 import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlFooter<M extends Model> extends HtmlElement<M, HtmlFooter<M>, HtmlDomNode> {
+public class HtmlFooter<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
-	public HtmlFooter(HtmlElement<?, ?, ?> parent) {
+	public HtmlFooter(HtmlElement<?, ?> parent) {
 		super(parent, HtmlDomNode.class);
 	}
 
