@@ -6,13 +6,13 @@ import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtracto
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSection;
 
 public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends HtmlSection<M> {
 
 	private ObservableListExtractor subObservableListExtractor = ObservableListExtractor.ATTRIBUTES;
-	private ObservableListExtractor subSubObservableListExtractor = ObservableListExtractor.HOLDERS;
 
 	public TypeTableHtmlTemplate(HtmlElement<?, ?> parent) {
 		super(parent);
@@ -26,6 +26,8 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				addStyle("flex-wrap", "nowrap");
 				addStyle("justify-content", "center");
 				addStyle("background-color", "#ffa500");
+				addStyle("margin-right", "1px");
+				addStyle("margin-bottom", "1px");
 				new HtmlH1<M>(this) {
 					{
 						bindText(CompositeModel::getString);
@@ -41,6 +43,9 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				new HtmlSection<M>(this) {
 					{
 						addStyle("min-width", "200px");
+						addStyle("background-color", "#ffa5a5");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
 					}
 				};
 				new HtmlSection<CompositeModel>(this) {
@@ -48,9 +53,14 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("display", "flex");
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "1");
+						addStyle("flex-direction", "row");
 						addStyle("justify-content", "center");
-						addStyle("background-color", "#538255");
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs), CompositeModel::new);
+						addStyle("overflow", "hidden");
+						addStyle("color", "#ffffff");
+						addStyle("background-color", "#ffa5a5");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
 						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
@@ -60,6 +70,9 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
+						addStyle("background-color", "#ffa5a5");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
 					}
 				};
 			}
@@ -69,13 +82,65 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				addStyle("display", "flex");
 				addStyle("flex-wrap", "nowrap");
 				addStyle("flex-direction", "row");
+				// bindStyle("flex-direction", CompositeModel::getFlexDirection);
+
+				new HtmlSection<M>(this) {
+					{
+						addStyle("min-width", "200px");
+						addStyle("background-color", "#ffa5ff");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
+					}
+				};
+				new HtmlSection<CompositeModel>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex", "1");
+						addStyle("flex-direction", "row");
+						// addStyle("justify-content", "center");
+						addStyle("overflow", "hidden");
+						addStyle("color", "#ffffff");
+						addStyle("background-color", "#ffa5ff");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
+						new HtmlInputText<CompositeModel>(this).bindText(CompositeModel::getString);
+					}
+				};
+				new HtmlSection<M>(this) {
+					{
+						addStyle("display", "flex");
+						addStyle("flex-wrap", "nowrap");
+						addStyle("flex", "0");
+						addStyle("min-width", "100px");
+						addStyle("background-color", "#ffa5ff");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
+						new HtmlButton<>(this).setText("Add    4");
+					}
+				};
+			}
+		};
+
+		new HtmlSection<CompositeModel>(this) {
+			{
+				addStyle("display", "flex");
+				addStyle("flex-wrap", "nowrap");
+				addStyle("flex-direction", "row");
+				addStyle("overflow", "hidden");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.INSTANCES, CompositeModel::new);
 				new HtmlSection<M>(this) {
 					{
 						addStyle("display", "flex");
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
+						addStyle("flex-direction", "column");
+						addStyle("justify-content", "center");
 						addStyle("min-width", "200px");
+						addStyle("background-color", "#bba5ff");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
 						bindText(CompositeModel::getString);
 						new HtmlLabel<M>(this);
 					}
@@ -86,14 +151,21 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex-direction", "column");
 						addStyle("flex", "1");
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs), CompositeModel::new);
+						addStyle("background-color", "#dda5e2");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
 						new HtmlSection<CompositeModel>(this) {
 							{
+								addStyle("display", "flex");
 								addStyle("flex", "1");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS, CompositeModel::new);
+								addStyle("flex-direction", "row");
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
 								new HtmlSection<CompositeModel>(this) {
 									{
-										addStyle("flex-direction", "row");
+										addStyle("display", "flex");
+										addStyle("flex-direction", "column");
+										addStyle("justify-content", "center");
 										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 									}
 								};
@@ -107,6 +179,11 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
+						addStyle("background-color", "#dda5e2");
+						addStyle("margin-right", "1px");
+						addStyle("margin-bottom", "1px");
+						addStyle("flex-direction", "column");
+						addStyle("justify-content", "center");
 						new HtmlButton<M>(this).bindAction(CompositeModel::remove).setText("Remove");
 					}
 				};
@@ -118,10 +195,6 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 
 	public ObservableListExtractor getSubObservableListExtractor() {
 		return subObservableListExtractor;
-	}
-
-	public ObservableListExtractor getSubSubObservableListExtractor() {
-		return subSubObservableListExtractor;
 	}
 
 	public TypeTableHtmlTemplate<M> setSubObservableListExtractor(ObservableListExtractor subObservableListExtractor) {
