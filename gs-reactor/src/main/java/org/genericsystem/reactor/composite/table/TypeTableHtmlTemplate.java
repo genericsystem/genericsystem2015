@@ -87,7 +87,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				new HtmlSection<M>(this) {
 					{
 						addStyle("min-width", "200px");
-						addStyle("background-color", "#ffa5ff");
+						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 					}
@@ -101,23 +101,34 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						// addStyle("justify-content", "center");
 						addStyle("overflow", "hidden");
 						addStyle("color", "#ffffff");
-						addStyle("background-color", "#ffa5ff");
+						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
-						new HtmlInputText<CompositeModel>(this).bindText(CompositeModel::getString);
+						new HtmlInputText<CompositeModel>(this) {
+							{
+								bindText(CompositeModel::getString);
+								addStyle("width", "100%");
+							}
+						};
+
 					}
 				};
-				new HtmlSection<M>(this) {
+				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("display", "flex");
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
-						addStyle("background-color", "#ffa5ff");
+						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlButton<>(this).setText("Add    4");
+						new HtmlButton<CompositeModel>(this) {
+							{
+								setText("Add");
+								addStyle("width", "100%");
+							}
+						};
 					}
 				};
 			}
@@ -184,7 +195,13 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("margin-bottom", "1px");
 						addStyle("flex-direction", "column");
 						addStyle("justify-content", "center");
-						new HtmlButton<M>(this).bindAction(CompositeModel::remove).setText("Remove");
+						new HtmlButton<M>(this) {
+							{
+								setText("Remove");
+								bindAction(CompositeModel::remove);
+								addStyle("width", "100%");
+							}
+						};
 					}
 				};
 
