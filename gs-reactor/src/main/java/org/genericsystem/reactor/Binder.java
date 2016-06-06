@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 
 /**
@@ -77,18 +76,18 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N> Binder<N, ObservableValue<String>, ObservableSet<String>> observableSetBinder() {
-		return new Binder<N, ObservableValue<String>, ObservableSet<String>>() {
-			@Override
-			public void init(ObservableSet<String> nodeResult, ObservableValue<String> modelResult) {
-				nodeResult.add(modelResult.getValue());
-				modelResult.addListener((o, ov, nv) -> {
-					nodeResult.remove(ov);
-					nodeResult.add(nv);
-				});
-			}
-		};
-	}
+	// public static <N> Binder<N, ObservableValue<String>, ObservableSet<String>> observableSetBinder() {
+	// return new Binder<N, ObservableValue<String>, ObservableSet<String>>() {
+	// @Override
+	// public void init(ObservableSet<String> nodeResult, ObservableValue<String> modelResult) {
+	// nodeResult.add(modelResult.getValue());
+	// modelResult.addListener((o, ov, nv) -> {
+	// nodeResult.remove(ov);
+	// nodeResult.add(nv);
+	// });
+	// }
+	// };
+	// }
 
 	public static <N, W> Binder<N, ObservableValue<Boolean>, Set<W>> observableSetBinder(W styleClass) {
 		return new Binder<N, ObservableValue<Boolean>, Set<W>>() {

@@ -75,14 +75,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	}
 
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public <T extends CompositeModel> COMPONENT forEach(Function<T, ObservableList<CompositeModel>> applyOnModel, StringExtractor stringExtractor,
-	// ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-	// super.forEach(applyOnModel, stringExtractor, observableListExtractor, constructor);
-	//
-	// }
-
 	@Override
 	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
 			ModelConstructor<CompositeModel> constructor) {
@@ -128,17 +120,11 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 	}
 
 	public void addStyleClass(String styleClass) {
-		// addBoot(domNode -> domNode.addStyleClasses(styleClass), styleClass);
 		addSetBoot(HtmlDomNode::getStyleClasses, styleClass);
-
 	}
 
 	public void addStyle(String propertyName, String value) {
-		addBoot(domNode -> ((HtmlDomNode) domNode).getStyle(propertyName), value);
-	}
-
-	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
-		addSetBinding(HtmlDomNode::getStyleClasses, function, text);
+		addBoot(domNode -> domNode.getStyle(propertyName), value);
 	}
 
 	public void setText(String text) {
@@ -163,10 +149,9 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		bindStyle(propertyName, model -> ((CompositeModel) model).getObservableStyle(this, propertyName, initialValue));
 	}
 
-	// public void bindStyles(Function<M, ObservableMap<String, String>> function) {
-	// addObservableMapBinding(HtmlDomNode::getStyles, function);
-	//
-	// }
+	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
+		addSetBinding(HtmlDomNode::getStyleClasses, function, text);
+	}
 
 	public class HtmlDomNode {
 
@@ -175,13 +160,14 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		private final StringProperty text = new SimpleStringProperty();
 
 		private final Set<String> styleClasses = new HashSet<String>() {
+
+			private static final long serialVersionUID = -7679372997269319684L;
+
 			@Override
 			public boolean add(String styleClass) {
 				boolean result = super.add(styleClass);
-				if (result) {
-					System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz" + styleClass);
+				if (result)
 					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLECLASS, styleClass));
-				}
 				return result;
 			};
 
@@ -195,6 +181,9 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		};
 
 		private final Map<String, String> styles = new HashMap<String, String>() {
+
+			private static final long serialVersionUID = 3900526227565046414L;
+
 			@Override
 			public String put(String propertyName, String value) {
 				String result = super.put(propertyName, value);
@@ -305,15 +294,9 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 			return styleClasses;
 		}
 
-		// public ObservableMap<String, String> getStyles() {
-		// return styles;
-		// }
-
 		public Property<String> getStyle(String propertyName) {
 			Property<String> property = new SimpleStringProperty(styles.get(propertyName));
-			property.addListener((change, old, newValue) -> {
-				styles.put(propertyName, newValue);
-			});
+			property.addListener((change, old, newValue) -> styles.put(propertyName, newValue));
 			return property;
 		}
 
