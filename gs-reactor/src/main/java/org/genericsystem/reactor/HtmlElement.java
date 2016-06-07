@@ -1,5 +1,9 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +15,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -28,9 +22,14 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -69,54 +68,24 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		return HtmlDomNode::getChildren;
 	}
 
-	@Override
-	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
-		super.forEach(applyOnModel);
-
-	}
-
-	@Override
-	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		super.forEach(stringExtractor, observableListExtractor, constructor);
-
-	}
-
-	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
 		forEach(stringExtractor, observableListExtractor, CompositeModel::new);
-
 	}
 
-	@Override
-	public <T extends Model> void select(Function<T, ObservableValue<M>> function) {
-		super.select(function);
-
-	}
-
-	@Override
-	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> generic, ModelConstructor<CompositeModel> constructor) {
-		select(stringExtractor, generic, constructor);
-
-	}
-
-	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> generic) {
+	public void select(StringExtractor stringExtractor, Supplier<Generic> generic) {
 		select(stringExtractor, generic, CompositeModel::new);
-
 	}
 
-	public <T extends CompositeModel> void select(Supplier<Generic> generic) {
+	public void select(Supplier<Generic> generic) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generic, CompositeModel::new);
-
 	}
 
-	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Class<?> genericClass) {
+	public void select(StringExtractor stringExtractor, Class<?> genericClass) {
 		super.select(stringExtractor, genericClass, CompositeModel::new);
-
 	}
 
-	public <T extends CompositeModel> void select(Class<?> genericClass) {
+	public void select(Class<?> genericClass) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericClass);
-
 	}
 
 	public void addStyleClass(String styleClass) {
@@ -134,7 +103,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
 		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
-
 	}
 
 	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {

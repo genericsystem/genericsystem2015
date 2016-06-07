@@ -7,15 +7,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -89,7 +89,6 @@ public abstract class Element<M extends Model, N> {
 
 	protected <T> void addSetBinding(Function<N, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
 		bindings.add(Binding.bindSet(applyOnModel, styleClass, applyOnNode));
-
 	}
 
 	// protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableValue<Number>> applyOnModel,
@@ -104,30 +103,24 @@ public abstract class Element<M extends Model, N> {
 	//
 	// }
 
-	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
+	public void forEach(Function<? extends Model, ObservableList<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
-
 	}
 
-	public <T extends CompositeModel> void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.forEach(stringExtractor, observableListExtractor, constructor));
 	}
 
-	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
+	public void select(Function<? extends Model, ObservableValue<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
-
 	}
 
-	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier,
-			ModelConstructor<CompositeModel> constructor) {
+	public void select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.selector(stringExtractor, genericSupplier, constructor));
-
 	}
 
-	public <T extends CompositeModel> void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
 		metaBindings.add(MetaBinding.selector(this, stringExtractor, genericClass, constructor));
-
 	}
 
 	protected N createNode(Object parent) {

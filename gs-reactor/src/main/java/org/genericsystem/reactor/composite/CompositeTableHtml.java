@@ -1,7 +1,7 @@
-package org.genericsystem.reactor.composite.table;
+package org.genericsystem.reactor.composite;
 
 import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.html.HtmlButton;
@@ -10,16 +10,22 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSection;
 
-public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends HtmlSection<M> {
+/**
+ * @author Nicolas Feybesse
+ *
+ * @param <M>
+ */
+public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel> {
 
-	private ObservableListExtractor subObservableListExtractor = ObservableListExtractor.ATTRIBUTES;
+	public CompositeTableHtml(HtmlElement<?, ?> parent) {
+		this(parent, ObservableListExtractor.ATTRIBUTES);
+	}
 
-	public TypeTableHtmlTemplate(HtmlElement<?, ?> parent) {
+	public CompositeTableHtml(HtmlElement<?, ?> parent, ObservableListExtractor subObservableListExtractor) {
 		super(parent);
 		addStyle("display", "flex");
 		addStyle("flex-wrap", "nowrap");
 		addStyle("flex-direction", "column");
-		// bindStyle("color", CompositeModel::getColor);
 		new HtmlSection<CompositeModel>(this) {
 			{
 				addStyle("display", "flex");
@@ -29,24 +35,24 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
-				HtmlH1 h1 = new HtmlH1<CompositeModel>(this) {
+				new HtmlH1<CompositeModel>(this) {
 					{
 						bindStyle("color", "red");
 						bindText(CompositeModel::getString);
 					}
 				};
-				new HtmlButton<CompositeModel>(this) {
-					{
-						setText("red");
-						bindAction(model -> model.getStyleProperty(h1, "color").setValue("red"));
-					}
-				};
-				new HtmlButton<CompositeModel>(this) {
-					{
-						setText("blue");
-						bindAction(model -> model.getStyleProperty(h1, "color").setValue("blue"));
-					}
-				};
+				// new HtmlButton<CompositeModel>(this) {
+				// {
+				// setText("red");
+				// bindAction(model -> model.getStyleProperty(h1, "color").setValue("red"));
+				// }
+				// };
+				// new HtmlButton<CompositeModel>(this) {
+				// {
+				// setText("blue");
+				// bindAction(model -> model.getStyleProperty(h1, "color").setValue("blue"));
+				// }
+				// };
 
 			}
 		};
@@ -55,7 +61,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				addStyle("display", "flex");
 				addStyle("flex-wrap", "nowrap");
 				addStyle("flex-direction", "row");
-				new HtmlSection<M>(this) {
+				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("min-width", "200px");
 						addStyle("background-color", "#ffa5a5");
@@ -75,11 +81,11 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("background-color", "#ffa5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> subObservableListExtractor.apply(gs));
 						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
-				new HtmlSection<M>(this) {
+				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("display", "flex");
 						addStyle("flex-wrap", "nowrap");
@@ -97,14 +103,18 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				addStyle("display", "flex");
 				addStyle("flex-wrap", "nowrap");
 				addStyle("flex-direction", "row");
-				// bindStyle("flex-direction", CompositeModel::getFlexDirection);
-
-				new HtmlSection<M>(this) {
+				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("min-width", "200px");
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
+						new HtmlInputText<InputCompositeModel>(this) {
+							{
+								bindTextBidirectional(InputCompositeModel::getInputString);
+								addStyle("width", "100%");
+							}
+						};
 					}
 				};
 				new HtmlSection<CompositeModel>(this) {
@@ -113,16 +123,15 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "1");
 						addStyle("flex-direction", "row");
-						// addStyle("justify-content", "center");
 						addStyle("overflow", "hidden");
 						addStyle("color", "#ffffff");
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
-						new HtmlInputText<CompositeModel>(this) {
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> subObservableListExtractor.apply(gs), InputCompositeModel::new);
+						new HtmlInputText<InputCompositeModel>(this) {
 							{
-								bindText(CompositeModel::getString);
+								bindTextBidirectional(InputCompositeModel::getInputString);
 								addStyle("width", "100%");
 							}
 						};
@@ -138,8 +147,12 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlButton<CompositeModel>(this) {
+						new HtmlButton<InputCompositeModel>(this) {
 							{
+								bindAction(model -> {
+									model.getGeneric().addInstance(model.getInputString().getValue());
+									model.getInputString().setValue(null);
+								});
 								setText("Add");
 								addStyle("width", "100%");
 							}
@@ -156,7 +169,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 				addStyle("flex-direction", "row");
 				addStyle("overflow", "hidden");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.INSTANCES, CompositeModel::new);
-				new HtmlSection<M>(this) {
+				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("display", "flex");
 						addStyle("flex-wrap", "nowrap");
@@ -168,7 +181,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						bindText(CompositeModel::getString);
-						new HtmlLabel<M>(this);
+						new HtmlLabel<CompositeModel>(this);
 					}
 				};
 				new HtmlSection<CompositeModel>(this) {
@@ -180,7 +193,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("background-color", "#dda5e2");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs));
+						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> subObservableListExtractor.apply(gs));
 						new HtmlSection<CompositeModel>(this) {
 							{
 								addStyle("display", "flex");
@@ -199,7 +212,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						};
 					}
 				};
-				new HtmlSection<M>(this) {
+				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("display", "flex");
 						addStyle("flex-wrap", "nowrap");
@@ -210,7 +223,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("margin-bottom", "1px");
 						addStyle("flex-direction", "column");
 						addStyle("justify-content", "center");
-						new HtmlButton<M>(this) {
+						new HtmlButton<CompositeModel>(this) {
 							{
 								setText("Remove");
 								bindAction(CompositeModel::remove);
@@ -219,24 +232,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						};
 					}
 				};
-
 			}
 		};
-
-	}
-
-	public ObservableListExtractor getSubObservableListExtractor() {
-		return subObservableListExtractor;
-	}
-
-	public TypeTableHtmlTemplate<M> setSubObservableListExtractor(ObservableListExtractor subObservableListExtractor) {
-		this.subObservableListExtractor = subObservableListExtractor;
-		return this;
-	}
-
-	public static class TypeTableHtml<M extends CompositeModel> extends TypeTableHtmlTemplate<M> {
-		public TypeTableHtml(HtmlElement<?, ?> parent) {
-			super(parent);
-		}
 	}
 }
