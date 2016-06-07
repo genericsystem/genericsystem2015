@@ -7,15 +7,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -103,7 +103,7 @@ public abstract class Element<M extends Model, N> {
 	//
 	// }
 
-	public void forEach(Function<? extends Model, ObservableList<M>> applyOnModel) {
+	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.forEach(applyOnModel));
 	}
 
@@ -111,7 +111,7 @@ public abstract class Element<M extends Model, N> {
 		metaBindings.add(MetaBinding.forEach(stringExtractor, observableListExtractor, constructor));
 	}
 
-	public void select(Function<? extends Model, ObservableValue<M>> applyOnModel) {
+	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
 		metaBindings.add(MetaBinding.selector(applyOnModel));
 	}
 
