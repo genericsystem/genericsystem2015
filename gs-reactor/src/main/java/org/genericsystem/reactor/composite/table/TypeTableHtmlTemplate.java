@@ -86,6 +86,7 @@ public abstract class TypeTableHtmlTemplate<M extends CompositeModel> extends Ht
 						addStyle("flex-wrap", "nowrap");
 						addStyle("flex-direction", "column");
 						addStyle("flex", "1");
+						addStyle("padding", "3");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> getSubObservableListExtractor().apply(gs), CompositeModel::new);
 						new HtmlSection<CompositeModel>(this) {
 							{

@@ -1,6 +1,6 @@
-package org.genericsystem.cdi;
+package org.genericsystem.spring;
 
-import javax.enterprise.context.ApplicationScoped;
+import org.springframework.stereotype.Component;
 
 /**
  * Persistence is not activated by default. If you want to persist, you have to set a specialized mock persistentDirectoryProvider in your project :
@@ -18,7 +18,8 @@ import javax.enterprise.context.ApplicationScoped;
  * @author Nicolas Feybesse
  * 
  */
-@ApplicationScoped
+// @ApplicationScoped
+@Component
 public class PersistentDirectoryProvider {
 	public static final String DEFAULT_DIRECTORY_PATH = System.getenv("HOME") + "/test/genericsystem";
 
