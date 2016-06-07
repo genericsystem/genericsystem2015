@@ -7,6 +7,9 @@ import javax.enterprise.context.ApplicationScoped;
  * 
  * @Specializes <pre>
  * public class MockPersistentDirectoryProvider extends PersistentDirectoryProvider {
+ * 	public String getEngineValue() {
+ * 		return Statics.ENGINE_VALUE;
+ * 	}
  * 
  * 	&#064;Override
  * 	public String getDirectoryPath() {

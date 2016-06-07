@@ -8,7 +8,7 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlSection;
 
-public abstract class CompositeSectionHtml<M extends CompositeModel> extends HtmlSection<M> {
+public abstract class CompositeSectionHtml extends HtmlSection<CompositeModel> {
 
 	private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;
 	private ObservableListExtractor observableListExtractor = ObservableListExtractor.INSTANCES;
@@ -56,7 +56,7 @@ public abstract class CompositeSectionHtml<M extends CompositeModel> extends Htm
 		this.modelConstructor = modelConstructor;
 	}
 
-	public static abstract class TitleCompositeSectionHtml<M extends CompositeModel> extends HtmlSection<M> {
+	public static abstract class TitleCompositeSectionHtml extends HtmlSection<CompositeModel> {
 		private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;
 		private ObservableListExtractor observableListExtractor = ObservableListExtractor.INSTANCES;
 		private ModelConstructor<CompositeModel> modelConstructor = CompositeModel::new;

@@ -11,12 +11,12 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
-import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.composite.CompositeSectionHtml.TitleCompositeSectionHtml;
-import org.genericsystem.reactor.composite.CompositeSelectHtmlTemplate.CompositeSelectHtml;
-import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
+import org.genericsystem.reactor.composite.CompositeSelectHtml;
+import org.genericsystem.reactor.composite.CompositeTableHtml;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlDiv;
 
@@ -38,27 +38,36 @@ public class AppHtml extends HtmlApp<AppModel> {
 				addStyle("flex-wrap", "nowrap");
 				addStyle("justify-content", "center");
 				new AppHeaderHtml(this);
-				new CompositeSelectHtml<CompositeModel>(this) {
+				new CompositeSelectHtml(this) {
 					{
 						select(Color.class);
 						setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
 					}
 				};
 
-				new TitleCompositeSectionHtml<CompositeModel>(this) {
+				new TitleCompositeSectionHtml(this) {
 					{
 						select(StringExtractor.MANAGEMENT, Car.class);
 					}
 				};
 
-				new TypeTableHtml<CompositeModel>(this) {
+				new CompositeTableHtml(this, ObservableListExtractor.from(Power.class, CarColor.class)) {
 					{
-						select(StringExtractor.MANAGEMENT, Car.class);
-						setSubObservableListExtractor(ObservableListExtractor.from(Power.class, CarColor.class));
+						select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
 					}
 				};
 
-				// new ColumnTitleTypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setSubObservableListExtractor(ObservableListExtractor.from(Power.class, CarColor.class));
+				new CompositeTableHtml(this, ObservableListExtractor.from()) {
+					{
+						select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
+					}
+				};
+				new CompositeTableHtml(this) {
+					{
+						select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
+					}
+				};
+
 				new AppFooterHtml(this);
 			}
 		};

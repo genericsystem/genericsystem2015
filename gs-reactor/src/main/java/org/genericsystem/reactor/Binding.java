@@ -1,13 +1,12 @@
 package org.genericsystem.reactor;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -64,25 +63,25 @@ public class Binding<N, X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.actionBinder());
 	}
 
-	public static <N, M, W> Binding<N, ObservableValue<Boolean>, ObservableSet<W>> bindObservableSet(Function<M, ObservableValue<Boolean>> applyOnModel,
-			W styleClass, Function<N, ObservableSet<W>> applyOnNode) {
+	public static <N, M, W> Binding<N, ObservableValue<Boolean>, Set<W>> bindSet(Function<M, ObservableValue<Boolean>> applyOnModel, W styleClass,
+			Function<N, Set<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder(styleClass));
 	}
 
-	public static <N, M, W> Binding<N, ObservableValue<Number>, ObservableMap<String, String>> bindObservableMap(
-			Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value, Function<N, ObservableMap<String, String>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder(attr, value));
-	}
+	// public static <N, M, W> Binding<N, ObservableValue<Number>, ObservableMap<String, String>> bindObservableMap(
+	// Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value, Function<N, ObservableMap<String, String>> applyOnNode) {
+	// return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder(attr, value));
+	// }
+	//
+	// public static <N, M, W> Binding<N, ObservableMap<String, String>, ObservableMap<String, String>> bindObservableMap(
+	// Function<M, ObservableMap<String, String>> applyOnModel, Function<N, ObservableMap<String, String>> applyOnNode) {
+	// return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
+	// }
 
-	public static <N, M, W> Binding<N, ObservableMap<String, String>, ObservableMap<String, String>> bindObservableMap(
-			Function<M, ObservableMap<String, String>> applyOnModel, Function<N, ObservableMap<String, String>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
-	}
-
-	public static <N, M> Binding<N, ObservableValue<String>, ObservableSet<String>> bindObservableSetToObservableValue(
-			Function<M, ObservableValue<String>> applyOnModel, Function<N, ObservableSet<String>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder());
-	}
+	// public static <N, M> Binding<N, ObservableValue<String>, ObservableSet<String>> bindObservableSetToObservableValue(
+	// Function<M, ObservableValue<String>> applyOnModel, Function<N, ObservableSet<String>> applyOnNode) {
+	// return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder());
+	// }
 
 	public static <N, M, W> Binding<N, ObservableList<W>, Property<ObservableList<W>>> bindObservableList(Function<M, ObservableList<W>> applyOnModel,
 			Function<N, Property<ObservableList<W>>> applyOnNode) {

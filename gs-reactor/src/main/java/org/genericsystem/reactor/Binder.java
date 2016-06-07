@@ -1,15 +1,13 @@
 package org.genericsystem.reactor;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 
 /**
@@ -78,23 +76,23 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N> Binder<N, ObservableValue<String>, ObservableSet<String>> observableSetBinder() {
-		return new Binder<N, ObservableValue<String>, ObservableSet<String>>() {
-			@Override
-			public void init(ObservableSet<String> nodeResult, ObservableValue<String> modelResult) {
-				nodeResult.add(modelResult.getValue());
-				modelResult.addListener((o, ov, nv) -> {
-					nodeResult.remove(ov);
-					nodeResult.add(nv);
-				});
-			}
-		};
-	}
+	// public static <N> Binder<N, ObservableValue<String>, ObservableSet<String>> observableSetBinder() {
+	// return new Binder<N, ObservableValue<String>, ObservableSet<String>>() {
+	// @Override
+	// public void init(ObservableSet<String> nodeResult, ObservableValue<String> modelResult) {
+	// nodeResult.add(modelResult.getValue());
+	// modelResult.addListener((o, ov, nv) -> {
+	// nodeResult.remove(ov);
+	// nodeResult.add(nv);
+	// });
+	// }
+	// };
+	// }
 
-	public static <N, W> Binder<N, ObservableValue<Boolean>, ObservableSet<W>> observableSetBinder(W styleClass) {
-		return new Binder<N, ObservableValue<Boolean>, ObservableSet<W>>() {
+	public static <N, W> Binder<N, ObservableValue<Boolean>, Set<W>> observableSetBinder(W styleClass) {
+		return new Binder<N, ObservableValue<Boolean>, Set<W>>() {
 			@Override
-			public void init(ObservableSet<W> nodeResult, ObservableValue<Boolean> modelResult) {
+			public void init(Set<W> nodeResult, ObservableValue<Boolean> modelResult) {
 				Consumer<Boolean> consumer = bool -> {
 					if (bool)
 						nodeResult.add(styleClass);
@@ -107,28 +105,28 @@ public interface Binder<N, X, Y> {
 		};
 	}
 
-	public static <N> Binder<N, ObservableValue<Number>, ObservableMap<String, String>> observableMapBinder(String attr, String[] value) {
-		return new Binder<N, ObservableValue<Number>, ObservableMap<String, String>>() {
-			@Override
-			public void init(ObservableMap<String, String> nodeResult, ObservableValue<Number> modelResult) {
-				Consumer<Number> consumer = number -> {
-
-					if (number.intValue() < value.length)
-						nodeResult.put(attr, value[number.intValue()]);
-				};
-				consumer.accept(modelResult.getValue());
-				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
-			}
-		};
-	}
-
-	public static <N> Binder<N, ObservableMap<String, String>, ObservableMap<String, String>> observableMapBinder() {
-		return new Binder<N, ObservableMap<String, String>, ObservableMap<String, String>>() {
-			@Override
-			public void init(ObservableMap<String, String> nodeResult, ObservableMap<String, String> modelResult) {
-				Bindings.bindContent(nodeResult, modelResult);
-			}
-		};
-	}
+	// public static <N> Binder<N, ObservableValue<Number>, ObservableMap<String, String>> observableMapBinder(String attr, String[] value) {
+	// return new Binder<N, ObservableValue<Number>, ObservableMap<String, String>>() {
+	// @Override
+	// public void init(ObservableMap<String, String> nodeResult, ObservableValue<Number> modelResult) {
+	// Consumer<Number> consumer = number -> {
+	//
+	// if (number.intValue() < value.length)
+	// nodeResult.put(attr, value[number.intValue()]);
+	// };
+	// consumer.accept(modelResult.getValue());
+	// modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
+	// }
+	// };
+	// }
+	//
+	// public static <N> Binder<N, ObservableMap<String, String>, ObservableMap<String, String>> observableMapBinder() {
+	// return new Binder<N, ObservableMap<String, String>, ObservableMap<String, String>>() {
+	// @Override
+	// public void init(ObservableMap<String, String> nodeResult, ObservableMap<String, String> modelResult) {
+	// Bindings.bindContent(nodeResult, modelResult);
+	// }
+	// };
+	// }
 
 }
