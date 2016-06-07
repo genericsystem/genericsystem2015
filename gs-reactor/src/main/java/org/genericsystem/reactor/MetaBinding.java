@@ -1,18 +1,8 @@
 package org.genericsystem.reactor;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import javafx.beans.binding.ListBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -39,7 +29,8 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 		System.out.println("What a surprize => could you warn Nicolas ?");
 	};
 
-	public static <N, M extends Model, SUBMODEL extends Model> MetaBinding<N, ObservableList<SUBMODEL>> forEach(Function<M, ObservableList<SUBMODEL>> applyOnModel) {
+	public static <N, M extends Model, SUBMODEL extends Model> MetaBinding<N, ObservableList<SUBMODEL>> forEach(
+			Function<M, ObservableList<SUBMODEL>> applyOnModel) {
 		return new MetaBinding<>(model -> applyOnModel.apply((M) model), MetaBinder.<N, SUBMODEL> foreachBinder());
 	}
 
@@ -48,34 +39,5 @@ public class MetaBinding<N, T extends ObservableList<?>> {
 	// ModelConstructor<CompositeModel> constructor) {
 	// return forEach(model -> ((M) model).getBoundObservableList(applyOnModel, stringExtractor, observableListExtractor, constructor));
 	// }
-
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, observableListExtractor, constructor));
-	}
-
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, genericSupplier, constructor));
-	}
-
-	public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		return forEach(model -> ((CompositeModel) model).getObservableList(element, stringExtractor, genericClass, constructor));
-	}
-
-	public static <N, M extends Model, T extends Model> MetaBinding<N, ObservableList<T>> selector(Function<M, ObservableValue<T>> applyOnModel) {
-		return forEach(model -> {
-			ObservableValue<T> observableValue = applyOnModel.apply((M) model);
-			return new ListBinding<T>() {
-				{
-					bind(observableValue);
-				}
-
-				@Override
-				protected ObservableList<T> computeValue() {
-					T value = observableValue.getValue();
-					return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
-				}
-			};
-		});
-	}
 
 }

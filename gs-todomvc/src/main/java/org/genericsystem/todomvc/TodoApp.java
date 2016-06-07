@@ -62,6 +62,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 										addStyleClass("todo-list");
 										new HtmlLi<Todo>(this) {
 											{
+
 												forEach(TodoList::getFiltered);
 												bindOptionalStyleClass(Todo::getCompleted, "completed");
 												new HtmlDiv<Todo>(this) {
