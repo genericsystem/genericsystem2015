@@ -7,6 +7,10 @@ import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 
+/**
+ * @author Nicolas Feybesse
+ *
+ */
 public abstract class CompositeSelectHtml extends HtmlSelect<CompositeModel> {
 
 	private StringExtractor stringExtractor = StringExtractor.SIMPLE_CLASS_EXTRACTOR;

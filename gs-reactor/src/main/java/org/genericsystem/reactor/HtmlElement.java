@@ -1,7 +1,6 @@
 package org.genericsystem.reactor;
 
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.AbstractList;
@@ -42,14 +41,18 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 	private static final String ADD = "A";
 	private static final String UPDATE = "U";
 	private static final String REMOVE = "R";
+	private static final String UPDATE_TEXT = "UT";
+	private static final String ADD_STYLECLASS = "AC";
+	private static final String REMOVE_STYLECLASS = "RC";
+	private static final String ADD_STYLE = "AS";
+	private static final String REMOVE_STYLE = "RS";
 
 	private static final String PARENT_ID = "parentId";
 	public static final String ID = "nodeId";
 	private static final String NEXT_ID = "nextId";
-	private static final String STYLE = "style";
-	private static final String STYLECLASSES = "styleClasses";
+	private static final String STYLE_PROPERTY = "styleProperty";
+	private static final String STYLE_VALUE = "styleValue";
 	private static final String STYLECLASS = "styleClass";
-	private static final String REMOVEDSTYLECLASS = "removedStyleClass";
 	private static final String TEXT_CONTENT = "textContent";
 	private static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
@@ -81,7 +84,7 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass) {
-		super.select(stringExtractor, genericClass, CompositeModel::new);
+		select(stringExtractor, genericClass, CompositeModel::new);
 	}
 
 	public void select(Class<?> genericClass) {
@@ -98,7 +101,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	public void setText(String text) {
 		addBoot(HtmlDomNode::getText, text);
-
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
@@ -117,9 +119,16 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		bindStyle(propertyName, model -> ((CompositeModel) model).getObservableStyle(this, propertyName, initialValue));
 	}
 
+	public void bindStyle(String propertyName) {
+		bindStyle(propertyName, model -> ((CompositeModel) model).getStyleProperty(this, propertyName));
+	}
+
 	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
 		addSetBinding(HtmlDomNode::getStyleClasses, function, text);
 	}
+
+	@Override
+	protected abstract NODE createNode(Object parent);
 
 	public class HtmlDomNode {
 
@@ -134,16 +143,20 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 			@Override
 			public boolean add(String styleClass) {
 				boolean result = super.add(styleClass);
-				if (result)
-					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLECLASS, styleClass));
+				if (result) {
+					System.out.println(new JsonObject().put(MSG_TYPE, ADD_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass).encodePrettily());
+					sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass));
+				}
 				return result;
 			};
 
 			@Override
 			public boolean remove(Object styleClass) {
 				boolean result = super.remove(styleClass);
-				if (result)
-					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(REMOVEDSTYLECLASS, styleClass));
+				if (result) {
+					System.out.println(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass).encodePrettily());
+					sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass));
+				}
 				return result;
 			};
 		};
@@ -158,7 +171,10 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 				if (!Objects.equals(value, result)) {
 					JsonObject mapJS = new JsonObject();
 					mapJS.put(propertyName, value);
-					sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
+					if (value != null && !value.isEmpty())
+						sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName).put(STYLE_VALUE, value));
+					else
+						sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName));
 				}
 				return result;
 			}
@@ -167,42 +183,10 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		public HtmlDomNode(String tag) {
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 			this.tag = tag;
-		}
-
-		public void initListener() {
-
-			this.text.addListener((o, oldValue, newValue) -> {
-				System.out.println("NEWVALUE : " + new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue).encodePrettily());
-				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(TEXT_CONTENT, newValue));
+			text.addListener((c, o, n) -> {
+				System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : "").encodePrettily());
+				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : ""));
 			});
-
-			// this.styleClasses.addListener((SetChangeListener<String>) change -> {
-			//
-			// JsonObject jsonMessage = new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id);
-			//
-			// if (change.getElementAdded() != null) {
-			// jsonMessage.put(STYLECLASS, change.getElementAdded());
-			// } else {
-			// jsonMessage.put(REMOVEDSTYLECLASS, change.getElementRemoved());
-			// }
-			// sendMessage(jsonMessage);
-			//
-			// });
-
-			// this.styles.addListener((MapChangeListener<String, String>) change -> {
-			// // JsonObject mapJS = new JsonObject();
-			// // String value = "";
-			// // if (change.getValueAdded() != null) {
-			// // value = change.getValueAdded();
-			// // }
-			// // mapJS.put(change.getKey(), value);
-			// // sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
-			//
-			// JsonObject mapJS = new JsonObject();
-			// styles.forEach((key, value) -> mapJS.put(key, value));
-			// sendMessage(new JsonObject().put(MSG_TYPE, UPDATE).put(ID, id).put(STYLE, mapJS));
-			// System.out.println("CHANGE IN STYLES");
-			// });
 		}
 
 		protected List<HtmlDomNode> getChildren() {
@@ -227,6 +211,7 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 				JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
 				childNode.fillJson(HtmlDomNode.this, jsonObj);
 				jsonObj.put(NEXT_ID, index < size() ? get(index).id : null);
+				System.out.println(jsonObj.encodePrettily());
 				sendMessage(jsonObj);
 				internal.add(index, childNode);
 			}
@@ -241,7 +226,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		};
 
 		public void sendMessage(JsonObject jsonObj) {
-			// Buffer littleBuffer = new BufferFactoryImpl().buffer(Buffer.buffer().appendString(jsonObj.encode()).getByteBuf().order(ByteOrder.BIG_ENDIAN));
 			getWebSocket().writeFinalTextFrame(jsonObj.encode());
 		}
 
@@ -249,13 +233,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 			jsonObj.put(PARENT_ID, parentNodeJs.getId());
 			jsonObj.put(ID, id);
 			jsonObj.put(TAG_HTML, tag);
-			jsonObj.put(TEXT_CONTENT, text.getValue());
-			JsonArray arrayJS = new JsonArray();
-			styleClasses.forEach(arrayJS::add);
-			jsonObj.put(STYLECLASSES, arrayJS);
-			JsonObject mapJS = new JsonObject();
-			styles.forEach((key, value) -> mapJS.put(key, value));
-			jsonObj.put(STYLE, mapJS);
 		}
 
 		public Set<String> getStyleClasses() {
@@ -264,7 +241,7 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 		public Property<String> getStyle(String propertyName) {
 			Property<String> property = new SimpleStringProperty(styles.get(propertyName));
-			property.addListener((change, old, newValue) -> styles.put(propertyName, newValue));
+			property.addListener((c, o, n) -> styles.put(propertyName, n));
 			return property;
 		}
 

@@ -11,33 +11,33 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
+import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.composite.CompositeSectionHtml.TitleCompositeSectionHtml;
+import org.genericsystem.reactor.composite.CompositeSectionHtml.ColorCompositeSectionHtml;
 import org.genericsystem.reactor.composite.CompositeSelectHtml;
 import org.genericsystem.reactor.composite.CompositeTableHtml;
+import org.genericsystem.reactor.composite.EngineModel;
+import org.genericsystem.reactor.flex.FlexColumn;
+import org.genericsystem.reactor.flex.FlexRow.H1FlexRow;
+import org.genericsystem.reactor.flex.FlexRow.SaveCancelFlexRow;
 import org.genericsystem.reactor.html.HtmlApp;
-import org.genericsystem.reactor.html.HtmlDiv;
 
-public class AppHtml extends HtmlApp<AppModel> {
+public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/apphtml", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new HtmlDiv<AppModel>(this) {
+		new FlexColumn<CompositeModel>(this) {
 			{
-				addStyle("display", "flex");
-				addStyle("flex-direction", "column");
-				addStyle("flex-wrap", "nowrap");
 				addStyle("justify-content", "center");
-				new AppHeaderHtml(this);
 				new CompositeSelectHtml(this) {
 					{
 						select(Color.class);
@@ -45,30 +45,12 @@ public class AppHtml extends HtmlApp<AppModel> {
 					}
 				};
 
-				new TitleCompositeSectionHtml(this) {
-					{
-						select(StringExtractor.MANAGEMENT, Car.class);
-					}
-				};
-
-				new CompositeTableHtml(this, ObservableListExtractor.from(Power.class, CarColor.class)) {
-					{
-						select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
-					}
-				};
-
-				new CompositeTableHtml(this, ObservableListExtractor.from()) {
-					{
-						select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
-					}
-				};
-				new CompositeTableHtml(this) {
-					{
-						select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
-					}
-				};
-
-				new AppFooterHtml(this);
+				new ColorCompositeSectionHtml<>(this).select(StringExtractor.MANAGEMENT, Color.class);
+				new H1FlexRow(this, "Reactive System Live Demo");
+				new CompositeTableHtml(this, ObservableListExtractor.from(Power.class, CarColor.class)).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+				new CompositeTableHtml(this, ObservableListExtractor.from()).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
+				new CompositeTableHtml(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
+				new SaveCancelFlexRow(this).addStyleClass("gsfooter");
 			}
 		};
 	}
@@ -101,4 +83,5 @@ public class AppHtml extends HtmlApp<AppModel> {
 		car.setInstance("Peugeot 106 GTI").setHolder(power, 120);
 		car.setInstance("Peugeot 206 S16").setHolder(power, 136);
 	}
+
 }

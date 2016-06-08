@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.Property;
@@ -54,6 +53,7 @@ public class CompositeModel extends Model {
 		return generics[0];
 	}
 
+	// TODO KK no cache ?
 	public ObservableValue<String> getString() {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
 	}
@@ -108,20 +108,12 @@ public class CompositeModel extends Model {
 		M build(Generic[] generics, StringExtractor stringExtractor);
 	}
 
-	private Set<ObservableList<CompositeModel>> observableLists = new HashSet<ObservableList<CompositeModel>>();
+	private Set<ObservableList<?>> observableLists = new HashSet<ObservableList<?>>();
 
-	public <M extends CompositeModel> ObservableList<CompositeModel> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		ObservableList<CompositeModel> observableList = new Transformation2<Generic, CompositeModel>(observableListExtractor.apply(generics), generic -> constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
+	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics), generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
 		observableLists.add(observableList);// Prevents garbaging
 		return observableList;
-	}
-
-	public <M extends CompositeModel> ObservableList<CompositeModel> getObservableList(StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		return getObservableList(stringExtractor, gs -> FXCollections.singletonObservableList(genericSupplier.get()), constructor);
-	}
-
-	public <M extends CompositeModel> ObservableList<CompositeModel> getObservableList(Element<?, ?> element, StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		return getObservableList(stringExtractor, () -> getGenerics()[0].getRoot().find(genericClass), constructor);
 	}
 
 	private Map<Element<?, ?>, Map<String, Property<String>>> observableStyles = new HashMap<Element<?, ?>, Map<String, Property<String>>>() {

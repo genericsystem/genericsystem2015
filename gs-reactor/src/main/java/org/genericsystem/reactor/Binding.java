@@ -68,21 +68,6 @@ public class Binding<N, X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder(styleClass));
 	}
 
-	// public static <N, M, W> Binding<N, ObservableValue<Number>, ObservableMap<String, String>> bindObservableMap(
-	// Function<M, ObservableValue<Number>> applyOnModel, String attr, String[] value, Function<N, ObservableMap<String, String>> applyOnNode) {
-	// return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder(attr, value));
-	// }
-	//
-	// public static <N, M, W> Binding<N, ObservableMap<String, String>, ObservableMap<String, String>> bindObservableMap(
-	// Function<M, ObservableMap<String, String>> applyOnModel, Function<N, ObservableMap<String, String>> applyOnNode) {
-	// return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
-	// }
-
-	// public static <N, M> Binding<N, ObservableValue<String>, ObservableSet<String>> bindObservableSetToObservableValue(
-	// Function<M, ObservableValue<String>> applyOnModel, Function<N, ObservableSet<String>> applyOnNode) {
-	// return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder());
-	// }
-
 	public static <N, M, W> Binding<N, ObservableList<W>, Property<ObservableList<W>>> bindObservableList(Function<M, ObservableList<W>> applyOnModel,
 			Function<N, Property<ObservableList<W>>> applyOnNode) {
 		return Binding.<N, M, ObservableList<W>, Property<ObservableList<W>>> bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder());

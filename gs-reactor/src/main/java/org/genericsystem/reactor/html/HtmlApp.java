@@ -1,12 +1,12 @@
 package org.genericsystem.reactor.html;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
+
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
@@ -34,5 +34,10 @@ public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlDomNod
 
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
+	}
+
+	@Override
+	protected HtmlDomNode createNode(Object parent) {
+		throw new UnsupportedOperationException();
 	}
 }

@@ -4,6 +4,8 @@ import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.flex.FlexColumn;
+import org.genericsystem.reactor.flex.FlexRow;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlInputText;
@@ -15,7 +17,7 @@ import org.genericsystem.reactor.html.HtmlSection;
  *
  * @param <M>
  */
-public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel> {
+public class CompositeTableHtml extends FlexColumn<InputCompositeModel> {
 
 	public CompositeTableHtml(HtmlElement<?, ?> parent) {
 		this(parent, ObservableListExtractor.ATTRIBUTES);
@@ -23,14 +25,8 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 
 	public CompositeTableHtml(HtmlElement<?, ?> parent, ObservableListExtractor subObservableListExtractor) {
 		super(parent);
-		addStyle("display", "flex");
-		addStyle("flex-wrap", "nowrap");
-		addStyle("flex-direction", "column");
-		new HtmlSection<CompositeModel>(this) {
+		new FlexRow<CompositeModel>(this) {
 			{
-				addStyle("display", "flex");
-				addStyle("flex-direction", "row");
-				addStyle("flex-wrap", "nowrap");
 				addStyle("justify-content", "center");
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
@@ -56,11 +52,8 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 
 			}
 		};
-		new HtmlSection<CompositeModel>(this) {
+		new FlexRow<CompositeModel>(this) {
 			{
-				addStyle("display", "flex");
-				addStyle("flex-wrap", "nowrap");
-				addStyle("flex-direction", "row");
 				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("min-width", "200px");
@@ -69,12 +62,9 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 						addStyle("margin-bottom", "1px");
 					}
 				};
-				new HtmlSection<CompositeModel>(this) {
+				new FlexRow<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "1");
-						addStyle("flex-direction", "row");
 						addStyle("justify-content", "center");
 						addStyle("overflow", "hidden");
 						addStyle("color", "#ffffff");
@@ -85,10 +75,8 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
-				new HtmlSection<CompositeModel>(this) {
+				new FlexRow<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
 						addStyle("background-color", "#ffa5a5");
@@ -98,11 +86,8 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 				};
 			}
 		};
-		new HtmlSection<CompositeModel>(this) {
+		new FlexRow<CompositeModel>(this) {
 			{
-				addStyle("display", "flex");
-				addStyle("flex-wrap", "nowrap");
-				addStyle("flex-direction", "row");
 				new HtmlSection<CompositeModel>(this) {
 					{
 						addStyle("min-width", "200px");
@@ -117,12 +102,9 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 						};
 					}
 				};
-				new HtmlSection<CompositeModel>(this) {
+				new FlexRow<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "1");
-						addStyle("flex-direction", "row");
 						addStyle("overflow", "hidden");
 						addStyle("color", "#ffffff");
 						addStyle("background-color", "#dda5a5");
@@ -138,10 +120,8 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 
 					}
 				};
-				new HtmlSection<CompositeModel>(this) {
+				new FlexRow<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
 						addStyle("background-color", "#dda5a5");
@@ -162,19 +142,13 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 			}
 		};
 
-		new HtmlSection<CompositeModel>(this) {
+		new FlexRow<CompositeModel>(this) {
 			{
-				addStyle("display", "flex");
-				addStyle("flex-wrap", "nowrap");
-				addStyle("flex-direction", "row");
 				addStyle("overflow", "hidden");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.INSTANCES, CompositeModel::new);
-				new HtmlSection<CompositeModel>(this) {
+				new FlexColumn<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
-						addStyle("flex-direction", "column");
 						addStyle("justify-content", "center");
 						addStyle("min-width", "200px");
 						addStyle("background-color", "#bba5ff");
@@ -184,26 +158,19 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 						new HtmlLabel<CompositeModel>(this);
 					}
 				};
-				new HtmlSection<CompositeModel>(this) {
+				new FlexColumn<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
-						addStyle("flex-direction", "column");
 						addStyle("flex", "1");
 						addStyle("background-color", "#dda5e2");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> subObservableListExtractor.apply(gs));
-						new HtmlSection<CompositeModel>(this) {
+						new FlexRow<CompositeModel>(this) {
 							{
-								addStyle("display", "flex");
 								addStyle("flex", "1");
-								addStyle("flex-direction", "row");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
-								new HtmlSection<CompositeModel>(this) {
+								new FlexColumn<CompositeModel>(this) {
 									{
-										addStyle("display", "flex");
-										addStyle("flex-direction", "column");
 										addStyle("justify-content", "center");
 										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 									}
@@ -212,10 +179,8 @@ public abstract class CompositeTableHtml extends HtmlSection<InputCompositeModel
 						};
 					}
 				};
-				new HtmlSection<CompositeModel>(this) {
+				new FlexRow<CompositeModel>(this) {
 					{
-						addStyle("display", "flex");
-						addStyle("flex-wrap", "nowrap");
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
 						addStyle("background-color", "#dda5e2");
