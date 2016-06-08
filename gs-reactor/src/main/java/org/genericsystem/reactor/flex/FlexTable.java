@@ -39,7 +39,7 @@ public class FlexTable extends FlexElement<InputCompositeModel> {
 		};
 		new FlexElement<CompositeModel>(this, FlexTag.SECTION) {
 			{
-				new FlexElement<CompositeModel>(this, FlexTag.HEADER, FlexDirection.COLUMN) {
+				new FlexElement<CompositeModel>(this, FlexTag.HEADER) {
 					{
 						addStyle("flex", "0");
 						addStyle("color", "#ffffff");
