@@ -13,7 +13,6 @@ public class InjectionTest extends AbstractTest {
 		assertNotNull(engine);
 		assertNotNull(engine.getCurrentCache());
 		assertNotNull(cacheProvider);
-		assertNotNull(engine.find(Color.class));
 	}
 
 	@Test
