@@ -10,14 +10,14 @@ import org.genericsystem.reactor.html.HtmlH1;
 public class FlexElement<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	public FlexElement(HtmlElement<?, ?> parent, FlexTag tag) {
-		this(parent, tag, FlexDirection.COLUMN);
+		this(parent, tag, FlexDirection.ROW);
 	}
 
 	public FlexElement(HtmlElement<?, ?> parent, FlexTag tag, FlexDirection direction) {
 		super(parent, tag.toString(), HtmlDomNode.class);
 		addStyle("display", "flex");
 		addStyle("flex-direction", direction.toString());
-		// addStyle("flex-wrap", "nowrap");
+		addStyle("flex-wrap", "nowrap");
 	}
 
 	@Override

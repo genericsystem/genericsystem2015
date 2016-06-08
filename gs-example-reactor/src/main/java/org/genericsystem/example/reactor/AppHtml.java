@@ -15,6 +15,7 @@ import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.composite.CompositeSelect;
 import org.genericsystem.reactor.composite.EngineModel;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexElement;
 import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.flex.FlexTag;
@@ -34,7 +35,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexElement<CompositeModel>(this, FlexTag.SECTION) {
+		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
 				new CompositeSelect<CompositeModel>(this) {
