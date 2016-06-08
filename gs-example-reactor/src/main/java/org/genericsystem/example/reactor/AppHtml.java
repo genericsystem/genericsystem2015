@@ -15,13 +15,13 @@ import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.composite.SaveCancelFlexRow;
 import org.genericsystem.reactor.composite.CompositeSectionHtml.ColorCompositeSectionHtml;
 import org.genericsystem.reactor.composite.CompositeSelectHtml;
 import org.genericsystem.reactor.composite.CompositeTableHtml;
-import org.genericsystem.reactor.composite.H1FlexRow;
 import org.genericsystem.reactor.composite.EngineModel;
 import org.genericsystem.reactor.flex.FlexColumn;
+import org.genericsystem.reactor.flex.FlexRow.H1FlexRow;
+import org.genericsystem.reactor.flex.FlexRow.SaveCancelFlexRow;
 import org.genericsystem.reactor.html.HtmlApp;
 
 public class AppHtml extends HtmlApp<EngineModel> {
