@@ -10,17 +10,17 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -53,6 +53,7 @@ public class CompositeModel extends Model {
 		return generics[0];
 	}
 
+	// TODO KK no cache ?
 	public ObservableValue<String> getString() {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
 	}
@@ -109,10 +110,8 @@ public class CompositeModel extends Model {
 
 	private Set<ObservableList<?>> observableLists = new HashSet<ObservableList<?>>();
 
-	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics),
-				generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
+	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics), generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
 		observableLists.add(observableList);// Prevents garbaging
 		return observableList;
 	}

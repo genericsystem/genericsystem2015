@@ -1,5 +1,8 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,14 +14,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -28,6 +23,12 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -116,6 +117,10 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	public void bindStyle(String propertyName, String initialValue) {
 		bindStyle(propertyName, model -> ((CompositeModel) model).getObservableStyle(this, propertyName, initialValue));
+	}
+
+	public void bindStyle(String propertyName) {
+		bindStyle(propertyName, model -> ((CompositeModel) model).getStyleProperty(this, propertyName));
 	}
 
 	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
