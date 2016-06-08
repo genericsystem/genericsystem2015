@@ -61,6 +61,7 @@ public class FlexTable extends FlexElement<InputCompositeModel> {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
+						addStyle("overflow", "hidden");
 						new FlexElement<InputCompositeModel>(this, FlexTag.SECTION) {
 							{
 								addStyle("flex", "1");
@@ -192,7 +193,6 @@ public class FlexTable extends FlexElement<InputCompositeModel> {
 
 		new FlexElement<CompositeModel>(this, FlexTag.SECTION) {
 			{
-
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES, CompositeModel::new);
 				new FlexElement<CompositeModel>(this, FlexTag.HEADER, FlexDirection.COLUMN) {
 					{
