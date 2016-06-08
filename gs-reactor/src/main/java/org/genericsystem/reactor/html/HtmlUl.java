@@ -11,12 +11,12 @@ import org.genericsystem.reactor.Model;
 public class HtmlUl<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	public HtmlUl(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "ul", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("ul");
+		return new HtmlDomNode();
 	}
 
 }

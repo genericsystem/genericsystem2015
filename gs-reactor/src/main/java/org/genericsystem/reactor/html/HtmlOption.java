@@ -13,12 +13,12 @@ import org.genericsystem.reactor.Model;
 public class HtmlOption<M extends Model> extends HtmlElement<M, ActionHtmlNode> {
 
 	public HtmlOption(HtmlElement<?, ?> parent) {
-		super(parent, ActionHtmlNode.class);
+		super(parent, "option", ActionHtmlNode.class);
 	}
 
 	@Override
 	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode("option");
+		return new ActionHtmlNode();
 	}
 
 	public HtmlOption<M> bindAction(Consumer<M> applyOnModel) {

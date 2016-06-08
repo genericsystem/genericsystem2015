@@ -64,16 +64,7 @@ public class ModelContext {
 	}
 
 	public <T> Supplier<T> applyOnModel(Function<Model, T> methodReference) {
-		return () -> {
-			ModelContext modelContext_ = this;
-			String s = "/" + modelContext_.getModel() + "/";
-			try {
-				return methodReference.apply(modelContext_.getModel());
-			} catch (ClassCastException ignore) {
-				return methodReference.apply(modelContext_.getModel());
-				// throw new IllegalStateException("Unable to resolve a method reference : " + methodReference + " on stack : " + s);
-			}
-		};
+		return () -> methodReference.apply(this.getModel());
 	}
 
 	public void destroy() {

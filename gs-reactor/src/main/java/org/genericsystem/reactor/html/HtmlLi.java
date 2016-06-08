@@ -11,11 +11,11 @@ import org.genericsystem.reactor.Model;
 public class HtmlLi<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	public HtmlLi(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "li", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("li");
+		return new HtmlDomNode();
 	}
 }

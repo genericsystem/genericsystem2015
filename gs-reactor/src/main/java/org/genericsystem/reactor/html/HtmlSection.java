@@ -11,11 +11,11 @@ import org.genericsystem.reactor.Model;
 public class HtmlSection<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	public HtmlSection(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "section", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("section");
+		return new HtmlDomNode();
 	}
 }

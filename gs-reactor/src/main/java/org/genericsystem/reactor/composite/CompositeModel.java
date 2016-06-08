@@ -10,17 +10,17 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -38,7 +38,7 @@ public class CompositeModel extends Model {
 		this.stringExtractor = stringExtractor;
 	}
 
-	Generic[] getGenerics() {
+	public Generic[] getGenerics() {
 		return generics;
 	}
 
@@ -74,14 +74,32 @@ public class CompositeModel extends Model {
 		}
 
 		public static final ObservableListExtractor INSTANCES = generics -> {
+			System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getObservableInstances());
+			return generics[0].getObservableSubInstances();
+		};
+
+		public static final ObservableListExtractor SUBINSTANCES = generics -> {
 			System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getObservableSubInstances());
 			return generics[0].getObservableSubInstances();
 		};
 
-		public static final ObservableListExtractor ATTRIBUTES = generics -> {
-			System.out.println("ATTRIBUTES : " + Arrays.toString(generics) + " " + generics[0].getObservableAttributes());
-			return generics[0].getObservableAttributes();
+		public static final ObservableListExtractor ATTRIBUTES_OF_TYPE = generics -> {
+			System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " "
+					+ generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
+			return generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0]));
 		};
+
+		public static final ObservableListExtractor ATTRIBUTES_OF_INSTANCES = generics -> {
+			System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " "
+					+ generics[1].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[1])));
+			return generics[1].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[1]));
+		};
+
+		public static final ObservableListExtractor COMPONENTS = generics -> {
+			System.out.println("COMPONENTS : " + Arrays.toString(generics) + " " + generics[0].getComponents());
+			return FXCollections.observableList(generics[0].getComponents());
+		};
+
 		public static final ObservableListExtractor HOLDERS = generics -> {
 			System.out.println("HOLDERS : " + Arrays.toString(generics) + " " + generics[1].getObservableHolders(generics[0]));
 			return generics[1].getObservableHolders(generics[0]);
@@ -110,8 +128,10 @@ public class CompositeModel extends Model {
 
 	private Set<ObservableList<?>> observableLists = new HashSet<ObservableList<?>>();
 
-	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics), generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
+	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
+			ModelConstructor<CompositeModel> constructor) {
+		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics),
+				generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
 		observableLists.add(observableList);// Prevents garbaging
 		return observableList;
 	}

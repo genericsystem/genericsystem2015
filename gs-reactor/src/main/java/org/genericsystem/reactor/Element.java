@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeModel;
@@ -147,9 +146,9 @@ public abstract class Element<M extends Model, N> {
 		});
 	}
 
-	public void select(StringExtractor stringExtractor, Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> FXCollections.singletonObservableList(genericSupplier.get()),
-				constructor));
+	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> (genericSupplier.apply(gs) != null
+				? FXCollections.singletonObservableList(genericSupplier.apply(gs)) : FXCollections.emptyObservableList()), constructor));
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {

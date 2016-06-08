@@ -2,11 +2,11 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Function;
 
-import javafx.beans.property.Property;
-
 import org.genericsystem.reactor.HtmlElement;
 import org.genericsystem.reactor.HtmlElement.CheckBoxHtmlDomNode;
 import org.genericsystem.reactor.Model;
+
+import javafx.beans.property.Property;
 
 /**
  * @author Nicolas Feybesse
@@ -15,7 +15,7 @@ import org.genericsystem.reactor.Model;
 public class HtmlCheckBox<M extends Model> extends HtmlElement<M, CheckBoxHtmlDomNode> {
 
 	public HtmlCheckBox(HtmlElement<?, ?> parent) {
-		super(parent, CheckBoxHtmlDomNode.class);
+		super(parent, "input", CheckBoxHtmlDomNode.class);
 	}
 
 	@Override

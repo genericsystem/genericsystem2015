@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +9,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,12 +28,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -57,8 +56,12 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 	private static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
 
-	protected <PARENTMODEL extends Model, PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTMODEL, PARENTNODE> parent, Class<NODE> nodeClass) {
+	private final String tag;
+
+	protected <PARENTMODEL extends Model, PARENTNODE extends HtmlDomNode> HtmlElement(Element<PARENTMODEL, PARENTNODE> parent, String tag,
+			Class<NODE> nodeClass) {
 		super(parent, nodeClass);
+		this.tag = tag;
 	}
 
 	public ServerWebSocket getWebSocket() {
@@ -71,16 +74,24 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		return HtmlDomNode::getChildren;
 	}
 
+	public void forEach(ObservableListExtractor observableListExtractor) {
+		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, CompositeModel::new);
+	}
+
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
 		forEach(stringExtractor, observableListExtractor, CompositeModel::new);
 	}
 
-	public void select(StringExtractor stringExtractor, Supplier<Generic> generic) {
-		select(stringExtractor, generic, CompositeModel::new);
+	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
+		select(stringExtractor, genericSupplier, CompositeModel::new);
 	}
 
-	public void select(Supplier<Generic> generic) {
-		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, generic, CompositeModel::new);
+	public void select(Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, constructor);
+	}
+
+	public void select_(Function<Generic[], Generic> genericSupplier) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, CompositeModel::new);
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass) {
@@ -133,7 +144,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 	public class HtmlDomNode {
 
 		private final String id;
-		private final String tag;
 		private final StringProperty text = new SimpleStringProperty();
 
 		private final Set<String> styleClasses = new HashSet<String>() {
@@ -174,15 +184,14 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 					if (value != null && !value.isEmpty())
 						sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName).put(STYLE_VALUE, value));
 					else
-						sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName));
+						sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName));
 				}
 				return result;
 			}
 		};
 
-		public HtmlDomNode(String tag) {
+		public HtmlDomNode() {
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-			this.tag = tag;
 			text.addListener((c, o, n) -> {
 				System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : "").encodePrettily());
 				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : ""));
@@ -266,10 +275,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 	public class ActionHtmlNode extends HtmlDomNode {
 		private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
 
-		public ActionHtmlNode(String tag) {
-			super(tag);
-		}
-
 		public ObjectProperty<EventHandler<ActionEvent>> getActionProperty() {
 			return actionProperty;
 		}
@@ -285,10 +290,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 
 	public class InputTextHtmlDomNode extends HtmlDomNode {
 		private final ObjectProperty<EventHandler<ActionEvent>> enterProperty = new SimpleObjectProperty<>();
-
-		public InputTextHtmlDomNode() {
-			super("input");
-		}
 
 		@Override
 		public void fillJson(HtmlDomNode parentNodeJs, JsonObject jsonObj) {
@@ -315,10 +316,6 @@ public abstract class HtmlElement<M extends Model, NODE extends HtmlDomNode> ext
 		private static final String CHECKED = "checked";
 
 		private Property<Boolean> checked = new SimpleBooleanProperty(false);
-
-		public CheckBoxHtmlDomNode() {
-			super("input");
-		}
 
 		public Property<Boolean> getChecked() {
 			return checked;

@@ -11,12 +11,12 @@ import org.genericsystem.reactor.Model;
 public class HtmlFooter<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	public HtmlFooter(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "footer", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("footer");
+		return new HtmlDomNode();
 	}
 
 }

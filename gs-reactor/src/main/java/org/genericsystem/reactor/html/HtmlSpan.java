@@ -11,12 +11,12 @@ import org.genericsystem.reactor.Model;
 public class HtmlSpan<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 
 	public HtmlSpan(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "span", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("span");
+		return new HtmlDomNode();
 	}
 
 }

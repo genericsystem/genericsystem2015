@@ -13,12 +13,12 @@ import org.genericsystem.reactor.Model;
 public class HtmlButton<M extends Model> extends HtmlElement<M, ActionHtmlNode> {
 
 	public HtmlButton(HtmlElement<?, ?> parent) {
-		super(parent, ActionHtmlNode.class);
+		super(parent, "button", ActionHtmlNode.class);
 	}
 
 	@Override
 	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode("button");
+		return new ActionHtmlNode();
 	}
 
 	public HtmlButton<M> bindAction(Consumer<M> applyOnModel) {

@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -13,44 +11,44 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.composite.CompositeSectionHtml.ColorCompositeSectionHtml;
-import org.genericsystem.reactor.composite.CompositeSelectHtml;
-import org.genericsystem.reactor.composite.CompositeTableHtml;
+import org.genericsystem.reactor.composite.CompositeSelect;
 import org.genericsystem.reactor.composite.EngineModel;
-import org.genericsystem.reactor.flex.FlexColumn;
-import org.genericsystem.reactor.flex.FlexRow.H1FlexRow;
-import org.genericsystem.reactor.flex.FlexRow.SaveCancelFlexRow;
+import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.flex.FlexElement;
+import org.genericsystem.reactor.flex.FlexTable;
+import org.genericsystem.reactor.flex.FlexTag;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
+				Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexColumn<CompositeModel>(this) {
+		new FlexElement<CompositeModel>(this, FlexTag.SECTION) {
 			{
 				addStyle("justify-content", "center");
-				new CompositeSelectHtml(this) {
+				new CompositeSelect<CompositeModel>(this) {
 					{
 						select(Color.class);
-						setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
 					}
 				};
 
-				new ColorCompositeSectionHtml<>(this).select(StringExtractor.MANAGEMENT, Color.class);
-				new H1FlexRow(this, "Reactive System Live Demo");
-				new CompositeTableHtml(this, ObservableListExtractor.from(Power.class, CarColor.class)).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
-				new CompositeTableHtml(this, ObservableListExtractor.from()).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
-				new CompositeTableHtml(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
-				new SaveCancelFlexRow(this).addStyleClass("gsfooter");
+				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
+				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
+				new SaveCancelFlexRow(this, FlexTag.FOOTER).addStyle("background-color", "#ffa500");
 			}
 		};
 	}

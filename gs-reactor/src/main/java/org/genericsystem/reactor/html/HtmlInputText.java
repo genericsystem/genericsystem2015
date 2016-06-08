@@ -13,7 +13,7 @@ import org.genericsystem.reactor.Model;
 public class HtmlInputText<M extends Model> extends HtmlElement<M, InputTextHtmlDomNode> {
 
 	public HtmlInputText(HtmlElement<?, ?> parent) {
-		super(parent, InputTextHtmlDomNode.class);
+		super(parent, "input", InputTextHtmlDomNode.class);
 	}
 
 	@Override

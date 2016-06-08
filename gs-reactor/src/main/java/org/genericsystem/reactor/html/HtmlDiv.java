@@ -10,11 +10,11 @@ import org.genericsystem.reactor.Model;
  */
 public class HtmlDiv<M extends Model> extends HtmlElement<M, HtmlDomNode> {
 	public HtmlDiv(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "div", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("div");
+		return new HtmlDomNode();
 	}
 }

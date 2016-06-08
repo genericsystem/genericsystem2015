@@ -11,11 +11,11 @@ import org.genericsystem.reactor.composite.CompositeModel;
 public abstract class HtmlSelect<M extends CompositeModel> extends HtmlElement<M, HtmlDomNode> {
 
 	public HtmlSelect(HtmlElement<?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+		super(parent, "select", HtmlDomNode.class);
 	}
 
 	@Override
 	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("select");
+		return new HtmlDomNode();
 	}
 }
