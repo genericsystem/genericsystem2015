@@ -1,14 +1,13 @@
 package org.genericsystem.spring;
 
-
 import java.io.Serializable;
+
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-@Test
 public class PersistenceTest extends AbstractTest {
-
+	@Test
 	public void testCount() {
 		Generic count = engine.find(Count.class);
 		if (count.getInstances().isEmpty()) {

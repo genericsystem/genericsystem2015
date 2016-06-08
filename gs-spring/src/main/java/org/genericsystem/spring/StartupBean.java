@@ -31,7 +31,6 @@ public class StartupBean /* implements Extension */{
 
 		String basePackage = "org.genericsystem.spring";
 
-		System.out.println("Base Package :" + basePackage);
 		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 		MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
 
@@ -61,9 +60,8 @@ public class StartupBean /* implements Extension */{
 
 	@EventListener
 	public void onApplicationEvent(ApplicationEvent event) throws ClassNotFoundException, IOException {
-		System.out.println("ContextRefreshedEvent Start");
+
 		if (event instanceof ContextRefreshedEvent) {
-			System.out.println("ContextRefreshedEvent Received");
 			ApplicationContext applicationContext = ((ContextRefreshedEvent) event).getApplicationContext();
 			findMyTypes(applicationContext);
 			// now you can do applicationContext.getBean(...)

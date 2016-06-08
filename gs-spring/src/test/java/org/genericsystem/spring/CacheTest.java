@@ -1,27 +1,36 @@
 package org.genericsystem.spring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Test
 public class CacheTest extends AbstractTest {
 
+	protected static Logger log = LoggerFactory.getLogger(CacheTest.class);
+
+	@Test
 	public void test001_flush() {
 		Generic vehicle = engine.addInstance("Vehicle");
-		assert vehicle.isAlive();
+		assertTrue(vehicle.isAlive());
 		engine.getCurrentCache().flush();
-		assert vehicle.isAlive();
+		assertTrue(vehicle.isAlive());
 		vehicle.remove();
 		engine.getCurrentCache().flush();
-		assert !vehicle.isAlive();
+		assertFalse(vehicle.isAlive());
 	}
 
+	@Test
 	public void test001_clear() {
 		engine.addInstance("Vehicle");
 		engine.getCurrentCache().clear();
-		assert engine.getInstance("Vehicle") == null;
+		assertNull(engine.getInstance("Vehicle"));
 	}
 
 	// public void test001_newCache_nostarted() {
@@ -29,26 +38,28 @@ public class CacheTest extends AbstractTest {
 	// engine.newCache().start();
 	// catchAndCheckCause(() -> currentCache.flush(), CacheNoStartedException.class);
 	// }
-
+	@Test
 	public void test001_mountNewCache() {
 		AbstractCache currentCache = engine.getCurrentCache();
 		currentCache.mount();
-		assert engine.getCurrentCache() == currentCache;
+		assertEquals(engine.getCurrentCache(), currentCache);
 		engine.addInstance("Vehicle");
 		currentCache.flush();
 		currentCache.unmount();
 		currentCache.clear();
-		assert engine.getInstance("Vehicle") == null;
+		assertNull(engine.getInstance("Vehicle"));
 	}
 
+	@Test
 	public void test002_mountNewCache() {
 		AbstractCache currentCache = engine.getCurrentCache();
-		assert currentCache.getCacheLevel() == 0;
+		assertEquals(currentCache.getCacheLevel(), 0);
 		currentCache.mount();
 		Generic vehicle = engine.addInstance("Vehicle");
-		assert currentCache.getCacheLevel() == 1;
-		assert vehicle.isAlive();
+		assertEquals(currentCache.getCacheLevel(), 1);
+		assertTrue(vehicle.isAlive());
 		currentCache.unmount();
-		assert !vehicle.isAlive();
+		assertFalse(vehicle.isAlive());
 	}
+
 }

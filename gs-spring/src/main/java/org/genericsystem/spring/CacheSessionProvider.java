@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Scope("prototype")
+@Scope("session")
 @Component
 @Lazy
 public class CacheSessionProvider implements Serializable {

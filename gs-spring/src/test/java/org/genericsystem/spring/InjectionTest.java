@@ -1,18 +1,22 @@
 package org.genericsystem.spring;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.genericsystem.common.Generic;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-@Test
 public class InjectionTest extends AbstractTest {
-
+	@Test
 	public void test() {
-		assert engine != null;
-		assert engine.getCurrentCache() != null;
-		assert cacheProvider.get() != null;
+
+		assertNotNull(engine);
+		assertNotNull(engine.getCurrentCache());
+		assertNotNull(cacheProvider);
+		assertNotNull(engine.find(Color.class));
 	}
 
+	@Test
 	public void test2() {
 		Generic car = engine.addInstance("Car");
 		Generic color = engine.addInstance("Color");
@@ -20,7 +24,8 @@ public class InjectionTest extends AbstractTest {
 		Generic audi = car.addInstance("audi");
 		Generic red = color.addInstance("red");
 		Generic audiRed = audi.setHolder(carColor, "audiRed", red);
-		assert audi.getHolders(carColor).contains(audiRed) : audi.getHolders(carColor);
+		// assert audi.getHolders(carColor).contains(audiRed) : audi.getHolders(carColor).info();
+		assertTrue(audi.getHolders(carColor).contains(audiRed));
 	}
 
 }

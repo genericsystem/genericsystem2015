@@ -1,6 +1,7 @@
 package org.genericsystem.spring;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 // @ApplicationScoped
 @Lazy
 @Component
+@Primary
 public class PersistentDirectoryProvider {
 	public static final String DEFAULT_DIRECTORY_PATH = System.getenv("HOME") + "/test/genericsystem";
 
