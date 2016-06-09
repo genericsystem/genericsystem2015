@@ -2,8 +2,8 @@ package org.genericsystem.spring;
 
 import java.io.Serializable;
 
-import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
+import org.genericsystem.models.Count;
 import org.junit.Test;
 
 public class PersistenceTest extends AbstractTest {
@@ -20,10 +20,6 @@ public class PersistenceTest extends AbstractTest {
 		log.info("previousValue " + previousValue + " actualValue " + actualValue.getValue());
 		engine.getCurrentCache().flush();
 		engine.close();
-	}
-
-	@SystemGeneric
-	public static class Count {
 	}
 
 }
