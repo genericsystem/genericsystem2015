@@ -1,22 +1,21 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlP<M extends Model> extends HtmlElement<M, HtmlDomNode> {
+public class HtmlP<M extends Model> extends Element<M> {
 
-	public HtmlP(HtmlElement<?, ?> parent) {
-		super(parent, "p", HtmlDomNode.class);
+	public HtmlP(Element<?> parent) {
+		super(parent, "p");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode();
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId);
 	}
 
 }

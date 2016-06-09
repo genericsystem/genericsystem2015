@@ -1,7 +1,11 @@
 package org.genericsystem.reactor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,121 +16,93 @@ import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.ListBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <N>
  */
-public abstract class Element<M extends Model, N> {
-	private final Class<N> nodeClass;
-	private List<Boot<N>> boots = new ArrayList<>();
-	public final List<MetaBinding<N, ?>> metaBindings = new ArrayList<>();
-	public final List<Binding<N, ?, ?>> bindings = new ArrayList<>();
-	private final Element<?, ?> parent;
-	private final List<Element<?, ?>> children = new ArrayList<>();
+public abstract class Element<M extends Model> {
+
+	private final String tag;
+	private List<Boot<HtmlDomNode>> boots = new ArrayList<>();
+	public MetaBinding<?> metaBinding;
+	public final List<Binding<?, ?>> bindings = new ArrayList<>();
+	private final Element<?> parent;
+	private final List<Element<?>> children = new ArrayList<>();
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "<" + nodeClass.getSimpleName() + ">";
+		return getClass().getSimpleName();
 	}
 
-	protected <PARENTNODE, W> Element(Element<?, PARENTNODE> parent, Class<N> nodeClass) {
-		this.nodeClass = nodeClass;
+	protected Element(Element<?> parent, String tag) {
+		this.tag = tag;
 		this.parent = parent;
 		if (parent != null)
-			parent.<N> getChildren().add(this);
+			parent.getChildren().add(this);
 	}
 
-	@SuppressWarnings("rawtypes")
-	protected abstract Function<N, List> getGraphicChildren();
+	public String getTag() {
+		return tag;
+	}
 
-	protected <VALUE> void addBoot(Function<N, Property<VALUE>> applyOnNode, VALUE value) {
+	protected <VALUE> void addBoot(Function<HtmlDomNode, Property<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.setProperty(applyOnNode, value));
 	}
 
-	protected <VALUE> void addSetBoot(Function<N, Set<VALUE>> applyOnNode, VALUE value) {
+	protected <VALUE> void addSetBoot(Function<HtmlDomNode, Set<VALUE>> applyOnNode, VALUE value) {
 		this.boots.add(Boot.addProperty(applyOnNode, value));
 	}
 
-	protected List<Boot<N>> getBootList() {
+	protected List<Boot<HtmlDomNode>> getBootList() {
 		return boots;
 	}
 
-	protected <W> void addBidirectionalBinding(Function<N, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
+	protected <W, NODE extends HtmlDomNode> void addBidirectionalBinding(Function<NODE, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
 		bindings.add(Binding.bindBiDirectionalProperty(applyOnModel, applyOnNode));
 
 	}
 
-	protected <T> void addBinding(Function<N, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
+	protected <T, NODE extends HtmlDomNode> void addBinding(Function<NODE, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
 		bindings.add(Binding.bindProperty(applyOnModel, applyOnNode));
 
 	}
 
-	// protected <T> void setObservableListBinding(Function<N, Property<ObservableList<T>>> applyOnNode, Function<M, ObservableList<T>> applyOnModel) {
-	// bindings.add(Binding.bindObservableList(applyOnModel, applyOnNode));
-	//
-	// }
-
-	protected <T> void addActionBinding(Function<N, Property<T>> applyOnNode, Consumer<M> applyOnModel) {
+	protected <T, NODE extends HtmlDomNode> void addActionBinding(Function<NODE, Property<T>> applyOnNode, Consumer<M> applyOnModel) {
 		bindings.add(Binding.bindAction(applyOnModel, applyOnNode));
-
 	}
 
-	protected <T> void addReversedBinding(Function<N, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
+	protected <T, NODE extends HtmlDomNode> void addReversedBinding(Function<NODE, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
 		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));
 
 	}
 
-	// protected void addObservableSetToObservableValueBinding(Function<N, ObservableSet<String>> applyOnNode, Function<M, ObservableValue<String>>
-	// applyOnModel) {
-	// bindings.add(Binding.bindObservableSetToObservableValue(applyOnModel, applyOnNode));
-	// }
-
-	protected <T> void addSetBinding(Function<N, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
+	protected <T, NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel,
+			T styleClass) {
 		bindings.add(Binding.bindSet(applyOnModel, styleClass, applyOnNode));
 	}
 
-	// protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode, Function<M, ObservableValue<Number>> applyOnModel,
-	// String attr, String[] value) {
-	// bindings.add(Binding.bindObservableMap(applyOnModel, attr, value, applyOnNode));
-	//
-	// }
-	//
-	// protected <T> void addObservableMapBinding(Function<N, ObservableMap<String, String>> applyOnNode,
-	// Function<M, ObservableMap<String, String>> applyOnModel) {
-	// bindings.add(Binding.bindObservableMap(applyOnModel, applyOnNode));
-	//
-	// }
-
 	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
-		metaBindings.add(MetaBinding.forEach(applyOnModel));
+		metaBinding = MetaBinding.forEach(applyOnModel);
 	}
 
-	//
-	// public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> forEach(StringExtractor stringExtractor,
-	// ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-	// return forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, observableListExtractor, constructor));
-	// }
-	//
-	// public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(StringExtractor stringExtractor,
-	// Supplier<Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-	// return forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, genericSupplier, constructor));
-	// }
-	//
-	// public static <N, M extends CompositeModel> MetaBinding<N, ObservableList<CompositeModel>> selector(Element<?, ?> element, StringExtractor
-	// stringExtractor,
-	// Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-	// return forEach(model -> ((CompositeModel) model).getObservableList(element, stringExtractor, genericClass, constructor));
-	// }
-
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		metaBindings.add(MetaBinding.forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, observableListExtractor, constructor)));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, observableListExtractor, constructor));
 	}
 
 	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
@@ -156,21 +132,286 @@ public abstract class Element<M extends Model, N> {
 				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
 	}
 
-	protected N createNode(Object parent) {
-		try {
-			return nodeClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
+	public ServerWebSocket getWebSocket() {
+		return getParent().getWebSocket();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected <CHILDNODE> List<Element<?, CHILDNODE>> getChildren() {
-		return (List) children;
+	public void forEach_(ObservableListExtractor observableListExtractor) {
+		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, CompositeModel::new);
+	}
+
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
+		forEach(stringExtractor, observableListExtractor, CompositeModel::new);
+	}
+
+	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
+		select(stringExtractor, genericSupplier, CompositeModel::new);
+	}
+
+	public void select(Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, constructor);
+	}
+
+	public void select_(Function<Generic[], Generic> genericSupplier) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, CompositeModel::new);
+	}
+
+	public void select(StringExtractor stringExtractor, Class<?> genericClass) {
+		select(stringExtractor, genericClass, CompositeModel::new);
+	}
+
+	public void select(Class<?> genericClass) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericClass);
+	}
+
+	public void addStyleClass(String styleClass) {
+		addSetBoot(HtmlDomNode::getStyleClasses, styleClass);
+	}
+
+	public void addStyle(String propertyName, String value) {
+		addBoot(domNode -> domNode.getStyle(propertyName), value);
+	}
+
+	public void setText(String text) {
+		addBoot(HtmlDomNode::getText, text);
+	}
+
+	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
+		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
+	}
+
+	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
+		addBinding(HtmlDomNode::getText, applyOnModel);
+	}
+
+	public void bindStyle(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
+		addBinding(domNode -> domNode.getStyle(propertyName), applyOnModel);
+	}
+
+	public void bindStyle(String propertyName, String initialValue) {
+		bindStyle(propertyName, model -> ((CompositeModel) model).getObservableStyle(this, propertyName, initialValue));
+	}
+
+	public void bindStyle(String propertyName) {
+		bindStyle(propertyName, model -> ((CompositeModel) model).getStyleProperty(this, propertyName));
+	}
+
+	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
+		addSetBinding(HtmlDomNode::getStyleClasses, function, text);
+	}
+
+	protected abstract HtmlDomNode createNode(String parentId);
+
+	protected List<Element<?>> getChildren() {
+		return children;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <COMPONENT extends Element<?, ?>> COMPONENT getParent() {
+	public <COMPONENT extends Element<?>> COMPONENT getParent() {
 		return (COMPONENT) parent;
 	}
+
+	private static final String MSG_TYPE = "msgType";
+	private static final String ADD = "A";
+	private static final String UPDATE = "U";
+	private static final String REMOVE = "R";
+	private static final String UPDATE_TEXT = "UT";
+	private static final String ADD_STYLECLASS = "AC";
+	private static final String REMOVE_STYLECLASS = "RC";
+	private static final String ADD_STYLE = "AS";
+	private static final String REMOVE_STYLE = "RS";
+
+	private static final String PARENT_ID = "parentId";
+	public static final String ID = "nodeId";
+	private static final String PREV_ID = "nextId";
+	private static final String STYLE_PROPERTY = "styleProperty";
+	private static final String STYLE_VALUE = "styleValue";
+	private static final String STYLECLASS = "styleClass";
+	private static final String TEXT_CONTENT = "textContent";
+	private static final String TAG_HTML = "tagHtml";
+	private static final String ELT_TYPE = "eltType";
+
+	public class HtmlDomNode {
+
+		private final String id;
+		private final String parentId;
+		private final StringProperty text = new SimpleStringProperty();
+
+		private final Set<String> styleClasses = new HashSet<String>() {
+
+			private static final long serialVersionUID = -7679372997269319684L;
+
+			@Override
+			public boolean add(String styleClass) {
+				boolean result = super.add(styleClass);
+				if (result) {
+					System.out.println(new JsonObject().put(MSG_TYPE, ADD_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass).encodePrettily());
+					sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass));
+				}
+				return result;
+			};
+
+			@Override
+			public boolean remove(Object styleClass) {
+				boolean result = super.remove(styleClass);
+				if (result) {
+					System.out.println(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass).encodePrettily());
+					sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, id).put(STYLECLASS, styleClass));
+				}
+				return result;
+			};
+		};
+
+		private final Map<String, String> styles = new HashMap<String, String>() {
+
+			private static final long serialVersionUID = 3900526227565046414L;
+
+			@Override
+			public String put(String propertyName, String value) {
+				String result = super.put(propertyName, value);
+				if (!Objects.equals(value, result)) {
+					JsonObject mapJS = new JsonObject();
+					mapJS.put(propertyName, value);
+					if (value != null && !value.isEmpty())
+						sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName).put(STYLE_VALUE, value));
+					else
+						sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, id).put(STYLE_PROPERTY, propertyName));
+				}
+				return result;
+			}
+		};
+
+		public HtmlDomNode(String parentId) {
+			this.parentId = parentId;
+			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
+			text.addListener((c, o, n) -> {
+				System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : "").encodePrettily());
+				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : ""));
+			});
+		}
+
+		public void sendAdd(int index) {
+			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
+			fillJson(jsonObj);
+			jsonObj.put(PREV_ID, index);
+			System.out.println(jsonObj.encodePrettily());
+			sendMessage(jsonObj);
+		}
+
+		public void sendRemove() {
+			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, REMOVE);
+			jsonObj.put(ID, id);
+			sendMessage(jsonObj);
+		}
+
+		public void sendMessage(JsonObject jsonObj) {
+			getWebSocket().writeFinalTextFrame(jsonObj.encode());
+		}
+
+		void fillJson(JsonObject jsonObj) {
+			jsonObj.put(PARENT_ID, parentId);
+			jsonObj.put(ID, id);
+			jsonObj.put(TAG_HTML, getTag());
+		}
+
+		public Set<String> getStyleClasses() {
+			return styleClasses;
+		}
+
+		public Property<String> getStyle(String propertyName) {
+			Property<String> property = new SimpleStringProperty(styles.get(propertyName));
+			property.addListener((c, o, n) -> styles.put(propertyName, n));
+			return property;
+		}
+
+		public StringProperty getText() {
+			return text;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public void handleMessage(JsonObject json) {
+
+		}
+
+	}
+
+	public class ActionHtmlNode extends HtmlDomNode {
+		public ActionHtmlNode(String parentId) {
+			super(parentId);
+		}
+
+		private final ObjectProperty<EventHandler<ActionEvent>> actionProperty = new SimpleObjectProperty<>();
+
+		public ObjectProperty<EventHandler<ActionEvent>> getActionProperty() {
+			return actionProperty;
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			if (ADD.equals(json.getString(MSG_TYPE)))
+				getActionProperty().get().handle(new ActionEvent());
+			super.handleMessage(json);
+		}
+
+	}
+
+	public class InputTextHtmlDomNode extends HtmlDomNode {
+		public InputTextHtmlDomNode(String parentId) {
+			super(parentId);
+		}
+
+		private final ObjectProperty<EventHandler<ActionEvent>> enterProperty = new SimpleObjectProperty<>();
+
+		@Override
+		public void fillJson(JsonObject jsonObj) {
+			super.fillJson(jsonObj);
+			jsonObj.put("type", "text");
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			if (ADD.equals(json.getString(MSG_TYPE)))
+				getEnterProperty().get().handle(new ActionEvent());
+			if (UPDATE.equals(json.getString(MSG_TYPE)))
+				getText().setValue(json.getString(TEXT_CONTENT));
+			super.handleMessage(json);
+		}
+
+		public ObjectProperty<EventHandler<ActionEvent>> getEnterProperty() {
+			return enterProperty;
+		}
+
+	}
+
+	public class CheckBoxHtmlDomNode extends HtmlDomNode {
+		public CheckBoxHtmlDomNode(String parentId) {
+			super(parentId);
+		}
+
+		private static final String CHECKED = "checked";
+
+		private Property<Boolean> checked = new SimpleBooleanProperty(false);
+
+		public Property<Boolean> getChecked() {
+			return checked;
+		}
+
+		@Override
+		public void fillJson(JsonObject jsonObj) {
+			super.fillJson(jsonObj);
+			jsonObj.put("type", "checkbox");
+			jsonObj.put(CHECKED, checked.getValue());
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			if ("checkbox".equals(json.getString(ELT_TYPE)))
+				getChecked().setValue(json.getBoolean(CHECKED));
+			super.handleMessage(json);
+		}
+	}
+
 }

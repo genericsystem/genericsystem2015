@@ -1,21 +1,20 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlSection<M extends Model> extends HtmlElement<M, HtmlDomNode> {
+public class HtmlSection<M extends Model> extends Element<M> {
 
-	public HtmlSection(HtmlElement<?, ?> parent) {
-		super(parent, "section", HtmlDomNode.class);
+	public HtmlSection(Element<?> parent) {
+		super(parent, "section");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode();
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId);
 	}
 }

@@ -17,26 +17,26 @@ import javafx.collections.WeakListChangeListener;
  * @param <N>
  * @param <W>
  */
-public interface MetaBinder<N, W extends ObservableList<?>> {
+public interface MetaBinder<W extends ObservableList<?>> {
 
-	default void init(Function<Model, W> method, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+	default void init(Function<Model, W> method, ViewContext<?> viewContext, Element<?> childElement) {
 		init(viewContext.getModelContext().applyOnModel(method), viewContext, childElement);
 	}
 
-	default void init(Supplier<W> applyOnModel, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+	default void init(Supplier<W> applyOnModel, ViewContext<?> viewContext, Element<?> childElement) {
 		init(applyOnModel.get(), viewContext, childElement);
 	}
 
-	default void init(W wrapper, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+	default void init(W wrapper, ViewContext<?> viewContext, Element<?> childElement) {
 	}
 
-	public static <N, T extends Model> MetaBinder<N, ObservableList<T>> foreachBinder() {
-		return new MetaBinder<N, ObservableList<T>>() {
+	public static <T extends Model> MetaBinder<ObservableList<T>> foreachBinder() {
+		return new MetaBinder<ObservableList<T>>() {
 
 			private List<ListChangeListener<Model>> listeners = new ArrayList<>();
 
 			@Override
-			public void init(ObservableList<T> wrapper, ViewContext<?, N> viewContext, Element<?, ?> childElement) {
+			public void init(ObservableList<T> wrapper, ViewContext<?> viewContext, Element<?> childElement) {
 				ModelContextList children = viewContext.getModelContext().getChildren(childElement);
 
 				ListChangeListener<Model> listener = (ListChangeListener<Model>) change -> {

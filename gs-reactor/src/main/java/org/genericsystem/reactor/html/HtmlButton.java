@@ -2,23 +2,22 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.ActionHtmlNode;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlButton<M extends Model> extends HtmlElement<M, ActionHtmlNode> {
+public class HtmlButton<M extends Model> extends Element<M> {
 
-	public HtmlButton(HtmlElement<?, ?> parent) {
-		super(parent, "button", ActionHtmlNode.class);
+	public HtmlButton(Element<?> parent) {
+		super(parent, "button");
 	}
 
 	@Override
-	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode();
+	protected ActionHtmlNode createNode(String parentId) {
+		return new ActionHtmlNode(parentId);
 	}
 
 	public HtmlButton<M> bindAction(Consumer<M> applyOnModel) {

@@ -2,8 +2,7 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Function;
 
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.CheckBoxHtmlDomNode;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
 import javafx.beans.property.Property;
@@ -12,15 +11,15 @@ import javafx.beans.property.Property;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlCheckBox<M extends Model> extends HtmlElement<M, CheckBoxHtmlDomNode> {
+public class HtmlCheckBox<M extends Model> extends Element<M> {
 
-	public HtmlCheckBox(HtmlElement<?, ?> parent) {
-		super(parent, "input", CheckBoxHtmlDomNode.class);
+	public HtmlCheckBox(Element<?> parent) {
+		super(parent, "input");
 	}
 
 	@Override
-	protected CheckBoxHtmlDomNode createNode(Object parent) {
-		return new CheckBoxHtmlDomNode();
+	protected CheckBoxHtmlDomNode createNode(String parentId) {
+		return new CheckBoxHtmlDomNode(parentId);
 	}
 
 	public HtmlCheckBox<M> bindCheckedBidirectional(Function<M, Property<Boolean>> applyOnModel) {

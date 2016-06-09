@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -10,9 +8,11 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Statics;
-import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -58,7 +58,8 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return new ApplicationDeploymentConfig(json.getMap());
 	}
 
-	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends HtmlElement<?, ?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
+	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends Element<?>> htmlAppClass, Class<? extends Model> modelClass,
+			Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes));
 		return this;
 	}
@@ -68,13 +69,15 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 	}
 
 	public Set<Class<?>> getClasses(String persistentDirectoryPath) {
-		return getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json)).filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath()))
-				.flatMap(conf -> conf.getClasses().stream()).collect(Collectors.toSet());
+		return getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json))
+				.filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath())).flatMap(conf -> conf.getClasses().stream())
+				.collect(Collectors.toSet());
 	}
 
 	public Class<? extends AbstractRoot> getEngineClass(String persistentDirectoryPath) {
-		Set<Class<? extends AbstractRoot>> set = getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json)).filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath()))
-				.map(conf -> conf.getEngineClass()).collect(Collectors.toSet());
+		Set<Class<? extends AbstractRoot>> set = getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json))
+				.filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath())).map(conf -> conf.getEngineClass())
+				.collect(Collectors.toSet());
 		assert set.size() == 1;
 		return set.iterator().next();
 	}
@@ -93,7 +96,8 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends HtmlElement<?, ?>> applicationClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
+		public ApplicationDeploymentConfig(Class<? extends Element<?>> applicationClass, Class<? extends Model> modelClass,
+				Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
 			put("modelClass", modelClass.getName());
@@ -130,12 +134,13 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 
 	public static class DefaultPathSingleWebAppDeployment extends ApplicationsDeploymentConfig {
 
-		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, Class<?>... classes) {
+		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass,
+				Class<? extends AbstractRoot> engineClass, Class<?>... classes) {
 			addApplication("/", htmlAppClass, modelClass, engineClass, null, classes);
 		}
 
-		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath,
-				Class<?>... classes) {
+		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass,
+				Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
 			addApplication("/", htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes);
 		}
 	}

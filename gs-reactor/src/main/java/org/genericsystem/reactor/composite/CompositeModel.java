@@ -59,6 +59,7 @@ public class CompositeModel extends Model {
 	}
 
 	public void remove() {
+		System.out.println("remove!!!");
 		getGeneric().remove();
 	}
 
@@ -136,14 +137,14 @@ public class CompositeModel extends Model {
 		return observableList;
 	}
 
-	private Map<Element<?, ?>, Map<String, Property<String>>> observableStyles = new HashMap<Element<?, ?>, Map<String, Property<String>>>() {
+	private Map<Element<?>, Map<String, Property<String>>> observableStyles = new HashMap<Element<?>, Map<String, Property<String>>>() {
 		private static final long serialVersionUID = -1827306835524845605L;
 
 		@Override
 		public Map<String, Property<String>> get(Object key) {
 			Map<String, Property<String>> result = super.get(key);
 			if (result == null)
-				put((Element<?, ?>) key, result = new HashMap<String, Property<String>>() {
+				put((Element<?>) key, result = new HashMap<String, Property<String>>() {
 					private static final long serialVersionUID = -8866241510145377825L;
 
 					@Override
@@ -158,13 +159,13 @@ public class CompositeModel extends Model {
 		};
 	};
 
-	public ObservableValue<String> getObservableStyle(Element<?, ?> element, String propertyName, String initialValue) {
+	public ObservableValue<String> getObservableStyle(Element<?> element, String propertyName, String initialValue) {
 		Property<String> result = getStyleProperty(element, propertyName);
 		result.setValue(initialValue);
 		return result;
 	}
 
-	public Property<String> getStyleProperty(Element<?, ?> element, String propertyName) {
+	public Property<String> getStyleProperty(Element<?> element, String propertyName) {
 		return observableStyles.get(element).get(propertyName);
 	}
 

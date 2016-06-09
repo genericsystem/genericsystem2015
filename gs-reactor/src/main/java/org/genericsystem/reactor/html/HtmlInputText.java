@@ -2,23 +2,22 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.InputTextHtmlDomNode;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlInputText<M extends Model> extends HtmlElement<M, InputTextHtmlDomNode> {
+public class HtmlInputText<M extends Model> extends Element<M> {
 
-	public HtmlInputText(HtmlElement<?, ?> parent) {
-		super(parent, "input", InputTextHtmlDomNode.class);
+	public HtmlInputText(Element<?> parent) {
+		super(parent, "input");
 	}
 
 	@Override
-	protected InputTextHtmlDomNode createNode(Object parent) {
-		return new InputTextHtmlDomNode();
+	protected InputTextHtmlDomNode createNode(String parentId) {
+		return new InputTextHtmlDomNode(parentId);
 	}
 
 	public HtmlInputText<M> bindAction(Consumer<M> applyOnModel) {

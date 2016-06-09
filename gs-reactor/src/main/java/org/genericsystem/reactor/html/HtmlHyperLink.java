@@ -2,8 +2,7 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.ActionHtmlNode;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
 import javafx.event.Event;
@@ -12,14 +11,14 @@ import javafx.event.Event;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlHyperLink<M extends Model> extends HtmlElement<M, ActionHtmlNode> {
+public class HtmlHyperLink<M extends Model> extends Element<M> {
 
-	public HtmlHyperLink(HtmlElement<?, ?> parent, String text) {
-		super(parent, "a", ActionHtmlNode.class);
+	public HtmlHyperLink(Element<?> parent, String text) {
+		super(parent, "a");
 		addBoot(HtmlDomNode::getText, text);
 	}
 
-	public HtmlHyperLink(HtmlElement<?, ?> parent, String text, Consumer<M> action) {
+	public HtmlHyperLink(Element<?> parent, String text, Consumer<M> action) {
 		this(parent, text);
 		setAction(action);
 	}
@@ -30,8 +29,8 @@ public class HtmlHyperLink<M extends Model> extends HtmlElement<M, ActionHtmlNod
 	}
 
 	@Override
-	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode();
+	protected ActionHtmlNode createNode(String parentId) {
+		return new ActionHtmlNode(parentId);
 	}
 
 }

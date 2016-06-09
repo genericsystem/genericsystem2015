@@ -1,6 +1,6 @@
 package org.genericsystem.reactor.flex;
 
-import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
@@ -17,11 +17,11 @@ import org.genericsystem.reactor.html.HtmlLabel;
  */
 public class FlexTable extends FlexElement<InputCompositeModel> {
 
-	public FlexTable(HtmlElement<?, ?> parent) {
+	public FlexTable(Element<?> parent) {
 		this(parent, FlexTag.SECTION);
 	}
 
-	public FlexTable(HtmlElement<?, ?> parent, FlexTag tag) {
+	public FlexTable(Element<?> parent, FlexTag tag) {
 		super(parent, tag, FlexDirection.COLUMN);
 		new FlexElement<CompositeModel>(this, FlexTag.HEADER) {
 			{
@@ -86,7 +86,8 @@ public class FlexTable extends FlexElement<InputCompositeModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("justify-content", "center");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 								new HtmlLabel<CompositeModel>(this) {
 									{
 										bindText(CompositeModel::getString);
@@ -156,7 +157,8 @@ public class FlexTable extends FlexElement<InputCompositeModel> {
 								addStyle("background-color", "#dda5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), InputCompositeModel::new);
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), InputCompositeModel::new);
 								new HtmlInputText<InputCompositeModel>(this) {
 									{
 										bindTextBidirectional(InputCompositeModel::getInputString);
@@ -227,7 +229,8 @@ public class FlexTable extends FlexElement<InputCompositeModel> {
 										addStyle("background-color", "#dda5e2");
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
-										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+												gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 									}
 								};

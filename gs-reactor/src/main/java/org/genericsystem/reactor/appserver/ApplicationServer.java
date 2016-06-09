@@ -1,11 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -17,10 +11,16 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Element.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -45,20 +45,25 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath + " and persistence directory path : " + directoryPath);
+			apps.put(applicationPath,
+					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
+			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
+					+ " and persistence directory path : " + directoryPath);
 		}
 	}
 
 	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
 		try {
-			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath, userClasses.toArray(new Class[userClasses.size()]));
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath,
+					userClasses.toArray(new Class[userClasses.size()]));
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
+			Class<? extends Model> modelClass, AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
@@ -74,12 +79,12 @@ public class ApplicationServer extends AbstractBackEnd {
 			if (application == null)
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			AbstractCache cache = application.getEngine().newCache();
-			HtmlElement app = cache.safeSupply(() -> application.newHtmlApp(socket));
+			Element app = cache.safeSupply(() -> application.newHtmlApp(socket));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = ((HtmlApp) app).getNodeById(json.getString(HtmlElement.ID));
+				HtmlDomNode node = ((HtmlApp) app).getNodeById(json.getString(Element.ID));
 				if (node != null)
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};

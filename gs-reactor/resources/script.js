@@ -80,7 +80,7 @@ function onMessageReceived(evt) {
 		};
 		break;
 		}
-		parent.insertBefore(elt, document.getElementById(message.nextId));
+		parent.insertBefore(elt, parent.children[message.nextId]);
 		break;
 	case 'R':
 		if (elt != null) {

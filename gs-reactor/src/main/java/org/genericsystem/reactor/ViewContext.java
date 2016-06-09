@@ -2,11 +2,9 @@ package org.genericsystem.reactor;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Element.HtmlDomNode;
 import org.genericsystem.reactor.ModelContext.RootModelContext;
 
 /**
@@ -14,42 +12,33 @@ import org.genericsystem.reactor.ModelContext.RootModelContext;
  *
  * @param <N>
  */
-public class ViewContext<M extends Model, N> {
+public class ViewContext<M extends Model> {
 
-	private final ViewContext<?, ?> parent;
-	private final Element<M, N> template;
-	private final N node;
+	private final ViewContext<?> parent;
+	private final Element<M> template;
+	private final HtmlDomNode node;
 	private ModelContext modelContext;
 
-	private final List<N> nodeChildren;
-
-	private ViewContext(int indexInChildren, ViewContext<?, ?> parent, ModelContext modelContext, Element<M, N> template, N node) {
+	private ViewContext(int indexInChildren, ViewContext<?> parent, ModelContext modelContext, Element<M> template, HtmlDomNode node) {
 		this.parent = parent;
 		this.template = template;
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
-		nodeChildren = this.parent != null ? (List<N>) ((Function) template.getParent().getGraphicChildren()).apply(parent.node) : null;
 		modelContext.register(this);
 
 		if (parent != null) {
-			parent.incrementSize(template);
-			nodeChildren.add(indexInChildren, node);
-			if (node instanceof HtmlDomNode) {
-				getRootViewContext().add(((HtmlDomNode) node).getId(), (HtmlDomNode) node);
-				// ((HtmlDomNode) node).initListener();
-				// sizeByElement.put(template, indexInChildren);
-			}
+			insertChild(indexInChildren);
 		}
 		this.template.getBootList().forEach(boot -> boot.init(node));
 
-		for (Binding<N, ?, ?> binding : template.bindings)
+		for (Binding<?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
-		
-		for (Element<?, N> childElement : template.<N> getChildren()) {
-			for (MetaBinding<N, ?> metaBinding : childElement.metaBindings)
-				metaBinding.init(this, childElement);
-			if (childElement.metaBindings.isEmpty())
+
+		for (Element<?> childElement : template.getChildren()) {
+			if (childElement.metaBinding != null)
+				childElement.metaBinding.init(this, childElement);
+			else
 				createChildContext(null, modelContext, childElement);
 		}
 	}
@@ -58,53 +47,49 @@ public class ViewContext<M extends Model, N> {
 		return modelContext;
 	}
 
-	public <SUBNODE> ViewContext<?, SUBNODE> createChildContext(Integer index, ModelContext childModelContext, Element<?, SUBNODE> template) {
+	public ViewContext<?> createChildContext(Integer index, ModelContext childModelContext, Element<?> template) {
 		int indexInChildren = computeIndex(index, template);
-		return new ViewContext<>(indexInChildren, this, childModelContext, template, template.createNode(getNode()));
+		return new ViewContext<>(indexInChildren, this, childModelContext, template, template.createNode(node.getId()));
 	}
 
-	@SuppressWarnings("unchecked")
-	private RootViewContext<?, N> getRootViewContext() {
-		ViewContext<?, ?> parent = this.parent;
-		while (parent != null) {
-
-			try {
-				return (RootViewContext<?, N>) parent;
-			} catch (ClassCastException ignore) {
-			}
-			parent = parent.parent;
-		}
-		throw new IllegalStateException("parent null");
+	protected RootViewContext<?> getRootViewContext() {
+		return parent.getRootViewContext();
 	}
 
-	public N getNode() {
+	public HtmlDomNode getNode() {
 		return node;
 	}
 
-	private Map<Element<?, ?>, Integer> sizeByElement = new IdentityHashMap<Element<?, ?>, Integer>() {
+	private Map<Element<?>, Integer> sizeByElement = new IdentityHashMap<Element<?>, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
 		public Integer get(Object key) {
 			Integer size = super.get(key);
 			if (size == null)
-				put((Element<?, ?>) key, size = 0);
+				put((Element<?>) key, size = 0);
 			return size;
 		};
 	};
 
+	void insertChild(int index) {
+		parent.incrementSize(template);
+		node.sendAdd(index);
+		getRootViewContext().add(node.getId(), node);
+	}
+
 	void destroyChild() {
 		parent.decrementSize(template);
-		nodeChildren.remove(getNode());
-		// TODO remove ids from viewrootcontext
+		node.sendRemove();
+		getRootViewContext().remove(node.getId());
 
 	}
 
-	private void incrementSize(Element<?, ?> child) {
+	private void incrementSize(Element<?> child) {
 		sizeByElement.put(child, sizeByElement.get(child) + 1);
 	}
 
-	private void decrementSize(Element<?, ?> child) {
+	private void decrementSize(Element<?> child) {
 		int size = sizeByElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
@@ -113,9 +98,9 @@ public class ViewContext<M extends Model, N> {
 			sizeByElement.put(child, size);
 	}
 
-	private int computeIndex(Integer nullable, Element<?, ?> childElement) {
+	private int computeIndex(Integer nullable, Element<?> childElement) {
 		int indexInChildren = nullable == null ? sizeByElement.get(childElement) : nullable;
-		for (Element<?, ?> child : template.getChildren()) {
+		for (Element<?> child : template.getChildren()) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeByElement.get(child);
@@ -123,11 +108,16 @@ public class ViewContext<M extends Model, N> {
 		return indexInChildren;
 	}
 
-	public static class RootViewContext<M extends Model, N> extends ViewContext<M, N> {
+	public static class RootViewContext<M extends Model> extends ViewContext<M> {
 		private Map<String, HtmlDomNode> nodeById;
 
-		public RootViewContext(Model model, Element<M, N> template, N node) {
+		public RootViewContext(Model model, Element<M> template, HtmlDomNode node) {
 			super(0, null, new RootModelContext(model), template, node);
+		}
+
+		@Override
+		protected RootViewContext<?> getRootViewContext() {
+			return this;
 		}
 
 		private Map<String, HtmlDomNode> getMap() {
