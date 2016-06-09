@@ -29,14 +29,16 @@ public abstract class AbstractTest extends Arquillian {
 	@Deployment
 	public static JavaArchive createDeployment() {
 		JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class);
-		javaArchive.addClasses(UserClassesProvider.class, PersistentDirectoryProvider.class, PersistentDirectoryConfig.class, /* EventLauncher.class, */CacheSessionProvider.class, CacheRequestProvider.class, EngineProvider.class, Count.class);
+		javaArchive.addClasses(UserClassesProvider.class, PersistentDirectoryProvider.class, PersistentDirectoryConfig.class, /* EventLauncher.class, */
+				CacheSessionProvider.class, CacheRequestProvider.class, EngineProvider.class, Count.class);
 		createBeansXml(javaArchive);
 		return javaArchive;
 	}
 
 	private static void createBeansXml(JavaArchive javaArchive) {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("<beans xmlns=\"http://java.sun.com/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\" http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/beans_1_0.xsd\">");
+		stringBuilder
+				.append("<beans xmlns=\"http://java.sun.com/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\" http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/beans_1_0.xsd\">");
 		stringBuilder.append("<alternatives> ");
 		stringBuilder.append("<class>org.genericsystem.cdi.PersistentDirectoryConfig</class>");
 		stringBuilder.append("</alternatives>");

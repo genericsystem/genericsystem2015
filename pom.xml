@@ -42,11 +42,9 @@
 		<module>gs-cdi</module>
     	<module>gs-common</module>
 	    <module>gs-reactor</module>
-	    <module>gs-carcolor-model</module>
 	    <module>gs-todomvc</module>
 	    <module>gs-example-reactor</module>
-    
-    <module>gs-spring</module>
+    	<module>gs-spring</module>
   </modules>
 
 	<distributionManagement>
