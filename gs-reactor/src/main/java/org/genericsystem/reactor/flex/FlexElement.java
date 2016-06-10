@@ -8,10 +8,6 @@ import org.genericsystem.reactor.html.HtmlH1;
 
 public class FlexElement<M extends Model> extends Element<M> {
 
-	public FlexElement(Element<?> parent, FlexTag tag) {
-		this(parent, tag, FlexDirection.ROW);
-	}
-
 	public FlexElement(Element<?> parent, FlexTag tag, FlexDirection direction) {
 		super(parent, tag.toString());
 		addStyle("display", "flex");

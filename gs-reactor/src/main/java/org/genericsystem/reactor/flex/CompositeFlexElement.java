@@ -23,12 +23,12 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 		footer();
 	}
 
-	protected Element<?> header() {
-		return null;
+	protected void header() {
+
 	}
 
-	protected Element<?> sections() {
-		return new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+	protected void sections() {
+		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
 			{
 				forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
 						(gs, extractor) -> getModelConstructor().build(gs, extractor));
@@ -37,8 +37,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 		};
 	}
 
-	protected Element<?> footer() {
-		return null;
+	protected void footer() {
 	}
 
 	public static class TitleCompositeFlexElement<M extends CompositeModel> extends CompositeFlexElement<M> {
@@ -60,8 +59,8 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 		}
 
 		@Override
-		protected Element<?> header() {
-			return new FlexElement<CompositeModel>(this, FlexTag.HEADER, FlexDirection.ROW) {
+		protected void header() {
+			new FlexElement<CompositeModel>(this, FlexTag.HEADER, FlexDirection.ROW) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("background-color", "#ffa500");
@@ -94,16 +93,20 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 		}
 
 		@Override
-		protected Element<?> sections() {
-			FlexElement<CompositeModel> sections = (FlexElement<CompositeModel>) super.sections();
-			sections.bindStyle("background-color");
-			sections.forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-					(gs, extractor) -> new CompositeModel(gs, extractor) {
-						{
-							getStyleProperty(sections, "background-color").setValue(getString().getValue());
-						}
-					});
-			return sections;
-		};
+		protected void sections() {
+			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+				{
+					FlexElement<CompositeModel> row = this;
+					bindStyle("background-color");
+					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
+							(gs, extractor) -> new CompositeModel(gs, extractor) {
+								{
+									getStyleProperty(row, "background-color").setValue(getString().getValue());
+								}
+							});
+					new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+				}
+			};
+		}
 	}
 }

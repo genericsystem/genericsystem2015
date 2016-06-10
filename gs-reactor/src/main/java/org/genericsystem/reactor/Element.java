@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +10,14 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
@@ -25,12 +30,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -56,6 +55,7 @@ public abstract class Element<M extends Model> {
 		this.parent = parent;
 		if (parent != null)
 			parent.getChildren().add(this);
+
 	}
 
 	public String getTag() {
@@ -93,7 +93,8 @@ public abstract class Element<M extends Model> {
 
 	}
 
-	protected <T, NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel, T styleClass) {
+	protected <T, NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel,
+			T styleClass) {
 		bindings.add(Binding.bindSet(applyOnModel, styleClass, applyOnNode));
 	}
 
@@ -123,11 +124,13 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> (genericSupplier.apply(gs) != null ? FXCollections.singletonObservableList(genericSupplier.apply(gs)) : FXCollections.emptyObservableList()), constructor));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> (genericSupplier.apply(gs) != null
+				? FXCollections.singletonObservableList(genericSupplier.apply(gs)) : FXCollections.emptyObservableList()), constructor));
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor,
+				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
 	}
 
 	public ServerWebSocket getWebSocket() {
