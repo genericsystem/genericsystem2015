@@ -27,14 +27,12 @@ public class ViewContext<M extends Model> {
 		this.modelContext = modelContext;
 		modelContext.register(this);
 
-		if (parent != null) {
+		if (parent != null)
 			insertChild(indexInChildren);
-		}
-		this.template.getBootList().forEach(boot -> boot.init(node));
-
+		for (Boot<Element<M>.HtmlDomNode> boot : template.getBootList())
+			boot.init(node);
 		for (Binding<?, ?> binding : template.bindings)
 			binding.init(modelContext, getNode());
-
 		for (Element<?> childElement : template.getChildren()) {
 			if (childElement.metaBinding != null)
 				childElement.metaBinding.init(this, childElement);
