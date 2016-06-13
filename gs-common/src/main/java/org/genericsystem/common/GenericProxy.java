@@ -1,11 +1,12 @@
 package org.genericsystem.common;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.List;
 
-import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.defaults.DefaultGeneric;
+
+import javassist.util.proxy.ProxyObject;
 
 public interface GenericProxy extends DefaultGeneric<Generic> {
 	@Override
@@ -56,4 +57,9 @@ public interface GenericProxy extends DefaultGeneric<Generic> {
 	default Vertex getVertex() {
 		return getProxyHandler().getVertex();
 	}
+
+	default <A extends Annotation> A getAnnotation(Class<A> annotation) {
+		return getRoot().getAnnotedClass((Generic) this).getAnnotation(annotation);
+	}
+
 }

@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
 import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
@@ -269,7 +270,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										addStyle("background-color", "#dda5e2");
+										bindStyle("background-color", "#dda5e2");
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
 										select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
@@ -279,7 +280,8 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										addStyle("background-color", "#dda5e2");
+										bindStyle("background-color", model -> model.getObservableStyle(this, "background-color",
+												model.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? model.getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
