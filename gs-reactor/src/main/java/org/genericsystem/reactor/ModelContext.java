@@ -63,6 +63,7 @@ public class ModelContext {
 		return viewContexts;
 	}
 
+	@Deprecated
 	public <T> Supplier<T> applyOnModel(Function<Model, T> methodReference) {
 		return () -> methodReference.apply(this.getModel());
 	}

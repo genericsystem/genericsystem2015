@@ -11,6 +11,7 @@ import javafx.beans.property.Property;
  *
  * @param <NODE>
  */
+@Deprecated
 public class Boot<NODE> {
 
 	private final Consumer<NODE> consumer;
@@ -23,10 +24,12 @@ public class Boot<NODE> {
 		consumer.accept(node);
 	}
 
+	@Deprecated
 	public static <NODE, VALUE> Boot<NODE> setProperty(Function<NODE, Property<VALUE>> applyOnNode, VALUE value) {
 		return new Boot<>(node -> applyOnNode.apply(node).setValue(value));
 	}
 
+	@Deprecated
 	public static <NODE, VALUE> Boot<NODE> addProperty(Function<NODE, Set<VALUE>> applyOnNode, VALUE value) {
 		return new Boot<>(node -> applyOnNode.apply(node).add(value));
 	}
@@ -35,6 +38,7 @@ public class Boot<NODE> {
 	// return new Boot<>(node -> applyOnNode.apply(node).put(attr, value));
 	// }
 
+	@Deprecated
 	public static <NODE> Boot<NODE> apply(Consumer<NODE> applyOnNode) {
 		return new Boot<>(object -> applyOnNode.accept(object));
 	}

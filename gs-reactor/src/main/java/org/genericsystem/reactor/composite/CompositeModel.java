@@ -21,6 +21,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -137,7 +139,8 @@ public class CompositeModel extends Model {
 		return observableList;
 	}
 
-	private Map<Element<?>, Map<String, Property<String>>> observableStyles = new HashMap<Element<?>, Map<String, Property<String>>>() {
+	@Deprecated
+	private Map<Element<?>, Map<String, Property<String>>> observableStylesOld = new HashMap<Element<?>, Map<String, Property<String>>>() {
 		private static final long serialVersionUID = -1827306835524845605L;
 
 		@Override
@@ -159,14 +162,49 @@ public class CompositeModel extends Model {
 		};
 	};
 
+	private Map<Element<?>, ObservableSet<String>> observableStyleClasses = new HashMap<Element<?>, ObservableSet<String>>() {
+		private static final long serialVersionUID = -1827306835524845605L;
+
+		@Override
+		public ObservableSet<String> get(Object key) {
+			ObservableSet<String> result = super.get(key);
+			if (result == null)
+				put((Element<?>) key, result = FXCollections.observableSet());
+			return result;
+		};
+
+	};
+
+	public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
+		return observableStyleClasses.get(element);
+	}
+
+	private Map<Element<?>, ObservableMap<String, String>> observableStyles = new HashMap<Element<?>, ObservableMap<String, String>>() {
+		private static final long serialVersionUID = -1827306835524845605L;
+
+		@Override
+		public ObservableMap<String, String> get(Object key) {
+			ObservableMap<String, String> result = super.get(key);
+			if (result == null)
+				put((Element<?>) key, result = FXCollections.observableHashMap());
+			return result;
+		};
+	};
+
+	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
+		return observableStyles.get(element);
+	}
+
+	@Deprecated
 	public ObservableValue<String> getObservableStyle(Element<?> element, String propertyName, String initialValue) {
 		Property<String> result = getStyleProperty(element, propertyName);
 		result.setValue(initialValue);
 		return result;
 	}
 
+	@Deprecated
 	public Property<String> getStyleProperty(Element<?> element, String propertyName) {
-		return observableStyles.get(element).get(propertyName);
+		return observableStylesOld.get(element).get(propertyName);
 	}
 
 	public void flush() {

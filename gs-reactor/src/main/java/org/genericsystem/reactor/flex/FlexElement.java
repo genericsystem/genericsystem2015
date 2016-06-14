@@ -10,6 +10,8 @@ public class FlexElement<M extends Model> extends Element<M> {
 
 	public FlexElement(Element<?> parent, FlexTag tag, FlexDirection direction) {
 		super(parent, tag.toString());
+		bindStyles();
+		bindStyleClasses();
 		addStyle("display", "flex");
 		addStyle("flex-direction", direction.toString());
 		addStyle("flex-wrap", "nowrap");

@@ -1,5 +1,6 @@
 package org.genericsystem.reactor;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -9,6 +10,8 @@ import org.genericsystem.reactor.Element.HtmlDomNode;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -66,13 +69,23 @@ public class Binding<X, Y> {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.actionBinder());
 	}
 
-	public static <M, W> Binding<ObservableValue<Boolean>, Set<W>> bindSet(Function<M, ObservableValue<Boolean>> applyOnModel, W styleClass,
-			Function<? extends HtmlDomNode, Set<W>> applyOnNode) {
-		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder(styleClass));
+	public static <M> Binding<ObservableValue<Boolean>, Set<String>> bindStyleClass(Element<?> element, Function<M, ObservableValue<Boolean>> applyOnModel,
+			String styleClass) {
+		return Binding.bind(null, applyOnModel, Binder.styleClassBinder(element, styleClass));
+	}
+
+	public static <M, W> Binding<ObservableSet<String>, Set<String>> bindSet(Function<M, ObservableSet<String>> applyOnModel,
+			Function<? extends HtmlDomNode, Set<String>> applyOnNode) {
+		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder());
 	}
 
 	public static <M, W> Binding<ObservableList<W>, Property<ObservableList<W>>> bindObservableList(Function<M, ObservableList<W>> applyOnModel,
 			Function<? extends HtmlDomNode, Property<ObservableList<W>>> applyOnNode) {
-		return Binding.<M, ObservableList<W>, Property<ObservableList<W>>> bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder());
+		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder());
+	}
+
+	public static <M> Binding<ObservableMap<String, String>, Map<String, String>> bindMap(Function<M, ObservableMap<String, String>> applyOnModel,
+			Function<? extends HtmlDomNode, Map<String, String>> applyOnNode) {
+		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
 	}
 }

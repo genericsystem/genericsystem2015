@@ -27,7 +27,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
+import javafx.collections.WeakMapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -84,6 +88,11 @@ public abstract class Element<M extends Model> {
 
 	}
 
+	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
+			Function<M, ObservableMap<String, String>> applyOnModel) {
+		bindings.add(Binding.bindMap(applyOnModel, applyOnNode));
+	}
+
 	protected <T, NODE extends HtmlDomNode> void addActionBinding(Function<NODE, Property<T>> applyOnNode, Consumer<M> applyOnModel) {
 		bindings.add(Binding.bindAction(applyOnModel, applyOnNode));
 	}
@@ -93,9 +102,12 @@ public abstract class Element<M extends Model> {
 
 	}
 
-	protected <T, NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<T>> applyOnNode, Function<M, ObservableValue<Boolean>> applyOnModel,
-			T styleClass) {
-		bindings.add(Binding.bindSet(applyOnModel, styleClass, applyOnNode));
+	protected <NODE extends HtmlDomNode> void addStyleClassBinding(Function<M, ObservableValue<Boolean>> applyOnModel, String styleClass) {
+		bindings.add(Binding.bindStyleClass(this, applyOnModel, styleClass));
+	}
+
+	protected <NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<String>> applyOnNode, Function<M, ObservableSet<String>> applyOnModel) {
+		bindings.add(Binding.bindSet(applyOnModel, applyOnNode));
 	}
 
 	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
@@ -185,20 +197,31 @@ public abstract class Element<M extends Model> {
 		addBinding(HtmlDomNode::getText, applyOnModel);
 	}
 
+	public void bindStyles() {
+		addMapBinding(HtmlDomNode::getStyles, model -> ((CompositeModel) model).getObservableStyles(this));
+	}
+
+	public void bindStyleClasses() {
+		addSetBinding(HtmlDomNode::getStyleClasses, model -> ((CompositeModel) model).getObservableStyleClasses(this));
+	}
+
+	@Deprecated
 	public void bindStyle(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
 		addBinding(domNode -> domNode.getStyle(propertyName), applyOnModel);
 	}
 
+	@Deprecated
 	public void bindStyle(String propertyName, String initialValue) {
 		bindStyle(propertyName, model -> ((CompositeModel) model).getObservableStyle(this, propertyName, initialValue));
 	}
 
+	@Deprecated
 	public void bindStyle(String propertyName) {
 		bindStyle(propertyName, model -> ((CompositeModel) model).getStyleProperty(this, propertyName));
 	}
 
-	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String text) {
-		addSetBinding(HtmlDomNode::getStyleClasses, function, text);
+	public void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> function, String styleClass) {
+		addStyleClassBinding(function, styleClass);
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);
@@ -263,7 +286,8 @@ public abstract class Element<M extends Model> {
 			};
 		};
 
-		private final Map<String, String> styles = new HashMap<String, String>() {
+		@Deprecated
+		private final Map<String, String> stylesOld = new HashMap<String, String>() {
 
 			private static final long serialVersionUID = 3900526227565046414L;
 
@@ -282,6 +306,12 @@ public abstract class Element<M extends Model> {
 			}
 		};
 
+		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
+
+		public ObservableMap<String, String> getStyles() {
+			return styles;
+		}
+
 		public HtmlDomNode(String parentId) {
 			this.parentId = parentId;
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
@@ -289,6 +319,15 @@ public abstract class Element<M extends Model> {
 				System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : "").encodePrettily());
 				sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, id).put(TEXT_CONTENT, n != null ? n : ""));
 			});
+			MapChangeListener<String, String> stylesListener = change -> {
+				if (change.wasAdded() && change.getValueAdded() != null && !change.getValueAdded().isEmpty()) {
+					sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, id).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE,
+							change.getValueAdded()));
+				} else {
+					sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, id).put(STYLE_PROPERTY, change.getKey()));
+				}
+			};
+			styles.addListener(new WeakMapChangeListener<>(stylesListener));
 		}
 
 		public void sendAdd(int index) {
