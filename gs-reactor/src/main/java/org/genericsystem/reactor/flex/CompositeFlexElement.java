@@ -97,11 +97,10 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
 				{
 					FlexElement<CompositeModel> row = this;
-					bindStyle("background-color");
 					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
 							(gs, extractor) -> new CompositeModel(gs, extractor) {
 								{
-									getStyleProperty(row, "background-color").setValue(getString().getValue());
+									getObservableStyles(row).put("background-color", getString().getValue());
 								}
 							});
 					new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);

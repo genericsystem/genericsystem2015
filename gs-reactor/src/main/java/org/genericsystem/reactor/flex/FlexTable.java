@@ -248,9 +248,10 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "200px");
-						addStyle("background-color", "#bba5ff");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
+						addInitBinding(model -> model.getObservableStyles(this).put("background-color",
+								model.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? model.getString().getValue() : "#bba5ff"));
 						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
@@ -280,8 +281,9 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										addStyle("background-color", model -> model.getObservableStyle(this, "background-color",
-												model.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? model.getString().getValue() : "#dda5e2"));
+										addInitBinding(model -> model.getObservableStyles(this).put("background-color",
+												model.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? model.getString().getValue()
+														: "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,

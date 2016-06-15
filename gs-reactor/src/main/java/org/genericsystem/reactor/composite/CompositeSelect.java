@@ -1,9 +1,10 @@
 package org.genericsystem.reactor.composite;
 
 import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
+
+import javafx.collections.MapChangeListener;
 
 public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> implements Composite<M> {
 
@@ -26,7 +27,7 @@ public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> imp
 
 		public ColorsSelect(Element<?> parent) {
 			super(parent);
-			bindStyle("background-color", model -> model.getObservableStyles(ColorsSelect.this).put("background-color", model.getString().getValue()));
+			addStyle("background-color", "White");
 		}
 
 		@Override
@@ -37,12 +38,19 @@ public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> imp
 
 					HtmlOption<CompositeModel> row = this;
 					bindText(CompositeModel::getString);
-					bindAction(model -> model.getParent().getObservableStyles(parent).put("background-color", model.getString().getValue()));
-					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> new CompositeModel(gs, extractor) {
-						{
-							getObservableStyles(row).put("background-color", getString().getValue());
-						}
+					bindAction(model -> {
+						model.getParent().getObservableStyles(parent)
+								.addListener((MapChangeListener<String, String>) change -> System.out.println("zzz" + change));
+						System.out.println("put : background-color," + model.getString().getValue());
+						model.getParent().getObservableStyles(parent).remove("background-color");
+						model.getParent().getObservableStyles(parent).put("background-color", model.getString().getValue());
 					});
+					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
+							(gs, extractor) -> new CompositeModel(gs, extractor) {
+								{
+									getObservableStyles(row).put("background-color", getString().getValue());
+								}
+							});
 				}
 
 			};

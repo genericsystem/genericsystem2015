@@ -1,7 +1,5 @@
 package org.genericsystem.todomvc;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -21,6 +19,8 @@ import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.html.HtmlSpan;
 import org.genericsystem.reactor.html.HtmlStrong;
 import org.genericsystem.reactor.html.HtmlUl;
+
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
@@ -111,21 +111,21 @@ public class TodoApp extends HtmlApp<TodoList> {
 										addStyleClass("filters");
 										new HtmlLi<TodoList>(this) {
 											{
-												new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass(TodoList::getAllMode, "selected");
-												;
+												new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass(TodoList::getAllMode,
+														"selected");
 											}
 										};
 										new HtmlLi<TodoList>(this) {
 											{
 
-												new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive).bindOptionalStyleClass(TodoList::getActiveMode, "selected");
-												;
+												new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive)
+														.bindOptionalStyleClass(TodoList::getActiveMode, "selected");
 											}
 										};
 										new HtmlLi<TodoList>(this) {
 											{
-												new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted).bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
-												;
+												new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted)
+														.bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
 											}
 										};
 									}

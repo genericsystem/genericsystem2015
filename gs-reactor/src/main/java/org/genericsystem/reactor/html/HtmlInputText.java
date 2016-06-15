@@ -20,9 +20,8 @@ public class HtmlInputText<M extends Model> extends Element<M> {
 		return new InputTextHtmlDomNode(parentId);
 	}
 
-	public HtmlInputText<M> bindAction(Consumer<M> applyOnModel) {
+	public void bindAction(Consumer<M> applyOnModel) {
 		addActionBinding(InputTextHtmlDomNode::getEnterProperty, applyOnModel);
-		return this;
 	}
 
 }

@@ -80,6 +80,7 @@ public class TodoList extends Model {
 	}
 
 	public void showActive() {
+		System.out.println("Show active");
 		mode.setValue(ACTIVE);
 	}
 

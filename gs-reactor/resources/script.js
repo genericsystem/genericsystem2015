@@ -24,9 +24,15 @@ function onMessageReceived(evt) {
 		elt.id = message.nodeId;
 		switch (message.tagHtml) {						
 		case "a": 		
-			elt.href="#";						
+			elt.href="#";
+			elt.onclick = function () {
+				wsocket.send(JSON.stringify({
+					msgType : "A",
+					nodeId : elt.id
+				}));
+			};
 			break;
-		case "button":						
+		case "button":
 			elt.onclick = function () {
 			wsocket.send(JSON.stringify({
 				msgType : "A",
@@ -34,7 +40,6 @@ function onMessageReceived(evt) {
 			}));
 		};
 		break;
-
 		case "input": 
 			elt.type = message.type;
 			switch (message.type) 

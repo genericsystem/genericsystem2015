@@ -20,8 +20,7 @@ public class HtmlOption<M extends Model> extends Element<M> {
 		return new ActionHtmlNode(parentId);
 	}
 
-	public HtmlOption<M> bindAction(Consumer<M> applyOnModel) {
-		addActionBinding(ActionHtmlNode::getActionProperty, applyOnModel);
-		return this;
+	public void bindAction(Consumer<M> consumer) {
+		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}
 }

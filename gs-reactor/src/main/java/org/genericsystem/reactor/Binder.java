@@ -2,9 +2,10 @@ package org.genericsystem.reactor;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.genericsystem.reactor.Element.HtmlDomNode;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -13,9 +14,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
-
-import org.genericsystem.reactor.Element.HtmlDomNode;
-import org.genericsystem.reactor.composite.CompositeModel;
 
 /**
  * @author Nicolas Feybesse
@@ -26,8 +24,8 @@ import org.genericsystem.reactor.composite.CompositeModel;
  */
 public interface Binder<X, Y> {
 
-	default void init(Function<? extends HtmlDomNode, Y> applyOnNode, Function<Model, X> method, ModelContext modelContext, HtmlDomNode node) {
-		init(((Function<HtmlDomNode, Y>) applyOnNode).apply(node), modelContext.applyOnModel(method));
+	default void init(Function<? extends HtmlDomNode, Y> applyOnNode, Function<? extends Model, X> applyOnModel, ModelContext modelContext, HtmlDomNode node) {
+		init(((Function<HtmlDomNode, Y>) applyOnNode).apply(node), () -> applyOnModel.apply(modelContext.getModel()));
 	}
 
 	default void init(Y nodeResult, Supplier<X> applyOnModel) {
@@ -83,25 +81,26 @@ public interface Binder<X, Y> {
 		};
 	}
 
-	@Deprecated
-	public static Binder<ObservableValue<Boolean>, Set<String>> styleClassBinder(Element<?> element, String styleClass) {
-		return new Binder<ObservableValue<Boolean>, Set<String>>() {
-
-			@Override
-			public void init(Function<? extends HtmlDomNode, Set<String>> applyOnNode, Function<Model, ObservableValue<Boolean>> method, ModelContext modelContext, HtmlDomNode node) {
-				ObservableValue<Boolean> optional = modelContext.applyOnModel(method).get();
-				ObservableSet<String> styleClasses = modelContext.applyOnModel(model -> ((CompositeModel) model).getObservableStyleClasses(element)).get();
-				Consumer<Boolean> consumer = bool -> {
-					if (bool)
-						styleClasses.add(styleClass);
-					else
-						styleClasses.remove(styleClass);
-				};
-				consumer.accept(optional.getValue());
-				optional.addListener((o, ov, nv) -> consumer.accept(nv));
-			}
-		};
-	}
+	// @Deprecated
+	// public static Binder<ObservableValue<Boolean>, Set<String>> styleClassBinder(Element<?> element, String styleClass) {
+	// return new Binder<ObservableValue<Boolean>, Set<String>>() {
+	//
+	// @Override
+	// public void init(Function<? extends HtmlDomNode, Set<String>> applyOnNode, Function<? extends Model, ObservableValue<Boolean>> method,
+	// ModelContext modelContext, HtmlDomNode node) {
+	// ObservableValue<Boolean> optional = modelContext.applyOnModel(method).get();
+	// ObservableSet<String> styleClasses = modelContext.applyOnModel(model -> ((CompositeModel) model).getObservableStyleClasses(element)).get();
+	// Consumer<Boolean> consumer = bool -> {
+	// if (bool)
+	// styleClasses.add(styleClass);
+	// else
+	// styleClasses.remove(styleClass);
+	// };
+	// consumer.accept(optional.getValue());
+	// optional.addListener((o, ov, nv) -> consumer.accept(nv));
+	// }
+	// };
+	// }
 
 	public static Binder<ObservableSet<String>, Set<String>> observableSetBinder() {
 		return new Binder<ObservableSet<String>, Set<String>>() {

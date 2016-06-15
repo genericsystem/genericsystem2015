@@ -22,9 +22,8 @@ public class HtmlCheckBox<M extends Model> extends Element<M> {
 		return new CheckBoxHtmlDomNode(parentId);
 	}
 
-	public HtmlCheckBox<M> bindCheckedBidirectional(Function<M, Property<Boolean>> applyOnModel) {
+	public void bindCheckedBidirectional(Function<M, Property<Boolean>> applyOnModel) {
 		addBidirectionalBinding(CheckBoxHtmlDomNode::getChecked, applyOnModel);
-		return this;
 	}
 
 }
