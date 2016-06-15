@@ -270,7 +270,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										bindStyle("background-color", "#dda5e2");
+										addStyle("background-color", "#dda5e2");
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
 										select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
@@ -280,7 +280,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										bindStyle("background-color", model -> model.getObservableStyle(this, "background-color",
+										addStyle("background-color", model -> model.getObservableStyle(this, "background-color",
 												model.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? model.getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");

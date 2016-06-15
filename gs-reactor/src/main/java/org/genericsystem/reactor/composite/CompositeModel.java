@@ -10,19 +10,17 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -87,14 +85,12 @@ public class CompositeModel extends Model {
 		};
 
 		public static final ObservableListExtractor ATTRIBUTES_OF_TYPE = generics -> {
-			System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " "
-					+ generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
+			System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " " + generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
 			return generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0]));
 		};
 
 		public static final ObservableListExtractor ATTRIBUTES_OF_INSTANCES = generics -> {
-			System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " "
-					+ generics[1].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[1])));
+			System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " " + generics[1].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[1])));
 			return generics[1].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[1]));
 		};
 
@@ -131,10 +127,8 @@ public class CompositeModel extends Model {
 
 	private Set<ObservableList<?>> observableLists = new HashSet<ObservableList<?>>();
 
-	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics),
-				generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
+	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics), generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
 		observableLists.add(observableList);// Prevents garbaging
 		return observableList;
 	}
@@ -161,39 +155,6 @@ public class CompositeModel extends Model {
 			return result;
 		};
 	};
-
-	private Map<Element<?>, ObservableSet<String>> observableStyleClasses = new HashMap<Element<?>, ObservableSet<String>>() {
-		private static final long serialVersionUID = -1827306835524845605L;
-
-		@Override
-		public ObservableSet<String> get(Object key) {
-			ObservableSet<String> result = super.get(key);
-			if (result == null)
-				put((Element<?>) key, result = FXCollections.observableSet());
-			return result;
-		};
-
-	};
-
-	public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
-		return observableStyleClasses.get(element);
-	}
-
-	private Map<Element<?>, ObservableMap<String, String>> observableStyles = new HashMap<Element<?>, ObservableMap<String, String>>() {
-		private static final long serialVersionUID = -1827306835524845605L;
-
-		@Override
-		public ObservableMap<String, String> get(Object key) {
-			ObservableMap<String, String> result = super.get(key);
-			if (result == null)
-				put((Element<?>) key, result = FXCollections.observableHashMap());
-			return result;
-		};
-	};
-
-	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
-		return observableStyles.get(element);
-	}
 
 	@Deprecated
 	public ObservableValue<String> getObservableStyle(Element<?> element, String propertyName, String initialValue) {

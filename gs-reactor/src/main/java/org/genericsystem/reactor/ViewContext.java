@@ -31,7 +31,7 @@ public class ViewContext<M extends Model> {
 			insertChild(indexInChildren);
 		for (Boot<Element<M>.HtmlDomNode> boot : template.getBootList())
 			boot.init(node);
-		for (Binding<?, ?> binding : template.bindings)
+		for (Binding binding : template.bindings)
 			binding.init(modelContext, getNode());
 		for (Element<?> childElement : template.getChildren()) {
 			if (childElement.metaBinding != null)

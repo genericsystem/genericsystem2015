@@ -6,9 +6,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.reactor.Element.HtmlDomNode;
-import org.genericsystem.reactor.composite.CompositeModel;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
@@ -16,6 +13,9 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
+
+import org.genericsystem.reactor.Element.HtmlDomNode;
+import org.genericsystem.reactor.composite.CompositeModel;
 
 /**
  * @author Nicolas Feybesse
@@ -83,12 +83,12 @@ public interface Binder<X, Y> {
 		};
 	}
 
+	@Deprecated
 	public static Binder<ObservableValue<Boolean>, Set<String>> styleClassBinder(Element<?> element, String styleClass) {
 		return new Binder<ObservableValue<Boolean>, Set<String>>() {
 
 			@Override
-			public void init(Function<? extends HtmlDomNode, Set<String>> applyOnNode, Function<Model, ObservableValue<Boolean>> method,
-					ModelContext modelContext, HtmlDomNode node) {
+			public void init(Function<? extends HtmlDomNode, Set<String>> applyOnNode, Function<Model, ObservableValue<Boolean>> method, ModelContext modelContext, HtmlDomNode node) {
 				ObservableValue<Boolean> optional = modelContext.applyOnModel(method).get();
 				ObservableSet<String> styleClasses = modelContext.applyOnModel(model -> ((CompositeModel) model).getObservableStyleClasses(element)).get();
 				Consumer<Boolean> consumer = bool -> {

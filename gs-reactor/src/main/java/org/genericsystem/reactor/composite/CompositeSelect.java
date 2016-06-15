@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.composite;
 
 import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 
@@ -25,7 +26,7 @@ public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> imp
 
 		public ColorsSelect(Element<?> parent) {
 			super(parent);
-			bindStyle("background-color", model -> model.getObservableStyle(ColorsSelect.this, "background-color", model.getString().getValue()));
+			bindStyle("background-color", model -> model.getObservableStyles(ColorsSelect.this).put("background-color", model.getString().getValue()));
 		}
 
 		@Override
@@ -33,17 +34,15 @@ public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> imp
 			new HtmlOption<CompositeModel>(this) {
 				{
 					ColorsSelect<M> parent = ColorsSelect.this;
-					bindStyle("background-color");
+
 					HtmlOption<CompositeModel> row = this;
 					bindText(CompositeModel::getString);
-					bindAction(
-							model -> ((CompositeModel) model.getParent()).getStyleProperty(parent, "background-color").setValue(model.getString().getValue()));
-					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-							(gs, extractor) -> new CompositeModel(gs, extractor) {
-								{
-									getStyleProperty(row, "background-color").setValue(getString().getValue());
-								}
-							});
+					bindAction(model -> model.getParent().getObservableStyles(parent).put("background-color", model.getString().getValue()));
+					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> new CompositeModel(gs, extractor) {
+						{
+							getObservableStyles(row).put("background-color", getString().getValue());
+						}
+					});
 				}
 
 			};
