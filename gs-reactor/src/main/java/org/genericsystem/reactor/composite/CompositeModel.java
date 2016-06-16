@@ -2,9 +2,7 @@ package org.genericsystem.reactor.composite;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -12,11 +10,12 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
-import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -56,6 +55,10 @@ public class CompositeModel extends Model {
 	// TODO KK no cache ?
 	public ObservableValue<String> getString() {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
+	}
+
+	public StringExtractor getStringExtractor() {
+		return stringExtractor;
 	}
 
 	public void remove() {
@@ -109,7 +112,7 @@ public class CompositeModel extends Model {
 
 	@FunctionalInterface
 	public static interface StringExtractor extends Function<Generic, String> {
-		public static final StringExtractor EXTRACTOR = generic -> Objects.toString(generic.getValue());
+		public static final StringExtractor EXTRACTOR = generic -> generic != null ? Objects.toString(generic.getValue()) : "";
 		public static final StringExtractor SIMPLE_CLASS_EXTRACTOR = generic -> {
 			Serializable value = generic.getValue();
 			return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
@@ -137,41 +140,6 @@ public class CompositeModel extends Model {
 		return observableList;
 	}
 
-	@Deprecated
-	private Map<Element<?>, Map<String, Property<String>>> observableStylesOld = new HashMap<Element<?>, Map<String, Property<String>>>() {
-		private static final long serialVersionUID = -1827306835524845605L;
-
-		@Override
-		public Map<String, Property<String>> get(Object key) {
-			Map<String, Property<String>> result = super.get(key);
-			if (result == null)
-				put((Element<?>) key, result = new HashMap<String, Property<String>>() {
-					private static final long serialVersionUID = -8866241510145377825L;
-
-					@Override
-					public Property<String> get(Object key) {
-						Property<String> result = super.get(key);
-						if (result == null)
-							put((String) key, result = new SimpleStringProperty());
-						return result;
-					};
-				});
-			return result;
-		};
-	};
-
-	@Deprecated
-	public ObservableValue<String> getObservableStyle(Element<?> element, String propertyName, String initialValue) {
-		Property<String> result = getStyleProperty(element, propertyName);
-		result.setValue(initialValue);
-		return result;
-	}
-
-	@Deprecated
-	public Property<String> getStyleProperty(Element<?> element, String propertyName) {
-		return observableStylesOld.get(element).get(propertyName);
-	}
-
 	public void flush() {
 		getGeneric().getCurrentCache().flush();
 	}
@@ -189,6 +157,24 @@ public class CompositeModel extends Model {
 
 		public Property<String> getInputString() {
 			return inputString;
+		}
+	}
+
+	public static class SelectorModel extends CompositeModel {
+		private Property<Generic> selection = new SimpleObjectProperty<>();
+		private ObservableValue<String> selectionString = Bindings.createStringBinding(() -> getStringExtractor().apply(getSelection().getValue()),
+				getSelection());
+
+		public SelectorModel(Generic[] generics, StringExtractor extractor) {
+			super(generics, extractor);
+		}
+
+		public Property<Generic> getSelection() {
+			return selection;
+		}
+
+		public ObservableValue<String> getSelectionString() {
+			return selectionString;
 		}
 	}
 

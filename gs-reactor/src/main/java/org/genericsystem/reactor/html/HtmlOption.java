@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.html;
 
-import java.util.function.Consumer;
-
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 
@@ -16,11 +14,11 @@ public class HtmlOption<M extends Model> extends Element<M> {
 	}
 
 	@Override
-	protected ActionHtmlNode createNode(String parentId) {
-		return new ActionHtmlNode(parentId);
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId);
 	}
 
-	public void bindAction(Consumer<M> consumer) {
-		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
-	}
+	// public void bindAction(Consumer<M> consumer) {
+	// addActionBinding(ActionHtmlNode::getActionProperty, consumer);
+	// }
 }

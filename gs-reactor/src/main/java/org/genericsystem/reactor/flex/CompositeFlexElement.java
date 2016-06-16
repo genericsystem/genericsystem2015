@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.composite.Composite;
+import org.genericsystem.reactor.composite.CompositeElement;
 import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
@@ -10,7 +10,7 @@ import org.genericsystem.reactor.html.HtmlLabel;
  * @author Nicolas Feybesse
  *
  */
-public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<M> implements Composite<M> {
+public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<M> implements CompositeElement<M> {
 
 	public CompositeFlexElement(Element<?> parent, FlexTag tag) {
 		this(parent, tag, FlexDirection.COLUMN);
@@ -30,7 +30,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 	protected void sections() {
 		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
 			{
-				forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> getModelConstructor().build(gs, extractor));
+				forEach(CompositeFlexElement.this);
 				new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 			}
 		};
@@ -95,12 +95,8 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 		protected void sections() {
 			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
 				{
-					FlexElement<CompositeModel> row = this;
-					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> new CompositeModel(gs, extractor) {
-						{
-							getObservableStyles(row).put("background-color", getString().getValue());
-						}
-					});
+					bindStyle("background-color", CompositeModel::getString);
+					forEach(ColorTitleCompositeFlexElement.this);
 					new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 				}
 			};

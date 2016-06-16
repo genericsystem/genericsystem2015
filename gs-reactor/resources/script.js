@@ -28,7 +28,7 @@ function onMessageReceived(evt) {
 			elt.onclick = function () {
 				wsocket.send(JSON.stringify({
 					msgType : "A",
-					nodeId : elt.id
+					nodeId : this.id
 				}));
 			};
 			break;
@@ -36,7 +36,7 @@ function onMessageReceived(evt) {
 			elt.onclick = function () {
 			wsocket.send(JSON.stringify({
 				msgType : "A",
-				nodeId : elt.id
+				nodeId : this.id
 			}));
 		};
 		break;
@@ -50,13 +50,13 @@ function onMessageReceived(evt) {
 				if (code == 13) {
 					wsocket.send(JSON.stringify({
 						msgType : "A",
-						nodeId : elt.id
+						nodeId : this.id
 					}));
 				} else {
 					wsocket.send(JSON.stringify({
 						msgType : "U",
-						nodeId : elt.id,
-						textContent : elt.value
+						nodeId : this.id,
+						textContent : this.value
 					}));
 				}
 			};
@@ -66,9 +66,9 @@ function onMessageReceived(evt) {
 				elt.onchange = function () {
 				wsocket.send(JSON.stringify({
 					msgType : "U",
-					nodeId : elt.id,
+					nodeId : this.id,
 					eltType : "checkbox",
-					checked : elt.checked
+					checked : this.checked
 				}));
 			};
 			elt.checked = message.checked;
@@ -76,14 +76,25 @@ function onMessageReceived(evt) {
 			}
 			break;	
 
-		case "option": 
-			elt.onclick = function () {
+		case "select": 
+			elt.onchange = function () {
 			wsocket.send(JSON.stringify({
-				msgType : "A",
-				nodeId : elt.id
+				msgType : "U",
+				nodeId : this.id,
+				selectedIndex : this.selectedIndex
 			}));
 		};
+		//alert(message.selectedIndex);
+		//elt.selectedIndex = message.selectedIndex;
 		break;
+//		case "option": 
+//			elt.onclick = function () {
+//			wsocket.send(JSON.stringify({
+//				msgType : "A",
+//				nodeId : this.id
+//			}));
+//		};
+//		break;
 		}
 		parent.insertBefore(elt, parent.children[message.nextId]);
 		break;
@@ -102,6 +113,9 @@ function onMessageReceived(evt) {
 		}
 		else
 			elt.textContent = message.textContent;
+		break;
+	case 'US':
+		elt.selectedIndex = message.selectedIndex;
 		break;
 	case 'AC':
 		elt.classList.add(message.styleClass);

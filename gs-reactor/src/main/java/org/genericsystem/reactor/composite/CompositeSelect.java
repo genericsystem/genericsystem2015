@@ -1,15 +1,15 @@
 package org.genericsystem.reactor.composite;
 
-import javafx.collections.MapChangeListener;
-
 import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.composite.CompositeModel.SelectorModel;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 
-public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> implements Composite<M> {
+public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> implements CompositeElement<M> {
 
 	public CompositeSelect(Element<?> parent) {
 		super(parent);
+		bindStyle("background-color", SelectorModel::getSelectionString);
 		options();
 	}
 
@@ -17,38 +17,26 @@ public class CompositeSelect<M extends CompositeModel> extends HtmlSelect<M> imp
 		new HtmlOption<CompositeModel>(this) {
 			{
 				bindText(CompositeModel::getString);
-				bindAction(CompositeModel::select);
-				forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (a, b) -> getModelConstructor().build(a, b));
+				forEach(CompositeSelect.this);
 			}
 		};
 	}
 
-	public static class ColorsSelect<M extends CompositeModel> extends CompositeSelect<M> {
+	public static class ColorsSelect<M extends SelectorModel> extends CompositeSelect<M> {
 
 		public ColorsSelect(Element<?> parent) {
 			super(parent);
-			addStyle("background-color", "White");
 		}
 
 		@Override
 		protected void options() {
+
 			new HtmlOption<CompositeModel>(this) {
 				{
-					ColorsSelect<M> parent = ColorsSelect.this;
-
-					HtmlOption<CompositeModel> row = this;
 					bindText(CompositeModel::getString);
-					bindAction(model -> {
-						// TODO put directly
-						model.getParent().getObservableStyles(parent).addListener((MapChangeListener<String, String>) change -> System.out.println("zzz" + change));
-						model.getParent().getObservableStyles(parent).remove("background-color");
-						model.getParent().getObservableStyles(parent).put("background-color", model.getString().getValue());
-					});
-					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> new CompositeModel(gs, extractor) {
-						{
-							getObservableStyles(row).put("background-color", getString().getValue());
-						}
-					});
+					addStyle("selected", "true");
+					bindStyle("background-color", CompositeModel::getString);
+					forEach(ColorsSelect.this);
 				}
 
 			};

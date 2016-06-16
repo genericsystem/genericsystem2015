@@ -6,14 +6,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.genericsystem.reactor.Element.HtmlDomNode;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.reactor.Element.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -35,6 +35,7 @@ public interface Binder<X, Y> {
 	default void init(Y nodeResult, X modelResult) {
 	}
 
+	@Deprecated
 	public static <W, Y> Binder<ObservableValue<W>, Property<W>> propertyBinder() {
 		return new Binder<ObservableValue<W>, Property<W>>() {
 			@Override
@@ -44,16 +45,16 @@ public interface Binder<X, Y> {
 		};
 	}
 
-	public static <W> Binder<W, Property<W>> actionBinder() {
-		return new Binder<W, Property<W>>() {
-			@SuppressWarnings("unchecked")
+	public static Binder<Consumer<Object>, Property<Consumer<Object>>> actionBinder() {
+		return new Binder<Consumer<Object>, Property<Consumer<Object>>>() {
 			@Override
-			public void init(Property<W> nodeResult, Supplier<W> applyOnModel) {
-				nodeResult.setValue((W) (Consumer) event -> applyOnModel.get());
+			public void init(Property<Consumer<Object>> nodeResult, Supplier<Consumer<Object>> applyOnModel) {
+				nodeResult.setValue(o -> applyOnModel.get());
 			}
 		};
 	}
 
+	@Deprecated
 	public static <W> Binder<Property<W>, ObservableValue<W>> propertyReverseBinder() {
 		return new Binder<Property<W>, ObservableValue<W>>() {
 			@Override
@@ -63,6 +64,7 @@ public interface Binder<X, Y> {
 		};
 	}
 
+	@Deprecated
 	public static <N, W> Binder<ObservableList<W>, Property<ObservableList<W>>> observableListPropertyBinder() {
 		return new Binder<ObservableList<W>, Property<ObservableList<W>>>() {
 			@Override
@@ -81,6 +83,7 @@ public interface Binder<X, Y> {
 		};
 	}
 
+	@Deprecated
 	public static Binder<ObservableSet<String>, Set<String>> observableSetBinder() {
 		return new Binder<ObservableSet<String>, Set<String>>() {
 			@Override
@@ -90,6 +93,7 @@ public interface Binder<X, Y> {
 		};
 	}
 
+	@Deprecated
 	public static Binder<ObservableMap<String, String>, Map<String, String>> observableMapBinder() {
 		return new Binder<ObservableMap<String, String>, Map<String, String>>() {
 			@Override

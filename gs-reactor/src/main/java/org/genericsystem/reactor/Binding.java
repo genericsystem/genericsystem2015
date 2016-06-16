@@ -54,11 +54,13 @@ public interface Binding {
 		}, binder);
 	}
 
+	@Deprecated
 	public static <W> Binding bindProperty(Function<? extends Model, ObservableValue<W>> applyOnModel,
 			Function<? extends HtmlDomNode, Property<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBinder());
 	}
 
+	@Deprecated
 	public static <W> Binding bindReversedProperty(Function<? extends Model, Property<W>> applyOnModel,
 			Function<? extends HtmlDomNode, ObservableValue<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyReverseBinder());
@@ -69,7 +71,7 @@ public interface Binding {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBiDirectionalBinder());
 	}
 
-	public static <W> Binding bindAction(Consumer<? extends Model> applyOnModel, Function<? extends HtmlDomNode, Property<W>> applyOnNode) {
+	public static Binding bindAction(Consumer<? extends Model> applyOnModel, Function<? extends HtmlDomNode, Property<Consumer<Object>>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.actionBinder());
 	}
 
@@ -78,15 +80,18 @@ public interface Binding {
 	// return Binding.bind(null, applyOnModel, Binder.styleClassBinder(element, styleClass));
 	// }
 
+	@Deprecated
 	public static <W> Binding bindSet(Function<? extends Model, ObservableSet<String>> applyOnModel, Function<? extends HtmlDomNode, Set<String>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableSetBinder());
 	}
 
+	@Deprecated
 	public static <W> Binding bindObservableList(Function<? extends Model, ObservableList<W>> applyOnModel,
 			Function<? extends HtmlDomNode, Property<ObservableList<W>>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder());
 	}
 
+	@Deprecated
 	public static Binding bindMap(Function<? extends Model, ObservableMap<String, String>> applyOnModel,
 			Function<? extends HtmlDomNode, Map<String, String>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
