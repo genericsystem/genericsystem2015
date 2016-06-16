@@ -46,7 +46,8 @@ public abstract class Model {
 	};
 
 	public Property<String> getTextProperty(Element<?> element) {
-		return observableTexts.get(element);
+		return getModelContext().getViewContext(element).getNode().getTextProperty();
+		// return observableTexts.get(element);
 	}
 
 	private Map<Element<?>, ObservableSet<String>> observableStyleClasses = new HashMap<Element<?>, ObservableSet<String>>() {
@@ -63,7 +64,8 @@ public abstract class Model {
 	};
 
 	public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
-		return observableStyleClasses.get(element);
+		return getModelContext().getViewContext(element).getNode().getStyleClasses();
+		// return observableStyleClasses.get(element);
 	}
 
 	private Map<Element<?>, ObservableMap<String, String>> observableStyles = new HashMap<Element<?>, ObservableMap<String, String>>() {
@@ -78,8 +80,17 @@ public abstract class Model {
 		};
 	};
 
+	ModelContext modelContext;
+
+	ModelContext getModelContext() {
+		return modelContext;
+	}
+
 	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
-		return observableStyles.get(element);
+		assert getModelContext() != null;
+		assert getModelContext().getViewContext(element) != null;
+		return getModelContext().getViewContext(element).getNode().getStyles();
+		// return observableStyles.get(element);
 	}
 
 }

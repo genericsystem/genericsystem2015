@@ -2,10 +2,9 @@ package org.genericsystem.reactor;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import org.genericsystem.reactor.Element.HtmlDomNode;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -13,7 +12,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-import javafx.event.EventHandler;
+
+import org.genericsystem.reactor.Element.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -49,7 +49,7 @@ public interface Binder<X, Y> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void init(Property<W> nodeResult, Supplier<W> applyOnModel) {
-				nodeResult.setValue((W) (EventHandler) event -> applyOnModel.get());
+				nodeResult.setValue((W) (Consumer) event -> applyOnModel.get());
 			}
 		};
 	}
@@ -80,27 +80,6 @@ public interface Binder<X, Y> {
 			}
 		};
 	}
-
-	// @Deprecated
-	// public static Binder<ObservableValue<Boolean>, Set<String>> styleClassBinder(Element<?> element, String styleClass) {
-	// return new Binder<ObservableValue<Boolean>, Set<String>>() {
-	//
-	// @Override
-	// public void init(Function<? extends HtmlDomNode, Set<String>> applyOnNode, Function<? extends Model, ObservableValue<Boolean>> method,
-	// ModelContext modelContext, HtmlDomNode node) {
-	// ObservableValue<Boolean> optional = modelContext.applyOnModel(method).get();
-	// ObservableSet<String> styleClasses = modelContext.applyOnModel(model -> ((CompositeModel) model).getObservableStyleClasses(element)).get();
-	// Consumer<Boolean> consumer = bool -> {
-	// if (bool)
-	// styleClasses.add(styleClass);
-	// else
-	// styleClasses.remove(styleClass);
-	// };
-	// consumer.accept(optional.getValue());
-	// optional.addListener((o, ov, nv) -> consumer.accept(nv));
-	// }
-	// };
-	// }
 
 	public static Binder<ObservableSet<String>, Set<String>> observableSetBinder() {
 		return new Binder<ObservableSet<String>, Set<String>>() {

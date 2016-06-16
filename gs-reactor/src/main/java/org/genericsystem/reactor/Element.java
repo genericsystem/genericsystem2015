@@ -1,5 +1,8 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,14 +10,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
@@ -36,6 +31,12 @@ import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -61,22 +62,22 @@ public abstract class Element<M extends Model> {
 		this.parent = parent;
 		if (parent != null)
 			parent.getChildren().add(this);
-		bindText();
-		bindStyles();
-		bindStyleClasses();
+		// bindText();
+		// bindStyles();
+		// bindStyleClasses();
 	}
 
-	private void bindText() {
-		addBidirectionalBinding(HtmlDomNode::getText, model -> model.getTextProperty(this));
-	}
-
-	private void bindStyles() {
-		addMapBinding(HtmlDomNode::getStyles, model -> model.getObservableStyles(this));
-	}
-
-	private void bindStyleClasses() {
-		addSetBinding(HtmlDomNode::getStyleClasses, model -> model.getObservableStyleClasses(this));
-	}
+	// private void bindText() {
+	// addBidirectionalBinding(HtmlDomNode::getTextProperty, model -> model.getTextProperty(this));
+	// }
+	//
+	// private void bindStyles() {
+	// addMapBinding(HtmlDomNode::getStyles, model -> model.getObservableStyles(this));
+	// }
+	//
+	// private void bindStyleClasses() {
+	// addSetBinding(HtmlDomNode::getStyleClasses, model -> model.getObservableStyleClasses(this));
+	// }
 
 	public String getTag() {
 		return tag;
@@ -96,8 +97,7 @@ public abstract class Element<M extends Model> {
 		bindings.add(Binding.bindInit(consumer));
 	}
 
-	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
-			Function<M, ObservableMap<String, String>> applyOnModel) {
+	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
 		bindings.add(Binding.bindMap(applyOnModel, applyOnNode));
 	}
 
@@ -155,13 +155,11 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> (genericSupplier.apply(gs) != null
-				? FXCollections.singletonObservableList(genericSupplier.apply(gs)) : FXCollections.emptyObservableList()), constructor));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> (genericSupplier.apply(gs) != null ? FXCollections.singletonObservableList(genericSupplier.apply(gs)) : FXCollections.emptyObservableList()), constructor));
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor,
-				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
 	}
 
 	public ServerWebSocket getWebSocket() {
@@ -241,7 +239,7 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
-		addBidirectionalBinding(HtmlDomNode::getText, applyOnModel);
+		addBidirectionalBinding(HtmlDomNode::getTextProperty, applyOnModel);
 	}
 
 	public void setText(String value) {
@@ -291,8 +289,7 @@ public abstract class Element<M extends Model> {
 		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old,
-				newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			System.out.println("Receive : " + change.toString());
@@ -302,8 +299,7 @@ public abstract class Element<M extends Model> {
 			}
 			if (change.wasAdded()) {
 				System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE,
-						change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -351,7 +347,7 @@ public abstract class Element<M extends Model> {
 			jsonObj.put(TAG_HTML, getTag());
 		}
 
-		public Set<String> getStyleClasses() {
+		public ObservableSet<String> getStyleClasses() {
 			return styleClasses;
 		}
 
@@ -361,7 +357,7 @@ public abstract class Element<M extends Model> {
 			return property;
 		}
 
-		public StringProperty getText() {
+		public StringProperty getTextProperty() {
 			return text;
 		}
 
@@ -411,7 +407,7 @@ public abstract class Element<M extends Model> {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().handle(new ActionEvent());
 			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				getText().setValue(json.getString(TEXT_CONTENT));
+				getTextProperty().setValue(json.getString(TEXT_CONTENT));
 		}
 
 		public ObjectProperty<EventHandler<ActionEvent>> getEnterProperty() {

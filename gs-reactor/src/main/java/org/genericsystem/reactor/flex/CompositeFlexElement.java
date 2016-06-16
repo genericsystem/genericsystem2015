@@ -30,8 +30,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 	protected void sections() {
 		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
 			{
-				forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-						(gs, extractor) -> getModelConstructor().build(gs, extractor));
+				forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> getModelConstructor().build(gs, extractor));
 				new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 			}
 		};
@@ -97,12 +96,11 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
 				{
 					FlexElement<CompositeModel> row = this;
-					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs),
-							(gs, extractor) -> new CompositeModel(gs, extractor) {
-								{
-									getObservableStyles(row).put("background-color", getString().getValue());
-								}
-							});
+					forEach(g -> getStringExtractor().apply(g), gs -> getObservableListExtractor().apply(gs), (gs, extractor) -> new CompositeModel(gs, extractor) {
+						{
+							getObservableStyles(row).put("background-color", getString().getValue());
+						}
+					});
 					new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 				}
 			};
