@@ -2,10 +2,13 @@ package org.genericsystem.reactor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
+
+import javafx.beans.property.Property;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -57,14 +60,12 @@ public class ModelContext {
 
 	public void register(ViewContext<?> viewContext) {
 		this.viewContexts.add(viewContext);
+		ViewContext<?> previous = viewContextsMap.put(viewContext.getElement(), viewContext);
+		assert previous == null;
 	}
 
 	public List<ViewContext<?>> getViewContexts() {
 		return viewContexts;
-	}
-
-	public <T> Supplier<T> applyOnModel(Function<Model, T> methodReference) {
-		return () -> methodReference.apply(this.getModel());
 	}
 
 	public void destroy() {
@@ -89,16 +90,34 @@ public class ModelContext {
 		}
 
 		public void insert(int index, Model model, ViewContext<?> viewContext) {
-			ModelContext childModelContext = createChildContext(model);
+			ModelContext modelContextChild = createChildContext(model);
 			model.parent = getModel();// inject parent
 			model.element = childElement;
 			model.afterParentConstruct();
-			viewContext.createChildContext(index, childModelContext, childElement);
-			internal.add(index, childModelContext);
+			viewContext.createViewContextChild(index, modelContextChild, childElement);
+			internal.add(index, modelContextChild);
 		};
 
 		public void delete(int index) {
 			internal.remove(index).destroy();
 		};
+	}
+
+	private final Map<Element<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
+
+	public ViewContext<?> getViewContext(Element<?> element) {
+		return viewContextsMap.get(element);
+	}
+
+	public Property<String> getTextProperty(Element<?> element) {
+		return getViewContext(element).getNode().getTextProperty();
+	}
+
+	public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
+		return getViewContext(element).getNode().getStyleClasses();
+	}
+
+	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
+		return getViewContext(element).getNode().getStyles();
 	}
 }

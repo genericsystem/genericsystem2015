@@ -1,14 +1,15 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCompositeModel;
 
 /**
  * @author Nicolas Feybesse
@@ -112,8 +113,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("justify-content", "center");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 								new HtmlLabel<CompositeModel>(this) {
 									{
 										bindText(CompositeModel::getString);
@@ -195,8 +195,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("background-color", "#dda5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), InputCompositeModel::new);
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), InputCompositeModel::new);
 								new HtmlInputText<InputCompositeModel>(this) {
 									{
 										bindTextBidirectional(InputCompositeModel::getInputString);
@@ -247,9 +246,10 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "200px");
-						addStyle("background-color", "#bba5ff");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
+						addInitBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
 						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
@@ -279,11 +279,11 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										addStyle("background-color", "#dda5e2");
+										addInitBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+												modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
-										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-												gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 									}
 								};

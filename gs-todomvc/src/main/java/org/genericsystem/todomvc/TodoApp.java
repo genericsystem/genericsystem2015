@@ -113,7 +113,6 @@ public class TodoApp extends HtmlApp<TodoList> {
 											{
 												new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass(TodoList::getAllMode,
 														"selected");
-												;
 											}
 										};
 										new HtmlLi<TodoList>(this) {
@@ -121,14 +120,12 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 												new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive)
 														.bindOptionalStyleClass(TodoList::getActiveMode, "selected");
-												;
 											}
 										};
 										new HtmlLi<TodoList>(this) {
 											{
 												new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted)
 														.bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
-												;
 											}
 										};
 									}

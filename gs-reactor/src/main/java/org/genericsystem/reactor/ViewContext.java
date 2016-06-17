@@ -15,29 +15,26 @@ import org.genericsystem.reactor.ModelContext.RootModelContext;
 public class ViewContext<M extends Model> {
 
 	private final ViewContext<?> parent;
-	private final Element<M> template;
+	private final Element<M> element;
 	private final HtmlDomNode node;
 	private ModelContext modelContext;
 
-	private ViewContext(int indexInChildren, ViewContext<?> parent, ModelContext modelContext, Element<M> template, HtmlDomNode node) {
+	private ViewContext(int indexInChildren, ViewContext<?> parent, ModelContext modelContext, Element<M> element, HtmlDomNode node) {
 		this.parent = parent;
-		this.template = template;
+		this.element = element;
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
 		modelContext.register(this);
-
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (Boot<Element<M>.HtmlDomNode> boot : template.getBootList())
-			boot.init(node);
-		for (Binding<?, ?> binding : template.bindings)
+		for (Binding binding : element.bindings)
 			binding.init(modelContext, getNode());
-		for (Element<?> childElement : template.getChildren()) {
+		for (Element<?> childElement : element.getChildren()) {
 			if (childElement.metaBinding != null)
 				childElement.metaBinding.init(this, childElement);
 			else
-				createChildContext(null, modelContext, childElement);
+				createViewContextChild(null, modelContext, childElement);
 		}
 	}
 
@@ -45,9 +42,9 @@ public class ViewContext<M extends Model> {
 		return modelContext;
 	}
 
-	public ViewContext<?> createChildContext(Integer index, ModelContext childModelContext, Element<?> template) {
-		int indexInChildren = computeIndex(index, template);
-		return new ViewContext<>(indexInChildren, this, childModelContext, template, template.createNode(node.getId()));
+	public ViewContext<?> createViewContextChild(Integer index, ModelContext childModelContext, Element<?> element) {
+		int indexInChildren = computeIndex(index, element);
+		return new ViewContext<>(indexInChildren, this, childModelContext, element, element.createNode(node.getId()));
 	}
 
 	protected RootViewContext<?> getRootViewContext() {
@@ -71,13 +68,13 @@ public class ViewContext<M extends Model> {
 	};
 
 	void insertChild(int index) {
-		parent.incrementSize(template);
+		parent.incrementSize(element);
 		node.sendAdd(index);
 		getRootViewContext().add(node.getId(), node);
 	}
 
 	void destroyChild() {
-		parent.decrementSize(template);
+		parent.decrementSize(element);
 		node.sendRemove();
 		getRootViewContext().remove(node.getId());
 
@@ -98,7 +95,7 @@ public class ViewContext<M extends Model> {
 
 	private int computeIndex(Integer nullable, Element<?> childElement) {
 		int indexInChildren = nullable == null ? sizeByElement.get(childElement) : nullable;
-		for (Element<?> child : template.getChildren()) {
+		for (Element<?> child : element.getChildren()) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeByElement.get(child);
@@ -133,5 +130,9 @@ public class ViewContext<M extends Model> {
 		public void remove(String id) {
 			getMap().remove(id);
 		}
+	}
+
+	public Element<M> getElement() {
+		return element;
 	}
 }

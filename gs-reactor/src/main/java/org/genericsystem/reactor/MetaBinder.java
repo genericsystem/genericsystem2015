@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.genericsystem.reactor.ModelContext.ModelContextList;
-
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
+
+import org.genericsystem.reactor.ModelContext.ModelContextList;
 
 /**
  * @author Nicolas Feybesse
@@ -19,8 +19,8 @@ import javafx.collections.WeakListChangeListener;
  */
 public interface MetaBinder<W extends ObservableList<?>> {
 
-	default void init(Function<Model, W> method, ViewContext<?> viewContext, Element<?> childElement) {
-		init(viewContext.getModelContext().applyOnModel(method), viewContext, childElement);
+	default void init(Function<Model, W> applyOnModel, ViewContext<?> viewContext, Element<?> childElement) {
+		init(applyOnModel.apply(viewContext.getModelContext().getModel()), viewContext, childElement);
 	}
 
 	default void init(Supplier<W> applyOnModel, ViewContext<?> viewContext, Element<?> childElement) {

@@ -1,5 +1,6 @@
 package org.genericsystem.reactor;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -7,10 +8,12 @@ import java.util.function.Supplier;
 
 import org.genericsystem.reactor.Element.HtmlDomNode;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -21,17 +24,18 @@ import javafx.event.EventHandler;
  */
 public interface Binder<X, Y> {
 
-	default void init(Function<? extends HtmlDomNode, Y> applyOnNode, Function<Model, X> method, ModelContext modelContext, HtmlDomNode node) {
-		init(((Function<HtmlDomNode, Y>) applyOnNode).apply(node), modelContext.applyOnModel(method), modelContext);
+	default void init(Function<? extends HtmlDomNode, Y> applyOnNode, Function<? extends Model, X> applyOnModel, ModelContext modelContext, HtmlDomNode node) {
+		init(((Function<HtmlDomNode, Y>) applyOnNode).apply(node), () -> applyOnModel.apply(modelContext.getModel()));
 	}
 
-	default void init(Y nodeResult, Supplier<X> applyOnModel, ModelContext modelContext) {
+	default void init(Y nodeResult, Supplier<X> applyOnModel) {
 		init(nodeResult, applyOnModel.get());
 	}
 
 	default void init(Y nodeResult, X modelResult) {
 	}
 
+	@Deprecated
 	public static <W, Y> Binder<ObservableValue<W>, Property<W>> propertyBinder() {
 		return new Binder<ObservableValue<W>, Property<W>>() {
 			@Override
@@ -41,16 +45,16 @@ public interface Binder<X, Y> {
 		};
 	}
 
-	public static <W> Binder<W, Property<W>> actionBinder() {
-		return new Binder<W, Property<W>>() {
-			@SuppressWarnings("unchecked")
+	public static Binder<Consumer<Object>, Property<Consumer<Object>>> actionBinder() {
+		return new Binder<Consumer<Object>, Property<Consumer<Object>>>() {
 			@Override
-			public void init(Property<W> nodeResult, Supplier<W> applyOnModel, ModelContext modelContext) {
-				nodeResult.setValue((W) (EventHandler) event -> applyOnModel.get());
+			public void init(Property<Consumer<Object>> nodeResult, Supplier<Consumer<Object>> applyOnModel) {
+				nodeResult.setValue(o -> applyOnModel.get());
 			}
 		};
 	}
 
+	@Deprecated
 	public static <W> Binder<Property<W>, ObservableValue<W>> propertyReverseBinder() {
 		return new Binder<Property<W>, ObservableValue<W>>() {
 			@Override
@@ -60,6 +64,7 @@ public interface Binder<X, Y> {
 		};
 	}
 
+	@Deprecated
 	public static <N, W> Binder<ObservableList<W>, Property<ObservableList<W>>> observableListPropertyBinder() {
 		return new Binder<ObservableList<W>, Property<ObservableList<W>>>() {
 			@Override
@@ -78,18 +83,22 @@ public interface Binder<X, Y> {
 		};
 	}
 
-	public static <W> Binder<ObservableValue<Boolean>, Set<W>> observableSetBinder(W styleClass) {
-		return new Binder<ObservableValue<Boolean>, Set<W>>() {
+	@Deprecated
+	public static Binder<ObservableSet<String>, Set<String>> observableSetBinder() {
+		return new Binder<ObservableSet<String>, Set<String>>() {
 			@Override
-			public void init(Set<W> nodeResult, ObservableValue<Boolean> modelResult) {
-				Consumer<Boolean> consumer = bool -> {
-					if (bool)
-						nodeResult.add(styleClass);
-					else
-						nodeResult.remove(styleClass);
-				};
-				consumer.accept(modelResult.getValue());
-				modelResult.addListener((o, ov, nv) -> consumer.accept(nv));
+			public void init(Set<String> nodeResult, ObservableSet<String> modelResult) {
+				Bindings.bindContent(nodeResult, modelResult);
+			}
+		};
+	}
+
+	@Deprecated
+	public static Binder<ObservableMap<String, String>, Map<String, String>> observableMapBinder() {
+		return new Binder<ObservableMap<String, String>, Map<String, String>>() {
+			@Override
+			public void init(Map<String, String> nodeResult, ObservableMap<String, String> modelResult) {
+				Bindings.bindContent(nodeResult, modelResult);
 			}
 		};
 	}
