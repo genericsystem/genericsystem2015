@@ -190,10 +190,25 @@ public abstract class Element<M extends Model> {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericClass);
 	}
 
+	public void addSelectionIndex(int value) {
+		addInitBinding(model -> model.getSelectionIndex(this).setValue(value));
+	}
+
+	// public void bindSelectionIndex(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
+	// addInitBinding(modelContext -> {
+	// Map<String, String> stylesMap = modelContext.getObservableStyles(this);
+	// ChangeListener<String> listener = (o, old, newValue) -> stylesMap.put(propertyName, newValue);
+	// ObservableValue<String> observableStyle = applyOnModel.apply(modelContext.getModel());
+	// observableStyle.addListener(listener);
+	// stylesMap.put(propertyName, observableStyle.getValue());
+	// });
+	// }
+
 	public void addStyle(String propertyName, String value) {
 		addInitBinding(model -> model.getObservableStyles(this).put(propertyName, value));
 	}
 
+	@Deprecated
 	public void addStyle(String propertyName, Function<M, String> applyOnModel) {
 		addInitBinding(modelContext -> modelContext.getObservableStyles(this).put(propertyName, applyOnModel.apply(modelContext.getModel())));
 	}
@@ -397,7 +412,7 @@ public abstract class Element<M extends Model> {
 	public class SelectableActionHtmlNode extends ActionHtmlNode {
 		private static final String SELECTED_INDEX = "selectedIndex";
 
-		private Property<Number> selectedIndex = new SimpleIntegerProperty();
+		private Property<Number> selectionIndex = new SimpleIntegerProperty();
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
 			System.out.println(
@@ -407,19 +422,19 @@ public abstract class Element<M extends Model> {
 
 		public SelectableActionHtmlNode(String parentId) {
 			super(parentId);
-			selectedIndex.addListener(new WeakChangeListener<>(indexListener));
-			selectedIndex.setValue(5);
+			selectionIndex.addListener(new WeakChangeListener<>(indexListener));
+			selectionIndex.setValue(5);
 		}
 
-		public Property<Number> getSelectedIndex() {
-			return selectedIndex;
+		public Property<Number> getSelectionIndex() {
+			return selectionIndex;
 		}
 
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				getSelectedIndex().setValue(json.getInteger(SELECTED_INDEX));
-				System.out.println("Selected index : " + getSelectedIndex().getValue());
+				getSelectionIndex().setValue(json.getInteger(SELECTED_INDEX));
+				System.out.println("Selected index : " + getSelectionIndex().getValue());
 			}
 		}
 
@@ -453,13 +468,12 @@ public abstract class Element<M extends Model> {
 	}
 
 	public class CheckBoxHtmlDomNode extends HtmlDomNode {
+		private static final String CHECKED = "checked";
+		private Property<Boolean> checked = new SimpleBooleanProperty(false);
+
 		public CheckBoxHtmlDomNode(String parentId) {
 			super(parentId);
 		}
-
-		private static final String CHECKED = "checked";
-
-		private Property<Boolean> checked = new SimpleBooleanProperty(false);
 
 		public Property<Boolean> getChecked() {
 			return checked;

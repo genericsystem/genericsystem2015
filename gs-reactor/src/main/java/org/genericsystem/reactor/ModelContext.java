@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Element.SelectableActionHtmlNode;
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
@@ -102,5 +103,9 @@ public class ModelContext {
 
 	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
 		return getViewContext(element).getNode().getStyles();
+	}
+
+	public Property<Number> getSelectionIndex(Element<?> element) {
+		return ((SelectableActionHtmlNode) getViewContext(element).getNode()).getSelectionIndex();
 	}
 }
