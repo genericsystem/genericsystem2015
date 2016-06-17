@@ -1,11 +1,6 @@
 package org.genericsystem.reactor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
@@ -33,64 +28,24 @@ public abstract class Model {
 
 	}
 
-	private Map<Element<?>, Property<String>> observableTexts = new HashMap<Element<?>, Property<String>>() {
-		private static final long serialVersionUID = -1827306835524845605L;
-
-		@Override
-		public Property<String> get(Object key) {
-			Property<String> result = super.get(key);
-			if (result == null)
-				put((Element<?>) key, result = new SimpleStringProperty());
-			return result;
-		};
-	};
-
 	public Property<String> getTextProperty(Element<?> element) {
 		return getModelContext().getViewContext(element).getNode().getTextProperty();
-		// return observableTexts.get(element);
 	}
-
-	private Map<Element<?>, ObservableSet<String>> observableStyleClasses = new HashMap<Element<?>, ObservableSet<String>>() {
-		private static final long serialVersionUID = -1827306835524845605L;
-
-		@Override
-		public ObservableSet<String> get(Object key) {
-			ObservableSet<String> result = super.get(key);
-			if (result == null)
-				put((Element<?>) key, result = FXCollections.observableSet());
-			return result;
-		};
-
-	};
 
 	public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
 		return getModelContext().getViewContext(element).getNode().getStyleClasses();
-		// return observableStyleClasses.get(element);
-	}
-
-	private Map<Element<?>, ObservableMap<String, String>> observableStyles = new HashMap<Element<?>, ObservableMap<String, String>>() {
-		private static final long serialVersionUID = -1827306835524845605L;
-
-		@Override
-		public ObservableMap<String, String> get(Object key) {
-			ObservableMap<String, String> result = super.get(key);
-			if (result == null)
-				put((Element<?>) key, result = FXCollections.observableHashMap());
-			return result;
-		};
-	};
-
-	ModelContext modelContext;
-
-	ModelContext getModelContext() {
-		return modelContext;
 	}
 
 	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
 		assert getModelContext() != null;
 		assert getModelContext().getViewContext(element) != null;
 		return getModelContext().getViewContext(element).getNode().getStyles();
-		// return observableStyles.get(element);
+	}
+
+	ModelContext modelContext;
+
+	ModelContext getModelContext() {
+		return modelContext;
 	}
 
 }

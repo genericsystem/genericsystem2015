@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.html;
 
 import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel;
 
 /**
  * @author Nicolas Feybesse

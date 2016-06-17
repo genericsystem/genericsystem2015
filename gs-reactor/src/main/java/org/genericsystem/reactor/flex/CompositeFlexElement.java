@@ -2,9 +2,9 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.composite.CompositeElement;
-import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.model.CompositeModel;
 
 /**
  * @author Nicolas Feybesse

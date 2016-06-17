@@ -1,5 +1,8 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,15 +10,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.composite.CompositeElement;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
@@ -36,6 +30,13 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.composite.CompositeElement;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -81,8 +82,7 @@ public abstract class Element<M extends Model> {
 	}
 
 	@Deprecated
-	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
-			Function<M, ObservableMap<String, String>> applyOnModel) {
+	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
 		bindings.add(Binding.bindMap(applyOnModel, applyOnNode));
 	}
 
@@ -90,6 +90,7 @@ public abstract class Element<M extends Model> {
 		bindings.add(Binding.bindAction(applyOnModel, applyOnNode));
 	}
 
+	@Deprecated
 	protected <T, NODE extends HtmlDomNode> void addReversedBinding(Function<NODE, ObservableValue<T>> applyOnNode, Function<M, Property<T>> applyOnModel) {
 		bindings.add(Binding.bindReversedProperty(applyOnModel, applyOnNode));
 
@@ -110,6 +111,7 @@ public abstract class Element<M extends Model> {
 		});
 	}
 
+	@Deprecated
 	protected <NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<String>> applyOnNode, Function<M, ObservableSet<String>> applyOnModel) {
 		bindings.add(Binding.bindSet(applyOnModel, applyOnNode));
 	}
@@ -140,13 +142,15 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> (genericSupplier.apply(gs) != null
-				? FXCollections.singletonObservableList(genericSupplier.apply(gs)) : FXCollections.emptyObservableList()), constructor));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> {
+			Generic generic = genericSupplier.apply(gs);
+			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
+		}, constructor));
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor,
-				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
 	}
 
 	public ServerWebSocket getWebSocket() {
@@ -242,8 +246,7 @@ public abstract class Element<M extends Model> {
 	}
 
 	protected void forEach(CompositeElement<?> parentCompositeElement) {
-		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
-				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
+		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs), (gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);
@@ -286,8 +289,7 @@ public abstract class Element<M extends Model> {
 		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old,
-				newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (change.wasRemoved() && (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))) {
@@ -296,8 +298,7 @@ public abstract class Element<M extends Model> {
 			}
 			if (change.wasAdded()) {
 				// System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE,
-						change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -394,8 +395,7 @@ public abstract class Element<M extends Model> {
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
 			// System.out.println("ZZZZZZZZZZZZ");
-			System.out.println(
-					new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
+			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
 			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 		};
 

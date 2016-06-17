@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.composite;
+package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -12,11 +12,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.reactor.Model;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -146,36 +142,6 @@ public class CompositeModel extends Model {
 
 	public void cancel() {
 		getGeneric().getCurrentCache().clear();
-	}
-
-	public static class InputCompositeModel extends CompositeModel {
-		private Property<String> inputString = new SimpleStringProperty();
-
-		public InputCompositeModel(Generic[] generics, StringExtractor extractor) {
-			super(generics, extractor);
-		}
-
-		public Property<String> getInputString() {
-			return inputString;
-		}
-	}
-
-	public static class SelectorModel extends CompositeModel {
-		private Property<Generic> selection = new SimpleObjectProperty<>();
-		private ObservableValue<String> selectionString = Bindings.createStringBinding(() -> getStringExtractor().apply(getSelection().getValue()),
-				getSelection());
-
-		public SelectorModel(Generic[] generics, StringExtractor extractor) {
-			super(generics, extractor);
-		}
-
-		public Property<Generic> getSelection() {
-			return selection;
-		}
-
-		public ObservableValue<String> getSelectionString() {
-			return selectionString;
-		}
 	}
 
 }

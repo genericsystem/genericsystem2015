@@ -9,18 +9,18 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.SelectorModel;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
-import org.genericsystem.reactor.composite.EngineModel;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexElement;
 import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.flex.FlexTag;
 import org.genericsystem.reactor.html.HtmlApp;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.EngineModel;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.SelectorModel;
 
 import io.vertx.core.http.ServerWebSocket;
 

@@ -2,7 +2,6 @@ package org.genericsystem.reactor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,9 +100,21 @@ public class ModelContext {
 		};
 	}
 
-	private final Map<Element<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-
-	public ViewContext<?> getViewContext(Element<?> element) {
-		return viewContextsMap.get(element);
-	}
+	// private final Map<Element<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
+	//
+	// public ViewContext<?> getViewContext(Element<?> element) {
+	// return viewContextsMap.get(element);
+	// }
+	//
+	// public Property<String> getTextProperty(Element<?> element) {
+	// return getViewContext(element).getNode().getTextProperty();
+	// }
+	//
+	// public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
+	// return getViewContext(element).getNode().getStyleClasses();
+	// }
+	//
+	// public ObservableMap<String, String> getObservableStyles(Element<?> element) {
+	// return getViewContext(element).getNode().getStyles();
+	// }
 }

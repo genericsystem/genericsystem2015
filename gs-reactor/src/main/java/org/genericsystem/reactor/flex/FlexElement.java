@@ -2,9 +2,9 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.composite.CompositeModel;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.model.CompositeModel;
 
 public class FlexElement<M extends Model> extends Element<M> {
 

@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.composite;
+package org.genericsystem.reactor.model;
 
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;

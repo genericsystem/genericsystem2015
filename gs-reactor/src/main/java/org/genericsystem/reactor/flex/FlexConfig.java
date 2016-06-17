@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.composite.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

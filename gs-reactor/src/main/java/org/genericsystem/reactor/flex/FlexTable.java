@@ -2,14 +2,14 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.annotation.InstanceColorize;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCompositeModel;
 
 /**
  * @author Nicolas Feybesse
