@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -11,23 +9,27 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
-import org.genericsystem.reactor.composite.CompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.InputCompositeModel;
-import org.genericsystem.reactor.composite.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.composite.CompositeSelect;
-import org.genericsystem.reactor.composite.EngineModel;
+import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexElement;
 import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.flex.FlexTag;
 import org.genericsystem.reactor.html.HtmlApp;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.EngineModel;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.SelectorModel;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
+				Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
@@ -37,7 +39,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
-				new CompositeSelect<CompositeModel>(this).select(Color.class);
+				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
 				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
 				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);

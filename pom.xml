@@ -45,6 +45,7 @@
 	    <module>gs-todomvc</module>
 	    <module>gs-example-reactor</module>
     	<module>gs-spring</module>
+    <module>gs-example-spring</module>
   </modules>
 
 	<distributionManagement>

@@ -4,8 +4,6 @@ import java.util.function.Supplier;
 
 import org.genericsystem.kernel.Cache;
 
-//@Vetoed
-//@Component
 public class Engine extends org.genericsystem.kernel.Engine {
 
 	private final Supplier<Cache> cacheSupplier;

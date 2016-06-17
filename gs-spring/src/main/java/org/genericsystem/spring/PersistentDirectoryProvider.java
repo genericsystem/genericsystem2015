@@ -1,6 +1,7 @@
 package org.genericsystem.spring;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +23,8 @@ import org.springframework.stereotype.Component;
  * @author Nicolas Feybesse
  * 
  */
-// @ApplicationScoped
+
+@Scope("singleton")
 @Lazy
 @Component
 public class PersistentDirectoryProvider {

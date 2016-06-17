@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-//@ApplicationScoped
+@Scope("singleton")
 @Component
 @Lazy
 public class UserClassesProvider {
@@ -15,6 +16,10 @@ public class UserClassesProvider {
 
 	public void addUserClasse(Class<?> userClasse) {
 		userClasses.add(userClasse);
+	}
+
+	public void setUserClasse(List<Class<?>> userClasses) {
+		this.userClasses = userClasses;
 	}
 
 	public Class<?>[] getUserClassesArray() {

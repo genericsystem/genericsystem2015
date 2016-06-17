@@ -26,7 +26,6 @@ public class CacheRequestProvider {
 		cacheSessionProvider.getCurrentCache().start();
 	}
 
-	// @Produces
 	@Bean
 	@Lazy
 	public Cache getCurrentCache() {

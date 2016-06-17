@@ -90,7 +90,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 		return systemCache.getClassByVertex(generic);
 	}
 
-	protected Generic getGenericById(long ts) {
+	public Generic getGenericById(long ts) {
 		return genericsById.get(ts);
 	}
 
