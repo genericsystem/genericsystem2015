@@ -2,14 +2,11 @@ package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.Transformation2;
 import org.genericsystem.reactor.Model;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -124,16 +121,6 @@ public class CompositeModel extends Model {
 	@FunctionalInterface
 	public interface ModelConstructor<M extends Model> {
 		M build(Generic[] generics, StringExtractor stringExtractor);
-	}
-
-	private Set<ObservableList<?>> observableLists = new HashSet<ObservableList<?>>();
-
-	public <M extends Model> ObservableList<M> getObservableList(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor,
-			ModelConstructor<CompositeModel> constructor) {
-		ObservableList<M> observableList = new Transformation2<Generic, M>(observableListExtractor.apply(generics),
-				generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, generics), stringExtractor));
-		observableLists.add(observableList);// Prevents garbaging
-		return observableList;
 	}
 
 	public void flush() {

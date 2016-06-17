@@ -9,15 +9,9 @@ package org.genericsystem.reactor;
 public abstract class Model {
 
 	Model parent;
-	Element<?> element;
 
 	public Model getParent() {
 		return parent;
-	}
-
-	public Element<?> getElement() {
-		assert element != null;
-		return element;
 	}
 
 	public void afterParentConstruct() {

@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +7,15 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.composite.CompositeElement;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
@@ -30,13 +36,6 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.composite.CompositeElement;
-import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -78,11 +77,12 @@ public abstract class Element<M extends Model> {
 	}
 
 	protected void addInitBinding(Consumer<ModelContext> consumer) {
-		bindings.add(Binding.bindInit(consumer));
+		bindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
 	@Deprecated
-	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
+	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
+			Function<M, ObservableMap<String, String>> applyOnModel) {
 		bindings.add(Binding.bindMap(applyOnModel, applyOnNode));
 	}
 
@@ -117,16 +117,20 @@ public abstract class Element<M extends Model> {
 	}
 
 	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
-		metaBinding = MetaBinding.forEach(applyOnModel);
+		contextForEach(modelContext -> applyOnModel.apply(modelContext.getModel()));
+	}
+
+	protected void contextForEach(Function<ModelContext, ObservableList<M>> applyOnModelContext) {
+		metaBinding = MetaBinding.forEach(applyOnModelContext);
 	}
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, observableListExtractor, constructor));
+		contextForEach(modelContext -> modelContext.getObservableSubModels(this, stringExtractor, observableListExtractor, constructor));
 	}
 
 	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
-		forEach(model -> {
-			ObservableValue<M> observableValue = applyOnModel.apply((T) model);
+		contextForEach(modelContext -> {
+			ObservableValue<M> observableValue = applyOnModel.apply(modelContext.getModel());
 			return new ListBinding<M>() {
 				{
 					bind(observableValue);
@@ -142,14 +146,15 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> {
+		contextForEach(modelContext -> modelContext.getObservableSubModels(this, stringExtractor, gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
 		}, constructor));
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		forEach(model -> ((CompositeModel) model).getObservableList(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		contextForEach(modelContext -> modelContext.getObservableSubModels(this, stringExtractor,
+				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
 		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
 	}
 
@@ -215,12 +220,10 @@ public abstract class Element<M extends Model> {
 		addInitBinding(model -> model.getObservableStyleClasses(this).addAll(styleClasses));
 	}
 
-	@Experimental
 	public void bindStyleClasses(ObservableSet<String> styleClasses) {
 		addInitBinding(model -> Bindings.bindContent(model.getObservableStyleClasses(this), styleClasses));
 	}
 
-	@Experimental
 	public void bindStylesMap(ObservableMap<String, String> styles) {
 		addInitBinding(model -> Bindings.bindContent(model.getObservableStyles(this), styles));
 	}
@@ -246,7 +249,8 @@ public abstract class Element<M extends Model> {
 	}
 
 	protected void forEach(CompositeElement<?> parentCompositeElement) {
-		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs), (gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
+		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
+				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);
@@ -289,7 +293,8 @@ public abstract class Element<M extends Model> {
 		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old,
+				newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (change.wasRemoved() && (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))) {
@@ -298,7 +303,8 @@ public abstract class Element<M extends Model> {
 			}
 			if (change.wasAdded()) {
 				// System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE,
+						change.getValueAdded()));
 			}
 		};
 
@@ -394,8 +400,8 @@ public abstract class Element<M extends Model> {
 		private Property<Number> selectedIndex = new SimpleIntegerProperty();
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-			// System.out.println("ZZZZZZZZZZZZ");
-			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
+			System.out.println(
+					new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
 			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 		};
 

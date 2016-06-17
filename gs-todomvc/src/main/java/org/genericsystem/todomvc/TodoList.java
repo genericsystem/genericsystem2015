@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.defaults.tools.Transformation2;
+import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Model;
 
 import javafx.beans.Observable;
@@ -47,7 +47,7 @@ public class TodoList extends Model {
 
 	public TodoList(AbstractRoot engine) {
 		this.engine = engine;
-		todos = new Transformation2<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g),
+		todos = new TransformationObservableList<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g),
 				todo -> new Observable[] { todo.getCompleted() });
 		filtered = new FilteredList<>(todos);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));

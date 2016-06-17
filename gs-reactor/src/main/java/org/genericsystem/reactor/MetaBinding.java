@@ -2,34 +2,23 @@ package org.genericsystem.reactor;
 
 import java.util.function.Function;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+
 import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
  *
- * @param <N>
- * @param <T>
+ *
+ * @param <M>
  */
-public class MetaBinding<T extends ObservableList<?>> {
+public interface MetaBinding<M extends Model> {
 
-	private final Function<Model, T> applyOnModel;
-	private final MetaBinder<T> binder;
+	public void init(ViewContext<?> viewContext, Element<?> childElement);
 
-	public MetaBinding(Function<Model, T> applyOnModel, MetaBinder<T> binder) {
-		this.applyOnModel = applyOnModel;
-		this.binder = binder;
-	}
-
-	public void init(ViewContext<?> viewContext, Element<?> childElement) {
-		binder.init(applyOnModel, viewContext, childElement);
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		System.out.println("What a surprize => could you warn Nicolas ?");
-	};
-
-	public static <M extends Model, SUBMODEL extends Model> MetaBinding<ObservableList<SUBMODEL>> forEach(Function<M, ObservableList<SUBMODEL>> applyOnModel) {
-		return new MetaBinding<>(model -> applyOnModel.apply((M) model), MetaBinder.<SUBMODEL> foreachBinder());
+	public static <SUBMODEL extends Model> MetaBinding<SUBMODEL> forEach(Function<ModelContext, ObservableList<SUBMODEL>> applyOnModelContext) {
+		return (viewContext, childElement) -> viewContext.getModelContext().getSubContextsMap().put(childElement,
+				new TransformationObservableList<SUBMODEL, ModelContext>(applyOnModelContext.apply(viewContext.getModelContext()),
+						(index, model) -> viewContext.getModelContext().createChildContext(model, viewContext, index, childElement), ModelContext::destroy));
 	}
 }
