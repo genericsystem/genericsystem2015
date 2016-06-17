@@ -1,9 +1,5 @@
 package org.genericsystem.reactor;
 
-import javafx.beans.property.Property;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
-
 //import org.genericsystem.kernel.Engine;
 
 /**
@@ -27,25 +23,4 @@ public abstract class Model {
 	public void afterParentConstruct() {
 
 	}
-
-	public Property<String> getTextProperty(Element<?> element) {
-		return getModelContext().getViewContext(element).getNode().getTextProperty();
-	}
-
-	public ObservableSet<String> getObservableStyleClasses(Element<?> element) {
-		return getModelContext().getViewContext(element).getNode().getStyleClasses();
-	}
-
-	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
-		assert getModelContext() != null;
-		assert getModelContext().getViewContext(element) != null;
-		return getModelContext().getViewContext(element).getNode().getStyles();
-	}
-
-	ModelContext modelContext;
-
-	ModelContext getModelContext() {
-		return modelContext;
-	}
-
 }

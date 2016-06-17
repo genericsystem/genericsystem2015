@@ -5,13 +5,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.reactor.Element.HtmlDomNode;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.reactor.Element.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -55,19 +55,16 @@ public interface Binding {
 	}
 
 	@Deprecated
-	public static <W> Binding bindProperty(Function<? extends Model, ObservableValue<W>> applyOnModel,
-			Function<? extends HtmlDomNode, Property<W>> applyOnNode) {
+	public static <W> Binding bindProperty(Function<? extends Model, ObservableValue<W>> applyOnModel, Function<? extends HtmlDomNode, Property<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBinder());
 	}
 
 	@Deprecated
-	public static <W> Binding bindReversedProperty(Function<? extends Model, Property<W>> applyOnModel,
-			Function<? extends HtmlDomNode, ObservableValue<W>> applyOnNode) {
+	public static <W> Binding bindReversedProperty(Function<? extends Model, Property<W>> applyOnModel, Function<? extends HtmlDomNode, ObservableValue<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyReverseBinder());
 	}
 
-	public static <W> Binding bindBiDirectionalProperty(Function<? extends Model, Property<W>> applyOnModel,
-			Function<? extends HtmlDomNode, Property<W>> applyOnNode) {
+	public static <W> Binding bindBiDirectionalProperty(Function<? extends Model, Property<W>> applyOnModel, Function<? extends HtmlDomNode, Property<W>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.propertyBiDirectionalBinder());
 	}
 
@@ -86,18 +83,16 @@ public interface Binding {
 	}
 
 	@Deprecated
-	public static <W> Binding bindObservableList(Function<? extends Model, ObservableList<W>> applyOnModel,
-			Function<? extends HtmlDomNode, Property<ObservableList<W>>> applyOnNode) {
+	public static <W> Binding bindObservableList(Function<? extends Model, ObservableList<W>> applyOnModel, Function<? extends HtmlDomNode, Property<ObservableList<W>>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableListPropertyBinder());
 	}
 
 	@Deprecated
-	public static Binding bindMap(Function<? extends Model, ObservableMap<String, String>> applyOnModel,
-			Function<? extends HtmlDomNode, Map<String, String>> applyOnNode) {
+	public static Binding bindMap(Function<? extends Model, ObservableMap<String, String>> applyOnModel, Function<? extends HtmlDomNode, Map<String, String>> applyOnNode) {
 		return Binding.bind(applyOnNode, applyOnModel, Binder.observableMapBinder());
 	}
 
-	public static Binding bindInit(Consumer<? extends Model> consumer) {
-		return (modelContext, node) -> consumer.accept(modelContext.getModel());
+	public static Binding bindInit(Consumer<ModelContext> consumer) {
+		return (modelContext, node) -> consumer.accept(modelContext);
 	}
 }

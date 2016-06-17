@@ -77,7 +77,7 @@ public abstract class Element<M extends Model> {
 		bindings.add(Binding.bindProperty(applyOnModel, applyOnNode));
 	}
 
-	protected void addInitBinding(Consumer<M> consumer) {
+	protected void addInitBinding(Consumer<ModelContext> consumer) {
 		bindings.add(Binding.bindInit(consumer));
 	}
 
@@ -97,9 +97,9 @@ public abstract class Element<M extends Model> {
 	}
 
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> applyOnModel, String styleClass) {
-		addInitBinding(model -> {
-			ObservableValue<Boolean> optional = applyOnModel.apply(model);
-			Set<String> styleClasses = model.getObservableStyleClasses(this);
+		addInitBinding(modelContext -> {
+			ObservableValue<Boolean> optional = applyOnModel.apply(modelContext.getModel());
+			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
 			Consumer<Boolean> consumer = bool -> {
 				if (bool)
 					styleClasses.add(styleClass);
@@ -190,14 +190,14 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void addStyle(String propertyName, Function<M, String> applyOnModel) {
-		addInitBinding(model -> model.getObservableStyles(this).put(propertyName, applyOnModel.apply(model)));
+		addInitBinding(modelContext -> modelContext.getObservableStyles(this).put(propertyName, applyOnModel.apply(modelContext.getModel())));
 	}
 
 	public void bindStyle(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
-		addInitBinding(model -> {
-			Map<String, String> stylesMap = model.getObservableStyles(this);
+		addInitBinding(modelContext -> {
+			Map<String, String> stylesMap = modelContext.getObservableStyles(this);
 			ChangeListener<String> listener = (o, old, newValue) -> stylesMap.put(propertyName, newValue);
-			ObservableValue<String> observableStyle = applyOnModel.apply(model);
+			ObservableValue<String> observableStyle = applyOnModel.apply(modelContext.getModel());
 			observableStyle.addListener(listener);
 			stylesMap.put(propertyName, observableStyle.getValue());
 		});
@@ -242,7 +242,7 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
-		addInitBinding(model -> model.getTextProperty(this).bind(applyOnModel.apply(model)));
+		addInitBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply(modelContext.getModel())));
 	}
 
 	protected void forEach(CompositeElement<?> parentCompositeElement) {
