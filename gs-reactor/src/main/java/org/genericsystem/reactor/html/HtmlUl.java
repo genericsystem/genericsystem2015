@@ -1,22 +1,21 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlUl<M extends Model> extends HtmlElement<M, HtmlUl<M>, HtmlDomNode> {
+public class HtmlUl<M extends Model> extends Element<M> {
 
-	public HtmlUl(HtmlElement<?, ?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+	public HtmlUl(Element<?> parent) {
+		super(parent, "ul");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("ul");
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId);
 	}
 
 }

@@ -1,28 +1,27 @@
 package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
-import org.genericsystem.reactor.HtmlElement;
+
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.HtmlElement.InputTextHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlInputText<M extends Model> extends HtmlElement<M, HtmlInputText<M>, InputTextHtmlDomNode> {
+public class HtmlInputText<M extends Model> extends Element<M> {
 
-	public HtmlInputText(HtmlElement<?, ?, ?> parent) {
-		super(parent, InputTextHtmlDomNode.class);
+	public HtmlInputText(Element<?> parent) {
+		super(parent, "input");
 	}
 
 	@Override
-	protected InputTextHtmlDomNode createNode(Object parent) {
-		return new InputTextHtmlDomNode();
+	protected InputTextHtmlDomNode createNode(String parentId) {
+		return new InputTextHtmlDomNode(parentId);
 	}
 
-	public HtmlInputText<M> bindAction(Consumer<M> applyOnModel) {
+	public void bindAction(Consumer<M> applyOnModel) {
 		addActionBinding(InputTextHtmlDomNode::getEnterProperty, applyOnModel);
-		return this;
 	}
 
 }

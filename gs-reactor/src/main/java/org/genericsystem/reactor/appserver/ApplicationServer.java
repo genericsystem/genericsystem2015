@@ -1,11 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -17,15 +11,22 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
+import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Element.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
  *
  */
+
 public class ApplicationServer extends AbstractBackEnd {
 
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
@@ -78,12 +79,12 @@ public class ApplicationServer extends AbstractBackEnd {
 			if (application == null)
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			AbstractCache cache = application.getEngine().newCache();
-			HtmlElement app = cache.safeSupply(() -> application.newHtmlApp(socket));
+			Element app = cache.safeSupply(() -> application.newHtmlApp(socket));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = ((HtmlApp) app).getNodeById(json.getString(HtmlElement.ID));
+				HtmlDomNode node = ((HtmlApp) app).getNodeById(json.getString(Element.ID));
 				if (node != null)
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};

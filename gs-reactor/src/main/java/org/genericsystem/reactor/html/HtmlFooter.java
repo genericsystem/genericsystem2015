@@ -1,22 +1,21 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlFooter<M extends Model> extends HtmlElement<M, HtmlFooter<M>, HtmlDomNode> {
+public class HtmlFooter<M extends Model> extends Element<M> {
 
-	public HtmlFooter(HtmlElement<?, ?, ?> parent) {
-		super(parent, HtmlDomNode.class);
+	public HtmlFooter(Element<?> parent) {
+		super(parent, "footer");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(Object parent) {
-		return new HtmlDomNode("footer");
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId);
 	}
 
 }

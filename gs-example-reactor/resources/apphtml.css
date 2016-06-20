@@ -8,7 +8,7 @@ body {
 	line-height: 1.4em;
 	background: #eaeaea;
 	color: #4d4d4d;
-	width: 800px;
+	width: 1200px;
 	margin: 0 auto;
 	-webkit-font-smoothing: antialiased;
 	-moz-font-smoothing: antialiased;
@@ -19,90 +19,4 @@ body {
 	flex-direction: column;
 	flex-wrap: nowrap;
 	justify-content: center;
-}
-
-.gsapp {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: center;
-}
-
-.gsheader {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	justify-content: center;
-	background-color: #ffa500;
-}
-
-.gsfooter {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	justify-content: center;
-	background-color: #ffa500;
-}
-
-.gstable {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: flex-start;
-}
-
-.gsrow {
-	margin-bottom : 1px;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-}
-
-.gstitlerow {
-	background-color: #91a692;
-	justify-content: center;
-}
-
-.gssubtitlerow {
-	background-color: #91a692;
-	justify-content: center;
-}
-
-.gssubtitlerow .gscell {
-	background-color: #538255;
-	margin-right : 1px;
-	justify-content : center;
-	flex-direction: row;
-}
-
-.gsinsertrow {
-	
-}
-
-.gscell {
-	margin-right : 1px;
-	display: flex;
-	flex-direction: column;
-	flex: 1;
-	color : #ffffff;
-	padding : 2px;
-	background-color: #ffc0cb;
-}
-
-.gstitlecell {
-	flex: 1;
-	min-width: 200px;
-	background-color: #e4788b;
-}
-
-.gsbuttoncell {
-	flex: 0;
-	min-width: 80px;
-	background-color: #b4868e;
-}
-
-.gssubcell {
-	display: flex;
-	flex-direction: row;
-	/*background-color: #927a7e;*/
 }

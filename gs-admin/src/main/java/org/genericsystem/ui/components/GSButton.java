@@ -30,7 +30,7 @@ public class GSButton extends GSRegion<GSButton, Button> {
 	}
 
 	public <M> GSButton setAction(Consumer<M> action) {
-		bindings.add(Binding.bindAction(action, Button::onActionProperty));
+		preFixedBindings.add(Binding.bindAction(action, Button::onActionProperty));
 		return this;
 	}
 

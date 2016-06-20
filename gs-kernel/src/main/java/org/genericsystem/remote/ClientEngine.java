@@ -35,7 +35,9 @@ public class ClientEngine extends AbstractRoot implements Generic {
 
 	public ClientEngine(String host, int port, String path, Class<?>... userClasses) {
 		assert path != null;
-		init(this, buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE, Collections.emptyList(), ApiStatics.TS_SYSTEM, ApiStatics.TS_SYSTEM));
+		init(this,
+				buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE, Collections.emptyList(), ApiStatics.TS_SYSTEM,
+						ApiStatics.TS_SYSTEM));
 		server = new FrontEnd(host, port, path);
 		startSystemCache(userClasses);
 		isInitialized = true;
@@ -51,7 +53,8 @@ public class ClientEngine extends AbstractRoot implements Generic {
 		return new SystemCache(root) {
 
 			@Override
-			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components) {
+			protected Generic getOrBuild(AbstractCache cache, Class<?> clazz, Generic meta, List<Generic> overrides, Serializable value,
+					List<Generic> components) {
 				// TODO Auto-generated method stub
 				Generic systemProperty = cache.get(meta, overrides, value, components);
 				if (systemProperty == null)
@@ -85,7 +88,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	@Override
-	protected Generic getGenericById(long ts) {
+	public Generic getGenericById(long ts) {
 		Generic generic = super.getGenericById(ts);
 		if (generic == null) {
 			Vertex vertex = server.getVertex(ts);

@@ -1,28 +1,27 @@
 package org.genericsystem.reactor.html;
 
-import io.vertx.core.http.ServerWebSocket;
 import org.genericsystem.reactor.Element;
-import org.genericsystem.reactor.HtmlElement;
-import org.genericsystem.reactor.HtmlElement.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
+
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>, HtmlDomNode> {
+public abstract class HtmlApp<M extends Model> extends Element<M> {
 
 	private final ServerWebSocket webSocket;
-	private RootViewContext<?, HtmlDomNode> rootViewContext;
+	private RootViewContext<M> rootViewContext;
 
 	public HtmlApp(ServerWebSocket webSocket) {
-		super(null, HtmlDomNode.class);
+		super(null, "div");
 		this.webSocket = webSocket;
 	}
 
 	public HtmlApp<M> init(M model) {
-		rootViewContext = new RootViewContext<>(model, (Element) this, new HtmlDomNode("div"));
+		rootViewContext = new RootViewContext<M>(model, this, new HtmlDomNode(null));
 		return this;
 	}
 
@@ -33,5 +32,10 @@ public abstract class HtmlApp<M extends Model> extends HtmlElement<M, HtmlApp<M>
 
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
+	}
+
+	@Override
+	protected HtmlDomNode createNode(String parentId) {
+		throw new UnsupportedOperationException();
 	}
 }

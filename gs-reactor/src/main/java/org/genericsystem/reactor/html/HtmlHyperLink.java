@@ -1,35 +1,33 @@
 package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
-import javafx.event.Event;
-import org.genericsystem.reactor.HtmlElement;
+
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.HtmlElement.ActionHtmlNode;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlHyperLink<M extends Model> extends HtmlElement<M, HtmlHyperLink<M>, ActionHtmlNode> {
+public class HtmlHyperLink<M extends Model> extends Element<M> {
 
-	public HtmlHyperLink(HtmlElement<?, ?, ?> parent, String text) {
-		super(parent, ActionHtmlNode.class);
-		addBoot(HtmlDomNode::getText, text);
+	public HtmlHyperLink(Element<?> parent, String text) {
+		super(parent, "a");
+		setText(text);
 	}
 
-	public HtmlHyperLink(HtmlElement<?, ?, ?> parent, String text, Consumer<M> action) {
+	public HtmlHyperLink(Element<?> parent, String text, Consumer<M> action) {
 		this(parent, text);
-		setAction(action);
+		bindAction(action);
 	}
 
-	public <T extends Event> HtmlHyperLink<M> setAction(Consumer<M> consumer) {
+	public void bindAction(Consumer<M> consumer) {
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
-		return this;
 	}
 
 	@Override
-	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode("a");
+	protected ActionHtmlNode createNode(String parentId) {
+		return new ActionHtmlNode(parentId);
 	}
 
 }

@@ -1,27 +1,24 @@
 package org.genericsystem.reactor.html;
 
-import java.util.function.Consumer;
-import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.HtmlElement.ActionHtmlNode;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlOption<M extends Model> extends HtmlElement<M, HtmlOption<M>, ActionHtmlNode> {
+public class HtmlOption<M extends Model> extends Element<M> {
 
-	public HtmlOption(HtmlElement<?, ?, ?> parent) {
-		super(parent, ActionHtmlNode.class);
+	public HtmlOption(Element<?> parent) {
+		super(parent, "option");
 	}
 
 	@Override
-	protected ActionHtmlNode createNode(Object parent) {
-		return new ActionHtmlNode("option");
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId);
 	}
-	
-	public HtmlOption<M> bindAction(Consumer<M> applyOnModel) {
-		addActionBinding(ActionHtmlNode::getActionProperty, applyOnModel);
-		return this;
-	}
+
+	// public void bindAction(Consumer<M> consumer) {
+	// addActionBinding(ActionHtmlNode::getActionProperty, consumer);
+	// }
 }

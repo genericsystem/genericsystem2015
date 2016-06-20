@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -9,19 +7,28 @@ import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.reactor.CompositeModel;
-import org.genericsystem.reactor.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
-import org.genericsystem.reactor.composite.table.TypeTableHtmlTemplate.TypeTableHtml;
+import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
+import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.flex.FlexDirection;
+import org.genericsystem.reactor.flex.FlexElement;
+import org.genericsystem.reactor.flex.FlexTable;
+import org.genericsystem.reactor.flex.FlexTag;
 import org.genericsystem.reactor.html.HtmlApp;
-import org.genericsystem.reactor.html.HtmlDiv;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.EngineModel;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.SelectorModel;
 
-public class AppHtml extends HtmlApp<AppModel> {
+import io.vertx.core.http.ServerWebSocket;
+
+public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/apphtml", AppHtml.class, AppModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
 				Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
@@ -29,24 +36,18 @@ public class AppHtml extends HtmlApp<AppModel> {
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-	}
-
-	@Override
-	protected void initChildren() {
-
-		HtmlDiv<AppModel> div = new HtmlDiv<AppModel>(this)// .addStyleClass("gsapp");
-				.addStyle("display", "flex").addStyle("flex-direction", "column").addStyle("flex-wrap", "nowrap").addStyle("justify-content", "center");
-		{
-			// new AppHeaderHtml(div);
-			// new CompositeSelectHtml<>(div).select(Color.class).setObservableListExtractor(gs -> gs[0].getObservableSubInstances());
-			// new TitleCompositeSectionHtml<>(div).select(StringExtractor.MANAGEMENT, Car.class);
-
-			new TypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class, CarColor.class);
-
-			// new ColumnTitleTypeTableHtml<CompositeModel>(div).select(StringExtractor.MANAGEMENT, Car.class).setAttributesExtractor(Power.class,
-			// CarColor.class);
-			// new AppFooterHtml(div);
-		}
+		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+			{
+				addStyle("justify-content", "center");
+				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
+				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
+				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
+				new SaveCancelFlexRow(this, FlexTag.FOOTER).addStyle("background-color", "#ffa500");
+			}
+		};
 	}
 
 	void runScript(AbstractRoot engine) {
@@ -77,4 +78,5 @@ public class AppHtml extends HtmlApp<AppModel> {
 		car.setInstance("Peugeot 106 GTI").setHolder(power, 120);
 		car.setInstance("Peugeot 206 S16").setHolder(power, 136);
 	}
+
 }

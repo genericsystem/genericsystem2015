@@ -1,16 +1,18 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.json.JsonObject;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Statics;
-import org.genericsystem.reactor.HtmlElement;
+import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -56,7 +58,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return new ApplicationDeploymentConfig(json.getMap());
 	}
 
-	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends HtmlElement<?, ?, ?>> htmlAppClass, Class<? extends Model> modelClass,
+	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends Element<?>> htmlAppClass, Class<? extends Model> modelClass,
 			Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes));
 		return this;
@@ -94,7 +96,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends HtmlElement<?, ?, ?>> applicationClass, Class<? extends Model> modelClass,
+		public ApplicationDeploymentConfig(Class<? extends Element<?>> applicationClass, Class<? extends Model> modelClass,
 				Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
