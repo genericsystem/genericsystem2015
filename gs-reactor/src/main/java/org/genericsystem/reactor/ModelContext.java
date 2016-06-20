@@ -5,18 +5,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Element.SelectableActionHtmlNode;
-import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
-import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
-
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Element.SelectableHtmlDomNode;
+import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
+import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -61,15 +61,17 @@ public class ModelContext {
 		return subContextsMap;
 	}
 
-	public <M extends Model> ObservableList<M> getObservableSubModels(Element<?> element, StringExtractor stringExtractor,
-			ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+	public <MODEL extends Model, SUBMODEL extends Model> ObservableList<SUBMODEL> getObservableSubModels(Element<SUBMODEL> element) {
+		return (ObservableList<SUBMODEL>) observableModels.get(element);
+	}
+
+	public <M extends Model> ObservableList<M> setObservableSubModels(Element<M> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
 		ObservableList<M> result = (ObservableList<M>) observableModels.get(element);
-		if (result == null) {
-			Generic[] gs = this.<CompositeModel> getModel().getGenerics();
-			result = new TransformationObservableList<Generic, M>(observableListExtractor.apply(gs),
-					generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, gs), stringExtractor));
-			observableModels.put(element, result);
-		}
+		if (result != null)
+			throw new IllegalStateException();
+		Generic[] gs = this.<CompositeModel> getModel().getGenerics();
+		result = new TransformationObservableList<Generic, M>(observableListExtractor.apply(gs), generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, gs), stringExtractor));
+		observableModels.put(element, result);
 		return result;
 	}
 
@@ -106,6 +108,9 @@ public class ModelContext {
 	}
 
 	public Property<Number> getSelectionIndex(Element<?> element) {
-		return ((SelectableActionHtmlNode) getViewContext(element).getNode()).getSelectionIndex();
+		assert element != null;
+		System.out.println("ZZZZ" + element);
+		assert getViewContext(element) != null : ("Element : " + element + " " + viewContextsMap);
+		return ((SelectableHtmlDomNode) getViewContext(element).getNode()).getSelectionIndex();
 	}
 }

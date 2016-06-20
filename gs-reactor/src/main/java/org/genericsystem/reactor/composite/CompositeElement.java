@@ -2,8 +2,8 @@ package org.genericsystem.reactor.composite;
 
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
-import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 
 public interface CompositeElement<M extends CompositeModel> {
 

@@ -6,18 +6,16 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 
 public class SelectorModel extends CompositeModel {
-	private Property<Generic> selection = new SimpleObjectProperty<>();
-	private ObservableValue<String> selectionString = Bindings.createStringBinding(() -> getStringExtractor().apply(getSelection().getValue()),
-			getSelection());
+	private Property<CompositeModel> selection = new SimpleObjectProperty<>();
+	private ObservableValue<String> selectionString = Bindings.createStringBinding(() -> getStringExtractor().apply(getSelection().getValue() != null ? getSelection().getValue().getGeneric() : null), getSelection());
 
 	public SelectorModel(Generic[] generics, StringExtractor extractor) {
 		super(generics, extractor);
 	}
 
-	public Property<Generic> getSelection() {
+	public Property<CompositeModel> getSelection() {
 		return selection;
 	}
 

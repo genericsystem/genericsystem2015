@@ -3,6 +3,7 @@ package org.genericsystem.reactor;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Element.HtmlDomNode;
 import org.genericsystem.reactor.ModelContext.RootModelContext;
@@ -28,14 +29,16 @@ public class ViewContext<M extends Model> {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (Binding binding : element.bindings)
-			binding.init(modelContext, getNode());
+		for (BiConsumer<ModelContext, Element<M>.HtmlDomNode> binding : element.preFixedBindings)
+			binding.accept(modelContext, getNode());
 		for (Element<?> childElement : element.getChildren()) {
 			if (childElement.metaBinding != null)
-				childElement.metaBinding.init(this, childElement);
+				childElement.metaBinding.accept((Element) childElement, this);
 			else
 				createViewContextChild(null, modelContext, childElement);
 		}
+		for (BiConsumer<ModelContext, Element<M>.HtmlDomNode> binding : element.postFixedBindings)
+			binding.accept(modelContext, getNode());
 	}
 
 	public ModelContext getModelContext() {
@@ -51,11 +54,11 @@ public class ViewContext<M extends Model> {
 		return parent.getRootViewContext();
 	}
 
-	public HtmlDomNode getNode() {
-		return node;
+	public <NODE extends HtmlDomNode> NODE getNode() {
+		return (NODE) node;
 	}
 
-	private Map<Element<?>, Integer> sizeByElement = new IdentityHashMap<Element<?>, Integer>() {
+	private Map<Element<?>, Integer> sizeBySubElement = new IdentityHashMap<Element<?>, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
@@ -81,24 +84,24 @@ public class ViewContext<M extends Model> {
 	}
 
 	private void incrementSize(Element<?> child) {
-		sizeByElement.put(child, sizeByElement.get(child) + 1);
+		sizeBySubElement.put(child, sizeBySubElement.get(child) + 1);
 	}
 
 	private void decrementSize(Element<?> child) {
-		int size = sizeByElement.get(child) - 1;
+		int size = sizeBySubElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
-			sizeByElement.remove(child);// remove map if empty
+			sizeBySubElement.remove(child);// remove map if empty
 		else
-			sizeByElement.put(child, size);
+			sizeBySubElement.put(child, size);
 	}
 
 	private int computeIndex(Integer nullable, Element<?> childElement) {
-		int indexInChildren = nullable == null ? sizeByElement.get(childElement) : nullable;
+		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
 		for (Element<?> child : element.getChildren()) {
 			if (child == childElement)
 				return indexInChildren;
-			indexInChildren += sizeByElement.get(child);
+			indexInChildren += sizeBySubElement.get(child);
 		}
 		return indexInChildren;
 	}

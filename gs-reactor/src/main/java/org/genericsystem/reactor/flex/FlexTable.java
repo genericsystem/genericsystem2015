@@ -7,9 +7,9 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.ObservableListExtractor;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 
 /**
  * @author Nicolas Feybesse
@@ -248,7 +248,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("min-width", "200px");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						addInitBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
 						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
@@ -279,7 +279,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										addInitBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 												modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");

@@ -24,15 +24,19 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 
 	public static class ColorsSelect<M extends SelectorModel> extends CompositeSelect<M> {
 
+		HtmlOption<CompositeModel> optionElement;
+
 		public ColorsSelect(Element<?> parent) {
 			super(parent);
+			bindBiDirectionalSelection(optionElement, SelectorModel::getSelection);
 			bindStyle("background-color", SelectorModel::getSelectionString);
 		}
 
 		@Override
 		protected void options() {
-			new HtmlOption<CompositeModel>(this) {
+			optionElement = new HtmlOption<CompositeModel>(this) {
 				{
+					// bindBidirectionalSelectionIndex(applyOnModel);
 					bindText(CompositeModel::getString);
 					addStyle("selected", "true");
 					bindStyle("background-color", CompositeModel::getString);

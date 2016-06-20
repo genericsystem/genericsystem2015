@@ -14,7 +14,7 @@ public abstract class HtmlSelect<M extends CompositeModel> extends Element<M> {
 	}
 
 	@Override
-	protected SelectableActionHtmlNode createNode(String parentId) {
-		return new SelectableActionHtmlNode(parentId);
+	protected SelectableHtmlDomNode createNode(String parentId) {
+		return new SelectableHtmlDomNode(parentId);
 	}
 }
