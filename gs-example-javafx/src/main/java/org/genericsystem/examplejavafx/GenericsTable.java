@@ -3,6 +3,11 @@ package org.genericsystem.examplejavafx;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.examplejavafx.AbstractColumn.GenericColumn;
+import org.genericsystem.examplejavafx.AbstractColumn.TargetComponentColumn;
+
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,9 +21,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.genericsystem.common.Generic;
-import org.genericsystem.examplejavafx.AbstractColumn.GenericColumn;
-import org.genericsystem.examplejavafx.AbstractColumn.TargetComponentColumn;
 
 /**
  * @author Nicolas Feybesse
@@ -28,15 +30,18 @@ public class GenericsTable extends TableView<Generic> {
 	public GenericsTable(Generic type, Generic... attributes) {
 		setEditable(true);
 
-		TableColumn<Generic, String> firstColumn = new GenericColumn<String>(type, Objects.toString(type.getValue()), g -> Objects.toString(g.getValue()), (g, v) -> g.updateValue(v));
+		TableColumn<Generic, String> firstColumn = new GenericColumn<String>(type, Objects.toString(type.getValue()), g -> Objects.toString(g.getValue()),
+				(g, v) -> g.updateValue(v));
 		getColumns().add(firstColumn);
 
 		for (Generic attribute : attributes) {
 			TableColumn<Generic, ?> column;
 			if (attribute.getComponents().size() < 2)
-				column = new GenericColumn<>(attribute, Objects.toString(attribute.getValue()), g -> g.getValue(attribute), (g, v) -> g.setHolder(attribute, v));
+				column = new GenericColumn<>(attribute, Objects.toString(attribute.getValue()), g -> g.getValue(attribute),
+						(g, v) -> g.setHolder(attribute, v));
 			else
-				column = new TargetComponentColumn(attribute.getTargetComponent(), Objects.toString(attribute.getTargetComponent().getValue()), g -> g.getHolder(attribute).getTargetComponent(), (g, v) -> g.setLink(attribute, null, v));
+				column = new TargetComponentColumn(attribute.getTargetComponent(), Objects.toString(attribute.getTargetComponent().getValue()),
+						g -> g.getHolder(attribute).getTargetComponent(), (g, v) -> g.setLink(attribute, null, v));
 			getColumns().add(column);
 		}
 		getColumns().add(new DeleteColumn());

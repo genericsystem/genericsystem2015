@@ -1,5 +1,12 @@
 package org.genericsystem.common;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -7,16 +14,13 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.ServerWebSocket;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
 public abstract class AbstractWebSocketsServer {
+	protected static Logger log = LoggerFactory.getLogger(AbstractWebSocketsServer.class);
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
@@ -26,7 +30,7 @@ public abstract class AbstractWebSocketsServer {
 		this.port = port;
 		this.host = host;
 		this.url = "ws://" + host + ":" + port;
-		System.out.println("url: " + this.url);
+		log.info("url: " + this.url);
 	}
 
 	public abstract Handler<Buffer> getHandler(String path, ServerWebSocket socket);
@@ -34,7 +38,7 @@ public abstract class AbstractWebSocketsServer {
 	public abstract void addHttpHandler(HttpServer httpServer, String url);
 
 	public void start() {
-		System.out.println("Generic System Server is starting...!");
+		log.info("Generic System Server is starting...!");
 		Vertx vertx = GSVertx.vertx().getVertx();
 
 		for (int i = 0; i < 2 * Runtime.getRuntime().availableProcessors(); i++) {
@@ -48,7 +52,7 @@ public abstract class AbstractWebSocketsServer {
 
 			httpServer.websocketHandler(webSocket -> {
 				String path = webSocket.path();
-				System.out.println("--- socket path: " + path);
+				log.info("--- socket path: " + path);
 				webSocket.handler(getHandler(path, webSocket));
 				webSocket.exceptionHandler(e -> {
 					e.printStackTrace();
@@ -61,7 +65,21 @@ public abstract class AbstractWebSocketsServer {
 			AbstractBackEnd.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
 		}
-		System.out.println("Generic System Server is ready!");
+		String logo = "\n";
+		logo += ("____________________________________________________________________________________________________________\n");
+		logo += ("|___________________________________________________________________________________________________________|\n");
+		logo += ("|___________________________________________________________________________________________________________|\n");
+		logo += ("|____________|         ____                      _      ____             __                  /______________|\n");
+		logo += ("|____________|        / ___)___  _  _____  ___  /_)__  / ___)_  __ ___  / /  ___  ____      /_______________|\n");
+		logo += ("|____________|       / /___/ __)/ \\/ / __)/ _ )/ |/ _)/___ \\/ \\/  ) __)/___)/ __)/    )    /________________|\n");
+		logo += ("|____________|      / /_  / __)/    / __)/   \\/  / /_ ___/ /\\    (__  / /_ / __)/ / / /   /_________________|\n");
+		logo += ("|____________|      \\____(____(_/\\_(____(_/\\_(__(____(____/  \\  (____(____(____(_/_/_/   /__________________|\n");
+		logo += ("|____________|                                               /_/                        /___________________|\n");
+		logo += ("|____________|_________________________________________________________________________/____________________|\n");
+		logo += ("|___________________________________________________________________________________________________________|\n");
+		logo += ("|___________________________________________________________________________________________________________|  \n");
+		log.info(logo);
+		log.info("Generic System Server is ready!");
 	}
 
 	public String getUrl() {
@@ -69,10 +87,10 @@ public abstract class AbstractWebSocketsServer {
 	}
 
 	public void stop(Map<String, AbstractRoot> roots) {
-		System.out.println("Generic System Server is stopping...");
+		log.info("Generic System Server is stopping...");
 		httpServers.forEach(httpServer -> AbstractBackEnd.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		roots.values().forEach(root -> root.close());
 		roots = null;
-		System.out.println("Generic System Server is stopped");
+		log.info("Generic System Server is stopped");
 	}
 }
