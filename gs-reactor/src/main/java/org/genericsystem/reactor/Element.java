@@ -43,8 +43,6 @@ import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
-import com.sun.javafx.binding.Logging;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -286,14 +284,16 @@ public abstract class Element<M extends Model> {
 							try {
 								property2.setValue(fromString(property1.getValue()));
 							} catch (Exception e) {
-								Logging.getLogger().warning("Exception while parsing String in bidirectional binding", e);
+								System.out.println("Exception while parsing String in bidirectional binding : " + e);
 								property2.setValue(null);
 							}
 						} else {
 							try {
 								property1.setValue(toString(property2.getValue()));
 							} catch (Exception e) {
-								Logging.getLogger().warning("Exception while converting Object to String in bidirectional binding", e);
+								System.out
+										.println("Exception while converting Object to String in bidirectional binding"
+												+ e);
 								property1.setValue(null);
 							}
 						}
