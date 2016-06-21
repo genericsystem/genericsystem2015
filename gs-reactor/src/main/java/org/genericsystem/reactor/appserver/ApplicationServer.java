@@ -15,6 +15,8 @@ import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Element.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -28,16 +30,16 @@ import io.vertx.core.json.JsonObject;
  */
 
 public class ApplicationServer extends AbstractBackEnd {
-
+	protected static Logger log = LoggerFactory.getLogger(ApplicationServer.class);
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
 
 	public ApplicationServer(ApplicationsDeploymentConfig options) {
 		super(options.getHost(), options.getPort());
-		System.out.println("Load config : \n" + options.encodePrettily());
+		log.info("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
 			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
-			System.out.println("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
+			log.info("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
 			roots.put(path, root);
@@ -47,8 +49,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			String path = directoryPath != null ? directoryPath : "/";
 			apps.put(applicationPath,
 					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
-					+ " and persistence directory path : " + directoryPath);
+
 		}
 	}
 
