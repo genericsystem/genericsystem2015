@@ -1,10 +1,14 @@
 package org.genericsystem.reactor.appserver;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
@@ -106,20 +110,22 @@ public class ApplicationServer extends AbstractBackEnd {
 					throw new IllegalStateException("Unable to load an application with path : " + appPath);
 				}
 
-				if (request.path().contains(".css")) {
-					request.response().sendFile(application.getApplicationClass().getClassLoader().getResource(appPath + ".css").getFile());
-				} else if (request.path().contains(".js")) {
-					request.response().sendFile(getClass().getClassLoader().getResource("script.js").getFile());
+				if (items.length > 2) {
+					String res = request.path().replaceFirst("/.*?/", "/");
+					InputStream input = application.getApplicationClass().getResourceAsStream(res);
+					String result = new BufferedReader(new InputStreamReader(input))
+					  .lines().collect(Collectors.joining("\n"));
+					request.response().end(result);
 				} else {
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/resources/style.css\"/>";
+					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/apphtml.css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
 					indexHtml += "</script>";
-					indexHtml += "<script type=\"text/javascript\" src=\"/" + appPath + "/javascript/script.js\"></script>";
+					indexHtml += "<script type=\"text/javascript\" src=\"/" + appPath + "/script.js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body onload=\"connect();\" id=\"root\">";
 					indexHtml += "</body>";
