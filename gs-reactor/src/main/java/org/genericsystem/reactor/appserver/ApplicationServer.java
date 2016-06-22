@@ -122,7 +122,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/apphtml.css\"/>";
+					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/" + appPath + ".css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
 					indexHtml += "</script>";
