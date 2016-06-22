@@ -77,6 +77,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 		car.setInstance("Audi A4 3.0 TDI").setHolder(power, 233);
 		car.setInstance("Peugeot 106 GTI").setHolder(power, 120);
 		car.setInstance("Peugeot 206 S16").setHolder(power, 136);
+		engine.getCurrentCache().flush();
 	}
 
 }
