@@ -18,18 +18,16 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <S>
  * @param <T>
  */
-public class EditingCell<S,T> extends TableCell<S, T> {
+public class EditingCell<S, T> extends TableCell<S, T> {
 
 	private final TextField textField;
 	private StringConverter<T> converter;
-
 
 	public EditingCell(StringConverter<T> converter) {
 		this.converter = converter;
@@ -38,8 +36,8 @@ public class EditingCell<S,T> extends TableCell<S, T> {
 
 		textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				if(!newValue.booleanValue() && textField != null) {
-					System.out.println("coucou lost focus : "+textField.getText());
+				if (!newValue.booleanValue() && textField != null) {
+					System.out.println("coucou lost focus : " + textField.getText());
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {
@@ -51,7 +49,8 @@ public class EditingCell<S,T> extends TableCell<S, T> {
 		});
 
 		textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
-			@Override public void handle(KeyEvent t) {
+			@Override
+			public void handle(KeyEvent t) {
 				if (t.getCode() == KeyCode.ENTER) {
 					commitEdit(converter.fromString(textField.getText()));
 				} else if (t.getCode() == KeyCode.ESCAPE) {
@@ -104,13 +103,11 @@ public class EditingCell<S,T> extends TableCell<S, T> {
 
 	@Override
 	public void commitEdit(T item) {
-		if (! isEditing() && ! Objects.equals(item,getItem())) {
+		if (!isEditing() && !Objects.equals(item, getItem())) {
 			TableView<S> table = getTableView();
 			if (table != null) {
 				TableColumn<S, T> column = getTableColumn();
-				CellEditEvent<S, T> event = new CellEditEvent<>(table, 
-						new TablePosition<S,T>(table, getIndex(), column), 
-						TableColumn.editCommitEvent(), item);
+				CellEditEvent<S, T> event = new CellEditEvent<>(table, new TablePosition<S, T>(table, getIndex(), column), TableColumn.editCommitEvent(), item);
 				Event.fireEvent(column, event);
 			}
 		}

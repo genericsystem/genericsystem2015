@@ -1,10 +1,14 @@
 package org.genericsystem.reactor.appserver;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
@@ -15,6 +19,8 @@ import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Element.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -28,16 +34,16 @@ import io.vertx.core.json.JsonObject;
  */
 
 public class ApplicationServer extends AbstractBackEnd {
-
+	protected static Logger log = LoggerFactory.getLogger(ApplicationServer.class);
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
 
 	public ApplicationServer(ApplicationsDeploymentConfig options) {
 		super(options.getHost(), options.getPort());
-		System.out.println("Load config : \n" + options.encodePrettily());
+		log.info("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
 			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
-			System.out.println("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
+			log.info("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
 			roots.put(path, root);
@@ -47,8 +53,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			String path = directoryPath != null ? directoryPath : "/";
 			apps.put(applicationPath,
 					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
-			System.out.println("Starts application " + options.getApplicationClass(applicationPath).getSimpleName() + " with path : " + applicationPath
-					+ " and persistence directory path : " + directoryPath);
+
 		}
 	}
 
@@ -106,20 +111,22 @@ public class ApplicationServer extends AbstractBackEnd {
 					throw new IllegalStateException("Unable to load an application with path : " + appPath);
 				}
 
-				if (request.path().contains(".css")) {
-					request.response().sendFile(application.getApplicationClass().getClassLoader().getResource(appPath + ".css").getFile());
-				} else if (request.path().contains(".js")) {
-					request.response().sendFile(getClass().getClassLoader().getResource("script.js").getFile());
+				if (items.length > 2) {
+					String res = request.path().replaceFirst("/.*?/", "/");
+					InputStream input = application.getApplicationClass().getResourceAsStream(res);
+					String result = new BufferedReader(new InputStreamReader(input))
+					  .lines().collect(Collectors.joining("\n"));
+					request.response().end(result);
 				} else {
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/resources/style.css\"/>";
+					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/" + appPath + ".css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
 					indexHtml += "</script>";
-					indexHtml += "<script type=\"text/javascript\" src=\"/" + appPath + "/javascript/script.js\"></script>";
+					indexHtml += "<script type=\"text/javascript\" src=\"/" + appPath + "/script.js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body onload=\"connect();\" id=\"root\">";
 					indexHtml += "</body>";
