@@ -96,7 +96,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 
 		@Override
-		public void addHttpHandler(HttpServer httpServer, String url) {
+		public void addHttpHandler(HttpServer httpServer) {
 			httpServer.requestHandler(request -> {
 				String[] items = request.path().split("/");
 				String appPath = "";
@@ -124,7 +124,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<meta charset=\"UTF-8\">";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/" + appPath + ".css\"/>";
 					indexHtml += "<script>";
-					indexHtml += "var serviceLocation =\"" + url + request.path() + "\";";
+					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
 					indexHtml += "</script>";
 					indexHtml += "<script type=\"text/javascript\" src=\"/" + appPath + "/script.js\"></script>";
 					indexHtml += "</head>";
@@ -134,7 +134,6 @@ public class ApplicationServer extends AbstractBackEnd {
 					request.response().end(indexHtml);
 				}
 			});
-
 		}
 	}
 

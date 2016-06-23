@@ -91,7 +91,7 @@ public class EngineServer extends AbstractBackEnd {
 		}
 
 		@Override
-		public void addHttpHandler(HttpServer httpServer, String url) {
+		public void addHttpHandler(HttpServer httpServer) {
 			// TODO Auto-generated method stub
 
 		}
