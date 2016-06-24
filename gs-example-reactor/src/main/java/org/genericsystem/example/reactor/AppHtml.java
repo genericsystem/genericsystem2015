@@ -1,5 +1,7 @@
 package org.genericsystem.example.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -10,6 +12,7 @@ import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
+import org.genericsystem.reactor.flex.CompositeFlexElement.ColorCompositeRadio;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexElement;
@@ -17,12 +20,10 @@ import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.flex.FlexTag;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.SelectorModel;
-
-import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<EngineModel> {
 
@@ -41,6 +42,8 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				addStyle("justify-content", "center");
 				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
 				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
+				new ColorCompositeRadio<SelectorModel>(this, FlexTag.SECTION, FlexDirection.COLUMN).select(StringExtractor.EXTRACTOR, Color.class,
+						SelectorModel::new);
 				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);

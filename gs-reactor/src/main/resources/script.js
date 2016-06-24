@@ -67,14 +67,26 @@ function onMessageReceived(evt) {
 				wsocket.send(JSON.stringify({
 					msgType : "U",
 					nodeId : this.id,
-					eltType : "checkbox",
+					eltType : elt.type,
 					checked : this.checked
 				}));
 			};
 			elt.checked = message.checked;
 			break;
+
+			case "radio":
+				elt.name = document.getElementById(message.parentId).parentNode.id;
+				elt.onclick = function () {
+				wsocket.send(JSON.stringify({
+					msgType : "U",
+					nodeId : this.parentNode.parentNode.id,
+					eltType : elt.type,
+					selectedIndex : selectIndex(this.name)
+				}));
+			};
+			break;
 			}
-			break;	
+			break;
 
 		case "select": 
 			elt.onchange = function () {
@@ -107,7 +119,7 @@ function onMessageReceived(evt) {
 		}
 		break;
 	case 'UT':
-		if (elt.tagName == "INPUT" && elt.getAttribute("type") == "text") {
+		if (elt.tagName == "INPUT") {
 			console.log("Receive : "+message.textContent);
 			elt.value = message.textContent;
 		}
@@ -138,4 +150,11 @@ function onclose(evt) {
 	alert("Socket close with code : " + evt.code);
 }
 
-
+function selectIndex(name){
+	var buttons = document.getElementsByName(name);
+	for (var i = 0; i < buttons.length; i++) {
+		if(buttons[i].checked){
+			return i;
+		}
+	}
+}

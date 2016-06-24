@@ -36,9 +36,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		protected void options() {
 			optionElement = new HtmlOption<CompositeModel>(this) {
 				{
-					// bindBidirectionalSelectionIndex(applyOnModel);
 					bindText(CompositeModel::getString);
-					addStyle("selected", "true");
 					bindStyle("background-color", CompositeModel::getString);
 					forEach(ColorsSelect.this);
 				}

@@ -4,7 +4,9 @@ import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.composite.CompositeElement;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.html.HtmlRadio;
 import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.SelectorModel;
 
 /**
  * @author Nicolas Feybesse
@@ -102,4 +104,62 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 			};
 		}
 	}
+
+	public static class CompositeRadio<M extends SelectorModel> extends CompositeFlexElement<M> implements CompositeElement<M> {
+
+		public CompositeRadio(Element<?> parent, FlexTag tag, FlexDirection flexDirection) {
+			super(parent, tag, flexDirection);
+		}
+
+		@Override
+		protected void sections() {
+			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+				{
+					forEach(CompositeRadio.this);
+					new HtmlRadio<CompositeModel>(this);
+					new HtmlLabel<CompositeModel>(this) {
+						{
+							bindText(CompositeModel::getString);
+						}
+					};
+				}
+			};
+		}
+
+	}
+
+	public static class ColorCompositeRadio<M extends SelectorModel> extends CompositeFlexElement<M> implements CompositeElement<M> {
+
+		private Element<CompositeModel> flexSubElement;
+
+		public ColorCompositeRadio(Element<?> parent, FlexTag tag, FlexDirection flexDirection) {
+			super(parent, tag, flexDirection);
+			bindBiDirectionalSelection(flexSubElement, SelectorModel::getSelection);
+			bindStyle("background-color", SelectorModel::getSelectionString);
+			addStyle("padding", "4px");
+		}
+
+		@Override
+		protected HtmlDomNode createNode(String parentId) {
+			return new SelectableHtmlDomNode(parentId);
+		}
+
+		@Override
+		protected void sections() {
+			flexSubElement = new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+				{
+					forEach(ColorCompositeRadio.this);
+					bindStyle("background-color", CompositeModel::getString);
+					new HtmlRadio<CompositeModel>(this);
+					new HtmlLabel<CompositeModel>(this) {
+						{
+							bindText(CompositeModel::getString);
+						}
+					};
+				}
+			};
+		}
+
+	}
+
 }
