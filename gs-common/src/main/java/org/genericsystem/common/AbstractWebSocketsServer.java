@@ -24,18 +24,15 @@ public abstract class AbstractWebSocketsServer {
 	private List<HttpServer> httpServers = new ArrayList<>();
 	private final int port;
 	private final String host;
-	private final String url;
 
 	public AbstractWebSocketsServer(String host, int port) {
 		this.port = port;
 		this.host = host;
-		this.url = "ws://" + host + ":" + port;
-		log.info("url: " + this.url);
 	}
 
 	public abstract Handler<Buffer> getHandler(String path, ServerWebSocket socket);
 
-	public abstract void addHttpHandler(HttpServer httpServer, String url);
+	public abstract void addHttpHandler(HttpServer httpServer);
 
 	public void start() {
 		log.info("Generic System Server is starting...!");
@@ -60,7 +57,7 @@ public abstract class AbstractWebSocketsServer {
 				});
 			});
 
-			addHttpHandler(httpServer, getUrl());
+			addHttpHandler(httpServer);
 
 			AbstractBackEnd.<HttpServer> synchronizeTask(handler -> httpServer.listen(handler));
 			httpServers.add(httpServer);
@@ -80,10 +77,6 @@ public abstract class AbstractWebSocketsServer {
 		logo += ("|___________________________________________________________________________________________________________|  \n");
 		log.info(logo);
 		log.info("Generic System Server is ready!");
-	}
-
-	public String getUrl() {
-		return url;
 	}
 
 	public void stop(Map<String, AbstractRoot> roots) {
