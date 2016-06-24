@@ -38,7 +38,6 @@ public class ViewContext<M extends Model> {
 				createViewContextChild(null, modelContext, childElement);
 		}
 		for (BiConsumer<ModelContext, Element<M>.HtmlDomNode> binding : element.postFixedBindings) {
-			System.out.println("coucou");
 			binding.accept(modelContext, getNode());
 		}
 
