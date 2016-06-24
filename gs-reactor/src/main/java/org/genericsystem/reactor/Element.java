@@ -86,12 +86,13 @@ public abstract class Element<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
-	protected void addPostFixBinding(Consumer<ModelContext> consumer) {
+	protected void addPostfixBinding(Consumer<ModelContext> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
 	@Deprecated
-	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
+	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
+			Function<M, ObservableMap<String, String>> applyOnModel) {
 		preFixedBindings.add((modelContext, node) -> Bindings.bindContent(applyOnNode.apply((NODE) node), applyOnModel.apply(modelContext.getModel())));
 	}
 
@@ -126,8 +127,10 @@ public abstract class Element<M extends Model> {
 	protected void contextForEach(Function<ModelContext, ObservableList<M>> applyOnModelContext) {
 		metaBinding = (childElement, viewContext) -> {
 			ModelContext modelContext = viewContext.getModelContext();
-			modelContext.getSubContextsMap().put(childElement,
-					new TransformationObservableList<M, ModelContext>(applyOnModelContext.apply(modelContext), (index, model) -> modelContext.createChildContext(model, viewContext, index, childElement), ModelContext::destroy));
+			modelContext.getSubContextsMap().put(
+					childElement,
+					new TransformationObservableList<M, ModelContext>(applyOnModelContext.apply(modelContext), (index, model) -> modelContext
+							.createChildContext(model, viewContext, index, childElement), ModelContext::destroy));
 		};
 	}
 
@@ -160,7 +163,8 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor,
+				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
 		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
 	}
 
@@ -212,8 +216,9 @@ public abstract class Element<M extends Model> {
 		bindBiDirectionalSelection(subElement, SelectorModel::getSelection);
 	}
 
-	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement, Function<SelectorModel, Property<CompositeModel>> applyOnModel) {
-		addPostFixBinding(modelContext -> {
+	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement,
+			Function<SelectorModel, Property<CompositeModel>> applyOnModel) {
+		addPostfixBinding(modelContext -> {
 			ObservableList<SUBMODEL> observableList = modelContext.<M, SUBMODEL> getObservableSubModels(subElement);
 			assert observableList != null;
 			Property<Number> indexSelection = modelContext.getSelectionIndex(this);
@@ -291,9 +296,7 @@ public abstract class Element<M extends Model> {
 							try {
 								property1.setValue(toString(property2.getValue()));
 							} catch (Exception e) {
-								System.out
-										.println("Exception while converting Object to String in bidirectional binding"
-												+ e);
+								System.out.println("Exception while converting Object to String in bidirectional binding" + e);
 								property1.setValue(null);
 							}
 						}
@@ -406,8 +409,13 @@ public abstract class Element<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply(modelContext.getModel())));
 	}
 
+	public void bindText2(Function<M, ObservableValue<String>> applyOnModel) {
+		addPostfixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply(modelContext.getModel())));
+	}
+
 	protected void forEach(CompositeElement<?> parentCompositeElement) {
-		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs), (gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
+		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
+				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);
@@ -434,7 +442,7 @@ public abstract class Element<M extends Model> {
 
 	private static final String PARENT_ID = "parentId";
 	public static final String ID = "nodeId";
-	private static final String PREV_ID = "nextId";
+	private static final String NEXT_ID = "nextId";
 	private static final String STYLE_PROPERTY = "styleProperty";
 	private static final String STYLE_VALUE = "styleValue";
 	private static final String STYLECLASS = "styleClass";
@@ -450,7 +458,8 @@ public abstract class Element<M extends Model> {
 		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())
+				.put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (change.wasRemoved() && (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))) {
@@ -459,7 +468,8 @@ public abstract class Element<M extends Model> {
 			}
 			if (change.wasAdded()) {
 				// System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey())
+						.put(STYLE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -488,7 +498,7 @@ public abstract class Element<M extends Model> {
 			jsonObj.put(PARENT_ID, parentId);
 			jsonObj.put(ID, id);
 			jsonObj.put(TAG_HTML, getTag());
-			jsonObj.put(PREV_ID, index);
+			jsonObj.put(NEXT_ID, index);
 			fillJson(jsonObj);
 			// System.out.println(jsonObj.encodePrettily());
 			sendMessage(jsonObj);
@@ -555,7 +565,8 @@ public abstract class Element<M extends Model> {
 		private Property<Number> selectionIndex = new SimpleIntegerProperty();
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
+			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
+					.encodePrettily());
 			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 		};
 
@@ -605,12 +616,14 @@ public abstract class Element<M extends Model> {
 
 	}
 
-	public class CheckBoxHtmlDomNode extends HtmlDomNode {
+	public class InputCheckHtmlDomNode extends HtmlDomNode {
 		private static final String CHECKED = "checked";
 		private Property<Boolean> checked = new SimpleBooleanProperty(false);
+		private final String type;
 
-		public CheckBoxHtmlDomNode(String parentId) {
+		public InputCheckHtmlDomNode(String parentId, String type) {
 			super(parentId);
+			this.type = type;
 		}
 
 		public Property<Boolean> getChecked() {
@@ -620,7 +633,7 @@ public abstract class Element<M extends Model> {
 		@Override
 		public void fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			jsonObj.put("type", "checkbox");
+			jsonObj.put("type", type);
 			jsonObj.put(CHECKED, checked.getValue());
 		}
 

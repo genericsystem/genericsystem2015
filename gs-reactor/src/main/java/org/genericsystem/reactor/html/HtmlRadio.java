@@ -11,15 +11,15 @@ import org.genericsystem.reactor.Model;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlCheckBox<M extends Model> extends Element<M> {
+public class HtmlRadio<M extends Model> extends Element<M> {
 
-	public HtmlCheckBox(Element<?> parent) {
+	public HtmlRadio(Element<?> parent) {
 		super(parent, "input");
 	}
 
 	@Override
 	protected InputCheckHtmlDomNode createNode(String parentId) {
-		return new InputCheckHtmlDomNode(parentId, "checkbox");
+		return new InputCheckHtmlDomNode(parentId, "radio");
 	}
 
 	public void bindCheckedBidirectional(Function<M, Property<Boolean>> applyOnModel) {
