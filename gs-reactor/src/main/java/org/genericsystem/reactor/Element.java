@@ -3,7 +3,6 @@ package org.genericsystem.reactor;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javafx.beans.WeakListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
@@ -35,10 +33,8 @@ import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.composite.CompositeElement;
 import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
@@ -73,6 +69,10 @@ public abstract class Element<M extends Model> {
 		return tag;
 	}
 
+	public ServerWebSocket getWebSocket() {
+		return getParent().getWebSocket();
+	}
+
 	protected <W, NODE extends HtmlDomNode> void addBidirectionalBinding(Function<NODE, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply(modelContext.getModel())));
 	}
@@ -91,8 +91,7 @@ public abstract class Element<M extends Model> {
 	}
 
 	@Deprecated
-	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
-			Function<M, ObservableMap<String, String>> applyOnModel) {
+	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode, Function<M, ObservableMap<String, String>> applyOnModel) {
 		preFixedBindings.add((modelContext, node) -> Bindings.bindContent(applyOnNode.apply((NODE) node), applyOnModel.apply(modelContext.getModel())));
 	}
 
@@ -125,13 +124,7 @@ public abstract class Element<M extends Model> {
 	}
 
 	protected void contextForEach(Function<ModelContext, ObservableList<M>> applyOnModelContext) {
-		metaBinding = (childElement, viewContext) -> {
-			ModelContext modelContext = viewContext.getModelContext();
-			modelContext.getSubContextsMap().put(
-					childElement,
-					new TransformationObservableList<M, ModelContext>(applyOnModelContext.apply(modelContext), (index, model) -> modelContext
-							.createChildContext(model, viewContext, index, childElement), ModelContext::destroy));
-		};
+		metaBinding = (childElement, viewContext) -> viewContext.getModelContext().setSubContexts(childElement, applyOnModelContext, viewContext);
 	}
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
@@ -139,8 +132,8 @@ public abstract class Element<M extends Model> {
 	}
 
 	public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
-		contextForEach(modelContext -> {
-			ObservableValue<M> observableValue = applyOnModel.apply(modelContext.getModel());
+		forEach(model -> {
+			ObservableValue<M> observableValue = applyOnModel.apply((T) model);
 			return new ListBinding<M>() {
 				{
 					bind(observableValue);
@@ -155,21 +148,8 @@ public abstract class Element<M extends Model> {
 		});
 	}
 
-	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> {
-			Generic generic = genericSupplier.apply(gs);
-			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
-		}, constructor));
-	}
-
-	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor,
-				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
-		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
-	}
-
-	public ServerWebSocket getWebSocket() {
-		return getParent().getWebSocket();
+	protected void forEach(CompositeElement<?> parentCompositeElement) {
+		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs), (gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
 	}
 
 	public void forEach_(ObservableListExtractor observableListExtractor) {
@@ -178,6 +158,18 @@ public abstract class Element<M extends Model> {
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
 		forEach(stringExtractor, observableListExtractor, CompositeModel::new);
+	}
+
+	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> {
+			Generic generic = genericSupplier.apply(gs);
+			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
+		}, constructor));
+	}
+
+	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
@@ -196,6 +188,11 @@ public abstract class Element<M extends Model> {
 		select(stringExtractor, genericClass, CompositeModel::new);
 	}
 
+	@FunctionalInterface
+	public interface ModelConstructor<M extends Model> {
+		M build(Generic[] generics, StringExtractor stringExtractor);
+	}
+
 	public void select(Class<?> genericClass) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericClass);
 	}
@@ -212,19 +209,14 @@ public abstract class Element<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).bindBidirectional(applyOnModel.apply(modelContext.getModel())));
 	}
 
-	private <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement) {
+	public <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement) {
 		bindBiDirectionalSelection(subElement, SelectorModel::getSelection);
 	}
 
-	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement,
-			Function<SelectorModel, Property<CompositeModel>> applyOnModel) {
+	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement, Function<SelectorModel, Property<CompositeModel>> applyOnModel) {
 		addPostfixBinding(modelContext -> {
-			ObservableList<SUBMODEL> observableList = modelContext.<M, SUBMODEL> getObservableSubModels(subElement);
-			assert observableList != null;
-			Property<Number> indexSelection = modelContext.getSelectionIndex(this);
-			Property<CompositeModel> selection = applyOnModel.apply(modelContext.getModel());
-			bindBidirectional(indexSelection, selection, number -> observableList.get(number.intValue()), generic -> observableList.indexOf(generic));
-
+			ObservableList<SUBMODEL> observableList = modelContext.getObservableSubModels(subElement);
+			bindBidirectional(modelContext.getSelectionIndex(this), applyOnModel.apply(modelContext.getModel()), number -> observableList.get(number.intValue()), generic -> observableList.indexOf(generic));
 		});
 	}
 
@@ -234,120 +226,6 @@ public abstract class Element<M extends Model> {
 		property.addListener(binding);
 		otherProperty.addListener(binding);
 		return binding;
-	}
-
-	private static class SBidirectionalBinding<S, T> implements ChangeListener<Object>, WeakListener {
-
-		private final WeakReference<Property<S>> stringPropertyRef;
-		private final WeakReference<Property<T>> otherPropertyRef;
-		private boolean updating;
-		private final Function<S, T> fromS;
-		private final Function<T, S> toS;
-
-		// private BidirectionalBinding<Object> kkk;
-
-		public SBidirectionalBinding(Property<S> stringProperty, Property<T> otherProperty, Function<S, T> fromS, Function<T, S> toS) {
-			stringPropertyRef = new WeakReference<Property<S>>(stringProperty);
-			otherPropertyRef = new WeakReference<Property<T>>(otherProperty);
-			cachedHashCode = stringProperty.hashCode() * otherProperty.hashCode();
-			this.fromS = fromS;
-			this.toS = toS;
-		}
-
-		protected S toString(T value) {
-			return toS.apply(value);
-		};
-
-		protected T fromString(S value) {
-			return fromS.apply(value);
-		}
-
-		protected Object getProperty1() {
-			return stringPropertyRef.get();
-		}
-
-		protected Object getProperty2() {
-			return otherPropertyRef.get();
-		}
-
-		@Override
-		public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-			if (!updating) {
-				final Property<S> property1 = stringPropertyRef.get();
-				final Property<T> property2 = otherPropertyRef.get();
-				if ((property1 == null) || (property2 == null)) {
-					if (property1 != null) {
-						property1.removeListener(this);
-					}
-					if (property2 != null) {
-						property2.removeListener(this);
-					}
-				} else {
-					try {
-						updating = true;
-						if (property1 == observable) {
-							try {
-								property2.setValue(fromString(property1.getValue()));
-							} catch (Exception e) {
-								System.out.println("Exception while parsing String in bidirectional binding : " + e);
-								property2.setValue(null);
-							}
-						} else {
-							try {
-								property1.setValue(toString(property2.getValue()));
-							} catch (Exception e) {
-								System.out.println("Exception while converting Object to String in bidirectional binding" + e);
-								property1.setValue(null);
-							}
-						}
-					} finally {
-						updating = false;
-					}
-				}
-			}
-		}
-
-		private final int cachedHashCode;
-
-		@Override
-		public int hashCode() {
-			return cachedHashCode;
-		}
-
-		@Override
-		public boolean wasGarbageCollected() {
-			return (getProperty1() == null) || (getProperty2() == null);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-
-			final Object propertyA1 = getProperty1();
-			final Object propertyA2 = getProperty2();
-			if ((propertyA1 == null) || (propertyA2 == null)) {
-				return false;
-			}
-
-			if (obj instanceof SBidirectionalBinding) {
-				final SBidirectionalBinding otherBinding = (SBidirectionalBinding) obj;
-				final Object propertyB1 = otherBinding.getProperty1();
-				final Object propertyB2 = otherBinding.getProperty2();
-				if ((propertyB1 == null) || (propertyB2 == null)) {
-					return false;
-				}
-
-				if (propertyA1 == propertyB1 && propertyA2 == propertyB2) {
-					return true;
-				}
-				if (propertyA1 == propertyB2 && propertyA2 == propertyB1) {
-					return true;
-				}
-			}
-			return false;
-		}
 	}
 
 	public void addStyle(String propertyName, String value) {
@@ -413,11 +291,6 @@ public abstract class Element<M extends Model> {
 		addPostfixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply(modelContext.getModel())));
 	}
 
-	protected void forEach(CompositeElement<?> parentCompositeElement) {
-		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
-				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
-	}
-
 	protected abstract HtmlDomNode createNode(String parentId);
 
 	protected List<Element<?>> getChildren() {
@@ -458,8 +331,7 @@ public abstract class Element<M extends Model> {
 		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())
-				.put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (change.wasRemoved() && (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))) {
@@ -468,8 +340,7 @@ public abstract class Element<M extends Model> {
 			}
 			if (change.wasAdded()) {
 				// System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey())
-						.put(STYLE_VALUE, change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -508,9 +379,7 @@ public abstract class Element<M extends Model> {
 		}
 
 		public void sendRemove() {
-			JsonObject jsonObj = new JsonObject().put(MSG_TYPE, REMOVE);
-			jsonObj.put(ID, id);
-			sendMessage(jsonObj);
+			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
 		}
 
 		public void sendMessage(JsonObject jsonObj) {
@@ -565,8 +434,7 @@ public abstract class Element<M extends Model> {
 		private Property<Number> selectionIndex = new SimpleIntegerProperty();
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
-					.encodePrettily());
+			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
 			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 		};
 

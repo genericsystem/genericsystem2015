@@ -28,7 +28,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 
 		public ColorsSelect(Element<?> parent) {
 			super(parent);
-			bindBiDirectionalSelection(optionElement, SelectorModel::getSelection);
+			bindBiDirectionalSelection(optionElement);
 			bindStyle("background-color", SelectorModel::getSelectionString);
 		}
 

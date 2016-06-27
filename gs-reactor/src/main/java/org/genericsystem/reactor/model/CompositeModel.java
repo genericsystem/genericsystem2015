@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -67,16 +67,6 @@ public class CompositeModel extends Model {
 			return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
 		};
 		public static final StringExtractor MANAGEMENT = g -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management";
-	}
-
-	@FunctionalInterface
-	public static interface Builder<M extends Model> extends Function<Generic[], M> {
-
-	}
-
-	@FunctionalInterface
-	public interface ModelConstructor<M extends Model> {
-		M build(Generic[] generics, StringExtractor stringExtractor);
 	}
 
 	public void flush() {

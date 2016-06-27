@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.composite;
 
+import org.genericsystem.reactor.Element.ModelConstructor;
 import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 

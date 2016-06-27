@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
@@ -12,9 +13,9 @@ import javafx.collections.ObservableSet;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Element.ModelConstructor;
 import org.genericsystem.reactor.Element.SelectableHtmlDomNode;
 import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.ModelConstructor;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
@@ -28,7 +29,7 @@ public class ModelContext {
 	private final Model model;
 	private final Map<Element<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Element<?>, List<ModelContext>> subContextsMap = new HashMap<>();
-	private final Map<Element<?>, ObservableList<?>> observableModels = new HashMap<>();
+	private final Map<Element<?>, ObservableList<? extends Model>> observableSubModels = new HashMap<>();
 
 	private ModelContext(ModelContext parent, Model model) {
 		this.parent = parent;
@@ -57,21 +58,23 @@ public class ModelContext {
 		return this.parent;
 	}
 
-	public Map<Element<?>, List<ModelContext>> getSubContextsMap() {
-		return subContextsMap;
+	public List<ModelContext> getSubContexts(Element<?> element) {
+		return subContextsMap.get(element);
 	}
 
-	public <MODEL extends Model, SUBMODEL extends Model> ObservableList<SUBMODEL> getObservableSubModels(Element<SUBMODEL> element) {
-		return (ObservableList<SUBMODEL>) observableModels.get(element);
+	public <SUBMODEL extends Model> void setSubContexts(Element<?> element, Function<ModelContext, ObservableList<SUBMODEL>> applyOnModelContext, ViewContext<?> viewContext) {
+		subContextsMap.put(element, new TransformationObservableList<SUBMODEL, ModelContext>(applyOnModelContext.apply(this), (index, model) -> createChildContext(model, viewContext, index, element), ModelContext::destroy));
 	}
 
-	public <M extends Model> ObservableList<M> setObservableSubModels(Element<M> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
-		ObservableList<M> result = (ObservableList<M>) observableModels.get(element);
-		if (result != null)
-			throw new IllegalStateException();
+	public <SUBMODEL extends Model> ObservableList<SUBMODEL> getObservableSubModels(Element<SUBMODEL> element) {
+		return (ObservableList<SUBMODEL>) observableSubModels.get(element);
+	}
+
+	public <SUBMODEL extends Model> ObservableList<SUBMODEL> setObservableSubModels(Element<SUBMODEL> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+		assert observableSubModels.get(element) == null;
 		Generic[] gs = this.<CompositeModel> getModel().getGenerics();
-		result = new TransformationObservableList<Generic, M>(observableListExtractor.apply(gs), generic -> (M) constructor.build(CompositeModel.addToGenerics(generic, gs), stringExtractor));
-		observableModels.put(element, result);
+		ObservableList<SUBMODEL> result = new TransformationObservableList<Generic, SUBMODEL>(observableListExtractor.apply(gs), generic -> (SUBMODEL) constructor.build(CompositeModel.addToGenerics(generic, gs), stringExtractor));
+		observableSubModels.put(element, result);
 		return result;
 	}
 
@@ -108,9 +111,6 @@ public class ModelContext {
 	}
 
 	public Property<Number> getSelectionIndex(Element<?> element) {
-		assert element != null;
-		System.out.println("ZZZZ" + element);
-		assert getViewContext(element) != null : ("Element : " + element + " " + viewContextsMap);
-		return ((SelectableHtmlDomNode) getViewContext(element).getNode()).getSelectionIndex();
+		return getViewContext(element).<SelectableHtmlDomNode> getNode().getSelectionIndex();
 	}
 }

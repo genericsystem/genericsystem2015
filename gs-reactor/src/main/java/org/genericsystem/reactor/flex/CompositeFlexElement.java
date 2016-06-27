@@ -134,7 +134,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 
 		public ColorCompositeRadio(Element<?> parent, FlexTag tag, FlexDirection flexDirection) {
 			super(parent, tag, flexDirection);
-			bindBiDirectionalSelection(flexSubElement, SelectorModel::getSelection);
+			bindBiDirectionalSelection(flexSubElement);
 			bindStyle("background-color", SelectorModel::getSelectionString);
 			addStyle("padding", "4px");
 		}
