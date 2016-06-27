@@ -161,15 +161,14 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> {
+		forEach(stringExtractor, gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
-		}, constructor));
+		}, constructor);
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
-		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
+		forEach(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor);
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {

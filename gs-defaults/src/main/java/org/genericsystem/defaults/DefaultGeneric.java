@@ -116,10 +116,12 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 	}
 
 	default boolean isDependencyOf(T meta, List<T> supers, Serializable value, List<T> components) {
-		return inheritsFrom(meta, supers, value, components)
+
+		return (inheritsFrom(meta, supers, value, components)
 				|| getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components))
 				|| (!isMeta() && getMeta().isDependencyOf(meta, supers, value, components)) || (!components.equals(getComponents())
-						&& componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta())));
+						&& componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()))));
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -134,6 +136,8 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 
 	@SuppressWarnings("unchecked")
 	default boolean componentsDepends(List<T> subComponents, List<T> superComponents, boolean[] singular) {
+		if (subComponents.size() < superComponents.size())
+			return false;
 		singular[0] = false;
 		int subIndex = 0;
 		loop: for (T superComponent : superComponents) {
