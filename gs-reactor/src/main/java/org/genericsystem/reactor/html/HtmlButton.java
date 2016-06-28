@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.ModelContext;
 
 /**
  * @author Nicolas Feybesse
@@ -20,6 +21,10 @@ public class HtmlButton<M extends Model> extends Element<M> {
 		return new ActionHtmlNode(parentId);
 	}
 
+	public void bindAction2(Consumer<ModelContext> consumer) {
+		addActionBinding2(ActionHtmlNode::getActionProperty, consumer);
+	}
+	
 	public void bindAction(Consumer<M> consumer) {
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}
