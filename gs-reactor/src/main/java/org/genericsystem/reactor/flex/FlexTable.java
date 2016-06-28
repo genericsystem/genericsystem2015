@@ -4,6 +4,7 @@ import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.CompositeModel;
@@ -250,7 +251,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-bottom", "1px");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
-						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+						new HtmlHyperLink<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
 			}

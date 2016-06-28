@@ -31,6 +31,12 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 				+ generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
 		return generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0]));
 	};
+	
+	public static final ObservableListExtractor ATTRIBUTES_OF_TYPE2 = generics -> {
+		System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " "
+				+ generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
+		return generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0].getMeta()));
+	};
 
 	public static final ObservableListExtractor ATTRIBUTES_OF_INSTANCES = generics -> {
 		System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " "

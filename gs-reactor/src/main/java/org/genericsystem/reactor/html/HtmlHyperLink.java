@@ -11,11 +11,15 @@ import org.genericsystem.reactor.Model;
  */
 public class HtmlHyperLink<M extends Model> extends Element<M> {
 
+	public HtmlHyperLink(Element<?> parent) {
+		super(parent, "a");
+	}
+	
 	public HtmlHyperLink(Element<?> parent, String text) {
 		super(parent, "a");
 		setText(text);
 	}
-
+	
 	public HtmlHyperLink(Element<?> parent, String text, Consumer<M> action) {
 		this(parent, text);
 		bindAction(action);
