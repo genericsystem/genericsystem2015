@@ -64,8 +64,12 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	void runScript(AbstractRoot engine) {
 		Generic car = engine.find(Car.class);
 		Generic power = engine.find(Power.class);
+		power.setInstanceValueClassConstraint(null);
+		Generic person = engine.setInstance("Person");
+		Generic category = engine.setInstance("Category");
 		Generic carColor = engine.find(CarColor.class);
 		Generic color = engine.find(Color.class);
+		Generic carPerson = car.setRelation("CarDriverOwner", category, person);
 		Generic red = color.setInstance("Red");
 		Generic black = color.setInstance("Black");
 		Generic green = color.setInstance("Green");
@@ -73,12 +77,21 @@ public class AppHtml extends HtmlApp<EngineModel> {
 		color.setInstance("Orange");
 		color.setInstance("White");
 		color.setInstance("Yellow");
+		Generic jdoe = person.setInstance("John Doe");
+		Generic hoover = person.setInstance("Edgar Hoover");
+		Generic jsnow = person.setInstance("Jon Snow");
+		Generic driver = category.setInstance("Driver");
+		Generic owner = category.setInstance("Owner");
 		Generic audiS4 = car.setInstance("Audi S4");
 		audiS4.setHolder(power, 333);
 		audiS4.setLink(carColor, "Audi S4 Green", green);
+		audiS4.setLink(carPerson, "Audi S4 owner", owner, jsnow);
+		audiS4.setLink(carPerson, "Audi S4 driver", driver, hoover);
 		Generic bmwM3 = car.setInstance("BMW M3");
 		bmwM3.setHolder(power, 450);
 		bmwM3.setLink(carColor, "BMW M3 Red", red);
+		bmwM3.setLink(carPerson, "BMW M3 owner", owner, jdoe);
+		bmwM3.setLink(carPerson, "BMW M3 owner", driver, jdoe);
 		Generic ferrariF40 = car.setInstance("Ferrari F40");
 		ferrariF40.setHolder(power, 478);
 		ferrariF40.setLink(carColor, "Ferrari F40 red", red);
