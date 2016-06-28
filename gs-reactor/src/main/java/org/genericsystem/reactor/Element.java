@@ -36,6 +36,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeElement;
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.InputCompositeModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
@@ -97,6 +99,10 @@ public abstract class Element<M extends Model> {
 
 	protected <NODE extends HtmlDomNode> void addActionBinding(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<M> applyOnModel) {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept(modelContext.getModel())));
+	}
+	
+	protected <NODE extends HtmlDomNode> void addActionBinding2(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<ModelContext> applyOnModelContext) {
+		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModelContext.accept(modelContext)));
 	}
 
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> applyOnModel, String styleClass) {
@@ -161,14 +167,15 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
-		forEach(stringExtractor, gs -> {
+		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
-		}, constructor);
+		}, constructor));
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
-		forEach(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor);
+		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
+		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
@@ -272,6 +279,10 @@ public abstract class Element<M extends Model> {
 
 	public void addStyleClass(String styleClass) {
 		addPrefixBinding(model -> model.getObservableStyleClasses(this).add(styleClass));
+	}
+
+	public void bindOperation(TriFunction<Generic[], String, Generic, Generic> operation) {
+		addPrefixBinding(model -> model.<InputCompositeModel>getModel().getInputAction().setValue(operation));
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {

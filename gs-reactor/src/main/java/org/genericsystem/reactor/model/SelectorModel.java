@@ -22,4 +22,8 @@ public class SelectorModel extends CompositeModel {
 	public ObservableValue<String> getSelectionString() {
 		return selectionString;
 	}
+	
+	public SelectorModel getParent(){
+		return this.getParent().getParent();
+	}
 }

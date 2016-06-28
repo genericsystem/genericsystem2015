@@ -159,6 +159,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 				}
 			};
 		}
+
 	}
 
 }

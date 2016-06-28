@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
@@ -61,7 +62,11 @@ public class ModelContext {
 	public List<ModelContext> getSubContexts(Element<?> element) {
 		return subContextsMap.get(element);
 	}
-
+	
+	public List<ModelContext> allSubContexts() {
+		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
+	}
+	
 	public <SUBMODEL extends Model> void setSubContexts(Element<?> element, Function<ModelContext, ObservableList<SUBMODEL>> applyOnModelContext, ViewContext<?> viewContext) {
 		subContextsMap.put(element, new TransformationObservableList<SUBMODEL, ModelContext>(applyOnModelContext.apply(this), (index, model) -> createChildContext(model, viewContext, index, element), ModelContext::destroy));
 	}

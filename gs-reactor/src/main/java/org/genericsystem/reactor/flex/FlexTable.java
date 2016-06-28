@@ -1,15 +1,21 @@
 package org.genericsystem.reactor.flex;
 
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Visitor.ClearVisitor;
+import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.annotation.InstanceColorize;
+import org.genericsystem.reactor.composite.CompositeSelect;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.SelectorModel;
 
 /**
  * @author Nicolas Feybesse
@@ -154,7 +160,8 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						new HtmlInputText<InputCompositeModel>(this) {
-							{
+							{		
+								bindOperation((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputCompositeModel::getInputString);
 								addStyle("width", "100%");
 							}
@@ -182,6 +189,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null, InputCompositeModel::new);
 								new HtmlInputText<InputCompositeModel>(this) {
 									{
+										bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 										bindTextBidirectional(InputCompositeModel::getInputString);
 										addStyle("width", "100%");
 									}
@@ -195,10 +203,9 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("background-color", "#dda5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), InputCompositeModel::new);
-								new HtmlInputText<InputCompositeModel>(this) {
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
+								new CompositeSelect<SelectorModel>(this) {
 									{
-										bindTextBidirectional(InputCompositeModel::getInputString);
 										addStyle("width", "100%");
 									}
 								};
@@ -219,9 +226,16 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-bottom", "1px");
 						new HtmlButton<InputCompositeModel>(this) {
 							{
-								bindAction(model -> {
-									model.getGeneric().addInstance(model.getInputString().getValue());
-									model.getInputString().setValue(null);
+								bindAction2(modelContext -> {
+									try {
+										// TODO: Convert inputs.
+										// TODO: Validate inputs. Don't try to create holders if no value is specified,
+										// or links if some targets are missing.
+										new HolderVisitor().visit(modelContext);
+										new ClearVisitor().visit(modelContext);
+									} catch (RollbackException e) {
+										// TODO
+									}
 								});
 								setText("Add");
 								addStyle("width", "100%");
@@ -250,7 +264,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-bottom", "1px");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
-						new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
+						new HtmlHyperLink<CompositeModel>(this).bindText(CompositeModel::getString);
 					}
 				};
 			}
