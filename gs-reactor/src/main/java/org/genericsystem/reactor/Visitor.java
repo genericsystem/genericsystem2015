@@ -34,19 +34,28 @@ public class Visitor {
 			CompositeModel cModel = model.getModel();
 			if (cModel instanceof InputCompositeModel) {
 				InputCompositeModel icModel = (InputCompositeModel) cModel;
-				Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(),	icModel.getInputString().getValue(), newInstance);
-				if (newInstance == null)
-					newInstance = g;
+				String value = icModel.getInputString().getValue();
+				if (value != null) {
+					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(),	value, newInstance);
+					if (newInstance == null)
+						newInstance = g;
+				}
 			}
 		}
 
 		@Override
 		public void postfix(ModelContext model) {
 			List<Generic> generics = new ArrayList<>();
+			boolean createLink = true;
 			for (ModelContext subModel : model.allSubContexts())
-				if (subModel.getModel() instanceof SelectorModel)
-					generics.add(((SelectorModel) subModel.getModel()).getSelection().getValue().getGeneric());
-			if (!generics.isEmpty())
+				if (subModel.getModel() instanceof SelectorModel) {
+					CompositeModel value = ((SelectorModel) subModel.getModel()).getSelection().getValue();
+					if (value != null)
+						generics.add(value.getGeneric());
+					else
+						createLink = false;
+			}
+			if (createLink && !generics.isEmpty())
 				newInstance.setHolder(model.<CompositeModel> getModel().getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}

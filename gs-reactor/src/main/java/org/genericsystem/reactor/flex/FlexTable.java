@@ -228,10 +228,9 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						new HtmlButton<InputCompositeModel>(this) {
 							{
 								bindAction2(modelContext -> {
+									// TODO: Convert inputs.
+									// TODO: Validate inputs.
 									try {
-										// TODO: Convert inputs.
-										// TODO: Validate inputs. Don't try to create holders if no value is specified,
-										// or links if some targets are missing.
 										new HolderVisitor().visit(modelContext);
 										new ClearVisitor().visit(modelContext);
 									} catch (RollbackException e) {
