@@ -216,13 +216,21 @@ public abstract class Element<M extends Model> {
 	}
 
 	public <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement) {
-		bindBiDirectionalSelection(subElement, SelectorModel::getSelection);
+		bindBiDirectionalSelection(subElement, 0);
+	}
+
+	public <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement, int shift) {
+		bindBiDirectionalSelection(subElement, SelectorModel::getSelection, shift);
 	}
 
 	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement, Function<SelectorModel, Property<CompositeModel>> applyOnModel) {
+		bindBiDirectionalSelection(subElement, applyOnModel, 0);
+	}
+
+	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement, Function<SelectorModel, Property<CompositeModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
 			ObservableList<SUBMODEL> observableList = modelContext.getObservableSubModels(subElement);
-			bindBidirectional(modelContext.getSelectionIndex(this), applyOnModel.apply(modelContext.getModel()), number -> observableList.get(number.intValue()), generic -> observableList.indexOf(generic));
+			bindBidirectional(modelContext.getSelectionIndex(this), applyOnModel.apply(modelContext.getModel()), number -> number.intValue() - shift >= 0 ? observableList.get(number.intValue() - shift) : null, generic -> observableList.indexOf(generic) + shift);
 		});
 	}
 
