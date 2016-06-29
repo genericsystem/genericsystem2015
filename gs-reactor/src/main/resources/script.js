@@ -77,14 +77,14 @@ function onMessageReceived(evt) {
 			case "radio":
 				elt.name = document.getElementById(message.parentId).parentNode.id;
 				elt.onclick = function () {
-				wsocket.send(JSON.stringify({
-					msgType : "U",
-					nodeId : this.parentNode.parentNode.id,
-					eltType : elt.type,
-					selectedIndex : selectIndex(this.name)
-				}));
-			};
-			break;
+					wsocket.send(JSON.stringify({
+						msgType : "U",
+						nodeId : this.parentNode.parentNode.id,
+						eltType : elt.type,
+						selectedIndex : selectIndex(this.name)
+					}));
+				};
+				break;
 			}
 			break;
 
@@ -95,24 +95,26 @@ function onMessageReceived(evt) {
 				nodeId : this.id,
 				selectedIndex : this.selectedIndex
 			}));
-		};
-		//alert(message.selectedIndex);
-		//elt.selectedIndex = message.selectedIndex;
-		break;
-//		case "option": 
-//			elt.onclick = function () {
-//			wsocket.send(JSON.stringify({
-//				msgType : "A",
-//				nodeId : this.id
-//			}));
-//		};
-//		break;
 		}
+			break;
+		case "section": 
+			elt.classList.add("adding");
+			break;
+		case "header": 
+			elt.classList.add("adding");
+			break;
+		case "footer": 
+			elt.classList.add("adding");
+			break;
+		};
 		parent.insertBefore(elt, parent.children[message.nextId]);
 		break;
 	case 'R':
 		if (elt != null) {
-			elt.parentNode.removeChild(elt);
+			elt.classList.add("removing");
+			setTimeout(function(){ 
+				elt.parentNode.removeChild(elt);
+			}, 0);
 		}
 		else {
 			console.log("Unreached removed element id : "+message.nodeId)

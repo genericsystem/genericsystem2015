@@ -6,6 +6,7 @@ import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeSelect;
+import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlHyperLink;
@@ -204,7 +205,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
-								new CompositeSelect<SelectorModel>(this) {
+								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
 										addStyle("width", "100%");
 									}
@@ -227,10 +228,9 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						new HtmlButton<InputCompositeModel>(this) {
 							{
 								bindAction2(modelContext -> {
+									// TODO: Convert inputs.
+									// TODO: Validate inputs.
 									try {
-										// TODO: Convert inputs.
-										// TODO: Validate inputs. Don't try to create holders if no value is specified,
-										// or links if some targets are missing.
 										new HolderVisitor().visit(modelContext);
 										new ClearVisitor().visit(modelContext);
 									} catch (RollbackException e) {

@@ -13,7 +13,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 	public CompositeSelect(Element<?> parent) {
 		super(parent);
 		options();
-		bindBiDirectionalSelection(optionElement);
+		bindOptionElement();
 	}
 
 	protected void options() {
@@ -23,6 +23,33 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 				forEach(CompositeSelect.this);
 			}
 		};
+	}
+	
+	protected void bindOptionElement() {
+		bindBiDirectionalSelection(optionElement);
+	}
+
+
+	public static class CompositeSelectWithEmptyEntry<M extends SelectorModel> extends CompositeSelect<M> {
+
+		public CompositeSelectWithEmptyEntry(Element<?> parent) {
+			super(parent);
+		}
+
+		protected void options() {
+			new HtmlOption<CompositeModel>(this);
+			optionElement = new HtmlOption<CompositeModel>(this) {
+				{
+					bindText(CompositeModel::getString);
+					forEach(CompositeSelectWithEmptyEntry.this);
+				}
+			};
+		}
+		
+		@Override
+		protected void bindOptionElement() {
+			bindBiDirectionalSelection(optionElement, 1);
+		}
 	}
 
 	public static class ColorsSelect<M extends SelectorModel> extends CompositeSelect<M> {
