@@ -19,4 +19,32 @@ body {
 	flex-direction: column;
 	flex-wrap: nowrap;
 	justify-content: center;
+	
 }
+
+section .adding ,header .adding ,footer .adding {
+	animation: appeareffect 2s;
+}
+
+section .removing,header .removing,footer .removing {
+    animation: disappeareffect 0.5s;
+}
+
+@keyframes appeareffect {
+ 	0% {
+ 		box-shadow: 0 0 15px rgba(0, 100, 0, 1);
+ 	}
+  	100% {
+ 		box-shadow: none;
+ 	}
+}
+
+@keyframes disappeareffect {
+ 	0% {
+ 		box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+ 	}
+  	100% {
+ 		box-shadow: none;
+ 	}
+}
+
