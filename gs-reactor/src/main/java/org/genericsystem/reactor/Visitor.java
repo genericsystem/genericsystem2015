@@ -47,7 +47,7 @@ public class Visitor {
 				if (subModel.getModel() instanceof SelectorModel)
 					generics.add(((SelectorModel) subModel.getModel()).getSelection().getValue().getGeneric());
 			if (!generics.isEmpty())
-				newInstance.setHolder(model.<CompositeModel> getModel().getGeneric(), null,	generics.toArray(new Generic[generics.size()]));
+				newInstance.setHolder(model.<CompositeModel> getModel().getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}
 
