@@ -1,8 +1,19 @@
 package org.genericsystem.api.core;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.genericsystem.api.core.IGeneric.SystemProperty;
+
+import javafx.util.StringConverter;
+import javafx.util.converter.BooleanStringConverter;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.FloatStringConverter;
+import javafx.util.converter.IntegerStringConverter;
+import javafx.util.converter.LongStringConverter;
+import javafx.util.converter.ShortStringConverter;
 
 /**
  * Statics constants and methods useful when dealing with Generics.
@@ -76,6 +87,81 @@ public class ApiStatics {
 			put(7, Short.class);
 			put(8, String.class);
 			put(9, Class.class);
+		}
+	};
+
+	public final static Map<Class<?>, StringConverter<? extends Serializable>> STRING_CONVERTERS =
+			new LinkedHashMap<Class<?>, StringConverter<? extends Serializable>>() {
+		{
+			put(AxedPropertyClass.class, new StringConverter<AxedPropertyClass>() {
+
+				@Override
+				public String toString(AxedPropertyClass object) {
+					return object.toString();
+				}
+
+				@Override
+				public AxedPropertyClass fromString(String string) {
+					try {
+						String[] parts = string.trim().split("#");
+						return new AxedPropertyClass((Class<? extends SystemProperty>) Class.forName(parts[0]),
+								Integer.parseInt(parts[1]));
+					} catch (ArrayIndexOutOfBoundsException | ClassNotFoundException |
+							ClassCastException | NumberFormatException e) {
+						throw new IllegalStateException();
+					}
+				}
+				
+			});
+			put(Boolean.class, new BooleanStringConverter());
+			put(byte[].class, new StringConverter<byte[]>() {
+
+				@Override
+				public String toString(byte[] bytes) {
+					return new String(bytes);
+				}
+
+				@Override
+				public byte[] fromString(String string) {
+					return string.getBytes();
+				}
+				
+			});
+			put(Double.class, new DoubleStringConverter());
+			put(Float.class, new FloatStringConverter());
+			put(Integer.class, new IntegerStringConverter());
+			put(Long.class, new LongStringConverter());
+			put(Short.class, new ShortStringConverter());
+			put(String.class, new StringConverter<String>() {
+
+				@Override
+				public String toString(String string) {
+					return string;
+				}
+
+				@Override
+				public String fromString(String string) {
+					return string;
+				}
+				
+			});
+			put(Class.class, new StringConverter<Class<?>>() {
+
+				@Override
+				public String toString(Class<?> clazz) {
+					return clazz.getName();
+				}
+
+				@Override
+				public Class<?> fromString(String className) {
+					try {
+						return Class.forName(className.trim());
+					} catch (ClassNotFoundException e) {
+						throw new IllegalStateException();
+					}
+				}
+				
+			});
 		}
 	};
 

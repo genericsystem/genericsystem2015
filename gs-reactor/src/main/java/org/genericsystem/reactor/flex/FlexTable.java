@@ -179,7 +179,6 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-
 						new FlexElement<InputCompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 							{
 								addStyle("flex", "1");
@@ -228,13 +227,12 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						new HtmlButton<InputCompositeModel>(this) {
 							{
 								bindAction2(modelContext -> {
-									// TODO: Convert inputs.
 									// TODO: Validate inputs.
 									try {
 										new HolderVisitor().visit(modelContext);
 										new ClearVisitor().visit(modelContext);
 									} catch (RollbackException e) {
-										// TODO
+										e.printStackTrace();
 									}
 								});
 								setText("Add");

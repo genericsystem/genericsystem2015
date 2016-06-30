@@ -3,6 +3,7 @@ package org.genericsystem.reactor;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -289,7 +290,7 @@ public abstract class Element<M extends Model> {
 		addPrefixBinding(model -> model.getObservableStyleClasses(this).add(styleClass));
 	}
 
-	public void bindOperation(TriFunction<Generic[], String, Generic, Generic> operation) {
+	public void bindOperation(TriFunction<Generic[], Serializable, Generic, Generic> operation) {
 		addPrefixBinding(model -> model.<InputCompositeModel>getModel().getInputAction().setValue(operation));
 	}
 

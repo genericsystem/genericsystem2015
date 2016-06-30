@@ -64,7 +64,6 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	void runScript(AbstractRoot engine) {
 		Generic car = engine.find(Car.class);
 		Generic power = engine.find(Power.class);
-		power.setInstanceValueClassConstraint(null);
 		Generic person = engine.setInstance("Person");
 		Generic category = engine.setInstance("Category");
 		Generic carColor = engine.find(CarColor.class);
