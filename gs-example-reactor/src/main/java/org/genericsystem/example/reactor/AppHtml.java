@@ -1,9 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import javafx.beans.binding.ListBinding;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -17,10 +13,10 @@ import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorCompositeRadio;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
+import org.genericsystem.reactor.flex.FlexEditor;
 import org.genericsystem.reactor.flex.FlexElement;
 import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.flex.FlexTag;
-import org.genericsystem.reactor.flex.FlexEditor;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
@@ -28,8 +24,7 @@ import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
-import com.sun.javafx.binding.BidirectionalBinding;
-import com.sun.javafx.binding.BidirectionalContentBinding;
+import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<EngineModel> {
 
@@ -51,9 +46,10 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new ColorCompositeRadio<SelectorModel>(this, FlexTag.SECTION, FlexDirection.COLUMN).select(StringExtractor.EXTRACTOR, Color.class,
 						SelectorModel::new);
 				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
-				new FlexEditor(this).select(SelectorModel::getParent);
-//				new FlexEditor(this).select(StringExtractor.MANAGEMENT, gs -> ((AbstractRoot)gs[0]).find(Car.class).getInstance("Audi S4"));
+
+				new FlexEditor(this).select(SelectorModel::getSelection);
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
 				new SaveCancelFlexRow(this, FlexTag.FOOTER).addStyle("background-color", "#ffa500");

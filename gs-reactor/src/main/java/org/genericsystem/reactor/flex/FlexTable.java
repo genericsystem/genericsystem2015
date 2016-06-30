@@ -5,7 +5,6 @@ import org.genericsystem.reactor.Element;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.annotation.InstanceColorize;
-import org.genericsystem.reactor.composite.CompositeSelect;
 import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
@@ -14,6 +13,7 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
@@ -120,7 +120,8 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("justify-content", "center");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 								new HtmlLabel<CompositeModel>(this) {
 									{
 										bindText(CompositeModel::getString);
@@ -161,7 +162,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						new HtmlInputText<InputCompositeModel>(this) {
-							{		
+							{
 								bindOperation((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputCompositeModel::getInputString);
 								addStyle("width", "100%");
@@ -204,7 +205,8 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("background-color", "#dda5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
 										addStyle("width", "100%");
@@ -263,8 +265,20 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
-						new HtmlHyperLink<CompositeModel>(this).bindText(CompositeModel::getString);
+								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null
+										? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
+						new HtmlHyperLink<CompositeModel>(this) {
+							{
+								bindText(CompositeModel::getString);
+								bindAction(compositeModel -> {
+									CompositeModel cm = compositeModel;
+									while (!(cm instanceof EngineModel))
+										cm = (CompositeModel) cm.getParent();
+									((EngineModel) cm).getSelection().setValue(compositeModel);
+								});
+							}
+						};
+
 					}
 				};
 			}
@@ -293,11 +307,15 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
-										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-												modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<CompositeModel> getModel().getString().getValue() : "#dda5e2"));
+										addPrefixBinding(
+												modelContext -> modelContext.getObservableStyles(this).put("background-color",
+														modelContext.<CompositeModel> getModel().getGeneric().getMeta()
+																.getAnnotation(InstanceColorize.class) != null
+																		? modelContext.<CompositeModel> getModel().getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
-										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+												gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 									}
 								};
