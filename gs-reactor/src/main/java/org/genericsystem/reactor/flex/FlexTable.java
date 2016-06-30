@@ -162,6 +162,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-bottom", "1px");
 						new HtmlInputText<InputCompositeModel>(this) {
 							{
+								bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
 								bindOperation((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputCompositeModel::getInputString);
 								addStyle("width", "100%");
@@ -189,6 +190,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null, InputCompositeModel::new);
 								new HtmlInputText<InputCompositeModel>(this) {
 									{
+										bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
 										bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 										bindTextBidirectional(InputCompositeModel::getInputString);
 										addStyle("width", "100%");
@@ -228,7 +230,6 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						new HtmlButton<InputCompositeModel>(this) {
 							{
 								bindAction2(modelContext -> {
-									// TODO: Validate inputs.
 									try {
 										new HolderVisitor().visit(modelContext);
 										new ClearVisitor().visit(modelContext);

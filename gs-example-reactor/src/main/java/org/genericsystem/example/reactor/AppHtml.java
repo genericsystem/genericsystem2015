@@ -1,5 +1,6 @@
 package org.genericsystem.example.reactor;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -101,6 +102,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 		car.setInstance("Audi A4 3.0 TDI").setHolder(power, 233);
 		car.setInstance("Peugeot 106 GTI").setHolder(power, 120);
 		car.setInstance("Peugeot 206 S16").setHolder(power, 136);
+		power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
 		engine.getCurrentCache().flush();
 	}
 

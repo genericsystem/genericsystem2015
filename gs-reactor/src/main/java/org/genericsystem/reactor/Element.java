@@ -252,6 +252,13 @@ public abstract class Element<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put(propertyName, applyOnModel.apply(modelContext.getModel())));
 	}
 
+	public void bindOptionalStyle(String propertyName, Function<M, ObservableValue<Boolean>> applyOnModel,String propertyValue) {
+		bindStyle(propertyName,model->  {
+			ObservableValue<Boolean> optional = applyOnModel.apply(model);
+			return Bindings.createStringBinding(()->optional.getValue() ? propertyValue : "", optional);
+		});
+	}
+	
 	public void bindStyle(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
 		addPrefixBinding(modelContext -> {
 			Map<String, String> stylesMap = modelContext.getObservableStyles(this);

@@ -5,13 +5,16 @@ import java.io.Serializable;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
 public class InputCompositeModel extends CompositeModel {
 	private Property<String> inputString = new SimpleStringProperty();
+	private ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
 	private StringConverter<? extends Serializable> stringConverter;
 	
@@ -23,6 +26,22 @@ public class InputCompositeModel extends CompositeModel {
 		setStringConverter(ApiStatics.STRING_CONVERTERS.get(clazz));
 	}
 
+	private Boolean validate(String input) {
+		boolean required = this.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
+		if (required && (inputString.getValue() == null || inputString.getValue().isEmpty()))
+			return false;
+		try {
+			getValue();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public ObservableValue<Boolean> getInvalid() {
+		return invalid;
+	}
+	
 	public Property<String> getInputString() {
 		return inputString;
 	}
