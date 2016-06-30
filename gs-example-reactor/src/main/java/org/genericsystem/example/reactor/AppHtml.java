@@ -47,8 +47,13 @@ public class AppHtml extends HtmlApp<EngineModel> {
 						SelectorModel::new);
 				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 
-				new FlexEditor(this).select(SelectorModel::getSelection);
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+				new FlexElement<SelectorModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+					{
+						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
+						new FlexEditor(this).select(SelectorModel::getSelection);
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+					}
+				};
 
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);

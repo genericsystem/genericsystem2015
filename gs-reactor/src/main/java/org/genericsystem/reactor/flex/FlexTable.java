@@ -13,7 +13,6 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.CompositeModel;
 import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
-import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
@@ -272,9 +271,9 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								bindText(CompositeModel::getString);
 								bindAction(compositeModel -> {
 									CompositeModel cm = compositeModel;
-									while (!(cm instanceof EngineModel))
+									while (!(cm instanceof SelectorModel) && cm != null)
 										cm = (CompositeModel) cm.getParent();
-									((EngineModel) cm).getSelection().setValue(compositeModel);
+									((SelectorModel) cm).getSelection().setValue(compositeModel);
 								});
 							}
 						};
