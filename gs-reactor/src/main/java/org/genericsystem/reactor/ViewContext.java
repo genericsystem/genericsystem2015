@@ -80,7 +80,6 @@ public class ViewContext<M extends Model> {
 
 	void destroyChild() {
 		parent.decrementSize(element);
-		node.sendRemove();
 		getRootViewContext().remove(node.getId());
 
 	}

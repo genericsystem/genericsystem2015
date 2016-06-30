@@ -89,8 +89,14 @@ public class ModelContext {
 	}
 
 	public void destroy() {
-		for (ViewContext<?> viewContext : viewContextsMap.values())
+		boolean first = true;
+		for (ViewContext<?> viewContext : viewContextsMap.values()) {
 			viewContext.destroyChild();
+			if (first) {
+				viewContext.getNode().sendRemove();
+				first = false;
+			}
+		}
 	}
 
 	public static class RootModelContext extends ModelContext {
