@@ -121,6 +121,10 @@ public class ModelContext {
 		return getViewContext(element).getNode().getStyles();
 	}
 
+	public ObservableMap<String, String> getObservableAttributes(Element<?> element) {
+		return getViewContext(element).getNode().getAttributes();
+	}
+
 	public Property<Number> getSelectionIndex(Element<?> element) {
 		return getViewContext(element).<SelectableHtmlDomNode> getNode().getSelectionIndex();
 	}

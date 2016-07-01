@@ -143,6 +143,12 @@ function onMessageReceived(evt) {
 	case 'RS':
 		elt.style.removeProperty(message.styleProperty);
 		break;
+	case 'AA':
+		elt.setAttribute(message.attributeName, message.attributeValue);
+		break;
+	case 'RA':
+		elt.removeAttribute(message.attributeName);
+		break;
 	default :
 		alert("Unknown message received");
 	}
