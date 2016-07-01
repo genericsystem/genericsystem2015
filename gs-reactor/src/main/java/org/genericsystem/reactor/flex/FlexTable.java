@@ -165,7 +165,6 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
 								bindOperation((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputCompositeModel::getInputString);
-								addStyle("width", "100%");
 							}
 						};
 
@@ -187,13 +186,13 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("background-color", "#dda5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
+								addStyle("overflow", "hidden");
 								select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null, InputCompositeModel::new);
 								new HtmlInputText<InputCompositeModel>(this) {
 									{
-										bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
+										bindOptionalStyle("border-color", InputCompositeModel::getInvalid, "red");
 										bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 										bindTextBidirectional(InputCompositeModel::getInputString);
-										addStyle("width", "100%");
 									}
 								};
 							}
@@ -205,11 +204,12 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								addStyle("background-color", "#dda5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
+								addStyle("overflow", "hidden");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
 										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
-										addStyle("width", "100%");
+										// addStyle("width", "100%");
 									}
 								};
 							}
@@ -262,6 +262,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("min-width", "200px");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
+						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 								modelContext.<CompositeModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null
 										? modelContext.<CompositeModel> getModel().getString().getValue() : "#bba5ff"));
@@ -298,12 +299,14 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 										addStyle("background-color", "#dda5e2");
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
+										addStyle("overflow", "hidden");
 										select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
 										new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
 									}
 								};
 								new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 									{
+										addStyle("overflow", "hidden");
 										addStyle("flex", "1");
 										addPrefixBinding(
 												modelContext -> modelContext.getObservableStyles(this).put("background-color",

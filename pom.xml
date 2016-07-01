@@ -51,7 +51,7 @@
 	<distributionManagement>
 		<repository>
 			<id>middlewarefactory</id>
-			<url>ftp://genericsystem.org/home/middleware/repository/</url>
+			<url>ftp://middlewarefactory.com/home/middleware/repository/</url>
 		</repository>
 	</distributionManagement>
 
