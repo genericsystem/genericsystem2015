@@ -114,7 +114,7 @@ function onMessageReceived(evt) {
 			elt.classList.add("removing");
 			setTimeout(function(){ 
 				elt.parentNode.removeChild(elt);
-			}, 0);
+			}, 500);
 		}
 		else {
 			console.log("Unreached removed element id : "+message.nodeId)
@@ -142,6 +142,12 @@ function onMessageReceived(evt) {
 		break;
 	case 'RS':
 		elt.style.removeProperty(message.styleProperty);
+		break;
+	case 'AA':
+		elt.setAttribute(message.attributeName, message.attributeValue);
+		break;
+	case 'RA':
+		elt.removeAttribute(message.attributeName);
 		break;
 	default :
 		alert("Unknown message received");

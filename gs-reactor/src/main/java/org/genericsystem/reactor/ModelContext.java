@@ -89,8 +89,14 @@ public class ModelContext {
 	}
 
 	public void destroy() {
-		for (ViewContext<?> viewContext : viewContextsMap.values())
+		boolean first = true;
+		for (ViewContext<?> viewContext : viewContextsMap.values()) {
 			viewContext.destroyChild();
+			if (first) {
+				viewContext.getNode().sendRemove();
+				first = false;
+			}
+		}
 	}
 
 	public static class RootModelContext extends ModelContext {
@@ -113,6 +119,10 @@ public class ModelContext {
 
 	public ObservableMap<String, String> getObservableStyles(Element<?> element) {
 		return getViewContext(element).getNode().getStyles();
+	}
+
+	public ObservableMap<String, String> getObservableAttributes(Element<?> element) {
+		return getViewContext(element).getNode().getAttributes();
 	}
 
 	public Property<Number> getSelectionIndex(Element<?> element) {

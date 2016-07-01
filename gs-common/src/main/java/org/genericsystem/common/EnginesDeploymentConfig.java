@@ -1,17 +1,17 @@
 package org.genericsystem.common;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 public class EnginesDeploymentConfig extends JsonObject {
 
 	public EnginesDeploymentConfig() {
-		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT);
+		this(Statics.DEFAULT_HOST, Statics.ENGINES_DEFAULT_PORT);
 	}
 
 	public EnginesDeploymentConfig(String host, int port) {

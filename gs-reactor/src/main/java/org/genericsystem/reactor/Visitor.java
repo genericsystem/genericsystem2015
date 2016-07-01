@@ -34,9 +34,8 @@ public class Visitor {
 			CompositeModel cModel = model.getModel();
 			if (cModel instanceof InputCompositeModel) {
 				InputCompositeModel icModel = (InputCompositeModel) cModel;
-				String value = icModel.getInputString().getValue();
-				if (value != null) {
-					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(),	value, newInstance);
+				if (icModel.getValue() != null) {
+					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(),	icModel.getValue(), newInstance);
 					if (newInstance == null)
 						newInstance = g;
 				}

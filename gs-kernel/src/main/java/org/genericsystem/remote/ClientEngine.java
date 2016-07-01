@@ -22,11 +22,11 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	protected final FrontEnd server;
 
 	public ClientEngine(Class<?>... userClasses) {
-		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT, userClasses);
+		this(Statics.DEFAULT_HOST, Statics.ENGINES_DEFAULT_PORT, userClasses);
 	}
 
 	public ClientEngine(String path, Class<?>... userClasses) {
-		this(Statics.DEFAULT_HOST, Statics.DEFAULT_PORT, path, userClasses);
+		this(Statics.DEFAULT_HOST, Statics.ENGINES_DEFAULT_PORT, path, userClasses);
 	}
 
 	public ClientEngine(String host, int port, Class<?>... userClasses) {
@@ -35,9 +35,8 @@ public class ClientEngine extends AbstractRoot implements Generic {
 
 	public ClientEngine(String host, int port, String path, Class<?>... userClasses) {
 		assert path != null;
-		init(this,
-				buildHandler(getClass(), (Generic) this, Collections.emptyList(), Statics.ENGINE_VALUE, Collections.emptyList(), ApiStatics.TS_SYSTEM,
-						ApiStatics.TS_SYSTEM));
+		init(this, buildHandler(getClass(), this, Collections.emptyList(), Statics.ENGINE_VALUE, Collections.emptyList(), ApiStatics.TS_SYSTEM,
+				ApiStatics.TS_SYSTEM));
 		server = new FrontEnd(host, port, path);
 		startSystemCache(userClasses);
 		isInitialized = true;

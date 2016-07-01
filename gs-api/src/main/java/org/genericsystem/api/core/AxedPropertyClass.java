@@ -88,6 +88,6 @@ public class AxedPropertyClass implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return clazz.getSimpleName() + "#" + axe;
+		return clazz.getName() + "#" + axe;
 	}
 }
