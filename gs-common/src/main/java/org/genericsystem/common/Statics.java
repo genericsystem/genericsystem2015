@@ -36,6 +36,7 @@ public class Statics {
 	public static final long LIFE_TIMEOUT = 1386174608777L;// 30 minutes
 	public final static String DEFAULT_HOST = "0.0.0.0";
 	public final static int DEFAULT_PORT = 8080;
+	public final static int ENGINES_DEFAULT_PORT = 8081;
 
 	public final static Vertex[] EMPTY = new Vertex[] {};
 

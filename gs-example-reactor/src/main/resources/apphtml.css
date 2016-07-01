@@ -1,4 +1,4 @@
-html, body {
+html, body,input,section,header,footer {
 	margin: 0;
 	padding: 0;
 }
