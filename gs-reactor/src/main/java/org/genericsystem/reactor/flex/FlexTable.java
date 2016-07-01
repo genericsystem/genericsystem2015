@@ -165,7 +165,6 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
 								bindOperation((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputCompositeModel::getInputString);
-								addStyle("width", "100%");
 							}
 						};
 
@@ -193,7 +192,6 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 										bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
 										bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 										bindTextBidirectional(InputCompositeModel::getInputString);
-										addStyle("width", "100%");
 									}
 								};
 							}
@@ -209,7 +207,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
-										addStyle("width", "100%");
+										// addStyle("width", "100%");
 									}
 								};
 							}
