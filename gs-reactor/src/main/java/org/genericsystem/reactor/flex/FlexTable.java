@@ -190,7 +190,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null, InputCompositeModel::new);
 								new HtmlInputText<InputCompositeModel>(this) {
 									{
-										// bindOptionalStyle("background-color", InputCompositeModel::getInvalid, "yellow");
+										bindOptionalStyle("border-color", InputCompositeModel::getInvalid, "red");
 										bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 										bindTextBidirectional(InputCompositeModel::getInputString);
 									}
