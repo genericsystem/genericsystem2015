@@ -3,8 +3,8 @@ package org.genericsystem.reactor.flex;
 public enum FlexDirection {
 	COLUMN, ROW;
 
-	public static FlexDirection reverse(FlexDirection directionToReverse) {
-		switch (directionToReverse) {
+	public FlexDirection reverse() {
+		switch (this) {
 		case COLUMN:
 			return FlexDirection.ROW;
 		case ROW:

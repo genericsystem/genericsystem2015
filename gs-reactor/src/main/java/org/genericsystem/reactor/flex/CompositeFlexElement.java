@@ -30,7 +30,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 	}
 
 	protected void sections() {
-		new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+		new FlexElement<CompositeModel>(this, FlexTag.SECTION, CompositeFlexElement.this.getReverseDirection()) {
 			{
 				forEach(CompositeFlexElement.this);
 				new HtmlLabel<CompositeModel>(this).bindText(CompositeModel::getString);
@@ -95,7 +95,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 
 		@Override
 		protected void sections() {
-			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+			new FlexElement<CompositeModel>(this, FlexTag.SECTION, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
 					bindStyle("background-color", CompositeModel::getString);
 					forEach(ColorTitleCompositeFlexElement.this);
@@ -113,7 +113,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 
 		@Override
 		protected void sections() {
-			new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+			new FlexElement<CompositeModel>(this, FlexTag.SECTION, CompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(CompositeRadio.this);
 					new HtmlRadio<CompositeModel>(this);
@@ -146,7 +146,7 @@ public class CompositeFlexElement<M extends CompositeModel> extends FlexElement<
 
 		@Override
 		protected void sections() {
-			flexSubElement = new FlexElement<CompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+			flexSubElement = new FlexElement<CompositeModel>(this, FlexTag.SECTION, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
 					bindStyle("background-color", CompositeModel::getString);

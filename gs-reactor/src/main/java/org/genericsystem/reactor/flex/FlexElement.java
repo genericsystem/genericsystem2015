@@ -8,11 +8,22 @@ import org.genericsystem.reactor.model.CompositeModel;
 
 public class FlexElement<M extends Model> extends Element<M> {
 
+	private final FlexDirection direction;
+
 	public FlexElement(Element<?> parent, FlexTag tag, FlexDirection direction) {
 		super(parent, tag.toString());
+		this.direction = direction;
 		addStyle("display", "flex");
 		addStyle("flex-direction", direction.toString());
 		addStyle("flex-wrap", "nowrap");
+	}
+
+	public FlexDirection getDirection() {
+		return direction;
+	}
+
+	public FlexDirection getReverseDirection() {
+		return getDirection().reverse();
 	}
 
 	@Override

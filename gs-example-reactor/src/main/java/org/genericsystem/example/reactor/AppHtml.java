@@ -1,5 +1,7 @@
 package org.genericsystem.example.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -25,14 +27,11 @@ import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
-import io.vertx.core.http.ServerWebSocket;
-
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
-				Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
@@ -44,15 +43,20 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				addStyle("justify-content", "center");
 				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
 				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
-				new ColorCompositeRadio<SelectorModel>(this, FlexTag.SECTION, FlexDirection.COLUMN).select(StringExtractor.EXTRACTOR, Color.class,
-						SelectorModel::new);
+				new ColorCompositeRadio<SelectorModel>(this, FlexTag.SECTION, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
 				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 
 				new FlexElement<SelectorModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
-						new FlexEditor(this).select(SelectorModel::getSelection);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
+						new FlexEditor(this, FlexTag.SECTION, FlexDirection.ROW) {
+							{
+								select(SelectorModel::getSelection);
+								addStyle("justify-content", "center");
+							}
+						};
+						new FlexEditor(this, FlexTag.SECTION, FlexDirection.COLUMN).select(SelectorModel::getSelection);
 					}
 				};
 
