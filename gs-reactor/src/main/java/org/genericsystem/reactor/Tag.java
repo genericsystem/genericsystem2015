@@ -13,8 +13,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeElement;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputCompositeModel;
-import org.genericsystem.reactor.model.InputCompositeModel.TriFunction;
+import org.genericsystem.reactor.model.InputGenericModel;
+import org.genericsystem.reactor.model.InputGenericModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
@@ -328,7 +328,7 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public void bindOperation(TriFunction<Generic[], Serializable, Generic, Generic> operation) {
-		addPrefixBinding(model -> model.<InputCompositeModel> getModel().getInputAction().setValue(operation));
+		addPrefixBinding(model -> model.<InputGenericModel> getModel().getInputAction().setValue(operation));
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {

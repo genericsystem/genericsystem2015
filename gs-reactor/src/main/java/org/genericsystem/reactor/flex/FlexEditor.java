@@ -26,7 +26,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 	@Override
 	protected void header() {
-		new FlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+		new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				addStyle("background-color", "#ffa500");
@@ -61,7 +61,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 					@Override
 					public void header() {
-						new FlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("background-color", "#dda5e2");
@@ -75,7 +75,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 					@Override
 					public void sections() {
-						new FlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
@@ -93,7 +93,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 			@Override
 			protected void sections() {
-				new FlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+				new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 					{
 						addStyle("flex", "1");
 						new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
@@ -104,7 +104,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 							@Override
 							public void header() {
-								new FlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+								new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 									{
 										addStyle("flex", "1");
 										addStyle("background-color", "#dda5e2");
@@ -118,7 +118,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 							@Override
 							public void sections() {
-								new FlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+								new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 									{
 										addStyle("flex", "1");
 										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",

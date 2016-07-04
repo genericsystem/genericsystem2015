@@ -6,12 +6,12 @@ import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class FlexElement<M extends Model> extends Tag<M> {
+public class FlexTag<M extends Model> extends Tag<M> {
 	private static final String FLEX_SECTION = "section";
 
 	private final FlexDirection direction;
 
-	public FlexElement(Tag<?> parent, FlexDirection direction) {
+	public FlexTag(Tag<?> parent, FlexDirection direction) {
 		super(parent, FLEX_SECTION);
 		this.direction = direction;
 		addStyle("display", "flex");
@@ -32,7 +32,7 @@ public class FlexElement<M extends Model> extends Tag<M> {
 		return new HtmlDomNode(parentId);
 	}
 
-	public static class H1FlexElement extends FlexElement<GenericModel> {
+	public static class H1FlexElement extends FlexTag<GenericModel> {
 		public H1FlexElement(Tag<?> parent, String title) {
 			this(parent, FlexDirection.ROW, title);
 		}
@@ -56,7 +56,7 @@ public class FlexElement<M extends Model> extends Tag<M> {
 		}
 	};
 
-	public static class SaveCancelFlexRow extends FlexElement<GenericModel> {
+	public static class SaveCancelFlexRow extends FlexTag<GenericModel> {
 
 		public SaveCancelFlexRow(Tag<?> parent) {
 			this(parent, FlexDirection.ROW);
