@@ -74,6 +74,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 		Generic carColor = engine.find(CarColor.class);
 		Generic color = engine.find(Color.class);
 		Generic carPerson = car.setRelation("CarDriverOwner", category, person);
+		carPerson.enablePropertyConstraint();
 		Generic red = color.setInstance("Red");
 		Generic black = color.setInstance("Black");
 		Generic green = color.setInstance("Green");
