@@ -4,16 +4,16 @@ import java.util.function.Function;
 
 import javafx.beans.property.Property;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlRadio<M extends Model> extends Element<M> {
+public class HtmlRadio<M extends Model> extends Tag<M> {
 
-	public HtmlRadio(Element<?> parent) {
+	public HtmlRadio(Tag<?> parent) {
 		super(parent, "input");
 	}
 

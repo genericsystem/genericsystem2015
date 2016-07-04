@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
-public class InputCompositeModel extends CompositeModel {
+public class InputCompositeModel extends GenericModel {
 	private Property<String> inputString = new SimpleStringProperty();
 	private ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();

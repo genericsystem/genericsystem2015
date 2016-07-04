@@ -15,12 +15,12 @@ import org.genericsystem.reactor.Model;
  *
  * @param <M>
  */
-public class CompositeModel extends Model {
+public class GenericModel extends Model {
 
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
 
-	public CompositeModel(Generic[] generics, StringExtractor stringExtractor) {
+	public GenericModel(Generic[] generics, StringExtractor stringExtractor) {
 		assert stringExtractor != null;
 		this.generics = generics;
 		this.stringExtractor = stringExtractor;

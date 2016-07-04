@@ -3,7 +3,7 @@ package org.genericsystem.reactor.appserver;
 import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
 
@@ -33,7 +33,7 @@ public class PersistentApplication {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Element<?> newHtmlApp(ServerWebSocket socket) {
+	public Tag<?> newHtmlApp(ServerWebSocket socket) {
 		try {
 			return ((HtmlApp<Model>) getApplicationClass().getConstructor(AbstractRoot.class, ServerWebSocket.class).newInstance(getEngine(), socket))
 					.init(modelClass.getConstructor(AbstractRoot.class).newInstance(engine));

@@ -5,7 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.Element.HtmlDomNode;
+import org.genericsystem.reactor.Tag.HtmlDomNode;
 import org.genericsystem.reactor.ModelContext.RootModelContext;
 
 /**
@@ -16,11 +16,11 @@ import org.genericsystem.reactor.ModelContext.RootModelContext;
 public class ViewContext<M extends Model> {
 
 	private final ViewContext<?> parent;
-	private final Element<M> element;
+	private final Tag<M> element;
 	private final HtmlDomNode node;
 	private ModelContext modelContext;
 
-	private ViewContext(int indexInChildren, ViewContext<?> parent, ModelContext modelContext, Element<M> element, HtmlDomNode node) {
+	private ViewContext(int indexInChildren, ViewContext<?> parent, ModelContext modelContext, Tag<M> element, HtmlDomNode node) {
 		this.parent = parent;
 		this.element = element;
 		assert node != null;
@@ -29,15 +29,15 @@ public class ViewContext<M extends Model> {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (BiConsumer<ModelContext, Element<M>.HtmlDomNode> binding : element.preFixedBindings)
+		for (BiConsumer<ModelContext, Tag<M>.HtmlDomNode> binding : element.preFixedBindings)
 			binding.accept(modelContext, getNode());
-		for (Element<?> childElement : element.getChildren()) {
+		for (Tag<?> childElement : element.getChildren()) {
 			if (childElement.metaBinding != null)
-				childElement.metaBinding.accept((Element) childElement, this);
+				childElement.metaBinding.accept((Tag) childElement, this);
 			else
 				createViewContextChild(null, modelContext, childElement);
 		}
-		for (BiConsumer<ModelContext, Element<M>.HtmlDomNode> binding : element.postFixedBindings) {
+		for (BiConsumer<ModelContext, Tag<M>.HtmlDomNode> binding : element.postFixedBindings) {
 			binding.accept(modelContext, getNode());
 		}
 
@@ -47,7 +47,7 @@ public class ViewContext<M extends Model> {
 		return modelContext;
 	}
 
-	public ViewContext<?> createViewContextChild(Integer index, ModelContext childModelContext, Element<?> element) {
+	public ViewContext<?> createViewContextChild(Integer index, ModelContext childModelContext, Tag<?> element) {
 		int indexInChildren = computeIndex(index, element);
 		return new ViewContext<>(indexInChildren, this, childModelContext, element, element.createNode(node.getId()));
 	}
@@ -60,14 +60,14 @@ public class ViewContext<M extends Model> {
 		return (NODE) node;
 	}
 
-	private Map<Element<?>, Integer> sizeBySubElement = new IdentityHashMap<Element<?>, Integer>() {
+	private Map<Tag<?>, Integer> sizeBySubElement = new IdentityHashMap<Tag<?>, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
 		public Integer get(Object key) {
 			Integer size = super.get(key);
 			if (size == null)
-				put((Element<?>) key, size = 0);
+				put((Tag<?>) key, size = 0);
 			return size;
 		};
 	};
@@ -84,11 +84,11 @@ public class ViewContext<M extends Model> {
 
 	}
 
-	private void incrementSize(Element<?> child) {
+	private void incrementSize(Tag<?> child) {
 		sizeBySubElement.put(child, sizeBySubElement.get(child) + 1);
 	}
 
-	private void decrementSize(Element<?> child) {
+	private void decrementSize(Tag<?> child) {
 		int size = sizeBySubElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
@@ -97,9 +97,9 @@ public class ViewContext<M extends Model> {
 			sizeBySubElement.put(child, size);
 	}
 
-	private int computeIndex(Integer nullable, Element<?> childElement) {
+	private int computeIndex(Integer nullable, Tag<?> childElement) {
 		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
-		for (Element<?> child : element.getChildren()) {
+		for (Tag<?> child : element.getChildren()) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeBySubElement.get(child);
@@ -110,7 +110,7 @@ public class ViewContext<M extends Model> {
 	public static class RootViewContext<M extends Model> extends ViewContext<M> {
 		private Map<String, HtmlDomNode> nodeById;
 
-		public RootViewContext(Model model, Element<M> template, HtmlDomNode node) {
+		public RootViewContext(Model model, Tag<M> template, HtmlDomNode node) {
 			super(0, null, new RootModelContext(model), template, node);
 		}
 
@@ -136,7 +136,7 @@ public class ViewContext<M extends Model> {
 		}
 	}
 
-	public Element<M> getElement() {
+	public Tag<M> getElement() {
 		return element;
 	}
 }

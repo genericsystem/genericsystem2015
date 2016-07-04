@@ -1,15 +1,15 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlSection<M extends Model> extends Element<M> {
+public class HtmlSection<M extends Model> extends Tag<M> {
 
-	public HtmlSection(Element<?> parent) {
+	public HtmlSection(Tag<?> parent) {
 		super(parent, "section");
 	}
 

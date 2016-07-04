@@ -1,15 +1,15 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlUl<M extends Model> extends Element<M> {
+public class HtmlUl<M extends Model> extends Tag<M> {
 
-	public HtmlUl(Element<?> parent) {
+	public HtmlUl(Tag<?> parent) {
 		super(parent, "ul");
 	}
 

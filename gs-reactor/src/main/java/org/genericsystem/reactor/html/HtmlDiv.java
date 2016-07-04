@@ -1,14 +1,14 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlDiv<M extends Model> extends Element<M> {
-	public HtmlDiv(Element<?> parent) {
+public class HtmlDiv<M extends Model> extends Tag<M> {
+	public HtmlDiv(Tag<?> parent) {
 		super(parent, "div");
 	}
 
