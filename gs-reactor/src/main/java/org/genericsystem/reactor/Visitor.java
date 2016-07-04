@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
@@ -31,7 +31,7 @@ public class Visitor {
 
 		@Override
 		public void prefix(ModelContext model) {
-			CompositeModel cModel = model.getModel();
+			GenericModel cModel = model.getModel();
 			if (cModel instanceof InputCompositeModel) {
 				InputCompositeModel icModel = (InputCompositeModel) cModel;
 				if (icModel.getValue() != null) {
@@ -48,14 +48,14 @@ public class Visitor {
 			boolean createLink = true;
 			for (ModelContext subModel : model.allSubContexts())
 				if (subModel.getModel() instanceof SelectorModel) {
-					CompositeModel value = ((SelectorModel) subModel.getModel()).getSelection().getValue();
+					GenericModel value = ((SelectorModel) subModel.getModel()).getSelection().getValue();
 					if (value != null)
 						generics.add(value.getGeneric());
 					else
 						createLink = false;
 			}
 			if (createLink && !generics.isEmpty())
-				newInstance.setHolder(model.<CompositeModel> getModel().getGeneric(), null, generics.stream().toArray(Generic[]::new));
+				newInstance.setHolder(model.<GenericModel> getModel().getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}
 

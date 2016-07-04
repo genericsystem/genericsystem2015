@@ -2,7 +2,7 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ModelContext;
 
@@ -10,9 +10,9 @@ import org.genericsystem.reactor.ModelContext;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlButton<M extends Model> extends Element<M> {
+public class HtmlButton<M extends Model> extends Tag<M> {
 
-	public HtmlButton(Element<?> parent) {
+	public HtmlButton(Tag<?> parent) {
 		super(parent, "button");
 	}
 

@@ -11,8 +11,8 @@ import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.composite.CompositeElement;
-import org.genericsystem.reactor.model.CompositeModel;
-import org.genericsystem.reactor.model.CompositeModel.StringExtractor;
+import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.InputCompositeModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -46,21 +46,21 @@ import javafx.collections.WeakSetChangeListener;
  *
  * @param <N>
  */
-public abstract class Element<M extends Model> {
+public abstract class Tag<M extends Model> {
 
 	private final String tag;
-	public BiConsumer<Element<M>, ViewContext<?>> metaBinding;
+	public BiConsumer<Tag<M>, ViewContext<?>> metaBinding;
 	public final List<BiConsumer<ModelContext, HtmlDomNode>> preFixedBindings = new ArrayList<>();
 	public final List<BiConsumer<ModelContext, HtmlDomNode>> postFixedBindings = new ArrayList<>();
-	private final Element<?> parent;
-	private final List<Element<?>> children = new ArrayList<>();
+	private final Tag<?> parent;
+	private final List<Tag<?>> children = new ArrayList<>();
 
 	@Override
 	public String toString() {
 		return tag + " " + getClass().getName();
 	}
 
-	protected Element(Element<?> parent, String tag) {
+	protected Tag(Tag<?> parent, String tag) {
 		this.tag = tag;
 		this.parent = parent;
 		if (parent != null)
@@ -135,7 +135,7 @@ public abstract class Element<M extends Model> {
 		metaBinding = (childElement, viewContext) -> viewContext.getModelContext().setSubContexts(childElement, applyOnModelContext, viewContext);
 	}
 
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<CompositeModel> constructor) {
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
 		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, observableListExtractor, constructor));
 	}
 
@@ -162,40 +162,40 @@ public abstract class Element<M extends Model> {
 	}
 
 	public void forEach_(ObservableListExtractor observableListExtractor) {
-		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, CompositeModel::new);
+		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, GenericModel::new);
 	}
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
-		forEach(stringExtractor, observableListExtractor, CompositeModel::new);
+		forEach(stringExtractor, observableListExtractor, GenericModel::new);
 	}
 
-	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<GenericModel> constructor) {
 		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor, gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
 		}, constructor));
 	}
 
-	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<CompositeModel> constructor) {
+	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<GenericModel> constructor) {
 		contextForEach(modelContext -> modelContext.setObservableSubModels(this, stringExtractor,
 				gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor));
 		// forEach(stringExtractor, gs -> gs[0].getRoot().find(genericClass), constructor);
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
-		select(stringExtractor, genericSupplier, CompositeModel::new);
+		select(stringExtractor, genericSupplier, GenericModel::new);
 	}
 
-	public void select(Function<Generic[], Generic> genericSupplier, ModelConstructor<CompositeModel> constructor) {
+	public void select(Function<Generic[], Generic> genericSupplier, ModelConstructor<GenericModel> constructor) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, constructor);
 	}
 
 	public void select_(Function<Generic[], Generic> genericSupplier) {
-		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, CompositeModel::new);
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, GenericModel::new);
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass) {
-		select(stringExtractor, genericClass, CompositeModel::new);
+		select(stringExtractor, genericClass, GenericModel::new);
 	}
 
 	@FunctionalInterface
@@ -219,21 +219,21 @@ public abstract class Element<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).bindBidirectional(applyOnModel.apply(modelContext.getModel())));
 	}
 
-	public <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement) {
+	public <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement) {
 		bindBiDirectionalSelection(subElement, 0);
 	}
 
-	public <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement, int shift) {
+	public <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, int shift) {
 		bindBiDirectionalSelection(subElement, SelectorModel::getSelection, shift);
 	}
 
-	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement,
-			Function<SelectorModel, Property<CompositeModel>> applyOnModel) {
+	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement,
+			Function<SelectorModel, Property<GenericModel>> applyOnModel) {
 		bindBiDirectionalSelection(subElement, applyOnModel, 0);
 	}
 
-	protected <SUBMODEL extends CompositeModel> void bindBiDirectionalSelection(Element<SUBMODEL> subElement,
-			Function<SelectorModel, Property<CompositeModel>> applyOnModel, int shift) {
+	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement,
+			Function<SelectorModel, Property<GenericModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
 			ObservableList<SUBMODEL> observableList = modelContext.getObservableSubModels(subElement);
 			bindBidirectional(modelContext.getSelectionIndex(this), applyOnModel.apply(modelContext.getModel()),
@@ -349,12 +349,12 @@ public abstract class Element<M extends Model> {
 
 	protected abstract HtmlDomNode createNode(String parentId);
 
-	protected List<Element<?>> getChildren() {
+	protected List<Tag<?>> getChildren() {
 		return children;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <COMPONENT extends Element<?>> COMPONENT getParent() {
+	public <COMPONENT extends Tag<?>> COMPONENT getParent() {
 		return (COMPONENT) parent;
 	}
 

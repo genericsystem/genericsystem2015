@@ -1,15 +1,15 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlStrong<M extends Model> extends Element<M> {
+public class HtmlStrong<M extends Model> extends Tag<M> {
 
-	public HtmlStrong(Element<?> parent) {
+	public HtmlStrong(Tag<?> parent) {
 		super(parent, "strong");
 	}
 

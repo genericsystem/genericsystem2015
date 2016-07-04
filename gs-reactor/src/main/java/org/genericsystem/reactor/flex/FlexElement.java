@@ -1,16 +1,16 @@
 package org.genericsystem.reactor.flex;
 
-import org.genericsystem.reactor.Element;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.model.CompositeModel;
+import org.genericsystem.reactor.model.GenericModel;
 
-public class FlexElement<M extends Model> extends Element<M> {
+public class FlexElement<M extends Model> extends Tag<M> {
 
 	private final FlexDirection direction;
 
-	public FlexElement(Element<?> parent, FlexTag tag, FlexDirection direction) {
+	public FlexElement(Tag<?> parent, FlexTag tag, FlexDirection direction) {
 		super(parent, tag.toString());
 		this.direction = direction;
 		addStyle("display", "flex");
@@ -31,74 +31,74 @@ public class FlexElement<M extends Model> extends Element<M> {
 		return new HtmlDomNode(parentId);
 	}
 
-	public static class H1FlexElement extends FlexElement<CompositeModel> {
-		public H1FlexElement(Element<?> parent, String title) {
+	public static class H1FlexElement extends FlexElement<GenericModel> {
+		public H1FlexElement(Tag<?> parent, String title) {
 			this(parent, FlexTag.SECTION, FlexDirection.ROW, title);
 		}
 
-		public H1FlexElement(Element<?> parent) {
+		public H1FlexElement(Tag<?> parent) {
 			this(parent, FlexTag.SECTION, FlexDirection.ROW);
 		}
 
-		public H1FlexElement(Element<?> parent, FlexTag tag, String title) {
+		public H1FlexElement(Tag<?> parent, FlexTag tag, String title) {
 			this(parent, tag, FlexDirection.ROW, title);
 		}
 
-		public H1FlexElement(Element<?> parent, FlexTag tag) {
+		public H1FlexElement(Tag<?> parent, FlexTag tag) {
 			this(parent, tag, FlexDirection.ROW);
 		}
 
-		public H1FlexElement(Element<?> parent, FlexDirection flexDirection, String title) {
+		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection, String title) {
 			this(parent, FlexTag.SECTION, flexDirection, title);
 		}
 
-		public H1FlexElement(Element<?> parent, FlexDirection flexDirection) {
+		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection) {
 			this(parent, FlexTag.SECTION, flexDirection);
 		}
 
-		public H1FlexElement(Element<?> parent, FlexTag tag, FlexDirection flexDirection, String title) {
+		public H1FlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection, String title) {
 			super(parent, tag, flexDirection);
 			addStyle("justify-content", "center");
 			addStyle("background-color", "#ffa500");
 			new HtmlH1<>(this).setText(title);
 		}
 
-		public H1FlexElement(Element<?> parent, FlexTag tag, FlexDirection flexDirection) {
+		public H1FlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
 			super(parent, tag, flexDirection);
 			addStyle("justify-content", "center");
 			addStyle("background-color", "#ffa500");
-			new HtmlH1<CompositeModel>(this).bindText(CompositeModel::getString);
+			new HtmlH1<GenericModel>(this).bindText(GenericModel::getString);
 		}
 	};
 
-	public static class SaveCancelFlexRow extends FlexElement<CompositeModel> {
+	public static class SaveCancelFlexRow extends FlexElement<GenericModel> {
 
-		public SaveCancelFlexRow(Element<?> parent) {
+		public SaveCancelFlexRow(Tag<?> parent) {
 			this(parent, FlexTag.SECTION, FlexDirection.ROW);
 		}
 
-		public SaveCancelFlexRow(Element<?> parent, FlexTag tag) {
+		public SaveCancelFlexRow(Tag<?> parent, FlexTag tag) {
 			this(parent, tag, FlexDirection.ROW);
 		}
 
-		public SaveCancelFlexRow(Element<?> parent, FlexDirection direction) {
+		public SaveCancelFlexRow(Tag<?> parent, FlexDirection direction) {
 			this(parent, FlexTag.SECTION, direction);
 		}
 
-		public SaveCancelFlexRow(Element<?> parent, FlexTag tag, FlexDirection direction) {
+		public SaveCancelFlexRow(Tag<?> parent, FlexTag tag, FlexDirection direction) {
 			super(parent, tag, direction);
 			addStyle("justify-content", "space-around");
 			addStyle("padding", "10px");
-			new HtmlButton<CompositeModel>(this) {
+			new HtmlButton<GenericModel>(this) {
 				{
 					setText("Save");
-					bindAction(CompositeModel::flush);
+					bindAction(GenericModel::flush);
 				}
 			};
-			new HtmlButton<CompositeModel>(this) {
+			new HtmlButton<GenericModel>(this) {
 				{
 					setText("Cancel");
-					bindAction(CompositeModel::cancel);
+					bindAction(GenericModel::cancel);
 				}
 			};
 		}
