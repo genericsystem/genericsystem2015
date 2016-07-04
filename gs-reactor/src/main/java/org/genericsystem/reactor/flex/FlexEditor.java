@@ -16,21 +16,17 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 	public FlexEditor(Tag<?> parent) {
-		this(parent, FlexTag.SECTION);
+		this(parent, FlexDirection.COLUMN);
 	}
 
-	public FlexEditor(Tag<?> parent, FlexTag tag) {
-		this(parent, tag, FlexDirection.COLUMN);
-	}
-
-	public FlexEditor(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-		super(parent, tag, flexDirection);
+	public FlexEditor(Tag<?> parent, FlexDirection flexDirection) {
+		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}
 
 	@Override
 	protected void header() {
-		new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexEditor.this.getReverseDirection()) {
+		new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				addStyle("background-color", "#ffa500");
@@ -50,7 +46,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 	@Override
 	protected void sections() {
 
-		new CompositeFlexElement<GenericModel>(this, FlexTag.SECTION, FlexEditor.this.getReverseDirection()) {
+		new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
@@ -58,14 +54,14 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 			@Override
 			protected void header() {
-				new CompositeFlexElement<GenericModel>(this, FlexTag.SECTION, FlexEditor.this.getDirection()) {
+				new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
 					}
 
 					@Override
 					public void header() {
-						new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexEditor.this.getReverseDirection()) {
+						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("background-color", "#dda5e2");
@@ -79,7 +75,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 					@Override
 					public void sections() {
-						new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexEditor.this.getReverseDirection()) {
+						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
@@ -97,10 +93,10 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 			@Override
 			protected void sections() {
-				new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexEditor.this.getReverseDirection()) {
+				new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 					{
 						addStyle("flex", "1");
-						new CompositeFlexElement<GenericModel>(this, FlexTag.SECTION, FlexEditor.this.getDirection()) {
+						new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
@@ -108,7 +104,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 							@Override
 							public void header() {
-								new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexEditor.this.getReverseDirection()) {
+								new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 									{
 										addStyle("flex", "1");
 										addStyle("background-color", "#dda5e2");
@@ -122,7 +118,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 							@Override
 							public void sections() {
-								new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexEditor.this.getReverseDirection()) {
+								new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 									{
 										addStyle("flex", "1");
 										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",

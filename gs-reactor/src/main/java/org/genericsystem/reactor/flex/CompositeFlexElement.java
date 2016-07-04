@@ -12,14 +12,14 @@ import org.genericsystem.reactor.model.SelectorModel;
  * @author Nicolas Feybesse
  *
  */
-public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M> implements CompositeElement<M> {
+public class CompositeFlexElement<M extends GenericModel> extends FlexTag<M> implements CompositeElement<M> {
 
-	public CompositeFlexElement(Tag<?> parent, FlexTag tag) {
-		this(parent, tag, FlexDirection.COLUMN);
+	public CompositeFlexElement(Tag<?> parent) {
+		this(parent, FlexDirection.COLUMN);
 	}
 
-	public CompositeFlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-		super(parent, tag, flexDirection);
+	public CompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
+		super(parent, flexDirection);
 		header();
 		sections();
 		footer();
@@ -30,7 +30,7 @@ public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M>
 	}
 
 	protected void sections() {
-		new FlexElement<GenericModel>(this, FlexTag.SECTION, CompositeFlexElement.this.getReverseDirection()) {
+		new FlexTag<GenericModel>(this, CompositeFlexElement.this.getReverseDirection()) {
 			{
 				forEach(CompositeFlexElement.this);
 				new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
@@ -43,25 +43,17 @@ public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M>
 
 	public static class TitleCompositeFlexElement<M extends GenericModel> extends CompositeFlexElement<M> {
 
-		public TitleCompositeFlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-			super(parent, tag, flexDirection);
-		}
-
-		public TitleCompositeFlexElement(Tag<?> parent, FlexTag tag) {
-			this(parent, tag, FlexDirection.COLUMN);
-		}
-
 		public TitleCompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
-			this(parent, FlexTag.SECTION, flexDirection);
+			super(parent, flexDirection);
 		}
 
 		public TitleCompositeFlexElement(Tag<?> parent) {
-			this(parent, FlexTag.SECTION, FlexDirection.COLUMN);
+			this(parent, FlexDirection.COLUMN);
 		}
 
 		@Override
 		protected void header() {
-			new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexDirection.ROW) {
+			new FlexTag<GenericModel>(this, FlexDirection.ROW) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("background-color", "#ffa500");
@@ -77,25 +69,17 @@ public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M>
 
 	public static class ColorTitleCompositeFlexElement<M extends GenericModel> extends TitleCompositeFlexElement<M> {
 
-		public ColorTitleCompositeFlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-			super(parent, tag, flexDirection);
-		}
-
-		public ColorTitleCompositeFlexElement(Tag<?> parent, FlexTag tag) {
-			this(parent, tag, FlexDirection.COLUMN);
-		}
-
 		public ColorTitleCompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
-			this(parent, FlexTag.SECTION, flexDirection);
+			super(parent, flexDirection);
 		}
 
 		public ColorTitleCompositeFlexElement(Tag<?> parent) {
-			this(parent, FlexTag.SECTION, FlexDirection.COLUMN);
+			this(parent, FlexDirection.COLUMN);
 		}
 
 		@Override
 		protected void sections() {
-			new FlexElement<GenericModel>(this, FlexTag.SECTION, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
+			new FlexTag<GenericModel>(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
 					bindStyle("background-color", GenericModel::getString);
 					forEach(ColorTitleCompositeFlexElement.this);
@@ -107,13 +91,13 @@ public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M>
 
 	public static class CompositeRadio<M extends SelectorModel> extends CompositeFlexElement<M> implements CompositeElement<M> {
 
-		public CompositeRadio(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-			super(parent, tag, flexDirection);
+		public CompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
+			super(parent, flexDirection);
 		}
 
 		@Override
 		protected void sections() {
-			new FlexElement<GenericModel>(this, FlexTag.SECTION, CompositeRadio.this.getReverseDirection()) {
+			new FlexTag<GenericModel>(this, CompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(CompositeRadio.this);
 					new HtmlRadio<GenericModel>(this);
@@ -132,8 +116,8 @@ public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M>
 
 		private Tag<GenericModel> flexSubElement;
 
-		public ColorCompositeRadio(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-			super(parent, tag, flexDirection);
+		public ColorCompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
+			super(parent, flexDirection);
 			bindBiDirectionalSelection(flexSubElement);
 			bindStyle("background-color", SelectorModel::getSelectionString);
 			addStyle("padding", "4px");
@@ -146,7 +130,7 @@ public class CompositeFlexElement<M extends GenericModel> extends FlexElement<M>
 
 		@Override
 		protected void sections() {
-			flexSubElement = new FlexElement<GenericModel>(this, FlexTag.SECTION, ColorCompositeRadio.this.getReverseDirection()) {
+			flexSubElement = new FlexTag<GenericModel>(this, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
 					bindStyle("background-color", GenericModel::getString);

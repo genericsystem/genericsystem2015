@@ -41,6 +41,7 @@ public class ModelContext {
 		childModel.parent = getModel();// inject parent
 		childModel.afterParentConstruct();
 		ModelContext modelContextChild = new ModelContext(this, childModel);
+		childModel.modelContext = modelContextChild;
 		viewContext.createViewContextChild(index, modelContextChild, childElement);
 		return modelContextChild;
 	}

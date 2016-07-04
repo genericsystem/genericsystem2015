@@ -17,14 +17,13 @@ import org.genericsystem.reactor.flex.CompositeFlexElement.ColorCompositeRadio;
 import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexEditor;
-import org.genericsystem.reactor.flex.FlexElement;
-import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.flex.FlexTag;
+import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.EngineModel;
-import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
 public class AppHtml extends HtmlApp<EngineModel> {
@@ -38,31 +37,31 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+		new FlexTag<GenericModel>(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
 				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
 				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
-				new ColorCompositeRadio<SelectorModel>(this, FlexTag.SECTION, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
-				new H1FlexElement(this, FlexTag.HEADER, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
+				new ColorCompositeRadio<SelectorModel>(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
+				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 
-				new FlexElement<SelectorModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+				new FlexTag<SelectorModel>(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputCompositeModel::new);
-						new FlexEditor(this, FlexTag.SECTION, FlexDirection.ROW) {
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
+						new FlexEditor(this, FlexDirection.ROW) {
 							{
 								select(SelectorModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};
-						new FlexEditor(this, FlexTag.SECTION, FlexDirection.COLUMN).select(SelectorModel::getSelection);
+						new FlexEditor(this, FlexDirection.COLUMN).select(SelectorModel::getSelection);
 					}
 				};
 
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputCompositeModel::new);
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputCompositeModel::new);
-				new SaveCancelFlexRow(this, FlexTag.FOOTER).addStyle("background-color", "#ffa500");
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputGenericModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputGenericModel::new);
+				new SaveCancelFlexRow(this).addStyle("background-color", "#ffa500");
 			}
 		};
 	}

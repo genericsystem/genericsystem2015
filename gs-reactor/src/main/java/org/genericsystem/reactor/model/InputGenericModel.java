@@ -12,13 +12,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
-public class InputCompositeModel extends GenericModel {
+public class InputGenericModel extends GenericModel {
 	private Property<String> inputString = new SimpleStringProperty();
 	private ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
 	private StringConverter<? extends Serializable> stringConverter;
 	
-	public InputCompositeModel(Generic[] generics, StringExtractor extractor) {
+	public InputGenericModel(Generic[] generics, StringExtractor extractor) {
 		super(generics, extractor);
 		Class<?> clazz = this.getGeneric().getInstanceValueClassConstraint();
 		if (clazz == null)

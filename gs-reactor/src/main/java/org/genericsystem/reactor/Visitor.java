@@ -5,8 +5,11 @@ import java.util.List;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.InputCompositeModel;
+import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 
 public class Visitor {
 
@@ -32,8 +35,8 @@ public class Visitor {
 		@Override
 		public void prefix(ModelContext model) {
 			GenericModel cModel = model.getModel();
-			if (cModel instanceof InputCompositeModel) {
-				InputCompositeModel icModel = (InputCompositeModel) cModel;
+			if (cModel instanceof InputGenericModel) {
+				InputGenericModel icModel = (InputGenericModel) cModel;
 				if (icModel.getValue() != null) {
 					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(),	icModel.getValue(), newInstance);
 					if (newInstance == null)
@@ -62,10 +65,36 @@ public class Visitor {
 	public static class ClearVisitor extends Visitor {
 		@Override
 		public void prefix(ModelContext model) {
-			if (model.getModel() instanceof InputCompositeModel)
-				((InputCompositeModel) model.getModel()).getInputString().setValue(null);
+			if (model.getModel() instanceof InputGenericModel)
+				((InputGenericModel) model.getModel()).getInputString().setValue(null);
 			if (model.getModel() instanceof SelectorModel)
 				((SelectorModel) model.getModel()).getSelection().setValue(null);
+		}
+	}
+
+	public static class CheckInputsValidityVisitor extends Visitor {
+		private final List<InputGenericModel> inputModels = new ArrayList<>();
+		private final ObservableValue<Boolean> invalid;
+
+		public CheckInputsValidityVisitor(ModelContext modelContext) {
+			super();
+			visit(modelContext);
+			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(), inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
+		}
+
+		public ObservableValue<Boolean> isInvalid() {
+			return invalid;
+		}
+		
+		private Boolean checkInvalidity() {
+			return inputModels.stream().map(inputModel -> inputModel.getInvalid().getValue()).reduce(false, (a, b) -> a || b);
+		}
+
+		@Override
+		public void prefix(ModelContext model) {
+			if (model.getModel() instanceof InputGenericModel) {
+				inputModels.add((InputGenericModel) model.getModel());
+			}
 		}
 	}
 }
