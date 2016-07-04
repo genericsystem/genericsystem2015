@@ -8,6 +8,9 @@ import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.InputCompositeModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
+
 public class Visitor {
 
 	public void visit(ModelContext modelContext) {
@@ -66,6 +69,32 @@ public class Visitor {
 				((InputCompositeModel) model.getModel()).getInputString().setValue(null);
 			if (model.getModel() instanceof SelectorModel)
 				((SelectorModel) model.getModel()).getSelection().setValue(null);
+		}
+	}
+
+	public static class CheckInputsValidityVisitor extends Visitor {
+		private final List<InputCompositeModel> inputModels = new ArrayList<>();
+		private final ObservableValue<Boolean> invalid;
+
+		public CheckInputsValidityVisitor(ModelContext modelContext) {
+			super();
+			visit(modelContext);
+			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(), inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
+		}
+
+		public ObservableValue<Boolean> isInvalid() {
+			return invalid;
+		}
+		
+		private Boolean checkInvalidity() {
+			return inputModels.stream().map(inputModel -> inputModel.getInvalid().getValue()).reduce(false, (a, b) -> a || b);
+		}
+
+		@Override
+		public void prefix(ModelContext model) {
+			if (model.getModel() instanceof InputCompositeModel) {
+				inputModels.add((InputCompositeModel) model.getModel());
+			}
 		}
 	}
 }

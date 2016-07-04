@@ -9,9 +9,14 @@ package org.genericsystem.reactor;
 public abstract class Model {
 
 	Model parent;
+	ModelContext modelContext;
 
 	public Model getParent() {
 		return parent;
+	}
+	
+	public ModelContext getModelContext() {
+		return modelContext;
 	}
 
 	public void afterParentConstruct() {

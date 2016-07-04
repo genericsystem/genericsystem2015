@@ -2,6 +2,7 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.annotation.InstanceColorize;
@@ -229,6 +230,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 						addStyle("margin-bottom", "1px");
 						new HtmlButton<InputCompositeModel>(this) {
 							{
+								bindOptionalAttribute("disabled", model -> new CheckInputsValidityVisitor(model.getModelContext()).isInvalid(), "disabled");
 								bindAction2(modelContext -> {
 									try {
 										new HolderVisitor().visit(modelContext);
