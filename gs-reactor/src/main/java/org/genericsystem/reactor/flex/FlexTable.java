@@ -26,11 +26,7 @@ import org.genericsystem.reactor.model.SelectorModel;
 public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 	public FlexTable(Tag<?> parent) {
-		this(parent, FlexTag.SECTION);
-	}
-
-	public FlexTable(Tag<?> parent, FlexTag tag) {
-		super(parent, tag, FlexDirection.COLUMN);
+		super(parent, FlexDirection.COLUMN);
 	}
 
 	@Override
@@ -41,7 +37,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 	}
 
 	protected void titleHeader() {
-		new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexDirection.ROW) {
+		new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 			{
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
@@ -58,11 +54,11 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 	}
 
 	protected void columnsTitleSection() {
-		new CompositeFlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+		new CompositeFlexElement<GenericModel>(this, FlexDirection.ROW) {
 
 			@Override
 			protected void header() {
-				new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexDirection.ROW) {
+				new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 					{
 						addStyle("flex", "0");
 						addStyle("color", "#ffffff");
@@ -83,7 +79,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 			@Override
 			protected void sections() {
-				new CompositeFlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+				new CompositeFlexElement<GenericModel>(this, FlexDirection.ROW) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
@@ -92,7 +88,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 					@Override
 					protected void header() {
-						new FlexElement<InputCompositeModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+						new FlexElement<InputCompositeModel>(this, FlexDirection.ROW) {
 							{
 								addStyle("flex", "1");
 								addStyle("color", "#ffffff");
@@ -112,7 +108,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 					@Override
 					protected void sections() {
-						new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+						new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 							{
 								addStyle("flex", "1");
 								addStyle("color", "#ffffff");
@@ -135,7 +131,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 			@Override
 			protected void footer() {
-				new FlexElement<GenericModel>(this, FlexTag.FOOTER, FlexDirection.ROW) {
+				new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
@@ -150,11 +146,11 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 	}
 
 	protected void columnsInputSection() {
-		new CompositeFlexElement<GenericModel>(this, FlexTag.FOOTER, FlexDirection.ROW) {
+		new CompositeFlexElement<GenericModel>(this, FlexDirection.ROW) {
 
 			@Override
 			protected void header() {
-				new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexDirection.COLUMN) {
+				new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "200px");
@@ -175,12 +171,12 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 			@Override
 			protected void sections() {
-				new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+				new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-						new FlexElement<InputCompositeModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+						new FlexElement<InputCompositeModel>(this, FlexDirection.COLUMN) {
 							{
 								addStyle("flex", "1");
 								addStyle("color", "#ffffff");
@@ -198,7 +194,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 								};
 							}
 						};
-						new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+						new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 							{
 								addStyle("flex", "1");
 								addStyle("color", "#ffffff");
@@ -221,7 +217,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 			@Override
 			protected void footer() {
-				new FlexElement<GenericModel>(this, FlexTag.FOOTER, FlexDirection.ROW) {
+				new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");
@@ -251,14 +247,14 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 	@Override
 	protected void sections() {
-		new CompositeFlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+		new CompositeFlexElement<GenericModel>(this, FlexDirection.ROW) {
 			{
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES, GenericModel::new);
 			}
 
 			@Override
 			protected void header() {
-				new FlexElement<GenericModel>(this, FlexTag.HEADER, FlexDirection.COLUMN) {
+				new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "200px");
@@ -286,16 +282,16 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 			@Override
 			protected void sections() {
-				new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+				new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.ROW) {
+						new FlexElement<GenericModel>(this, FlexDirection.ROW) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
-								new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+								new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 									{
 										addStyle("flex", "1");
 										addStyle("background-color", "#dda5e2");
@@ -306,7 +302,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 										new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
 									}
 								};
-								new FlexElement<GenericModel>(this, FlexTag.SECTION, FlexDirection.COLUMN) {
+								new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 									{
 										addStyle("overflow", "hidden");
 										addStyle("flex", "1");
@@ -330,7 +326,7 @@ public class FlexTable extends CompositeFlexElement<InputCompositeModel> {
 
 			@Override
 			protected void footer() {
-				new FlexElement<GenericModel>(this, FlexTag.FOOTER, FlexDirection.COLUMN) {
+				new FlexElement<GenericModel>(this, FlexDirection.COLUMN) {
 					{
 						addStyle("flex", "0");
 						addStyle("min-width", "100px");

@@ -7,11 +7,12 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.model.GenericModel;
 
 public class FlexElement<M extends Model> extends Tag<M> {
+	private static final String FLEX_SECTION = "section";
 
 	private final FlexDirection direction;
 
-	public FlexElement(Tag<?> parent, FlexTag tag, FlexDirection direction) {
-		super(parent, tag.toString());
+	public FlexElement(Tag<?> parent, FlexDirection direction) {
+		super(parent, FLEX_SECTION);
 		this.direction = direction;
 		addStyle("display", "flex");
 		addStyle("flex-direction", direction.toString());
@@ -33,38 +34,22 @@ public class FlexElement<M extends Model> extends Tag<M> {
 
 	public static class H1FlexElement extends FlexElement<GenericModel> {
 		public H1FlexElement(Tag<?> parent, String title) {
-			this(parent, FlexTag.SECTION, FlexDirection.ROW, title);
+			this(parent, FlexDirection.ROW, title);
 		}
 
 		public H1FlexElement(Tag<?> parent) {
-			this(parent, FlexTag.SECTION, FlexDirection.ROW);
-		}
-
-		public H1FlexElement(Tag<?> parent, FlexTag tag, String title) {
-			this(parent, tag, FlexDirection.ROW, title);
-		}
-
-		public H1FlexElement(Tag<?> parent, FlexTag tag) {
-			this(parent, tag, FlexDirection.ROW);
+			this(parent, FlexDirection.ROW);
 		}
 
 		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection, String title) {
-			this(parent, FlexTag.SECTION, flexDirection, title);
-		}
-
-		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection) {
-			this(parent, FlexTag.SECTION, flexDirection);
-		}
-
-		public H1FlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection, String title) {
-			super(parent, tag, flexDirection);
+			super(parent, flexDirection);
 			addStyle("justify-content", "center");
 			addStyle("background-color", "#ffa500");
 			new HtmlH1<>(this).setText(title);
 		}
 
-		public H1FlexElement(Tag<?> parent, FlexTag tag, FlexDirection flexDirection) {
-			super(parent, tag, flexDirection);
+		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection) {
+			super(parent, flexDirection);
 			addStyle("justify-content", "center");
 			addStyle("background-color", "#ffa500");
 			new HtmlH1<GenericModel>(this).bindText(GenericModel::getString);
@@ -74,19 +59,11 @@ public class FlexElement<M extends Model> extends Tag<M> {
 	public static class SaveCancelFlexRow extends FlexElement<GenericModel> {
 
 		public SaveCancelFlexRow(Tag<?> parent) {
-			this(parent, FlexTag.SECTION, FlexDirection.ROW);
-		}
-
-		public SaveCancelFlexRow(Tag<?> parent, FlexTag tag) {
-			this(parent, tag, FlexDirection.ROW);
+			this(parent, FlexDirection.ROW);
 		}
 
 		public SaveCancelFlexRow(Tag<?> parent, FlexDirection direction) {
-			this(parent, FlexTag.SECTION, direction);
-		}
-
-		public SaveCancelFlexRow(Tag<?> parent, FlexTag tag, FlexDirection direction) {
-			super(parent, tag, direction);
+			super(parent, direction);
 			addStyle("justify-content", "space-around");
 			addStyle("padding", "10px");
 			new HtmlButton<GenericModel>(this) {
