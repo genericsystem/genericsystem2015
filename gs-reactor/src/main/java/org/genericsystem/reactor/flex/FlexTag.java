@@ -1,18 +1,17 @@
 package org.genericsystem.reactor.flex;
 
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class FlexTag<M extends Model> extends Tag<M> {
-	private static final String FLEX_SECTION = "section";
-
+public class FlexTag<M extends Model> extends HtmlSection<M> {
 	private final FlexDirection direction;
 
 	public FlexTag(Tag<?> parent, FlexDirection direction) {
-		super(parent, FLEX_SECTION);
+		super(parent);
 		this.direction = direction;
 		addStyle("display", "flex");
 		addStyle("flex-direction", direction.toString());
