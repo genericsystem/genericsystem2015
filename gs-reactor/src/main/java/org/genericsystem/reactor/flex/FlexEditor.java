@@ -28,12 +28,13 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 	protected void header() {
 		new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
-				addStyle("flex", "1");
+				addStyle("flex", "0.3");
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
+				addStyle("align-items", "center");
 				new HtmlH1<GenericModel>(this) {
 					{
 						bindText(GenericModel::getString);
@@ -55,7 +56,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 			protected void header() {
 				new FlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
 					{
-						addStyle("flex", "1");
+						addStyle("flex", "0.3");
 						new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
