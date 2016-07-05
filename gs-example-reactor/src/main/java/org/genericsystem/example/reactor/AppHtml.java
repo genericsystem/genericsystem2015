@@ -13,11 +13,11 @@ import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
-import org.genericsystem.reactor.flex.CompositeFlexElement.ColorCompositeRadio;
-import org.genericsystem.reactor.flex.CompositeFlexElement.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.flex.CompositeFlexSection.ColorCompositeRadio;
+import org.genericsystem.reactor.flex.CompositeFlexSection.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexEditor;
-import org.genericsystem.reactor.flex.FlexTag;
+import org.genericsystem.reactor.flex.FlexSection;
 import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.GenericModel;
@@ -37,7 +37,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexTag<GenericModel>(this, FlexDirection.COLUMN) {
+		new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
 				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
@@ -45,7 +45,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new ColorCompositeRadio<SelectorModel>(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 
-				new FlexTag<SelectorModel>(this, FlexDirection.COLUMN) {
+				new FlexSection<SelectorModel>(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);

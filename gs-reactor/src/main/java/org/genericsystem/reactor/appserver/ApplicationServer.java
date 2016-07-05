@@ -21,7 +21,7 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
-import org.genericsystem.reactor.ModelContext;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.HtmlDomNode;
 import org.genericsystem.reactor.html.HtmlApp;
@@ -64,7 +64,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends ModelContext> modelClass, AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
