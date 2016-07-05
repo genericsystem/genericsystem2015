@@ -20,7 +20,6 @@ public class HtmlInputText<M extends ModelContext> extends Tag<M> {
 		return new InputTextHtmlDomNode(parentId);
 	}
 
-	@Deprecated
 	public void bindAction(Consumer<M> applyOnModel) {
 		addActionBinding(InputTextHtmlDomNode::getEnterProperty, applyOnModel);
 	}
