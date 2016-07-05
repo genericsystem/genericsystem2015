@@ -48,12 +48,12 @@ import javafx.collections.WeakSetChangeListener;
  *
  * @param <N>
  */
-public abstract class Tag<M extends ModelContext> {
+public abstract class Tag<M extends Model> {
 
 	private final String tag;
 	public BiConsumer<Tag<M>, ViewContext<?>> metaBinding;
-	public final List<BiConsumer<ModelContext, HtmlDomNode>> preFixedBindings = new ArrayList<>();
-	public final List<BiConsumer<ModelContext, HtmlDomNode>> postFixedBindings = new ArrayList<>();
+	public final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
+	public final List<BiConsumer<Model, HtmlDomNode>> postFixedBindings = new ArrayList<>();
 	private final Tag<?> parent;
 	private final List<Tag<?>> children = new ArrayList<>();
 
@@ -81,11 +81,11 @@ public abstract class Tag<M extends ModelContext> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
 
-	protected void addPrefixBinding(Consumer<ModelContext> consumer) {
+	protected void addPrefixBinding(Consumer<Model> consumer) {
 		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
-	protected void addPostfixBinding(Consumer<ModelContext> consumer) {
+	protected void addPostfixBinding(Consumer<Model> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
@@ -94,7 +94,7 @@ public abstract class Tag<M extends ModelContext> {
 	}
 
 	protected <NODE extends HtmlDomNode> void addActionBinding2(Function<NODE, Property<Consumer<Object>>> applyOnNode,
-			Consumer<ModelContext> applyOnModelContext) {
+			Consumer<Model> applyOnModelContext) {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModelContext.accept(modelContext)));
 	}
 
@@ -129,21 +129,21 @@ public abstract class Tag<M extends ModelContext> {
 				generic -> (M) constructor.build(GenericModel.addToGenerics(generic, ((GenericModel) modelContext).getGenerics()), stringExtractor)));
 	}
 
-	protected <MODEL extends ModelContext> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
+	protected <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
 		forEach(applyOnModelContext, (modelContext, childModel) -> {
 			childModel.parent = modelContext;
 			return childModel;
 		});
 	}
 
-	private <MODEL extends ModelContext> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext,
-			BiFunction<ModelContext, MODEL, ModelContext> modelContextBuilder) {
+	private <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext,
+			BiFunction<Model, MODEL, Model> modelContextBuilder) {
 		metaBinding = (childElement, viewContext) -> viewContext.getModelContext().setSubContexts(childElement,
 				new TransformationObservableList<M, MODEL>(applyOnModelContext.apply((MODEL) viewContext.getModelContext()), (index, childModel) -> {
 					childModel.parent = viewContext.getModelContext();
 					viewContext.createViewContextChild(index, childModel, childElement);
 					return (MODEL) childModel;
-				}, ModelContext::destroy));
+				}, Model::destroy));
 	}
 
 	public <T> void select(Function<T, ObservableValue<M>> applyOnModel) {
@@ -193,7 +193,7 @@ public abstract class Tag<M extends ModelContext> {
 	}
 
 	@FunctionalInterface
-	public interface ModelConstructor<M extends ModelContext> {
+	public interface ModelConstructor<M extends Model> {
 		M build(Generic[] generics, StringExtractor stringExtractor);
 	}
 
@@ -229,14 +229,14 @@ public abstract class Tag<M extends ModelContext> {
 	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement,
 			Function<SelectorModel, Property<GenericModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
-			List<? extends ModelContext> subContexts = modelContext.getSubContexts(subElement);
+			List<? extends Model> subContexts = modelContext.getSubContexts(subElement);
 			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext),
 					number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
 					genericModel -> subContexts.indexOf(genericModel) + shift);
 		});
 	}
 
-	private void bindMapElement(String name, Function<M, ObservableValue<String>> applyOnModel, Function<ModelContext, Map<String, String>> getMap) {
+	private void bindMapElement(String name, Function<M, ObservableValue<String>> applyOnModel, Function<Model, Map<String, String>> getMap) {
 		addPrefixBinding(modelContext -> {
 			Map<String, String> map = getMap.apply(modelContext);
 			ChangeListener<String> listener = (o, old, newValue) -> map.put(name, newValue);

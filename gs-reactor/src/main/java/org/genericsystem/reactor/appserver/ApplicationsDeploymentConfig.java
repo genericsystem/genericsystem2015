@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Statics;
-import org.genericsystem.reactor.ModelContext;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlApp;
 
@@ -46,7 +46,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return getApplicationDeploymentConfig(applicationPath).getApplicationClass();
 	}
 
-	public Class<? extends ModelContext> getModelClass(String applicationPath) {
+	public Class<? extends Model> getModelClass(String applicationPath) {
 		return getApplicationDeploymentConfig(applicationPath).getModelClass();
 	}
 
@@ -58,7 +58,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		return new ApplicationDeploymentConfig(json.getMap());
 	}
 
-	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends Tag<?>> htmlAppClass, Class<? extends ModelContext> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
+	public ApplicationsDeploymentConfig addApplication(String path, Class<? extends Tag<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath, Class<?>... classes) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes));
 		return this;
 	}
@@ -93,7 +93,7 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends Tag<?>> applicationClass, Class<? extends ModelContext> modelClass, Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
+		public ApplicationDeploymentConfig(Class<? extends Tag<?>> applicationClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
 			put("modelClass", modelClass.getName());
@@ -119,9 +119,9 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends ModelContext> getModelClass() {
+		public Class<? extends Model> getModelClass() {
 			try {
-				return (Class<? extends ModelContext>) Class.forName(getString("modelClass"));
+				return (Class<? extends Model>) Class.forName(getString("modelClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
@@ -130,11 +130,11 @@ public class ApplicationsDeploymentConfig extends JsonObject {
 
 	public static class DefaultPathSingleWebAppDeployment extends ApplicationsDeploymentConfig {
 
-		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends ModelContext> modelClass, Class<? extends AbstractRoot> engineClass, Class<?>... classes) {
+		public DefaultPathSingleWebAppDeployment(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, Class<?>... classes) {
 			addApplication("/", htmlAppClass, modelClass, engineClass, null, classes);
 		}
 
-		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends ModelContext> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath,
+		public DefaultPathSingleWebAppDeployment(Class<? extends AbstractRoot> applicationClass, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath,
 				Class<?>... classes) {
 			addApplication("/", htmlAppClass, modelClass, engineClass, persistentDirectoryPath, classes);
 		}

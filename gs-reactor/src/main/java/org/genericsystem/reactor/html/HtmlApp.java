@@ -2,7 +2,7 @@ package org.genericsystem.reactor.html;
 
 import io.vertx.core.http.ServerWebSocket;
 
-import org.genericsystem.reactor.ModelContext;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 
@@ -10,7 +10,7 @@ import org.genericsystem.reactor.ViewContext.RootViewContext;
  * @author Nicolas Feybesse
  *
  */
-public abstract class HtmlApp<M extends ModelContext> extends Tag<M> {
+public abstract class HtmlApp<M extends Model> extends Tag<M> {
 
 	private final ServerWebSocket webSocket;
 	private RootViewContext<M> rootViewContext;

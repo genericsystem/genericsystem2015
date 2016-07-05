@@ -16,25 +16,25 @@ import javafx.collections.ObservableSet;
  * @author Nicolas Feybesse
  *
  */
-public class ModelContext {
+public class Model {
 
-	ModelContext parent;
+	Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-	private final Map<Tag<?>, List<? extends ModelContext>> subContextsMap = new HashMap<>();
+	private final Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
 
-	public ModelContext getParent() {
+	public Model getParent() {
 		return this.parent;
 	}
 
-	public List<? extends ModelContext> getSubContexts(Tag<?> element) {
+	public List<? extends Model> getSubContexts(Tag<?> element) {
 		return subContextsMap.get(element);
 	}
 
-	public List<ModelContext> allSubContexts() {
+	public List<Model> allSubContexts() {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
-	public <MODEL extends ModelContext> void setSubContexts(Tag<?> element, List<MODEL> subContexts) {
+	public <MODEL extends Model> void setSubContexts(Tag<?> element, List<MODEL> subContexts) {
 		subContextsMap.put(element, subContexts);
 	}
 

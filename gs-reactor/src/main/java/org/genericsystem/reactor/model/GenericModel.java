@@ -8,14 +8,14 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.ModelContext;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <M>
  */
-public class GenericModel extends ModelContext {
+public class GenericModel extends Model {
 
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;

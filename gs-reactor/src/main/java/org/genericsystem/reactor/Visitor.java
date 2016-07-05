@@ -13,19 +13,19 @@ import org.genericsystem.reactor.model.SelectorModel;
 
 public class Visitor {
 
-	public void visit(ModelContext modelContext) {
+	public void visit(Model modelContext) {
 		prefix(modelContext);
-		for (ModelContext childContext : modelContext.allSubContexts()) { // why all the subcontexts here ?
+		for (Model childContext : modelContext.allSubContexts()) { // why all the subcontexts here ?
 			visit(childContext);
 		}
 		postfix(modelContext);
 	}
 
-	public void prefix(ModelContext modelContext) {
+	public void prefix(Model modelContext) {
 
 	}
 
-	public void postfix(ModelContext modelContext) {
+	public void postfix(Model modelContext) {
 
 	}
 
@@ -33,7 +33,7 @@ public class Visitor {
 		private Generic newInstance;
 
 		@Override
-		public void prefix(ModelContext model) {
+		public void prefix(Model model) {
 			GenericModel cModel = (GenericModel) model;
 			if (cModel instanceof InputGenericModel) {
 				InputGenericModel icModel = (InputGenericModel) cModel;
@@ -46,10 +46,10 @@ public class Visitor {
 		}
 
 		@Override
-		public void postfix(ModelContext model) {
+		public void postfix(Model model) {
 			List<Generic> generics = new ArrayList<>();
 			boolean createLink = true;
-			for (ModelContext subModel : model.allSubContexts())
+			for (Model subModel : model.allSubContexts())
 				if (subModel instanceof SelectorModel) {
 					GenericModel value = ((SelectorModel) subModel).getSelection().getValue();
 					if (value != null)
@@ -64,7 +64,7 @@ public class Visitor {
 
 	public static class ClearVisitor extends Visitor {
 		@Override
-		public void prefix(ModelContext model) {
+		public void prefix(Model model) {
 			if (model instanceof InputGenericModel)
 				((InputGenericModel) model).getInputString().setValue(null);
 			if (model instanceof SelectorModel)
@@ -76,7 +76,7 @@ public class Visitor {
 		private final List<InputGenericModel> inputModels = new ArrayList<>();
 		private final ObservableValue<Boolean> invalid;
 
-		public CheckInputsValidityVisitor(ModelContext modelContext) {
+		public CheckInputsValidityVisitor(Model modelContext) {
 			super();
 			visit(modelContext);
 			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(), inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
@@ -91,7 +91,7 @@ public class Visitor {
 		}
 
 		@Override
-		public void prefix(ModelContext model) {
+		public void prefix(Model model) {
 			if (model instanceof InputGenericModel) {
 				inputModels.add((InputGenericModel) model);
 			}

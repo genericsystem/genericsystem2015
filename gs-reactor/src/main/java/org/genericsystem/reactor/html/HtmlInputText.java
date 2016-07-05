@@ -2,14 +2,14 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.ModelContext;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlInputText<M extends ModelContext> extends Tag<M> {
+public class HtmlInputText<M extends Model> extends Tag<M> {
 
 	public HtmlInputText(Tag<?> parent) {
 		super(parent, "input");

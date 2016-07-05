@@ -12,14 +12,14 @@ import org.genericsystem.reactor.Tag.HtmlDomNode;
  *
  * @param <N>
  */
-public class ViewContext<M extends ModelContext> {
+public class ViewContext<M extends Model> {
 
 	private final ViewContext<?> parent;
 	private final Tag<M> element;
 	private final HtmlDomNode node;
-	private ModelContext modelContext;
+	private Model modelContext;
 
-	private ViewContext(int indexInChildren, ViewContext<?> parent, ModelContext modelContext, Tag<M> element, HtmlDomNode node) {
+	private ViewContext(int indexInChildren, ViewContext<?> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
 		this.parent = parent;
 		this.element = element;
 		assert node != null;
@@ -28,7 +28,7 @@ public class ViewContext<M extends ModelContext> {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (BiConsumer<ModelContext, Tag<M>.HtmlDomNode> binding : element.preFixedBindings)
+		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.preFixedBindings)
 			binding.accept(modelContext, getNode());
 		for (Tag<?> childElement : element.getChildren()) {
 			if (childElement.metaBinding != null)
@@ -36,17 +36,17 @@ public class ViewContext<M extends ModelContext> {
 			else
 				createViewContextChild(null, modelContext, childElement);
 		}
-		for (BiConsumer<ModelContext, Tag<M>.HtmlDomNode> binding : element.postFixedBindings) {
+		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.postFixedBindings) {
 			binding.accept(modelContext, getNode());
 		}
 
 	}
 
-	public ModelContext getModelContext() {
+	public Model getModelContext() {
 		return modelContext;
 	}
 
-	public ViewContext<?> createViewContextChild(Integer index, ModelContext childModelContext, Tag<?> element) {
+	public ViewContext<?> createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
 		int indexInChildren = computeIndex(index, element);
 		return new ViewContext<>(indexInChildren, this, childModelContext, element, element.createNode(node.getId()));
 	}
@@ -106,7 +106,7 @@ public class ViewContext<M extends ModelContext> {
 		return indexInChildren;
 	}
 
-	public static class RootViewContext<M extends ModelContext> extends ViewContext<M> {
+	public static class RootViewContext<M extends Model> extends ViewContext<M> {
 		private Map<String, HtmlDomNode> nodeById;
 
 		public RootViewContext(M rootModelContext, Tag<M> template, HtmlDomNode node) {
