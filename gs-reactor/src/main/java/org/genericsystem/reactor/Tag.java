@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.composite.CompositeElement;
+import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputGenericModel;
@@ -81,23 +81,12 @@ public abstract class Tag<M extends ModelContext> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
 
-	@Deprecated
-	protected <T, NODE extends HtmlDomNode> void addBinding(Function<NODE, Property<T>> applyOnNode, Function<M, ObservableValue<T>> applyOnModel) {
-		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bind(applyOnModel.apply((M) modelContext)));
-	}
-
 	protected void addPrefixBinding(Consumer<ModelContext> consumer) {
 		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
 	protected void addPostfixBinding(Consumer<ModelContext> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
-	}
-
-	@Deprecated
-	protected <NODE extends HtmlDomNode> void addMapBinding(Function<NODE, Map<String, String>> applyOnNode,
-			Function<M, ObservableMap<String, String>> applyOnModel) {
-		preFixedBindings.add((modelContext, node) -> Bindings.bindContent(applyOnNode.apply((NODE) node), applyOnModel.apply((M) modelContext)));
 	}
 
 	protected <NODE extends HtmlDomNode> void addActionBinding(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<M> applyOnModel) {
@@ -122,11 +111,6 @@ public abstract class Tag<M extends ModelContext> {
 			consumer.accept(optional.getValue());
 			optional.addListener((o, ov, nv) -> consumer.accept(nv));
 		});
-	}
-
-	@Deprecated
-	protected <NODE extends HtmlDomNode> void addSetBinding(Function<NODE, Set<String>> applyOnNode, Function<M, ObservableSet<String>> applyOnModel) {
-		preFixedBindings.add((modelContext, node) -> Bindings.bindContent(applyOnNode.apply((NODE) node), applyOnModel.apply((M) modelContext)));
 	}
 
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<GenericModel> constructor) {
@@ -179,7 +163,7 @@ public abstract class Tag<M extends ModelContext> {
 		});
 	}
 
-	protected void forEach(CompositeElement<?> parentCompositeElement) {
+	protected void forEach(CompositeTag<?> parentCompositeElement) {
 		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
 				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
 	}
@@ -266,11 +250,6 @@ public abstract class Tag<M extends ModelContext> {
 		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
 	}
 
-	@Deprecated
-	public void addStyle(String propertyName, Function<M, String> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put(propertyName, applyOnModel.apply((M) modelContext)));
-	}
-
 	public void bindOptionalStyle(String propertyName, Function<M, ObservableValue<Boolean>> applyOnModel, String propertyValue) {
 		bindOptionalStyle(propertyName, applyOnModel, propertyValue, "");
 	}
@@ -344,10 +323,6 @@ public abstract class Tag<M extends ModelContext> {
 
 	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
 		addPrefixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply((M) modelContext)));
-	}
-
-	public void bindText2(Function<M, ObservableValue<String>> applyOnModel) {
-		addPostfixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply((M) modelContext)));
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);

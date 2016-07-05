@@ -13,7 +13,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
  *
  * @param <M>
  */
-public class FlexEditor extends CompositeFlexElement<GenericModel> {
+public class FlexEditor extends CompositeFlexSection<GenericModel> {
 
 	public FlexEditor(Tag<?> parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -26,7 +26,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 	@Override
 	protected void header() {
-		new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+		new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				addStyle("background-color", "#ffa500");
@@ -46,7 +46,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 	@Override
 	protected void sections() {
 
-		new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+		new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
@@ -54,14 +54,14 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 			@Override
 			protected void header() {
-				new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
+				new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
 					}
 
 					@Override
 					public void header() {
-						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+						new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("background-color", "#dda5e2");
@@ -75,7 +75,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 					@Override
 					public void sections() {
-						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+						new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
@@ -93,10 +93,10 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 			@Override
 			protected void sections() {
-				new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+				new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 					{
 						addStyle("flex", "1");
-						new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
+						new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
@@ -104,7 +104,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 							@Override
 							public void header() {
-								new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+								new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 									{
 										addStyle("flex", "1");
 										addStyle("background-color", "#dda5e2");
@@ -118,7 +118,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 
 							@Override
 							public void sections() {
-								new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+								new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 									{
 										addStyle("flex", "1");
 										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",

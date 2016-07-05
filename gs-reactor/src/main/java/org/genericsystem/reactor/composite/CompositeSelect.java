@@ -6,7 +6,7 @@ import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
-public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> implements CompositeElement<M> {
+public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> implements CompositeTag<M> {
 	
 	HtmlOption<GenericModel> optionElement;
 
