@@ -2,15 +2,16 @@ package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
 
 public class InputGenericModel extends GenericModel {
 	private Property<String> inputString = new SimpleStringProperty();
@@ -64,7 +65,13 @@ public class InputGenericModel extends GenericModel {
 
 	@FunctionalInterface
 	public interface TriFunction<T, U, R, S> {
-
 		R apply(T t, U u, S s);
+	}
+
+	@Override
+	public InputGenericModel duplicate(Model parent) {
+		InputGenericModel model = new InputGenericModel(getGenerics(), getStringExtractor());
+		model.parent = parent;
+		return model;
 	}
 }

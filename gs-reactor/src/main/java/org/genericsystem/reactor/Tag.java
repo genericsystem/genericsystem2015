@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -93,11 +92,6 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
 
-	protected <NODE extends HtmlDomNode> void addActionBinding2(Function<NODE, Property<Consumer<Object>>> applyOnNode,
-			Consumer<Model> applyOnModelContext) {
-		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModelContext.accept(modelContext)));
-	}
-
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> applyOnModel, String styleClass) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<Boolean> optional = applyOnModel.apply((M) modelContext);
@@ -129,29 +123,29 @@ public abstract class Tag<M extends Model> {
 				generic -> (M) constructor.build(GenericModel.addToGenerics(generic, ((GenericModel) modelContext).getGenerics()), stringExtractor)));
 	}
 
-	protected <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
-		forEach(applyOnModelContext, (modelContext, childModel) -> {
-			childModel.parent = modelContext;
-			return childModel;
-		});
-	}
-
-	private <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext,
-			BiFunction<Model, MODEL, Model> modelContextBuilder) {
-		metaBinding = (childElement, viewContext) -> viewContext.getModelContext().setSubContexts(childElement,
-				new TransformationObservableList<M, MODEL>(applyOnModelContext.apply((MODEL) viewContext.getModelContext()), (index, childModel) -> {
-					childModel.parent = viewContext.getModelContext();
-					viewContext.createViewContextChild(index, childModel, childElement);
-					return (MODEL) childModel;
-				}, Model::destroy));
+	private <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
+		metaBinding = (childElement, viewContext) -> {
+			ObservableList<M> subModels = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
+			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(subModels, (index, childModel) -> {
+				Model duplicate = childModel.duplicate(viewContext.getModelContext());
+				viewContext.createViewContextChild(index, duplicate, childElement);
+				return (MODEL) duplicate;
+			}, Model::destroy));
+		};
 	}
 
 	public <T> void select(Function<T, ObservableValue<M>> applyOnModel) {
 		forEach(model -> {
 			ObservableValue<M> observableValue = applyOnModel.apply((T) model);
+
 			return new ListBinding<M>() {
 				{
 					bind(observableValue);
+				}
+
+				@Override
+				protected void onInvalidating() {
+					System.out.println("Invalidation of list binding " + System.identityHashCode(this));
 				}
 
 				@Override
