@@ -50,6 +50,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
+						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
 						new FlexEditor(this, FlexDirection.ROW) {
 							{
 								select(SelectorModel::getSelection);
