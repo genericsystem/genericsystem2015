@@ -137,6 +137,13 @@ public class TodoApp extends HtmlApp<TodoList> {
 										bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
 									}
 								};
+								new HtmlButton<TodoList>(this) {
+									{
+										addStyleClass("clear-completed");
+										bindText(TodoList::getSave);
+
+									}
+								};
 							}
 						};
 					}

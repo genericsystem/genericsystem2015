@@ -44,6 +44,7 @@ public class TodoList extends ModelContext {
 	private final ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, COMPLETE);
 	private final ObservableStringValue items;
 	private final ObservableStringValue clearCompleted;
+	private final ObservableStringValue save;
 
 	public TodoList(AbstractRoot engine) {
 		this.engine = engine;
@@ -59,6 +60,7 @@ public class TodoList extends ModelContext {
 		hasNoTodo = Bindings.not(hasTodo);
 		items = Bindings.createStringBinding(() -> " " + (activeCount.getValue().intValue() > 1 ? "items" : "item") + " left", activeCount);
 		clearCompleted = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue().intValue() + ")", completedCount);
+		save = Bindings.createStringBinding(() -> "Save ");
 	}
 
 	public ObservableValue<String> getActiveCount() {
@@ -91,6 +93,10 @@ public class TodoList extends ModelContext {
 	public void removeCompleted() {
 		for (Todo todo : new ArrayList<>(todos.filtered(COMPLETE)))
 			todo.remove();
+	}
+	
+	public void clear(){
+
 	}
 
 	static Predicate<Todo> ALL = todo -> true;
@@ -153,5 +159,8 @@ public class TodoList extends ModelContext {
 	public ObservableValue<String> getClearCompleted() {
 		return clearCompleted;
 	};
-
+	
+	public ObservableValue<String> getSave(){
+		return save;
+	};
 }
