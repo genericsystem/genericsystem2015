@@ -79,7 +79,7 @@ public class GenericModel extends Model {
 
 	@Override
 	public GenericModel duplicate(Model parent) {
-		GenericModel model = new InputGenericModel(getGenerics(), getStringExtractor());
+		GenericModel model = new GenericModel(getGenerics(), getStringExtractor());
 		model.parent = parent;
 		return model;
 	}
