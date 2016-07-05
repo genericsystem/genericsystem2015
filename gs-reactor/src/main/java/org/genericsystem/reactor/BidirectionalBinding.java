@@ -8,7 +8,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class SBidirectionalBinding<S, T> implements ChangeListener<Object>, WeakListener {
+public class BidirectionalBinding<S, T> implements ChangeListener<Object>, WeakListener {
 
 	private final WeakReference<Property<S>> stringPropertyRef;
 	private final WeakReference<Property<T>> otherPropertyRef;
@@ -16,9 +16,15 @@ public class SBidirectionalBinding<S, T> implements ChangeListener<Object>, Weak
 	private final Function<S, T> fromS;
 	private final Function<T, S> toS;
 
-	// private BidirectionalBinding<Object> kkk;
+	public static <S, T> BidirectionalBinding<S, T> bind(Property<S> property, Property<T> otherProperty, Function<S, T> to, Function<T, S> from) {
+		final BidirectionalBinding<S, T> binding = new BidirectionalBinding<S, T>(property, otherProperty, to, from);
+		property.setValue(from.apply(otherProperty.getValue()));
+		property.addListener(binding);
+		otherProperty.addListener(binding);
+		return binding;
+	}
 
-	public SBidirectionalBinding(Property<S> stringProperty, Property<T> otherProperty, Function<S, T> fromS, Function<T, S> toS) {
+	public BidirectionalBinding(Property<S> stringProperty, Property<T> otherProperty, Function<S, T> fromS, Function<T, S> toS) {
 		stringPropertyRef = new WeakReference<Property<S>>(stringProperty);
 		otherPropertyRef = new WeakReference<Property<T>>(otherProperty);
 		cachedHashCode = stringProperty.hashCode() * otherProperty.hashCode();
@@ -103,8 +109,8 @@ public class SBidirectionalBinding<S, T> implements ChangeListener<Object>, Weak
 			return false;
 		}
 
-		if (obj instanceof SBidirectionalBinding) {
-			final SBidirectionalBinding otherBinding = (SBidirectionalBinding) obj;
+		if (obj instanceof BidirectionalBinding) {
+			final BidirectionalBinding otherBinding = (BidirectionalBinding) obj;
 			final Object propertyB1 = otherBinding.getProperty1();
 			final Object propertyB2 = otherBinding.getProperty2();
 			if ((propertyB1 == null) || (propertyB2 == null)) {
