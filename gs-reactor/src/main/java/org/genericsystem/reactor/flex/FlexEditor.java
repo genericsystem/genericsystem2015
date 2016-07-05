@@ -79,7 +79,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 							{
 								addStyle("flex", "1");
 								addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-										modelContext.<GenericModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<GenericModel> getModel().getString().getValue() : "#dda5e2"));
+										((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())));
@@ -122,7 +122,7 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 									{
 										addStyle("flex", "1");
 										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-												modelContext.<GenericModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.<GenericModel> getModel().getString().getValue() : "#dda5e2"));
+												((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));

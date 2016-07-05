@@ -6,14 +6,13 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag.HtmlDomNode;
-import org.genericsystem.reactor.ModelContext.RootModelContext;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <N>
  */
-public class ViewContext<M extends Model> {
+public class ViewContext<M extends ModelContext> {
 
 	private final ViewContext<?> parent;
 	private final Tag<M> element;
@@ -107,11 +106,11 @@ public class ViewContext<M extends Model> {
 		return indexInChildren;
 	}
 
-	public static class RootViewContext<M extends Model> extends ViewContext<M> {
+	public static class RootViewContext<M extends ModelContext> extends ViewContext<M> {
 		private Map<String, HtmlDomNode> nodeById;
 
-		public RootViewContext(Model model, Tag<M> template, HtmlDomNode node) {
-			super(0, null, new RootModelContext(model), template, node);
+		public RootViewContext(M rootModelContext, Tag<M> template, HtmlDomNode node) {
+			super(0, null, rootModelContext, template, node);
 		}
 
 		@Override

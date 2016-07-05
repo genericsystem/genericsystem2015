@@ -1,5 +1,11 @@
 package org.genericsystem.reactor.appserver;
 
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,18 +21,12 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
+import org.genericsystem.reactor.ModelContext;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.HtmlDomNode;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -51,24 +51,20 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath,
-					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
 
 		}
 	}
 
 	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
 		try {
-			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath,
-					userClasses.toArray(new Class[userClasses.size()]));
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
+			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath, userClasses.toArray(new Class[userClasses.size()]));
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
-			Class<? extends Model> modelClass, AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends ModelContext> modelClass, AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
@@ -114,8 +110,7 @@ public class ApplicationServer extends AbstractBackEnd {
 				if (items.length > 2) {
 					String res = request.path().replaceFirst("/.*?/", "/");
 					InputStream input = application.getApplicationClass().getResourceAsStream(res);
-					String result = new BufferedReader(new InputStreamReader(input))
-					  .lines().collect(Collectors.joining("\n"));
+					String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
 					request.response().end(result);
 				} else {
 					String indexHtml = "<!DOCTYPE html>";

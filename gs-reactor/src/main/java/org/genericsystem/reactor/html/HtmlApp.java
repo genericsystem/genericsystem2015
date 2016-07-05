@@ -1,16 +1,16 @@
 package org.genericsystem.reactor.html;
 
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.ViewContext.RootViewContext;
-
 import io.vertx.core.http.ServerWebSocket;
+
+import org.genericsystem.reactor.ModelContext;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.ViewContext.RootViewContext;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public abstract class HtmlApp<M extends Model> extends Tag<M> {
+public abstract class HtmlApp<M extends ModelContext> extends Tag<M> {
 
 	private final ServerWebSocket webSocket;
 	private RootViewContext<M> rootViewContext;
@@ -20,8 +20,8 @@ public abstract class HtmlApp<M extends Model> extends Tag<M> {
 		this.webSocket = webSocket;
 	}
 
-	public HtmlApp<M> init(M model) {
-		rootViewContext = new RootViewContext<M>(model, this, new HtmlDomNode(null));
+	public HtmlApp<M> init(M rootModelContext) {
+		rootViewContext = new RootViewContext<M>(rootModelContext, this, new HtmlDomNode(null));
 		return this;
 	}
 

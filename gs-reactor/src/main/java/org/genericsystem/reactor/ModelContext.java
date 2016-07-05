@@ -18,25 +18,9 @@ import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
  */
 public class ModelContext {
 
-	private final ModelContext parent;
-	private final Model model;
+	ModelContext parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<ModelContext>> subContextsMap = new HashMap<>();
-
-	ModelContext(ModelContext parent, Model model) {
-		this.parent = parent;
-		this.model = model;
-	}
-
-	@Override
-	public String toString() {
-		return "ModelContext : " + model;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <M extends Model> M getModel() {
-		return (M) model;
-	}
 
 	public ModelContext getParent() {
 		return this.parent;
@@ -67,12 +51,6 @@ public class ModelContext {
 				viewContext.getNode().sendRemove();
 				first = false;
 			}
-		}
-	}
-
-	public static class RootModelContext extends ModelContext {
-		public RootModelContext(Model model) {
-			super(null, model);
 		}
 	}
 

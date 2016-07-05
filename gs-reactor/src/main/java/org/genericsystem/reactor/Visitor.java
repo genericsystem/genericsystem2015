@@ -34,7 +34,7 @@ public class Visitor {
 
 		@Override
 		public void prefix(ModelContext model) {
-			GenericModel cModel = model.getModel();
+			GenericModel cModel = (GenericModel) model;
 			if (cModel instanceof InputGenericModel) {
 				InputGenericModel icModel = (InputGenericModel) cModel;
 				if (icModel.getValue() != null) {
@@ -50,25 +50,25 @@ public class Visitor {
 			List<Generic> generics = new ArrayList<>();
 			boolean createLink = true;
 			for (ModelContext subModel : model.allSubContexts())
-				if (subModel.getModel() instanceof SelectorModel) {
-					GenericModel value = ((SelectorModel) subModel.getModel()).getSelection().getValue();
+				if (subModel instanceof SelectorModel) {
+					GenericModel value = ((SelectorModel) subModel).getSelection().getValue();
 					if (value != null)
 						generics.add(value.getGeneric());
 					else
 						createLink = false;
 				}
 			if (createLink && !generics.isEmpty())
-				newInstance.setHolder(model.<GenericModel> getModel().getGeneric(), null, generics.stream().toArray(Generic[]::new));
+				newInstance.setHolder(((GenericModel) model).getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}
 
 	public static class ClearVisitor extends Visitor {
 		@Override
 		public void prefix(ModelContext model) {
-			if (model.getModel() instanceof InputGenericModel)
-				((InputGenericModel) model.getModel()).getInputString().setValue(null);
-			if (model.getModel() instanceof SelectorModel)
-				((SelectorModel) model.getModel()).getSelection().setValue(null);
+			if (model instanceof InputGenericModel)
+				((InputGenericModel) model).getInputString().setValue(null);
+			if (model instanceof SelectorModel)
+				((SelectorModel) model).getSelection().setValue(null);
 		}
 	}
 
@@ -92,8 +92,8 @@ public class Visitor {
 
 		@Override
 		public void prefix(ModelContext model) {
-			if (model.getModel() instanceof InputGenericModel) {
-				inputModels.add((InputGenericModel) model.getModel());
+			if (model instanceof InputGenericModel) {
+				inputModels.add((InputGenericModel) model);
 			}
 		}
 	}

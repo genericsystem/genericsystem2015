@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.flex;
 
-import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.ModelContext;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class FlexTag<M extends Model> extends HtmlSection<M> {
+public class FlexTag<M extends ModelContext> extends HtmlSection<M> {
 	private final FlexDirection direction;
 
 	public FlexTag(Tag<?> parent, FlexDirection direction) {
