@@ -1,17 +1,19 @@
 package org.genericsystem.todomvc;
 
 import java.util.Objects;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.ModelContext;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class Todo extends Model {
+public class Todo extends ModelContext {
 
 	private final Generic generic;
 	private Property<String> todoString;

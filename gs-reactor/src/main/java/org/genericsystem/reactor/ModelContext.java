@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
+
 import javafx.beans.property.Property;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -20,13 +20,13 @@ public class ModelContext {
 
 	ModelContext parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-	private final Map<Tag<?>, List<ModelContext>> subContextsMap = new HashMap<>();
+	private final Map<Tag<?>, List<? extends ModelContext>> subContextsMap = new HashMap<>();
 
 	public ModelContext getParent() {
 		return this.parent;
 	}
 
-	public List<ModelContext> getSubContexts(Tag<?> element) {
+	public List<? extends ModelContext> getSubContexts(Tag<?> element) {
 		return subContextsMap.get(element);
 	}
 
@@ -34,7 +34,7 @@ public class ModelContext {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
-	public void setSubContexts(Tag<?> element, List<ModelContext> subContexts) {
+	public <MODEL extends ModelContext> void setSubContexts(Tag<?> element, List<MODEL> subContexts) {
 		subContextsMap.put(element, subContexts);
 	}
 

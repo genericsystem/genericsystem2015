@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.ModelContext;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -25,7 +25,7 @@ import javafx.collections.transformation.FilteredList;
  *
  */
 @SuppressWarnings("unchecked")
-public class TodoList extends Model {
+public class TodoList extends ModelContext {
 
 	private final AbstractRoot engine;
 
