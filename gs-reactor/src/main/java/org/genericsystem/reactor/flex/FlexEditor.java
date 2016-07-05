@@ -49,57 +49,17 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 		new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 			}
 
 			@Override
 			protected void header() {
-				new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
-					{
-						addStyle("flex", "1");
-					}
-
-					@Override
-					public void header() {
-						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
-							{
-								addStyle("flex", "1");
-								addStyle("background-color", "#dda5e2");
-								addStyle("margin-right", "1px");
-								addStyle("margin-bottom", "1px");
-								select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-								new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
-							}
-						};
-					}
-
-					@Override
-					public void sections() {
-						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
-							{
-								addStyle("flex", "1");
-								addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-										((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
-								addStyle("margin-right", "1px");
-								addStyle("margin-bottom", "1px");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())));
-								new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
-							}
-						};
-					}
-				};
-
-			}
-
-			@Override
-			protected void sections() {
-				new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+				new FlexTag<GenericModel>(this, FlexEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
 						new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 
 							@Override
@@ -125,8 +85,58 @@ public class FlexEditor extends CompositeFlexElement<GenericModel> {
 												((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
-										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())));
 										new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
+									}
+								};
+							}
+						};
+					}
+				};
+			}
+
+			@Override
+			protected void sections() {
+				new FlexTag<GenericModel>(this, FlexEditor.this.getDirection()) {
+					{
+						addStyle("flex", "1");
+						new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+							{
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								addStyle("flex", "1");
+								new CompositeFlexElement<GenericModel>(this, FlexEditor.this.getDirection()) {
+									{
+										addStyle("flex", "1");
+										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
+									}
+
+									@Override
+									public void header() {
+										new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+											{
+												addStyle("flex", "1");
+												addStyle("background-color", "#dda5e2");
+												addStyle("margin-right", "1px");
+												addStyle("margin-bottom", "1px");
+												select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
+												new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
+											}
+										};
+									}
+
+									@Override
+									public void sections() {
+										new FlexTag<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+											{
+												addStyle("flex", "1");
+												addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+														((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
+												addStyle("margin-right", "1px");
+												addStyle("margin-bottom", "1px");
+												forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+												new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
+											}
+										};
 									}
 								};
 							}
