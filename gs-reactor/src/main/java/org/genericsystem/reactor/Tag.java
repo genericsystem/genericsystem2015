@@ -250,7 +250,7 @@ public abstract class Tag<M extends ModelContext> {
 			// TODO KK
 			bindBidirectional(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext),
 					number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
-					generic -> subContexts.indexOf(generic) + shift);
+					genericModel -> subContexts.indexOf(genericModel) + shift);
 		});
 	}
 
