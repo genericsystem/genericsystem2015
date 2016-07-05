@@ -2,9 +2,6 @@ package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,12 +9,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+
 public class InputGenericModel extends GenericModel {
 	private Property<String> inputString = new SimpleStringProperty();
 	private ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
 	private StringConverter<? extends Serializable> stringConverter;
-	
+
 	public InputGenericModel(Generic[] generics, StringExtractor extractor) {
 		super(generics, extractor);
 		Class<?> clazz = this.getGeneric().getInstanceValueClassConstraint();
@@ -41,7 +41,7 @@ public class InputGenericModel extends GenericModel {
 	public ObservableValue<Boolean> getInvalid() {
 		return invalid;
 	}
-	
+
 	public Property<String> getInputString() {
 		return inputString;
 	}
@@ -65,6 +65,6 @@ public class InputGenericModel extends GenericModel {
 	@FunctionalInterface
 	public interface TriFunction<T, U, R, S> {
 
-	    R apply(T t, U u, S s);
+		R apply(T t, U u, S s);
 	}
 }

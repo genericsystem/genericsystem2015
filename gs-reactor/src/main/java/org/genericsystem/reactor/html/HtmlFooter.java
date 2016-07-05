@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.html;
 
+import org.genericsystem.reactor.ModelContext;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlFooter<M extends Model> extends Tag<M> {
+public class HtmlFooter<M extends ModelContext> extends Tag<M> {
 
 	public HtmlFooter(Tag<?> parent) {
 		super(parent, "footer");

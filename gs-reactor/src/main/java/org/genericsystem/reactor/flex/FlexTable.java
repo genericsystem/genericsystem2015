@@ -116,8 +116,7 @@ public class FlexTable extends CompositeFlexElement<InputGenericModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("justify-content", "center");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 								new HtmlLabel<GenericModel>(this) {
 									{
 										bindText(GenericModel::getString);
@@ -202,8 +201,7 @@ public class FlexTable extends CompositeFlexElement<InputGenericModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
 										// addStyle("width", "100%");
@@ -226,7 +224,7 @@ public class FlexTable extends CompositeFlexElement<InputGenericModel> {
 						addStyle("margin-bottom", "1px");
 						new HtmlButton<InputGenericModel>(this) {
 							{
-								bindOptionalAttribute("disabled", model -> new CheckInputsValidityVisitor(model.getModelContext()).isInvalid(), "disabled");
+								bindOptionalAttribute("disabled", model -> new CheckInputsValidityVisitor(model).isInvalid(), "disabled");
 								bindAction2(modelContext -> {
 									try {
 										new HolderVisitor().visit(modelContext);
@@ -262,8 +260,7 @@ public class FlexTable extends CompositeFlexElement<InputGenericModel> {
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								modelContext.<GenericModel> getModel().getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null
-										? modelContext.<GenericModel> getModel().getString().getValue() : "#bba5ff"));
+								((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#bba5ff"));
 						new HtmlHyperLink<GenericModel>(this) {
 							{
 								bindText(GenericModel::getString);
@@ -306,15 +303,11 @@ public class FlexTable extends CompositeFlexElement<InputGenericModel> {
 									{
 										addStyle("overflow", "hidden");
 										addStyle("flex", "1");
-										addPrefixBinding(
-												modelContext -> modelContext.getObservableStyles(this).put("background-color",
-														modelContext.<GenericModel> getModel().getGeneric().getMeta()
-																.getAnnotation(InstanceColorize.class) != null
-																		? modelContext.<GenericModel> getModel().getString().getValue() : "#dda5e2"));
+										addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+												((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 										addStyle("margin-right", "1px");
 										addStyle("margin-bottom", "1px");
-										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-												gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 										new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
 									}
 								};

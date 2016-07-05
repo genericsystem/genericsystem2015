@@ -3,19 +3,19 @@ package org.genericsystem.reactor;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
-
 public class Visitor {
 
 	public void visit(ModelContext modelContext) {
 		prefix(modelContext);
-		for (ModelContext childContext : modelContext.allSubContexts()) {
+		for (ModelContext childContext : modelContext.allSubContexts()) { // why all the subcontexts here ?
 			visit(childContext);
 		}
 		postfix(modelContext);
@@ -34,11 +34,11 @@ public class Visitor {
 
 		@Override
 		public void prefix(ModelContext model) {
-			GenericModel cModel = model.getModel();
+			GenericModel cModel = (GenericModel) model;
 			if (cModel instanceof InputGenericModel) {
 				InputGenericModel icModel = (InputGenericModel) cModel;
 				if (icModel.getValue() != null) {
-					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(),	icModel.getValue(), newInstance);
+					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(), icModel.getValue(), newInstance);
 					if (newInstance == null)
 						newInstance = g;
 				}
@@ -50,25 +50,25 @@ public class Visitor {
 			List<Generic> generics = new ArrayList<>();
 			boolean createLink = true;
 			for (ModelContext subModel : model.allSubContexts())
-				if (subModel.getModel() instanceof SelectorModel) {
-					GenericModel value = ((SelectorModel) subModel.getModel()).getSelection().getValue();
+				if (subModel instanceof SelectorModel) {
+					GenericModel value = ((SelectorModel) subModel).getSelection().getValue();
 					if (value != null)
 						generics.add(value.getGeneric());
 					else
 						createLink = false;
-			}
+				}
 			if (createLink && !generics.isEmpty())
-				newInstance.setHolder(model.<GenericModel> getModel().getGeneric(), null, generics.stream().toArray(Generic[]::new));
+				newInstance.setHolder(((GenericModel) model).getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}
 
 	public static class ClearVisitor extends Visitor {
 		@Override
 		public void prefix(ModelContext model) {
-			if (model.getModel() instanceof InputGenericModel)
-				((InputGenericModel) model.getModel()).getInputString().setValue(null);
-			if (model.getModel() instanceof SelectorModel)
-				((SelectorModel) model.getModel()).getSelection().setValue(null);
+			if (model instanceof InputGenericModel)
+				((InputGenericModel) model).getInputString().setValue(null);
+			if (model instanceof SelectorModel)
+				((SelectorModel) model).getSelection().setValue(null);
 		}
 	}
 
@@ -85,15 +85,15 @@ public class Visitor {
 		public ObservableValue<Boolean> isInvalid() {
 			return invalid;
 		}
-		
+
 		private Boolean checkInvalidity() {
 			return inputModels.stream().map(inputModel -> inputModel.getInvalid().getValue()).reduce(false, (a, b) -> a || b);
 		}
 
 		@Override
 		public void prefix(ModelContext model) {
-			if (model.getModel() instanceof InputGenericModel) {
-				inputModels.add((InputGenericModel) model.getModel());
+			if (model instanceof InputGenericModel) {
+				inputModels.add((InputGenericModel) model);
 			}
 		}
 	}
