@@ -4,21 +4,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.ModelConstructor;
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor;
 
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -30,19 +23,17 @@ public class ModelContext {
 	private final Model model;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<ModelContext>> subContextsMap = new HashMap<>();
-	private final Map<Tag<?>, ObservableList<? extends Model>> observableSubModels = new HashMap<>();
 
 	private ModelContext(ModelContext parent, Model model) {
 		this.parent = parent;
 		this.model = model;
 	}
 
-	public ModelContext createChildContext(Model childModel, ViewContext<?> viewContext, int index, Tag<?> childElement) {
+	public ModelContext createChildContext(Model childModel) {
 		childModel.parent = getModel();// inject parent
 		childModel.afterParentConstruct();
 		ModelContext modelContextChild = new ModelContext(this, childModel);
 		childModel.modelContext = modelContextChild;
-		viewContext.createViewContextChild(index, modelContextChild, childElement);
 		return modelContextChild;
 	}
 
@@ -63,25 +54,13 @@ public class ModelContext {
 	public List<ModelContext> getSubContexts(Tag<?> element) {
 		return subContextsMap.get(element);
 	}
-	
+
 	public List<ModelContext> allSubContexts() {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
-	
-	public <SUBMODEL extends Model> void setSubContexts(Tag<?> element, Function<ModelContext, ObservableList<SUBMODEL>> applyOnModelContext, ViewContext<?> viewContext) {
-		subContextsMap.put(element, new TransformationObservableList<SUBMODEL, ModelContext>(applyOnModelContext.apply(this), (index, model) -> createChildContext(model, viewContext, index, element), ModelContext::destroy));
-	}
 
-	public <SUBMODEL extends Model> ObservableList<SUBMODEL> getObservableSubModels(Tag<SUBMODEL> element) {
-		return (ObservableList<SUBMODEL>) observableSubModels.get(element);
-	}
-
-	public <SUBMODEL extends Model> ObservableList<SUBMODEL> setObservableSubModels(Tag<SUBMODEL> element, StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
-		assert observableSubModels.get(element) == null;
-		Generic[] gs = this.<GenericModel> getModel().getGenerics();
-		ObservableList<SUBMODEL> result = new TransformationObservableList<Generic, SUBMODEL>(observableListExtractor.apply(gs), generic -> (SUBMODEL) constructor.build(GenericModel.addToGenerics(generic, gs), stringExtractor));
-		observableSubModels.put(element, result);
-		return result;
+	public void setSubContexts(Tag<?> element, ObservableList<ModelContext> subContexts) {
+		subContextsMap.put(element, subContexts);
 	}
 
 	public void register(ViewContext<?> viewContext) {
