@@ -245,21 +245,11 @@ public abstract class Tag<M extends ModelContext> {
 	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement,
 			Function<SelectorModel, Property<GenericModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
-			// ObservableList<SUBMODEL> observableList = modelContext.getObservableSubModels(subElement);
 			List<? extends ModelContext> subContexts = modelContext.getSubContexts(subElement);
-			// TODO KK
-			bindBidirectional(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext),
+			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext),
 					number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
 					genericModel -> subContexts.indexOf(genericModel) + shift);
 		});
-	}
-
-	public static <S, T> Object bindBidirectional(Property<S> property, Property<T> otherProperty, Function<S, T> to, Function<T, S> from) {
-		final SBidirectionalBinding<S, T> binding = new SBidirectionalBinding<S, T>(property, otherProperty, to, from);
-		property.setValue(from.apply(otherProperty.getValue()));
-		property.addListener(binding);
-		otherProperty.addListener(binding);
-		return binding;
 	}
 
 	private void bindMapElement(String name, Function<M, ObservableValue<String>> applyOnModel, Function<ModelContext, Map<String, String>> getMap) {
