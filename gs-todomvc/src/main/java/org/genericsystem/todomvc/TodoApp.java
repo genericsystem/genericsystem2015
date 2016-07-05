@@ -19,7 +19,6 @@ import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.html.HtmlSpan;
 import org.genericsystem.reactor.html.HtmlStrong;
 import org.genericsystem.reactor.html.HtmlUl;
-
 import io.vertx.core.http.ServerWebSocket;
 
 /**
@@ -30,7 +29,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
-		appsConfig.addApplication("/todomvc", TodoApp.class, TodoList.class, Engine.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
+		appsConfig.addApplication("/todomvc", TodoApp.class, TodoList.class, Engine.class,
+				System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
@@ -98,43 +98,74 @@ public class TodoApp extends HtmlApp<TodoList> {
 							{
 								addStyleClass("footer");
 								bindOptionalStyleClass(TodoList::getHasNoTodo, "hide");
-								new HtmlSpan<TodoList>(this) {
+								new HtmlDiv<Todo>(this) {
 									{
-										addStyleClass("todo-count");
-										new HtmlStrong<TodoList>(this).bindText(TodoList::getActiveCount);
-										new HtmlSpan<TodoList>(this).bindText(TodoList::getItems);
+										new HtmlSpan<TodoList>(this) {
+											{
+												addStyleClass("todo-count");
+												new HtmlStrong<TodoList>(this).bindText(TodoList::getActiveCount);
+												new HtmlSpan<TodoList>(this).bindText(TodoList::getItems);
+											}
+										};
+										new HtmlUl<TodoList>(this) {
+											{
+												addStyleClass("filters");
+												new HtmlLi<TodoList>(this) {
+													{
+														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll)
+																.bindOptionalStyleClass(TodoList::getAllMode,
+																		"selected");
+													}
+												};
+												new HtmlLi<TodoList>(this) {
+													{
+
+														new HtmlHyperLink<TodoList>(this, "Actives",
+																TodoList::showActive).bindOptionalStyleClass(
+																		TodoList::getActiveMode, "selected");
+													}
+												};
+												new HtmlLi<TodoList>(this) {
+													{
+														new HtmlHyperLink<TodoList>(this, "Completes",
+																TodoList::showCompleted).bindOptionalStyleClass(
+																		TodoList::getCompletedMode, "selected");
+													}
+												};
+											}
+										};
+										new HtmlButton<TodoList>(this) {
+											{
+												addStyleClass("clear-completed");
+												bindAction(TodoList::removeCompleted);
+												bindText(TodoList::getClearCompleted);
+												bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
+											}
+										};
+
 									}
 								};
-								new HtmlUl<TodoList>(this) {
+							}
+						};
+					}
+				};
+				new HtmlFooter<TodoList>(this) {
+					{
+						new HtmlDiv<TodoList>(this) {
+							{
+								addStyleClass("save-cancel");
+								new HtmlButton<TodoList>(this) {
 									{
-										addStyleClass("filters");
-										new HtmlLi<TodoList>(this) {
-											{
-												new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass(TodoList::getAllMode,
-														"selected");
-											}
-										};
-										new HtmlLi<TodoList>(this) {
-											{
-
-												new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive)
-														.bindOptionalStyleClass(TodoList::getActiveMode, "selected");
-											}
-										};
-										new HtmlLi<TodoList>(this) {
-											{
-												new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted)
-														.bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
-											}
-										};
+										addStyleClass("save");
+										bindText(TodoList::getSave);
+										bindAction(TodoList::save);
 									}
 								};
 								new HtmlButton<TodoList>(this) {
 									{
-										addStyleClass("clear-completed");
-										bindAction(TodoList::removeCompleted);
-										bindText(TodoList::getClearCompleted);
-										bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
+										addStyleClass("cancel");
+										bindText(TodoList::getCancel);
+										bindAction(TodoList::cancel);
 									}
 								};
 							}

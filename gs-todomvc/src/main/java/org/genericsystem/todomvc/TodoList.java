@@ -44,6 +44,8 @@ public class TodoList extends Model {
 	private final ObservableValue<Boolean> completedMode = Bindings.equal((ObservableObjectValue<Predicate<Todo>>) mode, COMPLETE);
 	private final ObservableStringValue items;
 	private final ObservableStringValue clearCompleted;
+	private final ObservableStringValue save;
+	private final ObservableStringValue cancel;
 
 	public TodoList(AbstractRoot engine) {
 		this.engine = engine;
@@ -59,6 +61,8 @@ public class TodoList extends Model {
 		hasNoTodo = Bindings.not(hasTodo);
 		items = Bindings.createStringBinding(() -> " " + (activeCount.getValue().intValue() > 1 ? "items" : "item") + " left", activeCount);
 		clearCompleted = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue().intValue() + ")", completedCount);
+		save = Bindings.createStringBinding(() -> "Save ");
+		cancel = Bindings.createStringBinding(() -> "Cancel");
 	}
 
 	public ObservableValue<String> getActiveCount() {
@@ -91,6 +95,14 @@ public class TodoList extends Model {
 	public void removeCompleted() {
 		for (Todo todo : new ArrayList<>(todos.filtered(COMPLETE)))
 			todo.remove();
+	}
+
+	public void cancel() {
+		engine.getCurrentCache().clear();
+	}
+	
+	public void save(){
+		engine.getCurrentCache().flush();
 	}
 
 	static Predicate<Todo> ALL = todo -> true;
@@ -153,5 +165,12 @@ public class TodoList extends Model {
 	public ObservableValue<String> getClearCompleted() {
 		return clearCompleted;
 	};
-
+	
+	public ObservableValue<String> getSave(){
+		return save;
+	};
+	
+	public ObservableValue<String> getCancel(){
+		return cancel;
+	};
 }
