@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javafx.beans.property.Property;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
@@ -24,17 +23,9 @@ public class ModelContext {
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<ModelContext>> subContextsMap = new HashMap<>();
 
-	private ModelContext(ModelContext parent, Model model) {
+	ModelContext(ModelContext parent, Model model) {
 		this.parent = parent;
 		this.model = model;
-	}
-
-	public ModelContext createChildContext(Model childModel) {
-		childModel.parent = getModel();// inject parent
-		childModel.afterParentConstruct();
-		ModelContext modelContextChild = new ModelContext(this, childModel);
-		childModel.modelContext = modelContextChild;
-		return modelContextChild;
 	}
 
 	@Override
@@ -59,7 +50,7 @@ public class ModelContext {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
-	public void setSubContexts(Tag<?> element, ObservableList<ModelContext> subContexts) {
+	public void setSubContexts(Tag<?> element, List<ModelContext> subContexts) {
 		subContextsMap.put(element, subContexts);
 	}
 

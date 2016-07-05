@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -138,7 +139,7 @@ public abstract class Tag<M extends Model> {
 		forEach(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor);
 	}
 
-	public <T extends Model> void forEach(Function<T, ObservableList<M>> applyOnModel) {
+	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
 		contextForEach(modelContext -> applyOnModel.apply(modelContext.getModel()));
 	}
 
@@ -147,9 +148,18 @@ public abstract class Tag<M extends Model> {
 				GenericModel.addToGenerics(generic, modelContext.<GenericModel> getModel().getGenerics()), stringExtractor)));
 	}
 
-	protected void contextForEach(Function<ModelContext, ObservableList<M>> applyOnModelContext) {
-		metaBinding = (childElement, viewContext) -> viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, ModelContext>(applyOnModelContext.apply(viewContext.getModelContext()), (index, model) -> {
-			ModelContext modelContextChild = viewContext.getModelContext().createChildContext(model);
+	private <MODEL extends Model> void contextForEach(Function<ModelContext, ObservableList<MODEL>> applyOnModelContext) {
+		contextForEach(applyOnModelContext, (modelContext, childModel) -> {
+			ModelContext modelContextChild = new ModelContext(modelContext, childModel);
+			childModel.parent = modelContext.getModel();
+			childModel.modelContext = modelContextChild;
+			return modelContextChild;
+		});
+	}
+
+	private <MODEL> void contextForEach(Function<ModelContext, ObservableList<MODEL>> applyOnModelContext, BiFunction<ModelContext, MODEL, ModelContext> modelContextBuilder) {
+		metaBinding = (childElement, viewContext) -> viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<MODEL, ModelContext>(applyOnModelContext.apply(viewContext.getModelContext()), (index, childModel) -> {
+			ModelContext modelContextChild = modelContextBuilder.apply(viewContext.getModelContext(), childModel);
 			viewContext.createViewContextChild(index, modelContextChild, childElement);
 			return modelContextChild;
 		}, ModelContext::destroy));

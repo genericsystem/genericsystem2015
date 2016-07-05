@@ -14,12 +14,9 @@ public abstract class Model {
 	public Model getParent() {
 		return parent;
 	}
-	
+
 	public ModelContext getModelContext() {
 		return modelContext;
 	}
 
-	public void afterParentConstruct() {
-
-	}
 }
