@@ -29,6 +29,8 @@ public class SelectorModel extends GenericModel {
 	public SelectorModel duplicate(Model parent) {
 		SelectorModel model = new SelectorModel(getGenerics(), getStringExtractor());
 		model.parent = parent;
+		model.selection = this.selection;
+		model.selectionString = this.selectionString;
 		return model;
 	}
 }

@@ -72,6 +72,10 @@ public class InputGenericModel extends GenericModel {
 	public InputGenericModel duplicate(Model parent) {
 		InputGenericModel model = new InputGenericModel(getGenerics(), getStringExtractor());
 		model.parent = parent;
+		model.inputAction = this.inputAction;
+		model.inputString = this.inputString;
+		model.invalid = this.invalid;
+		model.stringConverter = this.stringConverter;
 		return model;
 	}
 }
