@@ -321,7 +321,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 		@Override
 		public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
-			checkConstraints();
 			getTransaction().apply(removes, adds);
 		}
 
