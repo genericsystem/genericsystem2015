@@ -80,7 +80,7 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
 
-	protected void addPrefixBinding(Consumer<Model> consumer) {
+	public void addPrefixBinding(Consumer<Model> consumer) {
 		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
