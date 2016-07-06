@@ -41,6 +41,7 @@ public class Todo extends Model {
 	public Todo duplicate(Model parent) {
 		Todo model = new Todo((TodoList)parent, generic);
 		model.parent = parent;
+		model.completed=this.completed;
 		return model;
 	}
 }
