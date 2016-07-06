@@ -80,7 +80,7 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
 
-	protected void addPrefixBinding(Consumer<Model> consumer) {
+	public void addPrefixBinding(Consumer<Model> consumer) {
 		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
@@ -123,7 +123,7 @@ public abstract class Tag<M extends Model> {
 				generic -> (M) constructor.build(GenericModel.addToGenerics(generic, ((GenericModel) modelContext).getGenerics()), stringExtractor)));
 	}
 
-	private <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
+	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
 		metaBinding = (childElement, viewContext) -> {
 			ObservableList<M> subModels = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
 			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(subModels, (index, childModel) -> {
