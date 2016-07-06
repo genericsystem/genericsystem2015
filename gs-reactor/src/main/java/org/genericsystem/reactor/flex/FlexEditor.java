@@ -60,6 +60,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 						new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
+								addStyle("overflow", "hidden");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 
@@ -105,6 +106,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 							{
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
+								addStyle("overflow", "hidden");
 								new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
 									{
 										addStyle("flex", "1");
@@ -119,6 +121,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 												addStyle("background-color", "#dda5e2");
 												addStyle("margin-right", "1px");
 												addStyle("margin-bottom", "1px");
+												addStyle("overflow", "hidden");
 												select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
 												new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
 											}
@@ -130,6 +133,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 										new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
 											{
 												addStyle("flex", "1");
+												addStyle("overflow", "hidden");
 												addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 														((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 												addStyle("margin-right", "1px");
