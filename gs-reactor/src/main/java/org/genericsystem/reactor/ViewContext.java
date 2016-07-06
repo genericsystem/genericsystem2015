@@ -88,7 +88,7 @@ public class ViewContext<M extends Model> {
 	}
 
 	private void decrementSize(Tag<?> child) {
-		int size = sizeBySubElement.get(child) - 1;
+				int size = sizeBySubElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
 			sizeBySubElement.remove(child);// remove map if empty

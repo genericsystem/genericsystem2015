@@ -20,10 +20,6 @@ public class HtmlButton<M extends Model> extends Tag<M> {
 		return new ActionHtmlNode(parentId);
 	}
 
-	public void bindAction2(Consumer<Model> consumer) {
-		addActionBinding2(ActionHtmlNode::getActionProperty, consumer);
-	}
-
 	public void bindAction(Consumer<M> consumer) {
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}

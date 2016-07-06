@@ -18,7 +18,7 @@ import javafx.collections.ObservableSet;
  */
 public class Model {
 
-	Model parent;
+	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
 
@@ -35,6 +35,7 @@ public class Model {
 	}
 
 	public <MODEL extends Model> void setSubContexts(Tag<?> element, List<MODEL> subContexts) {
+		assert subContextsMap.get(element) == null;
 		subContextsMap.put(element, subContexts);
 	}
 
@@ -76,5 +77,11 @@ public class Model {
 
 	public Property<Number> getSelectionIndex(Tag<?> element) {
 		return getViewContext(element).<SelectableHtmlDomNode> getNode().getSelectionIndex();
+	}
+
+	public Model duplicate(Model parent) {
+		Model model = new Model();
+		model.parent = parent;
+		return model;
 	}
 }
