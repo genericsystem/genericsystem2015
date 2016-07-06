@@ -110,6 +110,8 @@ public class ApplicationServer extends AbstractBackEnd {
 				if (items.length > 2) {
 					String res = request.path().replaceFirst("/.*?/", "/");
 					InputStream input = application.getApplicationClass().getResourceAsStream(res);
+					if(input==null)
+						throw new IllegalStateException("unable to find class : "+application.getApplicationClass().getName());
 					String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
 					request.response().end(result);
 				} else {

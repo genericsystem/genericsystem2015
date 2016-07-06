@@ -7,6 +7,7 @@ import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
@@ -29,7 +30,8 @@ import io.vertx.core.http.ServerWebSocket;
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig();
+		int port = 8082;
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, port);
 		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
 				Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
