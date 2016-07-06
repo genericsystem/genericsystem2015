@@ -37,4 +37,10 @@ public class Todo extends Model {
 	public void remove() {
 		generic.remove();
 	}
+	@Override
+	public Todo duplicate(Model parent) {
+		Todo model = new Todo((TodoList)parent, generic);
+		model.parent = parent;
+		return model;
+	}
 }
