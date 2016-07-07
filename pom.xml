@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.genericsystem</groupId>
@@ -29,7 +30,7 @@
 		<slf4j.version>1.7.10</slf4j.version>
 		<javassist.version>3.19.0-GA</javassist.version>
 		<vertx.version>3.2.0</vertx.version>
-		
+
 		<json.version>1.0.4</json.version>
 		<json-api.version>1.0</json-api.version>
 		<junit.version>4.12</junit.version>
@@ -38,15 +39,20 @@
 	<modules>
 		<module>gs-api</module>
 		<module>gs-defaults</module>
-		<module>gs-kernel</module>		
+		<module>gs-kernel</module>
 		<module>gs-cdi</module>
-    	<module>gs-common</module>
-	    <module>gs-reactor</module>
-	    <module>gs-todomvc</module>
-	    <module>gs-example-reactor</module>
-    	<module>gs-spring</module>
-    <module>gs-example-spring</module>
-  </modules>
+		<module>gs-common</module>
+		<module>gs-reactor</module>
+		<module>gs-example-reactor</module>
+		<module>gs-spring</module>
+		<module>gs-example-spring</module>
+		<module>gs-example-jsf</module>
+		<module>gs-example-javafx</module>
+		<module>gs-todomvc</module>
+		<module>gs-carcolor</module>
+		<module>gs-carcolor-model</module>
+		<module>gs-demo</module>
+	</modules>
 
 	<distributionManagement>
 		<repository>
@@ -110,9 +116,9 @@
 				<updatePolicy>daily</updatePolicy>
 			</snapshots>
 		</repository>
-		
-		
-		
+
+
+
 		<repository>
 			<id>jboss-nexus</id>
 			<name>JBoss (Nexus) Stable Repository</name>

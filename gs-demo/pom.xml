@@ -7,31 +7,14 @@
     <artifactId>genericsystem2015</artifactId>
     <version>4.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.genericsystem</groupId>
-  <artifactId>gs-example-reactor</artifactId>
-  <version>4.0-SNAPSHOT</version>
-  <name>Generic System Example Reactor</name>
+  <artifactId>gs-demo</artifactId>
+  <name>Generic System Demo</name>
+  <url>http://maven.apache.org</url>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
   </properties>
-  <dependencies>
-  
- 	<dependency>
-		<groupId>org.genericsystem</groupId>
-		<artifactId>gs-reactor</artifactId>
-		<version>4.0-SNAPSHOT</version>
-	</dependency>
-  
-	<dependency>
-		<groupId>org.genericsystem</groupId>
-		<artifactId>gs-carcolor-model</artifactId>
-		<version>4.0-SNAPSHOT</version>
-	</dependency>
-	
-  </dependencies>
-  
-  <build>
-	  <plugins>    
+	<build>
+		<plugins>    
       	<plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-assembly-plugin</artifactId>
@@ -42,7 +25,7 @@
       		</descriptorRefs>
 	        <archive>
 	          <manifest>
-	            <mainClass>org.genericsystem.example.reactor.AppHtml</mainClass>
+	            <mainClass>org.middlewarefactory.deployappli.App</mainClass>
 	          </manifest>
 	        </archive>
 	      </configuration>
@@ -54,7 +37,27 @@
         		</goals>
       		</execution>
     	  </executions>
-	    </plugin>
-	  </plugins>
-  </build>
+    	  </plugin>
+    	  </plugins>
+	</build>
+
+	<dependencies>		
+		<dependency>
+			<groupId>org.genericsystem</groupId>
+			<artifactId>gs-todomvc</artifactId>
+			<version>4.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.genericsystem</groupId>
+			<artifactId>gs-carcolor-model</artifactId>
+			<version>4.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.genericsystem</groupId>
+			<artifactId>gs-example-reactor</artifactId>
+			<version>4.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+  
 </project>
