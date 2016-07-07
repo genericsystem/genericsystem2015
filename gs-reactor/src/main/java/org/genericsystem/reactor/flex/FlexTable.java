@@ -85,7 +85,8 @@ public class FlexTable extends CompositeFlexSection<InputGenericModel> {
 
 			@Override
 			protected void sections() {
-				new FlexLinkTitleDisplayer<GenericModel>(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
+				new FlexLinkTitleDisplayer<GenericModel>(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])),
+						this.getDirection()) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
@@ -296,7 +297,6 @@ public class FlexTable extends CompositeFlexSection<InputGenericModel> {
 					}
 				};
 			}
-
 		};
 	}
 }
