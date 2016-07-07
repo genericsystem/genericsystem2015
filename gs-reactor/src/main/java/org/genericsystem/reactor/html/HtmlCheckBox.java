@@ -2,10 +2,10 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Function;
 
-import javafx.beans.property.Property;
-
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
+
+import javafx.beans.property.Property;
 
 /**
  * @author Nicolas Feybesse
