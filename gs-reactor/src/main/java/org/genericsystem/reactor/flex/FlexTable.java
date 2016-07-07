@@ -117,6 +117,9 @@ public class FlexTable extends CompositeFlexSection<InputGenericModel> {
 
 	protected void columnsInputSection() {
 		new CompositeFlexSection<GenericModel>(this, this.getReverseDirection()) {
+			{
+				select(gs -> gs[0], InputGenericModel::new);
+			}
 
 			@Override
 			protected void header() {
