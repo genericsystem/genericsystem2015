@@ -291,6 +291,10 @@ public abstract class Tag<M extends Model> {
 		bindOptionalAttribute(attributeName, applyOnModel, attributeValue, null);
 	}
 
+	public void addAttribute(String attributeName, String value) {
+		addPrefixBinding(model -> model.getObservableAttributes(this).put(attributeName, value));
+	}
+
 	public void bindOptionalAttribute(String attributeName, Function<M, ObservableValue<Boolean>> applyOnModel, String attributeValue,
 			String attributeValueFalse) {
 		bindAttribute(attributeName, model -> {
