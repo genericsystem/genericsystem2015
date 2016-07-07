@@ -3,13 +3,15 @@ package org.genericsystem.reactor;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.InputCheckModel;
 import org.genericsystem.reactor.model.InputGenericModel;
+import org.genericsystem.reactor.model.InputableModel;
 import org.genericsystem.reactor.model.SelectorModel;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 
 public class Visitor {
 
@@ -35,8 +37,8 @@ public class Visitor {
 		@Override
 		public void prefix(Model model) {
 			GenericModel cModel = (GenericModel) model;
-			if (cModel instanceof InputGenericModel) {
-				InputGenericModel icModel = (InputGenericModel) cModel;
+			if (cModel instanceof InputableModel) {
+				InputableModel icModel = (InputableModel) cModel;
 				if (icModel.getValue() != null) {
 					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(), icModel.getValue(), newInstance);
 					if (newInstance == null)
@@ -69,6 +71,8 @@ public class Visitor {
 				((InputGenericModel) model).getInputString().setValue(null);
 			if (model instanceof SelectorModel)
 				((SelectorModel) model).getSelection().setValue(null);
+			if (model instanceof InputCheckModel)
+				((InputCheckModel) model).getChecked().setValue(false);
 		}
 	}
 
@@ -79,7 +83,8 @@ public class Visitor {
 		public CheckInputsValidityVisitor(Model modelContext) {
 			super();
 			visit(modelContext);
-			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(), inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
+			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(),
+					inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
 		}
 
 		public ObservableValue<Boolean> isInvalid() {

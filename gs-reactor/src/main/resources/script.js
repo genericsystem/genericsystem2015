@@ -122,8 +122,10 @@ function onMessageReceived(evt) {
 		break;
 	case 'UT':
 		if (elt.tagName == "INPUT") {
-			console.log("Receive : "+message.textContent);
-			elt.value = message.textContent;
+			if (message.type == "checkbox")
+				elt.checked = message.checked;
+			else
+				elt.value = message.textContent;
 		}
 		else
 			elt.textContent = message.textContent;

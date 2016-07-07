@@ -1,11 +1,9 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkDisplayer;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
 import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
