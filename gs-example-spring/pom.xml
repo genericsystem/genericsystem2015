@@ -1,56 +1,69 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.genericsystem</groupId>
-    <artifactId>genericsystem2015</artifactId>
-    <version>4.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>gs-example-spring</artifactId>
-  <packaging>war</packaging>
-  <name>Generic System Example Spring</name>
-  
-   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.version>1.8</java.version>
-    <version.springframework>4.3.0.RELEASE</version.springframework>
-  </properties>
-  
-  <dependencies>
-  
-	<dependency>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
 		<groupId>org.genericsystem</groupId>
-		<artifactId>gs-spring</artifactId>
+		<artifactId>genericsystem2015</artifactId>
 		<version>4.0-SNAPSHOT</version>
-	</dependency>
-	
-	<!-- Spring dependencies -->
-	<dependency>
-		<groupId>org.springframework</groupId>
-		<artifactId>spring-core</artifactId>
-		<version>${version.springframework}</version>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.springframework</groupId>
-		<artifactId>spring-web</artifactId>
-		<version>${version.springframework}</version>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.springframework</groupId>
-		<artifactId>spring-webmvc</artifactId>
-		<version>${version.springframework}</version>
-	</dependency>
+	</parent>
+	<artifactId>gs-example-spring</artifactId>
+	<packaging>war</packaging>
+	<name>Generic System Example Spring</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+		<version.springframework>4.3.0.RELEASE</version.springframework>
+	</properties>
+
+	<dependencies>
+
 		<dependency>
-	    <groupId>jstl</groupId>
-	    <artifactId>jstl</artifactId>
-	    <version>1.2</version>
-	</dependency>
-	
-  </dependencies>
-  <build>
-    <finalName>${project.artifactId}</finalName>
-  </build>
+			<groupId>org.genericsystem</groupId>
+			<artifactId>gs-spring</artifactId>
+			<version>4.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+
+		<!-- Spring dependencies -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${version.springframework}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${version.springframework}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${version.springframework}</version>
+		</dependency>
+		<dependency>
+			<groupId>jstl</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+	</build>
 </project>

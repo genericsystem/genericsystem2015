@@ -1,13 +1,15 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="f" %>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="f"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<link href="${pageContext.request.contextPath}/resources/css/style.css" rel="stylesheet" >
+<link href="${pageContext.request.contextPath}/resources/css/style.css"
+	rel="stylesheet" >
 </head>
-<body> 
+<body>
 	<table class="maTable">
 		<thead>
 			<tr>
@@ -21,14 +23,15 @@
 			<tr>
 				<td colspan="4">
 					<div id="">
-						<f:form modelAttribute="sCar" method="POST" action="/gs-example-spring/">
-							<f:input size="10" path="carName"/>
-							<f:input size="10" path="carPower"/>
+						<f:form modelAttribute="sCar" method="POST"
+							action="/gs-example-spring/">
+							<f:input size="10" path="carName" />
+							<f:input size="10" path="carPower" />
 							<f:select path="carColor">
-							    <f:options items="${sColorBean.getColors()}" />					
-						  	</f:select>
-							<input value="Add" class="bouton" name="action" type="submit">				
-						</f:form>						
+								<f:options items="${sColorBean.getColors()}" />
+							</f:select>
+							<input value="Add" class="bouton" name="action" type="submit">
+						</f:form>
 					</div>
 				</td>
 			</tr>
@@ -36,38 +39,36 @@
 		<tbody>
 			<c:forEach items="${sCars}" var="car">
 				<tr id="${car.getTs()}">
-					<td>
-						<input value="x" class="xBouton" onclick="process('remove',this);" type="submit">
-					</td>
-					<td>
-						<span class="customHeader">${car.getValue()}</span>
-					</td>
-					<td>
-						<input value="${sCarBeanManager.getPower(car).getValue()}" size="10" onblur="process('power',this)" type="text">
-					</td>
-					<td>
-						<select name="" class="selectedItem" size="1" onchange="process('color',this)">	
+					<td><input value="x" class="xBouton"
+						onclick="process('remove',this);" type="submit"></td>
+					<td><span class="customHeader">${car.getValue()}</span></td>
+					<td><input value="${sCarBeanManager.getPower(car).getValue()}"
+						size="10" onblur="process('power',this)" type="text"></td>
+					<td><select name="" class="selectedItem" size="1"
+						onchange="process('color',this)">
 							<c:forEach items="${sColorBean.getColors()}" var="colorValue">
-						     	<c:choose>
-							        <c:when test="${colorValue.getValue().equals(sCarBeanManager.getColor(car).getValue())}">
-							            <option value="${colorValue.getValue()}" selected>${colorValue.getKey()}</option>
-							        </c:when>
-							        <c:otherwise>
-							            <option value="${colorValue.getValue()}" >${colorValue.getKey()}</option>
-							        </c:otherwise>
-						 		</c:choose>
-						    </c:forEach>
-						</select>
-					</td>
+								<c:choose>
+									<c:when
+										test="${colorValue.getValue().equals(sCarBeanManager.getColor(car).getValue())}">
+										<option value="${colorValue.getValue()}" selected>${colorValue.getKey()}</option>
+									</c:when>
+									<c:otherwise>
+										<option value="${colorValue.getValue()}">${colorValue.getKey()}</option>
+									</c:otherwise>
+								</c:choose>
+							</c:forEach>
+					</select></td>
 				</tr>
 			</c:forEach>
 		</tbody>
 	</table>
 
-	<input value="Save" class="bouton" name="action" onClick="process('save')" type="submit">
-	<input value="Cancel" class="bouton" name="action" onClick="process('cancel')" type="submit">
+	<input value="Save" class="bouton" name="action"
+		onClick="process('save')" type="submit">
+	<input value="Cancel" class="bouton" name="action"
+		onClick="process('cancel')" type="submit">
 
-<script type="text/javascript">
+	<script type="text/javascript">
 	var xhr = getXMLHttpRequest();
 	
 	function getXMLHttpRequest() {	
