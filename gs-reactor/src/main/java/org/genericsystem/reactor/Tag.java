@@ -14,8 +14,8 @@ import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputGenericModel;
-import org.genericsystem.reactor.model.InputGenericModel.TriFunction;
+import org.genericsystem.reactor.model.InputableModel;
+import org.genericsystem.reactor.model.InputableModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
@@ -80,12 +80,12 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
 
-	public void addPrefixBinding(Consumer<Model> consumer) {
-		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
+	public void addPrefixBinding(Consumer<M> consumer) {
+		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
-	protected void addPostfixBinding(Consumer<Model> consumer) {
-		postFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
+	protected void addPostfixBinding(Consumer<M> consumer) {
+		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
 	protected <NODE extends HtmlDomNode> void addActionBinding(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<M> applyOnModel) {
@@ -94,7 +94,7 @@ public abstract class Tag<M extends Model> {
 
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> applyOnModel, String styleClass) {
 		addPrefixBinding(modelContext -> {
-			ObservableValue<Boolean> optional = applyOnModel.apply((M) modelContext);
+			ObservableValue<Boolean> optional = applyOnModel.apply(modelContext);
 			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
 			Consumer<Boolean> consumer = bool -> {
 				if (bool)
@@ -200,11 +200,11 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public void bindSelectionIndex(Function<M, ObservableValue<Number>> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).bind(applyOnModel.apply((M) modelContext)));
+		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).bind(applyOnModel.apply(modelContext)));
 	}
 
 	public void bindBidirectionalSelectionIndex(Function<M, Property<Number>> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).bindBidirectional(applyOnModel.apply((M) modelContext)));
+		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).bindBidirectional(applyOnModel.apply(modelContext)));
 	}
 
 	public <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement) {
@@ -234,7 +234,7 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(modelContext -> {
 			Map<String, String> map = getMap.apply(modelContext);
 			ChangeListener<String> listener = (o, old, newValue) -> map.put(name, newValue);
-			ObservableValue<String> observable = applyOnModel.apply((M) modelContext);
+			ObservableValue<String> observable = applyOnModel.apply(modelContext);
 			observable.addListener(listener);
 			map.put(name, observable.getValue());
 		});
@@ -308,7 +308,7 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public void bindOperation(TriFunction<Generic[], Serializable, Generic, Generic> operation) {
-		addPrefixBinding(modelContext -> ((InputGenericModel) modelContext).getInputAction().setValue(operation));
+		addPrefixBinding(modelContext -> ((InputableModel) modelContext).getInputAction().setValue(operation));
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
@@ -320,7 +320,7 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply((M) modelContext)));
+		addPrefixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply(modelContext)));
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);
@@ -427,7 +427,8 @@ public abstract class Tag<M extends Model> {
 			sendMessage(jsonObj);
 		}
 
-		public void fillJson(JsonObject jsonObj) {
+		public JsonObject fillJson(JsonObject jsonObj) {
+			return null;
 		}
 
 		public void sendRemove() {
@@ -518,9 +519,9 @@ public abstract class Tag<M extends Model> {
 		private final ObjectProperty<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
 
 		@Override
-		public void fillJson(JsonObject jsonObj) {
+		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			jsonObj.put("type", "text");
+			return jsonObj.put("type", "text");
 		}
 
 		@Override
@@ -545,17 +546,21 @@ public abstract class Tag<M extends Model> {
 		public InputCheckHtmlDomNode(String parentId, String type) {
 			super(parentId);
 			this.type = type;
+			checked.addListener(new WeakChangeListener<>(checkedListener));
 		}
+
+		private final ChangeListener<Boolean> checkedListener = (o, old,
+				newValue) -> sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())));
 
 		public Property<Boolean> getChecked() {
 			return checked;
 		}
 
 		@Override
-		public void fillJson(JsonObject jsonObj) {
+		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
 			jsonObj.put("type", type);
-			jsonObj.put(CHECKED, checked.getValue());
+			return jsonObj.put(CHECKED, Boolean.TRUE.equals(checked.getValue()));
 		}
 
 		@Override

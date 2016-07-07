@@ -13,7 +13,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
-public class InputGenericModel extends GenericModel {
+public class InputGenericModel extends GenericModel implements InputableModel {
 	private Property<String> inputString = new SimpleStringProperty();
 	private ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
@@ -47,10 +47,12 @@ public class InputGenericModel extends GenericModel {
 		return inputString;
 	}
 
+	@Override
 	public Serializable getValue() {
 		return getStringConverter().fromString(inputString.getValue());
 	}
 
+	@Override
 	public Property<TriFunction<Generic[], Serializable, Generic, Generic>> getInputAction() {
 		return inputAction;
 	}
@@ -61,11 +63,6 @@ public class InputGenericModel extends GenericModel {
 
 	public void setStringConverter(StringConverter<? extends Serializable> stringConverter) {
 		this.stringConverter = stringConverter;
-	}
-
-	@FunctionalInterface
-	public interface TriFunction<T, U, R, S> {
-		R apply(T t, U u, S s);
 	}
 
 	@Override

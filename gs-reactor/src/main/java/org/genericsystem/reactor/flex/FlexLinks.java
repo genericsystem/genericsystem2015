@@ -2,9 +2,11 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotation.InstanceColorize;
+import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
+import org.genericsystem.reactor.model.InputCheckModel;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
@@ -27,9 +29,25 @@ public class FlexLinks {
 				{
 					style(this);
 					select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new HtmlLabel<GenericModel>(this) {
+					new FlexSection<GenericModel>(this, this.getDirection()) {
 						{
-							bindText(GenericModel::getString);
+							addStyle("justify-content", "center");
+							addStyle("align-items", "center");
+							addStyle("width", "100%");
+							addStyle("height", "100%");
+							new HtmlLabel<GenericModel>(this) {
+								{
+									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
+									bindText(GenericModel::getString);
+								}
+							};
+							new HtmlCheckBox<InputCheckModel>(this) {
+								{
+									addAttribute("disabled", "disabled");
+									bindOptionalAttribute("checked", InputCheckModel::getChecked, "checked");
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
+								}
+							};
 						}
 					};
 				}
@@ -37,6 +55,8 @@ public class FlexLinks {
 			new FlexSection<GenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
+					addStyle("justify-content", "center");
+					addStyle("align-items", "center");
 					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
 					new HtmlLabel<GenericModel>(this) {
 						{
@@ -65,7 +85,7 @@ public class FlexLinks {
 			tag.addStyle("margin-bottom", "1px");
 			tag.addPrefixBinding(modelContext -> modelContext.getObservableStyles(tag).put("background-color",
 					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null
-					? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
+							? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 		}
 	}
 
@@ -82,7 +102,6 @@ public class FlexLinks {
 			tag.addStyle("background-color", "#ffa5a5");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addStyle("justify-content", "center");
 		}
 	}
 }
