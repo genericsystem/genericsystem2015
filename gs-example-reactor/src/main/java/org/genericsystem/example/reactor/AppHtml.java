@@ -31,8 +31,8 @@ import io.vertx.core.http.ServerWebSocket;
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
-		int port = 8082;
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, port);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST,
+				args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
 		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
 				Power.class, Diesel.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
