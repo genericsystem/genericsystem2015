@@ -134,7 +134,8 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						new HtmlInputText<InputGenericModel>(this) {
 							{
 								addStyle("width", "100%");
-								bindOptionalStyle("background-color", InputGenericModel::getInvalid, "yellow");
+								addStyle("height", "100%");
+								bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
 								bindOperation((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputGenericModel::getInputString);
 							}
@@ -202,6 +203,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
 										addStyle("width", "100%");
+										addStyle("height", "100%");
 									}
 								};
 							}
