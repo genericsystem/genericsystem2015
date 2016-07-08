@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.flex;
 
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeSelect.EditCompositeSelectWithEmptyEntry;
@@ -87,9 +88,8 @@ public class FlexLinks {
 			tag.addStyle("flex", "1");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addPrefixBinding(modelContext -> modelContext.getObservableStyles(tag).put("background-color",
-					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null
-							? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
+			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
+					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 		}
 	}
 
@@ -138,8 +138,7 @@ public class FlexLinks {
 							addStyle("height", "100%");
 							new HtmlInputText<InputGenericModel>(this) {
 								{
-									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null,
-											EditInputGenericModel::new);
+									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, EditInputGenericModel::new);
 									addStyle("width", "100%");
 									addStyle("height", "100%");
 									bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
@@ -165,13 +164,10 @@ public class FlexLinks {
 					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
 					new EditCompositeSelectWithEmptyEntry<SelectorModel>(this) {
 						{
-							addPrefixBinding(modelContext -> {
+							addPostfixBinding(modelContext -> {
 								modelContext.getSelection().addListener((ov, ova, nva) -> {
-									if (modelContext.getGeneric().info().contains("Audi S4")) {
-										System.out.println("Modified generic: " + modelContext.getGenerics()[1] + ", old value: " + ova.getGeneric()
-												+ ", new value : " + nva.getGeneric());
+									if (!modelContext.getGenerics()[1].getComponent(1).equals(nva.getGeneric()))
 										modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1);
-									}
 								});
 							});
 							addStyle("width", "100%");
