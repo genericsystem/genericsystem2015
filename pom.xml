@@ -51,7 +51,6 @@
 		<module>gs-todomvc</module>
 		<module>gs-carcolor</module>
 		<module>gs-carcolor-model</module>
-		<module>gs-demo</module>
 	</modules>
 
 	<distributionManagement>

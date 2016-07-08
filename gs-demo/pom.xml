@@ -1,36 +1,51 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.genericsystem</groupId>
-    <artifactId>genericsystem2015</artifactId>
-    <version>4.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>gs-demo</artifactId>
-  <name>Generic System Demo</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>    
-  </properties>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+	<groupId>org.genericsystem</groupId>
+	<version>4.0-SNAPSHOT</version>
+	<artifactId>gs-demo</artifactId>
+	<name>Generic System Demo</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+		<maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
+		<maven-eclipse-plugin.version>2.9</maven-eclipse-plugin.version>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>${maven-eclipse-plugin.version}</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
 
-	<dependencies>		
+		</plugins>
+	</build>
+
+
+	<dependencies>
 		<dependency>
 			<groupId>org.genericsystem</groupId>
 			<artifactId>gs-todomvc</artifactId>
@@ -41,12 +56,12 @@
 			<artifactId>gs-carcolor-model</artifactId>
 			<version>4.0-SNAPSHOT</version>
 		</dependency>
- 		<dependency>
+		<dependency>
 			<groupId>org.genericsystem</groupId>
 			<artifactId>gs-carcolor</artifactId>
 			<version>4.0-SNAPSHOT</version>
-		</dependency> 
+		</dependency>
 	</dependencies>
 
-  
+
 </project>
