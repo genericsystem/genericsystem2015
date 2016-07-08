@@ -164,12 +164,7 @@ public class FlexLinks {
 					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
 					new EditCompositeSelectWithEmptyEntry<SelectorModel>(this) {
 						{
-							addPostfixBinding(modelContext -> {
-								modelContext.getSelection().addListener((ov, ova, nva) -> {
-									if (!modelContext.getGenerics()[1].getComponent(1).equals(nva.getGeneric()))
-										modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1);
-								});
-							});
+							addPostfixBinding(modelContext -> modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1)));
 							addStyle("width", "100%");
 							addStyle("height", "100%");
 						}
