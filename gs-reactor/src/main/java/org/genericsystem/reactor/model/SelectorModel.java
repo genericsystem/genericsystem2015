@@ -9,8 +9,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
 public class SelectorModel extends GenericModel {
-	private Property<GenericModel> selection = new SimpleObjectProperty<GenericModel>();
-	private ObservableValue<String> selectionString = Bindings.createStringBinding(
+	protected Property<GenericModel> selection = new SimpleObjectProperty<GenericModel>();
+	protected ObservableValue<String> selectionString = Bindings.createStringBinding(
 			() -> getStringExtractor().apply(getSelection().getValue() != null ? getSelection().getValue().getGeneric() : null), getSelection());
 
 	public SelectorModel(Generic[] generics, StringExtractor extractor) {

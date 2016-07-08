@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -227,6 +228,16 @@ public abstract class Tag<M extends Model> {
 			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext),
 					number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
 					genericModel -> subContexts.indexOf(genericModel) + shift);
+		});
+	}
+
+	protected <SUBMODEL extends GenericModel> void initSelection(Tag<SUBMODEL> subElement) {
+		addPostfixBinding(modelContext -> {
+			List<GenericModel> subContexts = (List) modelContext.getSubContexts(subElement);
+			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
+			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
+			if (selectedModel.isPresent())
+				((SelectorModel) modelContext).getSelection().setValue(selectedModel.get());
 		});
 	}
 
@@ -512,24 +523,36 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public class InputTextHtmlDomNode extends HtmlDomNode {
+
+		private final Property<String> inputString = new SimpleStringProperty();
+		private final ObjectProperty<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
+
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
+			inputString.addListener(new WeakChangeListener<>(inputListener));
 		}
 
-		private final ObjectProperty<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
+		private final ChangeListener<String> inputListener = (o, old,
+				newValue) -> sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())));
+
+		public Property<String> getInputString() {
+			return inputString;
+		}
 
 		@Override
 		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			return jsonObj.put("type", "text");
+			return jsonObj.put("type", "text").put(TEXT_CONTENT, inputString.getValue());
 		}
 
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().accept(new Object());
-			if (UPDATE.equals(json.getString(MSG_TYPE)))
+			if (UPDATE.equals(json.getString(MSG_TYPE))) {
 				getTextProperty().setValue(json.getString(TEXT_CONTENT));
+				getInputString().setValue(json.getString(TEXT_CONTENT));
+			}
 		}
 
 		public ObjectProperty<Consumer<Object>> getEnterProperty() {
