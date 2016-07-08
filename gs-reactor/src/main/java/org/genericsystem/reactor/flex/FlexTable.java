@@ -7,7 +7,7 @@ import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.flex.FlexLinks.FlexLinkDisplayer;
+import org.genericsystem.reactor.flex.FlexLinks.FlexLinkEditor;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
@@ -289,7 +289,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new FlexLinkDisplayer<GenericModel>(this, this.getReverseDirection()) {
+						new FlexLinkEditor<GenericModel>(this, this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);

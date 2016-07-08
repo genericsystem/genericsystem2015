@@ -4,16 +4,18 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
 public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> implements CompositeTag<M> {
-	
+
 	HtmlOption<GenericModel> optionElement;
 
 	public CompositeSelect(Tag<?> parent) {
 		super(parent);
 		options();
 		bindOptionElement();
+		initSelection(optionElement);
 	}
 
 	protected void options() {
@@ -24,11 +26,10 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 			}
 		};
 	}
-	
+
 	protected void bindOptionElement() {
 		bindBiDirectionalSelection(optionElement);
 	}
-
 
 	public static class CompositeSelectWithEmptyEntry<M extends SelectorModel> extends CompositeSelect<M> {
 
@@ -36,6 +37,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 			super(parent);
 		}
 
+		@Override
 		protected void options() {
 			new HtmlOption<GenericModel>(this);
 			optionElement = new HtmlOption<GenericModel>(this) {
@@ -45,7 +47,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 				}
 			};
 		}
-		
+
 		@Override
 		protected void bindOptionElement() {
 			bindBiDirectionalSelection(optionElement, 1);
@@ -68,6 +70,35 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 					forEach(ColorsSelect.this);
 				}
 			};
+		}
+	}
+
+	public static interface IEditCompositeSelect<M extends SelectorModel> extends CompositeTag<M> {
+
+		@Override
+		default ObservableListExtractor getObservableListExtractor() {
+			return ObservableListExtractor.SUBINSTANCES_OF_META;
+		}
+	}
+
+	public static class EditCompositeSelect<M extends SelectorModel> extends CompositeSelect<M> implements IEditCompositeSelect<M> {
+
+		public EditCompositeSelect(Tag<?> parent) {
+			super(parent);
+		}
+	}
+
+	public static class EditCompositeSelectWithEmptyEntry<M extends SelectorModel> extends CompositeSelect<M> implements IEditCompositeSelect<M> {
+
+		public EditCompositeSelectWithEmptyEntry(Tag<?> parent) {
+			super(parent);
+		}
+	}
+
+	public static class EditColorsSelect<M extends SelectorModel> extends CompositeSelect<M> implements IEditCompositeSelect<M> {
+
+		public EditColorsSelect(Tag<?> parent) {
+			super(parent);
 		}
 	}
 }

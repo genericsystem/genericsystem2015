@@ -14,17 +14,29 @@ import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
 public class InputGenericModel extends GenericModel implements InputableModel {
-	private Property<String> inputString = new SimpleStringProperty();
-	private ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
-	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
-	private StringConverter<? extends Serializable> stringConverter;
+	protected Property<String> inputString;
+	protected ObservableValue<Boolean> invalid;
+	protected Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
+	protected StringConverter<Serializable> stringConverter;
 
 	public InputGenericModel(Generic[] generics, StringExtractor extractor) {
 		super(generics, extractor);
+		Class<?> clazz = getInstanceValueClassConstraint();
+		setStringConverter(ApiStatics.STRING_CONVERTERS.get(clazz));
+		inputString = new SimpleStringProperty(getInitialInput());
+		invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
+	}
+
+	public Class<?> getInstanceValueClassConstraint() {
 		Class<?> clazz = this.getGeneric().getInstanceValueClassConstraint();
 		if (clazz == null)
 			clazz = String.class;
 		setStringConverter(ApiStatics.STRING_CONVERTERS.get(clazz));
+		return clazz;
+	}
+
+	public String getInitialInput() {
+		return null;
 	}
 
 	private Boolean validate(String input) {
@@ -61,7 +73,7 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 		return stringConverter;
 	}
 
-	public void setStringConverter(StringConverter<? extends Serializable> stringConverter) {
+	public void setStringConverter(StringConverter<Serializable> stringConverter) {
 		this.stringConverter = stringConverter;
 	}
 
@@ -74,5 +86,39 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 		model.invalid = this.invalid;
 		model.stringConverter = this.stringConverter;
 		return model;
+	}
+
+	public static class EditInputGenericModel extends InputGenericModel {
+		public EditInputGenericModel(Generic[] generics, StringExtractor extractor) {
+			super(generics, extractor);
+		}
+
+		@Override
+		public Class<?> getInstanceValueClassConstraint() {
+			Class<?> clazz = this.getGeneric().getMeta().getInstanceValueClassConstraint();
+			if (clazz == null) {
+				if (getGeneric().getValue() != null)
+					clazz = getGeneric().getValue().getClass();
+				else
+					clazz = String.class;
+			}
+			return clazz;
+		}
+
+		@Override
+		public String getInitialInput() {
+			return stringConverter.toString(getGeneric().getValue());
+		}
+
+		@Override
+		public EditInputGenericModel duplicate(Model parent) {
+			EditInputGenericModel model = new EditInputGenericModel(getGenerics(), getStringExtractor());
+			model.parent = parent;
+			model.inputAction = this.inputAction;
+			model.inputString = this.inputString;
+			model.invalid = this.invalid;
+			model.stringConverter = this.stringConverter;
+			return model;
+		}
 	}
 }
