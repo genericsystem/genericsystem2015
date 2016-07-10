@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
 
 public class InputCheckModel extends GenericModel implements InputableModel {
 
@@ -30,14 +29,5 @@ public class InputCheckModel extends GenericModel implements InputableModel {
 	@Override
 	public Property<TriFunction<Generic[], Serializable, Generic, Generic>> getInputAction() {
 		return inputAction;
-	}
-
-	@Override
-	public InputCheckModel duplicate(Model parent) {
-		InputCheckModel model = new InputCheckModel(getGenerics(), getStringExtractor());
-		model.parent = parent;
-		model.checked = this.checked;
-		model.inputAction = this.inputAction;
-		return model;
 	}
 }

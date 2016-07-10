@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
-
 import javafx.beans.property.Property;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -77,11 +77,5 @@ public class Model {
 
 	public Property<Number> getSelectionIndex(Tag<?> element) {
 		return getViewContext(element).<SelectableHtmlDomNode> getNode().getSelectionIndex();
-	}
-
-	public Model duplicate(Model parent) {
-		Model model = new Model();
-		model.parent = parent;
-		return model;
 	}
 }

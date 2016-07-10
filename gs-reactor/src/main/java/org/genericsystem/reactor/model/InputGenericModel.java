@@ -2,16 +2,15 @@ package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 
 public class InputGenericModel extends GenericModel implements InputableModel {
 	protected Property<String> inputString;
@@ -77,17 +76,6 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 		this.stringConverter = stringConverter;
 	}
 
-	@Override
-	public InputGenericModel duplicate(Model parent) {
-		InputGenericModel model = new InputGenericModel(getGenerics(), getStringExtractor());
-		model.parent = parent;
-		model.inputAction = this.inputAction;
-		model.inputString = this.inputString;
-		model.invalid = this.invalid;
-		model.stringConverter = this.stringConverter;
-		return model;
-	}
-
 	public static class EditInputGenericModel extends InputGenericModel {
 		public EditInputGenericModel(Generic[] generics, StringExtractor extractor) {
 			super(generics, extractor);
@@ -108,17 +96,6 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 		@Override
 		public String getInitialInput() {
 			return stringConverter.toString(getGeneric().getValue());
-		}
-
-		@Override
-		public EditInputGenericModel duplicate(Model parent) {
-			EditInputGenericModel model = new EditInputGenericModel(getGenerics(), getStringExtractor());
-			model.parent = parent;
-			model.inputAction = this.inputAction;
-			model.inputString = this.inputString;
-			model.invalid = this.invalid;
-			model.stringConverter = this.stringConverter;
-			return model;
 		}
 	}
 }

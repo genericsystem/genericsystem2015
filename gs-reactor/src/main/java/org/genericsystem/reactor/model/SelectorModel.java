@@ -6,7 +6,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
 
 public class SelectorModel extends GenericModel {
 	protected Property<GenericModel> selection = new SimpleObjectProperty<GenericModel>();
@@ -23,14 +22,5 @@ public class SelectorModel extends GenericModel {
 
 	public ObservableValue<String> getSelectionString() {
 		return selectionString;
-	}
-
-	@Override
-	public SelectorModel duplicate(Model parent) {
-		SelectorModel model = new SelectorModel(getGenerics(), getStringExtractor());
-		model.parent = parent;
-		model.selection = this.selection;
-		model.selectionString = this.selectionString;
-		return model;
 	}
 }

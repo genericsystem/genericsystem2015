@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -76,12 +76,4 @@ public class GenericModel extends Model {
 	public void cancel() {
 		getGeneric().getCurrentCache().clear();
 	}
-
-	@Override
-	public GenericModel duplicate(Model parent) {
-		GenericModel model = new GenericModel(getGenerics(), getStringExtractor());
-		model.parent = parent;
-		return model;
-	}
-
 }

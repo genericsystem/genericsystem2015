@@ -197,7 +197,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach2(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
 										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
@@ -251,7 +251,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 		new CompositeFlexSection<GenericModel>(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach2(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES, GenericModel::new);
+				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES, GenericModel::new);
 			}
 
 			@Override

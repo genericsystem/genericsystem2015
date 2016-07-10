@@ -33,7 +33,7 @@ public class FlexLinks {
 			new FlexSection<InputGenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
-					select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
+					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
 					new FlexSection<GenericModel>(this, this.getDirection()) {
 						{
 							addStyle("justify-content", "center");
@@ -49,6 +49,7 @@ public class FlexLinks {
 							new HtmlCheckBox<InputCheckModel>(this) {
 								{
 									addAttribute("disabled", "disabled");
+									bindCheckedBidirectional(InputCheckModel::getChecked);
 									bindOptionalAttribute("checked", InputCheckModel::getChecked, "checked");
 									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
 								}
@@ -131,7 +132,7 @@ public class FlexLinks {
 			new FlexSection<InputGenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
-					select_(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
+					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
 					new FlexSection<GenericModel>(this, this.getDirection()) {
 						{
 							addStyle("justify-content", "center");
@@ -164,7 +165,7 @@ public class FlexLinks {
 					style(this);
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
-					forEach2(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
+					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
 					new InstanceCompositeSelect<SelectorModel>(this) {
 						{
 							addPostfixBinding(modelContext -> modelContext.getSelection().addListener(

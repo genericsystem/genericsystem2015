@@ -84,4 +84,5 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 			return ObservableListExtractor.SUBINSTANCES_OF_META;
 		}
 	}
+
 }
