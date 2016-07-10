@@ -3,7 +3,7 @@ package org.genericsystem.reactor.flex;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotation.InstanceColorize;
-import org.genericsystem.reactor.composite.CompositeSelect.EditCompositeSelectWithEmptyEntry;
+import org.genericsystem.reactor.composite.CompositeSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
@@ -88,8 +88,10 @@ public class FlexLinks {
 			tag.addStyle("flex", "1");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
-					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
+			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put(
+					"background-color",
+					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext)
+							.getString().getValue() : "#dda5e2"));
 		}
 	}
 
@@ -138,7 +140,8 @@ public class FlexLinks {
 							addStyle("height", "100%");
 							new HtmlInputText<InputGenericModel>(this) {
 								{
-									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, EditInputGenericModel::new);
+									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null,
+											EditInputGenericModel::new);
 									addStyle("width", "100%");
 									addStyle("height", "100%");
 									bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
@@ -161,10 +164,11 @@ public class FlexLinks {
 					style(this);
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
-					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
-					new EditCompositeSelectWithEmptyEntry<SelectorModel>(this) {
+					forEach2(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
+					new InstanceCompositeSelect<SelectorModel>(this) {
 						{
-							addPostfixBinding(modelContext -> modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1)));
+							addPostfixBinding(modelContext -> modelContext.getSelection().addListener(
+									(ov, ova, nva) -> modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1)));
 							addStyle("width", "100%");
 							addStyle("height", "100%");
 						}

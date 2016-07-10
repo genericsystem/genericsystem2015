@@ -2,14 +2,15 @@ package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
+
 public class InputCheckModel extends GenericModel implements InputableModel {
+
 	private Property<Boolean> checked = new SimpleBooleanProperty(getGeneric().getValue() instanceof Boolean ? (Boolean) getGeneric().getValue() : false);
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
 

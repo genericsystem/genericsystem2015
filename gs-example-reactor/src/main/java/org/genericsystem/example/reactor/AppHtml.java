@@ -1,5 +1,7 @@
 package org.genericsystem.example.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -26,13 +28,11 @@ import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
-import io.vertx.core.http.ServerWebSocket;
-
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST,
-				args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT
+				: Integer.parseInt(args[0]));
 		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
 				Power.class, Diesel.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
@@ -56,12 +56,12 @@ public class AppHtml extends HtmlApp<EngineModel> {
 						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
 						new FlexEditor(this, FlexDirection.ROW) {
 							{
-								select(SelectorModel::getSelection);
+								select2(SelectorModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};
 
-						new FlexEditor(this, FlexDirection.COLUMN).select(SelectorModel::getSelection);
+						new FlexEditor(this, FlexDirection.COLUMN).select2(SelectorModel::getSelection);
 					}
 				};
 

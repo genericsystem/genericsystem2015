@@ -1,12 +1,12 @@
 package org.genericsystem.reactor.model;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 public class SelectorModel extends GenericModel {
 	protected Property<GenericModel> selection = new SimpleObjectProperty<GenericModel>();

@@ -14,7 +14,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 	public CompositeSelect(Tag<?> parent) {
 		super(parent);
 		options();
-		bindOptionElement();
+		bindOptionsToSelection();
 		initSelection(optionElement);
 	}
 
@@ -27,7 +27,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		};
 	}
 
-	protected void bindOptionElement() {
+	protected void bindOptionsToSelection() {
 		bindBiDirectionalSelection(optionElement);
 	}
 
@@ -49,7 +49,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		}
 
 		@Override
-		protected void bindOptionElement() {
+		protected void bindOptionsToSelection() {
 			bindBiDirectionalSelection(optionElement, 1);
 		}
 	}
@@ -73,32 +73,15 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		}
 	}
 
-	public static interface IEditCompositeSelect<M extends SelectorModel> extends CompositeTag<M> {
+	public static class InstanceCompositeSelect<M extends SelectorModel> extends CompositeSelect<M> implements CompositeTag<M> {
+
+		public InstanceCompositeSelect(Tag<?> parent) {
+			super(parent);
+		}
 
 		@Override
-		default ObservableListExtractor getObservableListExtractor() {
+		public ObservableListExtractor getObservableListExtractor() {
 			return ObservableListExtractor.SUBINSTANCES_OF_META;
-		}
-	}
-
-	public static class EditCompositeSelect<M extends SelectorModel> extends CompositeSelect<M> implements IEditCompositeSelect<M> {
-
-		public EditCompositeSelect(Tag<?> parent) {
-			super(parent);
-		}
-	}
-
-	public static class EditCompositeSelectWithEmptyEntry<M extends SelectorModel> extends CompositeSelect<M> implements IEditCompositeSelect<M> {
-
-		public EditCompositeSelectWithEmptyEntry(Tag<?> parent) {
-			super(parent);
-		}
-	}
-
-	public static class EditColorsSelect<M extends SelectorModel> extends CompositeSelect<M> implements IEditCompositeSelect<M> {
-
-		public EditColorsSelect(Tag<?> parent) {
-			super(parent);
 		}
 	}
 }

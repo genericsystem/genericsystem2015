@@ -180,8 +180,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										};
 										new HtmlCheckBox<InputCheckModel>(this) {
 											{
-												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null,
-														InputCheckModel::new);
+												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
 												bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 												bindCheckedBidirectional(InputCheckModel::getChecked);
 											}
@@ -198,7 +197,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
+								forEach2(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
 										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
@@ -252,7 +251,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 		new CompositeFlexSection<GenericModel>(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES, GenericModel::new);
+				forEach2(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES, GenericModel::new);
 			}
 
 			@Override
@@ -263,7 +262,8 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
-						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put(
+								"background-color",
 								modelContext.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.getString().getValue()
 										: "#bba5ff"));
 						new HtmlHyperLink<GenericModel>(this) {

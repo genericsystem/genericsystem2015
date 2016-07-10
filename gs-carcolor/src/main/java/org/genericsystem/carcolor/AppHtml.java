@@ -1,5 +1,7 @@
 package org.genericsystem.carcolor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -24,8 +26,6 @@ import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
-
-import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<EngineModel> {
 
@@ -61,12 +61,12 @@ public class AppHtml extends HtmlApp<EngineModel> {
 						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
 						new FlexEditor(this, FlexDirection.ROW) {
 							{
-								select(SelectorModel::getSelection);
+								select2(SelectorModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};
 
-						new FlexEditor(this, FlexDirection.COLUMN).select(SelectorModel::getSelection);
+						new FlexEditor(this, FlexDirection.COLUMN).select2(SelectorModel::getSelection);
 					}
 				};
 
