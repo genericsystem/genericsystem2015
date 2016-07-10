@@ -122,18 +122,6 @@ public abstract class Tag<M extends Model> {
 		};
 	}
 
-	// @Deprecated
-	// public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
-	// metaBinding = (childElement, viewContext) -> {
-	// ObservableList<M> subModels = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
-	// viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(subModels, (index, childModel) -> {
-	// Model duplicate = childModel.duplicate(viewContext.getModelContext());
-	// viewContext.createViewContextChild(index, duplicate, childElement);
-	// return (MODEL) duplicate;
-	// }, Model::destroy));
-	// };
-	// }
-
 	protected void forEach(CompositeTag<?> parentCompositeElement) {
 		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
 				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
@@ -146,25 +134,6 @@ public abstract class Tag<M extends Model> {
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
 		forEach(stringExtractor, observableListExtractor, GenericModel::new);
 	}
-
-	// @Deprecated
-	// public <T extends Model> void select(Function<T, ObservableValue<M>> applyOnModel) {
-	// forEach(model -> {
-	// ObservableValue<M> observableValue = applyOnModel.apply((T) model);
-	//
-	// return new ListBinding<M>() {
-	// {
-	// bind(observableValue);
-	// }
-	//
-	// @Override
-	// protected ObservableList<M> computeValue() {
-	// M value = observableValue.getValue();
-	// return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
-	// }
-	// };
-	// });
-	// }
 
 	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel, ModelConstructor<GenericModel> constructor) {
 		select_(null, applyOnModel, constructor);

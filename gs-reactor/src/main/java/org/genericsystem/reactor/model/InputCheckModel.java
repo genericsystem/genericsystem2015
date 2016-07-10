@@ -10,7 +10,7 @@ import org.genericsystem.common.Generic;
 
 public class InputCheckModel extends GenericModel implements InputableModel {
 
-	private Property<Boolean> checked = new SimpleBooleanProperty(getGeneric().getValue() instanceof Boolean ? (Boolean) getGeneric().getValue() : false);
+	private Property<Boolean> checked = new SimpleBooleanProperty();
 	private Property<TriFunction<Generic[], Serializable, Generic, Generic>> inputAction = new SimpleObjectProperty<>();
 
 	public InputCheckModel(Generic[] generics, StringExtractor stringExtractor) {

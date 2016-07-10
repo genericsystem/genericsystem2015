@@ -22,7 +22,7 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 		super(generics, extractor);
 		Class<?> clazz = getInstanceValueClassConstraint();
 		setStringConverter(ApiStatics.STRING_CONVERTERS.get(clazz));
-		inputString = new SimpleStringProperty(getInitialInput());
+		inputString = new SimpleStringProperty();
 		invalid = Bindings.createBooleanBinding(() -> !validate(inputString.getValue()), inputString);
 	}
 
@@ -32,10 +32,6 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 			clazz = String.class;
 		setStringConverter(ApiStatics.STRING_CONVERTERS.get(clazz));
 		return clazz;
-	}
-
-	public String getInitialInput() {
-		return null;
 	}
 
 	private Boolean validate(String input) {
@@ -68,7 +64,7 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 		return inputAction;
 	}
 
-	public StringConverter<? extends Serializable> getStringConverter() {
+	public StringConverter<Serializable> getStringConverter() {
 		return stringConverter;
 	}
 
@@ -91,11 +87,6 @@ public class InputGenericModel extends GenericModel implements InputableModel {
 					clazz = String.class;
 			}
 			return clazz;
-		}
-
-		@Override
-		public String getInitialInput() {
-			return stringConverter.toString(getGeneric().getValue());
 		}
 	}
 }

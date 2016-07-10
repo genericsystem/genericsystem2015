@@ -141,18 +141,31 @@ public class FlexLinks {
 							addStyle("height", "100%");
 							new HtmlInputText<InputGenericModel>(this) {
 								{
+
 									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null,
 											EditInputGenericModel::new);
 									addStyle("width", "100%");
 									addStyle("height", "100%");
 									bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
 									bindTextBidirectional(InputGenericModel::getInputString);
+									addPostfixBinding(model -> {
+										model.getInputString().setValue(model.getStringConverter().toString(model.getGenerics()[0].getValue()));
+										model.getInputString().addListener((ov, ova, nva) -> {
+											model.getGenerics()[0].updateValue(model.getStringConverter().fromString(nva));
+										});
+									});
 								}
 							};
 							new HtmlCheckBox<InputCheckModel>(this) {
 								{
 									bindCheckedBidirectional(InputCheckModel::getChecked);
-									bindOperation((gs, value, g) -> g.updateValue(value));
+									// bindOperation((gs, value, g) -> g.updateValue(value));
+									addPostfixBinding(model -> {
+										model.getChecked().setValue((Boolean) model.getGenerics()[0].getValue());
+										model.getChecked().addListener((ov, ova, nva) -> {
+											model.getGenerics()[0].updateValue(nva);
+										});
+									});
 									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
 								}
 							};
