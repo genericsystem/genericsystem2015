@@ -2,12 +2,12 @@ package org.genericsystem.todomvc;
 
 import java.util.Objects;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -36,12 +36,5 @@ public class Todo extends Model {
 
 	public void remove() {
 		generic.remove();
-	}
-	@Override
-	public Todo duplicate(Model parent) {
-		Todo model = new Todo((TodoList)parent, generic);
-		model.parent = parent;
-		model.completed=this.completed;
-		return model;
 	}
 }

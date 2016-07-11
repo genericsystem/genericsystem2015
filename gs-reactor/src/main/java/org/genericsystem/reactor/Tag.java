@@ -1,26 +1,18 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.composite.CompositeTag;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputableModel;
-import org.genericsystem.reactor.model.InputableModel.TriFunction;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.SelectorModel;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
@@ -41,6 +33,16 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.composite.CompositeTag;
+import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.GenericModel.StringExtractor;
+import org.genericsystem.reactor.model.InputableModel;
+import org.genericsystem.reactor.model.InputableModel.TriFunction;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.SelectorModel;
 
 /**
  * @author Nicolas Feybesse
@@ -107,6 +109,82 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	protected void forEach(CompositeTag<?> parentCompositeElement) {
+		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
+				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
+	}
+
+	public void forEach(ObservableListExtractor observableListExtractor) {
+		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, GenericModel::new);
+	}
+
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
+		forEach(stringExtractor, observableListExtractor, GenericModel::new);
+	}
+
+	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
+		metaBinding = (childElement, viewContext) -> {
+			M model = (M) viewContext.getModelContext();
+			ObservableList<M> models = applyOnModel.apply((MODEL) model);
+			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(models, (index, subModel) -> {
+				subModel.parent = model;
+				viewContext.createViewContextChild(index, subModel, childElement);
+				return (MODEL) subModel;
+			}, Model::destroy));
+		};
+	}
+
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
+		metaBinding = (childElement, viewContext) -> {
+			GenericModel model = (GenericModel) viewContext.getModelContext();
+			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
+			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
+				GenericModel duplicate = constructor.build(GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
+				duplicate.parent = model;
+				viewContext.createViewContextChild(index, duplicate, childElement);
+				return duplicate;
+			}, Model::destroy));
+		};
+	}
+
+	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel, ModelConstructor<GenericModel> constructor) {
+		select_(null, applyOnModel, constructor);
+	}
+
+	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel) {
+		select_(null, applyOnModel, GenericModel::new);
+	}
+
+	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext,
+			ModelConstructor<GenericModel> constructor) {
+		metaBinding = (childElement, viewContext) -> {
+			GenericModel model = (GenericModel) viewContext.getModelContext();
+			ObservableValue<M> observableValue = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
+			ObservableList<M> subModels = new ListBinding<M>() {
+				{
+					bind(observableValue);
+				}
+
+				@Override
+				protected ObservableList<M> computeValue() {
+					M value = observableValue.getValue();
+					return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
+				}
+			};
+			viewContext.getModelContext().setSubContexts(
+					childElement,
+					new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
+						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+							GenericModel childModel = constructor.build(gs,
+									stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
+							childModel.parent = viewContext.getModelContext();
+							viewContext.createViewContextChild(index, childModel, childElement);
+							return (MODEL) childModel;
+						}, Model::destroy));
+		};
+	}
+
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<GenericModel> constructor) {
 		forEach(stringExtractor, gs -> {
 			Generic generic = genericSupplier.apply(gs);
@@ -118,58 +196,6 @@ public abstract class Tag<M extends Model> {
 		forEach(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor);
 	}
 
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
-		forEach(modelContext -> new TransformationObservableList<Generic, M>(observableListExtractor.apply(((GenericModel) modelContext).getGenerics()),
-				generic -> (M) constructor.build(GenericModel.addToGenerics(generic, ((GenericModel) modelContext).getGenerics()), stringExtractor)));
-	}
-
-	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModelContext) {
-		metaBinding = (childElement, viewContext) -> {
-			ObservableList<M> subModels = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
-			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(subModels, (index, childModel) -> {
-				Model duplicate = childModel.duplicate(viewContext.getModelContext());
-				viewContext.createViewContextChild(index, duplicate, childElement);
-				return (MODEL) duplicate;
-			}, Model::destroy));
-		};
-	}
-
-	public <T> void select(Function<T, ObservableValue<M>> applyOnModel) {
-		forEach(model -> {
-			ObservableValue<M> observableValue = applyOnModel.apply((T) model);
-
-			return new ListBinding<M>() {
-				{
-					bind(observableValue);
-				}
-
-				@Override
-				protected void onInvalidating() {
-					System.out.println("Invalidation of list binding " + System.identityHashCode(this));
-				}
-
-				@Override
-				protected ObservableList<M> computeValue() {
-					M value = observableValue.getValue();
-					return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
-				}
-			};
-		});
-	}
-
-	protected void forEach(CompositeTag<?> parentCompositeElement) {
-		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
-				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
-	}
-
-	public void forEach_(ObservableListExtractor observableListExtractor) {
-		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, GenericModel::new);
-	}
-
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
-		forEach(stringExtractor, observableListExtractor, GenericModel::new);
-	}
-
 	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
 		select(stringExtractor, genericSupplier, GenericModel::new);
 	}
@@ -178,7 +204,7 @@ public abstract class Tag<M extends Model> {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, constructor);
 	}
 
-	public void select_(Function<Generic[], Generic> genericSupplier) {
+	public void select(Function<Generic[], Generic> genericSupplier) {
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, GenericModel::new);
 	}
 
@@ -224,9 +250,18 @@ public abstract class Tag<M extends Model> {
 			Function<SelectorModel, Property<GenericModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
 			List<? extends Model> subContexts = modelContext.getSubContexts(subElement);
-			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext),
-					number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
-					genericModel -> subContexts.indexOf(genericModel) + shift);
+			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext), number -> number.intValue()
+					- shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null, genericModel -> subContexts.indexOf(genericModel) + shift);
+		});
+	}
+
+	protected <SUBMODEL extends GenericModel> void initSelection(Tag<SUBMODEL> subElement) {
+		addPostfixBinding(modelContext -> {
+			List<GenericModel> subContexts = (List) modelContext.getSubContexts(subElement);
+			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
+			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
+			if (selectedModel.isPresent())
+				((SelectorModel) modelContext).getSelection().setValue(selectedModel.get());
 		});
 	}
 
@@ -259,29 +294,29 @@ public abstract class Tag<M extends Model> {
 		bindMapElement(propertyName, applyOnModel, model -> model.getObservableStyles(this));
 	}
 
-	public void setStyleClasses(Set<String> styleClasses) {
-		addPrefixBinding(model -> {
-			ObservableSet<String> observableStyleClasses = model.getObservableStyleClasses(this);
-			observableStyleClasses.removeIf(styleClass -> !styleClasses.contains(styleClass));
-			observableStyleClasses.addAll(styleClasses);
-		});
-	}
+	// public void setStyleClasses(Set<String> styleClasses) {
+	// addPrefixBinding(model -> {
+	// ObservableSet<String> observableStyleClasses = model.getObservableStyleClasses(this);
+	// observableStyleClasses.removeIf(styleClass -> !styleClasses.contains(styleClass));
+	// observableStyleClasses.addAll(styleClasses);
+	// });
+	// }
 
 	public void addStyleClasses(Set<String> styleClasses) {
 		addPrefixBinding(model -> model.getObservableStyleClasses(this).addAll(styleClasses));
 	}
 
-	public void bindStyleClasses(ObservableSet<String> styleClasses) {
-		addPrefixBinding(model -> Bindings.bindContent(model.getObservableStyleClasses(this), styleClasses));
-	}
-
-	public void bindStylesMap(ObservableMap<String, String> styles) {
-		addPrefixBinding(model -> Bindings.bindContent(model.getObservableStyles(this), styles));
-	}
-
-	public void setStylesMap(Map<String, String> styles) {
-		addPrefixBinding(model -> model.getObservableStyles(this).putAll(styles));
-	}
+	// public void bindStyleClasses(ObservableSet<String> styleClasses) {
+	// addPrefixBinding(model -> Bindings.bindContent(model.getObservableStyleClasses(this), styleClasses));
+	// }
+	//
+	// public void bindStylesMap(ObservableMap<String, String> styles) {
+	// addPrefixBinding(model -> Bindings.bindContent(model.getObservableStyles(this), styles));
+	// }
+	//
+	// public void setStylesMap(Map<String, String> styles) {
+	// addPrefixBinding(model -> model.getObservableStyles(this).putAll(styles));
+	// }
 
 	public void addStyleClass(String styleClass) {
 		addPrefixBinding(model -> model.getObservableStyleClasses(this).add(styleClass));
@@ -368,8 +403,8 @@ public abstract class Tag<M extends Model> {
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 		private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old,
-				newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())
+				.put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals("")) {
@@ -377,8 +412,8 @@ public abstract class Tag<M extends Model> {
 				sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()));
 			} else if (change.wasAdded()) {
 				// System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE,
-						change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey())
+						.put(STYLE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -386,8 +421,8 @@ public abstract class Tag<M extends Model> {
 			if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals("")) {
 				sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()));
 			} else if (change.wasAdded()) {
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()).put(ATTRIBUTE_VALUE,
-						change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey())
+						.put(ATTRIBUTE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -487,8 +522,8 @@ public abstract class Tag<M extends Model> {
 		private Property<Number> selectionIndex = new SimpleIntegerProperty();
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-			System.out.println(
-					new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0).encodePrettily());
+			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
+					.encodePrettily());
 			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 		};
 
@@ -512,24 +547,36 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public class InputTextHtmlDomNode extends HtmlDomNode {
+
+		private final Property<String> inputString = new SimpleStringProperty();
+		private final ObjectProperty<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
+
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
+			inputString.addListener(new WeakChangeListener<>(inputListener));
 		}
 
-		private final ObjectProperty<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
+		private final ChangeListener<String> inputListener = (o, old, newValue) -> sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID,
+				getId())));
+
+		public Property<String> getInputString() {
+			return inputString;
+		}
 
 		@Override
 		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			return jsonObj.put("type", "text");
+			return jsonObj.put("type", "text").put(TEXT_CONTENT, inputString.getValue());
 		}
 
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().accept(new Object());
-			if (UPDATE.equals(json.getString(MSG_TYPE)))
+			if (UPDATE.equals(json.getString(MSG_TYPE))) {
 				getTextProperty().setValue(json.getString(TEXT_CONTENT));
+				getInputString().setValue(json.getString(TEXT_CONTENT));
+			}
 		}
 
 		public ObjectProperty<Consumer<Object>> getEnterProperty() {
@@ -549,8 +596,8 @@ public abstract class Tag<M extends Model> {
 			checked.addListener(new WeakChangeListener<>(checkedListener));
 		}
 
-		private final ChangeListener<Boolean> checkedListener = (o, old,
-				newValue) -> sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())));
+		private final ChangeListener<Boolean> checkedListener = (o, old, newValue) -> sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID,
+				getId())));
 
 		public Property<Boolean> getChecked() {
 			return checked;

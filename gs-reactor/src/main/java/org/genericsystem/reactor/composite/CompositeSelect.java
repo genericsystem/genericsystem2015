@@ -4,16 +4,18 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
 public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> implements CompositeTag<M> {
-	
+
 	HtmlOption<GenericModel> optionElement;
 
 	public CompositeSelect(Tag<?> parent) {
 		super(parent);
 		options();
-		bindOptionElement();
+		bindOptionsToSelection();
+		initSelection(optionElement);
 	}
 
 	protected void options() {
@@ -24,11 +26,10 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 			}
 		};
 	}
-	
-	protected void bindOptionElement() {
+
+	protected void bindOptionsToSelection() {
 		bindBiDirectionalSelection(optionElement);
 	}
-
 
 	public static class CompositeSelectWithEmptyEntry<M extends SelectorModel> extends CompositeSelect<M> {
 
@@ -36,6 +37,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 			super(parent);
 		}
 
+		@Override
 		protected void options() {
 			new HtmlOption<GenericModel>(this);
 			optionElement = new HtmlOption<GenericModel>(this) {
@@ -45,9 +47,9 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 				}
 			};
 		}
-		
+
 		@Override
-		protected void bindOptionElement() {
+		protected void bindOptionsToSelection() {
 			bindBiDirectionalSelection(optionElement, 1);
 		}
 	}
@@ -70,4 +72,17 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 			};
 		}
 	}
+
+	public static class InstanceCompositeSelect<M extends SelectorModel> extends CompositeSelect<M> implements CompositeTag<M> {
+
+		public InstanceCompositeSelect(Tag<?> parent) {
+			super(parent);
+		}
+
+		@Override
+		public ObservableListExtractor getObservableListExtractor() {
+			return ObservableListExtractor.SUBINSTANCES_OF_META;
+		}
+	}
+
 }
