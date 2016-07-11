@@ -61,12 +61,12 @@ public class AppHtml extends HtmlApp<EngineModel> {
 						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
 						new FlexEditor(this, FlexDirection.ROW) {
 							{
-								select2(SelectorModel::getSelection);
+								select_(SelectorModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};
 
-						new FlexEditor(this, FlexDirection.COLUMN).select2(SelectorModel::getSelection);
+						new FlexEditor(this, FlexDirection.COLUMN).select_(SelectorModel::getSelection);
 					}
 				};
 
