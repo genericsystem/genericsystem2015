@@ -122,6 +122,18 @@ public abstract class Tag<M extends Model> {
 		forEach(stringExtractor, observableListExtractor, GenericModel::new);
 	}
 
+	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
+		metaBinding = (childElement, viewContext) -> {
+			M model = (M) viewContext.getModelContext();
+			ObservableList<M> models = applyOnModel.apply((MODEL) model);
+			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(models, (index, subModel) -> {
+				subModel.parent = model;
+				viewContext.createViewContextChild(index, subModel, childElement);
+				return (MODEL) subModel;
+			}, Model::destroy));
+		};
+	}
+
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
