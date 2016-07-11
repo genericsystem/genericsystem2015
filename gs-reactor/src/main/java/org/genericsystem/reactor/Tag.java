@@ -109,19 +109,6 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
-		metaBinding = (childElement, viewContext) -> {
-			GenericModel model = (GenericModel) viewContext.getModelContext();
-			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
-			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
-				GenericModel duplicate = constructor.build(GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
-				duplicate.parent = model;
-				viewContext.createViewContextChild(index, duplicate, childElement);
-				return duplicate;
-			}, Model::destroy));
-		};
-	}
-
 	protected void forEach(CompositeTag<?> parentCompositeElement) {
 		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs),
 				(gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
@@ -135,6 +122,19 @@ public abstract class Tag<M extends Model> {
 		forEach(stringExtractor, observableListExtractor, GenericModel::new);
 	}
 
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
+		metaBinding = (childElement, viewContext) -> {
+			GenericModel model = (GenericModel) viewContext.getModelContext();
+			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
+			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
+				GenericModel duplicate = constructor.build(GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
+				duplicate.parent = model;
+				viewContext.createViewContextChild(index, duplicate, childElement);
+				return duplicate;
+			}, Model::destroy));
+		};
+	}
+
 	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel, ModelConstructor<GenericModel> constructor) {
 		select_(null, applyOnModel, constructor);
 	}
@@ -146,6 +146,7 @@ public abstract class Tag<M extends Model> {
 	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext,
 			ModelConstructor<GenericModel> constructor) {
 		metaBinding = (childElement, viewContext) -> {
+			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableValue<M> observableValue = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
 			ObservableList<M> subModels = new ListBinding<M>() {
 				{
@@ -161,12 +162,14 @@ public abstract class Tag<M extends Model> {
 			viewContext.getModelContext().setSubContexts(
 					childElement,
 					new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
-						MODEL model = (MODEL) constructor.build(((GenericModel) selectedModel).getGenerics(), stringExtractor != null ? stringExtractor
-								: ((GenericModel) selectedModel).getStringExtractor());
-						model.parent = viewContext.getModelContext();
-						viewContext.createViewContextChild(index, model, childElement);
-						return model;
-					}, Model::destroy));
+						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+							GenericModel childModel = constructor.build(gs,
+									stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
+							childModel.parent = viewContext.getModelContext();
+							viewContext.createViewContextChild(index, childModel, childElement);
+							return (MODEL) childModel;
+						}, Model::destroy));
 		};
 	}
 
