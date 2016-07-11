@@ -71,7 +71,9 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																bindCheckedBidirectional(Todo::getCompleted);
+																initProperty(model -> model.getProperty(this, "checked"), model -> model.getCompleted().getValue());
+																bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
+																bindOperation(model -> model.getProperty(this, "checked"), (model, nva) -> model.getCompleted().setValue((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {

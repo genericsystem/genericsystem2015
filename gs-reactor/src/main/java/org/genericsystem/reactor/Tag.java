@@ -404,7 +404,7 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public void bindAction(TriFunction<Generic[], Serializable, Generic, Generic> operation) {
-		addPrefixBinding(modelContext -> ((InputableModel) modelContext).getInputAction().setValue(operation));
+		addPrefixBinding(modelContext -> ((InputGenericModel) modelContext).getInputAction().setValue(operation));
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
@@ -643,33 +643,23 @@ public abstract class Tag<M extends Model> {
 
 	public class InputCheckHtmlDomNode extends HtmlDomNode {
 		private static final String CHECKED = "checked";
-		private Property<Boolean> checked = new SimpleBooleanProperty(false);
 		private final String type;
 
 		public InputCheckHtmlDomNode(String parentId, String type) {
 			super(parentId);
 			this.type = type;
-			checked.addListener(new WeakChangeListener<>(checkedListener));
-		}
-
-		private final ChangeListener<Boolean> checkedListener = (o, old, newValue) -> sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID,
-				getId())));
-
-		public Property<Boolean> getChecked() {
-			return checked;
 		}
 
 		@Override
 		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			jsonObj.put("type", type);
-			return jsonObj.put(CHECKED, Boolean.TRUE.equals(checked.getValue()));
+			return jsonObj.put("type", type);
 		}
 
 		@Override
 		public void handleMessage(JsonObject json) {
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				getChecked().setValue(json.getBoolean(CHECKED));
+				getAttributes().put("checked", json.getBoolean(CHECKED) ? "checked" : "");
 		}
 	}
 

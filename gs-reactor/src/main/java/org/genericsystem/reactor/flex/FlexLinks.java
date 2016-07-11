@@ -9,7 +9,6 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputCheckModel;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.InputGenericModel.EditInputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -46,12 +45,12 @@ public class FlexLinks {
 									bindText(GenericModel::getString);
 								}
 							};
-							new HtmlCheckBox<InputCheckModel>(this) {
+							new HtmlCheckBox<InputGenericModel>(this) {
 								{
 									addAttribute("disabled", "disabled");
-									bindCheckedBidirectional(InputCheckModel::getChecked);
-									bindOptionalAttribute("checked", InputCheckModel::getChecked, "checked");
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
+									initProperty(model -> model.getProperty(this, "checked"), model -> (Boolean) model.getGeneric().getValue());
+									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
 								}
 							};
 						}
@@ -152,17 +151,12 @@ public class FlexLinks {
 									});
 								}
 							};
-							new HtmlCheckBox<InputCheckModel>(this) {
+							new HtmlCheckBox<InputGenericModel>(this) {
 								{
-									bindCheckedBidirectional(InputCheckModel::getChecked);
-									// bindOperation((gs, value, g) -> g.updateValue(value));
-									addPostfixBinding(model -> {
-										model.getChecked().setValue((Boolean) model.getGenerics()[0].getValue());
-										model.getChecked().addListener((ov, ova, nva) -> {
-											model.getGenerics()[0].updateValue(nva);
-										});
-									});
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
+									initProperty(model -> model.getProperty(this, "checked"), model -> (Boolean) model.getGeneric().getValue());
+									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
+									bindOperation(model -> model.getProperty(this, "checked"), (model, nva) -> model.getGeneric().updateValue(nva));
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
 								}
 							};
 						}

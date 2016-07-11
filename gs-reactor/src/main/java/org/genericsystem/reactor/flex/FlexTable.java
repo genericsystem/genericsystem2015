@@ -17,7 +17,6 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputCheckModel;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
@@ -176,11 +175,11 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 												bindAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
-										new HtmlCheckBox<InputCheckModel>(this) {
+										new HtmlCheckBox<InputGenericModel>(this) {
 											{
-												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
-												bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
-												bindCheckedBidirectional(InputCheckModel::getChecked);
+												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
+												bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
 											}
 										};
 									}
