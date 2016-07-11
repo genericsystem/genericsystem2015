@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
@@ -21,6 +22,23 @@ public class Model {
 	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
+	private final Map<Tag<?>, Map<String, Property<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, Property<Object>>>() {
+		@Override
+		public Map<String, Property<Object>> get(Object key) {
+			Map<String, Property<Object>> properties = super.get(key);
+			if (properties == null)
+				put((Tag) key, properties = new HashMap<String, Property<Object>>() {
+					@Override
+					public Property<Object> get(Object key) {
+						Property<Object> property = super.get(key);
+						if (property == null)
+							put((String) key, property = new SimpleObjectProperty<>());
+						return property;
+					};
+				});
+			return properties;
+		};
+	};
 
 	public Model getParent() {
 		return this.parent;
@@ -28,6 +46,10 @@ public class Model {
 
 	public List<? extends Model> getSubContexts(Tag<?> tag) {
 		return subContextsMap.get(tag);
+	}
+
+	public <T> Property<T> getProperty(Tag<?> tag, String name) {
+		return (Property<T>) propertiesMap.get(tag).get(name);
 	}
 
 	public List<Model> allSubContexts() {
