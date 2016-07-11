@@ -33,8 +33,8 @@ import java.util.zip.ZipOutputStream;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.genericsystem.common.Statics;
+import org.genericsystem.common.GenericBuilder.AtomicBuilder;
 import org.genericsystem.kernel.AbstractServer.RootServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,14 +87,6 @@ public class Archiver {
 			}
 		}
 		startScheduler();
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				log.info("Archiver in repository : " + directory.getAbsolutePath() + " is closing ...");
-				close();
-				log.info("Archiver in repository : " + directory.getAbsolutePath() + " has closed");
-			}
-		});
 	}
 
 	protected Loader getLoader(ObjectInputStream objectInputStream) {
@@ -314,8 +306,7 @@ public class Archiver {
 			List<Generic> supers = loadAncestors(ts, vertexMap);
 			List<Generic> components = loadAncestors(ts, vertexMap);
 			vertexMap.put(ts, new SetArchiverHandler(ts, context, meta, supers, value, components, otherTs).resolve());
-			// log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " +
-			// vertexMap.get(ts).getLifeManager().getBirthTs());
+			// log.info("load dependency : " + vertexMap.get(ts).info() + " " + ts + " " + vertexMap.get(ts).getTs() + " birthTs : " + vertexMap.get(ts).getLifeManager().getBirthTs());
 			assert ((Transaction) context.getTransaction()).isAlive(vertexMap.get(ts)) : vertexMap.get(ts).info();
 		}
 
@@ -372,8 +363,7 @@ public class Archiver {
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components,
-				long[] otherTs) {
+		SetArchiverHandler(long ts, AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
 			this.otherTs = otherTs;
@@ -381,8 +371,7 @@ public class Archiver {
 
 		@Override
 		protected Generic build() {
-			return gettable = ((Transaction) context.getTransaction())
-					.plug(((AbstractServer) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
+			return gettable = ((Transaction) context.getTransaction()).plug(((AbstractServer) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
 		}
 	}
 
