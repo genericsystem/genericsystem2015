@@ -135,7 +135,7 @@ public class ViewContext<M extends Model> {
 		}
 	}
 
-	public Tag<M> getElement() {
+	public Tag<M> getTag() {
 		return element;
 	}
 }

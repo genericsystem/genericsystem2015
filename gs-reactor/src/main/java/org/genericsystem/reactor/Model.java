@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
+
 import javafx.beans.property.Property;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -26,8 +26,8 @@ public class Model {
 		return this.parent;
 	}
 
-	public List<? extends Model> getSubContexts(Tag<?> element) {
-		return subContextsMap.get(element);
+	public List<? extends Model> getSubContexts(Tag<?> tag) {
+		return subContextsMap.get(tag);
 	}
 
 	public List<Model> allSubContexts() {
@@ -40,7 +40,7 @@ public class Model {
 	}
 
 	public void register(ViewContext<?> viewContext) {
-		ViewContext<?> previous = viewContextsMap.put(viewContext.getElement(), viewContext);
+		ViewContext<?> previous = viewContextsMap.put(viewContext.getTag(), viewContext);
 		assert previous == null;
 	}
 
