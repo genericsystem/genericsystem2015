@@ -158,7 +158,7 @@ public class FlexLinks {
 											return true;
 										}
 									}, model.getObservableAttributes(this)));
-									bindOptionalStyle("border-color", model -> model.getObservableValue(this, "invalid"), "red");
+									bindOptionalStyleClass(model -> model.getObservableValue(this, "invalid"), "invalid");
 
 									initProperty(model -> model.getProperty(this, "converter"), model -> {
 										Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();

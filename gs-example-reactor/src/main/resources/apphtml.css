@@ -30,10 +30,10 @@ section .removing {
     animation: disappeareffect 0.5s;
 }
 
-section .invalid {
-    animation: disappeareffect 0.5s infinite;
+.invalid {
+    animation: invalideffect 0.5s 5;
+    box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
 }
-
 
 @keyframes appeareffect {
  	0% {
@@ -53,3 +53,11 @@ section .invalid {
  	}
 }
 
+@keyframes invalideffect {
+ 	0% {
+ 		box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
+ 	}
+  	100% {
+  		box-shadow: none;
+ 	}
+}

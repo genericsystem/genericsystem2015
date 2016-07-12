@@ -103,7 +103,7 @@ public abstract class Tag<M extends Model> {
 			ObservableValue<Boolean> optional = applyOnModel.apply(modelContext);
 			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
 			Consumer<Boolean> consumer = bool -> {
-				if (bool)
+				if (Boolean.TRUE.equals(bool))
 					styleClasses.add(styleClass);
 				else
 					styleClasses.remove(styleClass);
