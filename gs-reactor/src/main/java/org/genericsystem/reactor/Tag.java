@@ -407,10 +407,10 @@ public abstract class Tag<M extends Model> {
 
 			@Override
 			public String toString(Boolean bool) {
-				if (bool == null || !bool)
-					return attributeValueFalse;
-				else
+				if (Boolean.TRUE.equals(bool))
 					return attributeValue;
+				else
+					return attributeValueFalse;
 			}
 
 			@Override
