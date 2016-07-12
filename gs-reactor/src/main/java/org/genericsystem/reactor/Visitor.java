@@ -88,7 +88,7 @@ public class Visitor {
 
 		@Override
 		public void prefix(Model model) {
-			propertiesInvalid.addAll(model.getPropertiesByName("invalid"));
+			propertiesInvalid.addAll(model.getPropertiesByName(ReactorStatics.INVALID));
 		}
 	}
 }

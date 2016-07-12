@@ -651,7 +651,7 @@ public abstract class Tag<M extends Model> {
 				getEnterProperty().get().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
 				getTextProperty().setValue(json.getString(TEXT_CONTENT));
-				getAttributes().put("value", json.getString(TEXT_CONTENT));
+				getAttributes().put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
 			}
 		}
 
@@ -662,7 +662,6 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public class InputCheckHtmlDomNode extends HtmlDomNode {
-		private static final String CHECKED = "checked";
 		private final String type;
 
 		public InputCheckHtmlDomNode(String parentId, String type) {
@@ -679,7 +678,7 @@ public abstract class Tag<M extends Model> {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				getAttributes().put("checked", json.getBoolean(CHECKED) ? "checked" : "");
+				getAttributes().put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
 		}
 	}
 

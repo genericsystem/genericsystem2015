@@ -2,6 +2,7 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeSelect.InstanceCompositeSelect;
@@ -51,8 +52,8 @@ public class FlexLinks {
 							new HtmlCheckBox<InputGenericModel>(this) {
 								{
 									addAttribute("disabled", "disabled");
-									initProperty(model -> model.getProperty(this, "checked"), model -> (Boolean) model.getGeneric().getValue());
-									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
+									initProperty(model -> model.getProperty(this, ReactorStatics.CHECKED), model -> (Boolean) model.getGeneric().getValue());
+									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
 								}
 							};
@@ -142,17 +143,17 @@ public class FlexLinks {
 							new HtmlGenericInputText<GenericModel>(this) {
 								{
 									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
-									initProperty(model -> model.getProperty(this, "value"), model -> model.getGeneric().getValue());
-									bindOperation(model -> model.getProperty(this, "value"), (model, nva) -> {
+									initProperty(model -> model.getProperty(this, ReactorStatics.VALUE), model -> model.getGeneric().getValue());
+									bindOperation(model -> model.getProperty(this, ReactorStatics.VALUE), (model, nva) -> {
 										model.getGeneric().updateValue(nva);
 									});
 								}
 							};
 							new HtmlCheckBox<GenericModel>(this) {
 								{
-									initProperty(model -> model.getProperty(this, "checked"), model -> (Boolean) model.getGeneric().getValue());
-									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
-									bindOperation(model -> model.getProperty(this, "checked"), (model, nva) -> model.getGeneric().updateValue(nva));
+									initProperty(model -> model.getProperty(this, ReactorStatics.CHECKED), model -> (Boolean) model.getGeneric().getValue());
+									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+									bindOperation(model -> model.getProperty(this, ReactorStatics.CHECKED), (model, nva) -> model.getGeneric().updateValue(nva));
 									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
 								}
 							};
@@ -195,9 +196,9 @@ public class FlexLinks {
 
 			initProperty(model -> model.getProperty(this, "converter"), model -> getConverter(model));
 
-			setProperty("invalid", model -> Bindings.createBooleanBinding(() -> {
+			setProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 				boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-				String value = model.getObservableAttributes(this).get("value");
+				String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
 				if (required && (value == null || value.trim().isEmpty()))
 					return true;
 				try {
@@ -207,9 +208,9 @@ public class FlexLinks {
 					return true;
 				}
 			}, model.getObservableAttributes(this)));
-			bindOptionalStyleClass(model -> model.getObservableValue(this, "invalid"), "invalid");
+			bindOptionalStyleClass(model -> model.getObservableValue(this, ReactorStatics.INVALID), ReactorStatics.INVALID);
 
-			bindBiDirectionalAttribute(model -> model.getProperty(this, "value"), "value", model -> (StringConverter) model.getProperty(this, "converter").getValue());
+			bindBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.VALUE), ReactorStatics.VALUE, model -> (StringConverter) model.getProperty(this, "converter").getValue());
 		}
 
 		public StringConverter<?> getConverter(GenericModel model) {

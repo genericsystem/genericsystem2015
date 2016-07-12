@@ -2,6 +2,7 @@ package org.genericsystem.reactor.flex;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
@@ -188,7 +189,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										new HtmlCheckBox<GenericModel>(this) {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
-												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
+												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 												// bindAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};

@@ -3,6 +3,7 @@ package org.genericsystem.todomvc;
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.html.HtmlApp;
@@ -71,9 +72,9 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																initProperty(model -> model.getProperty(this, "checked"), model -> model.getCompleted().getValue());
-																bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
-																bindOperation(model -> model.getProperty(this, "checked"), (model, nva) -> model.getCompleted().setValue((Boolean) nva));
+																initProperty(model -> model.getProperty(this, ReactorStatics.CHECKED), model -> model.getCompleted().getValue());
+																bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindOperation(model -> model.getProperty(this, ReactorStatics.CHECKED), (model, nva) -> model.getCompleted().setValue((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {
