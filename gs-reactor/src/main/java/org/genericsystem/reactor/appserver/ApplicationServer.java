@@ -51,24 +51,20 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath,
-					new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
 
 		}
 	}
 
 	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
 		try {
-			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath,
-					userClasses.toArray(new Class[userClasses.size()]));
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
+			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath, userClasses.toArray(new Class[userClasses.size()]));
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses,
-			Class<? extends Model> modelClass, AbstractRoot engine) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine) {
 		return new PersistentApplication(applicationClass, modelClass, engine);
 	}
 
@@ -81,8 +77,9 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
 			PersistentApplication application = apps.get(path);
-			if (application == null)
+			if (application == null) {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
+			}
 			AbstractCache cache = application.getEngine().newCache();
 			Tag app = cache.safeSupply(() -> application.newHtmlApp(socket));
 			return buffer -> {
@@ -98,41 +95,54 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public void addHttpHandler(HttpServer httpServer) {
 			httpServer.requestHandler(request -> {
-				String[] items = request.path().split("/");
-				String appPath = "";
-
-				if (items.length > 1) {
-					appPath += items[1].trim();
-				}
-
+				// log.info("Request received with path : " + request.path());
+				String[] items = request.path().substring(1).split("/");
+				// log.info("Request received with splited items : " + Arrays.toString(items));
+				String appPath = items.length == 0 ? "" : items[0];
+				if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
+					appPath = "";
+				// log.info("Request received with application path : /" + appPath);
 				PersistentApplication application = apps.get("/" + appPath);
 				if (application == null) {
-					request.response().end();
-					throw new IllegalStateException("Unable to load an application with path : " + appPath);
+					request.response().end("No application is configured with path : /" + appPath);
+					throw new IllegalStateException("Unable to load an application with path : /" + appPath);
 				}
-
-				if (items.length > 2) {
-					String res = request.path().replaceFirst("/.*?/", "/");
-					InputStream input = application.getApplicationClass().getResourceAsStream(res);
-					if (input == null)
-						throw new IllegalStateException("unable to find class : " + res);
-					String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
-					request.response().end(result);
-				} else {
+				// log.info("Request detected for application : " + application.getApplicationClass().getName());
+				String resourceToServe = request.path().substring(appPath.length() + 1);
+				// log.info("Resource to serve : " + resourceToServe);
+				if ("".equals(resourceToServe)) {
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
 					indexHtml += "<head>";
 					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"/" + appPath + "/" + appPath + ".css\"/>";
+					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
 					indexHtml += "</script>";
-					indexHtml += "<script type=\"text/javascript\" src=\"/" + appPath + "/script.js\"></script>";
+					indexHtml += "<script type=\"text/javascript\" src=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body onload=\"connect();\" id=\"root\">";
 					indexHtml += "</body>";
 					indexHtml += "</html>";
 					request.response().end(indexHtml);
+				} else {
+					InputStream input = application.getApplicationClass().getResourceAsStream(resourceToServe);
+					if (input == null) {
+						if (resourceToServe.endsWith(".css")) {
+							log.warn("Unable to find resource : " + resourceToServe + ", get the reactor standard css instead");
+							input = ApplicationServer.class.getResourceAsStream("/reactor.css");
+						} else if (resourceToServe.endsWith(".js")) {
+							log.warn("Unable to find resource : " + resourceToServe + ", get the reactor standard js instead");
+							input = ApplicationServer.class.getResourceAsStream("/script.js");
+						} else if (resourceToServe.endsWith(".ico") || resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
+							log.warn("Unable to find resource : " + resourceToServe + ", get nothing instead");
+							request.response().end();
+							return;
+						} else
+							throw new IllegalStateException("Unable to find resource : " + resourceToServe);
+					}
+					String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
+					request.response().end(result);
 				}
 			});
 		}
