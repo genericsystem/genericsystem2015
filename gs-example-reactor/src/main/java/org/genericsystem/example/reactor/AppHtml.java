@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -25,16 +23,15 @@ import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT
-				: Integer.parseInt(args[0]));
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
-				Power.class, Diesel.class, Color.class, CarColor.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
+		appsConfig.addApplication("/", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Diesel.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
@@ -52,8 +49,8 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new FlexSection<SelectorModel>(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
-						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, GenericModel::new);
+						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, GenericModel::new);
 						new FlexEditor(this, FlexDirection.ROW) {
 							{
 								select_(SelectorModel::getSelection);
@@ -65,8 +62,8 @@ public class AppHtml extends HtmlApp<EngineModel> {
 					}
 				};
 
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputGenericModel::new);
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputGenericModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, GenericModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, GenericModel::new);
 				new SaveCancelFlexRow(this).addStyle("background-color", "#ffa500");
 			}
 		};
