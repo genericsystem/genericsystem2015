@@ -57,6 +57,10 @@ public class Model {
 		return (Property<T>) propertiesMap.get(tag).get(name);
 	}
 
+	public List<ObservableValue> getPropertiesByName(String propertyName) {
+		return propertiesMap.values().stream().map(map -> map.get(propertyName)).filter(property -> property != null).collect(Collectors.toList());
+	}
+
 	public void setProperty(Tag tag, String propertyName, ObservableValue value) {
 		propertiesMap.get(tag).put(propertyName, value);
 	}

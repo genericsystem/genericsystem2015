@@ -230,7 +230,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlButton<InputGenericModel>(this) {
+						new HtmlButton<GenericModel>(this) {
 							{
 								bindOptionalAttribute("disabled", model -> new CheckInputsValidityVisitor(model).isInvalid(), "disabled");
 								bindAction(modelContext -> {

@@ -73,29 +73,22 @@ public class Visitor {
 	}
 
 	public static class CheckInputsValidityVisitor extends Visitor {
-		private final List<InputGenericModel> inputModels = new ArrayList<>();
+		private final List<ObservableValue> propertiesInvalid = new ArrayList<>();
 		private final ObservableValue<Boolean> invalid;
 
 		public CheckInputsValidityVisitor(Model modelContext) {
 			super();
 			visit(modelContext);
-			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(),
-					inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
+			invalid = Bindings.createBooleanBinding(() -> propertiesInvalid.stream().map(input -> (Boolean) input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b), propertiesInvalid.stream().toArray(ObservableValue[]::new));
 		}
 
 		public ObservableValue<Boolean> isInvalid() {
 			return invalid;
 		}
 
-		private Boolean checkInvalidity() {
-			return inputModels.stream().map(inputModel -> inputModel.getInvalid().getValue()).reduce(false, (a, b) -> a || b);
-		}
-
 		@Override
 		public void prefix(Model model) {
-			if (model instanceof InputGenericModel) {
-				inputModels.add((InputGenericModel) model);
-			}
+			propertiesInvalid.addAll(model.getPropertiesByName("invalid"));
 		}
 	}
 }
