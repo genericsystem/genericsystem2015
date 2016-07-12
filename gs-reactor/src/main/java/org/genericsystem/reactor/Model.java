@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
-import org.genericsystem.reactor.model.InputGenericModel.TriFunction;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -44,6 +43,11 @@ public class Model {
 		};
 	};
 	private TriFunction<Generic[], Serializable, Generic, Generic> action;
+
+	@FunctionalInterface
+	public interface TriFunction<T, U, R, S> {
+		R apply(T t, U u, S s);
+	}
 
 	public Model getParent() {
 		return this.parent;

@@ -19,7 +19,6 @@ import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
@@ -122,7 +121,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 	protected void columnsInputSection() {
 		new CompositeFlexSection<GenericModel>(this, this.getReverseDirection()) {
 			{
-				select(gs -> gs[0], InputGenericModel::new);
+				select(gs -> gs[0], GenericModel::new);
 			}
 
 			@Override

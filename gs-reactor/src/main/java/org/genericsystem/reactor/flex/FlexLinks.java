@@ -11,7 +11,6 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 
@@ -33,7 +32,7 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new FlexSection<InputGenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new FlexSection<GenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
@@ -49,12 +48,12 @@ public class FlexLinks {
 									bindText(GenericModel::getString);
 								}
 							};
-							new HtmlCheckBox<InputGenericModel>(this) {
+							new HtmlCheckBox<GenericModel>(this) {
 								{
 									addAttribute("disabled", "disabled");
 									initProperty(model -> model.getProperty(this, ReactorStatics.CHECKED), model -> (Boolean) model.getGeneric().getValue());
 									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
 								}
 							};
 						}

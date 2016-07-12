@@ -14,11 +14,10 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputGenericModel;
-import org.genericsystem.reactor.model.InputGenericModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 import org.slf4j.Logger;
@@ -427,10 +426,6 @@ public abstract class Tag<M extends Model> {
 					return false;
 			}
 		});
-	}
-
-	public void bindAction(TriFunction<Generic[], Serializable, Generic, Generic> operation) {
-		addPrefixBinding(modelContext -> ((InputGenericModel) modelContext).getInputAction().setValue(operation));
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
