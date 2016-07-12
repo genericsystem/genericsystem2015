@@ -2,6 +2,7 @@ package org.genericsystem.reactor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -169,17 +170,14 @@ public abstract class Tag<M extends Model> {
 					return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
 				}
 			};
-			viewContext.getModelContext().setSubContexts(
-					childElement,
-					new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
-						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
-						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
-							GenericModel childModel = constructor.build(gs,
-									stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
-							childModel.parent = viewContext.getModelContext();
-							viewContext.createViewContextChild(index, childModel, childElement);
-							return (MODEL) childModel;
-						}, Model::destroy));
+			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
+				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+				GenericModel childModel = constructor.build(gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
+				childModel.parent = viewContext.getModelContext();
+				viewContext.createViewContextChild(index, childModel, childElement);
+				return (MODEL) childModel;
+			}, Model::destroy));
 		};
 	}
 
@@ -331,8 +329,8 @@ public abstract class Tag<M extends Model> {
 	// });
 	// }
 
-	public void addStyleClasses(Set<String> styleClasses) {
-		addPrefixBinding(model -> model.getObservableStyleClasses(this).addAll(styleClasses));
+	public void addStyleClasses(String... styleClasses) {
+		addPrefixBinding(model -> model.getObservableStyleClasses(this).addAll(Arrays.asList(styleClasses)));
 	}
 
 	// public void bindStyleClasses(ObservableSet<String> styleClasses) {

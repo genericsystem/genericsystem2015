@@ -22,13 +22,18 @@ body {
 	
 }
 
-section .adding ,header .adding ,footer .adding {
+section .adding  {
 	animation: appeareffect 2s;
 }
 
-section .removing,header .removing,footer .removing {
+section .removing {
     animation: disappeareffect 0.5s;
 }
+
+section .invalid {
+    animation: disappeareffect 0.5s infinite;
+}
+
 
 @keyframes appeareffect {
  	0% {

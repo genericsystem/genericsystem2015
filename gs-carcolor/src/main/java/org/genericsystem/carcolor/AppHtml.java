@@ -1,7 +1,5 @@
 package org.genericsystem.carcolor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -27,6 +25,8 @@ import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
+import io.vertx.core.http.ServerWebSocket;
+
 public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
@@ -37,8 +37,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 			port = Integer.parseInt(args[0]);
 		}
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, port);
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
-				Power.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 
 	}
@@ -63,6 +62,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 							{
 								select_(SelectorModel::getSelection);
 								addStyle("justify-content", "center");
+								addStyleClass("invalid");
 							}
 						};
 
