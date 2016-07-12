@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.flex;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
@@ -9,17 +10,19 @@ import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkEditor;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
+import org.genericsystem.reactor.flex.FlexLinks.HtmlGenericInputText;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlHyperLink;
-import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
+
+import javafx.util.StringConverter;
 
 /**
  * @author Nicolas Feybesse
@@ -129,16 +132,19 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlInputText<InputGenericModel>(this) {
+						new HtmlGenericInputText<GenericModel>(this) {
 							{
-								addStyle("width", "100%");
-								addStyle("height", "100%");
-								bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
-								bindAction((gs, value, g) -> gs[0].setInstance(value));
-								bindTextBidirectional(InputGenericModel::getInputString);
+								// bindAction((gs, value, g) -> gs[0].setInstance(value));
+							}
+
+							@Override
+							public StringConverter<?> getConverter(GenericModel model) {
+								Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
+								if (clazz == null)
+									clazz = String.class;
+								return ApiStatics.STRING_CONVERTERS.get(clazz);
 							}
 						};
-
 					}
 				};
 			}
@@ -165,21 +171,25 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										addStyle("align-items", "center");
 										addStyle("width", "100%");
 										addStyle("height", "100%");
-										new HtmlInputText<InputGenericModel>(this) {
+										new HtmlGenericInputText<GenericModel>(this) {
 											{
-												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
-												addStyle("width", "100%");
-												addStyle("height", "100%");
-												bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
-												bindTextBidirectional(InputGenericModel::getInputString);
-												bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
+												// bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+											}
+
+											@Override
+											public StringConverter<?> getConverter(GenericModel model) {
+												Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
+												if (clazz == null)
+													clazz = String.class;
+												return ApiStatics.STRING_CONVERTERS.get(clazz);
 											}
 										};
-										new HtmlCheckBox<InputGenericModel>(this) {
+										new HtmlCheckBox<GenericModel>(this) {
 											{
-												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
-												bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
 												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
+												// bindAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
 									}
