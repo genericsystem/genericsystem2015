@@ -14,11 +14,10 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputGenericModel;
-import org.genericsystem.reactor.model.InputGenericModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
 import org.slf4j.Logger;
@@ -320,6 +319,12 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	public <T> void setAction(TriFunction<Generic[], Serializable, Generic, Generic> action) {
+		addPrefixBinding(modelContext -> {
+			modelContext.setAction(action);
+		});
+	}
+
 	public void addStyle(String propertyName, String value) {
 		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
 	}
@@ -407,10 +412,10 @@ public abstract class Tag<M extends Model> {
 
 			@Override
 			public String toString(Boolean bool) {
-				if (bool == null || !bool)
-					return attributeValueFalse;
-				else
+				if (Boolean.TRUE.equals(bool))
 					return attributeValue;
+				else
+					return attributeValueFalse;
 			}
 
 			@Override
@@ -421,10 +426,6 @@ public abstract class Tag<M extends Model> {
 					return false;
 			}
 		});
-	}
-
-	public void bindAction(TriFunction<Generic[], Serializable, Generic, Generic> operation) {
-		addPrefixBinding(modelContext -> ((InputGenericModel) modelContext).getInputAction().setValue(operation));
 	}
 
 	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
@@ -650,9 +651,8 @@ public abstract class Tag<M extends Model> {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				// getTextProperty().setValue(json.getString(TEXT_CONTENT));
-				// getInputString().setValue(json.getString(TEXT_CONTENT));
-				getAttributes().put("value", json.getString(TEXT_CONTENT));
+				getTextProperty().setValue(json.getString(TEXT_CONTENT));
+				getAttributes().put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
 			}
 		}
 
@@ -663,7 +663,6 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public class InputCheckHtmlDomNode extends HtmlDomNode {
-		private static final String CHECKED = "checked";
 		private final String type;
 
 		public InputCheckHtmlDomNode(String parentId, String type) {
@@ -680,7 +679,7 @@ public abstract class Tag<M extends Model> {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				getAttributes().put("checked", json.getBoolean(CHECKED) ? "checked" : "");
+				getAttributes().put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
 		}
 	}
 

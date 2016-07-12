@@ -1,14 +1,15 @@
 package org.genericsystem.reactor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 public class Visitor {
@@ -34,11 +35,11 @@ public class Visitor {
 
 		@Override
 		public void prefix(Model model) {
-			GenericModel cModel = (GenericModel) model;
-			if (cModel instanceof InputGenericModel) {
-				InputGenericModel icModel = (InputGenericModel) cModel;
-				if (icModel.getValue() != null) {
-					Generic g = icModel.getInputAction().getValue().apply(cModel.getGenerics(), icModel.getValue(), newInstance);
+			GenericModel gModel = (GenericModel) model;
+			if (model.getAction() != null) {
+				Serializable value = (Serializable) model.getPropertiesByName(ReactorStatics.VALUE).get(0).getValue();
+				if (value != null) {
+					Generic g = gModel.getAction().apply(gModel.getGenerics(), value, newInstance);
 					if (newInstance == null)
 						newInstance = g;
 				}
@@ -65,37 +66,30 @@ public class Visitor {
 	public static class ClearVisitor extends Visitor {
 		@Override
 		public void prefix(Model model) {
-			if (model instanceof InputGenericModel)
-				((InputGenericModel) model).getInputString().setValue(null);
+			if (model.getAction() != null)
+				((Property) model.getPropertiesByName(ReactorStatics.VALUE).get(0)).setValue(null);
 			if (model instanceof SelectorModel)
 				((SelectorModel) model).getSelection().setValue(null);
 		}
 	}
 
 	public static class CheckInputsValidityVisitor extends Visitor {
-		private final List<InputGenericModel> inputModels = new ArrayList<>();
+		private final List<ObservableValue> propertiesInvalid = new ArrayList<>();
 		private final ObservableValue<Boolean> invalid;
 
 		public CheckInputsValidityVisitor(Model modelContext) {
 			super();
 			visit(modelContext);
-			invalid = Bindings.createBooleanBinding(() -> checkInvalidity(),
-					inputModels.stream().map(inputModel -> inputModel.getInputString()).toArray(ObservableValue[]::new));
+			invalid = Bindings.createBooleanBinding(() -> propertiesInvalid.stream().map(input -> (Boolean) input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b), propertiesInvalid.stream().toArray(ObservableValue[]::new));
 		}
 
 		public ObservableValue<Boolean> isInvalid() {
 			return invalid;
 		}
 
-		private Boolean checkInvalidity() {
-			return inputModels.stream().map(inputModel -> inputModel.getInvalid().getValue()).reduce(false, (a, b) -> a || b);
-		}
-
 		@Override
 		public void prefix(Model model) {
-			if (model instanceof InputGenericModel) {
-				inputModels.add((InputGenericModel) model);
-			}
+			propertiesInvalid.addAll(model.getPropertiesByName(ReactorStatics.INVALID));
 		}
 	}
 }

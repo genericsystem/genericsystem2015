@@ -1,11 +1,13 @@
 package org.genericsystem.reactor;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 import javafx.beans.property.Property;
@@ -40,6 +42,12 @@ public class Model {
 			return properties;
 		};
 	};
+	private TriFunction<Generic[], Serializable, Generic, Generic> action;
+
+	@FunctionalInterface
+	public interface TriFunction<T, U, R, S> {
+		R apply(T t, U u, S s);
+	}
 
 	public Model getParent() {
 		return this.parent;
@@ -57,8 +65,20 @@ public class Model {
 		return (Property<T>) propertiesMap.get(tag).get(name);
 	}
 
+	public List<ObservableValue> getPropertiesByName(String propertyName) {
+		return propertiesMap.values().stream().map(map -> map.get(propertyName)).filter(property -> property != null).collect(Collectors.toList());
+	}
+
 	public void setProperty(Tag tag, String propertyName, ObservableValue value) {
 		propertiesMap.get(tag).put(propertyName, value);
+	}
+
+	public TriFunction<Generic[], Serializable, Generic, Generic> getAction() {
+		return action;
+	}
+
+	public void setAction(TriFunction<Generic[], Serializable, Generic, Generic> action) {
+		this.action = action;
 	}
 
 	public List<Model> allSubContexts() {

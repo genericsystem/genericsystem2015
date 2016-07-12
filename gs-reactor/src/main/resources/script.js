@@ -147,9 +147,17 @@ function onMessageReceived(evt) {
 		break;
 	case 'AA':
 		elt.setAttribute(message.attributeName, message.attributeValue);
+		if (message.attributeName == "value")
+			elt.value = message.attributeValue;
+		if (message.attributeName == "checked")
+			elt.checked = message.attributeValue;
 		break;
 	case 'RA':
 		elt.removeAttribute(message.attributeName);
+		if (message.attributeName == "value")
+			elt.value = "";
+		if (message.attributeName == "checked")
+			elt.checked = false;
 		break;
 	default :
 		alert("Unknown message received");
