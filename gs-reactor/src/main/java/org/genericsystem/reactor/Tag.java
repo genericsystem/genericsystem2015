@@ -650,8 +650,7 @@ public abstract class Tag<M extends Model> {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				// getTextProperty().setValue(json.getString(TEXT_CONTENT));
-				// getInputString().setValue(json.getString(TEXT_CONTENT));
+				getTextProperty().setValue(json.getString(TEXT_CONTENT));
 				getAttributes().put("value", json.getString(TEXT_CONTENT));
 			}
 		}
