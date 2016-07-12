@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.flex;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotation.InstanceColorize;
@@ -13,6 +14,9 @@ import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.InputGenericModel.EditInputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
+
+import javafx.beans.binding.Bindings;
+import javafx.util.StringConverter;
 
 public class FlexLinks {
 
@@ -141,22 +145,45 @@ public class FlexLinks {
 									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, EditInputGenericModel::new);
 									addStyle("width", "100%");
 									addStyle("height", "100%");
-									bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
-									bindTextBidirectional(InputGenericModel::getInputString);
-									addPostfixBinding(model -> {
-										model.getInputString().setValue(model.getStringConverter().toString(model.getGenerics()[0].getValue()));
-										model.getInputString().addListener((ov, ova, nva) -> {
-											model.getGenerics()[0].updateValue(model.getStringConverter().fromString(nva));
-										});
+
+									setProperty("invalid", model -> Bindings.createBooleanBinding(() -> {
+										boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
+										String value = model.getObservableAttributes(this).get("value");
+										if (required && (value == null || value.isEmpty()))
+											return true;
+										try {
+											((StringConverter) model.getProperty(this, "converter").getValue()).fromString(value);
+											return false;
+										} catch (Exception e) {
+											return true;
+										}
+									}, model.getObservableAttributes(this)));
+									bindOptionalStyle("border-color", model -> model.getObservableValue(this, "invalid"), "red");
+
+									initProperty(model -> model.getProperty(this, "converter"), model -> {
+										Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
+										if (clazz == null) {
+											if (model.getGeneric().getValue() != null)
+												clazz = model.getGeneric().getValue().getClass();
+											else
+												clazz = String.class;
+										}
+										return ApiStatics.STRING_CONVERTERS.get(clazz);
+									});
+
+									initProperty(model -> model.getProperty(this, "value"), model -> model.getGeneric().getValue());
+									bindBiDirectionalAttribute(model -> model.getProperty(this, "value"), "value", model -> (StringConverter) model.getProperty(this, "converter").getValue());
+									bindOperation(model -> model.getProperty(this, "value"), (model, nva) -> {
+										model.getGeneric().updateValue(nva);
 									});
 								}
 							};
-							new HtmlCheckBox<InputGenericModel>(this) {
+							new HtmlCheckBox<GenericModel>(this) {
 								{
 									initProperty(model -> model.getProperty(this, "checked"), model -> (Boolean) model.getGeneric().getValue());
 									bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
 									bindOperation(model -> model.getProperty(this, "checked"), (model, nva) -> model.getGeneric().updateValue(nva));
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
 								}
 							};
 						}
