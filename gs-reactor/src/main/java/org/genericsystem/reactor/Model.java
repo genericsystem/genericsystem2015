@@ -10,6 +10,7 @@ import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
@@ -22,15 +23,15 @@ public class Model {
 	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
-	private final Map<Tag<?>, Map<String, Property<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, Property<Object>>>() {
+	private final Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
 		@Override
-		public Map<String, Property<Object>> get(Object key) {
-			Map<String, Property<Object>> properties = super.get(key);
+		public Map<String, ObservableValue<Object>> get(Object key) {
+			Map<String, ObservableValue<Object>> properties = super.get(key);
 			if (properties == null)
-				put((Tag) key, properties = new HashMap<String, Property<Object>>() {
+				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
 					@Override
-					public Property<Object> get(Object key) {
-						Property<Object> property = super.get(key);
+					public ObservableValue<Object> get(Object key) {
+						ObservableValue<Object> property = super.get(key);
 						if (property == null)
 							put((String) key, property = new SimpleObjectProperty<>());
 						return property;
@@ -48,8 +49,16 @@ public class Model {
 		return subContextsMap.get(tag);
 	}
 
+	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String name) {
+		return (ObservableValue<T>) propertiesMap.get(tag).get(name);
+	}
+
 	public <T> Property<T> getProperty(Tag<?> tag, String name) {
 		return (Property<T>) propertiesMap.get(tag).get(name);
+	}
+
+	public void setProperty(Tag tag, String propertyName, ObservableValue value) {
+		propertiesMap.get(tag).put(propertyName, value);
 	}
 
 	public List<Model> allSubContexts() {
