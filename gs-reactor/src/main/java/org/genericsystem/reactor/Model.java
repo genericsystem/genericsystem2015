@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
+
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -21,13 +23,42 @@ public class Model {
 	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private final Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
+	private final Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
+		@Override
+		public Map<String, ObservableValue<Object>> get(Object key) {
+			Map<String, ObservableValue<Object>> properties = super.get(key);
+			if (properties == null)
+				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
+					@Override
+					public ObservableValue<Object> get(Object key) {
+						ObservableValue<Object> property = super.get(key);
+						if (property == null)
+							put((String) key, property = new SimpleObjectProperty<>());
+						return property;
+					};
+				});
+			return properties;
+		};
+	};
 
 	public Model getParent() {
 		return this.parent;
 	}
 
-	public List<? extends Model> getSubContexts(Tag<?> element) {
-		return subContextsMap.get(element);
+	public List<? extends Model> getSubContexts(Tag<?> tag) {
+		return subContextsMap.get(tag);
+	}
+
+	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String name) {
+		return (ObservableValue<T>) propertiesMap.get(tag).get(name);
+	}
+
+	public <T> Property<T> getProperty(Tag<?> tag, String name) {
+		return (Property<T>) propertiesMap.get(tag).get(name);
+	}
+
+	public void setProperty(Tag tag, String propertyName, ObservableValue value) {
+		propertiesMap.get(tag).put(propertyName, value);
 	}
 
 	public List<Model> allSubContexts() {
@@ -40,7 +71,7 @@ public class Model {
 	}
 
 	public void register(ViewContext<?> viewContext) {
-		ViewContext<?> previous = viewContextsMap.put(viewContext.getElement(), viewContext);
+		ViewContext<?> previous = viewContextsMap.put(viewContext.getTag(), viewContext);
 		assert previous == null;
 	}
 

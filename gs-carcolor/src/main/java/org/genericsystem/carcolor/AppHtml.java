@@ -1,7 +1,5 @@
 package org.genericsystem.carcolor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -13,9 +11,6 @@ import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
-import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
-import org.genericsystem.reactor.flex.CompositeFlexSection.ColorCompositeRadio;
-import org.genericsystem.reactor.flex.CompositeFlexSection.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.FlexEditor;
 import org.genericsystem.reactor.flex.FlexSection;
@@ -27,18 +22,14 @@ import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.SelectorModel;
 
+import io.vertx.core.http.ServerWebSocket;
+
 public class AppHtml extends HtmlApp<EngineModel> {
+	private static final String MAIN_COLOR = "#3393ff";
 
 	public static void main(String[] args) {
-		int port;
-		if (args.length == 0) {
-			port = 8080;
-		} else {
-			port = Integer.parseInt(args[0]);
-		}
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, port);
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
-				Power.class, Color.class, CarColor.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0]) : Statics.DEFAULT_PORT);
+		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 
 	}
@@ -49,30 +40,21 @@ public class AppHtml extends HtmlApp<EngineModel> {
 		new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
-				new ColorsSelect<SelectorModel>(this).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
-				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
-				new ColorCompositeRadio<SelectorModel>(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class, SelectorModel::new);
-				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
-
+				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", MAIN_COLOR);
 				new FlexSection<SelectorModel>(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
-						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, InputGenericModel::new);
-						new FlexEditor(this, FlexDirection.ROW) {
+						new FlexEditor(this, FlexDirection.COLUMN) {
 							{
 								select_(SelectorModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};
-
-						new FlexEditor(this, FlexDirection.COLUMN).select_(SelectorModel::getSelection);
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputGenericModel::new);
 					}
 				};
-
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, InputGenericModel::new);
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, InputGenericModel::new);
-				new SaveCancelFlexRow(this).addStyle("background-color", "#ffa500");
+				new SaveCancelFlexRow(this).addStyle("background-color", MAIN_COLOR);
 			}
 		};
 	}

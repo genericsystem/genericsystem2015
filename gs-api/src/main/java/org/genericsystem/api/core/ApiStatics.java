@@ -142,7 +142,7 @@ public class ApiStatics {
 
 				@Override
 				public String toString(Class<?> clazz) {
-					return clazz.getName();
+					return clazz != null ? clazz.getName() : null;
 				}
 
 				@Override

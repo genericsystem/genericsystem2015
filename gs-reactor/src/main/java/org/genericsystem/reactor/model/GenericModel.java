@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
 
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
+
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ObservableValue;
 
 /**
  * @author Nicolas Feybesse

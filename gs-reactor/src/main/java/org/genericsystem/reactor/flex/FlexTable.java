@@ -17,7 +17,6 @@ import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.InputCheckModel;
 import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
@@ -87,8 +86,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 
 			@Override
 			protected void sections() {
-				new FlexLinkTitleDisplayer<GenericModel>(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])),
-						this.getDirection()) {
+				new FlexLinkTitleDisplayer<GenericModel>(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
@@ -136,7 +134,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 								addStyle("width", "100%");
 								addStyle("height", "100%");
 								bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
-								bindOperation((gs, value, g) -> gs[0].setInstance(value));
+								bindAction((gs, value, g) -> gs[0].setInstance(value));
 								bindTextBidirectional(InputGenericModel::getInputString);
 							}
 						};
@@ -169,20 +167,19 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										addStyle("height", "100%");
 										new HtmlInputText<InputGenericModel>(this) {
 											{
-												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null,
-														InputGenericModel::new);
+												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
 												addStyle("width", "100%");
 												addStyle("height", "100%");
 												bindOptionalStyle("border-color", InputGenericModel::getInvalid, "red");
-												bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
 												bindTextBidirectional(InputGenericModel::getInputString);
+												bindAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
-										new HtmlCheckBox<InputCheckModel>(this) {
+										new HtmlCheckBox<InputGenericModel>(this) {
 											{
-												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputCheckModel::new);
-												bindOperation((gs, value, g) -> g.setHolder(gs[1], value));
-												bindCheckedBidirectional(InputCheckModel::getChecked);
+												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, InputGenericModel::new);
+												bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, "checked"), "checked", "checked");
 											}
 										};
 									}
@@ -197,8 +194,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
 								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
 									{
 										addStyle("width", "100%");
@@ -262,10 +258,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
-						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put(
-								"background-color",
-								modelContext.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.getString().getValue()
-										: "#bba5ff"));
+						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color", modelContext.getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? modelContext.getString().getValue() : "#bba5ff"));
 						new HtmlHyperLink<GenericModel>(this) {
 							{
 								bindText(GenericModel::getString);

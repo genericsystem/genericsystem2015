@@ -22,13 +22,17 @@ body {
 	
 }
 
-section .adding ,header .adding ,footer .adding {
+section .adding {
 	animation: appeareffect 2s;
 }
 
-section .removing,header .removing,footer .removing {
+section .removing {
     animation: disappeareffect 0.5s;
 }
+
+.invalid {
+    animation: invalideffect 0.5s 5 forwards;
+  }
 
 @keyframes appeareffect {
  	0% {
@@ -48,3 +52,11 @@ section .removing,header .removing,footer .removing {
  	}
 }
 
+@keyframes invalideffect {
+ 	0% {
+		box-shadow: none;
+ 	}
+  	100% {
+  		box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
+ 	}
+}
