@@ -1,0 +1,44 @@
+#!/bin/bash
+
+SERVICE_NAME=GenericSystem
+PATH_TO_EXEC=/home/middleware/git/gs-demo/
+PID_PATH_NAME=/tmp/GenericSystem-pid
+
+case $1 in
+	start)
+	echo "Starting $SERVICE_NAME ..."
+	if [ ! -f  PID_PATH_NAME ]; then
+cd /home/middleware/git/gs-demo/; mvn clean install exec:java -Dexec.mainClass="org.genericsystem.demo.App" -Dexec.args="8080" 2>> /dev/null >> /dev/null & echo $! > $PID_PATH_NAME
+		echo "$SERVICE_NAME started ..."
+	else
+		echo "$SERVICE_NAME is already running ..."
+	fi
+	;;
+	stop)
+	if [ -f $PID_PATH_NAME ]; then
+	PID=$(cat $PID_PATH_NAME);
+		echo "$SERVICE_NAME stopping ..."
+		echo "killing processus : $PID"
+		kill $PID;
+		echo "$SERVICE_NAME is stopped ..."
+		rm $PID_PATH_NAME
+	else
+		echo "$SERVICE_NAME is not running ..."
+	fi
+	;;
+	restart)
+	if [ -f $PID_PATH_NAME ]; then
+	PID=$(cat $PID_PATH_NAME);
+		echo "$SERVICE_NAME stopping ..."
+		echo "killing processus : $PID"
+		kill $PID;
+		echo "$SERVICE_NAME is stopped ..."
+		rm $PID_PATH_NAME
+		echo "$SERVICE_NAME is starting ..."
+cd /home/middleware/git/gs-demo/; mvn clean install exec:java -Dexec.mainClass="org.genericsystem.demo.App" -Dexec.args="8080" 2>> /dev/null >> /dev/null & echo $! > $PID_PATH_NAME
+		echo "$SERVICE_NAME started ..."
+else
+		echo "$SERVICE_NAME is not running ..."
+fi
+	;;
+esac
