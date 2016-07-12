@@ -21,6 +21,8 @@ import org.genericsystem.reactor.model.InputGenericModel;
 import org.genericsystem.reactor.model.InputGenericModel.TriFunction;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.SelectorModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
@@ -52,6 +54,7 @@ import javafx.util.StringConverter;
  */
 public abstract class Tag<M extends Model> {
 
+	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
 	public BiConsumer<Tag<M>, ViewContext<?>> metaBinding;
 	public final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
@@ -274,15 +277,24 @@ public abstract class Tag<M extends Model> {
 	}
 
 	private <T extends Serializable> void bindBiDirectionalMapElement(Function<M, Property<T>> applyOnModel, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
+		bindBiDirectionalMapElement(applyOnModel, name, getMap, model -> stringConverter);
+	}
+
+	private <T extends Serializable> void bindBiDirectionalMapElement(Function<M, Property<T>> applyOnModel, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
 		addPrefixBinding(modelContext -> {
 			ObservableMap<String, String> map = getMap.apply(modelContext);
+			StringConverter<T> stringConverter = getStringConverter.apply(modelContext);
 			ChangeListener<T> listener = (o, old, newValue) -> map.put(name, stringConverter.toString(newValue));
 			Property<T> observable = applyOnModel.apply(modelContext);
 			observable.addListener(listener);
 			map.addListener((MapChangeListener<String, String>) c -> {
 				if (!name.equals(c.getKey()))
 					return;
-				observable.setValue(c.wasAdded() ? stringConverter.fromString(c.getValueAdded()) : null);
+				try {
+					observable.setValue(c.wasAdded() ? stringConverter.fromString(c.getValueAdded()) : null);
+				} catch (Exception ignore) {
+					log.warn("Conversion exception : " + ignore.getMessage());
+				}
 			});
 			map.put(name, stringConverter.toString(observable.getValue()));
 		});
@@ -299,6 +311,12 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(modelContext -> {
 			Property<T> observable = applyOnModel.apply(modelContext);
 			observable.setValue(getInitialValue.apply(modelContext));
+		});
+	}
+
+	public <T> void setProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
+		addPrefixBinding(modelContext -> {
+			modelContext.setProperty(this, propertyName, applyOnModel.apply(modelContext));
 		});
 	}
 
@@ -374,6 +392,10 @@ public abstract class Tag<M extends Model> {
 
 	public <T extends Serializable> void bindBiDirectionalAttribute(Function<M, Property<T>> applyOnModel, String attributeName, StringConverter<T> stringConverter) {
 		bindBiDirectionalMapElement(applyOnModel, attributeName, model -> model.getObservableAttributes(this), stringConverter);
+	}
+
+	public <T extends Serializable> void bindBiDirectionalAttribute(Function<M, Property<T>> applyOnModel, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
+		bindBiDirectionalMapElement(applyOnModel, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
 	}
 
 	public void bindOptionalBiDirectionalAttribute(Function<M, Property<Boolean>> applyOnModel, String attributeName, String attributeValue) {
@@ -628,8 +650,9 @@ public abstract class Tag<M extends Model> {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().get().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				getTextProperty().setValue(json.getString(TEXT_CONTENT));
-				getInputString().setValue(json.getString(TEXT_CONTENT));
+				// getTextProperty().setValue(json.getString(TEXT_CONTENT));
+				// getInputString().setValue(json.getString(TEXT_CONTENT));
+				getAttributes().put("value", json.getString(TEXT_CONTENT));
 			}
 		}
 
