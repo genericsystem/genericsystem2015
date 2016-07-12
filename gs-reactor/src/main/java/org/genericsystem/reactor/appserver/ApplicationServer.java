@@ -126,7 +126,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "</html>";
 					request.response().end(indexHtml);
 				} else {
-					InputStream input = application.getApplicationClass().getResourceAsStream(resourceToServe);
+					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
 					if (input == null) {
 						if (resourceToServe.endsWith(".css")) {
 							log.warn("Unable to find resource : " + resourceToServe + ", get the reactor standard css instead");
