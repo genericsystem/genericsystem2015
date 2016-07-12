@@ -320,6 +320,12 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	public <T> void setAction(TriFunction<Generic[], Serializable, Generic, Generic> action) {
+		addPrefixBinding(modelContext -> {
+			modelContext.setAction(action);
+		});
+	}
+
 	public void addStyle(String propertyName, String value) {
 		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
 	}

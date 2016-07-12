@@ -135,7 +135,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						addStyle("margin-bottom", "1px");
 						new HtmlGenericInputText<GenericModel>(this) {
 							{
-								// bindAction((gs, value, g) -> gs[0].setInstance(value));
+								setAction((gs, value, g) -> gs[0].setInstance(value));
 							}
 
 							@Override
@@ -175,7 +175,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										new HtmlGenericInputText<GenericModel>(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
-												// bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+												setAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 
 											@Override
@@ -189,8 +189,8 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										new HtmlCheckBox<GenericModel>(this) {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
-												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-												// bindAction((gs, value, g) -> g.setHolder(gs[1], value));
+												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.VALUE), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+												setAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
 									}
