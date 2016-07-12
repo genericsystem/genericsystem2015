@@ -31,9 +31,8 @@ section .removing {
 }
 
 .invalid {
-    animation: invalideffect 0.5s 5;
-    box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
-}
+    animation: invalideffect 0.5s 5 forwards;
+  }
 
 @keyframes appeareffect {
  	0% {
@@ -55,9 +54,9 @@ section .removing {
 
 @keyframes invalideffect {
  	0% {
- 		box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
+		box-shadow: none;
  	}
   	100% {
-  		box-shadow: none;
+  		box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
  	}
 }
