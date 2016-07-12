@@ -25,7 +25,7 @@ public abstract class AbstractServer extends AbstractRoot implements Generic, Pr
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);
-	private TsGenerator generator = new TsGenerator();;
+	private TsGenerator generator = new TsGenerator();
 
 	@Override
 	public AbstractServer getRoot() {
