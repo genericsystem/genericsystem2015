@@ -97,6 +97,10 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
 
+	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String propertyName, String styleClass) {
+		bindOptionalStyleClass(model -> model.getObservableValue(this, propertyName), styleClass);
+	}
+
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(Function<M, ObservableValue<Boolean>> applyOnModel, String styleClass) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<Boolean> optional = applyOnModel.apply(modelContext);
@@ -261,6 +265,10 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
+		bindMapElement(name, model -> model.getObservableValue(this, propertyName), getMap);
+	}
+
 	private void bindMapElement(String name, Function<M, ObservableValue<String>> applyOnModel, Function<Model, Map<String, String>> getMap) {
 		addPrefixBinding(modelContext -> {
 			Map<String, String> map = getMap.apply(modelContext);
@@ -271,12 +279,24 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	private void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap) {
+		bindBiDirectionalMapElement(propertyName, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
+	}
+
 	private void bindBiDirectionalMapElement(Function<M, Property<String>> applyOnModel, String name, Function<Model, ObservableMap<String, String>> getMap) {
 		bindBiDirectionalMapElement(applyOnModel, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
 	}
 
+	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
+		bindBiDirectionalMapElement(model -> model.getProperty(this, propertyName), name, getMap, stringConverter);
+	}
+
 	private <T extends Serializable> void bindBiDirectionalMapElement(Function<M, Property<T>> applyOnModel, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
 		bindBiDirectionalMapElement(applyOnModel, name, getMap, model -> stringConverter);
+	}
+
+	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
+		bindBiDirectionalMapElement(model -> model.getProperty(this, propertyName), name, getMap, getStringConverter);
 	}
 
 	private <T extends Serializable> void bindBiDirectionalMapElement(Function<M, Property<T>> applyOnModel, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
@@ -299,11 +319,19 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	public <T extends Serializable> void bindOperation(String propertyName, BiConsumer<M, T> operation) {
+		bindOperation(model -> model.getProperty(this, propertyName), operation);
+	}
+
 	public <T extends Serializable> void bindOperation(Function<M, Property<T>> applyOnModel, BiConsumer<M, T> operation) {
 		addPrefixBinding(modelContext -> {
 			Property<T> observable = applyOnModel.apply(modelContext);
 			observable.addListener((o, old, nva) -> operation.accept(modelContext, nva));
 		});
+	}
+
+	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
+		initProperty(model -> model.getProperty(this, propertyName), getInitialValue);
 	}
 
 	public <T> void initProperty(Function<M, Property<T>> applyOnModel, Function<M, T> getInitialValue) {
@@ -329,8 +357,16 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
 	}
 
+	public void bindOptionalStyle(String propertyName, String modelPropertyName, String propertyValue) {
+		bindOptionalStyle(propertyName, modelPropertyName, propertyValue, "");
+	}
+
 	public void bindOptionalStyle(String propertyName, Function<M, ObservableValue<Boolean>> applyOnModel, String propertyValue) {
 		bindOptionalStyle(propertyName, applyOnModel, propertyValue, "");
+	}
+
+	public void bindOptionalStyle(String propertyName, String modelPropertyName, String propertyValue, String propertyValueFalse) {
+		bindOptionalStyle(propertyName, model -> model.getObservableValue(this, modelPropertyName), propertyValue, propertyValueFalse);
 	}
 
 	public void bindOptionalStyle(String propertyName, Function<M, ObservableValue<Boolean>> applyOnModel, String propertyValue, String propertyValueFalse) {
@@ -338,6 +374,10 @@ public abstract class Tag<M extends Model> {
 			ObservableValue<Boolean> optional = applyOnModel.apply(model);
 			return Bindings.createStringBinding(() -> optional.getValue() ? propertyValue : propertyValueFalse, optional);
 		});
+	}
+
+	public void bindStyle(String propertyName, String modelPropertyName) {
+		bindMapElement(propertyName, modelPropertyName, model -> model.getObservableStyles(this));
 	}
 
 	public void bindStyle(String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
@@ -376,8 +416,16 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(model -> model.getObservableAttributes(this).put(attributeName, value));
 	}
 
+	public void bindOptionalAttribute(String attributeName, String propertyName, String attributeValue) {
+		bindOptionalAttribute(attributeName, propertyName, attributeValue, null);
+	}
+
 	public void bindOptionalAttribute(String attributeName, Function<M, ObservableValue<Boolean>> applyOnModel, String attributeValue) {
 		bindOptionalAttribute(attributeName, applyOnModel, attributeValue, null);
+	}
+
+	public void bindOptionalAttribute(String attributeName, String propertyName, String attributeValue, String attributeValueFalse) {
+		bindOptionalAttribute(attributeName, model -> model.getObservableValue(this, propertyName), attributeValue, attributeValueFalse);
 	}
 
 	public void bindOptionalAttribute(String attributeName, Function<M, ObservableValue<Boolean>> applyOnModel, String attributeValue, String attributeValueFalse) {
@@ -387,24 +435,48 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	public void bindAttribute(String attributeName, String propertyName) {
+		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+	}
+
 	public void bindAttribute(String attributeName, Function<M, ObservableValue<String>> applyOnModel) {
 		bindMapElement(attributeName, applyOnModel, model -> model.getObservableAttributes(this));
+	}
+
+	public void bindBiDirectionalAttribute(String propertyName, String attributeName) {
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this));
 	}
 
 	public void bindBiDirectionalAttribute(Function<M, Property<String>> applyOnModel, String attributeName) {
 		bindBiDirectionalMapElement(applyOnModel, attributeName, model -> model.getObservableAttributes(this));
 	}
 
+	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, StringConverter<T> stringConverter) {
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), stringConverter);
+	}
+
 	public <T extends Serializable> void bindBiDirectionalAttribute(Function<M, Property<T>> applyOnModel, String attributeName, StringConverter<T> stringConverter) {
 		bindBiDirectionalMapElement(applyOnModel, attributeName, model -> model.getObservableAttributes(this), stringConverter);
+	}
+
+	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
 	}
 
 	public <T extends Serializable> void bindBiDirectionalAttribute(Function<M, Property<T>> applyOnModel, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
 		bindBiDirectionalMapElement(applyOnModel, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
 	}
 
+	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue) {
+		bindOptionalBiDirectionalAttribute(propertyName, attributeName, attributeValue, null);
+	}
+
 	public void bindOptionalBiDirectionalAttribute(Function<M, Property<Boolean>> applyOnModel, String attributeName, String attributeValue) {
 		bindOptionalBiDirectionalAttribute(applyOnModel, attributeName, attributeValue, null);
+	}
+
+	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue, String attributeValueFalse) {
+		bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, propertyName), attributeName, attributeValue, attributeValueFalse);
 	}
 
 	public void bindOptionalBiDirectionalAttribute(Function<M, Property<Boolean>> applyOnModel, String attributeName, String attributeValue, String attributeValueFalse) {

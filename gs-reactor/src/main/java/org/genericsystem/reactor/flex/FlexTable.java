@@ -188,7 +188,7 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 										new HtmlCheckBox<GenericModel>(this) {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
-												bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.VALUE), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 												setAction((gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
