@@ -161,6 +161,10 @@ public abstract class Tag<M extends Model> {
 		select_(null, applyOnModel, GenericModel::new);
 	}
 
+	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext) {
+		select_(stringExtractor, applyOnModelContext, GenericModel::new);
+	}
+
 	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext, ModelConstructor<GenericModel> constructor) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
