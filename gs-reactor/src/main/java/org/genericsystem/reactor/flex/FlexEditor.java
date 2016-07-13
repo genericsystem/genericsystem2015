@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.flex.FlexLinks.FlexLinkDisplayer;
+import org.genericsystem.reactor.flex.FlexLinks.FlexLinkEditor;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.model.GenericModel;
@@ -78,7 +78,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new FlexLinkDisplayer<GenericModel>(this, FlexEditor.this.getDirection()) {
+								new FlexLinkEditor<GenericModel>(this, FlexEditor.this.getDirection()) {
 									{
 										addStyle("flex", "1");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
