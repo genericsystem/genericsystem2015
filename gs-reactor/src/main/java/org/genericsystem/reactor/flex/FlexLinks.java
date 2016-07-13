@@ -1,6 +1,9 @@
 package org.genericsystem.reactor.flex;
 
+import java.util.List;
+
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
@@ -117,6 +120,7 @@ public class FlexLinks {
 		private final boolean reverse;
 
 		public FlexLinkEditor(Tag<?> parent, FlexDirection direction) {
+			// TODO: filter only once.
 			this(parent, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])), direction, true);
 		}
 
@@ -167,11 +171,33 @@ public class FlexLinks {
 					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
 					new InstanceCompositeSelect(this) {
 						{
-							addPostfixBinding(modelContext -> modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1)));
+							select(gs -> gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
+							addPostfixBinding(modelContext -> {
+								int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
+								modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(nva.getGeneric(), axe));
+							});
 							addStyle("width", "100%");
 							addStyle("height", "100%");
 						}
 					};
+					new HtmlLabel<GenericModel>(this) {
+						{
+							// TODO: Allow removal, and addition.
+							select(gs -> !gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
+							bindText(GenericModel::getString);
+						}
+					};
+				}
+
+				int pos(Generic genericToUpdate, Generic oldComponent) {
+					List<Generic> components = genericToUpdate.getComponents();
+					int pos = 0;
+					for (Generic component : components) {
+						if (component.equals(oldComponent))
+							break;
+						pos++;
+					}
+					return pos;
 				}
 			};
 		}
