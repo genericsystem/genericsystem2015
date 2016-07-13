@@ -18,7 +18,7 @@ import javafx.util.StringConverter;
 
 public class FlexLinks {
 
-	public static class FlexLabelDisplayer<M extends GenericModel> extends FlexSection<M> {
+	public static class FlexLabelDisplayer extends FlexSection {
 
 		private final ObservableListExtractor observableListExtractor;
 		private final boolean reverse;
@@ -31,11 +31,11 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new FlexSection<GenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new FlexSection<GenericModel>(this, this.getDirection()) {
+					new FlexSection(this, this.getDirection()) {
 						{
 							addStyle("justify-content", "center");
 							addStyle("align-items", "center");
@@ -43,7 +43,7 @@ public class FlexLinks {
 							addStyle("height", "100%");
 							new HtmlLabel<GenericModel>(this) {
 								{
-									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
+									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 									bindText(GenericModel::getString);
 								}
 							};
@@ -52,14 +52,14 @@ public class FlexLinks {
 									addAttribute("disabled", "disabled");
 									initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
 									bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 								}
 							};
 						}
 					};
 				}
 			};
-			new FlexSection<GenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					addStyle("justify-content", "center");
@@ -78,7 +78,7 @@ public class FlexLinks {
 		}
 	}
 
-	public static class FlexLinkDisplayer<M extends GenericModel> extends FlexLabelDisplayer<M> {
+	public static class FlexLinkDisplayer extends FlexLabelDisplayer {
 
 		public FlexLinkDisplayer(Tag<?> parent, FlexDirection direction) {
 			super(parent, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])), direction, true);
@@ -95,7 +95,7 @@ public class FlexLinks {
 		}
 	}
 
-	public static class FlexLinkTitleDisplayer<M extends GenericModel> extends FlexLabelDisplayer<M> {
+	public static class FlexLinkTitleDisplayer extends FlexLabelDisplayer {
 
 		public FlexLinkTitleDisplayer(Tag<?> parent, ObservableListExtractor observableListExtractor, FlexDirection flexDirection) {
 			super(parent, observableListExtractor, flexDirection, false);
@@ -111,7 +111,7 @@ public class FlexLinks {
 		}
 	}
 
-	public static class FlexLinkEditor<M extends GenericModel> extends FlexSection<M> {
+	public static class FlexLinkEditor extends FlexSection {
 
 		private final ObservableListExtractor observableListExtractor;
 		private final boolean reverse;
@@ -128,19 +128,19 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new FlexSection<GenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new FlexSection<GenericModel>(this, this.getDirection()) {
+					new FlexSection(this, this.getDirection()) {
 						{
 							addStyle("justify-content", "center");
 							addStyle("align-items", "center");
 							addStyle("width", "100%");
 							addStyle("height", "100%");
-							new HtmlGenericInputText<GenericModel>(this) {
+							new HtmlGenericInputText(this) {
 								{
-									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
+									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 									initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
 									bindOperation(ReactorStatics.VALUE, (model, nva) -> {
 										model.getGeneric().updateValue(nva);
@@ -152,20 +152,20 @@ public class FlexLinks {
 									initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
 									bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 									bindOperation(ReactorStatics.CHECKED, (model, nva) -> model.getGeneric().updateValue(nva));
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null, GenericModel::new);
+									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 								}
 							};
 						}
 					};
 				}
 			};
-			new FlexSection<GenericModel>(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
-					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, GenericModel::new);
-					new InstanceCompositeSelect<GenericModel>(this) {
+					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
+					new InstanceCompositeSelect(this) {
 						{
 							addPostfixBinding(modelContext -> modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1)));
 							addStyle("width", "100%");
@@ -185,7 +185,7 @@ public class FlexLinks {
 		}
 	}
 
-	public static class HtmlGenericInputText<M extends GenericModel> extends HtmlInputText<M> {
+	public static class HtmlGenericInputText extends HtmlInputText<GenericModel> {
 		public HtmlGenericInputText(Tag<?> parent) {
 			super(parent);
 

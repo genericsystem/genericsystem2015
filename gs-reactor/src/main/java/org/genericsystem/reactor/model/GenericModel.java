@@ -32,6 +32,11 @@ public class GenericModel extends Model {
 		this.stringExtractor = stringExtractor;
 	}
 
+	public GenericModel(Model parent, Generic[] generics, StringExtractor stringExtractor) {
+		this(generics, stringExtractor);
+		this.parent = parent;
+	}
+
 	public Generic[] getGenerics() {
 		return generics;
 	}

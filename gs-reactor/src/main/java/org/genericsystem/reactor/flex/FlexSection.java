@@ -1,13 +1,12 @@
 package org.genericsystem.reactor.flex;
 
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class FlexSection<M extends Model> extends HtmlSection<M> {
+public class FlexSection extends HtmlSection<GenericModel> {
 	private final FlexDirection direction;
 
 	public FlexSection(Tag<?> parent, FlexDirection direction) {
@@ -31,7 +30,7 @@ public class FlexSection<M extends Model> extends HtmlSection<M> {
 		return new HtmlDomNode(parentId);
 	}
 
-	public static class H1FlexElement extends FlexSection<GenericModel> {
+	public static class H1FlexElement extends FlexSection {
 		public H1FlexElement(Tag<?> parent, String title) {
 			this(parent, FlexDirection.ROW, title);
 		}
@@ -55,7 +54,7 @@ public class FlexSection<M extends Model> extends HtmlSection<M> {
 		}
 	};
 
-	public static class SaveCancelFlexRow extends FlexSection<GenericModel> {
+	public static class SaveCancelFlexRow extends FlexSection {
 
 		public SaveCancelFlexRow(Tag<?> parent) {
 			this(parent, FlexDirection.ROW);

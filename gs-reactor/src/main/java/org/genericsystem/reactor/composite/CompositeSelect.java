@@ -6,7 +6,7 @@ import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
-public class CompositeSelect<M extends GenericModel> extends HtmlSelect<M> implements CompositeTag<M> {
+public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericModel> {
 
 	HtmlOption<GenericModel> optionElement;
 
@@ -31,7 +31,7 @@ public class CompositeSelect<M extends GenericModel> extends HtmlSelect<M> imple
 		bindBiDirectionalSelection(optionElement);
 	}
 
-	public static class CompositeSelectWithEmptyEntry<M extends GenericModel> extends CompositeSelect<M> {
+	public static class CompositeSelectWithEmptyEntry extends CompositeSelect {
 
 		public CompositeSelectWithEmptyEntry(Tag<?> parent) {
 			super(parent);
@@ -54,7 +54,7 @@ public class CompositeSelect<M extends GenericModel> extends HtmlSelect<M> imple
 		}
 	}
 
-	public static class ColorsSelect<M extends GenericModel> extends CompositeSelect<M> {
+	public static class ColorsSelect extends CompositeSelect {
 
 		public ColorsSelect(Tag<?> parent) {
 			super(parent);
@@ -73,7 +73,7 @@ public class CompositeSelect<M extends GenericModel> extends HtmlSelect<M> imple
 		}
 	}
 
-	public static class InstanceCompositeSelect<M extends GenericModel> extends CompositeSelect<M> implements CompositeTag<M> {
+	public static class InstanceCompositeSelect extends CompositeSelect implements CompositeTag<GenericModel> {
 
 		public InstanceCompositeSelect(Tag<?> parent) {
 			super(parent);

@@ -11,7 +11,7 @@ import org.genericsystem.reactor.model.GenericModel;
  * @author Nicolas Feybesse
  *
  */
-public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M> implements CompositeTag<M> {
+public class CompositeFlexSection extends FlexSection implements CompositeTag<GenericModel> {
 
 	public CompositeFlexSection(Tag<?> parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -29,7 +29,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 	}
 
 	protected void sections() {
-		new FlexSection<GenericModel>(this, CompositeFlexSection.this.getReverseDirection()) {
+		new FlexSection(this, CompositeFlexSection.this.getReverseDirection()) {
 			{
 				forEach(CompositeFlexSection.this);
 				new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
@@ -40,7 +40,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 	protected void footer() {
 	}
 
-	public static class TitleCompositeFlexElement<M extends GenericModel> extends CompositeFlexSection<M> {
+	public static class TitleCompositeFlexElement extends CompositeFlexSection {
 
 		public TitleCompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -52,7 +52,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 
 		@Override
 		protected void header() {
-			new FlexSection<GenericModel>(this, FlexDirection.ROW) {
+			new FlexSection(this, FlexDirection.ROW) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("background-color", "#ffa500");
@@ -66,7 +66,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 		}
 	}
 
-	public static class ColorTitleCompositeFlexElement<M extends GenericModel> extends TitleCompositeFlexElement<M> {
+	public static class ColorTitleCompositeFlexElement extends TitleCompositeFlexElement {
 
 		public ColorTitleCompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -78,7 +78,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 
 		@Override
 		protected void sections() {
-			new FlexSection<GenericModel>(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
+			new FlexSection(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
 					bindStyle("background-color", GenericModel::getString);
 					forEach(ColorTitleCompositeFlexElement.this);
@@ -88,7 +88,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 		}
 	}
 
-	public static class CompositeRadio<M extends GenericModel> extends CompositeFlexSection<M> implements CompositeTag<M> {
+	public static class CompositeRadio extends CompositeFlexSection implements CompositeTag<GenericModel> {
 
 		public CompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -96,7 +96,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 
 		@Override
 		protected void sections() {
-			new FlexSection<GenericModel>(this, CompositeRadio.this.getReverseDirection()) {
+			new FlexSection(this, CompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(CompositeRadio.this);
 					new HtmlRadio<GenericModel>(this);
@@ -111,7 +111,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 
 	}
 
-	public static class ColorCompositeRadio<M extends GenericModel> extends CompositeFlexSection<M> implements CompositeTag<M> {
+	public static class ColorCompositeRadio extends CompositeFlexSection implements CompositeTag<GenericModel> {
 
 		private Tag<GenericModel> flexSubElement;
 
@@ -129,7 +129,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 
 		@Override
 		protected void sections() {
-			flexSubElement = new FlexSection<GenericModel>(this, ColorCompositeRadio.this.getReverseDirection()) {
+			flexSubElement = new FlexSection(this, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
 					bindStyle("background-color", GenericModel::getString);

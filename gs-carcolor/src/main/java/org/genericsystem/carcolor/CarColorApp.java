@@ -37,16 +37,17 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 	public CarColorApp(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
+		new FlexSection(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", MAIN_COLOR);
-				new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
+				new FlexSection(this, FlexDirection.COLUMN) {
 					{
-						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], GenericModel::new);
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, GenericModel::new);
+						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
+						markSelector();
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new FlexEditor(this, FlexDirection.COLUMN).select_(GenericModel::getSelection);
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, GenericModel::new);
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}
 				};
 				new SaveCancelFlexRow(this).addStyle("background-color", MAIN_COLOR);

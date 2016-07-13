@@ -37,20 +37,20 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
+		new FlexSection(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
-				new ColorsSelect<GenericModel>(this).select(StringExtractor.EXTRACTOR, Color.class, GenericModel::new);
-				new ColorTitleCompositeFlexElement<>(this).select(StringExtractor.MANAGEMENT, Color.class);
-				new ColorCompositeRadio<GenericModel>(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class, GenericModel::new);
+				new ColorsSelect(this).select(StringExtractor.EXTRACTOR, Color.class);
+				new ColorTitleCompositeFlexElement(this).select(StringExtractor.MANAGEMENT, Color.class);
+				new ColorCompositeRadio(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class);
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 
-				new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
+				new FlexSection(this, FlexDirection.COLUMN) {
 					{
-						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], GenericModel::new);
+						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 						markSelector();
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, GenericModel::new);
-						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class, GenericModel::new);
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
+						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
 						new FlexEditor(this, FlexDirection.ROW) {
 							{
 								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
@@ -59,11 +59,11 @@ public class AppHtml extends HtmlApp<EngineModel> {
 						};
 
 						new FlexEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}
 				};
 
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class, GenericModel::new);
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class, GenericModel::new);
+				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
 				new SaveCancelFlexRow(this).addStyle("background-color", "#ffa500");
 			}
 		};

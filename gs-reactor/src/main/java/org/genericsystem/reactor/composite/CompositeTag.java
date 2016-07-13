@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.composite;
 
-import org.genericsystem.reactor.Tag.ModelConstructor;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -15,9 +14,5 @@ public interface CompositeTag<M extends GenericModel> {
 		return ObservableListExtractor.SUBINSTANCES;
 	}
 
-	default ModelConstructor<GenericModel> getModelConstructor() {
-		return GenericModel::new;
-	}
-
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor);
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor);
 }

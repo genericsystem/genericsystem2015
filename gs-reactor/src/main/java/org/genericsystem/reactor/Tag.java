@@ -116,15 +116,11 @@ public abstract class Tag<M extends Model> {
 	}
 
 	protected void forEach(CompositeTag<?> parentCompositeElement) {
-		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs), (gs, extractor) -> parentCompositeElement.getModelConstructor().build(gs, extractor));
+		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
 	}
 
 	public void forEach(ObservableListExtractor observableListExtractor) {
-		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, GenericModel::new);
-	}
-
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
-		forEach(stringExtractor, observableListExtractor, GenericModel::new);
+		forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
 	}
 
 	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
@@ -139,32 +135,23 @@ public abstract class Tag<M extends Model> {
 		};
 	}
 
-	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor, ModelConstructor<GenericModel> constructor) {
+	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
 			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
-				GenericModel duplicate = constructor.build(GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
-				duplicate.parent = model;
+				GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
 				viewContext.createViewContextChild(index, duplicate, childElement);
 				return duplicate;
 			}, Model::destroy));
 		};
 	}
 
-	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel, ModelConstructor<GenericModel> constructor) {
-		select_(null, applyOnModel, constructor);
-	}
-
 	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel) {
-		select_(null, applyOnModel, GenericModel::new);
+		select_(null, applyOnModel);
 	}
 
 	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext) {
-		select_(stringExtractor, applyOnModelContext, GenericModel::new);
-	}
-
-	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext, ModelConstructor<GenericModel> constructor) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableValue<M> observableValue = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
@@ -182,39 +169,26 @@ public abstract class Tag<M extends Model> {
 			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
 				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
 				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
-				GenericModel childModel = constructor.build(gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
-				childModel.parent = viewContext.getModelContext();
+				GenericModel childModel = new GenericModel(viewContext.getModelContext(), gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
 				viewContext.createViewContextChild(index, childModel, childElement);
 				return (MODEL) childModel;
 			}, Model::destroy));
 		};
 	}
 
-	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier, ModelConstructor<GenericModel> constructor) {
+	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
 		forEach(stringExtractor, gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
-		}, constructor);
-	}
-
-	public void select(StringExtractor stringExtractor, Class<?> genericClass, ModelConstructor<GenericModel> constructor) {
-		forEach(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)), constructor);
-	}
-
-	public void select(StringExtractor stringExtractor, Function<Generic[], Generic> genericSupplier) {
-		select(stringExtractor, genericSupplier, GenericModel::new);
-	}
-
-	public void select(Function<Generic[], Generic> genericSupplier, ModelConstructor<GenericModel> constructor) {
-		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, constructor);
-	}
-
-	public void select(Function<Generic[], Generic> genericSupplier) {
-		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier, GenericModel::new);
+		});
 	}
 
 	public void select(StringExtractor stringExtractor, Class<?> genericClass) {
-		select(stringExtractor, genericClass, GenericModel::new);
+		forEach(stringExtractor, gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
+	}
+
+	public void select(Function<Generic[], Generic> genericSupplier) {
+		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, genericSupplier);
 	}
 
 	@FunctionalInterface

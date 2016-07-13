@@ -13,7 +13,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
  *
  * @param <M>
  */
-public class FlexEditor extends CompositeFlexSection<GenericModel> {
+public class FlexEditor extends CompositeFlexSection {
 
 	public FlexEditor(Tag<?> parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -26,7 +26,7 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 
 	@Override
 	protected void header() {
-		new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+		new FlexSection(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "0.3");
 				addStyle("background-color", "#ffa500");
@@ -47,17 +47,17 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 	@Override
 	protected void sections() {
 
-		new CompositeFlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+		new CompositeFlexSection(this, FlexEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 			}
 
 			@Override
 			protected void header() {
-				new FlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
+				new FlexSection(this, FlexEditor.this.getDirection()) {
 					{
 						addStyle("flex", "0.3");
-						new FlexLinkTitleDisplayer<GenericModel>(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), FlexEditor.this.getDirection()) {
+						new FlexLinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), FlexEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
@@ -70,15 +70,15 @@ public class FlexEditor extends CompositeFlexSection<GenericModel> {
 
 			@Override
 			protected void sections() {
-				new FlexSection<GenericModel>(this, FlexEditor.this.getDirection()) {
+				new FlexSection(this, FlexEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
-						new FlexSection<GenericModel>(this, FlexEditor.this.getReverseDirection()) {
+						new FlexSection(this, FlexEditor.this.getReverseDirection()) {
 							{
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new FlexLinkEditor<GenericModel>(this, FlexEditor.this.getDirection()) {
+								new FlexLinkEditor(this, FlexEditor.this.getDirection()) {
 									{
 										addStyle("flex", "1");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);

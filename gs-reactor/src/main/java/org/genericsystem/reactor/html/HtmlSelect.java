@@ -7,7 +7,7 @@ import org.genericsystem.reactor.model.GenericModel;
  * @author Nicolas Feybesse
  *
  */
-public abstract class HtmlSelect<M extends GenericModel> extends Tag<M> {
+public abstract class HtmlSelect extends Tag<GenericModel> {
 
 	public HtmlSelect(Tag<?> parent) {
 		super(parent, "select");
