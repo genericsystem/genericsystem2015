@@ -31,7 +31,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
-		appsConfig.addApplication("/", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Diesel.class, Color.class, CarColor.class);
+		appsConfig.addApplication("/", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/example-reactor/", Car.class, Power.class, Diesel.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 	}
 
