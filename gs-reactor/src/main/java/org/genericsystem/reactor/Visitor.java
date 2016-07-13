@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.SelectorModel;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -51,8 +50,8 @@ public class Visitor {
 			List<Generic> generics = new ArrayList<>();
 			boolean createLink = true;
 			for (Model subModel : model.allSubContexts())
-				if (subModel instanceof SelectorModel) {
-					GenericModel value = ((SelectorModel) subModel).getSelection().getValue();
+				if (subModel instanceof GenericModel && ((GenericModel) subModel).isSelector()) {
+					GenericModel value = ((GenericModel) subModel).getSelection().getValue();
 					if (value != null)
 						generics.add(value.getGeneric());
 					else
@@ -68,8 +67,8 @@ public class Visitor {
 		public void prefix(Model model) {
 			if (model.getAction() != null)
 				((Property) model.getPropertiesByName(ReactorStatics.VALUE).get(0)).setValue(null);
-			if (model instanceof SelectorModel)
-				((SelectorModel) model).getSelection().setValue(null);
+			if (model instanceof GenericModel && ((GenericModel) model).isSelector())
+				((GenericModel) model).getSelection().setValue(null);
 		}
 	}
 

@@ -5,15 +5,15 @@ import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.SelectorModel;
 
-public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> implements CompositeTag<M> {
+public class CompositeSelect<M extends GenericModel> extends HtmlSelect<M> implements CompositeTag<M> {
 
 	HtmlOption<GenericModel> optionElement;
 
 	public CompositeSelect(Tag<?> parent) {
 		super(parent);
 		options();
+		markSelector();
 		bindOptionsToSelection();
 		initSelection(optionElement);
 	}
@@ -31,7 +31,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		bindBiDirectionalSelection(optionElement);
 	}
 
-	public static class CompositeSelectWithEmptyEntry<M extends SelectorModel> extends CompositeSelect<M> {
+	public static class CompositeSelectWithEmptyEntry<M extends GenericModel> extends CompositeSelect<M> {
 
 		public CompositeSelectWithEmptyEntry(Tag<?> parent) {
 			super(parent);
@@ -54,11 +54,11 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		}
 	}
 
-	public static class ColorsSelect<M extends SelectorModel> extends CompositeSelect<M> {
+	public static class ColorsSelect<M extends GenericModel> extends CompositeSelect<M> {
 
 		public ColorsSelect(Tag<?> parent) {
 			super(parent);
-			bindStyle("background-color", SelectorModel::getSelectionString);
+			bindStyle("background-color", GenericModel::getSelectionString);
 		}
 
 		@Override
@@ -73,7 +73,7 @@ public class CompositeSelect<M extends SelectorModel> extends HtmlSelect<M> impl
 		}
 	}
 
-	public static class InstanceCompositeSelect<M extends SelectorModel> extends CompositeSelect<M> implements CompositeTag<M> {
+	public static class InstanceCompositeSelect<M extends GenericModel> extends CompositeSelect<M> implements CompositeTag<M> {
 
 		public InstanceCompositeSelect(Tag<?> parent) {
 			super(parent);

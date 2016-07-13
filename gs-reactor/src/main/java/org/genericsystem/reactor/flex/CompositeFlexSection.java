@@ -6,7 +6,6 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlRadio;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.SelectorModel;
 
 /**
  * @author Nicolas Feybesse
@@ -89,7 +88,7 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 		}
 	}
 
-	public static class CompositeRadio<M extends SelectorModel> extends CompositeFlexSection<M> implements CompositeTag<M> {
+	public static class CompositeRadio<M extends GenericModel> extends CompositeFlexSection<M> implements CompositeTag<M> {
 
 		public CompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -112,14 +111,14 @@ public class CompositeFlexSection<M extends GenericModel> extends FlexSection<M>
 
 	}
 
-	public static class ColorCompositeRadio<M extends SelectorModel> extends CompositeFlexSection<M> implements CompositeTag<M> {
+	public static class ColorCompositeRadio<M extends GenericModel> extends CompositeFlexSection<M> implements CompositeTag<M> {
 
 		private Tag<GenericModel> flexSubElement;
 
 		public ColorCompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 			bindBiDirectionalSelection(flexSubElement);
-			bindStyle("background-color", SelectorModel::getSelectionString);
+			bindStyle("background-color", GenericModel::getSelectionString);
 			addStyle("padding", "4px");
 		}
 

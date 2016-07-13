@@ -20,7 +20,6 @@ import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.SelectorModel;
 
 import javafx.util.StringConverter;
 
@@ -204,8 +203,8 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), SelectorModel::new);
-								new CompositeSelectWithEmptyEntry<SelectorModel>(this) {
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), GenericModel::new);
+								new CompositeSelectWithEmptyEntry<GenericModel>(this) {
 									{
 										addStyle("width", "100%");
 										addStyle("height", "100%");
@@ -272,11 +271,11 @@ public class FlexTable extends CompositeFlexSection<GenericModel> {
 						new HtmlHyperLink<GenericModel>(this) {
 							{
 								bindText(GenericModel::getString);
-								bindAction(compositeModel -> {
-									GenericModel cm = compositeModel;
-									while (!(cm instanceof SelectorModel) && cm != null)
+								bindAction(model -> {
+									GenericModel cm = model;
+									while (cm != null && !cm.isSelector())
 										cm = (GenericModel) cm.getParent();
-									((SelectorModel) cm).getSelection().setValue(compositeModel);
+									cm.getSelection().setValue(model);
 								});
 							}
 						};

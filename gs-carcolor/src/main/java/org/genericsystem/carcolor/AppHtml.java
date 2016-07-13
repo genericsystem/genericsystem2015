@@ -19,7 +19,6 @@ import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
-import org.genericsystem.reactor.model.SelectorModel;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -40,13 +39,13 @@ public class AppHtml extends HtmlApp<EngineModel> {
 			{
 				addStyle("justify-content", "center");
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", MAIN_COLOR);
-				new FlexSection<SelectorModel>(this, FlexDirection.COLUMN) {
+				new FlexSection<GenericModel>(this, FlexDirection.COLUMN) {
 					{
-						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], SelectorModel::new);
+						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0], GenericModel::new);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class, GenericModel::new);
 						new FlexEditor(this, FlexDirection.COLUMN) {
 							{
-								select_(SelectorModel::getSelection);
+								select_(GenericModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};

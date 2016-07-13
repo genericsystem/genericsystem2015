@@ -12,7 +12,6 @@ import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.SelectorModel;
 
 import javafx.beans.binding.Bindings;
 import javafx.util.StringConverter;
@@ -165,8 +164,8 @@ public class FlexLinks {
 					style(this);
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
-					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, SelectorModel::new);
-					new InstanceCompositeSelect<SelectorModel>(this) {
+					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor, GenericModel::new);
+					new InstanceCompositeSelect<GenericModel>(this) {
 						{
 							addPostfixBinding(modelContext -> modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[1].updateComponent(nva.getGeneric(), 1)));
 							addStyle("width", "100%");

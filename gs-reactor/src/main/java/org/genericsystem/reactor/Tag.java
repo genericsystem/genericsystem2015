@@ -19,7 +19,6 @@ import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.SelectorModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,19 +243,23 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, int shift) {
-		bindBiDirectionalSelection(subElement, SelectorModel::getSelection, shift);
+		bindBiDirectionalSelection(subElement, GenericModel::getSelection, shift);
 	}
 
-	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, Function<SelectorModel, Property<GenericModel>> applyOnModel) {
+	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, Function<GenericModel, Property<GenericModel>> applyOnModel) {
 		bindBiDirectionalSelection(subElement, applyOnModel, 0);
 	}
 
-	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, Function<SelectorModel, Property<GenericModel>> applyOnModel, int shift) {
+	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, Function<GenericModel, Property<GenericModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
 			List<? extends Model> subContexts = modelContext.getSubContexts(subElement);
-			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((SelectorModel) modelContext), number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
+			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), applyOnModel.apply((GenericModel) modelContext), number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
 					genericModel -> subContexts.indexOf(genericModel) + shift);
 		});
+	}
+
+	protected void markSelector() {
+		addPrefixBinding(model -> ((GenericModel) model).markSelector());
 	}
 
 	protected <SUBMODEL extends GenericModel> void initSelection(Tag<SUBMODEL> subElement) {
@@ -265,7 +268,7 @@ public abstract class Tag<M extends Model> {
 			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
 			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			if (selectedModel.isPresent())
-				((SelectorModel) modelContext).getSelection().setValue(selectedModel.get());
+				((GenericModel) modelContext).getSelection().setValue(selectedModel.get());
 		});
 	}
 
