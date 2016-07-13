@@ -32,7 +32,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 	public static void main(String[] args) {
 		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
-		appsConfig.addApplication("/todomvc", TodoApp.class, TodoList.class, Engine.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
+		appsConfig.addApplication("/", TodoApp.class, TodoList.class, Engine.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
 		new ApplicationServer(appsConfig).start();
 	}
 

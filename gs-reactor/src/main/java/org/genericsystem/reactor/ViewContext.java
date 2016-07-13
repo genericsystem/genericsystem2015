@@ -77,10 +77,12 @@ public class ViewContext<M extends Model> {
 		getRootViewContext().add(node.getId(), node);
 	}
 
+	boolean removed = false;
+
 	void destroyChild() {
+		removed = true;
 		parent.decrementSize(element);
 		getRootViewContext().remove(node.getId());
-
 	}
 
 	private void incrementSize(Tag<?> child) {
@@ -88,7 +90,7 @@ public class ViewContext<M extends Model> {
 	}
 
 	private void decrementSize(Tag<?> child) {
-				int size = sizeBySubElement.get(child) - 1;
+		int size = sizeBySubElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
 			sizeBySubElement.remove(child);// remove map if empty

@@ -98,6 +98,7 @@ public class Model {
 	public void destroy() {
 		boolean first = true;
 		for (ViewContext<?> viewContext : viewContextsMap.values()) {
+			assert !viewContext.removed;
 			viewContext.destroyChild();
 			if (first) {
 				viewContext.getNode().sendRemove();

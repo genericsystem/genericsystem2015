@@ -101,14 +101,16 @@ public class ApplicationServer extends AbstractBackEnd {
 				String appPath = items.length == 0 ? "" : items[0];
 				if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
 					appPath = "";
-				// log.info("Request received with application path : /" + appPath);
+				// log.info("Request received with application path : " + appPath);
 				PersistentApplication application = apps.get("/" + appPath);
 				if (application == null) {
 					request.response().end("No application is configured with path : /" + appPath);
 					throw new IllegalStateException("Unable to load an application with path : /" + appPath);
 				}
 				// log.info("Request detected for application : " + application.getApplicationClass().getName());
-				String resourceToServe = request.path().substring(appPath.length() + 1);
+				int shift = appPath.isEmpty() ? 0 : 1;
+				shift += items.length > shift ? 1 : 0;
+				String resourceToServe = request.path().substring(appPath.length() + shift);
 				// log.info("Resource to serve : " + resourceToServe);
 				if ("".equals(resourceToServe)) {
 					String indexHtml = "<!DOCTYPE html>";
@@ -129,13 +131,13 @@ public class ApplicationServer extends AbstractBackEnd {
 					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
 					if (input == null) {
 						if (resourceToServe.endsWith(".css")) {
-							log.warn("Unable to find resource : " + resourceToServe + ", get the reactor standard css instead");
+							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard css instead");
 							input = ApplicationServer.class.getResourceAsStream("/reactor.css");
 						} else if (resourceToServe.endsWith(".js")) {
-							log.warn("Unable to find resource : " + resourceToServe + ", get the reactor standard js instead");
+							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard js instead");
 							input = ApplicationServer.class.getResourceAsStream("/script.js");
 						} else if (resourceToServe.endsWith(".ico") || resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
-							log.warn("Unable to find resource : " + resourceToServe + ", get nothing instead");
+							log.warn("Unable to find resource : /" + resourceToServe + ", get nothing instead");
 							request.response().end();
 							return;
 						} else
