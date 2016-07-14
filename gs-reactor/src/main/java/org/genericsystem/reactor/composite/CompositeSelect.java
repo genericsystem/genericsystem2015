@@ -13,7 +13,7 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 	public CompositeSelect(Tag<?> parent) {
 		super(parent);
 		options();
-		markSelector();
+		enableSelectorBehavior();
 		bindOptionsToSelection();
 		initSelection(optionElement);
 	}

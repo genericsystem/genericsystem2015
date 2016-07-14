@@ -18,7 +18,7 @@ import com.sun.javafx.collections.ObservableListWrapper;
  *
  * @param <E>
  */
-@SuppressWarnings("restriction")
+
 public abstract class MinimalChangesObservableList<E> extends ObservableListWrapper<E> {
 
 	private BindingHelperObserver observer;

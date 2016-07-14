@@ -1,5 +1,7 @@
 package org.genericsystem.carcolor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -20,14 +22,14 @@ import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 public class AppHtml extends HtmlApp<EngineModel> {
 	private static final String MAIN_COLOR = "#3393ff";
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0]) : Statics.DEFAULT_PORT);
-		appsConfig.addApplication("/apphtml", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0])
+				: Statics.DEFAULT_PORT);
+		appsConfig.addApplication("/", AppHtml.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class,
+				Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 
 	}
@@ -42,6 +44,8 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new FlexSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
+						enableSelectorBehavior();
+						// initSelection(subElement);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new FlexEditor(this, FlexDirection.COLUMN) {
 							{

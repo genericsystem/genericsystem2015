@@ -232,8 +232,8 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	protected void markSelector() {
-		addPrefixBinding(model -> ((GenericModel) model).markSelector());
+	protected void enableSelectorBehavior() {
+		addPrefixBinding(model -> ((GenericModel) model).enableSelectorBehavior());
 	}
 
 	protected <SUBMODEL extends GenericModel> void initSelection(Tag<SUBMODEL> subElement) {

@@ -48,7 +48,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new FlexSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-						markSelector();
+						enableSelectorBehavior();
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
 						new FlexEditor(this, FlexDirection.ROW) {

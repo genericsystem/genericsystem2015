@@ -53,7 +53,7 @@ public class GenericModel extends Model {
 		return selector;
 	}
 
-	public void markSelector() {
+	public void enableSelectorBehavior() {
 		this.selector = true;
 	}
 

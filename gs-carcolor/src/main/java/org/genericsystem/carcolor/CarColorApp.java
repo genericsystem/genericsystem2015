@@ -44,7 +44,7 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 				new FlexSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-						markSelector();
+						enableSelectorBehavior();
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new FlexEditor(this, FlexDirection.COLUMN).select_(GenericModel::getSelection);
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class);
