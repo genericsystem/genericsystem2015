@@ -11,6 +11,7 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.flex.FlexDirection;
@@ -18,6 +19,7 @@ import org.genericsystem.reactor.flex.FlexEditor;
 import org.genericsystem.reactor.flex.FlexSection;
 import org.genericsystem.reactor.flex.FlexTable;
 import org.genericsystem.reactor.html.HtmlApp;
+import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
@@ -46,11 +48,16 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 						enableSelectorBehavior();
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-						new FlexEditor(this, FlexDirection.COLUMN).select_(GenericModel::getSelection);
+						new FlexEditor(this, FlexDirection.COLUMN) {
+							{
+								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+								addStyle("min-height", "300px");
+							}
+						};
 						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}
 				};
-				new SaveCancelFlexRow(this).addStyle("background-color", MAIN_COLOR);
+				new TransactionMonitor(this).addStyle("background-color", MAIN_COLOR);
 			}
 		};
 	}

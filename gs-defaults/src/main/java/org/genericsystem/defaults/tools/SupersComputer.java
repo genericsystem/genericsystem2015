@@ -1,4 +1,4 @@
-package org.genericsystem.defaults;
+package org.genericsystem.defaults.tools;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.defaults.DefaultGeneric;
 
 /**
  * @author Nicolas Feybesse
@@ -27,7 +28,7 @@ public class SupersComputer<T extends DefaultGeneric<T>> extends LinkedHashSet<T
 
 	private final Map<T, boolean[]> alreadyComputed = new HashMap<>();
 
-	SupersComputer(T meta, List<T> overrides, Serializable value, List<T> components) {
+	public SupersComputer(T meta, List<T> overrides, Serializable value, List<T> components) {
 		assert meta != null;
 		reachLevel = isMeta(meta, value, components) ? ApiStatics.META : meta.getLevel() + 1;
 		this.meta = meta;

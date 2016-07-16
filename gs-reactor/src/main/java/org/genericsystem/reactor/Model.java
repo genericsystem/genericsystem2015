@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -24,7 +24,7 @@ public class Model {
 
 	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-	private final Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
+	private Map<Tag<?>, List<? extends Model>> subContextsMap = new HashMap<>();
 	private final Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
 		@Override
 		public Map<String, ObservableValue<Object>> get(Object key) {
@@ -53,8 +53,8 @@ public class Model {
 		return this.parent;
 	}
 
-	public List<? extends Model> getSubContexts(Tag<?> tag) {
-		return subContextsMap.get(tag);
+	public <SUBMODEL extends Model> List<SUBMODEL> getSubContexts(Tag<SUBMODEL> tag) {
+		return (List<SUBMODEL>) subContextsMap.get(tag);
 	}
 
 	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String name) {

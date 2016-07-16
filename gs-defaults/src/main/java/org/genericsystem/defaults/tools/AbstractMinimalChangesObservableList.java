@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 
@@ -19,7 +20,7 @@ import com.sun.javafx.collections.ObservableListWrapper;
  * @param <E>
  */
 
-public abstract class MinimalChangesObservableList<E> extends ObservableListWrapper<E> {
+public abstract class AbstractMinimalChangesObservableList<E> extends ObservableListWrapper<E> {
 
 	private BindingHelperObserver observer;
 
@@ -53,9 +54,8 @@ public abstract class MinimalChangesObservableList<E> extends ObservableListWrap
 		}
 	}
 
-	public MinimalChangesObservableList() {
+	public AbstractMinimalChangesObservableList() {
 		super(new ArrayList<>());
-		invalidate();
 	}
 
 	protected abstract List<E> computeValue();
@@ -79,11 +79,27 @@ public abstract class MinimalChangesObservableList<E> extends ObservableListWrap
 		}
 	}
 
+	public static class MinimalChangesObservableList<E> extends AbstractMinimalChangesObservableList<E> {
+
+		private final ObservableList<E> observableList;
+
+		public MinimalChangesObservableList(ObservableList<E> observableList) {
+			this.observableList = observableList;
+			bind(observableList);
+			invalidate();
+		}
+
+		@Override
+		protected List<E> computeValue() {
+			return observableList;
+		}
+	}
+
 	private static class BindingHelperObserver implements InvalidationListener {
 
-		private final WeakReference<MinimalChangesObservableList<?>> ref;
+		private final WeakReference<AbstractMinimalChangesObservableList<?>> ref;
 
-		public BindingHelperObserver(MinimalChangesObservableList<?> binding) {
+		public BindingHelperObserver(AbstractMinimalChangesObservableList<?> binding) {
 			if (binding == null) {
 				throw new NullPointerException("Binding has to be specified.");
 			}
@@ -92,7 +108,7 @@ public abstract class MinimalChangesObservableList<E> extends ObservableListWrap
 
 		@Override
 		public void invalidated(Observable observable) {
-			final MinimalChangesObservableList<?> binding = ref.get();
+			final AbstractMinimalChangesObservableList<?> binding = ref.get();
 			if (binding == null) {
 				observable.removeListener(this);
 			} else {

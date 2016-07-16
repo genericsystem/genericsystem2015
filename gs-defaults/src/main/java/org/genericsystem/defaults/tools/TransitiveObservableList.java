@@ -14,7 +14,7 @@ import javafx.collections.ObservableList;
  *
  * @param <T>
  */
-public abstract class TransitiveObservableList<T> extends MinimalChangesObservableList<T> {
+public abstract class TransitiveObservableList<T> extends AbstractMinimalChangesObservableList<T> {
 
 	private final List<Observable> slaves = new ArrayList<>();
 	protected final ObservableList<T> master;

@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -23,7 +23,8 @@ public class GenericModel extends Model {
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
 	private final Property<GenericModel> selection = new SimpleObjectProperty<GenericModel>();
-	private final ObservableValue<String> selectionString = Bindings.createStringBinding(() -> getStringExtractor().apply(getSelection().getValue() != null ? getSelection().getValue().getGeneric() : null), getSelection());
+	private final ObservableValue<String> selectionString = Bindings.createStringBinding(
+			() -> getStringExtractor().apply(getSelection().getValue() != null ? getSelection().getValue().getGeneric() : null), getSelection());
 	private boolean selector = false;
 
 	public GenericModel(Generic[] generics, StringExtractor stringExtractor) {
@@ -41,10 +42,14 @@ public class GenericModel extends Model {
 		return generics;
 	}
 
+	// TODO move this in Model properties by tag management ?
+	@Deprecated
 	public Property<GenericModel> getSelection() {
 		return selection;
 	}
 
+	// TODO move this in Model properties by tag management ?
+	@Deprecated
 	public ObservableValue<String> getSelectionString() {
 		return selectionString;
 	}
@@ -90,6 +95,8 @@ public class GenericModel extends Model {
 	public static interface StringExtractor extends Function<Generic, String> {
 		public static final StringExtractor EXTRACTOR = generic -> generic != null ? Objects.toString(generic.getValue()) : "";
 		public static final StringExtractor SIMPLE_CLASS_EXTRACTOR = generic -> {
+			if (generic == null)
+				return "";
 			Serializable value = generic.getValue();
 			return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
 		};

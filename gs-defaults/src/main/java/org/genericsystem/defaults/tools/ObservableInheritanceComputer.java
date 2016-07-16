@@ -1,4 +1,4 @@
-package org.genericsystem.defaults;
+package org.genericsystem.defaults.tools;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.genericsystem.defaults.DefaultGeneric;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
@@ -28,17 +30,16 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> {
 	private final T base;
 	private final T origin;
 	private final int level;
-	private InheritanceComputerBinding binding;
+	private final InheritanceComputerBinding binding;
 
 	public ObservableInheritanceComputer(T base, T origin, int level) {
 		this.base = base;
 		this.origin = origin;
 		this.level = level;
+		binding = new InheritanceComputerBinding();
 	}
 
 	public ObservableList<T> observableInheritanceList() {
-		if (binding == null)
-			binding = new InheritanceComputerBinding();
 		return binding;
 	}
 
@@ -62,7 +63,8 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> {
 			unbindAll();
 			inheritingsCache.clear();
 			set.clear();
-			return FXCollections.unmodifiableObservableList(FXCollections.observableList((getInheringsStream(base).filter(holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()))));
+			return FXCollections.unmodifiableObservableList(FXCollections.observableList((getInheringsStream(base).filter(
+					holder -> !set.contains(holder) && !holder.equals(origin) && holder.getLevel() == level).collect(Collectors.toList()))));
 		}
 	}
 
@@ -101,7 +103,8 @@ public class ObservableInheritanceComputer<T extends DefaultGeneric<T>> {
 		private Stream<T> getStream(final T holder) {
 			if (compositesBySuper(localBase, holder).count() != 0)
 				set.add(holder);
-			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(localBase, holder) : Stream.empty(), compositesBySuper(localBase, holder));
+			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(localBase, holder) : Stream.empty(),
+					compositesBySuper(localBase, holder));
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
 		}
 	}

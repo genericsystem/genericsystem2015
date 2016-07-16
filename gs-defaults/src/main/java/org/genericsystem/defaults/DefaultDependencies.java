@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
 import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.defaults.tools.TransitiveObservableList;
@@ -28,7 +30,9 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 
 	@Override
 	default boolean isAncestorOf(T dependency) {
-		return equals(dependency) || (!dependency.isMeta() && isAncestorOf(dependency.getMeta())) || dependency.getSupers().stream().anyMatch(this::isAncestorOf) || dependency.getComponents().stream().filter(x -> x != null).anyMatch(this::isAncestorOf);
+		return equals(dependency) || (!dependency.isMeta() && isAncestorOf(dependency.getMeta()))
+				|| dependency.getSupers().stream().anyMatch(this::isAncestorOf)
+				|| dependency.getComponents().stream().filter(x -> x != null).anyMatch(this::isAncestorOf);
 	}
 
 	@Override

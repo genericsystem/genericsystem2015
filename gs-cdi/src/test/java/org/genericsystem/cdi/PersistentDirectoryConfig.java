@@ -12,6 +12,7 @@ import javax.enterprise.inject.Specializes;
  * @author Nicolas Feybesse
  *
  */
+
 @Specializes
 @Alternative
 @ApplicationScoped

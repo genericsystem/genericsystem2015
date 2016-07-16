@@ -1,4 +1,4 @@
-package org.genericsystem.reactor;
+package org.genericsystem.defaults.tools;
 
 import java.lang.ref.WeakReference;
 import java.util.function.Function;

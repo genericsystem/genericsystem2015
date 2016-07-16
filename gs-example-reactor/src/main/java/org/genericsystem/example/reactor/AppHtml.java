@@ -64,7 +64,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				};
 
 				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
-				new SaveCancelFlexRow(this).addStyle("background-color", "#ffa500");
+				new TransactionMonitor(this).addStyle("background-color", "#ffa500");
 			}
 		};
 	}

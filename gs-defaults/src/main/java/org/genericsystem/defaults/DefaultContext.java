@@ -17,6 +17,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ReferentialIntegrityConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.api.core.exceptions.UnreachableOverridesException;
+import org.genericsystem.defaults.tools.SupersComputer;
 
 /**
  * @author Nicolas Feybesse
@@ -113,17 +114,21 @@ public interface DefaultContext<T extends DefaultGeneric<T>> extends IContext<T>
 			OrderedRemoveDependencies visit(T node) {
 				if (!contains(node)) {
 					if (!getInheritings(node).isEmpty())
-						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a inheriting dependencies : " + getInheritings(node).info()));
+						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a inheriting dependencies : "
+								+ getInheritings(node).info()));
 					getInheritings(node).forEach(this::visit);
 
 					if (!getInstances(node).isEmpty())
-						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a instance dependencies : " + getInstances(node).info()));
+						discardWithException(new ReferentialIntegrityConstraintViolationException("Ancestor : " + node + " has a instance dependencies : "
+								+ getInstances(node).info()));
 					getInstances(node).forEach(this::visit);
 
 					for (T composite : getComposites(node)) {
 						for (int componentPos = 0; componentPos < composite.getComponents().size(); componentPos++)
-							if (composite.getComponents().get(componentPos).equals(node) && !contains(composite) && composite.getMeta().isReferentialIntegrityEnabled(componentPos))
-								discardWithException(new ReferentialIntegrityConstraintViolationException(composite + " is Referential Integrity for ancestor " + node + " by composite position : " + componentPos));
+							if (composite.getComponents().get(componentPos).equals(node) && !contains(composite)
+									&& composite.getMeta().isReferentialIntegrityEnabled(componentPos))
+								discardWithException(new ReferentialIntegrityConstraintViolationException(composite + " is Referential Integrity for ancestor "
+										+ node + " by composite position : " + componentPos));
 						visit(composite);
 					}
 					add(node);

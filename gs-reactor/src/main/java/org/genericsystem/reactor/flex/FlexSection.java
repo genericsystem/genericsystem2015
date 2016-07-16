@@ -30,6 +30,8 @@ public class FlexSection extends HtmlSection<GenericModel> {
 		return new HtmlDomNode(parentId);
 	}
 
+	// TODO remove or improve this
+	@Deprecated
 	public static class H1FlexElement extends FlexSection {
 		public H1FlexElement(Tag<?> parent, String title) {
 			this(parent, FlexDirection.ROW, title);
@@ -54,13 +56,13 @@ public class FlexSection extends HtmlSection<GenericModel> {
 		}
 	};
 
-	public static class SaveCancelFlexRow extends FlexSection {
+	public static class TransactionMonitor extends FlexSection {
 
-		public SaveCancelFlexRow(Tag<?> parent) {
+		public TransactionMonitor(Tag<?> parent) {
 			this(parent, FlexDirection.ROW);
 		}
 
-		public SaveCancelFlexRow(Tag<?> parent, FlexDirection direction) {
+		public TransactionMonitor(Tag<?> parent, FlexDirection direction) {
 			super(parent, direction);
 			addStyle("justify-content", "space-around");
 			addStyle("padding", "10px");

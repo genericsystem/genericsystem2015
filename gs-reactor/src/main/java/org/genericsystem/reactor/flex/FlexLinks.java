@@ -2,6 +2,9 @@ package org.genericsystem.reactor.flex;
 
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
+import javafx.util.StringConverter;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
@@ -15,9 +18,6 @@ import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-
-import javafx.beans.binding.Bindings;
-import javafx.util.StringConverter;
 
 public class FlexLinks {
 
@@ -93,8 +93,10 @@ public class FlexLinks {
 			tag.addStyle("flex", "1");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
-					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
+			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put(
+					"background-color",
+					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext)
+							.getString().getValue() : "#dda5e2"));
 		}
 	}
 
@@ -138,10 +140,10 @@ public class FlexLinks {
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
 					new FlexSection(this, this.getDirection()) {
 						{
-							addStyle("justify-content", "center");
-							addStyle("align-items", "center");
 							addStyle("width", "100%");
 							addStyle("height", "100%");
+							addStyle("justify-content", "center");
+							addStyle("align-items", "center");
 							new HtmlGenericInputText(this) {
 								{
 									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
