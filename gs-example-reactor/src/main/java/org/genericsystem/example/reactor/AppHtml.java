@@ -13,16 +13,16 @@ import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
-import org.genericsystem.reactor.flex.CompositeFlexSection.ColorCompositeRadio;
-import org.genericsystem.reactor.flex.CompositeFlexSection.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.flex.GenericCompositeSection.ColorCompositeRadio;
+import org.genericsystem.reactor.flex.GenericCompositeSection.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.flex.FlexDirection;
-import org.genericsystem.reactor.flex.FlexEditor;
-import org.genericsystem.reactor.flex.FlexSection;
-import org.genericsystem.reactor.flex.FlexTable;
+import org.genericsystem.reactor.flex.GenericEditor;
+import org.genericsystem.reactor.flex.GenericSection;
+import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.GenericModel.StringExtractor;
+import org.genericsystem.reactor.model.StringExtractor;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -37,7 +37,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		runScript(engine);
-		new FlexSection(this, FlexDirection.COLUMN) {
+		new GenericSection(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
 				new ColorsSelect(this).select(StringExtractor.EXTRACTOR, Color.class);
@@ -45,25 +45,25 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new ColorCompositeRadio(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class);
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
 
-				new FlexSection(this, FlexDirection.COLUMN) {
+				new GenericSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 						enableSelectorBehavior();
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-						new FlexTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
-						new FlexEditor(this, FlexDirection.ROW) {
+						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
+						new GenericDependenciesTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
+						new GenericEditor(this, FlexDirection.ROW) {
 							{
 								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
 								addStyle("justify-content", "center");
 							}
 						};
 
-						new FlexEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
-						new FlexTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+						new GenericEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}
 				};
 
-				new FlexTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
+				new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
 				new TransactionMonitor(this).addStyle("background-color", "#ffa500");
 			}
 		};

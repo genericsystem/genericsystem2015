@@ -6,10 +6,10 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class FlexSection extends HtmlSection<GenericModel> {
+public class GenericSection extends HtmlSection<GenericModel> {
 	private final FlexDirection direction;
 
-	public FlexSection(Tag<?> parent, FlexDirection direction) {
+	public GenericSection(Tag<?> parent, FlexDirection direction) {
 		super(parent);
 		this.direction = direction;
 		addStyle("display", "flex");
@@ -32,7 +32,7 @@ public class FlexSection extends HtmlSection<GenericModel> {
 
 	// TODO remove or improve this
 	@Deprecated
-	public static class H1FlexElement extends FlexSection {
+	public static class H1FlexElement extends GenericSection {
 		public H1FlexElement(Tag<?> parent, String title) {
 			this(parent, FlexDirection.ROW, title);
 		}
@@ -56,7 +56,7 @@ public class FlexSection extends HtmlSection<GenericModel> {
 		}
 	};
 
-	public static class TransactionMonitor extends FlexSection {
+	public static class TransactionMonitor extends GenericSection {
 
 		public TransactionMonitor(Tag<?> parent) {
 			this(parent, FlexDirection.ROW);

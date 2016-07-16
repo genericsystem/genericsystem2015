@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.Generic;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.common.Generic;
 
 @FunctionalInterface
 public interface ObservableListExtractor extends Function<Generic[], ObservableList<Generic>> {
@@ -35,12 +35,6 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		// attribute.isCompositeForInstances(generics[0])));
 		return generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0]));
 	};
-
-	// public static final ObservableListExtractor ATTRIBUTES_OF_TYPE2 = generics -> {
-	// System.out.println("ATTRIBUTES_OF_TYPE : " + Arrays.toString(generics) + " "
-	// + generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0])));
-	// return generics[0].getObservableAttributes().filtered(attribute -> attribute.isCompositeForInstances(generics[0].getMeta()));
-	// };
 
 	public static final ObservableListExtractor ATTRIBUTES_OF_INSTANCES = generics -> {
 		// System.out.println("ATTRIBUTES_OF_INSTANCES : " + Arrays.toString(generics) + " " + generics[1].getObservableAttributes().filtered(attribute ->

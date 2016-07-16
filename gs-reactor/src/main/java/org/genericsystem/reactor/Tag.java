@@ -42,8 +42,8 @@ import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

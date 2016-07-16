@@ -10,18 +10,17 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotation.InstanceColorize;
 import org.genericsystem.reactor.composite.CompositeSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.GenericModel.StringExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.StringExtractor;
 
 public class FlexLinks {
 
-	public static class FlexLabelDisplayer extends FlexSection {
+	public static class FlexLabelDisplayer extends GenericSection {
 
 		private final ObservableListExtractor observableListExtractor;
 		private final boolean reverse;
@@ -34,11 +33,11 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new FlexSection(this, this.getDirection()) {
+					new GenericSection(this, this.getDirection()) {
 						{
 							addStyle("justify-content", "center");
 							addStyle("align-items", "center");
@@ -62,7 +61,7 @@ public class FlexLinks {
 					};
 				}
 			};
-			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					addStyle("justify-content", "center");
@@ -93,10 +92,11 @@ public class FlexLinks {
 			tag.addStyle("flex", "1");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put(
-					"background-color",
-					((GenericModel) modelContext).getGeneric().getMeta().getAnnotation(InstanceColorize.class) != null ? ((GenericModel) modelContext)
-							.getString().getValue() : "#dda5e2"));
+			tag.addPrefixBinding(modelContext -> ((Model) modelContext)
+					.getObservableStyles(tag)
+					.put("background-color",
+							"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? ((GenericModel) modelContext)
+									.getString().getValue() : "#dda5e2"));
 		}
 	}
 
@@ -116,7 +116,7 @@ public class FlexLinks {
 		}
 	}
 
-	public static class FlexLinkEditor extends FlexSection {
+	public static class FlexLinkEditor extends GenericSection {
 
 		private final ObservableListExtractor observableListExtractor;
 		private final boolean reverse;
@@ -134,11 +134,11 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new FlexSection(this, this.getDirection()) {
+					new GenericSection(this, this.getDirection()) {
 						{
 							addStyle("width", "100%");
 							addStyle("height", "100%");
@@ -165,7 +165,7 @@ public class FlexLinks {
 					};
 				}
 			};
-			new FlexSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					addStyle("justify-content", "center");
