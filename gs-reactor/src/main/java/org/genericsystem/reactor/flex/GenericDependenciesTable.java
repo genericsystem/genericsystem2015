@@ -1,5 +1,9 @@
 package org.genericsystem.reactor.flex;
 
+import java.util.Map;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -118,9 +122,6 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 	protected void columnsInputSection() {
 		new GenericCompositeSection(this, this.getReverseDirection()) {
-			// {
-			// select(gs -> gs[0]);
-			// }
 
 			@Override
 			protected void header() {
@@ -208,6 +209,21 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 									{
 										addStyle("width", "100%");
 										addStyle("height", "100%");
+										addPrefixBinding(model -> {
+											if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
+												Map<String, String> map = model.getObservableStyles(this);
+												ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
+												ObservableValue<String> observable = model.getSelectionString();
+												observable.addListener(listener);
+												map.put("background-color", observable.getValue());
+											}
+										});
+										optionElement.addPrefixBinding(model -> {
+											if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+												model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
+										});
+										// bindStyle("background-color", GenericModel::getSelectionString);
+										// optionElement.bindStyle("background-color", GenericModel::getString);
 									}
 								};
 							}

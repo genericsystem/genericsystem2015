@@ -178,6 +178,23 @@ public class FlexLinks {
 								int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
 								modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(nva.getGeneric(), axe));
 							});
+							// addPrefixBinding(model -> {
+							// if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta()))) {
+							// Map<String, String> map = model.getObservableStyles(this);
+							// ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
+							// ObservableValue<String> observable = model.getSelectionString();
+							// observable.addListener(listener);
+							// map.put("background-color", observable.getValue());
+							// }
+							// });
+							addPostfixBinding(model -> {
+								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+									model.getObservableStyles(this).put("background-color", model.getSelectionString().getValue());
+							});
+							optionElement.addPrefixBinding(model -> {
+								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+									model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
+							});
 							addStyle("width", "100%");
 							addStyle("height", "100%");
 						}
@@ -220,7 +237,7 @@ public class FlexLinks {
 			addStyle("width", "100%");
 			addStyle("height", "100%");
 
-			initProperty("converter", model -> getConverter(model));
+			initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
 
 			setProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 				boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
@@ -228,7 +245,7 @@ public class FlexLinks {
 				if (required && (value == null || value.trim().isEmpty()))
 					return true;
 				try {
-					((StringConverter) model.getProperty(this, "converter").getValue()).fromString(value);
+					((StringConverter) model.getProperty(this, ReactorStatics.CONVERTER).getValue()).fromString(value);
 					return false;
 				} catch (Exception e) {
 					return true;

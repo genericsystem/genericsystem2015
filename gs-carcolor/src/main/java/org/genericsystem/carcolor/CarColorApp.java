@@ -11,15 +11,13 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.flex.FlexDirection;
+import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.flex.GenericEditor;
 import org.genericsystem.reactor.flex.GenericSection;
-import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.html.HtmlApp;
-import org.genericsystem.reactor.html.HtmlInputText;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -45,7 +43,6 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", MAIN_COLOR);
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
-						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 						enableSelectorBehavior();
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericEditor(this, FlexDirection.COLUMN) {

@@ -77,12 +77,9 @@ public class ViewContext<M extends Model> {
 		getRootViewContext().add(node.getId(), node);
 	}
 
-	boolean removed = false;
-
 	void destroyChild() {
-		removed = true;
-		parent.decrementSize(element);
 		getRootViewContext().remove(node.getId());
+		parent.decrementSize(element);
 	}
 
 	private void incrementSize(Tag<?> child) {

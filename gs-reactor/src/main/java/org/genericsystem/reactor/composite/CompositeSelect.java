@@ -8,7 +8,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 
 public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericModel> {
 
-	HtmlOption<GenericModel> optionElement;
+	protected HtmlOption<GenericModel> optionElement;
 	private final int shift;
 
 	public CompositeSelect(Tag<?> parent) {
@@ -32,10 +32,6 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 		};
 	}
 
-	protected void bindOptionsToGeneric() {
-		bindBiDirectionalSelection(optionElement);
-	}
-
 	public static class CompositeSelectWithEmptyEntry extends CompositeSelect {
 
 		public CompositeSelectWithEmptyEntry(Tag<?> parent) {
@@ -45,12 +41,7 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 		@Override
 		protected void options() {
 			new HtmlOption<GenericModel>(this);
-			optionElement = new HtmlOption<GenericModel>(this) {
-				{
-					bindText(GenericModel::getString);
-					forEach(CompositeSelectWithEmptyEntry.this);
-				}
-			};
+			super.options();
 		}
 	}
 
@@ -59,21 +50,11 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 		public ColorsSelect(Tag<?> parent) {
 			super(parent);
 			bindStyle("background-color", GenericModel::getSelectionString);
-		}
-
-		@Override
-		protected void options() {
-			optionElement = new HtmlOption<GenericModel>(this) {
-				{
-					bindText(GenericModel::getString);
-					bindStyle("background-color", GenericModel::getString);
-					forEach(ColorsSelect.this);
-				}
-			};
+			optionElement.bindStyle("background-color", GenericModel::getString);
 		}
 	}
 
-	public static class InstanceCompositeSelect extends ColorsSelect implements CompositeTag<GenericModel> {
+	public static class InstanceCompositeSelect extends CompositeSelect implements CompositeTag<GenericModel> {
 
 		public InstanceCompositeSelect(Tag<?> parent) {
 			super(parent);
