@@ -43,6 +43,7 @@ section .adding {
  */
 
 .invalid {
+	background : white;
 	animation: invalideffect 0.5s 5 forwards;
 }
 
