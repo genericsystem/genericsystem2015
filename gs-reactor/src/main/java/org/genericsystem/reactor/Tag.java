@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -159,19 +158,18 @@ public abstract class Tag<M extends Model> {
 
 	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext) {
 		metaBinding = (childElement, viewContext) -> {
+
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableValue<M> observableValue = applyOnModelContext.apply((MODEL) viewContext.getModelContext());
-			ObservableList<M> subModels = new ListBinding<M>() {
-				{
-					bind(observableValue);
-				}
-
-				@Override
-				protected ObservableList<M> computeValue() {
-					M value = observableValue.getValue();
-					return value != null ? FXCollections.singletonObservableList(value) : FXCollections.emptyObservableList();
-				}
+			ObservableList<M> subModels = FXCollections.observableArrayList();
+			ChangeListener<M> listener = (ChangeListener<M>) (observable, oldValue, newValue) -> {
+				if (oldValue != null)
+					subModels.remove(0);
+				if (newValue != null)
+					subModels.add(newValue);
 			};
+			observableValue.addListener(new WeakChangeListener<>(listener));
+			listener.changed(observableValue, null, observableValue.getValue());
 			viewContext.getModelContext().setSubContexts(
 					childElement,
 					new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {

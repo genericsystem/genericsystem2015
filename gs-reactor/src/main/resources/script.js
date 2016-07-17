@@ -112,9 +112,9 @@ function onMessageReceived(evt) {
 	case 'R':
 		if (elt != null) {
 			elt.classList.add("removing");
-			setTimeout(function(){ 
+			//setTimeout(function(){ 
 				elt.parentNode.removeChild(elt);
-			}, 500);
+			//}, 500);
 		}
 		else {
 			console.log("Unreached removed element id : "+message.nodeId)

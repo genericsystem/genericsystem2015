@@ -26,38 +26,42 @@ section .adding {
 	animation: appeareffect 2s;
 }
 
-section .removing {
-    animation: disappeareffect 0.5s;
+
+/* section .removing {
+	animation: disappeareffect 2s forwards;
 }
+ */
 
 .invalid {
-	background: white;
-    animation: invalideffect 0.5s 5 forwards;
-  }
-
-@keyframes appeareffect {
- 	0% {
- 		box-shadow: 0 0 15px rgba(0, 100, 0, 1);
- 	}
-  	100% {
- 		box-shadow: none;
- 	}
+	animation: invalideffect 0.5s 5 forwards;
 }
 
-@keyframes disappeareffect {
- 	0% {
- 		box-shadow: 0 0 15px rgba(255, 0, 0, 1);
- 	}
-  	100% {
- 		box-shadow: none;
- 	}
-}
+@keyframes appeareffect { 
+	0% {
+		box-shadow: inset 0 0 15px rgba(0, 100, 0, 1);
+	}
 
-@keyframes invalideffect {
- 	0% {
+	100%
+	{
+		box-shadow:none;
+	}
+}
+/* @keyframes disappeareffect { 
+	0% {
+		box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+	}
+
+	100% {
+		box-shadow:none;
+	}
+} */
+
+@keyframes invalideffect { 
+	0% {
 		box-shadow: none;
- 	}
-  	100% {
-  		box-shadow: inset 0 0 15px rgba(255, 0, 0, 1);
- 	}
+	}
+	100%
+	{
+		box-shadow: inset 0 0 15px rgba(255,0,0,1);
+	}
 }
