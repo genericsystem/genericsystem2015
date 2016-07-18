@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +11,21 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.composite.CompositeTag;
+import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.StringExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -33,18 +44,6 @@ import javafx.collections.SetChangeListener;
 import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 import javafx.util.StringConverter;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Model.TriFunction;
-import org.genericsystem.reactor.composite.CompositeTag;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.StringExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -229,25 +228,18 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, int shift) {
-		bindBiDirectionalSelection(subElement, GenericModel::getSelection, shift);
+		bindBiDirectionalSelection(subElement, model -> model.getProperty(this, ReactorStatics.SELECTION), shift);
 	}
 
-	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement,
-			Function<GenericModel, Property<GenericModel>> applyOnModel, int shift) {
+	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag<SUBMODEL> subElement, Function<GenericModel, Property<GenericModel>> applyOnModel, int shift) {
 		addPostfixBinding(modelContext -> {
 			List<SUBMODEL> subContexts = modelContext.getSubContexts(subElement);
 			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
 			Optional<SUBMODEL> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			Property<GenericModel> selection = applyOnModel.apply((GenericModel) modelContext);
 			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
-			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), selection,
-					number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null,
-					genericModel -> subContexts.indexOf(genericModel) + shift);
+			BidirectionalBinding.bind(modelContext.getSelectionIndex(this), selection, number -> number.intValue() - shift >= 0 ? (GenericModel) subContexts.get(number.intValue() - shift) : null, genericModel -> subContexts.indexOf(genericModel) + shift);
 		});
-	}
-
-	protected void enableSelectorBehavior() {
-		addPrefixBinding(model -> ((GenericModel) model).enableSelectorBehavior());
 	}
 
 	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
@@ -319,6 +311,10 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
+	public <T> void initProperty(String propertyName, T initialValue) {
+		initProperty(propertyName, model -> initialValue);
+	}
+
 	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
 		initProperty(model -> model.getProperty(this, propertyName), getInitialValue);
 	}
@@ -333,12 +329,6 @@ public abstract class Tag<M extends Model> {
 	public <T> void setProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
 		addPrefixBinding(modelContext -> {
 			modelContext.setProperty(this, propertyName, applyOnModel.apply(modelContext));
-		});
-	}
-
-	public <T> void setAction(TriFunction<Generic[], Serializable, Generic, Generic> action) {
-		addPrefixBinding(modelContext -> {
-			modelContext.setAction(action);
 		});
 	}
 
@@ -361,8 +351,20 @@ public abstract class Tag<M extends Model> {
 	public void bindOptionalStyle(String propertyName, Function<M, ObservableValue<Boolean>> applyOnModel, String propertyValue, String propertyValueFalse) {
 		bindStyle(propertyName, model -> {
 			ObservableValue<Boolean> optional = applyOnModel.apply(model);
-			return Bindings.createStringBinding(() -> Boolean.TRUE.equals(optional.getValue()) ? propertyValue : propertyValueFalse, optional);
-		});
+			return new StringBinding() {
+				ObservableValue<Boolean> strongReference = optional;
+				{
+					bind(optional);
+				}
+
+				@Override
+				protected String computeValue() {
+					return Boolean.TRUE.equals(optional.getValue()) ? propertyValue : propertyValueFalse;
+				}
+			};
+
+			// return new Bindings.createStringBinding(() -> Boolean.TRUE.equals(optional.getValue()) ? propertyValue : propertyValueFalse, optional);
+			});
 	}
 
 	// public <SUBMODEL extends GenericModel> void bindOptionalStyle(String propertyName, Function<SUBMODEL, ObservableValue<Boolean>> applyOnModel,
