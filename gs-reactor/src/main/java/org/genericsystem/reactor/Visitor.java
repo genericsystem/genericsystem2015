@@ -3,8 +3,11 @@ package org.genericsystem.reactor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.binding.Bindings;
@@ -35,10 +38,10 @@ public class Visitor {
 		@Override
 		public void prefix(Model model) {
 			GenericModel gModel = (GenericModel) model;
-			if (model.getAction() != null) {
-				Serializable value = (Serializable) model.getPropertiesByName(ReactorStatics.VALUE).get(0).getValue();
-				if (value != null) {
-					Generic g = gModel.getAction().apply(gModel.getGenerics(), value, newInstance);
+			for (Map<String, ObservableValue<Object>> properties : model.getProperties().values()) {
+				if (properties.get(ReactorStatics.VALUE).getValue() != null && properties.get(ReactorStatics.ACTION).getValue() != null) {
+					TriFunction<Generic[], Serializable, Generic, Generic> action = (TriFunction<Generic[], Serializable, Generic, Generic>) properties.get(ReactorStatics.ACTION).getValue();
+					Generic g = action.apply(gModel.getGenerics(), (Serializable) properties.get(ReactorStatics.VALUE).getValue(), newInstance);
 					if (newInstance == null)
 						newInstance = g;
 				}
@@ -48,16 +51,12 @@ public class Visitor {
 		@Override
 		public void postfix(Model model) {
 			List<Generic> generics = new ArrayList<>();
-			boolean createLink = true;
 			for (Model subModel : model.allSubContexts())
-				if (subModel instanceof GenericModel && ((GenericModel) subModel).isSelector()) {
-					GenericModel value = ((GenericModel) subModel).getSelection().getValue();
-					if (value != null)
-						generics.add(value.getGeneric());
-					else
-						createLink = false;
-				}
-			if (createLink && !generics.isEmpty())
+				for (Tag tag : subModel.getProperties().keySet())
+					if (Boolean.TRUE.equals(subModel.getProperty(tag, ReactorStatics.SELECTOR_TAG).getValue()))
+						if (subModel.getProperty(tag, ReactorStatics.SELECTION).getValue() != null)
+							generics.add(((GenericModel) subModel.getProperty(tag, ReactorStatics.SELECTION).getValue()).getGeneric());
+			if (!generics.isEmpty() && generics.size() + 1 == ((GenericModel) model).getGeneric().getComponents().size()) // test OK?
 				newInstance.setHolder(((GenericModel) model).getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}
@@ -65,10 +64,12 @@ public class Visitor {
 	public static class ClearVisitor extends Visitor {
 		@Override
 		public void prefix(Model model) {
-			if (model.getAction() != null)
-				((Property) model.getPropertiesByName(ReactorStatics.VALUE).get(0)).setValue(null);
-			if (model instanceof GenericModel && ((GenericModel) model).isSelector())
-				((GenericModel) model).getSelection().setValue(null);
+			for (Map<String, ObservableValue<Object>> properties : model.getProperties().values()) {
+				if (properties.get(ReactorStatics.VALUE).getValue() != null)
+					((Property) properties.get(ReactorStatics.VALUE)).setValue(null);
+				if (properties.get(ReactorStatics.SELECTION).getValue() != null)
+					((Property) properties.get(ReactorStatics.SELECTION)).setValue(null);
+			}
 		}
 	}
 
@@ -88,7 +89,7 @@ public class Visitor {
 
 		@Override
 		public void prefix(Model model) {
-			propertiesInvalid.addAll(model.getPropertiesByName(ReactorStatics.INVALID));
+			propertiesInvalid.addAll(model.getProperties().values().stream().map(properties -> properties.get(ReactorStatics.INVALID)).collect(Collectors.toList()));
 		}
 	}
 }

@@ -10,6 +10,7 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
@@ -21,7 +22,6 @@ import org.genericsystem.reactor.flex.GenericSection;
 import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.EngineModel;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
 import io.vertx.core.http.ServerWebSocket;
@@ -48,17 +48,17 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-						enableSelectorBehavior();
+						initProperty(ReactorStatics.SELECTOR_TAG, true);
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericDependenciesTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericEditor(this, FlexDirection.ROW) {
 							{
-								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> model.getProperty(this.getParent(), ReactorStatics.SELECTION));
 								addStyle("justify-content", "center");
 							}
 						};
 
-						new GenericEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+						new GenericEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> model.getProperty(this, ReactorStatics.SELECTION));
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}
 				};

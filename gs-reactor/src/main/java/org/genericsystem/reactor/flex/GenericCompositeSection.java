@@ -1,11 +1,14 @@
 package org.genericsystem.reactor.flex;
 
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlRadio;
 import org.genericsystem.reactor.model.GenericModel;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -117,8 +120,13 @@ public class GenericCompositeSection extends GenericSection implements Composite
 
 		public ColorCompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
+			initProperty(ReactorStatics.SELECTOR_TAG, true);
 			bindBiDirectionalSelection(flexSubElement);
-			bindStyle("background-color", GenericModel::getSelectionString);
+			setProperty(ReactorStatics.SELECTION_STRING,
+					model -> Bindings.createStringBinding(
+							() -> getStringExtractor().apply(model.getProperty(this, ReactorStatics.SELECTION).getValue() != null ? ((GenericModel) model.getProperty(this, ReactorStatics.SELECTION).getValue()).getGeneric() : null),
+							model.getProperty(this, ReactorStatics.SELECTION)));
+			bindStyle("background-color", model -> model.getObservableValue(this, ReactorStatics.SELECTION_STRING));
 			addStyle("padding", "4px");
 		}
 

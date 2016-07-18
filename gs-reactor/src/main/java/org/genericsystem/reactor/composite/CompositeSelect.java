@@ -1,15 +1,17 @@
 package org.genericsystem.reactor.composite;
 
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlOption;
 import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
+import javafx.beans.binding.Bindings;
+
 public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericModel> {
 
 	protected HtmlOption<GenericModel> optionElement;
-	private final int shift;
 
 	public CompositeSelect(Tag<?> parent) {
 		this(parent, 0);
@@ -17,10 +19,13 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 
 	private CompositeSelect(Tag<?> parent, int shift) {
 		super(parent);
-		this.shift = shift;
 		options();
-		enableSelectorBehavior();
+		initProperty(ReactorStatics.SELECTOR_TAG, true);
 		bindBiDirectionalSelection(optionElement, shift);
+		setProperty(ReactorStatics.SELECTION_STRING,
+				model -> Bindings.createStringBinding(
+						() -> getStringExtractor().apply(model.getProperty(this, ReactorStatics.SELECTION).getValue() != null ? ((GenericModel) model.getProperty(this, ReactorStatics.SELECTION).getValue()).getGeneric() : null),
+						model.getProperty(this, ReactorStatics.SELECTION)));
 	}
 
 	protected void options() {
@@ -49,7 +54,7 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 
 		public ColorsSelect(Tag<?> parent) {
 			super(parent);
-			bindStyle("background-color", GenericModel::getSelectionString);
+			bindStyle("background-color", model -> model.getObservableValue(this, ReactorStatics.SELECTION_STRING));
 			optionElement.bindStyle("background-color", GenericModel::getString);
 		}
 	}

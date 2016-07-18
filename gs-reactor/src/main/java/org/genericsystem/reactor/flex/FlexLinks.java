@@ -2,9 +2,6 @@ package org.genericsystem.reactor.flex;
 
 import java.util.List;
 
-import javafx.beans.binding.Bindings;
-import javafx.util.StringConverter;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
@@ -17,6 +14,9 @@ import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.Bindings;
+import javafx.util.StringConverter;
 
 public class FlexLinks {
 
@@ -176,7 +176,7 @@ public class FlexLinks {
 							select(gs -> gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
 							addPostfixBinding(modelContext -> {
 								int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
-								modelContext.getSelection().addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(nva.getGeneric(), axe));
+								modelContext.getProperty(this, ReactorStatics.SELECTION).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
 							});
 							// addPrefixBinding(model -> {
 							// if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta()))) {
@@ -189,7 +189,7 @@ public class FlexLinks {
 							// });
 							addPostfixBinding(model -> {
 								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-									model.getObservableStyles(this).put("background-color", model.getSelectionString().getValue());
+									model.getObservableStyles(this).put("background-color", (String) model.getObservableValue(this, ReactorStatics.SELECTION_STRING).getValue());
 							});
 							optionElement.addPrefixBinding(model -> {
 								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))

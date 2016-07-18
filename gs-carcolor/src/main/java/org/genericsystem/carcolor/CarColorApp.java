@@ -12,6 +12,7 @@ import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.flex.FlexDirection;
@@ -45,14 +46,13 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", MAIN_COLOR);
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
-						enableSelectorBehavior();
+						initProperty(ReactorStatics.SELECTOR_TAG, true);
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericSection(this, FlexDirection.COLUMN) {
 							{
 								addStyleClass("modal");
-								bindOptionalStyle("display",
-										model -> Bindings.createBooleanBinding(() -> model.getSelection().getValue() != null, model.getSelection()), "flex",
-										"none");
+								bindOptionalStyle("display", model -> Bindings.createBooleanBinding(() -> model.getProperty(this.getParent(), ReactorStatics.SELECTION).getValue() != null, model.getProperty(this.getParent(), ReactorStatics.SELECTION)),
+										"flex", "none");
 
 								new GenericSection(this, FlexDirection.COLUMN) {
 									{
@@ -63,12 +63,12 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 											{
 												addStyleClass("close");
 												setText("×");
-												bindAction(model -> model.getSelection().setValue(null));
+												bindAction(model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION).setValue(null));
 											}
 										};
 										new GenericEditor(this, FlexDirection.COLUMN) {
 											{
-												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION));
 												addStyle("min-height", "300px");
 											}
 										};
