@@ -2,7 +2,7 @@
 var wsocket;
 
 function connect() {
-	console.log("connecte");
+	console.log("connect");
 	wsocket = new WebSocket(serviceLocation);
 	wsocket.binaryType = "arraybuffer";
 	wsocket.onmessage = onMessageReceived;
@@ -113,7 +113,7 @@ function onMessageReceived(evt) {
 		if (elt != null) {
 			elt.classList.add("removing");
 			//setTimeout(function(){ 
-				elt.parentNode.removeChild(elt);
+			elt.parentNode.removeChild(elt);
 			//}, 2000);
 		}
 		else {
@@ -173,6 +173,15 @@ function selectIndex(name){
 	for (var i = 0; i < buttons.length; i++) {
 		if(buttons[i].checked){
 			return i;
+		}
+	}
+}
+
+window.onclick = function(event) {
+	var modal =  document.getElementsByClassName("modal")[0];
+	if (event.target == modal) {
+		if(modal.style.display != "none") {
+			document.getElementsByClassName("close")[0].click();
 		}
 	}
 }

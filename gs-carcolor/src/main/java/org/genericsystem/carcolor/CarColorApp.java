@@ -1,6 +1,7 @@
 package org.genericsystem.carcolor;
 
 import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.Bindings;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
@@ -18,6 +19,7 @@ import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.flex.GenericEditor;
 import org.genericsystem.reactor.flex.GenericSection;
 import org.genericsystem.reactor.html.HtmlApp;
+import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -45,11 +47,35 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 					{
 						enableSelectorBehavior();
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-						new GenericEditor(this, FlexDirection.COLUMN) {
+						new GenericSection(this, FlexDirection.COLUMN) {
 							{
-								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
-								addStyle("min-height", "300px");
+								addStyleClass("modal");
+								bindOptionalStyle("display",
+										model -> Bindings.createBooleanBinding(() -> model.getSelection().getValue() != null, model.getSelection()), "flex",
+										"none");
+
+								new GenericSection(this, FlexDirection.COLUMN) {
+									{
+										addStyle("max-width", "40%");
+										addStyle("max-height", "40%");
+										addStyleClass("modal-content");
+										new HtmlHyperLink<GenericModel>(this) {
+											{
+												addStyleClass("close");
+												setText("×");
+												bindAction(model -> model.getSelection().setValue(null));
+											}
+										};
+										new GenericEditor(this, FlexDirection.COLUMN) {
+											{
+												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, GenericModel::getSelection);
+												addStyle("min-height", "300px");
+											}
+										};
+									}
+								};
 							}
+
 						};
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}

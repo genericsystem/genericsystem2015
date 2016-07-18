@@ -361,7 +361,7 @@ public abstract class Tag<M extends Model> {
 	public void bindOptionalStyle(String propertyName, Function<M, ObservableValue<Boolean>> applyOnModel, String propertyValue, String propertyValueFalse) {
 		bindStyle(propertyName, model -> {
 			ObservableValue<Boolean> optional = applyOnModel.apply(model);
-			return Bindings.createStringBinding(() -> optional.getValue() ? propertyValue : propertyValueFalse, optional);
+			return Bindings.createStringBinding(() -> Boolean.TRUE.equals(optional.getValue()) ? propertyValue : propertyValueFalse, optional);
 		});
 	}
 
@@ -675,8 +675,8 @@ public abstract class Tag<M extends Model> {
 		private Property<Number> selectionIndex = new SimpleIntegerProperty();
 
 		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
-					.encodePrettily());
+			// System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
+			// .encodePrettily());
 			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 		};
 
