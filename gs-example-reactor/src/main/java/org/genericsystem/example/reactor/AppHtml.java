@@ -14,12 +14,12 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
+import org.genericsystem.reactor.flex.FlexDirection;
 import org.genericsystem.reactor.flex.GenericCompositeSection.ColorCompositeRadio;
 import org.genericsystem.reactor.flex.GenericCompositeSection.ColorTitleCompositeFlexElement;
-import org.genericsystem.reactor.flex.FlexDirection;
+import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.flex.GenericEditor;
 import org.genericsystem.reactor.flex.GenericSection;
-import org.genericsystem.reactor.flex.GenericDependenciesTable;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -43,7 +43,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new ColorsSelect(this).select(StringExtractor.EXTRACTOR, Color.class);
 				new ColorTitleCompositeFlexElement(this).select(StringExtractor.MANAGEMENT, Color.class);
 				new ColorCompositeRadio(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class);
-				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", "#ffa500");
+				new H1FlexElement(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
