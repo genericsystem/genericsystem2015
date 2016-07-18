@@ -168,7 +168,7 @@ public abstract class Tag<M extends Model> {
 				if (newValue != null)
 					subModels.add(newValue);
 			};
-			observableValue.addListener(new WeakChangeListener<>(listener));
+			observableValue.addListener(listener);
 			listener.changed(observableValue, null, observableValue.getValue());
 			viewContext.getModelContext().setSubContexts(
 					childElement,
