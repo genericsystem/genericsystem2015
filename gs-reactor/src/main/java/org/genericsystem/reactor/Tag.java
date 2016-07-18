@@ -693,7 +693,7 @@ public abstract class Tag<M extends Model> {
 		public void handleMessage(JsonObject json) {
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
 				getSelectionIndex().setValue(json.getInteger(SELECTED_INDEX));
-				System.out.println("Selected index : " + getSelectionIndex().getValue());
+				// System.out.println("Selected index : " + getSelectionIndex().getValue());
 			}
 		}
 
