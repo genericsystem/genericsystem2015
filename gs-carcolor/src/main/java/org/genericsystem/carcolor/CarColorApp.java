@@ -1,8 +1,5 @@
 package org.genericsystem.carcolor;
 
-import io.vertx.core.http.ServerWebSocket;
-import javafx.beans.binding.Bindings;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -24,14 +21,15 @@ import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
+import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.Bindings;
+
 public class CarColorApp extends HtmlApp<EngineModel> {
 	private static final String MAIN_COLOR = "#3393ff";
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0])
-				: Statics.DEFAULT_PORT);
-		appsConfig.addApplication("/", CarColorApp.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
-				Power.class, Color.class, CarColor.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0]) : Statics.DEFAULT_PORT);
+		appsConfig.addApplication("/", CarColorApp.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 
 	}
@@ -42,7 +40,7 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 		new GenericSection(this, FlexDirection.COLUMN) {
 			{
 				addStyle("justify-content", "center");
-				new H1FlexElement(this, "Reactive System Live Demo").addStyle("background-color", MAIN_COLOR);
+				new H1FlexElement(this, "Generic System Reactor Live Demo").addStyle("background-color", MAIN_COLOR);
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
 						enableSelectorBehavior();
@@ -50,9 +48,7 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 						new GenericSection(this, FlexDirection.COLUMN) {
 							{
 								addStyleClass("modal");
-								bindOptionalStyle("display",
-										model -> Bindings.createBooleanBinding(() -> model.getSelection().getValue() != null, model.getSelection()), "flex",
-										"none");
+								bindOptionalStyle("display", model -> Bindings.createBooleanBinding(() -> model.getSelection().getValue() != null, model.getSelection()), "flex", "none");
 
 								new GenericSection(this, FlexDirection.COLUMN) {
 									{
