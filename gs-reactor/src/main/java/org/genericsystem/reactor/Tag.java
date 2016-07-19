@@ -24,6 +24,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -138,15 +139,34 @@ public abstract class Tag<M extends Model> {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
-			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
+			ObservableList<GenericModel> subModels = new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
 				// System.out.println("Change detected on : " + System.identityHashCode(generics) + " newValue : " + generic.info());
-					GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
-					viewContext.createViewContextChild(index, duplicate, childElement);
-					return duplicate;
-				}, m -> {
-					// TODO unregister viewContext before removing in list ?
-					m.destroy();
-				}));
+				GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
+				viewContext.createViewContextChild(index, duplicate, childElement);
+				return duplicate;
+			}, m -> {
+				// TODO unregister viewContext before removing in list ?
+				m.destroy();
+			});
+			viewContext.getModelContext().setSubContexts(childElement, subModels);
+			Tag selectionTag = this.metaBinding == null ? this : this.getParent();
+			GenericModel selectionModel = model;
+			while (selectionModel != null && !selectionModel.getProperties().get(selectionTag).containsKey(ReactorStatics.SELECTION)) {
+				selectionTag = selectionTag.getParent();
+				if (selectionTag == null)
+					break;
+				if (selectionTag.metaBinding != null)
+					selectionModel = (GenericModel) selectionModel.getParent();
+			}
+			final Tag selectionTag_ = selectionTag;
+			final GenericModel selectionModel_ = selectionModel;
+			if (selectionTag_ != null && selectionModel_ != null)
+				subModels.addListener((ListChangeListener<? super GenericModel>) change -> {
+					while (change.next())
+						if (change.wasRemoved() && !change.wasAdded())
+							if (change.getRemoved().contains(selectionModel_.getProperty(selectionTag_, ReactorStatics.SELECTION).getValue()))
+								selectionModel_.getProperty(selectionTag_, ReactorStatics.SELECTION).setValue(null);
+				});
 		};
 	}
 
