@@ -46,7 +46,7 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 				new H1FlexElement(this, "Generic System Reactor Live Demo").addStyle("background-color", MAIN_COLOR);
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
-						initProperty(ReactorStatics.SELECTOR_TAG, true);
+						initProperty(ReactorStatics.SELECTION, model -> null);
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericSection(this, FlexDirection.COLUMN) {
 							{
