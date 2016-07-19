@@ -1,13 +1,17 @@
 package org.genericsystem.reactor.flex;
 
+import java.io.Serializable;
 import java.util.Map;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
@@ -133,7 +137,8 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 						addStyle("margin-bottom", "1px");
 						new HtmlGenericInputText(this) {
 							{
-								setAction((gs, value, g) -> gs[0].setInstance(value));
+								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
+										(gs, value, g) -> gs[0].setInstance(value));
 							}
 
 							@Override
@@ -173,7 +178,8 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 										new HtmlGenericInputText(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												setAction((gs, value, g) -> g.setHolder(gs[1], value));
+												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
+														(gs, value, g) -> g.setHolder(gs[1], value));
 											}
 
 											@Override
@@ -188,7 +194,8 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-												setAction((gs, value, g) -> g.setHolder(gs[1], value));
+												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
+														(gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
 									}
@@ -213,7 +220,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 											if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
 												Map<String, String> map = model.getObservableStyles(this);
 												ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
-												ObservableValue<String> observable = model.getSelectionString();
+												ObservableValue<String> observable = model.getObservableValue(this, ReactorStatics.SELECTION_STRING);
 												observable.addListener(listener);
 												map.put("background-color", observable.getValue());
 											}
@@ -247,7 +254,14 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 						addStyle("margin-bottom", "1px");
 						new HtmlButton<GenericModel>(this) {
 							{
-								bindOptionalAttribute("disabled", model -> new CheckInputsValidityVisitor(model).isInvalid(), "disabled");
+								// storeProperty(ReactorStatics.DISABLED, model -> {
+								// ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
+								// return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? "disabled" : "", observable);
+								// });
+								bindAttribute("disabled", ReactorStatics.DISABLED, model -> {
+									ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
+									return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? "disabled" : "", observable);
+								});// model -> new CheckInputsValidityVisitor(model).isInvalid(), "disabled");
 								bindAction(modelContext -> {
 									try {
 										new HolderVisitor().visit(modelContext);
@@ -292,9 +306,14 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 								bindText(GenericModel::getString);
 								bindAction(model -> {
 									GenericModel cm = model;
-									while (cm != null && !cm.isSelector())
+									while (cm != null) {
 										cm = (GenericModel) cm.getParent();
-									cm.getSelection().setValue(model);
+										for (Tag tag : cm.getProperties().keySet())
+											if (Boolean.TRUE.equals(cm.getProperty(tag, ReactorStatics.SELECTOR_TAG).getValue())) {
+												cm.getProperty(tag, ReactorStatics.SELECTION).setValue(model);
+												return;
+											}
+									}
 								});
 							}
 						};

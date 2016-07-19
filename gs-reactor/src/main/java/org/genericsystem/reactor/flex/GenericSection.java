@@ -78,6 +78,12 @@ public class GenericSection extends HtmlSection<GenericModel> {
 					bindAction(GenericModel::cancel);
 				}
 			};
+			new HtmlButton<GenericModel>(this) {
+				{
+					setText("Collect");
+					bindAction(model -> System.gc());
+				}
+			};
 		}
 
 	}
