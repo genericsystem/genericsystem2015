@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -66,7 +66,9 @@ public class Model {
 		return (Property<T>) propertiesMap.get(tag).get(name);
 	}
 
-	public void setProperty(Tag tag, String propertyName, ObservableValue value) {
+	public void storeProperty(Tag tag, String propertyName, ObservableValue value) {
+		if (propertiesMap.get(tag).containsKey(propertyName))
+			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
 		propertiesMap.get(tag).put(propertyName, value);
 	}
 

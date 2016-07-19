@@ -1,5 +1,8 @@
 package org.genericsystem.carcolor;
 
+import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.Bindings;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -22,15 +25,14 @@ import org.genericsystem.reactor.model.EngineModel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
-import io.vertx.core.http.ServerWebSocket;
-import javafx.beans.binding.Bindings;
-
 public class CarColorApp extends HtmlApp<EngineModel> {
 	private static final String MAIN_COLOR = "#3393ff";
 
 	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0]) : Statics.DEFAULT_PORT);
-		appsConfig.addApplication("/", CarColorApp.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class, Power.class, Color.class, CarColor.class);
+		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length != 0 ? Integer.parseInt(args[0])
+				: Statics.DEFAULT_PORT);
+		appsConfig.addApplication("/", CarColorApp.class, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/cars/", Car.class,
+				Power.class, Color.class, CarColor.class);
 		new ApplicationServer(appsConfig).start();
 
 	}
@@ -49,8 +51,9 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 						new GenericSection(this, FlexDirection.COLUMN) {
 							{
 								addStyleClass("modal");
-								bindOptionalStyle("display", model -> Bindings.createBooleanBinding(() -> model.getProperty(this.getParent(), ReactorStatics.SELECTION).getValue() != null, model.getProperty(this.getParent(), ReactorStatics.SELECTION)),
-										"flex", "none");
+								bindStyle("display", ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(
+										() -> model.getProperty(this.getParent(), ReactorStatics.SELECTION).getValue() != null ? "flex" : "none",
+										model.getProperty(this.getParent(), ReactorStatics.SELECTION)));
 
 								new GenericSection(this, FlexDirection.COLUMN) {
 									{
@@ -61,12 +64,14 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 											{
 												addStyleClass("close");
 												setText("×");
-												bindAction(model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION).setValue(null));
+												bindAction(model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION)
+														.setValue(null));
 											}
 										};
 										new GenericEditor(this, FlexDirection.COLUMN) {
 											{
-												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION));
+												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR,
+														model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION));
 												addStyle("min-height", "300px");
 											}
 										};

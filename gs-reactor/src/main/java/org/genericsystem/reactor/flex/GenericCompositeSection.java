@@ -1,5 +1,7 @@
 package org.genericsystem.reactor.flex;
 
+import javafx.beans.binding.Bindings;
+
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.composite.CompositeTag;
@@ -7,8 +9,6 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlRadio;
 import org.genericsystem.reactor.model.GenericModel;
-
-import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -83,7 +83,7 @@ public class GenericCompositeSection extends GenericSection implements Composite
 		protected void sections() {
 			new GenericSection(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
-					bindStyle("background-color", GenericModel::getString);
+					bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
 					forEach(ColorTitleCompositeFlexElement.this);
 					new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
 				}
@@ -122,11 +122,13 @@ public class GenericCompositeSection extends GenericSection implements Composite
 			super(parent, flexDirection);
 			initProperty(ReactorStatics.SELECTOR_TAG, true);
 			bindBiDirectionalSelection(flexSubElement);
-			setProperty(ReactorStatics.SELECTION_STRING,
+			storeProperty(
+					ReactorStatics.SELECTION_STRING,
 					model -> Bindings.createStringBinding(
-							() -> getStringExtractor().apply(model.getProperty(this, ReactorStatics.SELECTION).getValue() != null ? ((GenericModel) model.getProperty(this, ReactorStatics.SELECTION).getValue()).getGeneric() : null),
-							model.getProperty(this, ReactorStatics.SELECTION)));
-			bindStyle("background-color", model -> model.getObservableValue(this, ReactorStatics.SELECTION_STRING));
+							() -> getStringExtractor().apply(
+									model.getProperty(this, ReactorStatics.SELECTION).getValue() != null ? ((GenericModel) model.getProperty(this,
+											ReactorStatics.SELECTION).getValue()).getGeneric() : null), model.getProperty(this, ReactorStatics.SELECTION)));
+			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
 			addStyle("padding", "4px");
 		}
 
@@ -140,7 +142,7 @@ public class GenericCompositeSection extends GenericSection implements Composite
 			flexSubElement = new GenericSection(this, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
-					bindStyle("background-color", GenericModel::getString);
+					bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
 					new HtmlRadio<GenericModel>(this);
 					new HtmlLabel<GenericModel>(this) {
 						{

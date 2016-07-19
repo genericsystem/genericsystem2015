@@ -239,7 +239,7 @@ public class FlexLinks {
 
 			initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
 
-			setProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
+			storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 				boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 				String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
 				if (required && (value == null || value.trim().isEmpty()))
