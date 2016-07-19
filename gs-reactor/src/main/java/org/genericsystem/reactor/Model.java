@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 import javafx.beans.property.Property;
@@ -22,7 +23,7 @@ public class Model {
 
 	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-	private Map<Tag<?>, List<Model>> subContextsMap = new HashMap<>();
+	private Map<Tag<?>, TransformationObservableList<?, Model>> subContextsMap = new HashMap<>();
 	private final Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
 		@Override
 		public Map<String, ObservableValue<Object>> get(Object key) {
@@ -76,9 +77,9 @@ public class Model {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
-	public <MODEL extends Model> void setSubContexts(Tag<?> element, List<MODEL> subContexts) {
+	public <MODEL extends Model> void setSubContexts(Tag<?> element, TransformationObservableList<?, MODEL> subContexts) {
 		assert subContextsMap.get(element) == null;
-		subContextsMap.put(element, (List) subContexts);
+		subContextsMap.put(element, (TransformationObservableList) subContexts);
 	}
 
 	public void register(ViewContext<?> viewContext) {
@@ -91,7 +92,7 @@ public class Model {
 		internalDestroy();
 	}
 
-	private boolean destroyed = false;
+	public boolean destroyed = false;
 
 	public void internalDestroy() {
 		System.out.println("InternalDestroy : " + this);
@@ -100,9 +101,11 @@ public class Model {
 		for (ViewContext<?> viewContext : viewContextsMap.values()) {
 			viewContext.destroy();
 		}
-		for (List<Model> subModels : subContextsMap.values())
+		for (TransformationObservableList<?, Model> subModels : subContextsMap.values()) {
+			subModels.unbind();
 			for (Model subModel : subModels)
 				subModel.internalDestroy();
+		}
 	}
 
 	public ViewContext<?> getViewContext(Tag<?> element) {

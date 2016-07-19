@@ -139,12 +139,14 @@ public abstract class Tag<M extends Model> {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
-			ObservableList<GenericModel> subModels = new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
+			TransformationObservableList<Generic, GenericModel> subModels = new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
 				// System.out.println("Change detected on : " + System.identityHashCode(generics) + " newValue : " + generic.info());
 				GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
 				viewContext.createViewContextChild(index, duplicate, childElement);
 				return duplicate;
 			}, m -> {
+				assert !model.destroyed;
+				assert !m.destroyed;
 				// TODO unregister viewContext before removing in list ?
 				m.destroy();
 			});
