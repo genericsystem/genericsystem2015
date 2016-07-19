@@ -307,12 +307,12 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 								bindAction(model -> {
 									GenericModel cm = model;
 									while (cm != null) {
-										cm = (GenericModel) cm.getParent();
 										for (Tag tag : cm.getProperties().keySet())
-											if (Boolean.TRUE.equals(cm.getProperty(tag, ReactorStatics.SELECTOR_TAG).getValue())) {
+											if (cm.getProperties().get(tag).containsKey(ReactorStatics.SELECTOR_TAG)) {
 												cm.getProperty(tag, ReactorStatics.SELECTION).setValue(model);
 												return;
 											}
+										cm = (GenericModel) cm.getParent();
 									}
 								});
 							}

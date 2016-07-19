@@ -39,7 +39,7 @@ public class Visitor {
 		public void prefix(Model model) {
 			GenericModel gModel = (GenericModel) model;
 			for (Map<String, ObservableValue<Object>> properties : model.getProperties().values()) {
-				if (properties.get(ReactorStatics.VALUE).getValue() != null && properties.get(ReactorStatics.ACTION).getValue() != null) {
+				if (properties.containsKey(ReactorStatics.VALUE) && properties.containsKey(ReactorStatics.ACTION) && properties.get(ReactorStatics.VALUE).getValue() != null && properties.get(ReactorStatics.ACTION).getValue() != null) {
 					TriFunction<Generic[], Serializable, Generic, Generic> action = (TriFunction<Generic[], Serializable, Generic, Generic>) properties.get(ReactorStatics.ACTION).getValue();
 					Generic g = action.apply(gModel.getGenerics(), (Serializable) properties.get(ReactorStatics.VALUE).getValue(), newInstance);
 					if (newInstance == null)
@@ -53,7 +53,7 @@ public class Visitor {
 			List<Generic> generics = new ArrayList<>();
 			for (Model subModel : model.allSubContexts())
 				for (Tag tag : subModel.getProperties().keySet())
-					if (Boolean.TRUE.equals(subModel.getProperty(tag, ReactorStatics.SELECTOR_TAG).getValue()))
+					if (subModel.getProperties().get(tag).containsKey(ReactorStatics.SELECTOR_TAG))
 						if (subModel.getProperty(tag, ReactorStatics.SELECTION).getValue() != null)
 							generics.add(((GenericModel) subModel.getProperty(tag, ReactorStatics.SELECTION).getValue()).getGeneric());
 			if (!generics.isEmpty() && generics.size() + 1 == ((GenericModel) model).getGeneric().getComponents().size()) // test OK?
@@ -65,9 +65,9 @@ public class Visitor {
 		@Override
 		public void prefix(Model model) {
 			for (Map<String, ObservableValue<Object>> properties : model.getProperties().values()) {
-				if (properties.get(ReactorStatics.VALUE).getValue() != null)
+				if (properties.containsKey(ReactorStatics.VALUE))
 					((Property) properties.get(ReactorStatics.VALUE)).setValue(null);
-				if (properties.get(ReactorStatics.SELECTION).getValue() != null)
+				if (properties.containsKey(ReactorStatics.SELECTION))
 					((Property) properties.get(ReactorStatics.SELECTION)).setValue(null);
 			}
 		}
@@ -89,7 +89,7 @@ public class Visitor {
 
 		@Override
 		public void prefix(Model model) {
-			propertiesInvalid.addAll(model.getProperties().values().stream().map(properties -> properties.get(ReactorStatics.INVALID)).collect(Collectors.toList()));
+			propertiesInvalid.addAll(model.getProperties().values().stream().filter(properties -> properties.containsKey(ReactorStatics.INVALID)).map(properties -> properties.get(ReactorStatics.INVALID)).collect(Collectors.toList()));
 		}
 	}
 }
