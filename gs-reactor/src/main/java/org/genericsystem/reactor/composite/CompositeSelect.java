@@ -20,7 +20,6 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 	private CompositeSelect(Tag<?> parent, int shift) {
 		super(parent);
 		options();
-		initProperty(ReactorStatics.SELECTOR_TAG, true);
 		bindBiDirectionalSelection(optionElement, shift);
 		storeProperty(
 				ReactorStatics.SELECTION_STRING,

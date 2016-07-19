@@ -120,7 +120,6 @@ public class GenericCompositeSection extends GenericSection implements Composite
 
 		public ColorCompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
-			initProperty(ReactorStatics.SELECTOR_TAG, true);
 			bindBiDirectionalSelection(flexSubElement);
 			storeProperty(
 					ReactorStatics.SELECTION_STRING,

@@ -53,7 +53,7 @@ public class Visitor {
 			List<Generic> generics = new ArrayList<>();
 			for (Model subModel : model.allSubContexts())
 				for (Tag tag : subModel.getProperties().keySet())
-					if (subModel.getProperties().get(tag).containsKey(ReactorStatics.SELECTOR_TAG))
+					if (subModel.getProperties().get(tag).containsKey(ReactorStatics.SELECTION))
 						if (subModel.getProperty(tag, ReactorStatics.SELECTION).getValue() != null)
 							generics.add(((GenericModel) subModel.getProperty(tag, ReactorStatics.SELECTION).getValue()).getGeneric());
 			if (!generics.isEmpty() && generics.size() + 1 == ((GenericModel) model).getGeneric().getComponents().size()) // test OK?

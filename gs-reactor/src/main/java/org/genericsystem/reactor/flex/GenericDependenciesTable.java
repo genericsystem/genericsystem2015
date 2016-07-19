@@ -308,7 +308,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 									GenericModel cm = model;
 									while (cm != null) {
 										for (Tag tag : cm.getProperties().keySet())
-											if (cm.getProperties().get(tag).containsKey(ReactorStatics.SELECTOR_TAG)) {
+											if (cm.getProperties().get(tag).containsKey(ReactorStatics.SELECTION)) {
 												cm.getProperty(tag, ReactorStatics.SELECTION).setValue(model);
 												return;
 											}
