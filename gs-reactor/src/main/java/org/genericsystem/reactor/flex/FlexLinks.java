@@ -52,7 +52,10 @@ public class FlexLinks {
 							new HtmlCheckBox<GenericModel>(this) {
 								{
 									addAttribute("disabled", "disabled");
-									initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
+									initProperty(ReactorStatics.CHECKED, model -> {
+										assert !model.destroyed;
+										return (Boolean) model.getGeneric().getValue();
+									});
 									bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 								}
@@ -92,11 +95,8 @@ public class FlexLinks {
 			tag.addStyle("flex", "1");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addPrefixBinding(modelContext -> ((Model) modelContext)
-					.getObservableStyles(tag)
-					.put("background-color",
-							"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? ((GenericModel) modelContext)
-									.getString().getValue() : "#dda5e2"));
+			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
+					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 		}
 	}
 

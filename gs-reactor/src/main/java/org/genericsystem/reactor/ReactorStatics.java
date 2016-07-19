@@ -7,7 +7,6 @@ public class ReactorStatics {
 	public static final String INVALID = "invalid";
 	public static final String SELECTION = "selection";
 	public static final String SELECTION_STRING = "selectionString";
-	public static final String SELECTOR_TAG = "selectorTag";
 	public static final String VALUE = "value";
 	public static final String CONVERTER = "converter";
 	public static final String TEXT = "text";

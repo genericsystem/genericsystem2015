@@ -77,7 +77,12 @@ public class ViewContext<M extends Model> {
 		getRootViewContext().add(node.getId(), node);
 	}
 
-	void destroyChild() {
+	private boolean destroyed = false;
+
+	void destroy() {
+		System.out.println("Attempt to destroy : " + getNode().getId());
+		assert !destroyed : "Node : " + getNode().getId();
+		destroyed = true;
 		getRootViewContext().remove(node.getId());
 		parent.decrementSize(element);
 	}

@@ -1,5 +1,6 @@
 
 var wsocket;
+var count = -1;
 
 function connect() {
 	console.log("connect");
@@ -12,12 +13,18 @@ function connect() {
 function onMessageReceived(evt) {
 	console.log("JSON : "+evt.data);
 	var message = JSON.parse(evt.data);
+	if(count==-1)
+		count = message.count;
+	if(message.count != count){
+		alert("count pb");
+	}
+	count = count + 1;
 	var elt = document.getElementById(message.nodeId);
 	switch (message.msgType) {
 	case 'A':
 		var parent = document.getElementById(message.parentId);
 		if (parent == null) {
-			console.log("Unreached parent element id on add : "+message.nodeId)
+			console.log("Unreached parent on add. parent id  : "+message.parentId+" for element : "+message.nodeId);
 			parent = document.getElementById("root");
 		}
 		elt = document.createElement(message.tagHtml);
