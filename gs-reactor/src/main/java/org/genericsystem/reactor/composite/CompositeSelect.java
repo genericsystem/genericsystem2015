@@ -13,20 +13,16 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 
 	protected HtmlOption<GenericModel> optionElement;
 
-	public CompositeSelect(Tag<?> parent) {
-		this(parent, 0);
-	}
-
-	private CompositeSelect(Tag<?> parent, int shift) {
+	private CompositeSelect(Tag<?> parent) {
 		super(parent);
 		options();
-		bindBiDirectionalSelection(optionElement, shift);
-		storeProperty(
-				ReactorStatics.SELECTION_STRING,
-				model -> Bindings.createStringBinding(
-						() -> getStringExtractor().apply(
-								model.getProperty(this, ReactorStatics.SELECTION).getValue() != null ? ((GenericModel) model.getProperty(this,
-										ReactorStatics.SELECTION).getValue()).getGeneric() : null), model.getProperty(this, ReactorStatics.SELECTION)));
+		init();
+		createProperty(ReactorStatics.SELECTION);
+		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
+		bindBiDirectionalSelection(optionElement);
+		storeProperty(ReactorStatics.SELECTION_STRING,
+				model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
+						getProperty(ReactorStatics.SELECTION, model)));
 	}
 
 	protected void options() {
@@ -38,16 +34,25 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 		};
 	}
 
+	protected void init() {
+
+	}
+
 	public static class CompositeSelectWithEmptyEntry extends CompositeSelect {
 
 		public CompositeSelectWithEmptyEntry(Tag<?> parent) {
-			super(parent, 1);
+			super(parent);
 		}
 
 		@Override
 		protected void options() {
 			new HtmlOption<GenericModel>(this);
 			super.options();
+		}
+
+		@Override
+		protected void init() {
+			initProperty(ReactorStatics.SELECTION_SHIFT, 1);
 		}
 	}
 

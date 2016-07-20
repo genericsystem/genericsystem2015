@@ -61,6 +61,13 @@ public class GenericEditor extends GenericCompositeSection {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
+								select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0].getMeta());
+							}
+						};
+						new FlexLinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GenericEditor.this.getDirection()) {
+							{
+								addStyle("flex", "1");
+								addStyle("overflow", "hidden");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 						};
@@ -73,6 +80,18 @@ public class GenericEditor extends GenericCompositeSection {
 				new GenericSection(this, GenericEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
+						new GenericSection(this, GenericEditor.this.getReverseDirection()) {
+							{
+								addStyle("flex", "1");
+								addStyle("overflow", "hidden");
+								new FlexLinkEditor(this, GenericEditor.this.getDirection()) {
+									{
+										addStyle("flex", "1");
+										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
+									}
+								};
+							}
+						};
 						new GenericSection(this, GenericEditor.this.getReverseDirection()) {
 							{
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);

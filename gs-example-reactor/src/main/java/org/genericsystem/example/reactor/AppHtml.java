@@ -48,17 +48,17 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-						initProperty(ReactorStatics.SELECTION, model -> null);
+						createProperty(ReactorStatics.SELECTION);
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericDependenciesTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericEditor(this, FlexDirection.ROW) {
 							{
-								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> model.getProperty(this.getParent(), ReactorStatics.SELECTION));
+								select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
 								addStyle("justify-content", "center");
 							}
 						};
 
-						new GenericEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> model.getProperty(this, ReactorStatics.SELECTION));
+						new GenericEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 					}
 				};

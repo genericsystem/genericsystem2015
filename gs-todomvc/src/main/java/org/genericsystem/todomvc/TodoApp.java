@@ -65,16 +65,16 @@ public class TodoApp extends HtmlApp<TodoList> {
 										new HtmlLi<Todo>(this) {
 											{
 												forEach(TodoList::getFiltered);
-												bindOptionalStyleClass(Todo::getCompleted, "completed");
+												bindOptionalStyleClass("completed", "completed", Todo::getCompleted);
 												new HtmlDiv<Todo>(this) {
 													{
 														addStyleClass("view");
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																initProperty(model -> model.getProperty(this, ReactorStatics.CHECKED), model -> model.getCompleted().getValue());
-																bindOptionalBiDirectionalAttribute(model -> model.getProperty(this, ReactorStatics.CHECKED), ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																bindOperation(model -> model.getProperty(this, ReactorStatics.CHECKED), (model, nva) -> model.getCompleted().setValue((Boolean) nva));
+																initProperty(ReactorStatics.CHECKED, model -> model.getCompleted().getValue());
+																bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindOperation(ReactorStatics.CHECKED, (model, nva) -> model.getCompleted().setValue((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {
@@ -101,7 +101,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 						new HtmlFooter<TodoList>(this) {
 							{
 								addStyleClass("footer");
-								bindOptionalStyleClass(TodoList::getHasNoTodo, "hide");
+								bindOptionalStyleClass("hide", "hasNoTodo", TodoList::getHasNoTodo);
 								new HtmlDiv<Todo>(this) {
 									{
 										new HtmlSpan<TodoList>(this) {
@@ -116,18 +116,17 @@ public class TodoApp extends HtmlApp<TodoList> {
 												addStyleClass("filters");
 												new HtmlLi<TodoList>(this) {
 													{
-														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass(TodoList::getAllMode, "selected");
+														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass("selected", "allMode", TodoList::getAllMode);
 													}
 												};
 												new HtmlLi<TodoList>(this) {
 													{
-
-														new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive).bindOptionalStyleClass(TodoList::getActiveMode, "selected");
+														new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive).bindOptionalStyleClass("selected", "activeMode", TodoList::getActiveMode);
 													}
 												};
 												new HtmlLi<TodoList>(this) {
 													{
-														new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted).bindOptionalStyleClass(TodoList::getCompletedMode, "selected");
+														new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted).bindOptionalStyleClass("selected", "completeMode", TodoList::getCompletedMode);
 													}
 												};
 											}
@@ -137,7 +136,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 												addStyleClass("clear-completed");
 												bindAction(TodoList::removeCompleted);
 												bindText(TodoList::getClearCompleted);
-												bindOptionalStyleClass(TodoList::getHasNoCompleted, "hide");
+												bindOptionalStyleClass("hide", "hasNoCompleted", TodoList::getHasNoCompleted);
 											}
 										};
 
