@@ -80,7 +80,7 @@ public class ViewContext<M extends Model> {
 	private boolean destroyed = false;
 
 	void destroy() {
-		System.out.println("Attempt to destroy : " + getNode().getId());
+		// System.out.println("Attempt to destroy : " + getNode().getId());
 		assert !destroyed : "Node : " + getNode().getId();
 		destroyed = true;
 		getRootViewContext().remove(node.getId());

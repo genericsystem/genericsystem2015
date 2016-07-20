@@ -15,9 +15,9 @@ function onMessageReceived(evt) {
 	var message = JSON.parse(evt.data);
 	if(count==-1)
 		count = message.count;
-	if(message.count != count){
-		alert("count pb");
-	}
+//	if(message.count != count){
+//		alert("count pb");
+//	}
 	count = count + 1;
 	var elt = document.getElementById(message.nodeId);
 	switch (message.msgType) {
