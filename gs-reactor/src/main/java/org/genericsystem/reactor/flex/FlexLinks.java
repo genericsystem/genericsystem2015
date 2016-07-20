@@ -224,7 +224,7 @@ public class FlexLinks {
 		public void style(Tag<?> tag) {
 			tag.addStyle("flex", "1");
 			tag.addStyle("color", "#ffffff");
-			tag.addStyle("background-color", "#ffa5a5");
+			tag.addStyle("background-color", "#dda5e2");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
 		}
