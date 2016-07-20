@@ -48,7 +48,7 @@ public class AppHtml extends HtmlApp<EngineModel> {
 				new GenericSection(this, FlexDirection.COLUMN) {
 					{
 						select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-						initProperty(ReactorStatics.SELECTION, model -> null);
+						createProperty(ReactorStatics.SELECTION);
 						new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericDependenciesTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
 						new GenericEditor(this, FlexDirection.ROW) {
