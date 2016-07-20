@@ -51,9 +51,8 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 						new GenericSection(this, FlexDirection.COLUMN) {
 							{
 								addStyleClass("modal");
-								bindStyle("display", ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(
-										() -> model.getProperty(this.getParent(), ReactorStatics.SELECTION).getValue() != null ? "flex" : "none",
-										model.getProperty(this.getParent(), ReactorStatics.SELECTION)));
+								bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY,
+										model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.SELECTION, model).getValue() != null ? "flex" : "none", this.getProperty(ReactorStatics.SELECTION, model)));
 
 								new GenericSection(this, FlexDirection.COLUMN) {
 									{
@@ -64,14 +63,12 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 											{
 												addStyleClass("close");
 												setText("×");
-												bindAction(model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION)
-														.setValue(null));
+												bindAction(model -> getProperty(ReactorStatics.SELECTION, model).setValue(null));
 											}
 										};
 										new GenericEditor(this, FlexDirection.COLUMN) {
 											{
-												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR,
-														model -> model.getProperty(this.getParent().getParent().getParent(), ReactorStatics.SELECTION));
+												select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
 												addStyle("min-height", "300px");
 											}
 										};

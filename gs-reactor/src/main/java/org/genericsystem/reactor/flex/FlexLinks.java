@@ -176,7 +176,7 @@ public class FlexLinks {
 							select(gs -> gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
 							addPostfixBinding(modelContext -> {
 								int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
-								modelContext.getProperty(this, ReactorStatics.SELECTION).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
+								getProperty(ReactorStatics.SELECTION, modelContext).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
 							});
 							// addPrefixBinding(model -> {
 							// if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta()))) {
@@ -245,7 +245,7 @@ public class FlexLinks {
 				if (required && (value == null || value.trim().isEmpty()))
 					return true;
 				try {
-					((StringConverter) model.getProperty(this, ReactorStatics.CONVERTER).getValue()).fromString(value);
+					((StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue()).fromString(value);
 					return false;
 				} catch (Exception e) {
 					return true;
@@ -253,7 +253,7 @@ public class FlexLinks {
 			}, model.getObservableAttributes(this)));
 			bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
 
-			bindBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) model.getProperty(this, "converter").getValue());
+			bindBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
 		}
 
 		public StringConverter<?> getConverter(GenericModel model) {

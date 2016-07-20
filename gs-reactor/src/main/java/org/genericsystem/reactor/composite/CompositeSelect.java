@@ -21,10 +21,8 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
 		storeProperty(ReactorStatics.SELECTION_STRING,
-				model -> Bindings.createStringBinding(
-						() -> getStringExtractor().apply(
-								model.getProperty(this, ReactorStatics.SELECTION).getValue() != null ? ((GenericModel) model.getProperty(this,
-										ReactorStatics.SELECTION).getValue()).getGeneric() : null), model.getProperty(this, ReactorStatics.SELECTION)));
+				model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
+						getProperty(ReactorStatics.SELECTION, model)));
 	}
 
 	protected void options() {
