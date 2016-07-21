@@ -14,7 +14,7 @@ import org.genericsystem.reactor.model.GenericModel;
  * @author Nicolas Feybesse
  *
  */
-public class GenericCompositeSection extends GenericSection implements CompositeTag<GenericModel> {
+public class GenericCompositeSection extends GenericSection implements CompositeTag {
 
 	public GenericCompositeSection(Tag<?> parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -91,7 +91,7 @@ public class GenericCompositeSection extends GenericSection implements Composite
 		}
 	}
 
-	public static class CompositeRadio extends GenericCompositeSection implements CompositeTag<GenericModel> {
+	public static class CompositeRadio extends GenericCompositeSection implements CompositeTag {
 
 		public CompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -114,7 +114,7 @@ public class GenericCompositeSection extends GenericSection implements Composite
 
 	}
 
-	public static class ColorCompositeRadio extends GenericCompositeSection implements CompositeTag<GenericModel> {
+	public static class ColorCompositeRadio extends GenericCompositeSection implements CompositeTag {
 
 		private Tag<GenericModel> flexSubElement;
 

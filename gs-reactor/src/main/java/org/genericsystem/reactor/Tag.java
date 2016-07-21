@@ -118,7 +118,7 @@ public abstract class Tag<M extends Model> {
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	protected void forEach(CompositeTag<?> parentCompositeElement) {
+	protected void forEach(CompositeTag parentCompositeElement) {
 		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
 	}
 
@@ -203,14 +203,14 @@ public abstract class Tag<M extends Model> {
 	// return model[0] != null && tag != null ? model[0].getProperty(tag, propertyName) : null;
 	// }
 
-	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel) {
+	public void select_(Function<GenericModel, ObservableValue<M>> applyOnModel) {
 		select_(null, applyOnModel);
 	}
 
-	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext) {
+	public void select_(StringExtractor stringExtractor, Function<GenericModel, ObservableValue<M>> applyOnModelContext) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
-			ObservableValue<M> observableValue = applyOnModelContext.apply((MODEL) model);
+			ObservableValue<M> observableValue = applyOnModelContext.apply(model);
 			ObservableList<M> subModels = FXCollections.observableArrayList();
 			ChangeListener<M> listener = (ChangeListener<M>) (observable, oldValue, newValue) -> {
 				if (oldValue != null)
@@ -220,16 +220,13 @@ public abstract class Tag<M extends Model> {
 			};
 			observableValue.addListener(listener);
 			listener.changed(observableValue, null, observableValue.getValue());
-			model.setSubContexts(
-					childElement,
-					new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
-						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
-						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
-							GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel)
-									.getStringExtractor());
-							viewContext.createViewContextChild(index, childModel, childElement);
-							return (MODEL) childModel;
-						}, Model::destroy));
+			model.setSubContexts(childElement, new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
+				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+				GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
+				viewContext.createViewContextChild(index, childModel, childElement);
+				return childModel;
+			}, Model::destroy));
 		};
 	}
 
@@ -261,11 +258,11 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
 	}
 
-	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag subElement) {
+	protected void bindBiDirectionalSelection(Tag subElement) {
 		addPostfixBinding(modelContext -> {
-			List<SUBMODEL> subContexts = modelContext.getSubContexts(subElement);
+			List<GenericModel> subContexts = modelContext.getSubContexts(subElement);
 			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
-			Optional<SUBMODEL> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
+			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, modelContext);
 			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT,
 					modelContext).getValue() : 0;

@@ -1,10 +1,9 @@
 package org.genericsystem.reactor.composite;
 
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
-public interface CompositeTag<M extends GenericModel> {
+public interface CompositeTag {
 
 	default StringExtractor getStringExtractor() {
 		return StringExtractor.SIMPLE_CLASS_EXTRACTOR;
