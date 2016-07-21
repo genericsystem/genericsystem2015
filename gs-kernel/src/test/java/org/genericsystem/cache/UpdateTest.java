@@ -1,9 +1,12 @@
 package org.genericsystem.cache;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
+
+import javafx.collections.ObservableList;
 
 @Test
 public class UpdateTest extends AbstractTest {
@@ -129,5 +132,21 @@ public class UpdateTest extends AbstractTest {
 
 		assert v233.getValue().equals(233);
 
+	}
+
+	public void testInverseObservation() {
+		Engine engine = new Engine();
+		Generic car = engine.addInstance("Car");
+		Generic color = engine.addInstance("Color");
+		Generic carColor = car.addRelation("CarColor", color);
+		Generic audi = car.addInstance("audi");
+		Generic red = color.addInstance("Red");
+		Generic green = color.addInstance("Green");
+		Generic audiRed = audi.addLink(carColor, "audiRed", red);
+		ObservableList<Generic> greenCars = green.getObservableHolders(carColor);
+		assert greenCars.isEmpty();
+		// System.gc();
+		Generic audiGreen = audiRed.updateComponent(green, ApiStatics.TARGET_POSITION);
+		assert greenCars.contains(audiGreen);
 	}
 }
