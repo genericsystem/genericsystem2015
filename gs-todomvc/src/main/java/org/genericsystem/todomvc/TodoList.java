@@ -74,9 +74,11 @@ public class TodoList extends Model {
 	}
 
 	public void create() {
-		engine.find(Todos.class).addInstance(getName().getValue());
-		System.out.println("Add instance : " + getName().getValue());
-		name.setValue(null);
+		if (getName().getValue() != null) {
+			engine.find(Todos.class).addInstance(getName().getValue());
+			System.out.println("Add instance : " + getName().getValue());
+			name.setValue(null);
+		}
 	}
 
 	public void showAll() {
