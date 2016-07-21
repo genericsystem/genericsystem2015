@@ -51,8 +51,9 @@ public class CarColorApp extends HtmlApp<EngineModel> {
 						new GenericSection(this, FlexDirection.COLUMN) {
 							{
 								addStyleClass("modal");
-								bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY,
-										model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.SELECTION, model).getValue() != null ? "flex" : "none", this.getProperty(ReactorStatics.SELECTION, model)));
+								bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(
+										() -> getProperty(ReactorStatics.SELECTION, model).getValue() != null ? "flex" : "none",
+										this.getProperty(ReactorStatics.SELECTION, model)));
 
 								new GenericSection(this, FlexDirection.COLUMN) {
 									{

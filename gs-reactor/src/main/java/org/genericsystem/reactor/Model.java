@@ -1,5 +1,6 @@
 package org.genericsystem.reactor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +29,8 @@ public class Model {
 		@Override
 		public Map<String, ObservableValue<Object>> get(Object key) {
 			Map<String, ObservableValue<Object>> properties = super.get(key);
-			if (properties == null)
+			if (properties == null) {
+				assert viewContextsMap.keySet().contains(key);
 				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
 					@Override
 					public ObservableValue<Object> get(Object key) {
@@ -38,6 +40,7 @@ public class Model {
 						return property;
 					};
 				});
+			}
 			return properties;
 		};
 	};
@@ -55,25 +58,36 @@ public class Model {
 		return (List<SUBMODEL>) subContextsMap.get(tag);
 	}
 
+	public boolean containsProperty(Tag<?> tag, String propertyName) {
+		return propertiesMap.containsKey(tag) ? propertiesMap.get(tag).containsKey(propertyName) : false;
+	}
+
+	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String propertyName) {
+		return (ObservableValue<T>) propertiesMap.get(tag).get(propertyName);
+	}
+
+	public <T> Property<T> getProperty(Tag<?> tag, String propertyName) {
+		return (Property<T>) propertiesMap.get(tag).get(propertyName);
+	}
+
+	public Collection<Map<String, ObservableValue<Object>>> getPropertiesMaps() {
+		return propertiesMap.values();
+	}
+
+	// Avoid direct access to map
+	@Deprecated
 	public Map<Tag<?>, Map<String, ObservableValue<Object>>> getProperties() {
 		return propertiesMap;
 	}
 
-	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String name) {
-		return (ObservableValue<T>) propertiesMap.get(tag).get(name);
-	}
-
-	public <T> Property<T> getProperty(Tag<?> tag, String name) {
-		return (Property<T>) propertiesMap.get(tag).get(name);
-	}
-
 	public void storeProperty(Tag tag, String propertyName, ObservableValue value) {
+		assert viewContextsMap.keySet().contains(tag);
 		if (propertiesMap.get(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
 		propertiesMap.get(tag).put(propertyName, value);
 	}
 
-	public List<Model> allSubContexts() {
+	public List<Model> subContexts() {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
