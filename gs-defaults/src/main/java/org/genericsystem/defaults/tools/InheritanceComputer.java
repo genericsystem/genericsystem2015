@@ -1,4 +1,4 @@
-package org.genericsystem.defaults;
+package org.genericsystem.defaults.tools;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.genericsystem.defaults.DefaultGeneric;
+
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T> {
+public class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T> {
 
 	private static final long serialVersionUID = 1877502935577170921L;
 
@@ -22,29 +24,33 @@ class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T> {
 	private final T origin;
 	private final int level;
 
-	InheritanceComputer(T base, T origin, int level) {
+	public InheritanceComputer(T base, T origin, int level) {
 		this.base = base;
 		this.origin = origin;
 		this.level = level;
 	}
 
-	Stream<T> inheritanceStream() {
+	public Stream<T> inheritanceStream() {
 		return getInheringsStream(base).filter(holder -> !contains(holder) && !holder.equals(origin) && holder.getLevel() == level);
 	}
 
 	private Stream<T> getInheringsStream(T superVertex) {
 		Collection<T> result = inheritingsCache.get(superVertex);
 		if (result == null)
-			inheritingsCache.put(superVertex, result = new Inheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
+			inheritingsCache.put(superVertex, result = buildInheritings(superVertex).inheritanceStream().collect(Collectors.toList()));
 		return result.stream();
 		// return new Inheritings(superVertex).inheritanceStream();
 	}
 
-	private class Inheritings {
+	protected Inheritings buildInheritings(T superVertex) {
+		return new Inheritings(superVertex);
+	}
 
-		private final T localBase;
+	protected class Inheritings {
 
-		private Inheritings(T localBase) {
+		protected final T localBase;
+
+		protected Inheritings(T localBase) {
 			this.localBase = localBase;
 		}
 
@@ -65,19 +71,20 @@ class InheritanceComputer<T extends DefaultGeneric<T>> extends HashSet<T> {
 		}
 
 		private Stream<T> getStream(final T holder) {
-			if (compositesBySuper(localBase, holder).count() != 0)
+			if (compositesBySuper(holder).count() != 0)
 				add(holder);
-			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(localBase, holder) : Stream.empty(), compositesBySuper(localBase, holder));
+			Stream<T> indexStream = Stream.concat(holder.getLevel() < level ? compositesByMeta(holder) : Stream.empty(), compositesBySuper(holder));
 			return Stream.concat(Stream.of(holder), indexStream.flatMap(x -> getStream(x)).distinct());
+		}
+
+		protected Stream<T> compositesByMeta(T holder) {
+			return localBase.getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
+		}
+
+		protected Stream<T> compositesBySuper(T holder) {
+			return localBase.getComposites().stream().filter(x -> x.getSupers().contains(holder));
 		}
 
 	}
 
-	private static <T extends DefaultGeneric<T>> Stream<T> compositesByMeta(T localBase, T holder) {
-		return localBase.getComposites().stream().filter(x -> !x.equals(holder) && x.getMeta().equals(holder));
-	}
-
-	private static <T extends DefaultGeneric<T>> Stream<T> compositesBySuper(T localBase, T holder) {
-		return localBase.getComposites().stream().filter(x -> x.getSupers().contains(holder));
-	}
 }
