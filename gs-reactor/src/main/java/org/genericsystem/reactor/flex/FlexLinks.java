@@ -238,6 +238,7 @@ public class FlexLinks {
 			addStyle("height", "100%");
 
 			initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
+			createProperty(ReactorStatics.VALUE);
 
 			storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 				boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
@@ -253,7 +254,7 @@ public class FlexLinks {
 			}, model.getObservableAttributes(this)));
 			bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
 
-			bindBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
+			bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
 		}
 
 		public StringConverter<?> getConverter(GenericModel model) {
