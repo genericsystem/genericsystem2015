@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.flex;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.flex.FlexLinks.FlexLinkCreator;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkEditor;
 import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
 import org.genericsystem.reactor.html.HtmlH1;
@@ -101,6 +102,12 @@ public class GenericEditor extends GenericCompositeSection {
 									{
 										addStyle("flex", "1");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
+									}
+								};
+								new FlexLinkCreator(this, GenericEditor.this.getDirection()) {
+									{
+										addStyle("flex", "1");
+										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() ? gs[0] : null);
 									}
 								};
 							}

@@ -11,7 +11,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 
 public class CompositeSelect extends HtmlSelect implements CompositeTag {
 
-	protected HtmlOption<GenericModel> optionElement;
+	public HtmlOption<GenericModel> optionElement;
 
 	private CompositeSelect(Tag<?> parent) {
 		super(parent);

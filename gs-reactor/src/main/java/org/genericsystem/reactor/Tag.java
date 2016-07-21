@@ -89,7 +89,7 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
-	protected void addPostfixBinding(Consumer<M> consumer) {
+	public void addPostfixBinding(Consumer<M> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
