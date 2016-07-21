@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
@@ -54,8 +55,8 @@ public class Model {
 		return this.parent;
 	}
 
-	public <SUBMODEL extends Model> List<SUBMODEL> getSubContexts(Tag<SUBMODEL> tag) {
-		return (List<SUBMODEL>) subContextsMap.get(tag);
+	public <SUBMODEL extends Model> ObservableList<SUBMODEL> getSubContexts(Tag<SUBMODEL> tag) {
+		return (ObservableList<SUBMODEL>) subContextsMap.get(tag);
 	}
 
 	public boolean containsProperty(Tag<?> tag, String propertyName) {

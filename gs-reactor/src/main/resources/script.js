@@ -59,6 +59,12 @@ function onMessageReceived(evt) {
 						textContent : this.value
 					}));
 				}
+				elt.onblur = function (e) {
+					wsocket.send(JSON.stringify({
+						msgType : "A",
+						nodeId : this.id
+					}));
+				}
 			};
 			break;
 

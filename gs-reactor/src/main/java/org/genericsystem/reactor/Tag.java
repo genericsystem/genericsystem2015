@@ -89,7 +89,7 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
-	protected void addPostfixBinding(Consumer<M> consumer) {
+	public void addPostfixBinding(Consumer<M> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
@@ -118,7 +118,7 @@ public abstract class Tag<M extends Model> {
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	protected void forEach(CompositeTag<?> parentCompositeElement) {
+	protected void forEach(CompositeTag parentCompositeElement) {
 		forEach(g -> parentCompositeElement.getStringExtractor().apply(g), gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
 	}
 
@@ -142,36 +142,17 @@ public abstract class Tag<M extends Model> {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
-			TransformationObservableList<Generic, GenericModel> subModels = new TransformationObservableList<Generic, GenericModel>(generics,
-					(index, generic) -> {
-						// System.out.println("Change detected on : " + System.identityHashCode(generics) + " newValue : " + generic.info());
-					GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
-					viewContext.createViewContextChild(index, duplicate, childElement);
-					return duplicate;
-				}, m -> {
-					assert !model.destroyed;
-					assert !m.destroyed;
-					// TODO unregister viewContext before removing in list ?
-					m.destroy();
-				});
-			model.setSubContexts(childElement, subModels);
-			subModels.addListener((ListChangeListener<? super GenericModel>) change -> {
-				Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, model);
-				if (selection != null) {
-					if (getProperty(ReactorStatics.SELECTION_INDEX, model) != null) {
-						int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, model) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT,
-								model).getValue() : 0;
-						Number oldIndex = (Number) getProperty(ReactorStatics.SELECTION_INDEX, model).getValue();
-						Number newIndex = subModels.indexOf(selection.getValue()) + selectionShift;
-						if (newIndex != oldIndex)
-							this.getProperty(ReactorStatics.SELECTION_INDEX, model).setValue(newIndex);
-					} else
-						while (change.next())
-							if (change.wasRemoved() && !change.wasAdded())
-								if (change.getRemoved().contains(selection.getValue()))
-									selection.setValue(null);
-				}
-			});
+			model.setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
+				// System.out.println("Change detected on : " + System.identityHashCode(generics) + " newValue : " + generic.info());
+				GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
+				viewContext.createViewContextChild(index, duplicate, childElement);
+				return duplicate;
+			}, m -> {
+				assert !model.destroyed;
+				assert !m.destroyed;
+				// TODO unregister viewContext before removing in list ?
+				m.destroy();
+			}));
 		};
 	}
 
@@ -203,14 +184,14 @@ public abstract class Tag<M extends Model> {
 	// return model[0] != null && tag != null ? model[0].getProperty(tag, propertyName) : null;
 	// }
 
-	public <MODEL extends GenericModel> void select_(Function<MODEL, ObservableValue<M>> applyOnModel) {
+	public void select_(Function<GenericModel, ObservableValue<M>> applyOnModel) {
 		select_(null, applyOnModel);
 	}
 
-	public <MODEL extends GenericModel> void select_(StringExtractor stringExtractor, Function<MODEL, ObservableValue<M>> applyOnModelContext) {
+	public void select_(StringExtractor stringExtractor, Function<GenericModel, ObservableValue<M>> applyOnModelContext) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
-			ObservableValue<M> observableValue = applyOnModelContext.apply((MODEL) model);
+			ObservableValue<M> observableValue = applyOnModelContext.apply(model);
 			ObservableList<M> subModels = FXCollections.observableArrayList();
 			ChangeListener<M> listener = (ChangeListener<M>) (observable, oldValue, newValue) -> {
 				if (oldValue != null)
@@ -220,16 +201,13 @@ public abstract class Tag<M extends Model> {
 			};
 			observableValue.addListener(listener);
 			listener.changed(observableValue, null, observableValue.getValue());
-			model.setSubContexts(
-					childElement,
-					new TransformationObservableList<M, MODEL>(subModels, (index, selectedModel) -> {
-						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
-						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
-							GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel)
-									.getStringExtractor());
-							viewContext.createViewContextChild(index, childModel, childElement);
-							return (MODEL) childModel;
-						}, Model::destroy));
+			model.setSubContexts(childElement, new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
+				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+				GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
+				viewContext.createViewContextChild(index, childModel, childElement);
+				return childModel;
+			}, Model::destroy));
 		};
 	}
 
@@ -261,19 +239,40 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
 	}
 
-	protected <SUBMODEL extends GenericModel> void bindBiDirectionalSelection(Tag subElement) {
+	protected void bindBiDirectionalSelection(Tag<GenericModel> subElement) {
 		addPostfixBinding(modelContext -> {
-			List<SUBMODEL> subContexts = modelContext.getSubContexts(subElement);
+			ObservableList<GenericModel> subContexts = modelContext.getSubContexts(subElement);
 			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
-			Optional<SUBMODEL> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
+			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, modelContext);
-			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT,
-					modelContext).getValue() : 0;
+			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT, modelContext).getValue() : 0;
 			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
 			Property<Number> selectionIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection,
-					number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
+			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
 					genericModel -> subContexts.indexOf(genericModel) + selectionShift);
+			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
+				if (selection != null) {
+					Number oldIndex = (Number) getProperty(ReactorStatics.SELECTION_INDEX, modelContext).getValue();
+					Number newIndex = subContexts.indexOf(selection.getValue()) + selectionShift;
+					if (newIndex != oldIndex)
+						this.getProperty(ReactorStatics.SELECTION_INDEX, modelContext).setValue(newIndex);
+				}
+			});
+		});
+	}
+
+	protected void bindSelection(Tag<GenericModel> subElement) {
+		addPostfixBinding(model -> {
+			ObservableList<GenericModel> subContexts = model.getSubContexts(subElement);
+			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, model);
+			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
+				if (selection != null) {
+					while (change.next())
+						if (change.wasRemoved() && !change.wasAdded())
+							if (change.getRemoved().contains(selection.getValue()))
+								selection.setValue(null);
+				}
+			});
 		});
 	}
 

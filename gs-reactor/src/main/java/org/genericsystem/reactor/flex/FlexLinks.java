@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.flex;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -7,6 +8,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.composite.CompositeSelect;
+import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
 import org.genericsystem.reactor.composite.CompositeSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlInputText;
@@ -118,19 +121,70 @@ public class FlexLinks {
 
 	public static class FlexLinkEditor extends GenericSection {
 
-		private final ObservableListExtractor observableListExtractor;
 		private final boolean reverse;
 
 		public FlexLinkEditor(Tag<?> parent, FlexDirection direction) {
 			// TODO: filter only once.
-			this(parent, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])), direction, true);
+			this(parent, direction, true);
 		}
 
-		public FlexLinkEditor(Tag<?> parent, ObservableListExtractor observableListExtractor, FlexDirection flexDirection, boolean reverse) {
+		private FlexLinkEditor(Tag<?> parent, FlexDirection flexDirection, boolean reverse) {
 			super(parent, flexDirection);
-			this.observableListExtractor = observableListExtractor;
 			this.reverse = reverse;
 			content();
+		}
+
+		public void initInputText(Tag<GenericModel> tag) {
+			tag.select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
+			tag.initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
+			tag.bindOperation(ReactorStatics.VALUE, (model, nva) -> {
+				model.getGeneric().updateValue(nva);
+			});
+		}
+
+		public void initCheckBox(Tag<GenericModel> tag) {
+			tag.select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
+			tag.initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
+			tag.bindOperation(ReactorStatics.CHECKED, (model, nva) -> model.getGeneric().updateValue(nva));
+		}
+
+		public void initRelations(Tag<GenericModel> tag) {
+			tag.forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+			new InstanceCompositeSelect(tag) {
+				{
+					initComboBoxCommon(this);
+					initComboBox(this);
+				}
+			};
+			new HtmlLabel<GenericModel>(this) {
+				{
+					// TODO: Allow removal, and addition.
+					select(gs -> !gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
+					bindText(GenericModel::getString);
+				}
+			};
+		}
+
+		public void initComboBoxCommon(CompositeSelect tag) {
+			tag.select(gs -> gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
+			tag.addPostfixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+					model.getObservableStyles(tag).put("background-color", (String) model.getObservableValue(tag, ReactorStatics.SELECTION_STRING).getValue());
+			});
+			tag.optionElement.addPrefixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+					model.getObservableStyles(tag.optionElement).put("background-color", model.getString().getValue());
+			});
+			tag.addStyle("width", "100%");
+			tag.addStyle("height", "100%");
+			initComboBox(tag);
+		}
+
+		public void initComboBox(Tag<GenericModel> tag) {
+			tag.addPostfixBinding(modelContext -> {
+				int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
+				tag.getProperty(ReactorStatics.SELECTION, modelContext).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
+			});
 		}
 
 		private void content() {
@@ -146,19 +200,13 @@ public class FlexLinks {
 							addStyle("align-items", "center");
 							new HtmlGenericInputText(this) {
 								{
-									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
-									initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
-									bindOperation(ReactorStatics.VALUE, (model, nva) -> {
-										model.getGeneric().updateValue(nva);
-									});
+									initInputText(this);
 								}
 							};
 							new HtmlCheckBox<GenericModel>(this) {
 								{
-									initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
 									bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-									bindOperation(ReactorStatics.CHECKED, (model, nva) -> model.getGeneric().updateValue(nva));
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
+									initCheckBox(this);
 								}
 							};
 						}
@@ -170,53 +218,7 @@ public class FlexLinks {
 					style(this);
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
-					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
-					new InstanceCompositeSelect(this) {
-						{
-							select(gs -> gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
-							addPostfixBinding(modelContext -> {
-								int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
-								getProperty(ReactorStatics.SELECTION, modelContext).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
-							});
-							// addPrefixBinding(model -> {
-							// if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta()))) {
-							// Map<String, String> map = model.getObservableStyles(this);
-							// ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
-							// ObservableValue<String> observable = model.getSelectionString();
-							// observable.addListener(listener);
-							// map.put("background-color", observable.getValue());
-							// }
-							// });
-							addPostfixBinding(model -> {
-								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-									model.getObservableStyles(this).put("background-color", (String) model.getObservableValue(this, ReactorStatics.SELECTION_STRING).getValue());
-							});
-							optionElement.addPrefixBinding(model -> {
-								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-									model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
-							});
-							addStyle("width", "100%");
-							addStyle("height", "100%");
-						}
-					};
-					new HtmlLabel<GenericModel>(this) {
-						{
-							// TODO: Allow removal, and addition.
-							select(gs -> !gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
-							bindText(GenericModel::getString);
-						}
-					};
-				}
-
-				int pos(Generic genericToUpdate, Generic oldComponent) {
-					List<Generic> components = genericToUpdate.getComponents();
-					int pos = 0;
-					for (Generic component : components) {
-						if (component.equals(oldComponent))
-							break;
-						pos++;
-					}
-					return pos;
+					initRelations(this);
 				}
 			};
 		}
@@ -228,6 +230,61 @@ public class FlexLinks {
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
 		}
+
+		protected int pos(Generic genericToUpdate, Generic oldComponent) {
+			List<Generic> components = genericToUpdate.getComponents();
+			int pos = 0;
+			for (Generic component : components) {
+				if (component.equals(oldComponent))
+					break;
+				pos++;
+			}
+			return pos;
+		}
+	}
+
+	public static class FlexLinkCreator extends FlexLinkEditor {
+
+		public FlexLinkCreator(Tag<?> parent, FlexDirection direction) {
+			super(parent, direction);
+		}
+
+		@Override
+		public void initInputText(Tag<GenericModel> tag) {
+			tag.select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
+			tag.bindOperation(ReactorStatics.VALUE, (model, nva) -> {
+				System.out.println("Input value changed, " + Arrays.asList(model.getGenerics()));
+			});
+		}
+
+		@Override
+		public void initCheckBox(Tag<GenericModel> tag) {
+			tag.select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
+			tag.bindOperation(ReactorStatics.CHECKED, (model, nva) -> {
+				System.out.println("Checkbox value changed, " + Arrays.asList(model.getGenerics()));
+			});
+		}
+
+		@Override
+		public void initRelations(Tag<GenericModel> tag) {
+			tag.forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
+			new ColorsSelect(tag) {
+				{
+					initComboBoxCommon(this);
+					initComboBox(this);
+				}
+			};
+		}
+
+		@Override
+		public void initComboBox(Tag<GenericModel> tag) {
+			tag.addPostfixBinding(modelContext -> {
+				int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
+				tag.getProperty(ReactorStatics.SELECTION, modelContext).addListener((ov, ova, nva) -> {
+					System.out.println("Selection changed, " + Arrays.asList(modelContext.getGenerics()));
+				});
+			});
+		}
 	}
 
 	public static class HtmlGenericInputText extends HtmlInputText<GenericModel> {
@@ -238,6 +295,7 @@ public class FlexLinks {
 			addStyle("height", "100%");
 
 			initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
+			createProperty(ReactorStatics.VALUE);
 
 			storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 				boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
@@ -253,7 +311,7 @@ public class FlexLinks {
 			}, model.getObservableAttributes(this)));
 			bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
 
-			bindBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
+			bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
 		}
 
 		public StringConverter<?> getConverter(GenericModel model) {

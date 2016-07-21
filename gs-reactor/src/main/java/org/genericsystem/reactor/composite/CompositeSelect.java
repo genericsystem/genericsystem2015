@@ -9,9 +9,9 @@ import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
-public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericModel> {
+public class CompositeSelect extends HtmlSelect implements CompositeTag {
 
-	protected HtmlOption<GenericModel> optionElement;
+	public HtmlOption<GenericModel> optionElement;
 
 	private CompositeSelect(Tag<?> parent) {
 		super(parent);
@@ -65,7 +65,7 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag<GenericM
 		}
 	}
 
-	public static class InstanceCompositeSelect extends CompositeSelect implements CompositeTag<GenericModel> {
+	public static class InstanceCompositeSelect extends CompositeSelect implements CompositeTag {
 
 		public InstanceCompositeSelect(Tag<?> parent) {
 			super(parent);
