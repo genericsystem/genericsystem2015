@@ -2,6 +2,7 @@ package org.genericsystem.defaults.tools;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,25 +22,40 @@ import javafx.collections.ObservableList;
  */
 public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends ListBinding<T> {
 
-	private Set<Observable> invalidators = new HashSet<Observable>();;
+	private Set<Observable> invalidators = new HashSet<Observable>();
+	// private static Set<Observable> refs = new HashSet<Observable>();
 
 	private final T base;
 	private final T origin;
 	private final int level;
+	private boolean out = false;
+	List<T> internal;
 
 	public ObservableInheritanceComputer2(T base, T origin, int level) {
 		this.base = base;
 		this.origin = origin;
 		this.level = level;
+		if (Objects.toString(base.getValue()).contains("Yellow") && Objects.toString(origin.getValue()).contains("CarColor")) {
+			System.out.println("Register ObservableInheritanceComputer2 on Yellow");
+			out = true;
+			addListener((InvalidationListener) (c -> System.out.println("ObservableInheritanceComputer2 on Yellow has changed : " + c)));
+		}
 	}
 
-	public static int i = 0;
+	// @Override
+	// protected void onInvalidating() {
+	// if (out)
+	// System.out.println("Invalidation of ObservableInheritanceComputer2 on Yellow");
+	// super.onInvalidating();
+	// }
+
+	// public static int i = 0;
 
 	@Override
 	protected ObservableList<T> computeValue() {
-		invalidators.forEach(this::unbind);
+		invalidators.forEach(ObservableInheritanceComputer2.this::unbind);
 		invalidators = new HashSet<Observable>();
-		List<T> internal = new InheritanceComputer<T>(base, origin, level) {
+		internal = new InheritanceComputer<T>(base, origin, level) {
 			private static final long serialVersionUID = 4269874133078234506L;
 
 			@Override
@@ -48,12 +64,27 @@ public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends
 					@Override
 					protected Stream<T> compositesByMeta(T holder) {
 						ObservableList<T> ol = localBase.getObservableComposites();
-						ol.addListener((InvalidationListener) c -> System.out.println("zzzzzzzzzzzzz" + i + " " + localBase + " " + holder));
-						ObservableList<T> filtered = ol.filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
-						filtered.addListener((InvalidationListener) c -> System.out.println("ffffffffffff" + i + " " + localBase + " " + holder));
-						i++;
+						// boolean b = Objects.toString(localBase.getValue()).contains("Yellow") && Objects.toString(holder.getValue()).contains("CarColor");
+						ObservableList<T> filtered = ol.filtered(x -> {
+							boolean result = !x.equals(holder) && x.getMeta().equals(holder);
+							// if (b)
+							// System.out.println("FILTERRRRRRRRRRRRRRRRRRR" + result);
+							return result;
+						});
+						// if (b) {
+						// System.out.println("REGISTER FILTERED LISTENER");
+						// ol.addListener((InvalidationListener) c -> System.out.println("Composites of yellow" + i + " " + localBase + " " + holder));
+						// ol.addListener((ListChangeListener) c -> System.out.println("Composites of yellow" + i + " " + localBase + " " + holder));
+						// filtered.addListener((InvalidationListener) c -> System.out.println("Filtered composites of yellow" + i + " " + localBase + " " + holder));
+						// filtered.addListener((ListChangeListener) c -> System.out.println("Filtered composites of yellow" + i + " " + localBase + " " + holder));
+						// }
+						// i++;
+						// refs.add(filtered);
+						// refs.add(ol);
 						invalidators.add(filtered);
-						return filtered.stream();
+						bind(filtered);
+						// ol.addListener((ListChangeListener) c -> ObservableInheritanceComputer2.this.invalidate());
+						return super.compositesByMeta(holder);
 					}
 
 					@Override
@@ -61,14 +92,15 @@ public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends
 						ObservableList<T> ol = localBase.getObservableComposites();
 						ObservableList<T> filtered = ol.filtered(x -> x.getSupers().contains(holder));
 						invalidators.add(filtered);
-						return filtered.stream();
+						bind(filtered);
+						return super.compositesBySuper(holder);
 					}
 				};
 
 			};
 		}.inheritanceStream().collect(Collectors.toList());
-		invalidators.forEach(this::bind);
-		return FXCollections.unmodifiableObservableList(FXCollections.observableList(internal));
+		// invalidators.forEach(ObservableInheritanceComputer2.this::bind);
+		return FXCollections.observableList(internal);
 	}
 
 }

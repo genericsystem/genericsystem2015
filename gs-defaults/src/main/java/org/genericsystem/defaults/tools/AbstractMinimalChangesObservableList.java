@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
-
-import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
  * @author Nicolas Feybesse
@@ -110,6 +110,7 @@ public abstract class AbstractMinimalChangesObservableList<E> extends Observable
 		public void invalidated(Observable observable) {
 			final AbstractMinimalChangesObservableList<?> binding = ref.get();
 			if (binding == null) {
+				assert false;
 				observable.removeListener(this);
 			} else {
 				binding.invalidate();
