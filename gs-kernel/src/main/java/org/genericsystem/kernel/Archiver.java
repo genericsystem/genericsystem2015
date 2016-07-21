@@ -90,9 +90,17 @@ public class Archiver {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				log.info("Archiver in repository : " + directory.getAbsolutePath() + " is closing ...");
+				if (directory != null)
+					log.info("Archiver in repository : " + directory.getAbsolutePath() + " is closing ...");
+				else
+					log.info("Archiver is closing without persistence");
 				close();
-				log.info("Archiver in repository : " + directory.getAbsolutePath() + " has closed");
+				if (directory != null)
+					if (directory != null)
+						log.info("Archiver in repository : " + directory.getAbsolutePath() + " has closed");
+					else
+						log.info("Archiver has closed");
+
 			}
 		});
 	}
@@ -371,8 +379,7 @@ public class Archiver {
 		private final long ts;
 		private final long[] otherTs;
 
-		SetArchiverHandler(long ts, AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components,
-				long[] otherTs) {
+		SetArchiverHandler(long ts, AbstractCache context, Generic meta, List<Generic> overrides, Serializable value, List<Generic> components, long[] otherTs) {
 			super(context, meta, overrides, value, components);
 			this.ts = ts;
 			this.otherTs = otherTs;
@@ -380,8 +387,7 @@ public class Archiver {
 
 		@Override
 		protected Generic build() {
-			return gettable = ((Transaction) context.getTransaction())
-					.plug(((AbstractServer) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
+			return gettable = ((Transaction) context.getTransaction()).plug(((AbstractServer) context.getRoot()).build(ts, null, isMeta() ? null : adjustedMeta, supers, value, components, otherTs));
 		}
 	}
 

@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class PersistentApplication {
 	private final Class<? extends HtmlApp<?>> htmlAppClass;
