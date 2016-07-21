@@ -9,9 +9,11 @@ import java.util.stream.Stream;
 
 import org.genericsystem.defaults.DefaultGeneric;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
@@ -23,6 +25,7 @@ import javafx.collections.transformation.FilteredList;
 public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends ListBinding<T> {
 
 	private Set<Observable> invalidators = new HashSet<Observable>();
+	private Set<Observable> refs = new HashSet<Observable>();
 
 	private final T base;
 	private final T origin;
@@ -46,10 +49,16 @@ public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends
 				return new Inheritings(superVertex) {
 					@Override
 					protected Stream<T> compositesByMeta(T holder) {
-						ObservableList<T> ol = localBase.getObservableComposites();
+						ObservableList<T> od = localBase.getCurrentCache().getObservableDependencies(localBase);
+						od.addListener((ListChangeListener) c -> System.out.println("dependencies invalidation"));
+
+						FilteredList<T> ol = od.filtered(x -> x.getComponents().contains(localBase));
+
+						ol.addListener((ListChangeListener) c -> System.out.println("invalidation"));
 						ObservableList<T> filtered = new FilteredList<>(ol, x -> !x.equals(holder) && x.getMeta().equals(holder));
-						invalidators.add(ol);
-						bind(ol);
+						filtered.addListener((InvalidationListener) c -> System.out.println("invalidation filtered"));
+						refs.add(ol);
+						bind(filtered);
 						return super.compositesByMeta(holder);
 					}
 
@@ -57,8 +66,9 @@ public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends
 					protected Stream<T> compositesBySuper(T holder) {
 						ObservableList<T> ol = localBase.getObservableComposites();
 						ObservableList<T> filtered = new FilteredList<>(ol, x -> x.getSupers().contains(holder));
-						invalidators.add(ol);
-						bind(ol);
+						refs.add(ol);
+						invalidators.add(filtered);
+						bind(filtered);
 						return super.compositesBySuper(holder);
 					}
 				};
