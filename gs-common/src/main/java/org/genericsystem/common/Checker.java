@@ -149,8 +149,8 @@ public class Checker {
 
 	private void checkDependsMetaComponents(Generic vertex) {
 		if (vertex.getMeta().getComponents().size() != vertex.getComponents().size())
-			context.discardWithException(
-					new MetaRuleConstraintViolationException("Added generic and its meta do not have the same components size. Added node components : " + vertex.getComponents() + " and meta components : " + vertex.getMeta().getComponents()));
+			context.discardWithException(new MetaRuleConstraintViolationException("Added generic and its meta do not have the same components size. Added node components : " + vertex.getComponents() + " and meta components : "
+					+ vertex.getMeta().getComponents()));
 		for (int pos = 0; pos < vertex.getComponents().size(); pos++) {
 			Generic component = vertex.getComponent(pos);
 			Generic metaComponent = vertex.getMeta().getComponent(pos);
@@ -228,8 +228,6 @@ public class Checker {
 		try {
 			statelessConstraint(constraintHolder.getMeta()).check(vertex, baseComponent, constraintHolder.getValue(), ((AxedPropertyClass) constraintHolder.getMeta().getValue()).getAxe(), isOnAdd, isFlushTime, isRevert);
 		} catch (ConstraintViolationException e) {
-			System.out.println("Is flush time :" + isFlushTime);
-			System.out.println("Is isOnAdd :" + isOnAdd);
 			context.discardWithException(e);
 		}
 	}
