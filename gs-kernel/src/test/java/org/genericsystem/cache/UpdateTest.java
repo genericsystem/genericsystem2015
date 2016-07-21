@@ -7,6 +7,7 @@ import org.genericsystem.defaults.tools.ObservableInheritanceComputer2;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @Test
@@ -147,10 +148,22 @@ public class UpdateTest extends AbstractTest {
 		Generic audiRed = audi.addLink(carColor, "audiRed", red);
 		ObservableList<Generic> greenCars = new ObservableInheritanceComputer2<>(green, carColor, ApiStatics.CONCRETE);
 		assert greenCars.isEmpty();
-		// System.gc();
+		System.gc();
 		// Generic audiGreen = audiRed.updateComponent(green, ApiStatics.TARGET_POSITION);
 		Generic audiGreen = green.setHolder(carColor, "audiRed", audi);
 		assert greenCars.contains(audiGreen);
 		engine.getCurrentCache().flush();
+	}
+
+	public void testFilterList() {
+		ObservableList<String> ol = FXCollections.observableArrayList("one", "two");
+		ThreadLocal<ObservableList<String>> tl = new ThreadLocal<>();
+		tl.set(ol);
+		ObservableList<String> list = ol.filtered(x -> x.contains("three"));
+		ol = null;
+		System.gc();
+		tl.get().add("three");
+		assert !list.isEmpty();
+
 	}
 }

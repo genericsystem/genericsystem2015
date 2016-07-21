@@ -13,6 +13,7 @@ import javafx.beans.Observable;
 import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -45,18 +46,19 @@ public class ObservableInheritanceComputer2<T extends DefaultGeneric<T>> extends
 				return new Inheritings(superVertex) {
 					@Override
 					protected Stream<T> compositesByMeta(T holder) {
-						ObservableList<T> filtered = localBase.getObservableComposites().filtered(x -> !x.equals(holder) && x.getMeta().equals(holder));
-						invalidators.add(filtered);
-						bind(filtered);
+						ObservableList<T> ol = localBase.getObservableComposites();
+						ObservableList<T> filtered = new FilteredList<>(ol, x -> !x.equals(holder) && x.getMeta().equals(holder));
+						invalidators.add(ol);
+						bind(ol);
 						return super.compositesByMeta(holder);
 					}
 
 					@Override
 					protected Stream<T> compositesBySuper(T holder) {
 						ObservableList<T> ol = localBase.getObservableComposites();
-						ObservableList<T> filtered = ol.filtered(x -> x.getSupers().contains(holder));
-						invalidators.add(filtered);
-						bind(filtered);
+						ObservableList<T> filtered = new FilteredList<>(ol, x -> x.getSupers().contains(holder));
+						invalidators.add(ol);
+						bind(ol);
 						return super.compositesBySuper(holder);
 					}
 				};
