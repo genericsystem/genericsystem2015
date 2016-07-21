@@ -42,8 +42,9 @@ public class ViewContext<M extends Model> {
 
 	}
 
-	public Model getModelContext() {
-		return modelContext;
+	@SuppressWarnings("unchecked")
+	public <MODEL extends Model> MODEL getModelContext() {
+		return (MODEL) modelContext;
 	}
 
 	public ViewContext<?> createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
@@ -55,6 +56,7 @@ public class ViewContext<M extends Model> {
 		return parent.getRootViewContext();
 	}
 
+	@SuppressWarnings({ "unchecked" })
 	public <NODE extends HtmlDomNode> NODE getNode() {
 		return (NODE) node;
 	}

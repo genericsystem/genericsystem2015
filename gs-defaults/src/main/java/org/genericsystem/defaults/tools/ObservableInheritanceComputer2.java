@@ -1,3 +1,4 @@
+
 package org.genericsystem.defaults.tools;
 
 import java.util.HashSet;
