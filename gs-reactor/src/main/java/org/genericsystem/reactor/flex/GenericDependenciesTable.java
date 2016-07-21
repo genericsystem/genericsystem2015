@@ -283,7 +283,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 	@Override
 	protected void sections() {
-		new GenericCompositeSection(this, this.getReverseDirection()) {
+		Tag<GenericModel> selectableTag = new GenericCompositeSection(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES);
@@ -354,5 +354,6 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 				};
 			}
 		};
+		bindSelection(selectableTag);
 	}
 }
