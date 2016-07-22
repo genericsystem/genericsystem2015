@@ -18,8 +18,8 @@ import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.flex.FlexLinks.FlexLinkDisplayer;
-import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
+import org.genericsystem.reactor.flex.FlexLinks.LinkDisplayer;
+import org.genericsystem.reactor.flex.FlexLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.flex.FlexLinks.HtmlGenericInputText;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
@@ -95,7 +95,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void sections() {
-				new FlexLinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
+				new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
@@ -319,7 +319,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new FlexLinkDisplayer(this, this.getReverseDirection()) {
+						new LinkDisplayer(this, this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);

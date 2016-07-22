@@ -32,7 +32,15 @@ public class Visitor {
 	}
 
 	public static class HolderVisitor extends Visitor {
-		private Generic newInstance;
+		private Generic modifiedInstance;
+
+		public HolderVisitor() {
+
+		}
+
+		public HolderVisitor(Generic modifiedInstance) {
+			this.modifiedInstance = modifiedInstance;
+		}
 
 		@Override
 		public void prefix(Model model) {
@@ -42,9 +50,9 @@ public class Visitor {
 						&& tagPropertiesMap.get(ReactorStatics.VALUE).getValue() != null && tagPropertiesMap.get(ReactorStatics.ACTION).getValue() != null) {
 					TriFunction<Generic[], Serializable, Generic, Generic> action = (TriFunction<Generic[], Serializable, Generic, Generic>) tagPropertiesMap
 							.get(ReactorStatics.ACTION).getValue();
-					Generic g = action.apply(gModel.getGenerics(), (Serializable) tagPropertiesMap.get(ReactorStatics.VALUE).getValue(), newInstance);
-					if (newInstance == null)
-						newInstance = g;
+					Generic g = action.apply(gModel.getGenerics(), (Serializable) tagPropertiesMap.get(ReactorStatics.VALUE).getValue(), modifiedInstance);
+					if (modifiedInstance == null)
+						modifiedInstance = g;
 				}
 			}
 		}
@@ -58,7 +66,7 @@ public class Visitor {
 						if (subModel.getProperty(tag, ReactorStatics.SELECTION).getValue() != null)
 							generics.add(((GenericModel) subModel.getProperty(tag, ReactorStatics.SELECTION).getValue()).getGeneric());
 			if (!generics.isEmpty() && generics.size() + 1 == ((GenericModel) model).getGeneric().getComponents().size()) // test OK?
-				newInstance.setHolder(((GenericModel) model).getGeneric(), null, generics.stream().toArray(Generic[]::new));
+				modifiedInstance.setHolder(((GenericModel) model).getGeneric(), null, generics.stream().toArray(Generic[]::new));
 		}
 	}
 
