@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
@@ -52,7 +51,7 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		// System.out.println("HOLDERS : " + Arrays.toString(generics) + " " + generics[1].getObservableHolders(generics[0]));
 
 		ObservableList<Generic> holders = generics[1].getObservableHolders(generics[0]);
-		holders.addListener((ListChangeListener) c -> System.out.println(c));
+		// holders.addListener((ListChangeListener) c -> System.out.println(c));
 		return holders;
 	};
 }

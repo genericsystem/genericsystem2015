@@ -1,14 +1,13 @@
 package org.genericsystem.cache;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.ObservableInheritanceComputer2;
 import org.genericsystem.kernel.Engine;
 import org.testng.annotations.Test;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @Test
 public class UpdateTest extends AbstractTest {
@@ -155,15 +154,4 @@ public class UpdateTest extends AbstractTest {
 		engine.getCurrentCache().flush();
 	}
 
-	public void testFilterList() {
-		ObservableList<String> ol = FXCollections.observableArrayList("one", "two");
-		ThreadLocal<ObservableList<String>> tl = new ThreadLocal<>();
-		tl.set(ol);
-		ObservableList<String> list = ol.filtered(x -> x.contains("three"));
-		ol = null;
-		System.gc();
-		tl.get().add("three");
-		assert !list.isEmpty();
-
-	}
 }

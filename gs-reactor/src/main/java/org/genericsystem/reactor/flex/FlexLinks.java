@@ -3,6 +3,9 @@ package org.genericsystem.reactor.flex;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.beans.binding.Bindings;
+import javafx.util.StringConverter;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
@@ -17,9 +20,6 @@ import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
-
-import javafx.beans.binding.Bindings;
-import javafx.util.StringConverter;
 
 public class FlexLinks {
 
@@ -177,7 +177,7 @@ public class FlexLinks {
 			});
 			tag.addStyle("width", "100%");
 			tag.addStyle("height", "100%");
-			initComboBox(tag);
+			// initComboBox(tag);
 		}
 
 		public void initComboBox(Tag<GenericModel> tag) {

@@ -144,15 +144,15 @@ public abstract class Tag<M extends Model> {
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
 			model.setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
 				// System.out.println("Change detected on : " + System.identityHashCode(generics) + " newValue : " + generic.info());
-				GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
-				viewContext.createViewContextChild(index, duplicate, childElement);
-				return duplicate;
-			}, m -> {
-				assert !model.destroyed;
-				assert !m.destroyed;
-				// TODO unregister viewContext before removing in list ?
-				m.destroy();
-			}));
+					GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
+					viewContext.createViewContextChild(index, duplicate, childElement);
+					return duplicate;
+				}, m -> {
+					assert !model.destroyed;
+					assert !m.destroyed;
+					// TODO unregister viewContext before removing in list ?
+					m.destroy();
+				}));
 		};
 	}
 
@@ -201,13 +201,16 @@ public abstract class Tag<M extends Model> {
 			};
 			observableValue.addListener(listener);
 			listener.changed(observableValue, null, observableValue.getValue());
-			model.setSubContexts(childElement, new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
-				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
-				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
-				GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
-				viewContext.createViewContextChild(index, childModel, childElement);
-				return childModel;
-			}, Model::destroy));
+			model.setSubContexts(
+					childElement,
+					new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
+						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+							GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel)
+									.getStringExtractor());
+							viewContext.createViewContextChild(index, childModel, childElement);
+							return childModel;
+						}, Model::destroy));
 		};
 	}
 
@@ -245,10 +248,12 @@ public abstract class Tag<M extends Model> {
 			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
 			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, modelContext);
-			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT, modelContext).getValue() : 0;
+			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT,
+					modelContext).getValue() : 0;
 			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
 			Property<Number> selectionIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
+			BidirectionalBinding.bind(selectionIndex, selection,
+					number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
 					genericModel -> subContexts.indexOf(genericModel) + selectionShift);
 			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
 				if (selection != null) {
@@ -534,8 +539,8 @@ public abstract class Tag<M extends Model> {
 
 		public void sendMessage(JsonObject jsonObj) {
 			jsonObj.put("count", count++);
-			if (jsonObj.getString(MSG_TYPE).equals(ADD) || jsonObj.getString(MSG_TYPE).equals(REMOVE))
-				System.out.println(jsonObj.encodePrettily());
+			// if (jsonObj.getString(MSG_TYPE).equals(ADD) || jsonObj.getString(MSG_TYPE).equals(REMOVE))
+			// System.out.println(jsonObj.encodePrettily());
 			getWebSocket().writeFinalTextFrame(jsonObj.encode());
 		}
 
