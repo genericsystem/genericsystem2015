@@ -9,12 +9,13 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.genericsystem.carcolor.model.Car;
+import org.genericsystem.carcolor.model.CarColor;
+import org.genericsystem.carcolor.model.Color;
+import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.cdi.Engine;
+import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.Generic;
-import org.genericsystem.examplejsf.model.Car;
-import org.genericsystem.examplejsf.model.CarColor;
-import org.genericsystem.examplejsf.model.Color;
-import org.genericsystem.examplejsf.model.Power;
 
 @Named
 @RequestScoped
@@ -37,10 +38,12 @@ public class CarBean {
 		power = engine.find(Power.class);
 		color = engine.find(Color.class);
 		carColor = engine.find(CarColor.class);
+		runScript(engine);
 	}
 
 	public List<Generic> getCars() {
 		return car.getSubInstances().stream().collect(Collectors.toList());
+
 	}
 
 	public ValueExpressionWrapper getPower(Generic instance) {
@@ -121,6 +124,15 @@ public class CarBean {
 
 	public void setNewCarPower(Integer newCarPower) {
 		this.newCarPower = newCarPower;
+	}
+
+	void runScript(AbstractRoot engine) {
+		color.setInstance("Blue");
+		color.setInstance("Orange");
+		color.setInstance("White");
+		color.setInstance("Yellow");
+		color.setInstance("red");
+
 	}
 
 }

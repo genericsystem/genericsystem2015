@@ -59,13 +59,24 @@ public class TodoApp extends HtmlApp<TodoList> {
 						new HtmlSection<TodoList>(this) {
 							{
 								addStyleClass("main");
+
 								new HtmlUl<TodoList>(this) {
 									{
+
 										addStyleClass("todo-list");
+
 										new HtmlLi<Todo>(this) {
 											{
+												addPrefixBinding(modelContext -> {
+													System.out.println("Model = " + modelContext);
+													if (modelContext.getProperty(this, "completed") == null) {
+														storeProperty("completed", Todo::getCompleted);
+													}
+													;
+												});
 												forEach(TodoList::getFiltered);
-												bindOptionalStyleClass("completed", "completed", Todo::getCompleted);
+
+												bindOptionalStyleClass("completed", "completed");
 												new HtmlDiv<Todo>(this) {
 													{
 														addStyleClass("view");
@@ -116,7 +127,9 @@ public class TodoApp extends HtmlApp<TodoList> {
 												addStyleClass("filters");
 												new HtmlLi<TodoList>(this) {
 													{
-														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass("selected", "allMode", TodoList::getAllMode);
+														storeProperty("selected", TodoList::getCompletedMode);
+														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass("selected", "allMode");
+
 													}
 												};
 												new HtmlLi<TodoList>(this) {

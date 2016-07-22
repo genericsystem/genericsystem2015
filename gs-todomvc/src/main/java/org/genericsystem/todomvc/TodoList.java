@@ -49,8 +49,7 @@ public class TodoList extends Model {
 
 	public TodoList(AbstractRoot engine) {
 		this.engine = engine;
-		todos = new TransformationObservableList<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g),
-				todo -> new Observable[] { todo.getCompleted() });
+		todos = new TransformationObservableList<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g), todo -> new Observable[] { todo.getCompleted() });
 		filtered = new FilteredList<>(todos);
 		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
 		completedCount = Bindings.size(todos.filtered(COMPLETE));
@@ -86,7 +85,6 @@ public class TodoList extends Model {
 	}
 
 	public void showActive() {
-		System.out.println("Show active");
 		mode.setValue(ACTIVE);
 	}
 
@@ -102,8 +100,8 @@ public class TodoList extends Model {
 	public void cancel() {
 		engine.getCurrentCache().clear();
 	}
-	
-	public void save(){
+
+	public void save() {
 		engine.getCurrentCache().flush();
 	}
 
@@ -167,12 +165,12 @@ public class TodoList extends Model {
 	public ObservableValue<String> getClearCompleted() {
 		return clearCompleted;
 	};
-	
-	public ObservableValue<String> getSave(){
+
+	public ObservableValue<String> getSave() {
 		return save;
 	};
-	
-	public ObservableValue<String> getCancel(){
+
+	public ObservableValue<String> getCancel() {
 		return cancel;
 	};
 }

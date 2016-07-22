@@ -346,6 +346,7 @@ public abstract class Tag<M extends Model> {
 
 	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
 		addPrefixBinding(modelContext -> {
+			System.out.println("Model = " + modelContext);
 			modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext));
 		});
 	}
