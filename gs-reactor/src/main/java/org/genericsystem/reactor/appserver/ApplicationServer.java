@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.appserver;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
@@ -23,7 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
@@ -131,11 +134,14 @@ public class ApplicationServer extends AbstractBackEnd {
 					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
 					if (input == null) {
 						if (resourceToServe.endsWith(".css")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard css instead");
+							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard reactor.css instead");
 							input = ApplicationServer.class.getResourceAsStream("/reactor.css");
 						} else if (resourceToServe.endsWith(".js")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard js instead");
+							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard script.js instead");
 							input = ApplicationServer.class.getResourceAsStream("/script.js");
+						} else if (resourceToServe.endsWith("favicon.ico")) {
+							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard favicon.ico instead");
+							input = ApplicationServer.class.getResourceAsStream("/favicon.ico");
 						} else if (resourceToServe.endsWith(".ico") || resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
 							log.warn("Unable to find resource : /" + resourceToServe + ", get nothing instead");
 							request.response().end();
@@ -143,10 +149,47 @@ public class ApplicationServer extends AbstractBackEnd {
 						} else
 							throw new IllegalStateException("Unable to find resource : " + resourceToServe);
 					}
-					String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
-					request.response().end(result);
+					if (resourceToServe.endsWith(".ico")) {
+						MultiMap headers = request.response().headers();
+						Buffer buffer = makeBuffer(input);
+						headers.add(HttpHeaders.CONTENT_TYPE, "image/x-icon");
+						headers.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(buffer.length()));
+						headers.add(HttpHeaders.CACHE_CONTROL, "public, max-age=" + 86400);
+						request.response().end(buffer);
+					} else if (resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
+						// TODO
+						MultiMap headers = request.response().headers();
+						Buffer buffer = makeBuffer(input);
+						// headers.add(HttpHeaders.CONTENT_TYPE, "image/x-icon");
+						headers.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(buffer.length()));
+						headers.add(HttpHeaders.CACHE_CONTROL, "public, max-age=" + 86400);
+						request.response().end(buffer);
+					} else {
+						String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
+						request.response().end(result);
+					}
 				}
 			});
+		}
+
+		private Buffer makeBuffer(InputStream input) {
+			Buffer buffer = Buffer.buffer();
+			int read;
+			byte[] data = new byte[4096];
+			try {
+				while ((read = input.read(data, 0, data.length)) != -1) {
+					if (read == data.length) {
+						buffer.appendBytes(data);
+					} else {
+						byte[] slice = new byte[read];
+						System.arraycopy(data, 0, slice, 0, slice.length);
+						buffer.appendBytes(slice);
+					}
+				}
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+			return buffer;
 		}
 
 		@Override
