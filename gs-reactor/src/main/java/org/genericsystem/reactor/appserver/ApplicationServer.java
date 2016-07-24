@@ -1,5 +1,13 @@
 package org.genericsystem.reactor.appserver;
 
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,17 +27,11 @@ import org.genericsystem.common.GSBuffer;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.HtmlDomNode;
+import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
+import org.genericsystem.reactor.flex.GenericApp;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -40,7 +42,7 @@ public class ApplicationServer extends AbstractBackEnd {
 	protected static Logger log = LoggerFactory.getLogger(ApplicationServer.class);
 	protected Map<String, PersistentApplication> apps = new HashMap<>();
 
-	public ApplicationServer(ApplicationsDeploymentConfig options) {
+	public ApplicationServer(WebAppsConfig options) {
 		super(options.getHost(), options.getPort());
 		log.info("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
@@ -54,9 +56,17 @@ public class ApplicationServer extends AbstractBackEnd {
 		for (String applicationPath : options.getApplicationsPaths()) {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
-			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path)));
+			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path), options.getRootId()));
 
 		}
+	}
+
+	public static void sartSimpleWebApp(String[] mainArgs, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
+		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, modelClass, homePersistentDirectoryPath)).start();
+	}
+
+	public static void sartSimpleGenericApp(String[] mainArgs, Class<? extends GenericApp> htmlAppClass, String homePersistentDirectoryPath) {
+		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, homePersistentDirectoryPath)).start();
 	}
 
 	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
@@ -67,8 +77,8 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine) {
-		return new PersistentApplication(applicationClass, modelClass, engine);
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine, String rootId) {
+		return new PersistentApplication(applicationClass, modelClass, engine, rootId);
 	}
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
@@ -99,77 +109,78 @@ public class ApplicationServer extends AbstractBackEnd {
 		public void addHttpHandler(HttpServer httpServer) {
 			httpServer.requestHandler(request -> {
 				// log.info("Request received with path : " + request.path());
-				String[] items = request.path().substring(1).split("/");
-				// log.info("Request received with splited items : " + Arrays.toString(items));
-				String appPath = items.length == 0 ? "" : items[0];
-				if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
-					appPath = "";
-				// log.info("Request received with application path : " + appPath);
-				PersistentApplication application = apps.get("/" + appPath);
-				if (application == null) {
-					request.response().end("No application is configured with path : /" + appPath);
-					throw new IllegalStateException("Unable to load an application with path : /" + appPath);
-				}
-				// log.info("Request detected for application : " + application.getApplicationClass().getName());
-				int shift = appPath.isEmpty() ? 0 : 1;
-				shift += items.length > shift ? 1 : 0;
-				String resourceToServe = request.path().substring(appPath.length() + shift);
-				// log.info("Resource to serve : " + resourceToServe);
-				if ("".equals(resourceToServe)) {
-					String indexHtml = "<!DOCTYPE html>";
-					indexHtml += "<html>";
-					indexHtml += "<head>";
-					indexHtml += "<meta charset=\"UTF-8\">";
-					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".css\"/>";
-					indexHtml += "<script>";
-					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
-					indexHtml += "</script>";
-					indexHtml += "<script type=\"text/javascript\" src=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".js\"></script>";
-					indexHtml += "</head>";
-					indexHtml += "<body onload=\"connect();\" id=\"root\">";
-					indexHtml += "</body>";
-					indexHtml += "</html>";
-					request.response().end(indexHtml);
-				} else {
-					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
-					if (input == null) {
-						if (resourceToServe.endsWith(".css")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard reactor.css instead");
-							input = ApplicationServer.class.getResourceAsStream("/reactor.css");
-						} else if (resourceToServe.endsWith(".js")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard script.js instead");
-							input = ApplicationServer.class.getResourceAsStream("/script.js");
-						} else if (resourceToServe.endsWith("favicon.ico")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard favicon.ico instead");
-							input = ApplicationServer.class.getResourceAsStream("/favicon.ico");
-						} else if (resourceToServe.endsWith(".ico") || resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
-							log.warn("Unable to find resource : /" + resourceToServe + ", get nothing instead");
-							request.response().end();
-							return;
-						} else
-							throw new IllegalStateException("Unable to find resource : " + resourceToServe);
+					String[] items = request.path().substring(1).split("/");
+					// log.info("Request received with splited items : " + Arrays.toString(items));
+					String appPath = items.length == 0 ? "" : items[0];
+					if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
+						appPath = "";
+					// log.info("Request received with application path : " + appPath);
+					PersistentApplication application = apps.get("/" + appPath);
+					if (application == null) {
+						request.response().end("No application is configured with path : /" + appPath);
+						log.info("No application is configured with path : /" + appPath);
+						return;
 					}
-					if (resourceToServe.endsWith(".ico")) {
-						MultiMap headers = request.response().headers();
-						Buffer buffer = makeBuffer(input);
-						headers.add(HttpHeaders.CONTENT_TYPE, "image/x-icon");
-						headers.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(buffer.length()));
-						headers.add(HttpHeaders.CACHE_CONTROL, "public, max-age=" + 86400);
-						request.response().end(buffer);
-					} else if (resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
-						// TODO
-						MultiMap headers = request.response().headers();
-						Buffer buffer = makeBuffer(input);
-						// headers.add(HttpHeaders.CONTENT_TYPE, "image/x-icon");
-						headers.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(buffer.length()));
-						headers.add(HttpHeaders.CACHE_CONTROL, "public, max-age=" + 86400);
-						request.response().end(buffer);
+					// log.info("Request detected for application : " + application.getApplicationClass().getName());
+					int shift = appPath.isEmpty() ? 0 : 1;
+					shift += items.length > shift ? 1 : 0;
+					String resourceToServe = request.path().substring(appPath.length() + shift);
+					// log.info("Resource to serve : " + resourceToServe);
+					if ("".equals(resourceToServe)) {
+						String indexHtml = "<!DOCTYPE html>";
+						indexHtml += "<html>";
+						indexHtml += "<head>";
+						indexHtml += "<meta charset=\"UTF-8\">";
+						indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".css\"/>";
+						indexHtml += "<script>";
+						indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
+						indexHtml += "</script>";
+						indexHtml += "<script type=\"text/javascript\" src=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".js\"></script>";
+						indexHtml += "</head>";
+						indexHtml += "<body onload=\"connect();\" id=\"" + application.getRootId() + "\">";
+						indexHtml += "</body>";
+						indexHtml += "</html>";
+						request.response().end(indexHtml);
 					} else {
-						String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
-						request.response().end(result);
+						InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
+						if (input == null) {
+							if (resourceToServe.endsWith(".css")) {
+								log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard reactor.css instead");
+								input = ApplicationServer.class.getResourceAsStream("/reactor.css");
+							} else if (resourceToServe.endsWith(".js")) {
+								log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard script.js instead");
+								input = ApplicationServer.class.getResourceAsStream("/script.js");
+							} else if (resourceToServe.endsWith("favicon.ico")) {
+								log.warn("Unable to find resource : /" + resourceToServe + ", get the reactor standard favicon.ico instead");
+								input = ApplicationServer.class.getResourceAsStream("/favicon.ico");
+							} else if (resourceToServe.endsWith(".ico") || resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
+								log.warn("Unable to find resource : /" + resourceToServe + ", get nothing instead");
+								request.response().end();
+								return;
+							} else
+								throw new IllegalStateException("Unable to find resource : " + resourceToServe);
+						}
+						if (resourceToServe.endsWith(".ico")) {
+							MultiMap headers = request.response().headers();
+							Buffer buffer = makeBuffer(input);
+							headers.add(HttpHeaders.CONTENT_TYPE, "image/x-icon");
+							headers.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(buffer.length()));
+							headers.add(HttpHeaders.CACHE_CONTROL, "public, max-age=" + 86400);
+							request.response().end(buffer);
+						} else if (resourceToServe.endsWith(".jpg") || resourceToServe.endsWith(".png")) {
+							// TODO
+							MultiMap headers = request.response().headers();
+							Buffer buffer = makeBuffer(input);
+							// headers.add(HttpHeaders.CONTENT_TYPE, "image/x-icon");
+							headers.add(HttpHeaders.CONTENT_LENGTH, Integer.toString(buffer.length()));
+							headers.add(HttpHeaders.CACHE_CONTROL, "public, max-age=" + 86400);
+							request.response().end(buffer);
+						} else {
+							String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
+							request.response().end(result);
+						}
 					}
-				}
-			});
+				});
 		}
 
 		private Buffer makeBuffer(InputStream input) {

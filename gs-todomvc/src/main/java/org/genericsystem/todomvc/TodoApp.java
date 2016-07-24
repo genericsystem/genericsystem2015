@@ -1,11 +1,11 @@
 package org.genericsystem.todomvc;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.Statics;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
@@ -22,18 +22,15 @@ import org.genericsystem.reactor.html.HtmlSpan;
 import org.genericsystem.reactor.html.HtmlStrong;
 import org.genericsystem.reactor.html.HtmlUl;
 
-import io.vertx.core.http.ServerWebSocket;
-
 /**
  * @author Nicolas Feybesse
  *
  */
+@DependsOnModel(Todos.class)
 public class TodoApp extends HtmlApp<TodoList> {
 
-	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
-		appsConfig.addApplication("/", TodoApp.class, TodoList.class, Engine.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
-		new ApplicationServer(appsConfig).start();
+	public static void main(String[] mainArgs) {
+		ApplicationServer.sartSimpleWebApp(mainArgs, TodoApp.class, TodoList.class, "/todo/");
 	}
 
 	public TodoApp(AbstractRoot engine, ServerWebSocket webSocket) {

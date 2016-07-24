@@ -18,9 +18,9 @@ import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
+import org.genericsystem.reactor.flex.FlexLinks.HtmlGenericInputText;
 import org.genericsystem.reactor.flex.FlexLinks.LinkDisplayer;
 import org.genericsystem.reactor.flex.FlexLinks.LinkTitleDisplayer;
-import org.genericsystem.reactor.flex.FlexLinks.HtmlGenericInputText;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlH1;
@@ -33,7 +33,6 @@ import org.genericsystem.reactor.model.StringExtractor;
 /**
  * @author Nicolas Feybesse
  *
- * @param <M>
  */
 public class GenericDependenciesTable extends GenericCompositeSection {
 
@@ -137,8 +136,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 						addStyle("margin-bottom", "1px");
 						new HtmlGenericInputText(this) {
 							{
-								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
-										(gs, value, g) -> gs[0].setInstance(value));
+								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
 							}
 
 							@Override
@@ -178,8 +176,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 										new HtmlGenericInputText(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
-														(gs, value, g) -> g.setHolder(gs[1], value));
+												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}
 
 											@Override
@@ -194,8 +191,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
-														(gs, value, g) -> g.setHolder(gs[1], value));
+												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
 									}
@@ -210,8 +206,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 								new CompositeSelectWithEmptyEntry(this) {
 									{
 										addStyle("width", "100%");
@@ -297,10 +292,8 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
-						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put(
-								"background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? modelContext.getString()
-										.getValue() : "#bba5ff"));
+						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? modelContext.getString().getValue() : "#bba5ff"));
 						new HtmlHyperLink<GenericModel>(this) {
 							{
 								bindText(GenericModel::getString);

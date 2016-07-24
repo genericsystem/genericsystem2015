@@ -97,6 +97,8 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
 
+	@Deprecated
+	// TODO KK not a postfix binding !
 	protected <NODE extends HtmlDomNode> void addPostfixActionBinding(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<M> applyOnModel) {
 		postFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
@@ -116,8 +118,7 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String modelPropertyName,
-			Function<M, ObservableValue<Boolean>> applyOnModel) {
+	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<M, ObservableValue<Boolean>> applyOnModel) {
 		storeProperty(modelPropertyName, applyOnModel);
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
@@ -205,16 +206,13 @@ public abstract class Tag<M extends Model> {
 			};
 			observableValue.addListener(listener);
 			listener.changed(observableValue, null, observableValue.getValue());
-			model.setSubContexts(
-					childElement,
-					new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
-						Generic[] gs = ((GenericModel) selectedModel).getGenerics();
-						// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
-							GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel)
-									.getStringExtractor());
-							viewContext.createViewContextChild(index, childModel, childElement);
-							return childModel;
-						}, Model::destroy));
+			model.setSubContexts(childElement, new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
+				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
+				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
+					GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
+					viewContext.createViewContextChild(index, childModel, childElement);
+					return childModel;
+				}, Model::destroy));
 		};
 	}
 
@@ -252,13 +250,11 @@ public abstract class Tag<M extends Model> {
 			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
 			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, modelContext);
-			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT,
-					modelContext).getValue() : 0;
+			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT, modelContext).getValue() : 0;
 			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
 			Property<Number> selectionIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection,
-					number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
-					genericModel -> subContexts.indexOf(genericModel) + selectionShift);
+			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null, genericModel -> subContexts.indexOf(genericModel)
+					+ selectionShift);
 			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
 				if (selection != null) {
 					Number oldIndex = (Number) getProperty(ReactorStatics.SELECTION_INDEX, modelContext).getValue();
@@ -299,13 +295,11 @@ public abstract class Tag<M extends Model> {
 		bindBiDirectionalMapElement(propertyName, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
 	}
 
-	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap,
-			StringConverter<T> stringConverter) {
+	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
 		bindBiDirectionalMapElement(propertyName, name, getMap, model -> stringConverter);
 	}
 
-	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap,
-			Function<M, StringConverter<T>> getStringConverter) {
+	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
 		addPrefixBinding(modelContext -> {
 			ObservableMap<String, String> map = getMap.apply(modelContext);
 			StringConverter<T> stringConverter = getStringConverter.apply(modelContext);
@@ -349,10 +343,7 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
-		addPrefixBinding(modelContext -> {
-			System.out.println("Model = " + modelContext);
-			modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext));
-		});
+		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
 	}
 
 	public void addStyle(String propertyName, String value) {
@@ -393,8 +384,7 @@ public abstract class Tag<M extends Model> {
 		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), stringConverter);
 	}
 
-	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName,
-			Function<M, StringConverter<T>> getStringConverter) {
+	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
 		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
 	}
 
@@ -474,8 +464,7 @@ public abstract class Tag<M extends Model> {
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 		private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
 
-		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())
-				.put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals("")) {
@@ -483,8 +472,7 @@ public abstract class Tag<M extends Model> {
 				sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()));
 			} else if (change.wasAdded()) {
 				// System.out.println("Add : " + change.getKey() + " " + change.getValueAdded());
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey())
-						.put(STYLE_VALUE, change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -492,8 +480,7 @@ public abstract class Tag<M extends Model> {
 			if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals("")) {
 				sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()));
 			} else if (change.wasAdded()) {
-				sendMessage(new JsonObject().put(MSG_TYPE, ADD_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey())
-						.put(ATTRIBUTE_VALUE, change.getValueAdded()));
+				sendMessage(new JsonObject().put(MSG_TYPE, ADD_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()).put(ATTRIBUTE_VALUE, change.getValueAdded()));
 			}
 		};
 
@@ -514,6 +501,7 @@ public abstract class Tag<M extends Model> {
 		}
 
 		public HtmlDomNode(String parentId) {
+			assert parentId != null;
 			this.parentId = parentId;
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 			text.addListener(new WeakChangeListener<>(textListener));

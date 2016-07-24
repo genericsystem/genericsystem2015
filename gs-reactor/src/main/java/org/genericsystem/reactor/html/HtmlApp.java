@@ -3,25 +3,26 @@ package org.genericsystem.reactor.html;
 import io.vertx.core.http.ServerWebSocket;
 
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public abstract class HtmlApp<M extends Model> extends Tag<M> {
+public abstract class HtmlApp<M extends Model> extends HtmlSection<M> {
 
 	private final ServerWebSocket webSocket;
 	private RootViewContext<M> rootViewContext;
 
 	public HtmlApp(ServerWebSocket webSocket) {
-		super(null, "div");
+		super(null);
 		this.webSocket = webSocket;
 	}
 
-	public HtmlApp<M> init(M rootModelContext) {
-		rootViewContext = new RootViewContext<M>(rootModelContext, this, new HtmlDomNode(null));
+	public HtmlApp<M> init(M rootModelContext, String rootId) {
+		HtmlDomNode rootNode = new HtmlDomNode(rootId);
+		rootNode.sendAdd(0);
+		rootViewContext = new RootViewContext<M>(rootModelContext, this, rootNode);
 		return this;
 	}
 

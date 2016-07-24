@@ -1,7 +1,9 @@
 package org.genericsystem.reactor.flex;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.model.GenericModel;
@@ -30,61 +32,34 @@ public class GenericSection extends HtmlSection<GenericModel> {
 		return new HtmlDomNode(parentId);
 	}
 
-	// TODO remove or improve this
-	@Deprecated
-	public static class H1FlexElement extends GenericSection {
-		public H1FlexElement(Tag<?> parent, String title) {
-			this(parent, FlexDirection.ROW, title);
+	public static class GenericColumn extends GenericSection {
+		public GenericColumn(Tag<?> parent) {
+			super(parent, FlexDirection.COLUMN);
 		}
+	}
 
-		public H1FlexElement(Tag<?> parent) {
-			this(parent, FlexDirection.ROW);
+	public static class GenericRow extends GenericSection {
+		public GenericRow(Tag<?> parent) {
+			super(parent, FlexDirection.ROW);
 		}
+	}
 
-		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection, String title) {
-			super(parent, flexDirection);
-			addStyle("justify-content", "center");
-			addStyle("background-color", "#ffa500");
-			new HtmlH1<>(this).setText(title);
-		}
-
-		public H1FlexElement(Tag<?> parent, FlexDirection flexDirection) {
-			super(parent, flexDirection);
-			addStyle("justify-content", "center");
-			addStyle("background-color", "#ffa500");
-			new HtmlH1<GenericModel>(this).bindText(GenericModel::getString);
-		}
-	};
-
-	public static class TransactionMonitor extends GenericSection {
-
-		public TransactionMonitor(Tag<?> parent) {
-			this(parent, FlexDirection.ROW);
-		}
-
-		public TransactionMonitor(Tag<?> parent, FlexDirection direction) {
+	public static class GenericRowWrapper extends GenericSection {
+		public GenericRowWrapper(Tag<?> parent, FlexDirection direction, Consumer<Tag<?>> consumer) {
 			super(parent, direction);
-			addStyle("justify-content", "space-around");
-			addStyle("padding", "10px");
-			new HtmlButton<GenericModel>(this) {
-				{
-					setText("Save");
-					bindAction(GenericModel::flush);
-				}
-			};
-			new HtmlButton<GenericModel>(this) {
-				{
-					setText("Cancel");
-					bindAction(GenericModel::cancel);
-				}
-			};
-			new HtmlButton<GenericModel>(this) {
-				{
-					setText("Collect");
-					bindAction(model -> System.gc());
-				}
-			};
+			addStyle("justify-content", "center");
+			consumer.accept(this);
 		}
 
+		public <T> GenericRowWrapper(Tag<?> parent, FlexDirection direction, BiConsumer<Tag<?>, T> consumer, T arg) {
+			super(parent, direction);
+			consumer.accept(this, arg);
+		}
+	}
+
+	public static class GenericH1Section extends GenericRowWrapper {
+		public GenericH1Section(Tag<?> parent, FlexDirection direction, String text) {
+			super(parent, direction, HtmlH1<GenericModel>::new, text);
+		}
 	}
 }
