@@ -7,6 +7,8 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,17 +23,15 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
-import org.genericsystem.common.AbstractRoot;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
+import org.genericsystem.common.Root;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.HtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
-import org.genericsystem.reactor.flex.GenericApp;
+import org.genericsystem.reactor.generic.GSApp;
 import org.genericsystem.reactor.html.HtmlApp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -47,7 +47,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		log.info("Load config : \n" + options.encodePrettily());
 		for (String directoryPath : options.getPersistentDirectoryPaths()) {
 			String path = directoryPath != null ? directoryPath : "/";
-			AbstractRoot root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
+			Root root = buildRoot(directoryPath, options.getClasses(directoryPath), options.getEngineClass(directoryPath));
 			log.info("Starts " + root.getClass().getSimpleName() + " with path : " + path + " and persistence directory path : " + directoryPath);
 			if (directoryPath == null)
 				directoryPath = "/";
@@ -65,11 +65,11 @@ public class ApplicationServer extends AbstractBackEnd {
 		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, modelClass, homePersistentDirectoryPath)).start();
 	}
 
-	public static void sartSimpleGenericApp(String[] mainArgs, Class<? extends GenericApp> htmlAppClass, String homePersistentDirectoryPath) {
+	public static void sartSimpleGenericApp(String[] mainArgs, Class<? extends GSApp> htmlAppClass, String homePersistentDirectoryPath) {
 		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, homePersistentDirectoryPath)).start();
 	}
 
-	protected AbstractRoot buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends AbstractRoot> applicationClass) {
+	protected Root buildRoot(String persistentDirectoryPath, Set<Class<?>> userClasses, Class<? extends Root> applicationClass) {
 		try {
 			return applicationClass.getConstructor(String.class, Class[].class).newInstance(persistentDirectoryPath, userClasses.toArray(new Class[userClasses.size()]));
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -77,7 +77,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, AbstractRoot engine, String rootId) {
+	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, Root engine, String rootId) {
 		return new PersistentApplication(applicationClass, modelClass, engine, rootId);
 	}
 

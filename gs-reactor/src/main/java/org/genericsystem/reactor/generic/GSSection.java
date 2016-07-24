@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.flex;
+package org.genericsystem.reactor.generic;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -8,10 +8,10 @@ import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class GenericSection extends HtmlSection<GenericModel> {
+public class GSSection extends HtmlSection<GenericModel> {
 	private final FlexDirection direction;
 
-	public GenericSection(Tag<?> parent, FlexDirection direction) {
+	public GSSection(Tag<?> parent, FlexDirection direction) {
 		super(parent);
 		this.direction = direction;
 		addStyle("display", "flex");
@@ -32,19 +32,19 @@ public class GenericSection extends HtmlSection<GenericModel> {
 		return new HtmlDomNode(parentId);
 	}
 
-	public static class GenericColumn extends GenericSection {
+	public static class GenericColumn extends GSSection {
 		public GenericColumn(Tag<?> parent) {
 			super(parent, FlexDirection.COLUMN);
 		}
 	}
 
-	public static class GenericRow extends GenericSection {
+	public static class GenericRow extends GSSection {
 		public GenericRow(Tag<?> parent) {
 			super(parent, FlexDirection.ROW);
 		}
 	}
 
-	public static class GenericRowWrapper extends GenericSection {
+	public static class GenericRowWrapper extends GSSection {
 		public GenericRowWrapper(Tag<?> parent, FlexDirection direction, Consumer<Tag<?>> consumer) {
 			super(parent, direction);
 			addStyle("justify-content", "center");

@@ -15,6 +15,7 @@ import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 
 import org.genericsystem.defaults.tools.TransformationObservableList;
+//import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
@@ -25,7 +26,7 @@ public class Model {
 
 	protected Model parent;
 	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-	private Map<Tag<?>, TransformationObservableList<?, Model>> subContextsMap = new HashMap<>();
+	private Map<Tag<?>, ObservableList<Model>> subContextsMap = new HashMap<>();
 	private final Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
 		@Override
 		public Map<String, ObservableValue<Object>> get(Object key) {
@@ -92,9 +93,9 @@ public class Model {
 		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
-	public <MODEL extends Model> void setSubContexts(Tag<?> element, TransformationObservableList<?, MODEL> subContexts) {
+	<MODEL extends Model> void setSubContexts(Tag<?> element, ObservableList<MODEL> subContexts) {
 		assert subContextsMap.get(element) == null;
-		subContextsMap.put(element, (TransformationObservableList) subContexts);
+		subContextsMap.put(element, (ObservableList<Model>) subContexts);
 	}
 
 	public void register(ViewContext<?> viewContext) {
@@ -116,8 +117,8 @@ public class Model {
 		for (ViewContext<?> viewContext : viewContextsMap.values()) {
 			viewContext.destroy();
 		}
-		for (TransformationObservableList<?, Model> subModels : subContextsMap.values()) {
-			subModels.unbind();
+		for (ObservableList<Model> subModels : subContextsMap.values()) {
+			((TransformationObservableList<?, Model>) subModels).unbind();
 			for (Model subModel : subModels)
 				subModel.internalDestroy();
 		}

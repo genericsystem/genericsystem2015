@@ -10,7 +10,7 @@ import javassist.util.proxy.ProxyObject;
 
 public interface GenericProxy extends DefaultGeneric<Generic> {
 	@Override
-	default AbstractRoot getRoot() {
+	default Root getRoot() {
 		return getProxyHandler().getRoot();
 	}
 
@@ -19,8 +19,8 @@ public interface GenericProxy extends DefaultGeneric<Generic> {
 	// return DefaultVertex.super.getCurrentCache();
 	// }
 
-	default AbstractRoot.DefaultHandler getProxyHandler() {
-		return ((AbstractRoot.DefaultHandler) ((ProxyObject) this).getHandler());
+	default Root.DefaultHandler getProxyHandler() {
+		return ((Root.DefaultHandler) ((ProxyObject) this).getHandler());
 	}
 
 	@Override

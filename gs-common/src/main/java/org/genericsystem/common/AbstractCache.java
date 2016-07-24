@@ -84,12 +84,12 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	protected abstract IDifferential<Generic> buildTransaction();
 
-	public AbstractCache(AbstractRoot root) {
+	public AbstractCache(Root root) {
 		this(root, new ContextEventListener<Generic>() {
 		});
 	}
 
-	public AbstractCache(AbstractRoot root, ContextEventListener<Generic> listener) {
+	public AbstractCache(Root root, ContextEventListener<Generic> listener) {
 		super(root);
 		this.restructurator = buildRestructurator();
 		this.listener = listener;

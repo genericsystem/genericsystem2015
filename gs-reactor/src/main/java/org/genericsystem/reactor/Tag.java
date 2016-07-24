@@ -55,7 +55,7 @@ public abstract class Tag<M extends Model> {
 	private static int count = 0;
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
-	public BiConsumer<Tag<M>, ViewContext<?>> metaBinding;
+	public BiConsumer<Tag<?>, ViewContext<?>> metaBinding;
 	public final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
 	public final List<BiConsumer<Model, HtmlDomNode>> postFixedBindings = new ArrayList<>();
 	private final Tag<?> parent;
@@ -143,11 +143,15 @@ public abstract class Tag<M extends Model> {
 		};
 	}
 
+	private <SUBMODEL extends GenericModel> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {
+		model.setSubContexts(child, subModels);
+	}
+
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
-			model.setSubContexts(childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
+			setSubModels(model, childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
 				// System.out.println("Change detected on : " + System.identityHashCode(generics) + " newValue : " + generic.info());
 					GenericModel duplicate = new GenericModel(model, GenericModel.addToGenerics(generic, model.getGenerics()), stringExtractor);
 					viewContext.createViewContextChild(index, duplicate, childElement);
@@ -206,7 +210,7 @@ public abstract class Tag<M extends Model> {
 			};
 			observableValue.addListener(listener);
 			listener.changed(observableValue, null, observableValue.getValue());
-			model.setSubContexts(childElement, new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
+			setSubModels(model, childElement, new TransformationObservableList<M, GenericModel>(subModels, (index, selectedModel) -> {
 				Generic[] gs = ((GenericModel) selectedModel).getGenerics();
 				// assert Arrays.equals(gs, gs2) : Arrays.toString(gs) + " vs " + Arrays.toString(gs2);
 					GenericModel childModel = new GenericModel(model, gs, stringExtractor != null ? stringExtractor : ((GenericModel) selectedModel).getStringExtractor());
@@ -319,10 +323,10 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public <T extends Serializable> void bindOperation(String propertyName, BiConsumer<M, T> operation) {
+	public <T extends Serializable> void bindActionToValueChangeListener(String propertyName, BiConsumer<M, T> listener) {
 		addPrefixBinding(modelContext -> {
 			Property<T> observable = modelContext.getProperty(this, propertyName);
-			observable.addListener((o, old, nva) -> operation.accept(modelContext, nva));
+			observable.addListener((o, old, nva) -> listener.accept(modelContext, nva));
 		});
 	}
 

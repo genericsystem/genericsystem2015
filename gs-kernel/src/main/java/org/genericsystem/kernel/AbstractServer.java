@@ -10,7 +10,7 @@ import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.common.AbstractCache;
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Container;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Protocol;
@@ -21,7 +21,7 @@ import org.genericsystem.common.Vertex;
  * @author Nicolas Feybesse
  *
  */
-public abstract class AbstractServer extends AbstractRoot implements Generic, Protocol {
+public abstract class AbstractServer extends Root implements Generic, Protocol {
 
 	protected Archiver archiver;
 	private final GarbageCollector garbageCollector = new GarbageCollector(this);

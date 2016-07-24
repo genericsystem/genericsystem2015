@@ -7,14 +7,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.flex.GenericApp;
+import org.genericsystem.reactor.generic.GSApp;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.EngineModel;
 
@@ -71,7 +71,7 @@ public class WebAppsConfig extends JsonObject {
 		return dependOn != null ? dependOn.value() : new Class[] {};
 	}
 
-	public WebAppsConfig addApplication(String path, Class<? extends Tag<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String persistentDirectoryPath) {
+	public WebAppsConfig addApplication(String path, Class<? extends Tag<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends Root> engineClass, String persistentDirectoryPath) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, engineClass, persistentDirectoryPath, getModelClasses(htmlAppClass)));
 		return this;
 	}
@@ -85,8 +85,8 @@ public class WebAppsConfig extends JsonObject {
 				.flatMap(conf -> conf.getClasses().stream()).collect(Collectors.toSet());
 	}
 
-	public Class<? extends AbstractRoot> getEngineClass(String persistentDirectoryPath) {
-		Set<Class<? extends AbstractRoot>> set = getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json)).filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath()))
+	public Class<? extends Root> getEngineClass(String persistentDirectoryPath) {
+		Set<Class<? extends Root>> set = getJsonObject("apps").getMap().values().stream().map(json -> applicationDeploymentConfig((JsonObject) json)).filter(conf -> Objects.equals(persistentDirectoryPath, conf.getPersistentDirectoryPath()))
 				.map(conf -> conf.getEngineClass()).collect(Collectors.toSet());
 		assert set.size() == 1;
 		return set.iterator().next();
@@ -106,7 +106,7 @@ public class WebAppsConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends Tag<?>> applicationClass, Class<? extends Model> modelClass, Class<? extends AbstractRoot> engineClass, String repositoryPath, Class<?>... classes) {
+		public ApplicationDeploymentConfig(Class<? extends Tag<?>> applicationClass, Class<? extends Model> modelClass, Class<? extends Root> engineClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
 			put("modelClass", modelClass.getName());
@@ -123,9 +123,9 @@ public class WebAppsConfig extends JsonObject {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends AbstractRoot> getEngineClass() {
+		public Class<? extends Root> getEngineClass() {
 			try {
-				return (Class<? extends AbstractRoot>) Class.forName(getString("engineClass"));
+				return (Class<? extends Root>) Class.forName(getString("engineClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
@@ -142,7 +142,7 @@ public class WebAppsConfig extends JsonObject {
 	}
 
 	public static class SimpleWebAppConfig extends WebAppsConfig {
-		public SimpleWebAppConfig(String[] mainArgs, Class<? extends GenericApp> htmlAppClass, String homePersistentDirectoryPath) {
+		public SimpleWebAppConfig(String[] mainArgs, Class<? extends GSApp> htmlAppClass, String homePersistentDirectoryPath) {
 			super(mainArgs);
 			addApplication("/", htmlAppClass, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
 		}

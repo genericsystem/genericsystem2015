@@ -7,7 +7,7 @@ import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Statics;
 import org.genericsystem.common.SystemCache;
@@ -17,7 +17,7 @@ import org.genericsystem.common.Vertex;
  * @author Nicolas Feybesse
  *
  */
-public class ClientEngine extends AbstractRoot implements Generic {
+public class ClientEngine extends Root implements Generic {
 
 	protected final FrontEnd server;
 
@@ -48,7 +48,7 @@ public class ClientEngine extends AbstractRoot implements Generic {
 	}
 
 	@Override
-	protected SystemCache buildSystemCache(AbstractRoot root) {
+	protected SystemCache buildSystemCache(Root root) {
 		return new SystemCache(root) {
 
 			@Override

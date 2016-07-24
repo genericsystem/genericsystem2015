@@ -29,17 +29,17 @@ import org.genericsystem.defaults.DefaultRoot;
  * @author Nicolas Feybesse
  *
  */
-public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject, Generic {
+public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic {
 
 	private final Map<Long, Generic> genericsById = new ConcurrentHashMap<>();
 	private final SystemCache systemCache = buildSystemCache(this);
 	protected boolean isInitialized = false;
 	private final ThreadLocal<AbstractCache> cacheLocal = new ThreadLocal<AbstractCache>();
 
-	protected abstract SystemCache buildSystemCache(AbstractRoot root);
+	protected abstract SystemCache buildSystemCache(Root root);
 
 	@Override
-	public AbstractRoot getRoot() {
+	public Root getRoot() {
 		return this;
 	}
 
@@ -140,7 +140,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 
 	protected Generic init(Generic generic, DefaultHandler handler) {
 		((ProxyObject) generic).setHandler(handler);
-		assert ((ProxyObject) generic).getHandler() instanceof AbstractRoot.DefaultHandler;
+		assert ((ProxyObject) generic).getHandler() instanceof Root.DefaultHandler;
 		Generic gresult = genericsById.putIfAbsent(handler.getTs(), generic);
 		assert gresult == null : gresult.info();
 		return generic;
@@ -200,7 +200,7 @@ public abstract class AbstractRoot implements DefaultRoot<Generic>, ProxyObject,
 			return ((DefaultGeneric<?>) self).defaultToString();
 		}
 
-		abstract protected AbstractRoot getRoot();
+		abstract protected Root getRoot();
 
 		public Vertex getVertex() {
 			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(Generic::getTs)

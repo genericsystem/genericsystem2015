@@ -1,7 +1,14 @@
-package org.genericsystem.reactor.flex;
+package org.genericsystem.reactor.generic;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.List;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -21,17 +28,11 @@ import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.util.StringConverter;
-
-public class FlexLinks {
+public class GSLinks {
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 
-	public static class LabelDisplayer extends GenericSection {
+	public static class LabelDisplayer extends GSSection {
 
 		private final ObservableListExtractor observableListExtractor;
 		private final boolean reverse;
@@ -44,11 +45,11 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new GenericSection(this, this.getDirection()) {
+					new GSSection(this, this.getDirection()) {
 						{
 							addStyle("justify-content", "center");
 							addStyle("align-items", "center");
@@ -75,7 +76,7 @@ public class FlexLinks {
 					};
 				}
 			};
-			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					addStyle("justify-content", "center");
@@ -127,7 +128,7 @@ public class FlexLinks {
 		}
 	}
 
-	public static class LinkEditor extends GenericSection {
+	public static class LinkEditor extends GSSection {
 
 		private final boolean reverse;
 
@@ -148,7 +149,7 @@ public class FlexLinks {
 
 		public void initInputText(Tag<GenericModel> tag) {
 			tag.initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
-			tag.bindOperation(ReactorStatics.VALUE, (model, nva) -> {
+			tag.bindActionToValueChangeListener(ReactorStatics.VALUE, (model, nva) -> {
 				model.getGeneric().updateValue(nva);
 			});
 		}
@@ -156,7 +157,7 @@ public class FlexLinks {
 		public void initCheckBox(Tag<GenericModel> tag) {
 			tag.select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 			tag.initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
-			tag.bindOperation(ReactorStatics.CHECKED, (model, nva) -> model.getGeneric().updateValue(nva));
+			tag.bindActionToValueChangeListener(ReactorStatics.CHECKED, (model, nva) -> model.getGeneric().updateValue(nva));
 		}
 
 		public void initRelations(Tag<GenericModel> tag) {
@@ -209,18 +210,18 @@ public class FlexLinks {
 		}
 
 		private void content() {
-			new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new GenericSection(this, this.getDirection()) {
+					new GSSection(this, this.getDirection()) {
 						{
 							addStyle("flex", "1");
 							addStyle("width", "100%");
 							addStyle("height", "100%");
 							addStyle("justify-content", "center");
 							addStyle("align-items", "center");
-							new GenericSection(this, this.getDirection()) {
+							new GSSection(this, this.getDirection()) {
 								{
 									addStyle("flex", "1");
 									addStyle("width", "100%");
@@ -235,12 +236,12 @@ public class FlexLinks {
 									inputActionButton(this, input);
 								}
 							};
-							new GenericSection(this, this.getDirection()) {
+							new GSSection(this, this.getDirection()) {
 								{
 									initCheckBox(this);
 									addStyle("width", "100%");
 									addStyle("height", "100%");
-									new GenericSection(this, this.getDirection()) {
+									new GSSection(this, this.getDirection()) {
 										{
 											addStyle("width", "100%");
 											addStyle("height", "100%");
@@ -266,12 +267,12 @@ public class FlexLinks {
 					};
 				}
 			};
-			new GenericSection(this, this.getDirection()) {
+			new GSSection(this, this.getDirection()) {
 
 				{
 					select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
 					style(this);
-					new GenericSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+					new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
 						{
 							addStyle("flex", "1");
 							addStyle("width", "100%");

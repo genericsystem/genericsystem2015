@@ -8,7 +8,7 @@ import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Diesel;
 import org.genericsystem.carcolor.model.Power;
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
 import org.genericsystem.kernel.Engine;
@@ -18,25 +18,25 @@ import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
-import org.genericsystem.reactor.flex.FlexDirection;
-import org.genericsystem.reactor.flex.GenericApp;
-import org.genericsystem.reactor.flex.GenericCompositeSection.ColorCompositeRadio;
-import org.genericsystem.reactor.flex.GenericCompositeSection.ColorTitleCompositeFlexElement;
-import org.genericsystem.reactor.flex.GenericDependenciesTable;
-import org.genericsystem.reactor.flex.GenericEditor;
-import org.genericsystem.reactor.flex.GenericSection.GenericH1Section;
-import org.genericsystem.reactor.flex.TransactionMonitor;
+import org.genericsystem.reactor.generic.FlexDirection;
+import org.genericsystem.reactor.generic.GSApp;
+import org.genericsystem.reactor.generic.GSTable;
+import org.genericsystem.reactor.generic.GSEditor;
+import org.genericsystem.reactor.generic.GSMonitor;
+import org.genericsystem.reactor.generic.GSComposite.ColorCompositeRadio;
+import org.genericsystem.reactor.generic.GSComposite.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.generic.GSSection.GenericH1Section;
 import org.genericsystem.reactor.model.StringExtractor;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
-public class AppHtml extends GenericApp {
+public class AppHtml extends GSApp {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
-	public AppHtml(AbstractRoot engine, ServerWebSocket webSocket) {
+	public AppHtml(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		addStyle("justify-content", "center");
 		new ColorsSelect(this).select(StringExtractor.EXTRACTOR, Color.class);
@@ -46,26 +46,26 @@ public class AppHtml extends GenericApp {
 
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 		createProperty(ReactorStatics.SELECTION);
-		new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GenericDependenciesTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
-		new GenericEditor(this, FlexDirection.ROW) {
+		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
+		new GSTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
+		new GSEditor(this, FlexDirection.ROW) {
 			{
 				select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
 				addStyle("justify-content", "center");
 			}
 		};
 
-		new GenericEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
-		new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+		new GSEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
+		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 
-		new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
-		new TransactionMonitor(this).addStyle("background-color", "#ffa500");
+		new GSTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
+		new GSMonitor(this).addStyle("background-color", "#ffa500");
 	}
 
 	public static class ExampleReactorScript implements Script {
 
 		@Override
-		public void run(AbstractRoot engine) {
+		public void run(Root engine) {
 			Generic car = engine.find(Car.class);
 			Generic power = engine.find(Power.class);
 			Generic diesel = engine.find(Diesel.class);

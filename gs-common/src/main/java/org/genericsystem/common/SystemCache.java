@@ -41,9 +41,9 @@ public abstract class SystemCache {
 
 	private final Map<Generic, Class<?>> reverseSystemCache = new IdentityHashMap<>();
 
-	protected final AbstractRoot root;
+	protected final Root root;
 
-	public SystemCache(AbstractRoot root) {
+	public SystemCache(Root root) {
 		this.root = root;
 		put(DefaultRoot.class, root);
 		put(root.getClass(), root);

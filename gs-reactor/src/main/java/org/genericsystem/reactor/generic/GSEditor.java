@@ -1,11 +1,11 @@
-package org.genericsystem.reactor.flex;
+package org.genericsystem.reactor.generic;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.flex.FlexLinks.LinkAdder;
-import org.genericsystem.reactor.flex.FlexLinks.LinkEditor;
-import org.genericsystem.reactor.flex.FlexLinks.LinkEditorWithRemoval;
-import org.genericsystem.reactor.flex.FlexLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.generic.GSLinks.LinkAdder;
+import org.genericsystem.reactor.generic.GSLinks.LinkEditor;
+import org.genericsystem.reactor.generic.GSLinks.LinkEditorWithRemoval;
+import org.genericsystem.reactor.generic.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -16,20 +16,20 @@ import org.genericsystem.reactor.model.StringExtractor;
  *
  * @param <M>
  */
-public class GenericEditor extends GenericCompositeSection {
+public class GSEditor extends GSComposite {
 
-	public GenericEditor(Tag<?> parent) {
+	public GSEditor(Tag<?> parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GenericEditor(Tag<?> parent, FlexDirection flexDirection) {
+	public GSEditor(Tag<?> parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}
 
 	@Override
 	protected void header() {
-		new GenericSection(this, GenericEditor.this.getReverseDirection()) {
+		new GSSection(this, GSEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "0.3");
 				addStyle("background-color", "#ffa500");
@@ -50,24 +50,24 @@ public class GenericEditor extends GenericCompositeSection {
 	@Override
 	protected void sections() {
 
-		new GenericCompositeSection(this, GenericEditor.this.getReverseDirection()) {
+		new GSComposite(this, GSEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 			}
 
 			@Override
 			protected void header() {
-				new GenericSection(this, GenericEditor.this.getDirection()) {
+				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "0.3");
-						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GenericEditor.this.getDirection()) {
+						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GSEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
 								select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0].getMeta());
 							}
 						};
-						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GenericEditor.this.getDirection()) {
+						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GSEditor.this.getDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
@@ -80,14 +80,14 @@ public class GenericEditor extends GenericCompositeSection {
 
 			@Override
 			protected void sections() {
-				new GenericSection(this, GenericEditor.this.getDirection()) {
+				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
-						new GenericSection(this, GenericEditor.this.getReverseDirection()) {
+						new GSSection(this, GSEditor.this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new LinkEditor(this, GenericEditor.this.getDirection()) {
+								new LinkEditor(this, GSEditor.this.getDirection()) {
 									{
 										addStyle("flex", "1");
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
@@ -95,18 +95,18 @@ public class GenericEditor extends GenericCompositeSection {
 								};
 							}
 						};
-						new GenericSection(this, GenericEditor.this.getReverseDirection()) {
+						new GSSection(this, GSEditor.this.getReverseDirection()) {
 							{
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new LinkEditorWithRemoval(this, GenericEditor.this.getDirection()) {
+								new LinkEditorWithRemoval(this, GSEditor.this.getDirection()) {
 									{
 										addStyle("flex", "1");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
 									}
 								};
-								new LinkAdder(this, GenericEditor.this.getDirection()) {
+								new LinkAdder(this, GSEditor.this.getDirection()) {
 									{
 										addStyle("flex", "1");
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())

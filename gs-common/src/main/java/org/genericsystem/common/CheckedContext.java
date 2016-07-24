@@ -12,10 +12,10 @@ import org.genericsystem.defaults.DefaultContext;
  */
 public abstract class CheckedContext implements DefaultContext<Generic> {
 
-	private final AbstractRoot root;
+	private final Root root;
 	private final Checker checker;
 
-	protected CheckedContext(AbstractRoot root) {
+	protected CheckedContext(Root root) {
 		assert root != null;
 		this.root = root;
 		this.checker = buildChecker();
@@ -32,7 +32,7 @@ public abstract class CheckedContext implements DefaultContext<Generic> {
 	}
 
 	@Override
-	public AbstractRoot getRoot() {
+	public Root getRoot() {
 		return root;
 	}
 

@@ -63,7 +63,7 @@ public abstract class AbstractWebSocketsServer {
 		}
 	}
 
-	public void stop(Map<String, AbstractRoot> roots) {
+	public void stop(Map<String, Root> roots) {
 		log.info("Generic System Server is stopping...");
 		httpServers.forEach(httpServer -> AbstractBackEnd.<Void> synchronizeTask(handler -> httpServer.close(handler)));
 		roots.values().forEach(root -> root.close());

@@ -1,6 +1,6 @@
 package org.genericsystem.reactor.model;
 
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 
 /**
@@ -9,7 +9,7 @@ import org.genericsystem.common.Generic;
  */
 public class EngineModel extends GenericModel {
 
-	public EngineModel(AbstractRoot engine) {
+	public EngineModel(Root engine) {
 		super(new Generic[] { engine }, StringExtractor.SIMPLE_CLASS_EXTRACTOR);
 	}
 }

@@ -1,10 +1,12 @@
 package org.genericsystem.reactor.model;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -13,6 +15,7 @@ import javafx.beans.value.ObservableValue;
  */
 public class GenericModel extends Model {
 
+	protected static Logger log = LoggerFactory.getLogger(GenericModel.class);
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
 
@@ -52,12 +55,7 @@ public class GenericModel extends Model {
 	}
 
 	public void remove() {
-		System.out.println("remove!!!");
 		getGeneric().remove();
-	}
-
-	public void select() {
-		System.out.println("select click!!!");
 	}
 
 	public void flush() {

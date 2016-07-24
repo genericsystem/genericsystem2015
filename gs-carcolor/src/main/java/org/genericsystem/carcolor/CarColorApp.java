@@ -7,19 +7,19 @@ import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.flex.FlexDirection;
-import org.genericsystem.reactor.flex.GenericApp;
-import org.genericsystem.reactor.flex.GenericDependenciesTable;
-import org.genericsystem.reactor.flex.GenericEditor;
-import org.genericsystem.reactor.flex.GenericSection.GenericH1Section;
-import org.genericsystem.reactor.flex.TransactionMonitor;
+import org.genericsystem.reactor.generic.FlexDirection;
+import org.genericsystem.reactor.generic.GSApp;
+import org.genericsystem.reactor.generic.GSTable;
+import org.genericsystem.reactor.generic.GSEditor;
+import org.genericsystem.reactor.generic.GSMonitor;
+import org.genericsystem.reactor.generic.GSSection.GenericH1Section;
 import org.genericsystem.reactor.model.StringExtractor;
 
 /**
@@ -28,34 +28,34 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
-public class CarColorApp extends GenericApp {
+public class CarColorApp extends GSApp {
 	private final String MAIN_COLOR = "#3393ff";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
-	public static Class<?>[] getModelClasses(Class<?> applicationClass, AbstractRoot engine) {
+	public static Class<?>[] getModelClasses(Class<?> applicationClass, Root engine) {
 		DependsOnModel dependOn = applicationClass.getAnnotation(DependsOnModel.class);
 		return dependOn != null ? dependOn.value() : new Class[] {};
 	}
 
-	public CarColorApp(AbstractRoot engine, ServerWebSocket webSocket) {
+	public CarColorApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		createProperty(ReactorStatics.SELECTION);
 		addStyle("background-color", MAIN_COLOR);
 
 		new GenericH1Section(this, FlexDirection.ROW, "Generic System Reactor Live Demo").addStyle("justify-content", "center");
-		new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GenericModal(this, FlexDirection.COLUMN, contentSection -> new GenericEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
-		new GenericDependenciesTable(this).select(StringExtractor.MANAGEMENT, Color.class);
-		new TransactionMonitor(this);
+		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
+		new GenericModal(this, FlexDirection.COLUMN, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
+		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+		new GSMonitor(this);
 	}
 
 	public static class CarColorScript implements Script {
 
 		@Override
-		public void run(AbstractRoot engine) {
+		public void run(Root engine) {
 			Generic car = engine.find(Car.class);
 			Generic power = engine.find(Power.class);
 			Generic carColor = engine.find(CarColor.class);
