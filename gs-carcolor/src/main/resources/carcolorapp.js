@@ -1,6 +1,5 @@
 
 var wsocket;
-var count = -1;
 
 function connect() {
 	console.log("connect");
@@ -13,19 +12,13 @@ function connect() {
 function onMessageReceived(evt) {
 	console.log("JSON : "+evt.data);
 	var message = JSON.parse(evt.data);
-	if(count==-1)
-		count = message.count;
-//	if(message.count != count){
-//		alert("count pb");
-//	}
-	count = count + 1;
 	var elt = document.getElementById(message.nodeId);
 	switch (message.msgType) {
 	case 'A':
 		var parent = document.getElementById(message.parentId);
 		if (parent == null) {
 			console.log("Unreached parent on add. parent id  : "+message.parentId+" for element : "+message.nodeId);
-			parent = document.getElementById("root");
+			break;
 		}
 		elt = document.createElement(message.tagHtml);
 		elt.id = message.nodeId;
@@ -123,15 +116,7 @@ function onMessageReceived(evt) {
 		parent.insertBefore(elt, parent.children[message.nextId]);
 		break;
 	case 'R':
-		if (elt != null) {
-			elt.classList.add("removing");
-			//setTimeout(function(){ 
-			elt.parentNode.removeChild(elt);
-			//}, 2000);
-		}
-		else {
-			console.log("Unreached removed element id : "+message.nodeId)
-		}
+		elt.parentNode.removeChild(elt);
 		break;
 	case 'UT':
 		if (elt.tagName == "INPUT") {

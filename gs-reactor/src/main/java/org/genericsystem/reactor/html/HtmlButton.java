@@ -23,4 +23,8 @@ public class HtmlButton<M extends Model> extends Tag<M> {
 	public void bindAction(Consumer<M> consumer) {
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}
+
+	public void bindPostfixAction(Consumer<M> consumer) {
+		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
+	}
 }

@@ -14,7 +14,7 @@ import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.cdi.Engine;
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 
 @Named
@@ -126,7 +126,7 @@ public class CarBean {
 		this.newCarPower = newCarPower;
 	}
 
-	void runScript(AbstractRoot engine) {
+	void runScript(Root engine) {
 		color.setInstance("Blue");
 		color.setInstance("Orange");
 		color.setInstance("White");

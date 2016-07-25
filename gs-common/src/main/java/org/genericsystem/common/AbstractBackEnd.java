@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public abstract class AbstractBackEnd {
 
-	protected Map<String, AbstractRoot> roots = new HashMap<>();
+	protected Map<String, Root> roots = new HashMap<>();
 	protected AbstractWebSocketsServer webSocketsServer;
 
 	public AbstractBackEnd(String host, int port) {

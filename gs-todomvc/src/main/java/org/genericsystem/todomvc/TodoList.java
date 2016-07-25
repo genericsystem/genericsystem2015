@@ -3,10 +3,6 @@ package org.genericsystem.todomvc;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
-import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -20,6 +16,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Model;
+
 /**
  * @author Nicolas Feybesse
  *
@@ -27,7 +28,7 @@ import javafx.collections.transformation.FilteredList;
 @SuppressWarnings("unchecked")
 public class TodoList extends Model {
 
-	private final AbstractRoot engine;
+	private final Root engine;
 
 	private final Property<String> name = new SimpleStringProperty();
 	private final Property<Predicate<Todo>> mode = new SimpleObjectProperty<>(ALL);
@@ -47,7 +48,7 @@ public class TodoList extends Model {
 	private final ObservableStringValue save;
 	private final ObservableStringValue cancel;
 
-	public TodoList(AbstractRoot engine) {
+	public TodoList(Root engine) {
 		this.engine = engine;
 		todos = new TransformationObservableList<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g), todo -> new Observable[] { todo.getCompleted() });
 		filtered = new FilteredList<>(todos);
@@ -74,7 +75,7 @@ public class TodoList extends Model {
 
 	public void create() {
 		if (getName().getValue() != null) {
-			engine.find(Todos.class).addInstance(getName().getValue());
+			Generic todo = engine.find(Todos.class).addInstance(getName().getValue());
 			System.out.println("Add instance : " + getName().getValue());
 			name.setValue(null);
 		}
@@ -110,7 +111,7 @@ public class TodoList extends Model {
 	static Predicate<Todo> COMPLETE = todo -> todo.getCompleted().getValue();
 
 	/*********************************************************************************************************************************/
-	public AbstractRoot getEngine() {
+	public Root getEngine() {
 		return engine;
 	}
 

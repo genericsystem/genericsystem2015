@@ -9,25 +9,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <T>
  */
-public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>,
-		DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
+public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAncestors<T>, DefaultDependencies<T>, DefaultDisplay<T>, DefaultSystemProperties<T>, DefaultCompositesInheritance<T>, DefaultWritable<T>, Comparable<T> {
 
 	@Override
 	default ObservableList<T> getObservableComposites() {
@@ -67,8 +64,7 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 				result.add(matchedComponent);
 				previousOrderComp.remove(matchedComponent);
 			} else
-				getCurrentCache().discardWithException(
-						new MetaRuleConstraintViolationException("Unable to order components : " + components + " with this meta : " + info()));
+				getCurrentCache().discardWithException(new MetaRuleConstraintViolationException("Unable to order components : " + components + " with this meta : " + info()));
 
 		}
 		result.addAll(previousOrderComp);
@@ -87,8 +83,7 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 		return getCurrentCache().update((T) this, overrides, newValue, Arrays.asList(newComponents));
 	}
 
-	static <T extends DefaultGeneric<T>> boolean isSuperOf(T subMeta, Serializable subValue, List<T> subComponents, T superMeta, Serializable superValue,
-			List<T> superComponents) {
+	static <T extends DefaultGeneric<T>> boolean isSuperOf(T subMeta, Serializable subValue, List<T> subComponents, T superMeta, Serializable superValue, List<T> superComponents) {
 		if (subMeta == null) {
 			if (!superMeta.isMeta())
 				return false;
@@ -111,23 +106,19 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 	}
 
 	default boolean inheritsFrom(T superMeta, List<T> overrides, Serializable superValue, List<T> superComponents) {
-		return isSuperOf(getMeta(), getValue(), getComponents(), superMeta, superValue, superComponents)
-				&& ApiStatics.areOverridesReached(getSupers(), overrides);
+		return isSuperOf(getMeta(), getValue(), getComponents(), superMeta, superValue, superComponents) && ApiStatics.areOverridesReached(getSupers(), overrides);
 	}
 
 	default boolean isDependencyOf(T meta, List<T> supers, Serializable value, List<T> components) {
 
-		return (inheritsFrom(meta, supers, value, components)
-				|| getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components))
-				|| (!isMeta() && getMeta().isDependencyOf(meta, supers, value, components)) || (!components.equals(getComponents())
-						&& componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()))));
+		return (inheritsFrom(meta, supers, value, components) || getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components)) || (!isMeta() && getMeta().isDependencyOf(meta, supers, value, components)) || (!components
+				.equals(getComponents()) && componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()))));
 
 	}
 
 	@SuppressWarnings("unchecked")
 	default boolean isSuperOf(T subMeta, List<T> overrides, Serializable subValue, List<T> subComponents) {
-		return overrides.stream().anyMatch(override -> override.inheritsFrom((T) this)) || (ApiStatics.areOverridesReached(getSupers(), overrides)
-				&& isSuperOf(subMeta, subValue, subComponents, getMeta(), getValue(), getComponents()));
+		return overrides.stream().anyMatch(override -> override.inheritsFrom((T) this)) || (ApiStatics.areOverridesReached(getSupers(), overrides) && isSuperOf(subMeta, subValue, subComponents, getMeta(), getValue(), getComponents()));
 	}
 
 	default boolean componentsDepends(List<T> subComponents, List<T> superComponents) {
@@ -178,8 +169,7 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 					if (result == null) {
 						result = directInheriting;
 					} else
-						getCurrentCache()
-								.discardWithException(new AmbiguousSelectionException("Ambigous selection : " + result.info() + directInheriting.info()));
+						getCurrentCache().discardWithException(new AmbiguousSelectionException("Ambigous selection : " + result.info() + directInheriting.info()));
 				}
 			}
 		return result == null ? (T) this : result.adjustMeta(components);
@@ -192,8 +182,7 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 		for (T instance : getInstances())
 			if (instance.equalsRegardlessSupers(this, value, components))
 				if (ApiStatics.areOverridesReached(instance.getSupers(), overrides))
-					if (!instance.getSupers().stream().anyMatch(superG -> superG.getComponents().equals(components) && equals(superG.getMeta()))
-							|| ApiStatics.areOverridesReached(overrides, instance.getSupers()))
+					if (!instance.getSupers().stream().anyMatch(superG -> superG.getComponents().equals(components) && equals(superG.getMeta())) || ApiStatics.areOverridesReached(overrides, instance.getSupers()))
 						return instance;
 		return null;
 	}
@@ -205,8 +194,7 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 		for (T instance : getInstances())
 			if (instance.equiv(this, value, components))
 				if (ApiStatics.areOverridesReached(instance.getSupers(), overrides))
-					if (!instance.getSupers().stream().anyMatch(superG -> superG.getComponents().equals(components) && equals(superG.getMeta()))
-							|| ApiStatics.areOverridesReached(overrides, instance.getSupers()))
+					if (!instance.getSupers().stream().anyMatch(superG -> superG.getComponents().equals(components) && equals(superG.getMeta())) || ApiStatics.areOverridesReached(overrides, instance.getSupers()))
 
 						return instance;
 		return null;
@@ -306,25 +294,8 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 	}
 
 	@Override
-	default ObservableValue<T> getObservableNonAmbiguousResult(ObservableList<T> list) {
-
-		SimpleObjectProperty<T> internal = new SimpleObjectProperty<>();
-
-		@SuppressWarnings("unused")
-		InvalidationListener listener;
-
-		list.addListener(new WeakInvalidationListener(listener = l -> {
-			Iterator<T> iterator = list.iterator();
-			if (!iterator.hasNext()) {
-				internal.set(null);
-				return;
-			}
-			T result = iterator.next();
-			if (iterator.hasNext())
-				getCurrentCache().discardWithException(new AmbiguousSelectionException(result.info() + " " + iterator.next().info()));
-			internal.set(result);
-		}));
-		return internal;
+	default ObservableValue<T> getFirstObservableValue(ObservableList<T> list) {
+		return Bindings.valueAt(list, 0);
 	}
 
 	@Override

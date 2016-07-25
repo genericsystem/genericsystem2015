@@ -13,6 +13,11 @@ public class HtmlH1<M extends Model> extends Tag<M> {
 		super(parent, "h1");
 	}
 
+	public HtmlH1(Tag<?> parent, String text) {
+		super(parent, "h1");
+		setText(text);
+	}
+
 	@Override
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);

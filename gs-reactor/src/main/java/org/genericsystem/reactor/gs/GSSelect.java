@@ -1,35 +1,37 @@
-package org.genericsystem.reactor.composite;
+package org.genericsystem.reactor.gs;
 
 import javafx.beans.binding.Bindings;
 
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlOption;
-import org.genericsystem.reactor.html.HtmlSelect;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
-public class CompositeSelect extends HtmlSelect implements CompositeTag {
+public class GSSelect extends GSTag {
 
-	public HtmlOption<GenericModel> optionElement;
+	public GSOption optionElement;
 
-	private CompositeSelect(Tag<?> parent) {
-		super(parent);
+	private GSSelect(GSTag parent) {
+		super(parent, "select");
 		options();
 		init();
 		createProperty(ReactorStatics.SELECTION);
 		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
-		storeProperty(ReactorStatics.SELECTION_STRING,
-				model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
-						getProperty(ReactorStatics.SELECTION, model)));
+		storeProperty(ReactorStatics.SELECTION_STRING, model -> Bindings.createStringBinding(
+				() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null), getProperty(ReactorStatics.SELECTION, model)));
+	}
+
+	@Override
+	protected SelectableHtmlDomNode createNode(String parentId) {
+		return new SelectableHtmlDomNode(parentId);
 	}
 
 	protected void options() {
-		optionElement = new HtmlOption<GenericModel>(this) {
+		optionElement = new GSOption(this) {
 			{
 				bindText(GenericModel::getString);
-				forEach(CompositeSelect.this);
+				forEach(GSSelect.this);
 			}
 		};
 	}
@@ -38,9 +40,9 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag {
 
 	}
 
-	public static class CompositeSelectWithEmptyEntry extends CompositeSelect {
+	public static class CompositeSelectWithEmptyEntry extends GSSelect {
 
-		public CompositeSelectWithEmptyEntry(Tag<?> parent) {
+		public CompositeSelectWithEmptyEntry(GSTag parent) {
 			super(parent);
 		}
 
@@ -56,18 +58,18 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag {
 		}
 	}
 
-	public static class ColorsSelect extends CompositeSelect {
+	public static class ColorsSelect extends GSSelect {
 
-		public ColorsSelect(Tag<?> parent) {
+		public ColorsSelect(GSTag parent) {
 			super(parent);
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
 			optionElement.bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
 		}
 	}
 
-	public static class InstanceCompositeSelect extends CompositeSelect implements CompositeTag {
+	public static class InstanceCompositeSelect extends GSSelect {
 
-		public InstanceCompositeSelect(Tag<?> parent) {
+		public InstanceCompositeSelect(GSTag parent) {
 			super(parent);
 		}
 
@@ -76,5 +78,4 @@ public class CompositeSelect extends HtmlSelect implements CompositeTag {
 			return ObservableListExtractor.SUBINSTANCES_OF_META;
 		}
 	}
-
 }

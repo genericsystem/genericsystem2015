@@ -1,11 +1,9 @@
 package org.genericsystem.todomvc;
 
-import org.genericsystem.common.AbstractRoot;
-import org.genericsystem.common.Statics;
-import org.genericsystem.kernel.Engine;
+import org.genericsystem.common.Root;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.appserver.ApplicationsDeploymentConfig;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
@@ -21,6 +19,7 @@ import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.html.HtmlSpan;
 import org.genericsystem.reactor.html.HtmlStrong;
 import org.genericsystem.reactor.html.HtmlUl;
+import org.genericsystem.todomvc.Todos.Completed;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -28,15 +27,14 @@ import io.vertx.core.http.ServerWebSocket;
  * @author Nicolas Feybesse
  *
  */
+@DependsOnModel({ Todos.class, Completed.class })
 public class TodoApp extends HtmlApp<TodoList> {
 
-	public static void main(String[] args) {
-		ApplicationsDeploymentConfig appsConfig = new ApplicationsDeploymentConfig(Statics.DEFAULT_HOST, args.length == 0 ? Statics.DEFAULT_PORT : Integer.parseInt(args[0]));
-		appsConfig.addApplication("/", TodoApp.class, TodoList.class, Engine.class, System.getenv("HOME") + "/genericsystem/todo/", Todos.class);
-		new ApplicationServer(appsConfig).start();
+	public static void main(String[] mainArgs) {
+		ApplicationServer.sartSimpleWebApp(mainArgs, TodoApp.class, TodoList.class, "/todo/");
 	}
 
-	public TodoApp(AbstractRoot engine, ServerWebSocket webSocket) {
+	public TodoApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		new HtmlDiv<TodoList>(this) {
 			{
@@ -67,12 +65,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 										new HtmlLi<Todo>(this) {
 											{
-												addPrefixBinding(modelContext -> {
-													if (modelContext.getProperty(this, "completed") == null)
-														storeProperty("completed", Todo::getCompleted);
-												});
+												addPrefixBinding(todo -> todo.storeProperty(this, "completed", todo.getCompleted()));
 												forEach(TodoList::getFiltered);
-
 												bindOptionalStyleClass("completed", "completed");
 												new HtmlDiv<Todo>(this) {
 													{
@@ -80,9 +74,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																initProperty(ReactorStatics.CHECKED, model -> model.getCompleted().getValue());
-																bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																bindOperation(ReactorStatics.CHECKED, (model, nva) -> model.getCompleted().setValue((Boolean) nva));
+																bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {
@@ -124,9 +117,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 												addStyleClass("filters");
 												new HtmlLi<TodoList>(this) {
 													{
-														storeProperty("selected", TodoList::getCompletedMode);
-														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass("selected", "allMode");
-
+														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass("selected", "allMode", TodoList::getAllMode);
 													}
 												};
 												new HtmlLi<TodoList>(this) {

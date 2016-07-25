@@ -18,7 +18,7 @@ function onMessageReceived(evt) {
 		var parent = document.getElementById(message.parentId);
 		if (parent == null) {
 			console.log("Unreached parent element id on add : "+message.nodeId)
-			parent = document.getElementById("root");
+			break;
 		}
 		elt = document.createElement(message.tagHtml);
 		elt.id = message.nodeId;
@@ -116,15 +116,7 @@ function onMessageReceived(evt) {
 		parent.insertBefore(elt, parent.children[message.nextId]);
 		break;
 	case 'R':
-		if (elt != null) {
-			elt.classList.add("removing");
-			//setTimeout(function(){ 
-				elt.parentNode.removeChild(elt);
-			//}, 500);
-		}
-		else {
-			console.log("Unreached removed element id : "+message.nodeId)
-		}
+		elt.parentNode.removeChild(elt);
 		break;
 	case 'UT':
 		if (elt.tagName == "INPUT") {
@@ -179,6 +171,15 @@ function selectIndex(name){
 	for (var i = 0; i < buttons.length; i++) {
 		if(buttons[i].checked){
 			return i;
+		}
+	}
+}
+
+window.onclick = function(event) {
+	var modal =  document.getElementsByClassName("modal")[0];
+	if (event.target == modal) {
+		if(modal.style.display != "none") {
+			document.getElementsByClassName("close")[0].click();
 		}
 	}
 }

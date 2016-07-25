@@ -24,15 +24,16 @@ import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 public class Model {
 
 	protected Model parent;
-	private final Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
-	private Map<Tag<?>, TransformationObservableList<?, Model>> subContextsMap = new HashMap<>();
-	private final Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
+	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
+	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
+	private Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
 		@Override
 		public Map<String, ObservableValue<Object>> get(Object key) {
 			Map<String, ObservableValue<Object>> properties = super.get(key);
 			if (properties == null) {
 				assert viewContextsMap.keySet().contains(key);
 				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
+					// TODO remove pervert auto instanciation of properties here
 					@Override
 					public ObservableValue<Object> get(Object key) {
 						ObservableValue<Object> property = super.get(key);
@@ -56,7 +57,7 @@ public class Model {
 	}
 
 	public <SUBMODEL extends Model> ObservableList<SUBMODEL> getSubContexts(Tag<SUBMODEL> tag) {
-		return (ObservableList<SUBMODEL>) subContextsMap.get(tag);
+		return (ObservableList<SUBMODEL>) subModelsMap.get(tag);
 	}
 
 	public boolean containsProperty(Tag<?> tag, String propertyName) {
@@ -89,12 +90,12 @@ public class Model {
 	}
 
 	public List<Model> subContexts() {
-		return subContextsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
+		return subModelsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
-	public <MODEL extends Model> void setSubContexts(Tag<?> element, TransformationObservableList<?, MODEL> subContexts) {
-		assert subContextsMap.get(element) == null;
-		subContextsMap.put(element, (TransformationObservableList) subContexts);
+	<SUBMODEL extends Model> void setSubContexts(Tag<?> element, ObservableList<SUBMODEL> subContexts) {
+		assert subModelsMap.get(element) == null;
+		subModelsMap.put(element, (ObservableList<Model>) subContexts);
 	}
 
 	public void register(ViewContext<?> viewContext) {
@@ -116,11 +117,33 @@ public class Model {
 		for (ViewContext<?> viewContext : viewContextsMap.values()) {
 			viewContext.destroy();
 		}
-		for (TransformationObservableList<?, Model> subModels : subContextsMap.values()) {
-			subModels.unbind();
+		for (ObservableList<Model> subModels : subModelsMap.values()) {
+			((TransformationObservableList<?, Model>) subModels).unbind();
 			for (Model subModel : subModels)
 				subModel.internalDestroy();
 		}
+		subModelsMap = new HashMap<>();
+		viewContextsMap = new LinkedHashMap<>();
+		propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
+			@Override
+			public Map<String, ObservableValue<Object>> get(Object key) {
+				Map<String, ObservableValue<Object>> properties = super.get(key);
+				if (properties == null) {
+					assert viewContextsMap.keySet().contains(key);
+					put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
+						// TODO remove pervert auto instanciation of properties here
+						@Override
+						public ObservableValue<Object> get(Object key) {
+							ObservableValue<Object> property = super.get(key);
+							if (property == null)
+								put((String) key, property = new SimpleObjectProperty<>());
+							return property;
+						};
+					});
+				}
+				return properties;
+			};
+		};
 	}
 
 	public ViewContext<?> getViewContext(Tag<?> element) {

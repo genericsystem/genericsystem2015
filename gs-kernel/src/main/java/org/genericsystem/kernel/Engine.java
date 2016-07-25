@@ -7,7 +7,7 @@ import java.util.List;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractCache.ContextEventListener;
-import org.genericsystem.common.AbstractRoot;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.GenericBuilder.SetSystemBuilder;
 import org.genericsystem.common.Statics;
@@ -34,7 +34,7 @@ public class Engine extends AbstractServer {
 	}
 
 	@Override
-	protected SystemCache buildSystemCache(AbstractRoot root) {
+	protected SystemCache buildSystemCache(Root root) {
 		return new SystemCache(root) {
 
 			@Override

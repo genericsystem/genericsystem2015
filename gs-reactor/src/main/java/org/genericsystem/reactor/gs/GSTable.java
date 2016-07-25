@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.flex;
+package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -17,10 +17,9 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
-import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.flex.FlexLinks.FlexLinkDisplayer;
-import org.genericsystem.reactor.flex.FlexLinks.FlexLinkTitleDisplayer;
-import org.genericsystem.reactor.flex.FlexLinks.HtmlGenericInputText;
+import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
+import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlH1;
@@ -33,15 +32,14 @@ import org.genericsystem.reactor.model.StringExtractor;
 /**
  * @author Nicolas Feybesse
  *
- * @param <M>
  */
-public class GenericDependenciesTable extends GenericCompositeSection {
+public class GSTable extends GSComposite {
 
-	public GenericDependenciesTable(Tag<?> parent) {
+	public GSTable(GSTag parent) {
 		super(parent, FlexDirection.COLUMN);
 	}
 
-	public GenericDependenciesTable(Tag<?> parent, FlexDirection flexDirection) {
+	public GSTable(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}
@@ -54,7 +52,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 	}
 
 	protected void titleHeader() {
-		new GenericSection(this, this.getReverseDirection()) {
+		new GSSection(this, this.getReverseDirection()) {
 			{
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
@@ -71,11 +69,11 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 	}
 
 	protected void columnsTitleSection() {
-		new GenericCompositeSection(this, this.getReverseDirection()) {
+		new GSComposite(this, this.getReverseDirection()) {
 
 			@Override
 			protected void header() {
-				new GenericSection(this, this.getDirection()) {
+				new GSSection(this, this.getDirection()) {
 					{
 						addStyle("flex", "1");
 						addStyle("color", "#ffffff");
@@ -95,7 +93,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void sections() {
-				new FlexLinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
+				new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
@@ -106,7 +104,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void footer() {
-				new GenericSection(this, this.getDirection()) {
+				new GSSection(this, this.getDirection()) {
 					{
 						if (this.getDirection().equals(FlexDirection.ROW)) {
 							addStyle("flex", "0");
@@ -125,20 +123,19 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 	}
 
 	protected void columnsInputSection() {
-		new GenericCompositeSection(this, this.getReverseDirection()) {
+		new GSComposite(this, this.getReverseDirection()) {
 
 			@Override
 			protected void header() {
-				new GenericSection(this, this.getReverseDirection()) {
+				new GSSection(this, this.getReverseDirection()) {
 					{
 						addStyle("flex", "1");
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlGenericInputText(this) {
+						new GSInputText(this) {
 							{
-								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
-										(gs, value, g) -> gs[0].setInstance(value));
+								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
 							}
 
 							@Override
@@ -155,12 +152,12 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void sections() {
-				new GenericSection(this, this.getDirection()) {
+				new GSSection(this, this.getDirection()) {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-						new GenericSection(this, this.getReverseDirection()) {
+						new GSSection(this, this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("color", "#ffffff");
@@ -169,17 +166,16 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
 								select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-								new GenericSection(this, this.getDirection()) {
+								new GSSection(this, this.getDirection()) {
 									{
 										addStyle("justify-content", "center");
 										addStyle("align-items", "center");
 										addStyle("width", "100%");
 										addStyle("height", "100%");
-										new HtmlGenericInputText(this) {
+										new GSInputText(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
-														(gs, value, g) -> g.setHolder(gs[1], value));
+												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}
 
 											@Override
@@ -194,15 +190,14 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION,
-														(gs, value, g) -> g.setHolder(gs[1], value));
+												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};
 									}
 								};
 							}
 						};
-						new GenericSection(this, this.getReverseDirection()) {
+						new GSSection(this, this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								addStyle("color", "#ffffff");
@@ -210,8 +205,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR,
-										gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 								new CompositeSelectWithEmptyEntry(this) {
 									{
 										addStyle("width", "100%");
@@ -241,7 +235,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void footer() {
-				new GenericSection(this, this.getDirection()) {
+				new GSSection(this, this.getDirection()) {
 					{
 						if (this.getDirection().equals(FlexDirection.ROW)) {
 							addStyle("flex", "0");
@@ -283,7 +277,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 	@Override
 	protected void sections() {
-		Tag<GenericModel> selectableTag = new GenericCompositeSection(this, this.getReverseDirection()) {
+		Tag<GenericModel> selectableTag = new GSComposite(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES);
@@ -291,16 +285,14 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void header() {
-				new GenericSection(this, this.getReverseDirection()) {
+				new GSSection(this, this.getReverseDirection()) {
 					{
 						addStyle("flex", "1");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
-						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put(
-								"background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? modelContext.getString()
-										.getValue() : "#bba5ff"));
+						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? modelContext.getString().getValue() : "#bba5ff"));
 						new HtmlHyperLink<GenericModel>(this) {
 							{
 								bindText(GenericModel::getString);
@@ -314,12 +306,12 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void sections() {
-				new GenericSection(this, this.getReverseDirection()) {
+				new GSSection(this, this.getReverseDirection()) {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new FlexLinkDisplayer(this, this.getReverseDirection()) {
+						new LinkDisplayer(this, this.getReverseDirection()) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
@@ -331,7 +323,7 @@ public class GenericDependenciesTable extends GenericCompositeSection {
 
 			@Override
 			protected void footer() {
-				new GenericSection(this, this.getDirection()) {
+				new GSSection(this, this.getDirection()) {
 					{
 						if (this.getDirection().equals(FlexDirection.ROW)) {
 							addStyle("flex", "0");
