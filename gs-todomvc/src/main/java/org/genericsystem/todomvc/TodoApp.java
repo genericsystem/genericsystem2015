@@ -74,6 +74,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
+																createProperty("completed");
 																bindAttribute(ReactorStatics.CHECKED, "completed");
 																bindAction((model, value) -> {
 																	if (value == null || value.isEmpty()) {

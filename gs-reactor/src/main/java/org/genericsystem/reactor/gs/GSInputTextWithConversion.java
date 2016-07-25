@@ -25,6 +25,7 @@ public class GSInputTextWithConversion extends GSInputText {
 		addStyle("width", "100%");
 		addStyle("height", "100%");
 
+		createProperty(ReactorStatics.CONVERTER);
 		initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
 		createProperty(ReactorStatics.VALUE);
 
@@ -43,7 +44,6 @@ public class GSInputTextWithConversion extends GSInputText {
 		bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
 
 		bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
-
 	}
 
 	private void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName) {

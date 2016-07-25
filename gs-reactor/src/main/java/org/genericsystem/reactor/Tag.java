@@ -219,7 +219,7 @@ public abstract class Tag<M extends Model> {
 			ObservableMap<String, String> map = getMap.apply(modelContext);
 			StringConverter<T> stringConverter = getStringConverter.apply(modelContext);
 			ChangeListener<T> listener = (o, old, newValue) -> map.put(name, stringConverter.toString(newValue));
-			Property<T> observable = getProperty(propertyName, modelContext) != null ? getProperty(propertyName, modelContext) : modelContext.getProperty(this, propertyName);
+			Property<T> observable = getProperty(propertyName, modelContext);
 			observable.addListener(listener);
 			map.addListener((MapChangeListener<String, String>) c -> {
 				if (!name.equals(c.getKey()))
@@ -243,7 +243,7 @@ public abstract class Tag<M extends Model> {
 
 	public void createProperty(String propertyName) {
 		addPrefixBinding(modelContext -> {
-			modelContext.getProperty(this, propertyName);
+			modelContext.createProperty(this, propertyName);
 		});
 	}
 
@@ -253,7 +253,7 @@ public abstract class Tag<M extends Model> {
 
 	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
 		addPrefixBinding(modelContext -> {
-			modelContext.getProperty(this, propertyName).setValue(getInitialValue.apply(modelContext));
+			getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext));
 		});
 	}
 

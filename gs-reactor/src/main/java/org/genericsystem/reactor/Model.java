@@ -32,16 +32,7 @@ public class Model {
 			Map<String, ObservableValue<Object>> properties = super.get(key);
 			if (properties == null) {
 				assert viewContextsMap.keySet().contains(key);
-				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
-					// TODO remove pervert auto instanciation of properties here
-					@Override
-					public ObservableValue<Object> get(Object key) {
-						ObservableValue<Object> property = super.get(key);
-						if (property == null)
-							put((String) key, property = new SimpleObjectProperty<>());
-						return property;
-					};
-				});
+				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>());
 			}
 			return properties;
 		};
@@ -62,6 +53,13 @@ public class Model {
 
 	public boolean containsProperty(Tag<?> tag, String propertyName) {
 		return propertiesMap.containsKey(tag) ? propertiesMap.get(tag).containsKey(propertyName) : false;
+	}
+
+	public void createProperty(Tag<?> tag, String propertyName) {
+		assert viewContextsMap.keySet().contains(tag);
+		if (propertiesMap.get(tag).containsKey(propertyName))
+			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
+		propertiesMap.get(tag).put(propertyName, new SimpleObjectProperty<>());
 	}
 
 	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String propertyName) {
@@ -130,16 +128,7 @@ public class Model {
 				Map<String, ObservableValue<Object>> properties = super.get(key);
 				if (properties == null) {
 					assert viewContextsMap.keySet().contains(key);
-					put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
-						// TODO remove pervert auto instanciation of properties here
-						@Override
-						public ObservableValue<Object> get(Object key) {
-							ObservableValue<Object> property = super.get(key);
-							if (property == null)
-								put((String) key, property = new SimpleObjectProperty<>());
-							return property;
-						};
-					});
+					put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>());
 				}
 				return properties;
 			};

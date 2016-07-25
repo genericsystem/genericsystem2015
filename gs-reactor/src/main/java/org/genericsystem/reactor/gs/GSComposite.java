@@ -121,9 +121,9 @@ public class GSComposite extends GSSection {
 			createProperty(ReactorStatics.SELECTION);
 			storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 			bindBiDirectionalSelection(flexSubElement);
-			storeProperty(ReactorStatics.SELECTION_STRING, model -> Bindings.createStringBinding(
-					() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
-					getProperty(ReactorStatics.SELECTION, model)));
+			storeProperty(ReactorStatics.SELECTION_STRING,
+					model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
+							getProperty(ReactorStatics.SELECTION, model)));
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
 			addStyle("padding", "4px");
 		}
