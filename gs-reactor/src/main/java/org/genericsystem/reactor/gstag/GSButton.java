@@ -1,17 +1,17 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gstag;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.model.GenericModel;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlButton<M extends Model> extends Tag<M> {
+public class GSButton extends GSTag {
 
-	public HtmlButton(Tag<?> parent) {
+	public GSButton(GSTag parent) {
 		super(parent, "button");
 	}
 
@@ -20,7 +20,7 @@ public class HtmlButton<M extends Model> extends Tag<M> {
 		return new ActionHtmlNode(parentId);
 	}
 
-	public void bindAction(Consumer<M> consumer) {
+	public void bindAction(Consumer<GenericModel> consumer) {
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}
 }

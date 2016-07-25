@@ -5,7 +5,7 @@ import org.genericsystem.reactor.gs.GSLinks.LinkAdder;
 import org.genericsystem.reactor.gs.GSLinks.LinkEditor;
 import org.genericsystem.reactor.gs.GSLinks.LinkEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
-import org.genericsystem.reactor.html.HtmlH1;
+import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -37,7 +37,7 @@ public class GSEditor extends GSComposite {
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
 				addStyle("align-items", "center");
-				new HtmlH1<GenericModel>(this) {
+				new GSH1(this) {
 					{
 						bindText(GenericModel::getString);
 					}

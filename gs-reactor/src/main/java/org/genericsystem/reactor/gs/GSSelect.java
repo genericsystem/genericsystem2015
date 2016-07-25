@@ -1,11 +1,11 @@
 package org.genericsystem.reactor.gs;
 
-import javafx.beans.binding.Bindings;
-
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.html.HtmlOption;
+import org.genericsystem.reactor.gstag.GSOption;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+
+import javafx.beans.binding.Bindings;
 
 public class GSSelect extends GSTag {
 
@@ -48,7 +48,7 @@ public class GSSelect extends GSTag {
 
 		@Override
 		protected void options() {
-			new HtmlOption<GenericModel>(this);
+			new GSOption(this);
 			super.options();
 		}
 

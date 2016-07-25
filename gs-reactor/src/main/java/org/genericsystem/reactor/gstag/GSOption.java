@@ -1,6 +1,6 @@
-package org.genericsystem.reactor.gs;
+package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.Tag.HtmlDomNode;
+import org.genericsystem.reactor.gs.GSTag;
 
 public class GSOption extends GSTag {
 

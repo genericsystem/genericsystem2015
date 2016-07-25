@@ -1,12 +1,7 @@
 package org.genericsystem.reactor.gs;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.io.Serializable;
 import java.util.List;
-
-import javafx.beans.property.Property;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -17,12 +12,16 @@ import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
-import org.genericsystem.reactor.html.HtmlButton;
-import org.genericsystem.reactor.html.HtmlCheckBox;
-import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.GSCheckBox;
+import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import javafx.beans.property.Property;
 
 public class GSLinks {
 	static final Logger log = LoggerFactory.getLogger(Tag.class);
@@ -50,13 +49,13 @@ public class GSLinks {
 							addStyle("align-items", "center");
 							addStyle("width", "100%");
 							addStyle("height", "100%");
-							new HtmlLabel<GenericModel>(this) {
+							new GSLabel(this) {
 								{
 									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 									bindText(GenericModel::getString);
 								}
 							};
-							new HtmlCheckBox<GenericModel>(this) {
+							new GSCheckBox(this) {
 								{
 									addAttribute("disabled", "disabled");
 									initProperty(ReactorStatics.CHECKED, model -> {
@@ -77,7 +76,7 @@ public class GSLinks {
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
 					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
-					new HtmlLabel<GenericModel>(this) {
+					new GSLabel(this) {
 						{
 							bindText(GenericModel::getString);
 						}
@@ -167,7 +166,7 @@ public class GSLinks {
 					initComboBox(this);
 				}
 			};
-			new HtmlLabel<GenericModel>(this) {
+			new GSLabel(this) {
 				{
 					select(gs -> !gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
 					bindText(GenericModel::getString);
@@ -197,15 +196,15 @@ public class GSLinks {
 			});
 		}
 
-		public void inputActionButton(Tag<GenericModel> tag, GSInputText input) {
+		public void inputActionButton(GSTag tag, GSInputText input) {
 
 		}
 
-		public void checkBoxActionButton(Tag<GenericModel> tag, HtmlCheckBox<GenericModel> checkbox) {
+		public void checkBoxActionButton(GSTag tag, GSCheckBox checkbox) {
 
 		}
 
-		public void linkActionButton(Tag<GenericModel> tag) {
+		public void linkActionButton(GSTag tag) {
 
 		}
 
@@ -247,7 +246,7 @@ public class GSLinks {
 											addStyle("height", "100%");
 											addStyle("justify-content", "center");
 											addStyle("align-items", "center");
-											checkbox = new HtmlCheckBox<GenericModel>(this) {
+											checkbox = new GSCheckBox(this) {
 												{
 													bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 												}
@@ -257,9 +256,9 @@ public class GSLinks {
 									insertButton(this);
 								}
 
-								private HtmlCheckBox<GenericModel> checkbox;
+								private GSCheckBox checkbox;
 
-								public void insertButton(Tag<GenericModel> tag) {
+								public void insertButton(GSTag tag) {
 									checkBoxActionButton(tag, checkbox);
 								}
 							};
@@ -313,8 +312,8 @@ public class GSLinks {
 		}
 
 		@Override
-		public void inputActionButton(Tag<GenericModel> tag, GSInputText input) {
-			new HtmlButton<GenericModel>(tag) {
+		public void inputActionButton(GSTag tag, GSInputText input) {
+			new GSButton(tag) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
@@ -325,12 +324,12 @@ public class GSLinks {
 		}
 
 		@Override
-		public void checkBoxActionButton(Tag<GenericModel> tag, HtmlCheckBox<GenericModel> checkbox) {
+		public void checkBoxActionButton(GSTag tag, GSCheckBox checkbox) {
 			inputActionButton(tag, null);
 		}
 
 		@Override
-		public void linkActionButton(Tag<GenericModel> tag) {
+		public void linkActionButton(GSTag tag) {
 			inputActionButton(tag, null);
 		}
 	}
@@ -363,13 +362,13 @@ public class GSLinks {
 		}
 
 		@Override
-		public void inputActionButton(Tag<GenericModel> tag, GSInputText input) {
-			new HtmlButton<GenericModel>(tag) {
+		public void inputActionButton(GSTag tag, GSInputText input) {
+			new GSButton(tag) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
 					setText("+");
-					bindPostfixAction(model -> {
+					bindAction(model -> {
 						// TODO: Add a binding somewhere so the value is correct (untested but probably same problem as for checkboxes).
 						Property<Serializable> observable = input.getProperty(ReactorStatics.VALUE, model);
 						model.getGenerics()[4].addHolder(model.getGenerics()[3], observable.getValue());
@@ -379,13 +378,13 @@ public class GSLinks {
 		}
 
 		@Override
-		public void checkBoxActionButton(Tag<GenericModel> tag, HtmlCheckBox<GenericModel> checkbox) {
-			new HtmlButton<GenericModel>(tag) {
+		public void checkBoxActionButton(GSTag tag, GSCheckBox checkbox) {
+			new GSButton(tag) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
 					setText("+");
-					bindPostfixAction(model -> {
+					bindAction(model -> {
 						// TODO: Add a binding somewhere so the value is correct (it’s always false currently).
 						Property<Serializable> observable = checkbox.getProperty(ReactorStatics.VALUE, model);
 						model.getGenerics()[4].addHolder(model.getGenerics()[3], observable.getValue());
@@ -395,8 +394,8 @@ public class GSLinks {
 		}
 
 		@Override
-		public void linkActionButton(Tag<GenericModel> tag) {
-			new HtmlButton<GenericModel>(tag) {
+		public void linkActionButton(GSTag tag) {
+			new GSButton(tag) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
