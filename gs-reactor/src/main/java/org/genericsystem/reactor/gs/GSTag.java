@@ -21,9 +21,9 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
-		if (metaBinding != null)
+		if (getMetaBinding() != null)
 			throw new IllegalStateException("MetaBinding already defined.");
-		metaBinding = (childElement, viewContext) -> {
+		setMetaBinding((childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
 			setSubModels(model, childElement, new TransformationObservableList<Generic, GenericModel>(generics, (index, generic) -> {
@@ -37,7 +37,7 @@ public abstract class GSTag extends Tag<GenericModel> {
 					// TODO unregister viewContext before removing in list ?
 					m.destroy();
 				}));
-		};
+		});
 	}
 
 	public void select_(Function<GenericModel, ObservableValue<GenericModel>> applyOnModel) {
@@ -45,9 +45,7 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void select_(StringExtractor stringExtractor, Function<GenericModel, ObservableValue<GenericModel>> applyOnModelContext) {
-		if (metaBinding != null)
-			throw new IllegalStateException("MetaBinding already defined.");
-		metaBinding = (childElement, viewContext) -> {
+		setMetaBinding((childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableValue<GenericModel> observableValue = applyOnModelContext.apply(model);
 			ObservableList<GenericModel> subModels = FXCollections.observableArrayList();
@@ -66,7 +64,7 @@ public abstract class GSTag extends Tag<GenericModel> {
 					viewContext.createViewContextChild(index, childModel, childElement);
 					return childModel;
 				}, Model::destroy));
-		};
+		});
 	}
 
 	protected void forEach(GSTag parentCompositeElement) {

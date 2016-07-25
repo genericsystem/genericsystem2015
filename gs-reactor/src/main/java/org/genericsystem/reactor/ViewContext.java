@@ -28,18 +28,15 @@ public class ViewContext<M extends Model> {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.preFixedBindings)
+		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag<?> childElement : element.getChildren()) {
-			if (childElement.metaBinding != null)
-				childElement.metaBinding.accept((Tag) childElement, this);
+		for (Tag<?> childElement : element.getChildren())
+			if (childElement.getMetaBinding() != null)
+				childElement.getMetaBinding().accept(childElement, this);
 			else
 				createViewContextChild(null, modelContext, childElement);
-		}
-		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.postFixedBindings) {
+		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.getPostFixedBindings())
 			binding.accept(modelContext, getNode());
-		}
-
 	}
 
 	@SuppressWarnings("unchecked")
