@@ -28,25 +28,19 @@ import org.genericsystem.reactor.model.StringExtractor;
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
 public class CarColorApp extends GSApp {
-	private final String MAIN_COLOR = "#3393ff";
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
-	public static Class<?>[] getModelClasses(Class<?> applicationClass, Root engine) {
-		DependsOnModel dependOn = applicationClass.getAnnotation(DependsOnModel.class);
-		return dependOn != null ? dependOn.value() : new Class[] {};
-	}
-
 	public CarColorApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		createProperty(ReactorStatics.SELECTION);
-		addStyle("background-color", MAIN_COLOR);
+		addStyle("background-color", "#3393ff");
 
-		new GenericH1Section(this, FlexDirection.ROW, "Generic System Reactor Live Demo").addStyle("justify-content", "center");
+		new GenericH1Section(this, "Generic System Reactor Live Demo");
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GSModal(this, FlexDirection.COLUMN, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
+		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 		new GSMonitor(this);
 	}

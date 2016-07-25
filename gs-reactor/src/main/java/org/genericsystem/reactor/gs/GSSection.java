@@ -57,8 +57,8 @@ public class GSSection extends GSTag {
 	}
 
 	public static class GenericH1Section extends GenericRowWrapper {
-		public GenericH1Section(GSTag parent, FlexDirection direction, String text) {
-			super(parent, direction, HtmlH1<GenericModel>::new, text);
+		public GenericH1Section(GSTag parent, String text) {
+			super(parent, FlexDirection.ROW, HtmlH1<GenericModel>::new, text);
 		}
 	}
 }

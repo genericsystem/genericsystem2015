@@ -42,8 +42,6 @@ import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import org.genericsystem.reactor.model.GenericModel;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -138,7 +136,7 @@ public abstract class Tag<M extends Model> {
 		setMetaBinding((childElement, viewContext) -> {
 			MODEL model = viewContext.getModelContext();
 			ObservableList<M> models = applyOnModel.apply(model);
-			viewContext.getModelContext().setSubContexts(childElement, new TransformationObservableList<M, MODEL>(models, (index, subModel) -> {
+			model.setSubContexts(childElement, new TransformationObservableList<M, MODEL>(models, (index, subModel) -> {
 				subModel.parent = model;
 				viewContext.createViewContextChild(index, subModel, childElement);
 				return (MODEL) subModel;
@@ -175,6 +173,7 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
 	}
 
+	// The form tells here :
 	protected void bindBiDirectionalSelection(Tag<GenericModel> subElement) {
 		addPostfixBinding(modelContext -> {
 			ObservableList<GenericModel> subContexts = modelContext.getSubContexts(subElement);

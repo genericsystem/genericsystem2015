@@ -18,6 +18,10 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 public class GSModal extends GSSection {
 
+	public GSModal(GSTag parent, Consumer<GSTag> contentTagConsumer) {
+		this(parent, FlexDirection.COLUMN, contentTagConsumer);
+	}
+
 	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
 		super(parent, direction);
 		addStyleClass("modal");
