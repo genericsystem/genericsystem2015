@@ -1,7 +1,5 @@
 package org.genericsystem.todomvc;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -22,6 +20,8 @@ import org.genericsystem.reactor.html.HtmlSpan;
 import org.genericsystem.reactor.html.HtmlStrong;
 import org.genericsystem.reactor.html.HtmlUl;
 import org.genericsystem.todomvc.Todos.Completed;
+
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
@@ -74,7 +74,16 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindAttribute(ReactorStatics.CHECKED, "completed");
+																bindAction((model, value) -> {
+																	if (value == null || value.isEmpty()) {
+																		model.setCompletion(false);
+																	} else {
+																		model.setCompletion(true);
+																	}
+
+																});
+																// bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
