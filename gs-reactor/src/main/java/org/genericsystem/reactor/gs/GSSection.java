@@ -52,6 +52,7 @@ public class GSSection extends GSTag {
 
 		public <T> GenericRowWrapper(GSTag parent, FlexDirection direction, BiConsumer<Tag<?>, T> consumer, T arg) {
 			super(parent, direction);
+			addStyle("justify-content", "center");
 			consumer.accept(this, arg);
 		}
 	}
