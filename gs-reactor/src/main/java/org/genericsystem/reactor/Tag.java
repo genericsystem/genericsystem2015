@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -533,7 +532,7 @@ public abstract class Tag<M extends Model> {
 	public class InputTextHtmlDomNode extends HtmlDomNode {
 
 		private final Property<String> inputString = new SimpleStringProperty();
-		private final ObjectProperty<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
+		private final Property<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
 
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
@@ -559,14 +558,14 @@ public abstract class Tag<M extends Model> {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
-				getEnterProperty().get().accept(new Object());
+				getEnterProperty().getValue().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
 				getTextProperty().setValue(json.getString(TEXT_CONTENT));
 				getAttributes().put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
 			}
 		}
 
-		public ObjectProperty<Consumer<Object>> getEnterProperty() {
+		public Property<Consumer<Object>> getEnterProperty() {
 			return enterProperty;
 		}
 
