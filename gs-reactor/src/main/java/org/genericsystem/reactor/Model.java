@@ -121,29 +121,29 @@ public class Model {
 			((TransformationObservableList<?, Model>) subModels).unbind();
 			for (Model subModel : subModels)
 				subModel.internalDestroy();
-			subModelsMap = new HashMap<>();
-			viewContextsMap = new LinkedHashMap<>();
-			propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
-				@Override
-				public Map<String, ObservableValue<Object>> get(Object key) {
-					Map<String, ObservableValue<Object>> properties = super.get(key);
-					if (properties == null) {
-						assert viewContextsMap.keySet().contains(key);
-						put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
-							// TODO remove pervert auto instanciation of properties here
-							@Override
-							public ObservableValue<Object> get(Object key) {
-								ObservableValue<Object> property = super.get(key);
-								if (property == null)
-									put((String) key, property = new SimpleObjectProperty<>());
-								return property;
-							};
-						});
-					}
-					return properties;
-				};
-			};
 		}
+		subModelsMap = new HashMap<>();
+		viewContextsMap = new LinkedHashMap<>();
+		propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
+			@Override
+			public Map<String, ObservableValue<Object>> get(Object key) {
+				Map<String, ObservableValue<Object>> properties = super.get(key);
+				if (properties == null) {
+					assert viewContextsMap.keySet().contains(key);
+					put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>() {
+						// TODO remove pervert auto instanciation of properties here
+						@Override
+						public ObservableValue<Object> get(Object key) {
+							ObservableValue<Object> property = super.get(key);
+							if (property == null)
+								put((String) key, property = new SimpleObjectProperty<>());
+							return property;
+						};
+					});
+				}
+				return properties;
+			};
+		};
 	}
 
 	public ViewContext<?> getViewContext(Tag<?> element) {
