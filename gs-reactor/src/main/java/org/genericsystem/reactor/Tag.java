@@ -96,12 +96,6 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
 
-	@Deprecated
-	// TODO KK not a postfix binding !
-	protected <NODE extends HtmlDomNode> void addPostfixActionBinding(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<M> applyOnModel) {
-		postFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
-	}
-
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String propertyName) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<Boolean> optional = modelContext.getObservableValue(this, propertyName);
@@ -123,6 +117,8 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
+		if (metaBinding != null)
+			throw new IllegalStateException("MetaBinding already defined.");
 		metaBinding = (childElement, viewContext) -> {
 			MODEL model = viewContext.getModelContext();
 			ObservableList<M> models = applyOnModel.apply(model);

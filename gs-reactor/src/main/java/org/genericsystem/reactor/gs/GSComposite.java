@@ -1,13 +1,12 @@
 package org.genericsystem.reactor.gs;
 
-import javafx.beans.binding.Bindings;
-
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.html.HtmlLabel;
-import org.genericsystem.reactor.html.HtmlRadio;
+import org.genericsystem.reactor.gstag.GSH1;
+import org.genericsystem.reactor.gstag.GSLabel;
+import org.genericsystem.reactor.gstag.GSRadio;
 import org.genericsystem.reactor.model.GenericModel;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -34,7 +33,7 @@ public class GSComposite extends GSSection {
 		new GSSection(this, GSComposite.this.getReverseDirection()) {
 			{
 				forEach(GSComposite.this);
-				new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
+				new GSLabel(this).bindText(GenericModel::getString);
 			}
 		};
 	}
@@ -58,7 +57,7 @@ public class GSComposite extends GSSection {
 				{
 					addStyle("justify-content", "center");
 					addStyle("background-color", "#ffa500");
-					new HtmlH1<GenericModel>(this) {
+					new GSH1(this) {
 						{
 							bindText(GenericModel::getString);
 						}
@@ -84,7 +83,7 @@ public class GSComposite extends GSSection {
 				{
 					bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
 					forEach(ColorTitleCompositeFlexElement.this);
-					new HtmlLabel<GenericModel>(this).bindText(GenericModel::getString);
+					new GSLabel(this).bindText(GenericModel::getString);
 				}
 			};
 		}
@@ -101,8 +100,8 @@ public class GSComposite extends GSSection {
 			new GSSection(this, CompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(CompositeRadio.this);
-					new HtmlRadio<GenericModel>(this);
-					new HtmlLabel<GenericModel>(this) {
+					new GSRadio(this);
+					new GSLabel(this) {
 						{
 							bindText(GenericModel::getString);
 						}
@@ -115,7 +114,7 @@ public class GSComposite extends GSSection {
 
 	public static class ColorCompositeRadio extends GSComposite {
 
-		private Tag<GenericModel> flexSubElement;
+		private GSTag flexSubElement;
 
 		public ColorCompositeRadio(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -140,8 +139,8 @@ public class GSComposite extends GSSection {
 				{
 					forEach(ColorCompositeRadio.this);
 					bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
-					new HtmlRadio<GenericModel>(this);
-					new HtmlLabel<GenericModel>(this) {
+					new GSRadio(this);
+					new GSLabel(this) {
 						{
 							bindText(GenericModel::getString);
 						}

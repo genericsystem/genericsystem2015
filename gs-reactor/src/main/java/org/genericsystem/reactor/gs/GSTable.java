@@ -3,11 +3,6 @@ package org.genericsystem.reactor.gs;
 import java.io.Serializable;
 import java.util.Map;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.util.StringConverter;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -20,14 +15,19 @@ import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.html.HtmlButton;
-import org.genericsystem.reactor.html.HtmlCheckBox;
-import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.html.HtmlHyperLink;
-import org.genericsystem.reactor.html.HtmlLabel;
+import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.GSCheckBox;
+import org.genericsystem.reactor.gstag.GSH1;
+import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.util.StringConverter;
 
 /**
  * @author Nicolas Feybesse
@@ -59,7 +59,7 @@ public class GSTable extends GSComposite {
 				addStyle("margin-bottom", "1px");
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
-				new HtmlH1<GenericModel>(this) {
+				new GSH1(this) {
 					{
 						bindText(GenericModel::getString);
 					}
@@ -81,7 +81,7 @@ public class GSTable extends GSComposite {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("justify-content", "center");
-						new HtmlLabel<GenericModel>(this) {
+						new GSLabel(this) {
 							{
 								bindText(GenericModel::getString);
 							}
@@ -133,7 +133,7 @@ public class GSTable extends GSComposite {
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new GSInputText(this) {
+						new GSInputTextWithConversion(this) {
 							{
 								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
 							}
@@ -172,7 +172,7 @@ public class GSTable extends GSComposite {
 										addStyle("align-items", "center");
 										addStyle("width", "100%");
 										addStyle("height", "100%");
-										new GSInputText(this) {
+										new GSInputTextWithConversion(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
@@ -186,7 +186,7 @@ public class GSTable extends GSComposite {
 												return ApiStatics.STRING_CONVERTERS.get(clazz);
 											}
 										};
-										new HtmlCheckBox<GenericModel>(this) {
+										new GSCheckBox(this) {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
@@ -246,7 +246,7 @@ public class GSTable extends GSComposite {
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlButton<GenericModel>(this) {
+						new GSButton(this) {
 							{
 								// storeProperty(ReactorStatics.DISABLED, model -> {
 								// ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
@@ -293,7 +293,7 @@ public class GSTable extends GSComposite {
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? modelContext.getString().getValue() : "#bba5ff"));
-						new HtmlHyperLink<GenericModel>(this) {
+						new GSHyperLink(this) {
 							{
 								bindText(GenericModel::getString);
 								bindAction(model -> getProperty(ReactorStatics.SELECTION, model).setValue(model));
@@ -334,7 +334,7 @@ public class GSTable extends GSComposite {
 						addStyle("background-color", "#dda5e2");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlButton<GenericModel>(this) {
+						new GSButton(this) {
 							{
 								setText("Remove");
 								bindAction(GenericModel::remove);

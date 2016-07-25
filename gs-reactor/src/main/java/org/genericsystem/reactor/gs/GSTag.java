@@ -21,6 +21,8 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
+		if (metaBinding != null)
+			throw new IllegalStateException("MetaBinding already defined.");
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
@@ -43,6 +45,8 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void select_(StringExtractor stringExtractor, Function<GenericModel, ObservableValue<GenericModel>> applyOnModelContext) {
+		if (metaBinding != null)
+			throw new IllegalStateException("MetaBinding already defined.");
 		metaBinding = (childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableValue<GenericModel> observableValue = applyOnModelContext.apply(model);
