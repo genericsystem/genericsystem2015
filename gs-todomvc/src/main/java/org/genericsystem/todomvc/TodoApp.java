@@ -68,11 +68,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 										new HtmlLi<Todo>(this) {
 											{
 												addPrefixBinding(modelContext -> {
-													System.out.println("Model = " + modelContext);
-													if (modelContext.getProperty(this, "completed") == null) {
+													if (modelContext.getProperty(this, "completed") == null)
 														storeProperty("completed", Todo::getCompleted);
-													}
-													;
 												});
 												forEach(TodoList::getFiltered);
 
