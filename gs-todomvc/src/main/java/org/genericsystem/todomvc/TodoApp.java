@@ -65,7 +65,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 										new HtmlLi<Todo>(this) {
 											{
-												addPrefixBinding(todo -> todo.storeProperty(this, "completed", todo.getCompleted()));
+												storeProperty("completed", Todo::getCompleted);
 												forEach(TodoList::getFiltered);
 												bindOptionalStyleClass("completed", "completed");
 												new HtmlDiv<Todo>(this) {
@@ -74,7 +74,16 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindAttribute(ReactorStatics.CHECKED, "completed");
+																bindAction((model, value) -> {
+																	if (value == null || value.isEmpty()) {
+																		model.setCompletion(false);
+																	} else {
+																		model.setCompletion(true);
+																	}
+
+																});
+																// bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
