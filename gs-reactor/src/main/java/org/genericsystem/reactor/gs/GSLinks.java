@@ -196,7 +196,7 @@ public class GSLinks {
 			});
 		}
 
-		public void inputActionButton(GSTag tag, GSInputText input) {
+		public void inputActionButton(GSTag tag, GSInputTextWithConversion input) {
 
 		}
 
@@ -225,7 +225,7 @@ public class GSLinks {
 									addStyle("flex", "1");
 									addStyle("width", "100%");
 									addStyle("height", "100%");
-									GSInputText input = new GSInputText(this) {
+									GSInputTextWithConversion input = new GSInputTextWithConversion(this) {
 										{
 											initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
 											initInputText(this);
@@ -312,7 +312,7 @@ public class GSLinks {
 		}
 
 		@Override
-		public void inputActionButton(GSTag tag, GSInputText input) {
+		public void inputActionButton(GSTag tag, GSInputTextWithConversion input) {
 			new GSButton(tag) {
 				{
 					addStyle("justify-content", "center");
@@ -362,7 +362,7 @@ public class GSLinks {
 		}
 
 		@Override
-		public void inputActionButton(GSTag tag, GSInputText input) {
+		public void inputActionButton(GSTag tag, GSInputTextWithConversion input) {
 			new GSButton(tag) {
 				{
 					addStyle("justify-content", "center");

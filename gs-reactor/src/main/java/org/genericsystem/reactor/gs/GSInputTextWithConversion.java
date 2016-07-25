@@ -1,27 +1,26 @@
 package org.genericsystem.reactor.gs;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.io.Serializable;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.gstag.GSInputText;
+import org.genericsystem.reactor.model.GenericModel;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.model.GenericModel;
+public class GSInputTextWithConversion extends GSInputText {
 
-public class GSInputText extends GSTag {
+	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
 
-	static final Logger log = LoggerFactory.getLogger(GSInputText.class);
-
-	public GSInputText(GSTag parent) {
-		super(parent, "input");
+	public GSInputTextWithConversion(GSTag parent) {
+		super(parent);
 
 		addStyle("width", "100%");
 		addStyle("height", "100%");
@@ -45,15 +44,6 @@ public class GSInputText extends GSTag {
 
 		bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
 
-	}
-
-	@Override
-	protected InputTextHtmlDomNode createNode(String parentId) {
-		return new InputTextHtmlDomNode(parentId);
-	}
-
-	public void bindAction(Consumer<GenericModel> applyOnModel) {
-		addActionBinding(InputTextHtmlDomNode::getEnterProperty, applyOnModel);
 	}
 
 	private void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName) {

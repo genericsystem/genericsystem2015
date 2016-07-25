@@ -133,7 +133,7 @@ public class GSTable extends GSComposite {
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new GSInputText(this) {
+						new GSInputTextWithConversion(this) {
 							{
 								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
 							}
@@ -172,7 +172,7 @@ public class GSTable extends GSComposite {
 										addStyle("align-items", "center");
 										addStyle("width", "100%");
 										addStyle("height", "100%");
-										new GSInputText(this) {
+										new GSInputTextWithConversion(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
