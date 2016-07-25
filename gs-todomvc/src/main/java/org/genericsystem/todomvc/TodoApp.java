@@ -65,7 +65,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 										new HtmlLi<Todo>(this) {
 											{
-												addPrefixBinding(todo -> todo.storeProperty(this, "completed", todo.getCompleted()));
+												storeProperty("completed", Todo::getCompleted);
 												forEach(TodoList::getFiltered);
 												bindOptionalStyleClass("completed", "completed");
 												new HtmlDiv<Todo>(this) {
