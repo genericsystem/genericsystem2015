@@ -7,16 +7,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.genericsystem.common.Root;
 import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
+import org.genericsystem.common.Root;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.generic.GSApp;
+import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.html.HtmlApp;
-import org.genericsystem.reactor.model.EngineModel;
+import org.genericsystem.reactor.model.RootModel;
 
 /**
  * @author Nicolas Feybesse
@@ -144,7 +144,7 @@ public class WebAppsConfig extends JsonObject {
 	public static class SimpleWebAppConfig extends WebAppsConfig {
 		public SimpleWebAppConfig(String[] mainArgs, Class<? extends GSApp> htmlAppClass, String homePersistentDirectoryPath) {
 			super(mainArgs);
-			addApplication("/", htmlAppClass, EngineModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
+			addApplication("/", htmlAppClass, RootModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
 		}
 
 		public SimpleWebAppConfig(String[] mainArgs, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {

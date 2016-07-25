@@ -7,19 +7,18 @@ import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
-import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.generic.FlexDirection;
-import org.genericsystem.reactor.generic.GSApp;
-import org.genericsystem.reactor.generic.GSTable;
-import org.genericsystem.reactor.generic.GSEditor;
-import org.genericsystem.reactor.generic.GSMonitor;
-import org.genericsystem.reactor.generic.GSSection.GenericH1Section;
+import org.genericsystem.reactor.gs.FlexDirection;
+import org.genericsystem.reactor.gs.GSApp;
+import org.genericsystem.reactor.gs.GSEditor;
+import org.genericsystem.reactor.gs.GSMonitor;
+import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.StringExtractor;
 
 /**

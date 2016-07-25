@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.Tag.HtmlDomNode;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.html.HtmlApp;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class PersistentApplication {
 		return engine;
 	}
 
-	public Class<? extends HtmlApp<?>> getApplicationClass() {
+	public Class<? extends App<?>> getApplicationClass() {
 		return htmlAppClass;
 	}
 
@@ -56,10 +56,16 @@ public class PersistentApplication {
 		engine.close();
 	}
 
+	public static interface App<M extends Model> {
+		App<M> init(M rootModelContext, String rootId);
+
+		HtmlDomNode getNodeById(String string);
+	}
+
 	@SuppressWarnings("unchecked")
-	public Tag<?> newHtmlApp(ServerWebSocket socket) {
+	public App<?> buildApp(ServerWebSocket socket) {
 		try {
-			return ((HtmlApp<Model>) getApplicationClass().getConstructor(Root.class, ServerWebSocket.class).newInstance(getEngine(), socket)).init(modelClass.getConstructor(Root.class).newInstance(engine), rootId);
+			return ((App<Model>) getApplicationClass().getConstructor(Root.class, ServerWebSocket.class).newInstance(getEngine(), socket)).init(modelClass.getConstructor(Root.class).newInstance(engine), rootId);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}

@@ -17,15 +17,15 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.composite.CompositeSelect.ColorsSelect;
-import org.genericsystem.reactor.generic.FlexDirection;
-import org.genericsystem.reactor.generic.GSApp;
-import org.genericsystem.reactor.generic.GSTable;
-import org.genericsystem.reactor.generic.GSEditor;
-import org.genericsystem.reactor.generic.GSMonitor;
-import org.genericsystem.reactor.generic.GSComposite.ColorCompositeRadio;
-import org.genericsystem.reactor.generic.GSComposite.ColorTitleCompositeFlexElement;
-import org.genericsystem.reactor.generic.GSSection.GenericH1Section;
+import org.genericsystem.reactor.gs.FlexDirection;
+import org.genericsystem.reactor.gs.GSApp;
+import org.genericsystem.reactor.gs.GSEditor;
+import org.genericsystem.reactor.gs.GSMonitor;
+import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.gs.GSComposite.ColorCompositeRadio;
+import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.gs.GSSection.GenericH1Section;
+import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.model.StringExtractor;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })

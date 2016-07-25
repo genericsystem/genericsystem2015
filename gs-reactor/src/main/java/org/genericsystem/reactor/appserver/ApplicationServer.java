@@ -29,8 +29,9 @@ import org.genericsystem.common.Root;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.HtmlDomNode;
+import org.genericsystem.reactor.appserver.PersistentApplication.App;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
-import org.genericsystem.reactor.generic.GSApp;
+import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.html.HtmlApp;
 
 /**
@@ -94,12 +95,12 @@ public class ApplicationServer extends AbstractBackEnd {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			AbstractCache cache = application.getEngine().newCache();
-			Tag app = cache.safeSupply(() -> application.newHtmlApp(socket));
+			App app = cache.safeSupply(() -> application.buildApp(socket));
 			return buffer -> {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = ((HtmlApp) app).getNodeById(json.getString(Tag.ID));
+				HtmlDomNode node = app.getNodeById(json.getString(Tag.ID));
 				if (node != null)
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};

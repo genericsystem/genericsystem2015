@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.generic;
+package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -17,10 +17,9 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
-import org.genericsystem.reactor.composite.CompositeSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.generic.GSLinks.HtmlGenericInputText;
-import org.genericsystem.reactor.generic.GSLinks.LinkDisplayer;
-import org.genericsystem.reactor.generic.GSLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
+import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.html.HtmlCheckBox;
 import org.genericsystem.reactor.html.HtmlH1;
@@ -36,11 +35,11 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 public class GSTable extends GSComposite {
 
-	public GSTable(Tag<?> parent) {
+	public GSTable(GSTag parent) {
 		super(parent, FlexDirection.COLUMN);
 	}
 
-	public GSTable(Tag<?> parent, FlexDirection flexDirection) {
+	public GSTable(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}
@@ -134,7 +133,7 @@ public class GSTable extends GSComposite {
 						addStyle("background-color", "#dda5a5");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new HtmlGenericInputText(this) {
+						new GSInputText(this) {
 							{
 								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
 							}
@@ -173,7 +172,7 @@ public class GSTable extends GSComposite {
 										addStyle("align-items", "center");
 										addStyle("width", "100%");
 										addStyle("height", "100%");
-										new HtmlGenericInputText(this) {
+										new GSInputText(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));

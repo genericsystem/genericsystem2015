@@ -1,11 +1,10 @@
-package org.genericsystem.reactor.generic;
+package org.genericsystem.reactor.gs;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.generic.GSLinks.LinkAdder;
-import org.genericsystem.reactor.generic.GSLinks.LinkEditor;
-import org.genericsystem.reactor.generic.GSLinks.LinkEditorWithRemoval;
-import org.genericsystem.reactor.generic.GSLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSLinks.LinkAdder;
+import org.genericsystem.reactor.gs.GSLinks.LinkEditor;
+import org.genericsystem.reactor.gs.GSLinks.LinkEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -18,11 +17,11 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 public class GSEditor extends GSComposite {
 
-	public GSEditor(Tag<?> parent) {
+	public GSEditor(GSTag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSEditor(Tag<?> parent, FlexDirection flexDirection) {
+	public GSEditor(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}

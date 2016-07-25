@@ -1,29 +1,26 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gs;
 
 import io.vertx.core.http.ServerWebSocket;
 
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.appserver.PersistentApplication.App;
+import org.genericsystem.reactor.model.GenericModel;
 
-/**
- * @author Nicolas Feybesse
- *
- */
-public abstract class HtmlApp<M extends Model> extends HtmlSection<M> implements App<M> {
+public class GSApp extends GSSection implements App<GenericModel> {
 
 	private final ServerWebSocket webSocket;
-	private RootViewContext<M> rootViewContext;
+	private RootViewContext<GenericModel> rootViewContext;
 
-	public HtmlApp(ServerWebSocket webSocket) {
-		super(null);
+	public GSApp(ServerWebSocket webSocket) {
+		super(null, FlexDirection.COLUMN);
 		this.webSocket = webSocket;
 	}
 
-	public HtmlApp<M> init(M rootModelContext, String rootId) {
+	@Override
+	public GSApp init(GenericModel rootModelContext, String rootId) {
 		HtmlDomNode rootNode = new HtmlDomNode(rootId);
 		rootNode.sendAdd(0);
-		rootViewContext = new RootViewContext<M>(rootModelContext, this, rootNode);
+		rootViewContext = new RootViewContext<GenericModel>(rootModelContext, this, rootNode);
 		return this;
 	}
 

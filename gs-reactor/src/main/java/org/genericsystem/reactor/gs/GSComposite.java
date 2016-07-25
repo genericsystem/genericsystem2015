@@ -1,10 +1,9 @@
-package org.genericsystem.reactor.generic;
+package org.genericsystem.reactor.gs;
 
 import javafx.beans.binding.Bindings;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.composite.CompositeTag;
 import org.genericsystem.reactor.html.HtmlH1;
 import org.genericsystem.reactor.html.HtmlLabel;
 import org.genericsystem.reactor.html.HtmlRadio;
@@ -14,13 +13,13 @@ import org.genericsystem.reactor.model.GenericModel;
  * @author Nicolas Feybesse
  *
  */
-public class GSComposite extends GSSection implements CompositeTag {
+public class GSComposite extends GSSection {
 
-	public GSComposite(Tag<?> parent) {
+	public GSComposite(GSTag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSComposite(Tag<?> parent, FlexDirection flexDirection) {
+	public GSComposite(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		header();
 		sections();
@@ -45,11 +44,11 @@ public class GSComposite extends GSSection implements CompositeTag {
 
 	public static class TitleCompositeFlexElement extends GSComposite {
 
-		public TitleCompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
+		public TitleCompositeFlexElement(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 		}
 
-		public TitleCompositeFlexElement(Tag<?> parent) {
+		public TitleCompositeFlexElement(GSTag parent) {
 			this(parent, FlexDirection.COLUMN);
 		}
 
@@ -71,11 +70,11 @@ public class GSComposite extends GSSection implements CompositeTag {
 
 	public static class ColorTitleCompositeFlexElement extends TitleCompositeFlexElement {
 
-		public ColorTitleCompositeFlexElement(Tag<?> parent, FlexDirection flexDirection) {
+		public ColorTitleCompositeFlexElement(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 		}
 
-		public ColorTitleCompositeFlexElement(Tag<?> parent) {
+		public ColorTitleCompositeFlexElement(GSTag parent) {
 			this(parent, FlexDirection.COLUMN);
 		}
 
@@ -91,9 +90,9 @@ public class GSComposite extends GSSection implements CompositeTag {
 		}
 	}
 
-	public static class CompositeRadio extends GSComposite implements CompositeTag {
+	public static class CompositeRadio extends GSComposite {
 
-		public CompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
+		public CompositeRadio(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 		}
 
@@ -114,18 +113,18 @@ public class GSComposite extends GSSection implements CompositeTag {
 
 	}
 
-	public static class ColorCompositeRadio extends GSComposite implements CompositeTag {
+	public static class ColorCompositeRadio extends GSComposite {
 
 		private Tag<GenericModel> flexSubElement;
 
-		public ColorCompositeRadio(Tag<?> parent, FlexDirection flexDirection) {
+		public ColorCompositeRadio(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 			createProperty(ReactorStatics.SELECTION);
 			storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 			bindBiDirectionalSelection(flexSubElement);
-			storeProperty(ReactorStatics.SELECTION_STRING,
-					model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
-							getProperty(ReactorStatics.SELECTION, model)));
+			storeProperty(ReactorStatics.SELECTION_STRING, model -> Bindings.createStringBinding(
+					() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
+					getProperty(ReactorStatics.SELECTION, model)));
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
 			addStyle("padding", "4px");
 		}

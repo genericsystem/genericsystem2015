@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.generic;
+package org.genericsystem.reactor.gs;
 
 public enum FlexDirection {
 	COLUMN, ROW;

@@ -19,15 +19,10 @@ public class GenericModel extends Model {
 	private final Generic[] generics;
 	private final StringExtractor stringExtractor;
 
-	public GenericModel(Generic[] generics, StringExtractor stringExtractor) {
-		assert stringExtractor != null;
+	public GenericModel(Model parent, Generic[] generics, StringExtractor stringExtractor) {
+		this.parent = parent;
 		this.generics = generics;
 		this.stringExtractor = stringExtractor;
-	}
-
-	public GenericModel(Model parent, Generic[] generics, StringExtractor stringExtractor) {
-		this(generics, stringExtractor);
-		this.parent = parent;
 	}
 
 	public Generic[] getGenerics() {

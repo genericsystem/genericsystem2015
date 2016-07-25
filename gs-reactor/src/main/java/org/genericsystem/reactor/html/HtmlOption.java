@@ -17,8 +17,4 @@ public class HtmlOption<M extends Model> extends Tag<M> {
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);
 	}
-
-	// public void bindAction(Consumer<M> consumer) {
-	// addActionBinding(ActionHtmlNode::getActionProperty, consumer);
-	// }
 }

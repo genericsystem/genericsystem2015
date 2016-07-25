@@ -5,9 +5,9 @@ import java.util.function.Consumer;
 import javafx.beans.binding.Bindings;
 
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.generic.FlexDirection;
-import org.genericsystem.reactor.generic.GSSection;
+import org.genericsystem.reactor.gs.FlexDirection;
+import org.genericsystem.reactor.gs.GSSection;
+import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -18,7 +18,7 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 public class GenericModal extends GSSection {
 
-	public GenericModal(Tag<?> parent, FlexDirection direction, Consumer<Tag<?>> contentTagConsumer) {
+	public GenericModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
 		super(parent, direction);
 		addStyleClass("modal");
 		bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.SELECTION, model).getValue() != null ? "flex" : "none", this.getProperty(ReactorStatics.SELECTION, model)));

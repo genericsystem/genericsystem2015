@@ -1,16 +1,15 @@
-package org.genericsystem.reactor.generic;
+package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.html.HtmlButton;
 import org.genericsystem.reactor.model.GenericModel;
 
 public class GSMonitor extends GSSection {
 
-	public GSMonitor(Tag<?> parent) {
+	public GSMonitor(GSTag parent) {
 		this(parent, FlexDirection.ROW);
 	}
 
-	public GSMonitor(Tag<?> parent, FlexDirection direction) {
+	public GSMonitor(GSTag parent, FlexDirection direction) {
 		super(parent, direction);
 		addStyle("justify-content", "space-around");
 		addStyle("padding", "10px");

@@ -21,12 +21,13 @@ import org.genericsystem.reactor.html.HtmlSection;
 import org.genericsystem.reactor.html.HtmlSpan;
 import org.genericsystem.reactor.html.HtmlStrong;
 import org.genericsystem.reactor.html.HtmlUl;
+import org.genericsystem.todomvc.Todos.Completed;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-@DependsOnModel(Todos.class)
+@DependsOnModel({ Todos.class, Completed.class })
 public class TodoApp extends HtmlApp<TodoList> {
 
 	public static void main(String[] mainArgs) {
@@ -64,12 +65,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 										new HtmlLi<Todo>(this) {
 											{
-												addPrefixBinding(modelContext -> {
-													if (modelContext.getProperty(this, "completed") == null)
-														storeProperty("completed", Todo::getCompleted);
-												});
+												addPrefixBinding(todo -> todo.storeProperty(this, "completed", todo.getCompleted()));
 												forEach(TodoList::getFiltered);
-
 												bindOptionalStyleClass("completed", "completed");
 												new HtmlDiv<Todo>(this) {
 													{
@@ -77,9 +74,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																initProperty(ReactorStatics.CHECKED, model -> model.getCompleted().getValue());
-																bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																bindActionToValueChangeListener(ReactorStatics.CHECKED, (model, nva) -> model.getCompleted().setValue((Boolean) nva));
+																bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {
