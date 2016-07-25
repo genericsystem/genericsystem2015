@@ -118,6 +118,8 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
+		if (metaBinding != null)
+			throw new IllegalStateException("MetaBinding already defined.");
 		metaBinding = (childElement, viewContext) -> {
 			MODEL model = viewContext.getModelContext();
 			ObservableList<M> models = applyOnModel.apply(model);
