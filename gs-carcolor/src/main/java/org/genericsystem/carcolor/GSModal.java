@@ -16,9 +16,9 @@ import org.genericsystem.reactor.model.StringExtractor;
  * @author Nicolas Feybesse
  *
  */
-public class GenericModal extends GSSection {
+public class GSModal extends GSSection {
 
-	public GenericModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
+	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
 		super(parent, direction);
 		addStyleClass("modal");
 		bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.SELECTION, model).getValue() != null ? "flex" : "none", this.getProperty(ReactorStatics.SELECTION, model)));

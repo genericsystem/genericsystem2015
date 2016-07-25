@@ -46,7 +46,7 @@ public class CarColorApp extends GSApp {
 
 		new GenericH1Section(this, FlexDirection.ROW, "Generic System Reactor Live Demo").addStyle("justify-content", "center");
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GenericModal(this, FlexDirection.COLUMN, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
+		new GSModal(this, FlexDirection.COLUMN, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
 		new GSMonitor(this);
 	}
