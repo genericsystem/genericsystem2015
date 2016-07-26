@@ -8,8 +8,8 @@ import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Diesel;
 import org.genericsystem.carcolor.model.Power;
-import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.ReactorStatics;
@@ -19,13 +19,12 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs.GSEditor;
-import org.genericsystem.reactor.gs.GSMonitor;
-import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.gs.GSComposite.ColorCompositeRadio;
 import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
-import org.genericsystem.reactor.gs.GSSection.GenericH1Section;
+import org.genericsystem.reactor.gs.GSEditor;
+import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
+import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.StringExtractor;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
@@ -42,7 +41,7 @@ public class AppHtml extends GSApp {
 		new ColorsSelect(this).select(StringExtractor.EXTRACTOR, Color.class);
 		new ColorTitleCompositeFlexElement(this).select(StringExtractor.MANAGEMENT, Color.class);
 		new ColorCompositeRadio(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class);
-		new GenericH1Section(this, FlexDirection.COLUMN, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
+		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 		createProperty(ReactorStatics.SELECTION);
