@@ -6,9 +6,9 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.todomvc.Todos.Completed;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 
 /**
@@ -19,15 +19,16 @@ public class Todo extends Model {
 
 	private final Generic generic;
 	private Property<String> todoString;
-	private ObservableValue<Boolean> completed;// = new SimpleBooleanProperty();
-	private ObservableValue<String> completionString;
+	private Property<Boolean> completed = new SimpleBooleanProperty();
 
 	Todo(TodoList parentModel, Generic generic) {
 		this.generic = generic;
 		todoString = new ReadOnlyObjectWrapper<>(Objects.toString(generic));
 		ObservableValue<Generic> observableHolder = generic.getObservableHolder(generic.getRoot().find(Completed.class));
-		completed = Bindings.createBooleanBinding(() -> observableHolder.getValue() != null ? (Boolean) observableHolder.getValue().getValue() : false, observableHolder);
-		completionString = Bindings.createStringBinding(() -> Boolean.TRUE.equals(completed.getValue()) ? "completed" : null, completed);
+		if (observableHolder.getValue() != null && Boolean.TRUE.equals((Boolean) observableHolder.getValue().getValue())) {
+			completed.setValue(true);
+		}
+		// completed = Bindings.createBooleanBinding(() -> observableHolder.getValue() != null ? (Boolean) observableHolder.getValue().getValue() : false, observableHolder);
 	}
 
 	/*********************************************************************************************************************************/

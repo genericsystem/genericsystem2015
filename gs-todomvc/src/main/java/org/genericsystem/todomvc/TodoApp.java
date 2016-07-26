@@ -80,15 +80,15 @@ public class TodoApp extends HtmlApp<TodoList> {
 																	}
 																});
 
-																bindAction((model, value) -> {
-																	if (value == null || value.isEmpty()) {
-																		model.setCompletion(false);
-																	} else {
-																		model.setCompletion(true);
-																	}
-																});
-																// bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																// bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
+																// bindAction((model, value) -> {
+																// if (value == null || value.isEmpty()) {
+																// model.setCompletion(false);
+																// } else {
+																// model.setCompletion(true);
+																// }
+																// });
+																bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {
