@@ -74,18 +74,21 @@ public class TodoApp extends HtmlApp<TodoList> {
 														new HtmlCheckBox<Todo>(this) {
 															{
 																addStyleClass("toggle");
-																createProperty("completed");
-																bindAttribute(ReactorStatics.CHECKED, "completed");
+																addPrefixBinding(todo -> {
+																	if (Boolean.TRUE.equals(getObservableValue("completed", todo).getValue())) {
+																		todo.getObservableAttributes(this).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																	}
+																});
+
 																bindAction((model, value) -> {
 																	if (value == null || value.isEmpty()) {
 																		model.setCompletion(false);
 																	} else {
 																		model.setCompletion(true);
 																	}
-
 																});
 																// bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
+																// bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {

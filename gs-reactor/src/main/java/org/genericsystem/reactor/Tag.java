@@ -164,6 +164,22 @@ public abstract class Tag<M extends Model> {
 		return null;
 	}
 
+	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
+		return getObservableValue(propertyName, new Model[] { model });
+	}
+
+	private <T> ObservableValue<T> getObservableValue(String propertyName, Model[] model) {
+		Tag<?> tag = this;
+		while (tag != null && model[0] != null) {
+			if (model[0].containsProperty(tag, propertyName))
+				return model[0].getObservableValue(tag, propertyName);
+			if (tag.metaBinding != null && model[0].getViewContext(tag.getParent()) == null)
+				model[0] = model[0].getParent();
+			tag = tag.getParent();
+		}
+		return null;
+	}
+
 	@FunctionalInterface
 	public interface ModelConstructor<M extends Model> {
 		M build(Generic[] generics, StringExtractor stringExtractor);
@@ -214,7 +230,7 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(model -> {
 			Map<String, String> map = getMap.apply(model);
 			ChangeListener<String> listener = (o, old, newValue) -> map.put(name, newValue);
-			ObservableValue<String> observable = model.getObservableValue(this, propertyName);
+			ObservableValue<String> observable = getObservableValue(propertyName, model);
 			observable.addListener(listener);
 			map.put(name, observable.getValue());
 		});
@@ -250,7 +266,7 @@ public abstract class Tag<M extends Model> {
 
 	public <T extends Serializable> void bindActionToValueChangeListener(String propertyName, BiConsumer<M, T> listener) {
 		addPrefixBinding(modelContext -> {
-			Property<T> observable = getProperty(propertyName, modelContext);
+			ObservableValue<T> observable = getObservableValue(propertyName, modelContext);
 			observable.addListener((o, old, nva) -> listener.accept(modelContext, nva));
 		});
 	}
