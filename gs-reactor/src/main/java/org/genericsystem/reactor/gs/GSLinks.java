@@ -29,52 +29,40 @@ public class GSLinks {
 	public static class LabelDisplayer extends GSSection {
 
 		private final ObservableListExtractor observableListExtractor;
-		private final boolean reverse;
 
-		public LabelDisplayer(GSTag parent, ObservableListExtractor observableListExtractor, FlexDirection flexDirection, boolean reverse) {
-			super(parent, flexDirection);
+		public LabelDisplayer(GSTag parent, ObservableListExtractor observableListExtractor) {
+			super(parent, FlexDirection.ROW);
 			this.observableListExtractor = observableListExtractor;
-			this.reverse = reverse;
 			content();
 		}
 
 		private void content() {
-			new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GSSection(this, FlexDirection.ROW) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new GSSection(this, this.getDirection()) {
+					new GSLabel(this) {
 						{
-							addStyle("justify-content", "center");
-							addStyle("align-items", "center");
-							addStyle("width", "100%");
-							addStyle("height", "100%");
-							new GSLabel(this) {
-								{
-									select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
-									bindText(GenericModel::getString);
-								}
-							};
-							new GSCheckBox(this) {
-								{
-									addAttribute("disabled", "disabled");
-									initProperty(ReactorStatics.CHECKED, model -> {
-										assert !model.destroyed;
-										return (Boolean) model.getGeneric().getValue();
-									});
-									bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-									select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
-								}
-							};
+							select(gs -> !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
+							bindText(GenericModel::getString);
+						}
+					};
+					new GSCheckBox(this) {
+						{
+							addAttribute("disabled", "disabled");
+							initProperty(ReactorStatics.CHECKED, model -> {
+								assert !model.destroyed;
+								return (Boolean) model.getGeneric().getValue();
+							});
+							bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+							select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 						}
 					};
 				}
 			};
-			new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GSSection(this, FlexDirection.ROW) {
 				{
 					style(this);
-					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
 					forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, observableListExtractor);
 					new GSLabel(this) {
 						{
@@ -86,13 +74,15 @@ public class GSLinks {
 		}
 
 		public void style(Tag<?> tag) {
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
 		}
 	}
 
 	public static class LinkDisplayer extends LabelDisplayer {
 
-		public LinkDisplayer(GSTag parent, FlexDirection direction) {
-			super(parent, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])), direction, true);
+		public LinkDisplayer(GSTag parent) {
+			super(parent, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 
 		@Override
@@ -108,8 +98,8 @@ public class GSLinks {
 
 	public static class LinkTitleDisplayer extends LabelDisplayer {
 
-		public LinkTitleDisplayer(GSTag parent, ObservableListExtractor observableListExtractor, FlexDirection flexDirection) {
-			super(parent, observableListExtractor, flexDirection, false);
+		public LinkTitleDisplayer(GSTag parent, ObservableListExtractor observableListExtractor) {
+			super(parent, observableListExtractor);
 		}
 
 		@Override
@@ -124,16 +114,9 @@ public class GSLinks {
 
 	public static class LinkEditor extends GSSection {
 
-		private final boolean reverse;
-
-		public LinkEditor(GSTag parent, FlexDirection direction) {
+		public LinkEditor(GSTag parent) {
 			// TODO: filter only once.
-			this(parent, direction, true);
-		}
-
-		private LinkEditor(GSTag parent, FlexDirection flexDirection, boolean reverse) {
-			super(parent, flexDirection);
-			this.reverse = reverse;
+			super(parent, FlexDirection.ROW);
 			content();
 		}
 
@@ -210,69 +193,60 @@ public class GSLinks {
 		}
 
 		private void content() {
-			new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+			new GSSection(this, FlexDirection.ROW) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-					new GSSection(this, this.getDirection()) {
+					new GSSection(this, FlexDirection.ROW) {
 						{
 							addStyle("flex", "1");
 							addStyle("width", "100%");
 							addStyle("height", "100%");
-							addStyle("justify-content", "center");
-							addStyle("align-items", "center");
-							new GSSection(this, this.getDirection()) {
+							GSInputTextWithConversion input = new GSInputTextWithConversion(this) {
 								{
-									addStyle("flex", "1");
-									addStyle("width", "100%");
-									addStyle("height", "100%");
-									GSInputTextWithConversion input = new GSInputTextWithConversion(this) {
-										{
-											initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
-											initInputText(this);
-										}
-									};
-									initInputSection(this);
-									inputActionButton(this, input);
+									initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
+									initInputText(this);
 								}
 							};
-							new GSSection(this, this.getDirection()) {
+							initInputSection(this);
+							inputActionButton(this, input);
+						}
+					};
+					new GSSection(this, FlexDirection.ROW) {
+						{
+							initCheckBox(this);
+							addStyle("width", "100%");
+							addStyle("height", "100%");
+							new GSSection(this, FlexDirection.ROW) {
 								{
-									initCheckBox(this);
 									addStyle("width", "100%");
 									addStyle("height", "100%");
-									new GSSection(this, this.getDirection()) {
+									addStyle("justify-content", "center");
+									addStyle("align-items", "center");
+									checkbox = new GSCheckBox(this) {
 										{
-											addStyle("width", "100%");
-											addStyle("height", "100%");
-											addStyle("justify-content", "center");
-											addStyle("align-items", "center");
-											checkbox = new GSCheckBox(this) {
-												{
-													bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-												}
-											};
+											bindOptionalBiDirectionalAttribute(ReactorStatics.CHECKED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 										}
 									};
-									insertButton(this);
-								}
-
-								private GSCheckBox checkbox;
-
-								public void insertButton(GSTag tag) {
-									checkBoxActionButton(tag, checkbox);
 								}
 							};
+							insertButton(this);
+						}
+
+						private GSCheckBox checkbox;
+
+						public void insertButton(GSTag tag) {
+							checkBoxActionButton(tag, checkbox);
 						}
 					};
 				}
 			};
-			new GSSection(this, this.getDirection()) {
+			new GSSection(this, FlexDirection.ROW) {
 
 				{
-					select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
 					style(this);
-					new GSSection(this, reverse ? this.getReverseDirection() : this.getDirection()) {
+					select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
+					new GSSection(this, FlexDirection.ROW) {
 						{
 							addStyle("flex", "1");
 							addStyle("width", "100%");
@@ -308,8 +282,8 @@ public class GSLinks {
 	}
 
 	public static class LinkEditorWithRemoval extends LinkEditor {
-		public LinkEditorWithRemoval(GSTag parent, FlexDirection direction) {
-			super(parent, direction);
+		public LinkEditorWithRemoval(GSTag parent) {
+			super(parent);
 		}
 
 		@Override
@@ -337,8 +311,8 @@ public class GSLinks {
 
 	public static class LinkAdder extends LinkEditor {
 
-		public LinkAdder(GSTag parent, FlexDirection direction) {
-			super(parent, direction);
+		public LinkAdder(GSTag parent) {
+			super(parent);
 		}
 
 		@Override

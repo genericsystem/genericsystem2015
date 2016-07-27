@@ -59,14 +59,14 @@ public class GSEditor extends GSComposite {
 				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "0.3");
-						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GSEditor.this.getDirection()) {
+						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta()))) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
 								select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0].getMeta());
 							}
 						};
-						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta())), GSEditor.this.getDirection()) {
+						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta()))) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
@@ -82,11 +82,11 @@ public class GSEditor extends GSComposite {
 				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
-						new GSSection(this, GSEditor.this.getReverseDirection()) {
+						new GSSection(this, FlexDirection.COLUMN) {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new LinkEditor(this, GSEditor.this.getDirection()) {
+								new LinkEditor(this) {
 									{
 										addStyle("flex", "1");
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
@@ -94,18 +94,18 @@ public class GSEditor extends GSComposite {
 								};
 							}
 						};
-						new GSSection(this, GSEditor.this.getReverseDirection()) {
+						new GSSection(this, FlexDirection.COLUMN) {
 							{
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new LinkEditorWithRemoval(this, GSEditor.this.getDirection()) {
+								new LinkEditorWithRemoval(this) {
 									{
 										addStyle("flex", "1");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
 									}
 								};
-								new LinkAdder(this, GSEditor.this.getDirection()) {
+								new LinkAdder(this) {
 									{
 										addStyle("flex", "1");
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())

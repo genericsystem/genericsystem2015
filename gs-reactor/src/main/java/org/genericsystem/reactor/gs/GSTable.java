@@ -93,7 +93,7 @@ public class GSTable extends GSComposite {
 
 			@Override
 			protected void sections() {
-				new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])), this.getDirection()) {
+				new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1]))) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 						addStyle("flex", "1");
@@ -153,7 +153,7 @@ public class GSTable extends GSComposite {
 
 			@Override
 			protected void sections() {
-				new GSSection(this, this.getDirection()) {
+				new GSSection(this, FlexDirection.ROW) {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
@@ -310,12 +310,12 @@ public class GSTable extends GSComposite {
 
 			@Override
 			protected void sections() {
-				new GSSection(this, this.getReverseDirection()) {
+				new GSSection(this, FlexDirection.COLUMN) {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new LinkDisplayer(this, this.getReverseDirection()) {
+						new LinkDisplayer(this) {
 							{
 								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
