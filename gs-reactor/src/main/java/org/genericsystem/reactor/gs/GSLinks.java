@@ -153,7 +153,7 @@ public class GSLinks {
 		@Deprecated
 		public void initCheckBox(GSTag tag) {
 			tag.select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
-			tag.createProperty(ReactorStatics.CHECKED);
+			tag.createNewProperty(ReactorStatics.CHECKED);
 			tag.initProperty(ReactorStatics.CHECKED, model -> (Boolean) model.getGeneric().getValue());
 			tag.bindActionToValueChangeListener(ReactorStatics.CHECKED, (model, nva) -> model.getGeneric().updateValue(nva));
 		}
@@ -348,7 +348,7 @@ public class GSLinks {
 
 		@Override
 		public void initCheckBox(GSTag tag) {
-			tag.createProperty(ReactorStatics.VALUE);
+			tag.createNewProperty(ReactorStatics.VALUE);
 			tag.select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 			tag.bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 		}

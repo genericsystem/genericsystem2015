@@ -35,7 +35,7 @@ public class CarColorApp extends GSApp {
 
 	public CarColorApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
-		createProperty(ReactorStatics.SELECTION);
+		createNewProperty(ReactorStatics.SELECTION);
 		addStyle("background-color", "#3393ff");
 
 		new GenericH1Section(this, "Generic System Reactor Live Demo");

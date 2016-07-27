@@ -25,9 +25,9 @@ public class GSInputTextWithConversion extends GSInputText {
 		addStyle("width", "100%");
 		addStyle("height", "100%");
 
-		createProperty(ReactorStatics.CONVERTER);
+		createNewProperty(ReactorStatics.CONVERTER);
 		initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
-		createProperty(ReactorStatics.VALUE);
+		createNewProperty(ReactorStatics.VALUE);
 
 		storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 			boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);

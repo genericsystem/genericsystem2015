@@ -135,7 +135,7 @@ public class GSTable extends GSComposite {
 						addStyle("margin-bottom", "1px");
 						new GSInputTextWithConversion(this) {
 							{
-								createProperty(ReactorStatics.ACTION);
+								createNewProperty(ReactorStatics.ACTION);
 								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
 							}
 
@@ -176,7 +176,7 @@ public class GSTable extends GSComposite {
 										new GSInputTextWithConversion(this) {
 											{
 												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												createProperty(ReactorStatics.ACTION);
+												createNewProperty(ReactorStatics.ACTION);
 												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}
 
@@ -191,9 +191,9 @@ public class GSTable extends GSComposite {
 										new GSCheckBox(this) {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												createProperty(ReactorStatics.VALUE);
+												createNewProperty(ReactorStatics.VALUE);
 												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-												createProperty(ReactorStatics.ACTION);
+												createNewProperty(ReactorStatics.ACTION);
 												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}
 										};

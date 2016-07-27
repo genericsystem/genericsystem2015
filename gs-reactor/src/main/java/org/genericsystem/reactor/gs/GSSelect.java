@@ -15,7 +15,7 @@ public class GSSelect extends GSTag {
 		super(parent, "select");
 		options();
 		init();
-		createProperty(ReactorStatics.SELECTION);
+		createNewProperty(ReactorStatics.SELECTION);
 		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
 		storeProperty(ReactorStatics.SELECTION_STRING,
@@ -55,7 +55,7 @@ public class GSSelect extends GSTag {
 
 		@Override
 		protected void init() {
-			createProperty(ReactorStatics.SELECTION_SHIFT);
+			createNewProperty(ReactorStatics.SELECTION_SHIFT);
 			initProperty(ReactorStatics.SELECTION_SHIFT, 1);
 		}
 	}

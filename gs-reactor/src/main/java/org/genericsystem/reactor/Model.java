@@ -55,7 +55,7 @@ public class Model {
 		return propertiesMap.containsKey(tag) ? propertiesMap.get(tag).containsKey(propertyName) : false;
 	}
 
-	public void createProperty(Tag<?> tag, String propertyName) {
+	public void createNewProperty(Tag<?> tag, String propertyName) {
 		assert viewContextsMap.keySet().contains(tag);
 		if (propertiesMap.get(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to create an already used property : " + propertyName);

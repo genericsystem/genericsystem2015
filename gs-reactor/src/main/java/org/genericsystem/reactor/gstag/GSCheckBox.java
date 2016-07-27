@@ -11,7 +11,7 @@ public class GSCheckBox extends GSTag {
 
 	public GSCheckBox(GSTag parent) {
 		super(parent, "input");
-		createProperty(ReactorStatics.CHECKED);
+		createNewProperty(ReactorStatics.CHECKED);
 	}
 
 	@Override

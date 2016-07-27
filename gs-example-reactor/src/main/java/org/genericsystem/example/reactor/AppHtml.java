@@ -44,7 +44,7 @@ public class AppHtml extends GSApp {
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-		createProperty(ReactorStatics.SELECTION);
+		createNewProperty(ReactorStatics.SELECTION);
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 		new GSTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
 		new GSEditor(this, FlexDirection.ROW) {

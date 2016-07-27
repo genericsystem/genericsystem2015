@@ -118,7 +118,7 @@ public class GSComposite extends GSSection {
 
 		public ColorCompositeRadio(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
-			createProperty(ReactorStatics.SELECTION);
+			createNewProperty(ReactorStatics.SELECTION);
 			storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 			bindBiDirectionalSelection(flexSubElement);
 			storeProperty(ReactorStatics.SELECTION_STRING,

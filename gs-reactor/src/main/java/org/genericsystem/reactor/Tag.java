@@ -271,9 +271,9 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public void createProperty(String propertyName) {
+	public void createNewProperty(String propertyName) {
 		addPrefixBinding(modelContext -> {
-			modelContext.createProperty(this, propertyName);
+			modelContext.createNewProperty(this, propertyName);
 		});
 	}
 
