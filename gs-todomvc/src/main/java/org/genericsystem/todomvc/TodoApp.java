@@ -65,9 +65,9 @@ public class TodoApp extends HtmlApp<TodoList> {
 
 										new HtmlLi<Todo>(this) {
 											{
-												storeProperty("completed", Todo::getCompleted);
+												storeProperty(ReactorStatics.COMPLETED, Todo::getCompleted);
 												forEach(TodoList::getFiltered);
-												bindOptionalStyleClass("completed", "completed");
+												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new HtmlDiv<Todo>(this) {
 													{
 														addStyleClass("view");
@@ -75,7 +75,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 															{
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
-																	if (Boolean.TRUE.equals(getObservableValue("completed", todo).getValue())) {
+																	if (Boolean.TRUE.equals(getObservableValue(ReactorStatics.COMPLETED, todo).getValue())) {
 																		todo.getObservableAttributes(this).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																	}
 																});
@@ -87,8 +87,8 @@ public class TodoApp extends HtmlApp<TodoList> {
 																// model.setCompletion(true);
 																// }
 																// });
-																bindOptionalBiDirectionalAttribute("completed", ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																bindActionToValueChangeListener("completed", (model, nva) -> model.setCompletion((Boolean) nva));
+																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																bindActionToValueChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.setCompletion((Boolean) nva));
 															}
 														};
 														new HtmlLabel<Todo>(this) {

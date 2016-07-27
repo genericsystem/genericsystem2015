@@ -4,6 +4,7 @@ public class ReactorStatics {
 
 	public static final String ACTION = "action";
 	public static final String CHECKED = "checked";
+	public static final String COMPLETED = "completed";
 	public static final String INVALID = "invalid";
 	public static final String SELECTION = "selection";
 	public static final String SELECTION_INDEX = "selectionIndex";
