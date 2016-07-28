@@ -68,6 +68,7 @@ public class AppHtml extends GSApp {
 			Generic car = engine.find(Car.class);
 			Generic power = engine.find(Power.class);
 			Generic diesel = engine.find(Diesel.class);
+			car.setAttribute("Description");
 			Generic person = engine.setInstance("Person");
 			Generic category = engine.setInstance("Category");
 			Generic carColor = engine.find(CarColor.class);

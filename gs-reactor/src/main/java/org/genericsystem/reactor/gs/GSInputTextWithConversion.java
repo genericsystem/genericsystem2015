@@ -83,4 +83,16 @@ public class GSInputTextWithConversion extends GSInputText {
 		}
 		return ApiStatics.STRING_CONVERTERS.get(clazz);
 	}
+
+	public static class GSInputTextEditorWithConversion extends GSInputTextWithConversion {
+
+		public GSInputTextEditorWithConversion(GSTag parent) {
+			super(parent);
+			initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
+			bindActionToValueChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+				if (nva != null)
+					model.getGeneric().updateValue(nva);
+			});
+		}
+	}
 }

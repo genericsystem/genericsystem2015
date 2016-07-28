@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gs;
 
+import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ChangeListener;
@@ -100,5 +101,16 @@ public abstract class GSTag extends Tag<GenericModel> {
 
 	public ObservableListExtractor getObservableListExtractor() {
 		return ObservableListExtractor.SUBINSTANCES;
+	}
+
+	public int pos(Generic genericToUpdate, Generic oldComponent) {
+		List<Generic> components = genericToUpdate.getComponents();
+		int pos = 0;
+		for (Generic component : components) {
+			if (component.equals(oldComponent))
+				break;
+			pos++;
+		}
+		return pos;
 	}
 }
