@@ -1,13 +1,15 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Visitor.ClearVisitor;
-import org.genericsystem.reactor.Visitor.HolderVisitor;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
@@ -21,6 +23,7 @@ import org.genericsystem.reactor.model.StringExtractor;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 
 public class GSLinks {
@@ -286,8 +289,6 @@ public class GSLinks {
 
 	public static class GSLinkEditor extends GSSection {
 
-		protected GSTag components;
-
 		public GSLinkEditor(GSTag parent) {
 			this(parent, GSLinkComponentEditor::new);
 		}
@@ -296,7 +297,7 @@ public class GSLinks {
 			super(parent, FlexDirection.ROW);
 			addStyle("width", "100%");
 			addStyle("height", "100%");
-			components = constructor.build(this);
+			constructor.build(this);
 		}
 	}
 
@@ -316,6 +317,7 @@ public class GSLinks {
 	}
 
 	public static class GSLinkAdder extends GSLinkEditor {
+		private List<Property<GenericModel>> selections = new ArrayList<>();
 
 		public GSLinkAdder(GSTag parent) {
 			super(parent, GSLinkComponentCreator::new);
@@ -324,17 +326,25 @@ public class GSLinks {
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
 					setText("+");
+					bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(() -> {
+						List<Generic> selectedGenerics = selections.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+						return selectedGenerics.size() + 1 != model.getGeneric().getComponents().size() ? ReactorStatics.DISABLED : "";
+					}, selections.stream().toArray(Property[]::new)));
 					bindAction(model -> {
 						try {
-							// TODO: Does not work currently.
-							new HolderVisitor(model.getGenerics()[3]).visit(model);
-							new ClearVisitor().visit(model);
+							List<Generic> selectedGenerics = selections.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+							model.getGenerics()[3].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
+							selections.stream().forEach(sel -> sel.setValue(null));
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}
 					});
 				}
 			};
+		}
+
+		public List<Property<GenericModel>> getSelections() {
+			return selections;
 		}
 	}
 
@@ -392,6 +402,8 @@ public class GSLinks {
 		public GSLinkComponentCreator(GSTag parent) {
 			super(parent, ColorsSelect::new);
 			forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[4])));
+			if (parent instanceof GSLinkAdder)
+				select.addPostfixBinding(model -> ((GSLinkAdder) parent).getSelections().add(model.getProperty(select, ReactorStatics.SELECTION)));
 		}
 	}
 }
