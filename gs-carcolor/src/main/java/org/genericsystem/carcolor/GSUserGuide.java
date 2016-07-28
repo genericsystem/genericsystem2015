@@ -13,7 +13,7 @@ public class GSUserGuide extends GSSection {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-direction", "column");
 		addStyle("flex-wrap", "nowrap");
-		// if ("flex".equalsIgnoreCase(ReactorStatics.DISPLAY))
+		addStyle("justify-content", "center");
 
 		GSSection gSection = new GSSection(this, FlexDirection.COLUMN) {
 			{
@@ -33,8 +33,6 @@ public class GSUserGuide extends GSSection {
 								setText("×");
 								bindAction(model -> {
 									this.getParent().getProperty(ReactorStatics.DISPLAY, model).setValue("none");
-									;
-									System.out.println("on clic fermer");
 								});
 							}
 						};
@@ -50,12 +48,11 @@ public class GSUserGuide extends GSSection {
 
 		new GSButton(this) {
 			{
-				this.setText("User Guide");
-				this.addStyleClass("buttonUser");
+				setText("User Guide");
+				addStyleClass("buttonUser");
+
 				bindAction(model -> {
 					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
-					;
-					System.out.println("on clic ouvre");
 				});
 			}
 		};
