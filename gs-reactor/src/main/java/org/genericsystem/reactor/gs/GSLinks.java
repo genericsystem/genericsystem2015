@@ -74,8 +74,12 @@ public class GSLinks {
 		}
 
 		public void style(Tag<?> tag) {
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
+			tag.addStyle("justify-content", "center");
+			tag.addStyle("align-items", "center");
+			tag.addStyle("flex", "1");
+			tag.addStyle("margin-right", "1px");
+			tag.addStyle("margin-bottom", "1px");
+			tag.addStyle("overflow", "hidden");
 		}
 	}
 
@@ -87,10 +91,7 @@ public class GSLinks {
 
 		@Override
 		public void style(Tag<?> tag) {
-			tag.addStyle("overflow", "hidden");
-			tag.addStyle("flex", "1");
-			tag.addStyle("margin-right", "1px");
-			tag.addStyle("margin-bottom", "1px");
+			super.style(tag);
 			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
 					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
 		}
@@ -104,11 +105,9 @@ public class GSLinks {
 
 		@Override
 		public void style(Tag<?> tag) {
-			tag.addStyle("flex", "1");
+			super.style(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#ffa5a5");
-			tag.addStyle("margin-right", "1px");
-			tag.addStyle("margin-bottom", "1px");
 		}
 	}
 
