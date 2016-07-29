@@ -46,10 +46,9 @@ public class GSUserGuide extends GSSection {
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
-										GSLi li4 = new GSLi(this);
 										li1.setText("Insert Car model");
 										li2.setText("Select color in the ComboBox");
-										li4.setText("Use \"add Button\" to update data");
+										li3.setText("Use \"add Button\" to update data");
 									}
 								};
 								new GSUl(this) {
@@ -70,14 +69,14 @@ public class GSUserGuide extends GSSection {
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
 										li1.setText("Use \"Save Button\" to persist your Data in the cache");
-										li2.setText("Use \"Cancel Button\" to go back to your last persistance");
-										li3.setText("Use the \"Remove Button\" to delete the line. Can be canceled until you persist your Data");
+										li2.setText("Use \"Cancel Button\" to go back to your last persistence");
+										li3.setText("Use the \"Remove Button\" to delete the line. This can be canceled until you persist your Data");
 									}
 								};
 								new GSSection(this, FlexDirection.COLUMN) {
 									{
 										addStyle("text-align", "center");
-										setText("To plenty enjoy the power of GS-reactor, go on Learning / Get Started");
+										setText("To plenty enjoy the power of GS-REACTOR, go to Learning / Get Started");
 									}
 								};
 							}
