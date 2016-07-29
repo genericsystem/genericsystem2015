@@ -16,7 +16,6 @@ import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gstag.GSButton;
-import org.genericsystem.reactor.gstag.GSCheckBox;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.gstag.GSLabel;
@@ -188,11 +187,9 @@ public class GSTable extends GSComposite {
 												return ApiStatics.STRING_CONVERTERS.get(clazz);
 											}
 										};
-										new GSCheckBox(this) {
+										new GSCheckBoxWithValue(this) {
 											{
 												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												createNewProperty(ReactorStatics.VALUE);
-												bindOptionalBiDirectionalAttribute(ReactorStatics.VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 												createNewProperty(ReactorStatics.ACTION);
 												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
 											}

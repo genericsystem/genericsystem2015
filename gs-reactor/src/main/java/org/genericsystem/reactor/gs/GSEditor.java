@@ -1,9 +1,16 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.gs.GSLinks.LinkAdder;
-import org.genericsystem.reactor.gs.GSLinks.LinkEditor;
-import org.genericsystem.reactor.gs.GSLinks.LinkEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSLinks.GSBooleanHolderAdder;
+import org.genericsystem.reactor.gs.GSLinks.GSBooleanHolderEditor;
+import org.genericsystem.reactor.gs.GSLinks.GSBooleanHolderEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSLinks.GSCellEditor;
+import org.genericsystem.reactor.gs.GSLinks.GSHolderAdder;
+import org.genericsystem.reactor.gs.GSLinks.GSHolderEditor;
+import org.genericsystem.reactor.gs.GSLinks.GSHolderEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSLinks.GSLinkAdder;
+import org.genericsystem.reactor.gs.GSLinks.GSLinkEditor;
+import org.genericsystem.reactor.gs.GSLinks.GSLinkEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.GenericModel;
@@ -86,9 +93,8 @@ public class GSEditor extends GSComposite {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new LinkEditor(this) {
+								new GSCellEditor(this, GSHolderEditor::new, GSBooleanHolderEditor::new, GSLinkEditor::new) {
 									{
-										addStyle("flex", "1");
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 									}
 								};
@@ -99,15 +105,13 @@ public class GSEditor extends GSComposite {
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new LinkEditorWithRemoval(this) {
+								new GSCellEditor(this, GSHolderEditorWithRemoval::new, GSBooleanHolderEditorWithRemoval::new, GSLinkEditorWithRemoval::new) {
 									{
-										addStyle("flex", "1");
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
 									}
 								};
-								new LinkAdder(this) {
+								new GSCellEditor(this, GSHolderAdder::new, GSBooleanHolderAdder::new, GSLinkAdder::new) {
 									{
-										addStyle("flex", "1");
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())
 												|| (gs[0].getComponents().size() >= 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? gs[0] : null);
 									}

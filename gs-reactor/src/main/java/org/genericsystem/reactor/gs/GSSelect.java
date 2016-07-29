@@ -73,6 +73,10 @@ public class GSSelect extends GSTag {
 
 		public InstanceCompositeSelect(GSTag parent) {
 			super(parent);
+			addPostfixBinding(modelContext -> {
+				int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
+				getProperty(ReactorStatics.SELECTION, modelContext).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
+			});
 		}
 
 		@Override
