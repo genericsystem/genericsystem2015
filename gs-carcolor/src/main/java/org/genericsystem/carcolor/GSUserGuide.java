@@ -76,6 +76,7 @@ public class GSUserGuide extends GSSection {
 								};
 								new GSSection(this, FlexDirection.COLUMN) {
 									{
+										addStyle("text-align", "center");
 										setText("To plenty enjoy the power of GS-reactor, go on Learning / Get Started");
 									}
 								};
