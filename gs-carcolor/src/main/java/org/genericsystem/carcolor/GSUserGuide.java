@@ -74,6 +74,11 @@ public class GSUserGuide extends GSSection {
 										li3.setText("Use the \"Remove Button\" to delete the line. Can be canceled until you persist your Data");
 									}
 								};
+								new GSSection(this, FlexDirection.COLUMN) {
+									{
+										setText("To plenty enjoy the power of GS-reactor, go on Learning / Get Started");
+									}
+								};
 							}
 						};
 					};
