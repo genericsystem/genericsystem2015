@@ -1,17 +1,8 @@
 package org.genericsystem.reactor.gs;
 
-import java.io.Serializable;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
-import org.genericsystem.reactor.Visitor.ClearVisitor;
-import org.genericsystem.reactor.Visitor.HolderVisitor;
-import org.genericsystem.reactor.gs.GSLinks.GSAttributeCreator;
+import org.genericsystem.reactor.gs.GSLinks.GSInstanceCreator;
 import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
@@ -21,10 +12,6 @@ import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
-import javafx.util.StringConverter;
 
 /**
  * @author Nicolas Feybesse
@@ -120,79 +107,7 @@ public class GSTable extends GSComposite {
 	}
 
 	protected void columnsInputSection() {
-		new GSComposite(this, this.getReverseDirection()) {
-
-			@Override
-			protected void header() {
-				new GSSection(this, this.getReverseDirection()) {
-					{
-						addStyle("flex", "1");
-						addStyle("background-color", "#dda5a5");
-						addStyle("margin-right", "1px");
-						addStyle("margin-bottom", "1px");
-						new GSInputTextWithConversion(this) {
-							{
-								createNewProperty(ReactorStatics.ACTION);
-								this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> gs[0].setInstance(value));
-							}
-
-							@Override
-							public StringConverter<?> getConverter(GenericModel model) {
-								Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
-								if (clazz == null)
-									clazz = String.class;
-								return ApiStatics.STRING_CONVERTERS.get(clazz);
-							}
-						};
-					}
-				};
-			}
-
-			@Override
-			protected void sections() {
-				new GSAttributeCreator(this, FlexDirection.ROW) {
-					{
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-					}
-				};
-			}
-
-			@Override
-			protected void footer() {
-				new GSSection(this, this.getDirection()) {
-					{
-						if (this.getDirection().equals(FlexDirection.ROW)) {
-							addStyle("flex", "0");
-							addStyle("min-width", "100px");
-						} else {
-							addStyle("flex", "1");
-						}
-						addStyle("background-color", "#dda5a5");
-						addStyle("margin-right", "1px");
-						addStyle("margin-bottom", "1px");
-						new GSButton(this) {
-							{
-								bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> {
-									ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
-									return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? ReactorStatics.DISABLED : "", observable);
-								});
-								bindAction(modelContext -> {
-									try {
-										new HolderVisitor().visit(modelContext);
-										new ClearVisitor().visit(modelContext);
-									} catch (RollbackException e) {
-										e.printStackTrace();
-									}
-								});
-								setText("Add");
-								addStyle("width", "100%");
-								addStyle("height", "100%");
-							}
-						};
-					}
-				};
-			}
-		};
+		new GSInstanceCreator(this, this.getReverseDirection());
 	}
 
 	@Override

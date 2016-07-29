@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSInputText;
 import org.genericsystem.reactor.model.GenericModel;
@@ -98,12 +96,13 @@ public class GSInputTextWithConversion extends GSInputText {
 		}
 	}
 
+	// TODO: Delete this class.
 	public static class GSInputTextCreatorWithConversion extends GSInputTextWithConversion {
 
 		public GSInputTextCreatorWithConversion(GSTag parent) {
 			super(parent);
-			createNewProperty(ReactorStatics.ACTION);
-			this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[0], value));
+			// createNewProperty(ReactorStatics.ACTION);
+			// this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[0], value));
 		}
 
 		@Override

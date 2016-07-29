@@ -38,11 +38,6 @@ public class Model {
 		};
 	};
 
-	@FunctionalInterface
-	public interface TriFunction<T, U, R, S> {
-		R apply(T t, U u, S s);
-	}
-
 	public Model getParent() {
 		return this.parent;
 	}
