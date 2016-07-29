@@ -2,8 +2,6 @@ package org.genericsystem.carcolor;
 
 import java.util.function.Consumer;
 
-import javafx.beans.binding.Bindings;
-
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSection;
@@ -11,6 +9,8 @@ import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -30,7 +30,7 @@ public class GSModal extends GSSection {
 		new GSSection(this, FlexDirection.COLUMN) {
 			{
 				addStyle("max-width", "40%");
-				addStyle("max-height", "40%");
+				// addStyle("max-height", "40%");
 				addStyleClass("modal-content");
 				new HtmlHyperLink<GenericModel>(this) {
 					{
