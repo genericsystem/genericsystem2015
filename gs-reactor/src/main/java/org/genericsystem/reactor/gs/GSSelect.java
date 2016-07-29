@@ -1,11 +1,16 @@
 package org.genericsystem.reactor.gs;
 
+import java.util.Map;
+
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSOption;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public class GSSelect extends GSTag {
 
@@ -45,6 +50,19 @@ public class GSSelect extends GSTag {
 
 		public CompositeSelectWithEmptyEntry(GSTag parent) {
 			super(parent);
+			addPrefixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
+					Map<String, String> map = model.getObservableStyles(this);
+					ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
+					ObservableValue<String> observable = model.getObservableValue(this, ReactorStatics.SELECTION_STRING);
+					observable.addListener(listener);
+					map.put("background-color", observable.getValue());
+				}
+			});
+			optionElement.addPrefixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+					model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
+			});
 		}
 
 		@Override

@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -12,9 +11,9 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.Visitor.ClearVisitor;
 import org.genericsystem.reactor.Visitor.HolderVisitor;
+import org.genericsystem.reactor.gs.GSLinks.GSAttributeCreator;
 import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
-import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSHyperLink;
@@ -24,7 +23,6 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.util.StringConverter;
 
@@ -152,87 +150,12 @@ public class GSTable extends GSComposite {
 
 			@Override
 			protected void sections() {
-				new GSSection(this, FlexDirection.ROW) {
+				new GSAttributeCreator(this, FlexDirection.ROW) {
 					{
-						addStyle("flex", "1");
-						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-						new GSSection(this, this.getReverseDirection()) {
-							{
-								addStyle("flex", "1");
-								addStyle("color", "#ffffff");
-								addStyle("background-color", "#dda5a5");
-								addStyle("margin-right", "1px");
-								addStyle("margin-bottom", "1px");
-								addStyle("overflow", "hidden");
-								select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-								new GSSection(this, this.getDirection()) {
-									{
-										addStyle("justify-content", "center");
-										addStyle("align-items", "center");
-										addStyle("width", "100%");
-										addStyle("height", "100%");
-										new GSInputTextWithConversion(this) {
-											{
-												select(gs -> !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												createNewProperty(ReactorStatics.ACTION);
-												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
-											}
-
-											@Override
-											public StringConverter<?> getConverter(GenericModel model) {
-												Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
-												if (clazz == null)
-													clazz = String.class;
-												return ApiStatics.STRING_CONVERTERS.get(clazz);
-											}
-										};
-										new GSCheckBoxWithValue(this) {
-											{
-												select(gs -> Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-												createNewProperty(ReactorStatics.ACTION);
-												this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[1], value));
-											}
-										};
-									}
-								};
-							}
-						};
-						new GSSection(this, this.getReverseDirection()) {
-							{
-								addStyle("flex", "1");
-								addStyle("color", "#ffffff");
-								addStyle("background-color", "#dda5a5");
-								addStyle("margin-right", "1px");
-								addStyle("margin-bottom", "1px");
-								addStyle("overflow", "hidden");
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
-								new CompositeSelectWithEmptyEntry(this) {
-									{
-										addStyle("width", "100%");
-										addStyle("height", "100%");
-										addPrefixBinding(model -> {
-											if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
-												Map<String, String> map = model.getObservableStyles(this);
-												ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
-												ObservableValue<String> observable = model.getObservableValue(this, ReactorStatics.SELECTION_STRING);
-												observable.addListener(listener);
-												map.put("background-color", observable.getValue());
-											}
-										});
-										optionElement.addPrefixBinding(model -> {
-											if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-												model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
-										});
-										// bindStyle("background-color", GenericModel::getSelectionString);
-										// optionElement.bindStyle("background-color", GenericModel::getString);
-									}
-								};
-							}
-						};
 					}
 				};
-			};
+			}
 
 			@Override
 			protected void footer() {
@@ -249,14 +172,10 @@ public class GSTable extends GSComposite {
 						addStyle("margin-bottom", "1px");
 						new GSButton(this) {
 							{
-								// storeProperty(ReactorStatics.DISABLED, model -> {
-								// ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
-								// return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? "disabled" : "", observable);
-								// });
 								bindAttribute("disabled", ReactorStatics.DISABLED, model -> {
 									ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
 									return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? "disabled" : "", observable);
-								});// model -> new CheckInputsValidityVisitor(model).isInvalid(), "disabled");
+								});
 								bindAction(modelContext -> {
 									try {
 										new HolderVisitor().visit(modelContext);

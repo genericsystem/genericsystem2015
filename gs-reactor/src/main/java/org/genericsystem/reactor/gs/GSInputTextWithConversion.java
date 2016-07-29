@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model.TriFunction;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSInputText;
 import org.genericsystem.reactor.model.GenericModel;
@@ -93,6 +95,23 @@ public class GSInputTextWithConversion extends GSInputText {
 				if (nva != null)
 					model.getGeneric().updateValue(nva);
 			});
+		}
+	}
+
+	public static class GSInputTextCreatorWithConversion extends GSInputTextWithConversion {
+
+		public GSInputTextCreatorWithConversion(GSTag parent) {
+			super(parent);
+			createNewProperty(ReactorStatics.ACTION);
+			this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[0], value));
+		}
+
+		@Override
+		public StringConverter<?> getConverter(GenericModel model) {
+			Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
+			if (clazz == null)
+				clazz = String.class;
+			return ApiStatics.STRING_CONVERTERS.get(clazz);
 		}
 	}
 }

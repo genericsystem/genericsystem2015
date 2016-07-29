@@ -10,9 +10,11 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxCreator;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
+import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextCreatorWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
-import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
+import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSCheckBox;
@@ -114,6 +116,23 @@ public class GSLinks {
 		GSTag build(GSTag parent);
 	}
 
+	public static class GSAttributeCreator extends GSCellEditor {
+
+		public GSAttributeCreator(GSTag parent, FlexDirection direction) {
+			super(parent, direction, GSHolderCreator::new, GSBooleanHolderCreator::new, GSLinkCreator::new);
+		}
+
+		@Override
+		public void style(Tag<?> tag) {
+			tag.addStyle("flex", "1");
+			tag.addStyle("color", "#ffffff");
+			tag.addStyle("background-color", "#dda5a5");
+			tag.addStyle("margin-right", "1px");
+			tag.addStyle("margin-bottom", "1px");
+			tag.addStyle("overflow", "hidden");
+		}
+	}
+
 	public static class GSCellEditor extends GSSection {
 
 		private final GSTagConstructor holderEditorConstructor;
@@ -121,31 +140,36 @@ public class GSLinks {
 		private final GSTagConstructor linkEditorConstructor;
 
 		public GSCellEditor(GSTag parent, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
+			this(parent, FlexDirection.ROW, holderEditorConstructor, booleanHolderEditorConstructor, linkEditorConstructor);
+		}
+
+		public GSCellEditor(GSTag parent, FlexDirection direction, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
 			// TODO: filter only once.
-			super(parent, FlexDirection.ROW);
+			super(parent, direction);
 			this.holderEditorConstructor = holderEditorConstructor;
 			this.booleanHolderEditorConstructor = booleanHolderEditorConstructor;
 			this.linkEditorConstructor = linkEditorConstructor;
 			addStyle("flex", "1");
+			addStyle("overflow", "hidden");
 			content();
 		}
 
 		private void content() {
-			new GSSection(this, FlexDirection.ROW) {
+			new GSSection(this, this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 					holderEditorConstructor.build(this);
 				}
 			};
-			new GSSection(this, FlexDirection.ROW) {
+			new GSSection(this, this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 					booleanHolderEditorConstructor.build(this);
 				}
 			};
-			new GSSection(this, FlexDirection.ROW) {
+			new GSSection(this, this.getDirection()) {
 				{
 					style(this);
 					select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
@@ -223,6 +247,13 @@ public class GSLinks {
 		}
 	}
 
+	public static class GSHolderCreator extends GSHolderEditor {
+
+		public GSHolderCreator(GSTag parent) {
+			super(parent, GSInputTextCreatorWithConversion::new);
+		}
+	}
+
 	@FunctionalInterface
 	public interface GSCheckBoxConstructor {
 		GSCheckBox build(GSTag parent);
@@ -287,6 +318,13 @@ public class GSLinks {
 		}
 	}
 
+	public static class GSBooleanHolderCreator extends GSBooleanHolderEditor {
+
+		public GSBooleanHolderCreator(GSTag parent) {
+			super(parent, GSCheckBoxCreator::new);
+		}
+	}
+
 	public static class GSLinkEditor extends GSSection {
 
 		public GSLinkEditor(GSTag parent) {
@@ -320,7 +358,7 @@ public class GSLinks {
 		private List<Property<GenericModel>> selections = new ArrayList<>();
 
 		public GSLinkAdder(GSTag parent) {
-			super(parent, GSLinkComponentCreator::new);
+			super(parent, GSLinkComponentAdder::new);
 			new GSButton(this) {
 				{
 					addStyle("justify-content", "center");
@@ -345,6 +383,13 @@ public class GSLinks {
 
 		public List<Property<GenericModel>> getSelections() {
 			return selections;
+		}
+	}
+
+	public static class GSLinkCreator extends GSLinkEditor {
+
+		public GSLinkCreator(GSTag parent) {
+			super(parent, GSLinkComponentCreator::new);
 		}
 	}
 
@@ -397,13 +442,21 @@ public class GSLinks {
 		}
 	}
 
-	public static class GSLinkComponentCreator extends GSLinkComponentSelector {
+	public static class GSLinkComponentAdder extends GSLinkComponentSelector {
 
-		public GSLinkComponentCreator(GSTag parent) {
-			super(parent, ColorsSelect::new);
+		public GSLinkComponentAdder(GSTag parent) {
+			super(parent, CompositeSelectWithEmptyEntry::new);
 			forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[4])));
 			if (parent instanceof GSLinkAdder)
 				select.addPostfixBinding(model -> ((GSLinkAdder) parent).getSelections().add(model.getProperty(select, ReactorStatics.SELECTION)));
+		}
+	}
+
+	public static class GSLinkComponentCreator extends GSLinkComponentSelector {
+
+		public GSLinkComponentCreator(GSTag parent) {
+			super(parent, CompositeSelectWithEmptyEntry::new);
+			forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 	}
 }
