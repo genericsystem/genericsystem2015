@@ -172,9 +172,9 @@ public class GSTable extends GSComposite {
 						addStyle("margin-bottom", "1px");
 						new GSButton(this) {
 							{
-								bindAttribute("disabled", ReactorStatics.DISABLED, model -> {
+								bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> {
 									ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
-									return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? "disabled" : "", observable);
+									return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? ReactorStatics.DISABLED : "", observable);
 								});
 								bindAction(modelContext -> {
 									try {

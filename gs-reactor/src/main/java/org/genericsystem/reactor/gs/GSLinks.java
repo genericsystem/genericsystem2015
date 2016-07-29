@@ -54,7 +54,7 @@ public class GSLinks {
 					};
 					new GSCheckBoxEditor(this) {
 						{
-							addAttribute("disabled", "disabled");
+							addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
 							select(gs -> Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 						}
 					};
