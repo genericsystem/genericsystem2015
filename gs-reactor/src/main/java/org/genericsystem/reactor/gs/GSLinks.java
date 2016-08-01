@@ -255,7 +255,7 @@ public class GSLinks {
 
 		public GSHolderCreator(GSTag parent) {
 			super(parent, GSInputTextCreatorWithConversion::new);
-			if (parent.getParent().getParent() instanceof GSInstanceCreator)
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
 				input.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), model.getProperty(input, ReactorStatics.VALUE)));
 		}
 	}
@@ -328,7 +328,7 @@ public class GSLinks {
 
 		public GSBooleanHolderCreator(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
-			if (parent.getParent().getParent() instanceof GSInstanceCreator)
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
 				checkbox.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), model.getProperty(checkbox, ReactorStatics.VALUE)));
 		}
 	}
@@ -350,6 +350,7 @@ public class GSLinks {
 			super(parent, FlexDirection.ROW);
 			addStyle("width", "100%");
 			addStyle("height", "100%");
+			createNewProperty(ReactorStatics.COMPONENTS);
 			components = constructor.build(this);
 		}
 	}
@@ -377,8 +378,8 @@ public class GSLinks {
 
 		public GSLinkCreator(GSTag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
-			if (parent.getParent().getParent() instanceof GSInstanceCreator)
-				addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getLinksValues().put(model.getGeneric(), components.getSelections()));
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
+				addPostfixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getLinksValues().put(model.getGeneric(), (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()));
 		}
 	}
 
@@ -392,14 +393,16 @@ public class GSLinks {
 					addStyle("align-items", "center");
 					setText("+");
 					bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(() -> {
-						List<Generic> selectedGenerics = components.getSelections().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
+								.filter(gen -> gen != null).collect(Collectors.toList());
 						return selectedGenerics.size() + 1 != model.getGeneric().getComponents().size() ? ReactorStatics.DISABLED : "";
-					}, components.getSelections().stream().toArray(Property[]::new)));
+					}, ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new)));
 					bindAction(model -> {
 						try {
-							List<Generic> selectedGenerics = components.getSelections().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+							List<Property<GenericModel>> selectedComponents = (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue();
+							List<Generic> selectedGenerics = selectedComponents.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 							model.getGenerics()[3].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
-							components.getSelections().stream().forEach(sel -> sel.setValue(null));
+							selectedComponents.stream().forEach(sel -> sel.setValue(null));
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}
@@ -416,7 +419,6 @@ public class GSLinks {
 
 	public static class GSLinkComponentSelector extends GSSection {
 
-		protected List<Property<GenericModel>> selections = new ArrayList<>();
 		protected GSSelect select;
 
 		public GSLinkComponentSelector(GSTag parent) {
@@ -442,17 +444,20 @@ public class GSLinks {
 			});
 			select.addStyle("width", "100%");
 			select.addStyle("height", "100%");
+			select.addPostfixBinding(model -> {
+				Property selectedComponents = getProperty(ReactorStatics.COMPONENTS, model.getParent());
+				if (selectedComponents != null) {
+					if (selectedComponents.getValue() == null)
+						selectedComponents.setValue(new ArrayList<Property<GenericModel>>());
+					((List<Property<GenericModel>>) selectedComponents.getValue()).add(model.getProperty(select, ReactorStatics.SELECTION));
+				}
+			});
 			new GSLabel(this) {
 				{
 					select(gs -> !gs[1].isReferentialIntegrityEnabled(pos(gs[1], gs[0])) ? gs[0] : null);
 					bindText(GenericModel::getString);
 				}
 			};
-			select.addPostfixBinding(model -> selections.add(model.getProperty(select, ReactorStatics.SELECTION)));
-		}
-
-		public List<Property<GenericModel>> getSelections() {
-			return selections;
 		}
 	}
 
@@ -484,7 +489,7 @@ public class GSLinks {
 
 		private Property<Serializable> newInstanceValue;
 		private Map<Generic, Property<Serializable>> holdersValues = new HashMap<>();
-		private Map<Generic, List<Property<GenericModel>>> linksValues = new HashMap<>();
+		private Map<Generic, List<Property<GenericModel>>> componentsValues = new HashMap<>();
 
 		public GSInstanceCreator(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -495,7 +500,7 @@ public class GSLinks {
 		}
 
 		public Map<Generic, List<Property<GenericModel>>> getLinksValues() {
-			return linksValues;
+			return componentsValues;
 		}
 
 		@Override
@@ -537,20 +542,18 @@ public class GSLinks {
 							});
 							bindAction(model -> {
 								Generic newInstance = model.getGeneric().setInstance(newInstanceValue.getValue());
-								System.out.println("HoldersValues : " + holdersValues + " linksValues : " + linksValues);
 								for (Entry<Generic, Property<Serializable>> entry : holdersValues.entrySet())
 									if (entry.getValue().getValue() != null) {
 										newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
 										entry.getValue().setValue(null);
 									}
-								for (Entry<Generic, List<Property<GenericModel>>> entry : linksValues.entrySet()) {
-									System.out.println("Entry : " + entry.getKey() + " value " + entry.getValue().stream().filter(e -> e.getValue() != null).map(o -> o.getValue().getGeneric()).collect(Collectors.toList()));
+								for (Entry<Generic, List<Property<GenericModel>>> entry : componentsValues.entrySet()) {
 									List<Generic> selectedGenerics = entry.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-									System.out.println("Selected generics : " + selectedGenerics + ", components : " + entry.getKey().getComponents());
 									if (!selectedGenerics.isEmpty() && selectedGenerics.size() + 1 == entry.getKey().getComponents().size())
 										newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
 									entry.getValue().stream().forEach(sel -> sel.setValue(null));
 								}
+								newInstanceValue.setValue(null);
 							});
 							setText("Add");
 							addStyle("width", "100%");
