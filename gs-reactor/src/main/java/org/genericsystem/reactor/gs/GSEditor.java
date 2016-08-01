@@ -1,17 +1,14 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.gs.GSLinks.GSBooleanHolderAdder;
-import org.genericsystem.reactor.gs.GSLinks.GSBooleanHolderEditor;
-import org.genericsystem.reactor.gs.GSLinks.GSBooleanHolderEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSLinks.GSCellEditor;
-import org.genericsystem.reactor.gs.GSLinks.GSHolderAdder;
-import org.genericsystem.reactor.gs.GSLinks.GSHolderEditor;
-import org.genericsystem.reactor.gs.GSLinks.GSHolderEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSLinks.GSLinkAdder;
-import org.genericsystem.reactor.gs.GSLinks.GSLinkEditor;
-import org.genericsystem.reactor.gs.GSLinks.GSLinkEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSLinks.InstanceLinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
+import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditor;
+import org.genericsystem.reactor.gs.GSCellDisplayer.InstanceLinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderAdder;
+import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkAdder;
+import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkEditorWithRemoval;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;

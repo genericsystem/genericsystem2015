@@ -2,9 +2,8 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSLinks.GSInstanceCellDisplayer;
-import org.genericsystem.reactor.gs.GSLinks.GSInstanceCreator;
-import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSCellDisplayer.GSInstanceCellDisplayer;
+import org.genericsystem.reactor.gs.GSCellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSHyperLink;
