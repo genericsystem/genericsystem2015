@@ -13,7 +13,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Visitor.CheckInputsValidityVisitor;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextCreatorWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
@@ -255,8 +254,10 @@ public class GSLinks {
 
 		public GSHolderCreator(GSTag parent) {
 			super(parent, GSInputTextCreatorWithConversion::new);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator) {
 				input.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), model.getProperty(input, ReactorStatics.VALUE)));
+				input.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getPropertiesInvalid().add(model.getObservableValue(input, ReactorStatics.INVALID)));
+			}
 		}
 	}
 
@@ -488,8 +489,9 @@ public class GSLinks {
 	public static class GSInstanceCreator extends GSComposite {
 
 		private Property<Serializable> newInstanceValue;
-		private Map<Generic, Property<Serializable>> holdersValues = new HashMap<>();
-		private Map<Generic, List<Property<GenericModel>>> componentsValues = new HashMap<>();
+		private final Map<Generic, Property<Serializable>> holdersValues = new HashMap<>();
+		private final Map<Generic, List<Property<GenericModel>>> componentsValues = new HashMap<>();
+		private final List<ObservableValue> propertiesInvalid = new ArrayList<>();
 
 		public GSInstanceCreator(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
@@ -501,6 +503,10 @@ public class GSLinks {
 
 		public Map<Generic, List<Property<GenericModel>>> getLinksValues() {
 			return componentsValues;
+		}
+
+		public List<ObservableValue> getPropertiesInvalid() {
+			return propertiesInvalid;
 		}
 
 		@Override
@@ -537,8 +543,9 @@ public class GSLinks {
 					new GSButton(this) {
 						{
 							bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> {
-								ObservableValue<Boolean> observable = new CheckInputsValidityVisitor(model).isInvalid();
-								return Bindings.createStringBinding(() -> Boolean.TRUE.equals(observable.getValue()) ? ReactorStatics.DISABLED : "", observable);
+								ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> propertiesInvalid.stream().map(input -> (Boolean) input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b),
+										propertiesInvalid.stream().toArray(ObservableValue[]::new));
+								return Bindings.createStringBinding(() -> Boolean.TRUE.equals(invalid.getValue()) ? ReactorStatics.DISABLED : "", invalid);
 							});
 							bindAction(model -> {
 								Generic newInstance = model.getGeneric().setInstance(newInstanceValue.getValue());
