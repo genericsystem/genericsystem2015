@@ -69,12 +69,6 @@ public class Model {
 		return propertiesMap.values();
 	}
 
-	// Avoid direct access to map
-	@Deprecated
-	public Map<Tag<?>, Map<String, ObservableValue<Object>>> getProperties() {
-		return propertiesMap;
-	}
-
 	public void storeProperty(Tag tag, String propertyName, ObservableValue value) {
 		assert viewContextsMap.keySet().contains(tag);
 		if (propertiesMap.get(tag).containsKey(propertyName))
