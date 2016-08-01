@@ -2,8 +2,8 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSLinks.GSInstanceCellDisplayer;
 import org.genericsystem.reactor.gs.GSLinks.GSInstanceCreator;
-import org.genericsystem.reactor.gs.GSLinks.LinkDisplayer;
 import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSH1;
@@ -77,11 +77,9 @@ public class GSTable extends GSComposite {
 
 			@Override
 			protected void sections() {
-				new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1]))) {
+				new LinkTitleDisplayer(this) {
 					{
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-						addStyle("flex", "1");
-						addStyle("overflow", "hidden");
 					}
 				};
 			}
@@ -146,9 +144,8 @@ public class GSTable extends GSComposite {
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new LinkDisplayer(this) {
+						new GSInstanceCellDisplayer(this) {
 							{
-								addStyle("flex", "1");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
 							}
 						};

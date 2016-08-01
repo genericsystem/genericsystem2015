@@ -19,4 +19,12 @@ public class GSCheckBoxWithValue extends GSCheckBox {
 			bindActionToValueChangeListener(ReactorStatics.VALUE, (model, nva) -> model.getGeneric().updateValue(nva));
 		}
 	}
+
+	public static class GSCheckBoxDisplayer extends GSCheckBoxEditor {
+
+		public GSCheckBoxDisplayer(GSTag parent) {
+			super(parent);
+			addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
+		}
+	}
 }

@@ -11,7 +11,7 @@ import org.genericsystem.reactor.gs.GSLinks.GSHolderEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSLinks.GSLinkAdder;
 import org.genericsystem.reactor.gs.GSLinks.GSLinkEditor;
 import org.genericsystem.reactor.gs.GSLinks.GSLinkEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSLinks.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSLinks.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -66,17 +66,13 @@ public class GSEditor extends GSComposite {
 				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "0.3");
-						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta()))) {
+						new InstanceLinkTitleDisplayer(this) {
 							{
-								addStyle("flex", "1");
-								addStyle("overflow", "hidden");
 								select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0].getMeta());
 							}
 						};
-						new LinkTitleDisplayer(this, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1].getMeta()))) {
+						new InstanceLinkTitleDisplayer(this) {
 							{
-								addStyle("flex", "1");
-								addStyle("overflow", "hidden");
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 						};

@@ -148,7 +148,5 @@ public class GSComposite extends GSSection {
 				}
 			};
 		}
-
 	}
-
 }
