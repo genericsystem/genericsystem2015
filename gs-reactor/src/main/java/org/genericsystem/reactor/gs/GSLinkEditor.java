@@ -73,11 +73,15 @@ public class GSLinkEditor extends GSSection {
 					addStyle("align-items", "center");
 					addStyle("height", "100%");
 					setText("+");
+					bindAttribute(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY,
+							model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.COMPONENTS, model).getValue() != null ? "flex" : "none", getProperty(ReactorStatics.COMPONENTS, model)));
 					bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(() -> {
+						if (getProperty(ReactorStatics.COMPONENTS, model).getValue() == null)
+							return ReactorStatics.DISABLED;
 						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
 								.filter(gen -> gen != null).collect(Collectors.toList());
 						return selectedGenerics.size() + 1 != model.getGeneric().getComponents().size() ? ReactorStatics.DISABLED : "";
-					}, ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new)));
+					}, getProperty(ReactorStatics.COMPONENTS, model).getValue() != null ? ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new) : null));
 					bindAction(model -> {
 						try {
 							List<Property<GenericModel>> selectedComponents = (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue();
