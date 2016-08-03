@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagProperty;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSInstanceCellDisplayer;
 import org.genericsystem.reactor.gs.GSCellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
@@ -18,12 +17,17 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 public class GSTable extends GSComposite {
 
-	public GSTable(GSTag parent) {
-		super(parent, FlexDirection.COLUMN);
+	private GSTag selectableTag;
+	private TagProperty<GenericModel> selectionProperty;
+
+	public GSTable(GSTag parent, TagProperty<GenericModel> selectionProperty) {
+		this(parent, FlexDirection.COLUMN, selectionProperty);
 	}
 
-	public GSTable(GSTag parent, FlexDirection flexDirection) {
+	public GSTable(GSTag parent, FlexDirection flexDirection, TagProperty<GenericModel> selectionProperty) {
 		super(parent, flexDirection);
+		this.selectionProperty = selectionProperty;
+		bindSelection(selectableTag, selectionProperty);
 		addStyle("flex", "1");
 	}
 
@@ -109,7 +113,7 @@ public class GSTable extends GSComposite {
 
 	@Override
 	protected void sections() {
-		Tag<GenericModel> selectableTag = new GSComposite(this, this.getReverseDirection()) {
+		selectableTag = new GSComposite(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES);
@@ -128,7 +132,7 @@ public class GSTable extends GSComposite {
 						new GSHyperLink(this) {
 							{
 								bindText(GenericModel::getString);
-								bindAction(model -> getProperty(ReactorStatics.SELECTION, model).setValue(model));
+								bindAction(model -> selectionProperty.setValue(model.getGeneric().getMeta().getMeta(), model));
 							}
 						};
 
@@ -177,6 +181,5 @@ public class GSTable extends GSComposite {
 				};
 			}
 		};
-		bindSelection(selectableTag);
 	}
 }

@@ -1,9 +1,12 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
-import java.util.function.Function;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.ConverterProperty;
+import org.genericsystem.reactor.TagProperty.InvalidProperty;
+import org.genericsystem.reactor.TagProperty.ValueProperty;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSInputText;
 import org.genericsystem.reactor.model.GenericModel;
@@ -11,13 +14,15 @@ import org.genericsystem.reactor.model.GenericModel;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
-public class GSInputTextWithConversion extends GSInputText {
+public class GSInputTextWithConversion<T extends Serializable> extends GSInputText {
 
 	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
+	protected final TagProperty<StringConverter<T>> converterProperty;
+	protected final TagProperty<T> valueProperty;
+	protected final TagProperty<Boolean> invalidProperty;
 
 	public GSInputTextWithConversion(GSTag parent) {
 		super(parent);
@@ -25,91 +30,71 @@ public class GSInputTextWithConversion extends GSInputText {
 		addStyle("width", "100%");
 		addStyle("height", "100%");
 
-		createNewProperty(ReactorStatics.CONVERTER);
-		initProperty(ReactorStatics.CONVERTER, model -> getConverter(model));
-		createNewProperty(ReactorStatics.VALUE);
+		converterProperty = createNewProperty(ConverterProperty::new);
+		initProperty(converterProperty, model -> getConverter(model));
 
-		storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
+		valueProperty = createNewProperty(ValueProperty::new);
+		bindBiDirectionalAttributeOnEnter(valueProperty, ReactorStatics.VALUE);
+
+		invalidProperty = storeProperty(InvalidProperty::new, model -> Bindings.createBooleanBinding(() -> {
 			boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 			String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
 			if (required && (value == null || value.trim().isEmpty()))
 				return true;
 			try {
-				((StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue()).fromString(value);
+				converterProperty.getValue(model.getGeneric()).fromString(value);
 				return false;
 			} catch (Exception e) {
 				return true;
 			}
 		}, model.getObservableAttributes(this)));
-		bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
-
-		bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE, model -> (StringConverter) getProperty(ReactorStatics.CONVERTER, model).getValue());
+		bindOptionalStyleClass(ReactorStatics.INVALID, invalidProperty);
 	}
 
-	private void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName) {
-		bindBiDirectionalAttributeOnEnter(propertyName, attributeName, ApiStatics.STRING_CONVERTERS.get(String.class));
-	}
-
-	private <T extends Serializable> void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName, StringConverter<T> stringConverter) {
-		bindBiDirectionalAttributeOnEnter(propertyName, attributeName, model -> stringConverter);
-	}
-
-	private <T extends Serializable> void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName, Function<GenericModel, StringConverter<T>> getStringConverter) {
+	private void bindBiDirectionalAttributeOnEnter(TagProperty<T> property, String attributeName) {
 		bindAction(model -> {
-			Property observable = getProperty(propertyName, model);
-			StringConverter stringConverter = getStringConverter.apply(model);
+			StringConverter<T> stringConverter = converterProperty.getValue(model.getGeneric());
 			String attributeValue = model.getObservableAttributes(this).get(attributeName);
 			try {
-				observable.setValue(stringConverter.fromString(attributeValue));
+				property.setValue(model.getGeneric(), stringConverter.fromString(attributeValue));
 			} catch (Exception ignore) {
 				log.warn("Conversion exception : " + ignore.getMessage());
 			}
 		});
 		addPrefixBinding(model -> {
-			StringConverter stringConverter = getStringConverter.apply(model);
-			ChangeListener listener = (o, old, newValue) -> model.getObservableAttributes(this).put(attributeName, stringConverter.toString(newValue));
-			Property observable = getProperty(propertyName, model);
-			observable.addListener(listener);
+			StringConverter<T> stringConverter = converterProperty.getValue(model.getGeneric());
+			ChangeListener<T> listener = (o, old, newValue) -> model.getObservableAttributes(this).put(attributeName, stringConverter.toString(newValue));
+			property.getProperty(model.getGeneric()).addListener(listener);
 		});
 	}
 
-	public StringConverter<?> getConverter(GenericModel model) {
-		Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
-		if (clazz == null) {
-			if (model.getGeneric().getValue() != null)
-				clazz = model.getGeneric().getValue().getClass();
-			else
-				clazz = String.class;
-		}
+	public StringConverter<T> getConverter(GenericModel model) {
+		Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
+		if (clazz == null)
+			clazz = String.class;
 		return ApiStatics.STRING_CONVERTERS.get(clazz);
 	}
 
-	public static class GSInputTextEditorWithConversion extends GSInputTextWithConversion {
+	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> {
 
 		public GSInputTextEditorWithConversion(GSTag parent) {
 			super(parent);
-			initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
-			bindActionToValueChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+			initProperty(valueProperty, model -> (T) model.getGeneric().getValue());
+			bindActionToValueChangeListener(valueProperty, (model, nva) -> {
 				if (nva != null)
 					model.getGeneric().updateValue(nva);
 			});
 		}
-	}
-
-	// TODO: Delete this class.
-	public static class GSInputTextCreatorWithConversion extends GSInputTextWithConversion {
-
-		public GSInputTextCreatorWithConversion(GSTag parent) {
-			super(parent);
-			// createNewProperty(ReactorStatics.ACTION);
-			// this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[0], value));
-		}
 
 		@Override
-		public StringConverter<?> getConverter(GenericModel model) {
-			Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
-			if (clazz == null)
-				clazz = String.class;
+		public StringConverter<T> getConverter(GenericModel model) {
+			Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
+			if (clazz == null) {
+				if (model.getGeneric().getValue() != null)
+					clazz = model.getGeneric().getValue().getClass();
+				else
+					clazz = String.class;
+			}
 			return ApiStatics.STRING_CONVERTERS.get(clazz);
 		}
 	}

@@ -1,19 +1,25 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.model.StringExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,7 +29,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -32,15 +37,6 @@ import javafx.collections.SetChangeListener;
 import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 import javafx.util.StringConverter;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.StringExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -96,6 +92,11 @@ public abstract class Tag<M extends Model> {
 		return getParent().getWebSocket();
 	}
 
+	@FunctionalInterface
+	public interface ModelPropertyConstructor<T> {
+		TagProperty<T> build();
+	}
+
 	protected <W, NODE extends HtmlDomNode> void addBidirectionalBinding(Function<NODE, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
@@ -112,9 +113,9 @@ public abstract class Tag<M extends Model> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
 
-	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String propertyName) {
+	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, TagProperty<Boolean> property) {
 		addPrefixBinding(modelContext -> {
-			ObservableValue<Boolean> optional = modelContext.getObservableValue(this, propertyName);
+			ObservableValue<Boolean> optional = property.getObservable(((GenericModelInterface) modelContext).getGeneric());
 			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
 			Consumer<Boolean> consumer = bool -> {
 				if (Boolean.TRUE.equals(bool))
@@ -127,9 +128,9 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<M, ObservableValue<Boolean>> applyOnModel) {
-		storeProperty(modelPropertyName, applyOnModel);
-		bindOptionalStyleClass(styleClass, modelPropertyName);
+	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, ModelPropertyConstructor<Boolean> constructor, Function<M, ObservableValue<Boolean>> applyOnModel) {
+		TagProperty<Boolean> property = storeProperty(constructor, applyOnModel);
+		bindOptionalStyleClass(styleClass, property);
 	}
 
 	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
@@ -144,40 +145,8 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	protected <SUBMODEL extends GenericModel> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {
+	protected void setSubModels(Model model, Tag<?> child, ObservableList<GenericModel> subModels) {
 		model.setSubContexts(child, subModels);
-	}
-
-	public <T> Property<T> getProperty(String propertyName, Model model) {
-		return getProperty(propertyName, new Model[] { model });
-	}
-
-	private <T> Property<T> getProperty(String propertyName, Model[] model) {
-		Tag<?> tag = this;
-		while (tag != null && model[0] != null) {
-			if (model[0].containsProperty(tag, propertyName))
-				return model[0].getProperty(tag, propertyName);
-			if (tag.metaBinding != null && model[0].getViewContext(tag.getParent()) == null)
-				model[0] = model[0].getParent();
-			tag = tag.getParent();
-		}
-		return null;
-	}
-
-	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
-		return getObservableValue(propertyName, new Model[] { model });
-	}
-
-	private <T> ObservableValue<T> getObservableValue(String propertyName, Model[] model) {
-		Tag<?> tag = this;
-		while (tag != null && model[0] != null) {
-			if (model[0].containsProperty(tag, propertyName))
-				return model[0].getObservableValue(tag, propertyName);
-			if (tag.metaBinding != null && model[0].getViewContext(tag.getParent()) == null)
-				model[0] = model[0].getParent();
-			tag = tag.getParent();
-		}
-		return null;
 	}
 
 	@FunctionalInterface
@@ -189,67 +158,30 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
 	}
 
-	// The form tells here :
-	protected void bindBiDirectionalSelection(Tag<GenericModel> subElement) {
-		addPostfixBinding(modelContext -> {
-			ObservableList<GenericModel> subContexts = modelContext.getSubContexts(subElement);
-			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
-			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
-			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, modelContext);
-			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT, modelContext).getValue() : 0;
-			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
-			Property<Number> selectionIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null, genericModel -> subContexts.indexOf(genericModel)
-					+ selectionShift);
-			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
-				if (selection != null) {
-					Number oldIndex = (Number) getProperty(ReactorStatics.SELECTION_INDEX, modelContext).getValue();
-					Number newIndex = subContexts.indexOf(selection.getValue()) + selectionShift;
-					if (newIndex != oldIndex)
-						this.getProperty(ReactorStatics.SELECTION_INDEX, modelContext).setValue(newIndex);
-				}
-			});
-		});
-	}
-
-	protected void bindSelection(Tag<GenericModel> subElement) {
-		addPostfixBinding(model -> {
-			ObservableList<GenericModel> subContexts = model.getSubContexts(subElement);
-			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, model);
-			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
-				if (selection != null)
-					while (change.next())
-						if (change.wasRemoved() && !change.wasAdded())
-							if (change.getRemoved().contains(selection.getValue()))
-								selection.setValue(null);
-			});
-		});
-	}
-
-	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
+	private void bindMapElement(String name, TagProperty<String> property, Function<Model, Map<String, String>> getMap) {
 		addPrefixBinding(model -> {
 			Map<String, String> map = getMap.apply(model);
 			ChangeListener<String> listener = (o, old, newValue) -> map.put(name, newValue);
-			ObservableValue<String> observable = getObservableValue(propertyName, model);
+			ObservableValue<String> observable = property.getObservable(((GenericModelInterface) model).getGeneric());
 			observable.addListener(listener);
 			map.put(name, observable.getValue());
 		});
 	}
 
-	private void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap) {
-		bindBiDirectionalMapElement(propertyName, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
+	private <T extends Serializable> void bindBiDirectionalMapElement(TagProperty<T> property, String name, Function<Model, ObservableMap<String, String>> getMap) {
+		bindBiDirectionalMapElement(property, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
 	}
 
-	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
-		bindBiDirectionalMapElement(propertyName, name, getMap, model -> stringConverter);
+	private <T extends Serializable> void bindBiDirectionalMapElement(TagProperty<T> property, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
+		bindBiDirectionalMapElement(property, name, getMap, model -> stringConverter);
 	}
 
-	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
+	private <T extends Serializable> void bindBiDirectionalMapElement(TagProperty<T> property, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
 		addPrefixBinding(modelContext -> {
 			ObservableMap<String, String> map = getMap.apply(modelContext);
 			StringConverter<T> stringConverter = getStringConverter.apply(modelContext);
 			ChangeListener<T> listener = (o, old, newValue) -> map.put(name, stringConverter.toString(newValue));
-			Property<T> observable = getProperty(propertyName, modelContext);
+			Property<T> observable = property.getProperty(((GenericModelInterface) modelContext).getGeneric());
 			observable.addListener(listener);
 			map.addListener((MapChangeListener<String, String>) c -> {
 				if (!name.equals(c.getKey()))
@@ -264,44 +196,55 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public <T extends Serializable> void bindActionToValueChangeListener(String propertyName, BiConsumer<M, T> listener) {
+	public interface GenericModelInterface {
+		public Generic getGeneric();
+	}
+
+	public <T extends Serializable> void bindActionToValueChangeListener(TagProperty<T> property, BiConsumer<M, T> listener) {
 		addPrefixBinding(modelContext -> {
-			ObservableValue<T> observable = getObservableValue(propertyName, modelContext);
-			observable.addListener((o, old, nva) -> listener.accept(modelContext, nva));
+			property.getObservable(((GenericModelInterface) modelContext).getGeneric()).addListener((o, old, nva) -> listener.accept(modelContext, nva));
 		});
 	}
 
-	public void createNewProperty(String propertyName) {
+	// TODO: Move everything related to ModelProperty to GenericModel and GSTag since they use Generics.
+	// No need to store in Model if Generics already stored in ModelProperty…
+	public <T> TagProperty<T> createNewProperty(ModelPropertyConstructor<T> constructor) {
+		TagProperty<T> modelProperty = constructor.build();
 		addPrefixBinding(modelContext -> {
-			modelContext.createNewProperty(this, propertyName);
+			modelProperty.setObservable(((GenericModelInterface) modelContext).getGeneric(), new SimpleObjectProperty<>());
+			// modelContext.storeProperty(this, modelProperty);
 		});
+		return modelProperty;
 	}
 
-	public <T> void initProperty(String propertyName, T initialValue) {
-		initProperty(propertyName, model -> initialValue);
+	public <T> void initProperty(TagProperty<T> property, T initialValue) {
+		initProperty(property, model -> initialValue);
 	}
 
-	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
+	public <T> void initProperty(TagProperty<T> property, Function<M, T> getInitialValue) {
+		addPrefixBinding(modelContext -> property.setValue(((GenericModelInterface) modelContext).getGeneric(), getInitialValue.apply(modelContext)));
+	}
+
+	public <T> TagProperty<T> storeProperty(ModelPropertyConstructor<T> constructor, Function<M, ObservableValue<T>> applyOnModel) {
+		TagProperty<T> modelObservable = constructor.build();
 		addPrefixBinding(modelContext -> {
-			getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext));
+			modelObservable.setObservable(((GenericModelInterface) modelContext).getGeneric(), applyOnModel.apply(modelContext));
+			// modelContext.storeProperty(this, modelObservable);
 		});
+		return modelObservable;
 	}
 
-	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
+	public void addStyle(String stylePropertyName, String value) {
+		addPrefixBinding(model -> model.getObservableStyles(this).put(stylePropertyName, value));
 	}
 
-	public void addStyle(String propertyName, String value) {
-		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
+	public void bindStyle(String style, TagProperty<String> property) {
+		bindMapElement(style, property, model -> model.getObservableStyles(this));
 	}
 
-	public void bindStyle(String style, String modelPropertyName) {
-		bindMapElement(style, modelPropertyName, model -> model.getObservableStyles(this));
-	}
-
-	public void bindStyle(String style, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
-		storeProperty(propertyName, applyOnModel);
-		bindMapElement(style, propertyName, model -> model.getObservableStyles(this));
+	public void bindStyle(String style, ModelPropertyConstructor<String> constructor, Function<M, ObservableValue<String>> applyOnModel) {
+		TagProperty<String> property = storeProperty(constructor, applyOnModel);
+		bindMapElement(style, property, model -> model.getObservableStyles(this));
 	}
 
 	public void addStyleClasses(String... styleClasses) {
@@ -316,33 +259,33 @@ public abstract class Tag<M extends Model> {
 		addPrefixBinding(model -> model.getObservableAttributes(this).put(attributeName, value));
 	}
 
-	public void bindAttribute(String attributeName, String propertyName) {
-		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+	public void bindAttribute(String attributeName, TagProperty<String> property) {
+		bindMapElement(attributeName, property, model -> model.getObservableAttributes(this));
 	}
 
-	public void bindAttribute(String attributeName, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
-		storeProperty(propertyName, applyOnModel);
-		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+	public void bindAttribute(String attributeName, ModelPropertyConstructor<String> constructor, Function<M, ObservableValue<String>> applyOnModel) {
+		TagProperty<String> property = storeProperty(constructor, applyOnModel);
+		bindMapElement(attributeName, property, model -> model.getObservableAttributes(this));
 	}
 
-	public void bindBiDirectionalAttribute(String propertyName, String attributeName) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this));
+	public <T extends Serializable> void bindBiDirectionalAttribute(TagProperty<T> property, String attributeName) {
+		bindBiDirectionalMapElement(property, attributeName, model -> model.getObservableAttributes(this));
 	}
 
-	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, StringConverter<T> stringConverter) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), stringConverter);
+	public <T extends Serializable> void bindBiDirectionalAttribute(TagProperty<T> property, String attributeName, StringConverter<T> stringConverter) {
+		bindBiDirectionalMapElement(property, attributeName, model -> model.getObservableAttributes(this), stringConverter);
 	}
 
-	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
+	public <T extends Serializable> void bindBiDirectionalAttribute(TagProperty<T> property, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
+		bindBiDirectionalMapElement(property, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
 	}
 
-	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue) {
-		bindOptionalBiDirectionalAttribute(propertyName, attributeName, attributeValue, null);
+	public void bindOptionalBiDirectionalAttribute(TagProperty<Boolean> property, String attributeName, String attributeValue) {
+		bindOptionalBiDirectionalAttribute(property, attributeName, attributeValue, null);
 	}
 
-	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue, String attributeValueFalse) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), new StringConverter<Boolean>() {
+	public void bindOptionalBiDirectionalAttribute(TagProperty<Boolean> property, String attributeName, String attributeValue, String attributeValueFalse) {
+		bindBiDirectionalMapElement(property, attributeName, model -> model.getObservableAttributes(this), new StringConverter<Boolean>() {
 
 			@Override
 			public String toString(Boolean bool) {

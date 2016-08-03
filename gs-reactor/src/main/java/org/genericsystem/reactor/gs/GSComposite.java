@@ -1,6 +1,10 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.SelectionIndexProperty;
+import org.genericsystem.reactor.TagProperty.SelectionProperty;
+import org.genericsystem.reactor.TagProperty.SelectionStringProperty;
+import org.genericsystem.reactor.TagProperty.TextProperty;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.gstag.GSRadio;
@@ -81,7 +85,7 @@ public class GSComposite extends GSSection {
 		protected void sections() {
 			new GSSection(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
-					bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
+					bindStyle("background-color", TextProperty::new, GenericModel::getString);
 					forEach(ColorTitleCompositeFlexElement.this);
 					new GSLabel(this).bindText(GenericModel::getString);
 				}
@@ -115,16 +119,18 @@ public class GSComposite extends GSSection {
 	public static class ColorCompositeRadio extends GSComposite {
 
 		private GSTag flexSubElement;
+		protected final TagProperty<GenericModel> selectionProperty;
+		protected final TagProperty<Number> selectionIndexProperty;
+		protected final TagProperty<String> selectionStringProperty;
 
 		public ColorCompositeRadio(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
-			createNewProperty(ReactorStatics.SELECTION);
-			storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
-			bindBiDirectionalSelection(flexSubElement);
-			storeProperty(ReactorStatics.SELECTION_STRING,
-					model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
-							getProperty(ReactorStatics.SELECTION, model)));
-			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
+			selectionProperty = createNewProperty(SelectionProperty::new);
+			selectionIndexProperty = storeProperty(SelectionIndexProperty::new, model -> model.getSelectionIndex(this));
+			bindBiDirectionalSelection(flexSubElement, selectionProperty, selectionIndexProperty);
+			selectionStringProperty = storeProperty(SelectionStringProperty::new, model -> Bindings
+					.createStringBinding(() -> getStringExtractor().apply(selectionProperty.getValue(model.getGeneric()) != null ? selectionProperty.getValue(model.getGeneric()).getGeneric() : null), selectionProperty.getProperty(model.getGeneric())));
+			bindStyle("background-color", selectionStringProperty);
 			addStyle("padding", "4px");
 		}
 
@@ -138,7 +144,7 @@ public class GSComposite extends GSSection {
 			flexSubElement = new GSSection(this, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
-					bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
+					bindStyle("background-color", TextProperty::new, GenericModel::getString);
 					new GSRadio(this);
 					new GSLabel(this) {
 						{

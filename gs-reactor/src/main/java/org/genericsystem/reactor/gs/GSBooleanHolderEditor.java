@@ -1,18 +1,12 @@
 package org.genericsystem.reactor.gs;
 
-import java.io.Serializable;
-
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gstag.GSButton;
-import org.genericsystem.reactor.gstag.GSCheckBox;
 import org.genericsystem.reactor.model.GenericModel;
-
-import javafx.beans.property.Property;
 
 public class GSBooleanHolderEditor extends GSSection {
 
-	protected GSCheckBox checkbox;
+	protected GSCheckBoxWithValue checkbox;
 
 	public GSBooleanHolderEditor(GSTag parent) {
 		this(parent, GSCheckBoxEditor::new);
@@ -36,7 +30,7 @@ public class GSBooleanHolderEditor extends GSSection {
 
 	@FunctionalInterface
 	public interface GSCheckBoxConstructor {
-		GSCheckBox build(GSTag parent);
+		GSCheckBoxWithValue build(GSTag parent);
 	}
 
 	public static class GSBooleanHolderEditorWithRemoval extends GSBooleanHolderEditor {
@@ -64,9 +58,8 @@ public class GSBooleanHolderEditor extends GSSection {
 					addStyle("align-items", "center");
 					setText("+");
 					bindAction(model -> {
-						Property<Serializable> observable = checkbox.getProperty(ReactorStatics.VALUE, model);
-						model.getGenerics()[3].addHolder(model.getGenerics()[2], observable.getValue());
-						observable.setValue(null);
+						model.getGenerics()[3].addHolder(model.getGenerics()[2], checkbox.valueProperty.getValue(model.getGenerics()[2]));
+						checkbox.valueProperty.setValue(model.getGenerics()[2], null);
 					});
 				}
 			};
@@ -78,7 +71,7 @@ public class GSBooleanHolderEditor extends GSSection {
 		public GSBooleanHolderCreator(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				checkbox.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), model.getProperty(checkbox, ReactorStatics.VALUE)));
+				checkbox.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), checkbox.valueProperty.getProperty(model.getGeneric())));
 		}
 	}
 }

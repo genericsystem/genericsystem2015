@@ -1,20 +1,25 @@
 package org.genericsystem.reactor.gs;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.TagProperty;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 
 public abstract class GSTag extends Tag<GenericModel> {
 	public GSTag(GSTag parent, String tag) {
@@ -112,5 +117,47 @@ public abstract class GSTag extends Tag<GenericModel> {
 			pos++;
 		}
 		return pos;
+	}
+
+	// TODO: Put back into Tag, using Tag<GenericModelInterface> ?
+	protected void bindBiDirectionalSelection(GSTag subElement, TagProperty<GenericModel> selection, TagProperty<Number> selectionIndex) {
+		bindBiDirectionalSelection(subElement, selection, selectionIndex, null);
+	}
+
+	// The form tells here :
+	protected void bindBiDirectionalSelection(GSTag subElement, TagProperty<GenericModel> selectionProperty, TagProperty<Number> selectionIndexProperty, TagProperty<Integer> selectionShiftProperty) {
+		addPostfixBinding(modelContext -> {
+			ObservableList<GenericModel> subContexts = modelContext.getSubContexts(subElement);
+			Generic selectedGeneric = modelContext.getGeneric();
+			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
+			Property<GenericModel> selection = selectionProperty.getProperty(modelContext.getGeneric());
+			int selectionShift = selectionShiftProperty != null ? (Integer) selectionShiftProperty.getValue(modelContext.getGeneric()) : 0;
+			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
+			Property<Number> selectionIndex = selectionIndexProperty.getProperty(modelContext.getGeneric());
+			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
+					genericModel -> subContexts.indexOf(genericModel) + selectionShift);
+			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
+				if (selection != null) {
+					Number oldIndex = selectionIndexProperty.getValue(modelContext.getGeneric());
+					Number newIndex = subContexts.indexOf(selection.getValue()) + selectionShift;
+					if (newIndex != oldIndex)
+						selectionIndexProperty.setValue(modelContext.getGeneric(), newIndex);
+				}
+			});
+		});
+	}
+
+	protected void bindSelection(GSTag subElement, TagProperty<GenericModel> selectionProperty) {
+		addPostfixBinding(model -> {
+			ObservableList<GenericModel> subContexts = model.getSubContexts(subElement);
+			Property<GenericModel> selection = selectionProperty.getProperty(model.getGeneric().getMeta());
+			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
+				if (selection != null)
+					while (change.next())
+						if (change.wasRemoved() && !change.wasAdded())
+							if (change.getRemoved().contains(selection.getValue()))
+								selection.setValue(null);
+			});
+		});
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag.GenericModelInterface;
 import org.genericsystem.todomvc.Todos.Completed;
 
 import javafx.beans.property.Property;
@@ -15,7 +16,7 @@ import javafx.beans.value.ObservableValue;
  * @author Nicolas Feybesse
  *
  */
-public class Todo extends Model {
+public class Todo extends Model implements GenericModelInterface {
 
 	private final Generic generic;
 	private Property<String> todoString;
@@ -25,7 +26,7 @@ public class Todo extends Model {
 		this.generic = generic;
 		todoString = new ReadOnlyObjectWrapper<>(Objects.toString(generic));
 		ObservableValue<Generic> observableHolder = generic.getObservableHolder(generic.getRoot().find(Completed.class));
-		if (observableHolder.getValue() != null && Boolean.TRUE.equals((Boolean) observableHolder.getValue().getValue())) {
+		if (observableHolder.getValue() != null && Boolean.TRUE.equals(observableHolder.getValue().getValue())) {
 			completed.setValue(true);
 		}
 		// completed = Bindings.createBooleanBinding(() -> observableHolder.getValue() != null ? (Boolean) observableHolder.getValue().getValue() : false, observableHolder);
@@ -47,5 +48,9 @@ public class Todo extends Model {
 
 	public void remove() {
 		generic.remove();
+	}
+
+	public Generic getGeneric() {
+		return generic;
 	}
 }

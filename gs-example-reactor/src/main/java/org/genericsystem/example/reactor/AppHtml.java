@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -12,7 +10,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.SelectionProperty;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -25,7 +24,10 @@ import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import io.vertx.core.http.ServerWebSocket;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
@@ -44,20 +46,20 @@ public class AppHtml extends GSApp {
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
 		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
-		createNewProperty(ReactorStatics.SELECTION);
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GSTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
+		TagProperty<GenericModel> selection = createNewProperty(SelectionProperty::new);
+		new GSTable(this, selection).select(StringExtractor.MANAGEMENT, Car.class);
+		new GSTable(this, FlexDirection.ROW, selection).select(StringExtractor.MANAGEMENT, Car.class);
 		new GSEditor(this, FlexDirection.ROW) {
 			{
-				select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
+				select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> selection.getObservable(model.getGeneric()));
 				addStyle("justify-content", "center");
 			}
 		};
 
-		new GSEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+		new GSEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> selection.getObservable(model.getGeneric()));
+		new GSTable(this, selection).select(StringExtractor.MANAGEMENT, Color.class);
 
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
+		new GSTable(this, selection).select(StringExtractor.MANAGEMENT, Engine.class);
 		new GSMonitor(this).addStyle("background-color", "#ffa500");
 	}
 

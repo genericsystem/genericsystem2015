@@ -7,7 +7,8 @@ import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.SelectionProperty;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -18,6 +19,7 @@ import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
 import io.vertx.core.http.ServerWebSocket;
@@ -36,7 +38,7 @@ public class CarColorApp extends GSApp {
 
 	public CarColorApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
-		createNewProperty(ReactorStatics.SELECTION);
+		TagProperty<GenericModel> selectionProperty = createNewProperty(SelectionProperty::new);
 		addStyle("background-color", "#3393ff");
 
 		new GSSection(this, FlexDirection.ROW) {
@@ -49,9 +51,9 @@ public class CarColorApp extends GSApp {
 				new GSUserGuide(this);
 			}
 		};
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+		new GSTable(this, selectionProperty).select(StringExtractor.MANAGEMENT, Car.class);
+		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"), selectionProperty);
+		new GSTable(this, selectionProperty).select(StringExtractor.MANAGEMENT, Color.class);
 		new GSMonitor(this);
 	}
 

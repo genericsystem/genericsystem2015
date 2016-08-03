@@ -1,19 +1,20 @@
 package org.genericsystem.reactor.model;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag.GenericModelInterface;
+
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
  *
  * @param <M>
  */
-public class GenericModel extends Model {
+public class GenericModel extends Model implements GenericModelInterface {
 
 	protected static Logger log = LoggerFactory.getLogger(GenericModel.class);
 	private final Generic[] generics;

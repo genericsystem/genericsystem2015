@@ -3,6 +3,12 @@ package org.genericsystem.todomvc;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag.GenericModelInterface;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -16,17 +22,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Model;
-
 /**
  * @author Nicolas Feybesse
  *
  */
 @SuppressWarnings("unchecked")
-public class TodoList extends Model {
+public class TodoList extends Model implements GenericModelInterface {
 
 	private final Root engine;
 
@@ -173,5 +174,10 @@ public class TodoList extends Model {
 
 	public ObservableValue<String> getCancel() {
 		return cancel;
+	}
+
+	@Override
+	public Generic getGeneric() {
+		return engine;
 	};
 }

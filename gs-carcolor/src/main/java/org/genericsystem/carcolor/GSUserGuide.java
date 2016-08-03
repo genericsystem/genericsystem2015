@@ -1,5 +1,7 @@
 package org.genericsystem.carcolor;
 
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.DisplayProperty;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSection;
@@ -11,19 +13,20 @@ import org.genericsystem.reactor.model.GenericModel;
 
 public class GSUserGuide extends GSSection {
 
+	private TagProperty<String> displayProperty;
+
 	public GSUserGuide(GSSection parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-direction", "column");
 		addStyle("flex-wrap", "nowrap");
 		addStyle("justify-content", "center");
 
-		GSSection gSection = new GSSection(this, FlexDirection.COLUMN) {
+		new GSSection(this, FlexDirection.COLUMN) {
 			{
-
 				addStyleClass("modal");
-				createNewProperty(ReactorStatics.DISPLAY);
-				initProperty(ReactorStatics.DISPLAY, "none");
-				bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY);
+				displayProperty = createNewProperty(DisplayProperty::new);
+				initProperty(displayProperty, "none");
+				bindStyle(ReactorStatics.DISPLAY, displayProperty);
 				new GSSection(this, FlexDirection.COLUMN) {
 					{
 						addStyle("max-width", "40%");
@@ -32,9 +35,7 @@ public class GSUserGuide extends GSSection {
 							{
 								addStyleClass("close");
 								setText("×");
-								bindAction(model -> {
-									this.getParent().getProperty(ReactorStatics.DISPLAY, model).setValue("none");
-								});
+								bindAction(model -> displayProperty.setValue(model.getGeneric(), "none"));
 							}
 						};
 						new GSSection(this, FlexDirection.COLUMN) {
@@ -90,10 +91,7 @@ public class GSUserGuide extends GSSection {
 			{
 				setText("User Guide");
 				addStyleClass("buttonUser");
-
-				bindAction(model -> {
-					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
-				});
+				bindAction(model -> displayProperty.setValue(model.getGeneric(), "flex"));
 			}
 		};
 	};

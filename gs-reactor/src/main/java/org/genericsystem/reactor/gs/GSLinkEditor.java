@@ -5,6 +5,10 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.ComponentsProperty;
+import org.genericsystem.reactor.TagProperty.DisabledProperty;
+import org.genericsystem.reactor.TagProperty.DisplayProperty;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentAdder;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentCreator;
@@ -17,7 +21,8 @@ import javafx.beans.property.Property;
 
 public class GSLinkEditor extends GSSection {
 
-	protected GSSingleLinkComponentEditor components;
+	protected final GSSingleLinkComponentEditor components;
+	protected final TagProperty<List<Property<GenericModel>>> componentsProperty;
 
 	public GSLinkEditor(GSTag parent) {
 		this(parent, GSLinkComponentEditor::new);
@@ -25,13 +30,13 @@ public class GSLinkEditor extends GSSection {
 
 	public GSLinkEditor(GSTag parent, GSLinkComponentConstructor constructor) {
 		super(parent, FlexDirection.ROW);
-		createNewProperty(ReactorStatics.COMPONENTS);
-		components = constructor.build(this);
+		componentsProperty = createNewProperty(ComponentsProperty::new);
+		components = constructor.build(this, componentsProperty);
 	}
 
 	@FunctionalInterface
 	public interface GSLinkComponentConstructor {
-		GSSingleLinkComponentEditor build(GSTag parent);
+		GSSingleLinkComponentEditor build(GSTag parent, TagProperty<List<Property<GenericModel>>> componentsProperty);
 	}
 
 	public static class GSLinkEditorWithRemoval extends GSLinkEditor {
@@ -59,7 +64,7 @@ public class GSLinkEditor extends GSSection {
 		public GSLinkCreator(GSTag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				addPostfixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getLinksValues().put(model.getGeneric(), (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()));
+				addPostfixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getLinksValues().put(model.getGeneric(), componentsProperty.getValue(model.getGeneric())));
 		}
 	}
 
@@ -73,21 +78,18 @@ public class GSLinkEditor extends GSSection {
 					addStyle("align-items", "center");
 					addStyle("height", "100%");
 					setText("+");
-					bindAttribute(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY,
-							model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.COMPONENTS, model).getValue() != null ? "flex" : "none", getProperty(ReactorStatics.COMPONENTS, model)));
-					bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(() -> {
-						if (getProperty(ReactorStatics.COMPONENTS, model).getValue() == null)
+					bindAttribute(ReactorStatics.DISPLAY, DisplayProperty::new, model -> Bindings.createStringBinding(() -> componentsProperty.getValue(model.getGeneric()) != null ? "flex" : "none", componentsProperty.getProperty(model.getGeneric())));
+					bindAttribute(ReactorStatics.DISABLED, DisabledProperty::new, model -> Bindings.createStringBinding(() -> {
+						if (componentsProperty.getValue(model.getGeneric()) == null)
 							return ReactorStatics.DISABLED;
-						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
-								.filter(gen -> gen != null).collect(Collectors.toList());
+						List<Generic> selectedGenerics = componentsProperty.getValue(model.getGeneric()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 						return selectedGenerics.size() + 1 != model.getGeneric().getComponents().size() ? ReactorStatics.DISABLED : "";
-					}, getProperty(ReactorStatics.COMPONENTS, model).getValue() != null ? ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new) : null));
+					}, componentsProperty.getValue(model.getGeneric()) != null ? componentsProperty.getValue(model.getGeneric()).stream().toArray(Property[]::new) : null));
 					bindAction(model -> {
 						try {
-							List<Property<GenericModel>> selectedComponents = (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue();
-							List<Generic> selectedGenerics = selectedComponents.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+							List<Generic> selectedGenerics = componentsProperty.getValue(model.getGeneric()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 							model.getGenerics()[3].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
-							selectedComponents.stream().forEach(sel -> sel.setValue(null));
+							componentsProperty.getValue(model.getGeneric()).stream().forEach(sel -> sel.setValue(null));
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}

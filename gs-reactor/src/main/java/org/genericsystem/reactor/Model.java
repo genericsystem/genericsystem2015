@@ -1,21 +1,18 @@
 package org.genericsystem.reactor;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
+
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -26,17 +23,6 @@ public class Model {
 	protected Model parent;
 	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
-	private Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
-		@Override
-		public Map<String, ObservableValue<Object>> get(Object key) {
-			Map<String, ObservableValue<Object>> properties = super.get(key);
-			if (properties == null) {
-				assert viewContextsMap.keySet().contains(key);
-				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>());
-			}
-			return properties;
-		};
-	};
 
 	public Model getParent() {
 		return this.parent;
@@ -44,36 +30,6 @@ public class Model {
 
 	public <SUBMODEL extends Model> ObservableList<SUBMODEL> getSubContexts(Tag<SUBMODEL> tag) {
 		return (ObservableList<SUBMODEL>) subModelsMap.get(tag);
-	}
-
-	public boolean containsProperty(Tag<?> tag, String propertyName) {
-		return propertiesMap.containsKey(tag) ? propertiesMap.get(tag).containsKey(propertyName) : false;
-	}
-
-	public void createNewProperty(Tag<?> tag, String propertyName) {
-		assert viewContextsMap.keySet().contains(tag);
-		if (propertiesMap.get(tag).containsKey(propertyName))
-			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
-		propertiesMap.get(tag).put(propertyName, new SimpleObjectProperty<>());
-	}
-
-	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String propertyName) {
-		return (ObservableValue<T>) propertiesMap.get(tag).get(propertyName);
-	}
-
-	public <T> Property<T> getProperty(Tag<?> tag, String propertyName) {
-		return (Property<T>) propertiesMap.get(tag).get(propertyName);
-	}
-
-	public Collection<Map<String, ObservableValue<Object>>> getPropertiesMaps() {
-		return propertiesMap.values();
-	}
-
-	public void storeProperty(Tag tag, String propertyName, ObservableValue value) {
-		assert viewContextsMap.keySet().contains(tag);
-		if (propertiesMap.get(tag).containsKey(propertyName))
-			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
-		propertiesMap.get(tag).put(propertyName, value);
 	}
 
 	public List<Model> subContexts() {
@@ -111,17 +67,6 @@ public class Model {
 		}
 		subModelsMap = new HashMap<>();
 		viewContextsMap = new LinkedHashMap<>();
-		propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
-			@Override
-			public Map<String, ObservableValue<Object>> get(Object key) {
-				Map<String, ObservableValue<Object>> properties = super.get(key);
-				if (properties == null) {
-					assert viewContextsMap.keySet().contains(key);
-					put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>());
-				}
-				return properties;
-			};
-		};
 	}
 
 	public ViewContext<?> getViewContext(Tag<?> element) {

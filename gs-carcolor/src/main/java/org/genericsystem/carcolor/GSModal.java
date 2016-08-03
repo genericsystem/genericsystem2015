@@ -2,6 +2,8 @@ package org.genericsystem.carcolor;
 
 import java.util.function.Consumer;
 
+import org.genericsystem.reactor.TagProperty;
+import org.genericsystem.reactor.TagProperty.DisplayProperty;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSection;
@@ -18,14 +20,14 @@ import javafx.beans.binding.Bindings;
  */
 public class GSModal extends GSSection {
 
-	public GSModal(GSTag parent, Consumer<GSTag> contentTagConsumer) {
-		this(parent, FlexDirection.COLUMN, contentTagConsumer);
+	public GSModal(GSTag parent, Consumer<GSTag> contentTagConsumer, TagProperty<GenericModel> selectionProperty) {
+		this(parent, FlexDirection.COLUMN, contentTagConsumer, selectionProperty);
 	}
 
-	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
+	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer, TagProperty<GenericModel> selectionProperty) {
 		super(parent, direction);
 		addStyleClass("modal");
-		bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> getProperty(ReactorStatics.SELECTION, model).getValue() != null ? "flex" : "none", this.getProperty(ReactorStatics.SELECTION, model)));
+		bindStyle(ReactorStatics.DISPLAY, DisplayProperty::new, model -> Bindings.createStringBinding(() -> selectionProperty.getValue(model.getGeneric()) != null ? "flex" : "none", selectionProperty.getProperty(model.getGeneric())));
 
 		new GSSection(this, FlexDirection.COLUMN) {
 			{
@@ -36,12 +38,12 @@ public class GSModal extends GSSection {
 					{
 						addStyleClass("close");
 						setText("×");
-						bindAction(model -> getProperty(ReactorStatics.SELECTION, model).setValue(null));
+						bindAction(model -> selectionProperty.setValue(model.getGeneric().getMeta(), null));
 					}
 				};
 				new GSSection(this, FlexDirection.COLUMN) {
 					{
-						select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
+						select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> selectionProperty.getProperty(model.getGeneric().getMeta()));
 						contentTagConsumer.accept(this);
 					}
 				};
