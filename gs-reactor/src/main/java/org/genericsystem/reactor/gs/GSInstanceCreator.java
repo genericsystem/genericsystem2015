@@ -26,7 +26,7 @@ public class GSInstanceCreator extends GSComposite {
 	private Property<Serializable> newInstanceValue;
 	private final Map<Generic, Property<Serializable>> holdersValues = new HashMap<>();
 	private final Map<Generic, List<Property<GenericModel>>> componentsValues = new HashMap<>();
-	private final List<ObservableValue> propertiesInvalid = new ArrayList<>();
+	private final List<ObservableValue<Boolean>> propertiesInvalid = new ArrayList<>();
 
 	public GSInstanceCreator(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
@@ -40,7 +40,7 @@ public class GSInstanceCreator extends GSComposite {
 		return componentsValues;
 	}
 
-	public List<ObservableValue> getPropertiesInvalid() {
+	public List<ObservableValue<Boolean>> getPropertiesInvalid() {
 		return propertiesInvalid;
 	}
 
@@ -78,7 +78,7 @@ public class GSInstanceCreator extends GSComposite {
 				new GSButton(this) {
 					{
 						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> {
-							ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> propertiesInvalid.stream().map(input -> (Boolean) input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b),
+							ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> propertiesInvalid.stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b),
 									propertiesInvalid.stream().toArray(ObservableValue[]::new));
 							return Bindings.createStringBinding(() -> Boolean.TRUE.equals(invalid.getValue()) ? ReactorStatics.DISABLED : "", invalid);
 						});
