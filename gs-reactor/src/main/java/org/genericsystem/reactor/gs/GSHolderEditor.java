@@ -1,7 +1,10 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextCreatorWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
@@ -9,6 +12,7 @@ import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
 
 public class GSHolderEditor extends GSSection {
 
@@ -72,8 +76,8 @@ public class GSHolderEditor extends GSSection {
 		public GSHolderCreator(GSTag parent) {
 			super(parent, GSInputTextCreatorWithConversion::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator) {
-				input.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), model.getProperty(input, ReactorStatics.VALUE)));
-				input.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getPropertiesInvalid().add(model.getObservableValue(input, ReactorStatics.INVALID)));
+				input.addPrefixBinding(model -> ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).put(model.getGeneric(), model.getProperty(input, ReactorStatics.VALUE)));
+				input.addPrefixBinding(model -> ((List<ObservableValue<Boolean>>) getProperty(ReactorStatics.INVALID_LIST, model).getValue()).add(model.getObservableValue(input, ReactorStatics.INVALID)));
 			}
 		}
 	}

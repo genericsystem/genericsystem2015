@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gs;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.genericsystem.reactor.ReactorStatics;
@@ -41,12 +40,9 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		select.addStyle("width", "100%");
 		select.addStyle("height", "100%");
 		select.addPostfixBinding(model -> {
-			Property selectedComponents = getProperty(ReactorStatics.COMPONENTS, model.getParent());
-			if (selectedComponents != null) {
-				if (selectedComponents.getValue() == null)
-					selectedComponents.setValue(new ArrayList<Property<GenericModel>>());
-				((List<Property<GenericModel>>) selectedComponents.getValue()).add(model.getProperty(select, ReactorStatics.SELECTION));
-			}
+			Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model.getParent());
+			if (selectedComponents != null)
+				selectedComponents.getValue().add(model.getProperty(select, ReactorStatics.SELECTION));
 		});
 		new GSLabelDisplayer(this) {
 			{
