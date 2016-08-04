@@ -74,13 +74,9 @@ public class GSInputTextWithConversion extends GSInputText {
 	}
 
 	public StringConverter<?> getConverter(GenericModel model) {
-		Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
-		if (clazz == null) {
-			if (model.getGeneric().getValue() != null)
-				clazz = model.getGeneric().getValue().getClass();
-			else
-				clazz = String.class;
-		}
+		Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
+		if (clazz == null)
+			clazz = String.class;
 		return ApiStatics.STRING_CONVERTERS.get(clazz);
 	}
 
@@ -94,22 +90,16 @@ public class GSInputTextWithConversion extends GSInputText {
 					model.getGeneric().updateValue(nva);
 			});
 		}
-	}
-
-	// TODO: Delete this class.
-	public static class GSInputTextCreatorWithConversion extends GSInputTextWithConversion {
-
-		public GSInputTextCreatorWithConversion(GSTag parent) {
-			super(parent);
-			// createNewProperty(ReactorStatics.ACTION);
-			// this.<TriFunction<Generic[], Serializable, Generic, Generic>> initProperty(ReactorStatics.ACTION, (gs, value, g) -> g.setHolder(gs[0], value));
-		}
 
 		@Override
 		public StringConverter<?> getConverter(GenericModel model) {
-			Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
-			if (clazz == null)
-				clazz = String.class;
+			Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
+			if (clazz == null) {
+				if (model.getGeneric().getValue() != null)
+					clazz = model.getGeneric().getValue().getClass();
+				else
+					clazz = String.class;
+			}
 			return ApiStatics.STRING_CONVERTERS.get(clazz);
 		}
 	}
