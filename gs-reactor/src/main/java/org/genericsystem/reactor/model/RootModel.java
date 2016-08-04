@@ -10,6 +10,6 @@ import org.genericsystem.common.Root;
 public class RootModel extends GenericModel {
 
 	public RootModel(Root engine) {
-		super(null, new Generic[] { engine }, StringExtractor.SIMPLE_CLASS_EXTRACTOR);
+		super(null, new Generic[] { engine });
 	}
 }

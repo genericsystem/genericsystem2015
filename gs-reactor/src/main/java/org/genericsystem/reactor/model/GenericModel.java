@@ -1,12 +1,12 @@
 package org.genericsystem.reactor.model;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
+
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -17,12 +17,10 @@ public class GenericModel extends Model {
 
 	protected static Logger log = LoggerFactory.getLogger(GenericModel.class);
 	private final Generic[] generics;
-	private final StringExtractor stringExtractor;
 
-	public GenericModel(Model parent, Generic[] generics, StringExtractor stringExtractor) {
+	public GenericModel(Model parent, Generic[] generics) {
 		this.parent = parent;
 		this.generics = generics;
-		this.stringExtractor = stringExtractor;
 	}
 
 	public Generic[] getGenerics() {
@@ -41,12 +39,8 @@ public class GenericModel extends Model {
 	}
 
 	// TODO KK no cache ?
-	public ObservableValue<String> getString() {
+	public ObservableValue<String> getString(StringExtractor stringExtractor) {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
-	}
-
-	public StringExtractor getStringExtractor() {
-		return stringExtractor;
 	}
 
 	public void remove() {

@@ -25,7 +25,6 @@ import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.model.StringExtractor;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
@@ -38,26 +37,26 @@ public class AppHtml extends GSApp {
 	public AppHtml(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
 		addStyle("justify-content", "center");
-		new ColorsSelect(this).select(StringExtractor.EXTRACTOR, Color.class);
-		new ColorTitleCompositeFlexElement(this).select(StringExtractor.MANAGEMENT, Color.class);
-		new ColorCompositeRadio(this, FlexDirection.ROW).select(StringExtractor.EXTRACTOR, Color.class);
+		new ColorsSelect(this).select(Color.class);
+		new ColorTitleCompositeFlexElement(this).select(Color.class);
+		new ColorCompositeRadio(this, FlexDirection.ROW).select(Color.class);
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
-		select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
+		select(gs -> gs[0]);
 		createNewProperty(ReactorStatics.SELECTION);
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
-		new GSTable(this, FlexDirection.ROW).select(StringExtractor.MANAGEMENT, Car.class);
+		new GSTable(this).select(Car.class);
+		new GSTable(this, FlexDirection.ROW).select(Car.class);
 		new GSEditor(this, FlexDirection.ROW) {
 			{
-				select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
+				select_(model -> getProperty(ReactorStatics.SELECTION, model));
 				addStyle("justify-content", "center");
 			}
 		};
 
-		new GSEditor(this, FlexDirection.COLUMN).select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+		new GSEditor(this, FlexDirection.COLUMN).select_(model -> getProperty(ReactorStatics.SELECTION, model));
+		new GSTable(this).select(Color.class);
 
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Engine.class);
+		new GSTable(this).select(Engine.class);
 		new GSMonitor(this).addStyle("background-color", "#ffa500");
 	}
 

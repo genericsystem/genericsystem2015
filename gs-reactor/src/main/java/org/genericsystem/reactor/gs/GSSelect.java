@@ -24,7 +24,8 @@ public class GSSelect extends GSTag {
 		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
 		storeProperty(ReactorStatics.SELECTION_STRING,
-				model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
+				model -> Bindings.createStringBinding(
+						() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
 						getProperty(ReactorStatics.SELECTION, model)));
 	}
 
@@ -36,7 +37,7 @@ public class GSSelect extends GSTag {
 	protected void options() {
 		optionElement = new GSOption(this) {
 			{
-				bindText(GenericModel::getString);
+				bindGenericText();
 				forEach(GSSelect.this);
 			}
 		};
@@ -61,7 +62,7 @@ public class GSSelect extends GSTag {
 			});
 			optionElement.addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
+					model.getObservableStyles(optionElement).put("background-color", getString(model).getValue());
 			});
 		}
 
@@ -83,7 +84,7 @@ public class GSSelect extends GSTag {
 		public ColorsSelect(GSTag parent) {
 			super(parent);
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
-			optionElement.bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
+			optionElement.bindStyle("background-color", ReactorStatics.TEXT, model -> getString(model));
 		}
 	}
 

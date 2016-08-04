@@ -143,7 +143,7 @@ public class GSCellDisplayer extends GSSection {
 		public void style(Tag<?> tag) {
 			super.style(tag);
 			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
-					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? ((GenericModel) modelContext).getString().getValue() : "#dda5e2"));
+					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? getString((GenericModel) modelContext).getValue() : "#dda5e2"));
 		}
 	}
 

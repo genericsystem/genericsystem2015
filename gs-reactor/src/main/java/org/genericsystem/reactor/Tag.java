@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +11,16 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.model.GenericModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -32,15 +39,6 @@ import javafx.collections.SetChangeListener;
 import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 import javafx.util.StringConverter;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.StringExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse

@@ -8,7 +8,6 @@ import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
 
@@ -41,7 +40,7 @@ public class GSModal extends GSSection {
 				};
 				new GSSection(this, FlexDirection.COLUMN) {
 					{
-						select_(StringExtractor.TYPE_INSTANCE_EXTRACTOR, model -> getProperty(ReactorStatics.SELECTION, model));
+						select_(model -> getProperty(ReactorStatics.SELECTION, model));
 						contentTagConsumer.accept(this);
 					}
 				};

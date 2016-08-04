@@ -15,7 +15,6 @@ import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderCreator;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -44,7 +43,7 @@ public class GSInstanceCreator extends GSComposite {
 	protected void sections() {
 		new GSAttributeCreator(this, FlexDirection.ROW) {
 			{
-				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+				forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 			}
 		};
 	}

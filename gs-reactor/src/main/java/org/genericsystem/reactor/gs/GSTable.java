@@ -44,7 +44,8 @@ public class GSTable extends GSComposite {
 				addStyle("justify-content", "center");
 				new GSH1(this) {
 					{
-						bindText(GenericModel::getString);
+						setStringExtractor(StringExtractor.MANAGEMENT);
+						bindGenericText();
 					}
 				};
 			}
@@ -64,9 +65,10 @@ public class GSTable extends GSComposite {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("justify-content", "center");
+						addStyle("align-items", "center");
 						new GSLabel(this) {
 							{
-								bindText(GenericModel::getString);
+								bindGenericText();
 							}
 						};
 
@@ -78,7 +80,7 @@ public class GSTable extends GSComposite {
 			protected void sections() {
 				new LinkTitleDisplayer(this) {
 					{
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+						forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 					}
 				};
 			}
@@ -112,7 +114,7 @@ public class GSTable extends GSComposite {
 		Tag<GenericModel> selectableTag = new GSComposite(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.SUBINSTANCES);
+				forEach(ObservableListExtractor.SUBINSTANCES);
 			}
 
 			@Override
@@ -124,10 +126,10 @@ public class GSTable extends GSComposite {
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? modelContext.getString().getValue() : "#bba5ff"));
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getString(modelContext).getValue() : "#bba5ff"));
 						new GSHyperLink(this) {
 							{
-								bindText(GenericModel::getString);
+								bindGenericText();
 								bindAction(model -> getProperty(ReactorStatics.SELECTION, model).setValue(model));
 							}
 						};
@@ -142,10 +144,10 @@ public class GSTable extends GSComposite {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
-						forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+						forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 						new GSInstanceCellDisplayer(this) {
 							{
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
+								forEach(ObservableListExtractor.HOLDERS);
 							}
 						};
 					}

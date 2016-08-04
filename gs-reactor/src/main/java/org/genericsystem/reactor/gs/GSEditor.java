@@ -6,7 +6,6 @@ import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditor;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSCellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSH1;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
@@ -39,7 +38,8 @@ public class GSEditor extends GSComposite {
 				addStyle("align-items", "center");
 				new GSH1(this) {
 					{
-						bindText(GenericModel::getString);
+						setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
+						bindGenericText();
 					}
 				};
 			}
@@ -61,12 +61,12 @@ public class GSEditor extends GSComposite {
 						addStyle("flex", "0.3");
 						new InstanceLinkTitleDisplayer(this) {
 							{
-								select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0].getMeta());
+								select(gs -> gs[0].getMeta());
 							}
 						};
 						new InstanceLinkTitleDisplayer(this) {
 							{
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 						};
 					}
@@ -84,24 +84,24 @@ public class GSEditor extends GSComposite {
 								addStyle("overflow", "hidden");
 								new GSCellEditor(this) {
 									{
-										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
+										select(gs -> gs[0]);
 									}
 								};
 							}
 						};
 						new GSSection(this, FlexDirection.COLUMN) {
 							{
-								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
 								new GSCellEditorWithRemoval(this) {
 									{
-										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
+										forEach(ObservableListExtractor.HOLDERS);
 									}
 								};
 								new GSCellAdder(this) {
 									{
-										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())
+										select(gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())
 												|| (gs[0].getComponents().size() >= 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? gs[0] : null);
 									}
 								};
