@@ -74,7 +74,7 @@ public class GSSelect extends GSTag {
 		@Override
 		protected void init() {
 			createNewProperty(ReactorStatics.SELECTION_SHIFT);
-			initProperty(ReactorStatics.SELECTION_SHIFT, 1);
+			initProperty(ReactorStatics.SELECTION_SHIFT, model -> 1);
 		}
 	}
 
