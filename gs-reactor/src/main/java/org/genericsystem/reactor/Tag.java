@@ -180,11 +180,6 @@ public abstract class Tag<M extends Model> {
 		return null;
 	}
 
-	@FunctionalInterface
-	public interface ModelConstructor<M extends Model> {
-		M build(Generic[] generics, StringExtractor stringExtractor);
-	}
-
 	public void addSelectionIndex(int value) {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
 	}

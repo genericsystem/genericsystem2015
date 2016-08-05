@@ -22,8 +22,6 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void forEach(StringExtractor stringExtractor, ObservableListExtractor observableListExtractor) {
-		if (getMetaBinding() != null)
-			throw new IllegalStateException("MetaBinding already defined.");
 		setMetaBinding((childElement, viewContext) -> {
 			GenericModel model = (GenericModel) viewContext.getModelContext();
 			ObservableList<Generic> generics = observableListExtractor.apply(model.getGenerics());
