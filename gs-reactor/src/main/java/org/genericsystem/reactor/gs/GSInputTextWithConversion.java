@@ -10,7 +10,6 @@ import org.genericsystem.reactor.model.GenericModel;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
@@ -48,8 +47,8 @@ public class GSInputTextWithConversion<T extends Serializable> extends GSInputTe
 			}
 		});
 		addPrefixBinding(model -> {
-			ChangeListener<T> listener = (o, old, newValue) -> model.getObservableAttributes(this).put(attributeName, getConverter(model).toString(newValue));
-			((Property<T>) getProperty(propertyName, model)).addListener(listener);
+			ChangeListener listener = (o, old, newValue) -> model.getObservableAttributes(this).put(attributeName, getConverter(model).toString((T) newValue));
+			getProperty(propertyName, model).addListener(listener);
 		});
 	}
 

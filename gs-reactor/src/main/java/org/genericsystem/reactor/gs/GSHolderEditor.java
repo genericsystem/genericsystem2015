@@ -15,7 +15,7 @@ import javafx.beans.value.ObservableValue;
 
 public class GSHolderEditor extends GSSection {
 
-	protected GSInputTextWithConversion input;
+	protected GSInputTextWithConversion<?> input;
 
 	public GSHolderEditor(GSTag parent) {
 		this(parent, GSInputTextEditorWithConversion::new);
@@ -31,7 +31,7 @@ public class GSHolderEditor extends GSSection {
 
 	@FunctionalInterface
 	public interface GSInputTextConstructor {
-		GSInputTextWithConversion build(GSTag parent);
+		GSInputTextWithConversion<?> build(GSTag parent);
 	}
 
 	public static class GSHolderEditorWithRemoval extends GSHolderEditor {
