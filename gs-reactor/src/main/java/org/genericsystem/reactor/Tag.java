@@ -277,10 +277,6 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public <T> void initProperty(String propertyName, T initialValue) {
-		initProperty(propertyName, model -> initialValue);
-	}
-
 	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
 		addPrefixBinding(modelContext -> {
 			getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext));

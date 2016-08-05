@@ -1,7 +1,9 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
+import java.util.Map;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gstag.GSCheckBox;
@@ -78,7 +80,7 @@ public class GSBooleanHolderEditor extends GSSection {
 		public GSBooleanHolderCreator(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				checkbox.addPrefixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getHoldersValues().put(model.getGeneric(), model.getProperty(checkbox, ReactorStatics.VALUE)));
+				checkbox.addPrefixBinding(model -> ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).put(model.getGeneric(), model.getProperty(checkbox, ReactorStatics.VALUE)));
 		}
 	}
 }

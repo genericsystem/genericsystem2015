@@ -1,6 +1,8 @@
 package org.genericsystem.reactor.gs;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
@@ -26,6 +28,7 @@ public class GSLinkEditor extends GSSection {
 	public GSLinkEditor(GSTag parent, GSLinkComponentConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		createNewProperty(ReactorStatics.COMPONENTS);
+		initProperty(ReactorStatics.COMPONENTS, model -> new ArrayList<Property<GenericModel>>());
 		components = constructor.build(this);
 	}
 
@@ -59,7 +62,8 @@ public class GSLinkEditor extends GSSection {
 		public GSLinkCreator(GSTag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				addPostfixBinding(model -> ((GSInstanceCreator) parent.getParent().getParent()).getLinksValues().put(model.getGeneric(), (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()));
+				addPostfixBinding(
+						model -> ((Map<Generic, List<Property<GenericModel>>>) getProperty(ReactorStatics.COMPONENTS_MAP, model).getValue()).put(model.getGeneric(), (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()));
 		}
 	}
 
@@ -73,6 +77,8 @@ public class GSLinkEditor extends GSSection {
 					addStyle("align-items", "center");
 					addStyle("height", "100%");
 					setText("+");
+					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY,
+							model -> Bindings.createStringBinding(() -> ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).isEmpty() ? "none" : "flex", getProperty(ReactorStatics.COMPONENTS, model)));
 					bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(() -> {
 						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
 								.filter(gen -> gen != null).collect(Collectors.toList());

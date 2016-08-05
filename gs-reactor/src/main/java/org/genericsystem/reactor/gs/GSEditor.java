@@ -1,14 +1,10 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
-import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellAdder;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditor;
+import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSCellDisplayer.InstanceLinkTitleDisplayer;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderAdder;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkAdder;
-import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkEditorWithRemoval;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -86,7 +82,7 @@ public class GSEditor extends GSComposite {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new GSCellEditor(this, GSHolderEditor::new, GSBooleanHolderEditor::new, GSLinkEditor::new) {
+								new GSCellEditor(this) {
 									{
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> gs[0]);
 									}
@@ -98,12 +94,12 @@ public class GSEditor extends GSComposite {
 								forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new GSCellEditor(this, GSHolderEditorWithRemoval::new, GSBooleanHolderEditorWithRemoval::new, GSLinkEditorWithRemoval::new) {
+								new GSCellEditorWithRemoval(this) {
 									{
 										forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, ObservableListExtractor.HOLDERS);
 									}
 								};
-								new GSCellEditor(this, GSHolderAdder::new, GSBooleanHolderAdder::new, GSLinkAdder::new) {
+								new GSCellAdder(this) {
 									{
 										select(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())
 												|| (gs[0].getComponents().size() >= 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? gs[0] : null);

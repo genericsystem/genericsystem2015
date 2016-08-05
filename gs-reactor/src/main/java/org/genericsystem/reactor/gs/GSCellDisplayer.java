@@ -2,10 +2,16 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderCreator;
+import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
+import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderAdder;
 import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderCreator;
+import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkAdder;
 import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkCreator;
+import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSInstanceLinkComponentsTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsDisplayer;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsTitleDisplayer;
@@ -81,6 +87,14 @@ public class GSCellDisplayer extends GSSection {
 
 	public static class GSCellEditor extends GSCellDisplayer {
 
+		public GSCellEditor(GSTag parent) {
+			this(parent, FlexDirection.ROW);
+		}
+
+		public GSCellEditor(GSTag parent, FlexDirection direction) {
+			this(parent, direction, GSHolderEditor::new, GSBooleanHolderEditor::new, GSLinkEditor::new);
+		}
+
 		public GSCellEditor(GSTag parent, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
 			this(parent, FlexDirection.ROW, holderEditorConstructor, booleanHolderEditorConstructor, linkEditorConstructor);
 		}
@@ -94,6 +108,28 @@ public class GSCellDisplayer extends GSSection {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#dda5e2");
+		}
+	}
+
+	public static class GSCellEditorWithRemoval extends GSCellEditor {
+
+		public GSCellEditorWithRemoval(GSTag parent) {
+			this(parent, FlexDirection.ROW);
+		}
+
+		public GSCellEditorWithRemoval(GSTag parent, FlexDirection direction) {
+			super(parent, direction, GSHolderEditorWithRemoval::new, GSBooleanHolderEditorWithRemoval::new, GSLinkEditorWithRemoval::new);
+		}
+	}
+
+	public static class GSCellAdder extends GSCellEditor {
+
+		public GSCellAdder(GSTag parent) {
+			this(parent, FlexDirection.ROW);
+		}
+
+		public GSCellAdder(GSTag parent, FlexDirection direction) {
+			super(parent, direction, GSHolderAdder::new, GSBooleanHolderAdder::new, GSLinkAdder::new);
 		}
 	}
 

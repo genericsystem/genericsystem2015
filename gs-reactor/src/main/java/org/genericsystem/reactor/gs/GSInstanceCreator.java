@@ -23,34 +23,21 @@ import javafx.beans.value.ObservableValue;
 
 public class GSInstanceCreator extends GSComposite {
 
-	private Property<Serializable> newInstanceValue;
-	private final Map<Generic, Property<Serializable>> holdersValues = new HashMap<>();
-	private final Map<Generic, List<Property<GenericModel>>> componentsValues = new HashMap<>();
-	private final List<ObservableValue> propertiesInvalid = new ArrayList<>();
+	private GSHolderEditor instanceValueInput;
 
 	public GSInstanceCreator(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
-	}
-
-	public Map<Generic, Property<Serializable>> getHoldersValues() {
-		return holdersValues;
-	}
-
-	public Map<Generic, List<Property<GenericModel>>> getLinksValues() {
-		return componentsValues;
-	}
-
-	public List<ObservableValue> getPropertiesInvalid() {
-		return propertiesInvalid;
+		createNewProperty(ReactorStatics.HOLDERS_MAP);
+		initProperty(ReactorStatics.HOLDERS_MAP, model -> new HashMap<Generic, Property<Serializable>>());
+		createNewProperty(ReactorStatics.COMPONENTS_MAP);
+		initProperty(ReactorStatics.COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<GenericModel>>>());
+		createNewProperty(ReactorStatics.INVALID_LIST);
+		initProperty(ReactorStatics.INVALID_LIST, model -> new ArrayList<ObservableValue<Boolean>>());
 	}
 
 	@Override
 	protected void header() {
-		new GSHolderCreator(this) {
-			{
-				input.addPrefixBinding(model -> newInstanceValue = model.getProperty(input, ReactorStatics.VALUE));
-			}
-		};
+		instanceValueInput = new GSHolderCreator(this);
 	}
 
 	@Override
@@ -78,24 +65,25 @@ public class GSInstanceCreator extends GSComposite {
 				new GSButton(this) {
 					{
 						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> {
-							ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(() -> propertiesInvalid.stream().map(input -> (Boolean) input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b),
-									propertiesInvalid.stream().toArray(ObservableValue[]::new));
+							ObservableValue<Boolean> invalid = Bindings.createBooleanBinding(
+									() -> ((List<ObservableValue<Boolean>>) getProperty(ReactorStatics.INVALID_LIST, model).getValue()).stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b),
+									((List<ObservableValue<Boolean>>) getProperty(ReactorStatics.INVALID_LIST, model).getValue()).stream().toArray(ObservableValue[]::new));
 							return Bindings.createStringBinding(() -> Boolean.TRUE.equals(invalid.getValue()) ? ReactorStatics.DISABLED : "", invalid);
 						});
 						bindAction(model -> {
-							Generic newInstance = model.getGeneric().setInstance(newInstanceValue.getValue());
-							for (Entry<Generic, Property<Serializable>> entry : holdersValues.entrySet())
+							Generic newInstance = model.getGeneric().setInstance((Serializable) model.getProperty(instanceValueInput.input, ReactorStatics.VALUE).getValue());
+							for (Entry<Generic, Property<Serializable>> entry : ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).entrySet())
 								if (entry.getValue().getValue() != null) {
 									newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
 									entry.getValue().setValue(null);
 								}
-							for (Entry<Generic, List<Property<GenericModel>>> entry : componentsValues.entrySet()) {
+							for (Entry<Generic, List<Property<GenericModel>>> entry : ((Map<Generic, List<Property<GenericModel>>>) getProperty(ReactorStatics.COMPONENTS_MAP, model).getValue()).entrySet()) {
 								List<Generic> selectedGenerics = entry.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 								if (!selectedGenerics.isEmpty() && selectedGenerics.size() + 1 == entry.getKey().getComponents().size())
 									newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
 								entry.getValue().stream().forEach(sel -> sel.setValue(null));
 							}
-							newInstanceValue.setValue(null);
+							model.getProperty(instanceValueInput.input, ReactorStatics.VALUE).setValue(null);
 						});
 						setText("Add");
 						addStyle("width", "100%");
