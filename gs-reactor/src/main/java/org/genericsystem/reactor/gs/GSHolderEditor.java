@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextCreatorWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
-import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
@@ -35,7 +35,7 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderEditorWithRemoval(GSTag parent) {
 			super(parent);
-			new GSButton(this) {
+			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
@@ -50,7 +50,7 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderAdder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
-			new GSButton(this) {
+			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");

@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
-import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSCheckBox;
+import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
@@ -43,7 +43,7 @@ public class GSBooleanHolderEditor extends GSSection {
 
 		public GSBooleanHolderEditorWithRemoval(GSTag parent) {
 			super(parent);
-			new GSButton(this) {
+			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
@@ -58,7 +58,7 @@ public class GSBooleanHolderEditor extends GSSection {
 
 		public GSBooleanHolderAdder(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
-			new GSButton(this) {
+			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");

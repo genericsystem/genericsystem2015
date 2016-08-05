@@ -9,7 +9,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentAdder;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentCreator;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentEditor;
-import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.binding.Bindings;
@@ -38,7 +38,7 @@ public class GSLinkEditor extends GSSection {
 
 		public GSLinkEditorWithRemoval(GSTag parent) {
 			super(parent);
-			new GSButton(this) {
+			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");
@@ -67,7 +67,7 @@ public class GSLinkEditor extends GSSection {
 
 		public GSLinkAdder(GSTag parent) {
 			super(parent, GSLinkComponentAdder::new);
-			new GSButton(this) {
+			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("align-items", "center");

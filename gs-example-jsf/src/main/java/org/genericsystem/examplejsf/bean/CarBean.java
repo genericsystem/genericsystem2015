@@ -14,7 +14,6 @@ import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.cdi.Engine;
-import org.genericsystem.common.Root;
 import org.genericsystem.common.Generic;
 
 @Named
@@ -38,7 +37,12 @@ public class CarBean {
 		power = engine.find(Power.class);
 		color = engine.find(Color.class);
 		carColor = engine.find(CarColor.class);
-		runScript(engine);
+		color.setInstance("Blue");
+		color.setInstance("Orange");
+		color.setInstance("White");
+		color.setInstance("Yellow");
+		color.setInstance("red");
+		// runScript(engine);
 	}
 
 	public List<Generic> getCars() {
@@ -126,13 +130,13 @@ public class CarBean {
 		this.newCarPower = newCarPower;
 	}
 
-	void runScript(Root engine) {
-		color.setInstance("Blue");
-		color.setInstance("Orange");
-		color.setInstance("White");
-		color.setInstance("Yellow");
-		color.setInstance("red");
-
-	}
+	// void runScript(Root engine) {
+	// color.setInstance("Blue");
+	// color.setInstance("Orange");
+	// color.setInstance("White");
+	// color.setInstance("Yellow");
+	// color.setInstance("red");
+	//
+	// }
 
 }
