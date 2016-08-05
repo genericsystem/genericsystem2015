@@ -44,7 +44,7 @@ public class GSLinkEditor extends GSSection {
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
+					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
 					setText("×");
 					bindAction(GenericModel::remove);
@@ -71,18 +71,17 @@ public class GSLinkEditor extends GSSection {
 
 		public GSLinkAdder(GSTag parent) {
 			super(parent, GSLinkComponentAdder::new);
+			addStyle("height", "100%");
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
+					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
 					setText("+");
-					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY,
-							model -> Bindings.createStringBinding(() -> ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).isEmpty() ? "none" : "flex", getProperty(ReactorStatics.COMPONENTS, model)));
-					bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(() -> {
+					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> {
 						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
 								.filter(gen -> gen != null).collect(Collectors.toList());
-						return selectedGenerics.size() + 1 != model.getGeneric().getComponents().size() ? ReactorStatics.DISABLED : "";
+						return selectedGenerics.size() + 1 == model.getGeneric().getComponents().size() ? "flex" : "none";
 					}, ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new)));
 					bindAction(model -> {
 						try {
