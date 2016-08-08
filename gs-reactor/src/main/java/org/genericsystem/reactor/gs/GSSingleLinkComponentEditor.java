@@ -68,7 +68,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentAdder(GSTag parent) {
 			super(parent, CompositeSelectWithEmptyEntry::new);
-			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[4])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
 		}
 	}
 

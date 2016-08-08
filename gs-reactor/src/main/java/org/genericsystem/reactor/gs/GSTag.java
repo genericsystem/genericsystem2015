@@ -39,8 +39,8 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void select_(Function<GenericModel, ObservableValue<GenericModel>> applyOnModelContext) {
-		super.forEach(model -> new ListBinding<GenericModel>() {
-			ObservableValue<GenericModel> ov = applyOnModelContext.apply((GenericModel) model);
+		select__(model -> new ListBinding<GenericModel>() {
+			ObservableValue<GenericModel> ov = applyOnModelContext.apply(model);
 			{
 				bind(ov);
 			}
@@ -50,7 +50,11 @@ public abstract class GSTag extends Tag<GenericModel> {
 				GenericModel model = ov.getValue();
 				return model != null ? FXCollections.singletonObservableList(model) : FXCollections.emptyObservableList();
 			}
-		}, (model, subElement) -> new GenericModel(model, subElement.getGenerics()));
+		});
+	}
+
+	public void select__(Function<GenericModel, ObservableList<GenericModel>> applyOnModelContext) {
+		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, subElement) -> new GenericModel(model, subElement.getGenerics()));
 	}
 
 	public void select(Class<?> genericClass) {

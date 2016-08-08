@@ -1,13 +1,19 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellAdder;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditor;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSCellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSH1;
+import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -101,8 +107,19 @@ public class GSEditor extends GSComposite {
 								};
 								new GSCellAdder(this) {
 									{
-										select(gs -> ObservableListExtractor.HOLDERS.apply(gs).isEmpty() || (gs[0].getComponents().size() < 2 && !gs[0].isPropertyConstraintEnabled())
-												|| (gs[0].getComponents().size() >= 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? gs[0] : null);
+										select__(model -> new ListBinding<GenericModel>() {
+											ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+											{
+												bind(holders);
+											}
+
+											@Override
+											protected ObservableList<GenericModel> computeValue() {
+												return holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
+														|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? FXCollections.singletonObservableList(model)
+																: FXCollections.emptyObservableList();
+											}
+										});
 									}
 								};
 							}
