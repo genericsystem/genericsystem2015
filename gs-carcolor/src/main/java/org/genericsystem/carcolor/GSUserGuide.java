@@ -3,6 +3,7 @@ package org.genericsystem.carcolor;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSection;
+import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSLi;
 import org.genericsystem.reactor.gstag.GSUl;
@@ -11,7 +12,7 @@ import org.genericsystem.reactor.model.GenericModel;
 
 public class GSUserGuide extends GSSection {
 
-	public GSUserGuide(GSSection parent) {
+	public GSUserGuide(GSTag parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-direction", "column");
 		addStyle("flex-wrap", "nowrap");
@@ -68,9 +69,12 @@ public class GSUserGuide extends GSSection {
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
-										li1.setText("Use \"Save Button\" to persist your Data in the cache");
-										li2.setText("Use \"Cancel Button\" to go back to your last persistence");
-										li3.setText("Use the \"Remove Button\" to delete the line. This can be canceled until you persist your Data");
+										GSLi li4 = new GSLi(this);
+										li1.setText("Use \"Add Button\" to add an entry in the cache");
+										li2.setText("Use the \"Remove Button\" to delete the entry in your cache");
+										li3.setText("Use \"Save Button\" to persist the cache");
+										li4.setText("Use \"Cancel Button\" to release the cache");
+
 									}
 								};
 								new GSSection(this, FlexDirection.COLUMN) {
@@ -90,6 +94,7 @@ public class GSUserGuide extends GSSection {
 			{
 				setText("User Guide");
 				addStyleClass("buttonUser");
+				addStyle("flex", "1/3");
 
 				bindAction(model -> {
 					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");

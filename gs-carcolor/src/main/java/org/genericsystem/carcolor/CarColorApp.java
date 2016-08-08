@@ -16,7 +16,6 @@ import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
-import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.StringExtractor;
 
@@ -39,16 +38,7 @@ public class CarColorApp extends GSApp {
 		createNewProperty(ReactorStatics.SELECTION);
 		addStyle("background-color", "#3393ff");
 
-		new GSSection(this, FlexDirection.ROW) {
-			{
-				new GenericH1Section(this, "Generic System Reactor Live Demo") {
-					{
-						addStyle("flex", "3");
-					}
-				};
-				new GSUserGuide(this);
-			}
-		};
+		new GSHeader(this, "Generic System Reactor Live Demo", null, "", GSUserGuide::new, "");
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
 		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
 		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
