@@ -71,7 +71,7 @@ public class GSBooleanHolderEditor extends GSSection {
 						Property<Boolean> observable = checkbox.getProperty(ReactorStatics.VALUE, model);
 						Boolean newValue = observable.getValue();
 						observable.setValue(null);
-						model.getGenerics()[2].addHolder(model.getGenerics()[1], newValue);
+						model.getGenerics()[1].addHolder(model.getGeneric(), newValue);
 					});
 				}
 			};

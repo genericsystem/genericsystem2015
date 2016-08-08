@@ -65,7 +65,7 @@ public class GSHolderEditor extends GSSection {
 						if (observable.getValue() != null) {
 							Serializable newValue = observable.getValue();
 							observable.setValue(null);
-							model.getGenerics()[2].addHolder(model.getGenerics()[1], newValue);
+							model.getGenerics()[1].addHolder(model.getGeneric(), newValue);
 						}
 					});
 				}

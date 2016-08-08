@@ -87,7 +87,7 @@ public class GSLinkEditor extends GSSection {
 							List<Property<GenericModel>> selectedComponents = (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue();
 							List<Generic> selectedGenerics = selectedComponents.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 							selectedComponents.stream().forEach(sel -> sel.setValue(null));
-							model.getGenerics()[2].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
+							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}
