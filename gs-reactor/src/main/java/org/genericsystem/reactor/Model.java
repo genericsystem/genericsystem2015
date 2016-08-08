@@ -26,22 +26,13 @@ public class Model {
 	protected Model parent;
 	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
-	private Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
-		@Override
-		public Map<String, ObservableValue<Object>> get(Object key) {
-			Map<String, ObservableValue<Object>> properties = super.get(key);
-			if (properties == null) {
-				assert viewContextsMap.keySet().contains(key);
-				put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>());
-			}
-			return properties;
-		};
-	};
+	private Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<>();
 
 	public Model getParent() {
 		return this.parent;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <SUBMODEL extends Model> ObservableList<SUBMODEL> getSubContexts(Tag<SUBMODEL> tag) {
 		return (ObservableList<SUBMODEL>) subModelsMap.get(tag);
 	}
@@ -54,32 +45,45 @@ public class Model {
 		assert viewContextsMap.keySet().contains(tag);
 		if (propertiesMap.get(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
-		propertiesMap.get(tag).put(propertyName, new SimpleObjectProperty<>());
+		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
 	}
 
+	private Map<String, ObservableValue<Object>> getProperties(Tag<?> tag) {
+		Map<String, ObservableValue<Object>> properties = propertiesMap.get(tag);
+		if (properties == null) {
+			assert viewContextsMap.keySet().contains(tag);
+			propertiesMap.put(tag, properties = new HashMap<String, ObservableValue<Object>>());
+		}
+		return properties;
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String propertyName) {
-		return (ObservableValue<T>) propertiesMap.get(tag).get(propertyName);
+		return (ObservableValue<T>) getProperties(tag).get(propertyName);
 	}
 
+	// TODO visibility should be package or protected to avoid direct access
+	@SuppressWarnings("unchecked")
 	public <T> Property<T> getProperty(Tag<?> tag, String propertyName) {
-		return (Property<T>) propertiesMap.get(tag).get(propertyName);
+		return (Property<T>) getProperties(tag).get(propertyName);
 	}
 
 	public Collection<Map<String, ObservableValue<Object>>> getPropertiesMaps() {
 		return propertiesMap.values();
 	}
 
-	public void storeProperty(Tag tag, String propertyName, ObservableValue value) {
+	public void storeProperty(Tag<?> tag, String propertyName, ObservableValue<?> value) {
 		assert viewContextsMap.keySet().contains(tag);
-		if (propertiesMap.get(tag).containsKey(propertyName))
+		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
-		propertiesMap.get(tag).put(propertyName, value);
+		getProperties(tag).put(propertyName, (ObservableValue) value);
 	}
 
 	public List<Model> subContexts() {
 		return subModelsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
 
+	@SuppressWarnings("unchecked")
 	<SUBMODEL extends Model> void setSubContexts(Tag<?> element, ObservableList<SUBMODEL> subContexts) {
 		assert subModelsMap.get(element) == null;
 		subModelsMap.put(element, (ObservableList<Model>) subContexts);
@@ -111,17 +115,7 @@ public class Model {
 		}
 		subModelsMap = new HashMap<>();
 		viewContextsMap = new LinkedHashMap<>();
-		propertiesMap = new HashMap<Tag<?>, Map<String, ObservableValue<Object>>>() {
-			@Override
-			public Map<String, ObservableValue<Object>> get(Object key) {
-				Map<String, ObservableValue<Object>> properties = super.get(key);
-				if (properties == null) {
-					assert viewContextsMap.keySet().contains(key);
-					put((Tag) key, properties = new HashMap<String, ObservableValue<Object>>());
-				}
-				return properties;
-			};
-		};
+		propertiesMap = new HashMap<>();
 	}
 
 	public ViewContext<?> getViewContext(Tag<?> element) {

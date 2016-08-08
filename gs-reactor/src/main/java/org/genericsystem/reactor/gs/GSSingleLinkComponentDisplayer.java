@@ -15,7 +15,7 @@ public class GSSingleLinkComponentDisplayer extends GSSection {
 		public GSLinkComponentsDisplayer(GSTag parent) {
 			super(parent);
 			// TODO: filter only once.
-			forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
+			forEachGeneric((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
 		}
 	}
 
@@ -23,7 +23,7 @@ public class GSSingleLinkComponentDisplayer extends GSSection {
 
 		public GSLinkComponentsTitleDisplayer(GSTag parent) {
 			super(parent);
-			forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+			forEachGeneric((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 	}
 
@@ -31,7 +31,7 @@ public class GSSingleLinkComponentDisplayer extends GSSection {
 
 		public GSInstanceLinkComponentsTitleDisplayer(GSTag parent) {
 			super(parent);
-			forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2].getMeta())));
+			forEachGeneric((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2].getMeta())));
 		}
 	}
 }

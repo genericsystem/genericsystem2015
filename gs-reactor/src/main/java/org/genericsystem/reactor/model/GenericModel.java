@@ -1,12 +1,12 @@
 package org.genericsystem.reactor.model;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Model;
-
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -38,7 +38,8 @@ public class GenericModel extends Model {
 		return generics[0];
 	}
 
-	// TODO KK no cache ?
+	@Deprecated
+	// TODO try to remove this method
 	public ObservableValue<String> getString(StringExtractor stringExtractor) {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
 	}

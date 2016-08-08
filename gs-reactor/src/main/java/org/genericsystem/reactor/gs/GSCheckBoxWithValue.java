@@ -16,7 +16,7 @@ public class GSCheckBoxWithValue extends GSCheckBox {
 		public GSCheckBoxEditor(GSTag parent) {
 			super(parent);
 			initProperty(ReactorStatics.VALUE, model -> (Boolean) model.getGeneric().getValue());
-			bindActionToValueChangeListener(ReactorStatics.VALUE, (model, nva) -> model.getGeneric().updateValue(nva));
+			addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> model.getGeneric().updateValue(nva));
 		}
 	}
 

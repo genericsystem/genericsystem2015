@@ -12,7 +12,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -25,10 +24,11 @@ import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.gs.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
-public class AppHtml extends GSApp {
+public class AppHtml extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
@@ -43,17 +43,17 @@ public class AppHtml extends GSApp {
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
 		select(gs -> gs[0]);
-		createNewProperty(ReactorStatics.SELECTION);
+		createSelectionProperty();
 		new GSTable(this).select(Car.class);
 		new GSTable(this, FlexDirection.ROW).select(Car.class);
 		new GSEditor(this, FlexDirection.ROW) {
 			{
-				select_(model -> getProperty(ReactorStatics.SELECTION, model));
+				select_(model -> getSelectionProperty(model));
 				addStyle("justify-content", "center");
 			}
 		};
 
-		new GSEditor(this, FlexDirection.COLUMN).select_(model -> getProperty(ReactorStatics.SELECTION, model));
+		new GSEditor(this, FlexDirection.COLUMN).select_(model -> getSelectionProperty(model));
 		new GSTable(this).select(Color.class);
 
 		new GSTable(this).select(Engine.class);

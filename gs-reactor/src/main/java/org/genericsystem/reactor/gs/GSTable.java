@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSInstanceCellDisplayer;
 import org.genericsystem.reactor.gs.GSCellDisplayer.LinkTitleDisplayer;
@@ -16,7 +15,7 @@ import org.genericsystem.reactor.model.StringExtractor;
  * @author Nicolas Feybesse
  *
  */
-public class GSTable extends GSComposite {
+public class GSTable extends GSComposite implements SelectionDefaults {
 
 	public GSTable(GSTag parent) {
 		super(parent, FlexDirection.COLUMN);
@@ -80,7 +79,7 @@ public class GSTable extends GSComposite {
 			protected void sections() {
 				new LinkTitleDisplayer(this) {
 					{
-						forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+						forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 					}
 				};
 			}
@@ -114,7 +113,7 @@ public class GSTable extends GSComposite {
 		Tag<GenericModel> selectableTag = new GSComposite(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach(ObservableListExtractor.SUBINSTANCES);
+				forEachGeneric(ObservableListExtractor.SUBINSTANCES);
 			}
 
 			@Override
@@ -130,7 +129,7 @@ public class GSTable extends GSComposite {
 						new GSHyperLink(this) {
 							{
 								bindGenericText();
-								bindAction(model -> getProperty(ReactorStatics.SELECTION, model).setValue(model));
+								bindAction(model -> getSelectionProperty(model).setValue(model));
 							}
 						};
 
@@ -144,10 +143,10 @@ public class GSTable extends GSComposite {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
-						forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+						forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 						new GSInstanceCellDisplayer(this) {
 							{
-								forEach(ObservableListExtractor.HOLDERS);
+								forEachGeneric(ObservableListExtractor.HOLDERS);
 							}
 						};
 					}

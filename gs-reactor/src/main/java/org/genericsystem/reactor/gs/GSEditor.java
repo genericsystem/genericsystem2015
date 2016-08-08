@@ -66,7 +66,7 @@ public class GSEditor extends GSComposite {
 						};
 						new InstanceLinkTitleDisplayer(this) {
 							{
-								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 						};
 					}
@@ -91,12 +91,12 @@ public class GSEditor extends GSComposite {
 						};
 						new GSSection(this, FlexDirection.COLUMN) {
 							{
-								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
 								new GSCellEditorWithRemoval(this) {
 									{
-										forEach(ObservableListExtractor.HOLDERS);
+										forEachGeneric(ObservableListExtractor.HOLDERS);
 									}
 								};
 								new GSCellAdder(this) {
