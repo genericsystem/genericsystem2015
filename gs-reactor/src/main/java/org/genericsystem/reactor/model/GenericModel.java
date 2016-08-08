@@ -17,12 +17,10 @@ public class GenericModel extends Model {
 
 	protected static Logger log = LoggerFactory.getLogger(GenericModel.class);
 	private final Generic[] generics;
-	private final StringExtractor stringExtractor;
 
-	public GenericModel(Model parent, Generic[] generics, StringExtractor stringExtractor) {
+	public GenericModel(Model parent, Generic[] generics) {
 		this.parent = parent;
 		this.generics = generics;
-		this.stringExtractor = stringExtractor;
 	}
 
 	public Generic[] getGenerics() {
@@ -40,13 +38,10 @@ public class GenericModel extends Model {
 		return generics[0];
 	}
 
-	// TODO KK no cache ?
-	public ObservableValue<String> getString() {
+	@Deprecated
+	// TODO try to remove this method
+	public ObservableValue<String> getString(StringExtractor stringExtractor) {
 		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
-	}
-
-	public StringExtractor getStringExtractor() {
-		return stringExtractor;
 	}
 
 	public void remove() {

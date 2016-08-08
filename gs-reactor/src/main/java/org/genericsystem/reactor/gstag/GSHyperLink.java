@@ -3,13 +3,14 @@ package org.genericsystem.reactor.gstag;
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.gs.SelectionDefaults;
 import org.genericsystem.reactor.model.GenericModel;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class GSHyperLink extends GSTag {
+public class GSHyperLink extends GSTag implements SelectionDefaults {
 
 	public GSHyperLink(GSTag parent) {
 		super(parent, "a");

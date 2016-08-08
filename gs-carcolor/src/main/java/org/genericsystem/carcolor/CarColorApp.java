@@ -17,7 +17,6 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.model.StringExtractor;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -39,9 +38,9 @@ public class CarColorApp extends GSApp {
 		addStyle("background-color", "#3393ff");
 
 		new GSHeader(this, "Generic System Reactor Live Demo", null, "", GSUserGuide::new, "");
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Car.class);
+		new GSTable(this).select(Car.class);
 		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
-		new GSTable(this).select(StringExtractor.MANAGEMENT, Color.class);
+		new GSTable(this).select(Color.class);
 		new GSMonitor(this);
 	}
 

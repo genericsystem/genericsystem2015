@@ -41,7 +41,8 @@ public class GSHolderEditor extends GSSection {
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
+					addStyle("text-decoration", "none");
+					addStyle("height", "100%");
 					setText("×");
 					bindAction(GenericModel::remove);
 				}
@@ -56,7 +57,8 @@ public class GSHolderEditor extends GSSection {
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
+					addStyle("text-decoration", "none");
+					addStyle("height", "100%");
 					setText("+");
 					bindAction(model -> {
 						Property<Serializable> observable = input.getProperty(ReactorStatics.VALUE, model);

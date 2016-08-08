@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -23,7 +23,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -34,11 +33,7 @@ import javafx.collections.WeakSetChangeListener;
 import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,18 +128,26 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
-		setMetaBinding((childElement, viewContext) -> {
-			MODEL model = viewContext.getModelContext();
-			ObservableList<M> models = applyOnModel.apply(model);
-			model.setSubContexts(childElement, new TransformationObservableList<M, MODEL>(models, (index, subModel) -> {
-				subModel.parent = model;
-				viewContext.createViewContextChild(index, subModel, childElement);
-				return (MODEL) subModel;
-			}, Model::destroy));
+		forEach(applyOnModel, (model, subElement) -> {
+			subElement.parent = model;
+			return subElement;
 		});
 	}
 
-	protected <SUBMODEL extends GenericModel> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {
+	protected <MODEL extends Model, SUBELEMENT> void forEach(Function<MODEL, ObservableList<SUBELEMENT>> applyOnModel, BiFunction<MODEL, SUBELEMENT, M> modelBuilder) {
+		setMetaBinding((childElement, viewContext) -> {
+			MODEL model = viewContext.getModelContext();
+			ObservableList<SUBELEMENT> subElements = applyOnModel.apply(model);
+			ObservableList<M> subModels = new TransformationObservableList<SUBELEMENT, M>(subElements, (index, subModel) -> {
+				M resultModel = modelBuilder.apply(model, subModel);
+				viewContext.createViewContextChild(index, resultModel, childElement);
+				return resultModel;
+			}, Model::destroy);
+			setSubModels(model, childElement, subModels);
+		});
+	}
+
+	protected <SUBMODEL extends Model> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {
 		model.setSubContexts(child, subModels);
 	}
 
@@ -180,50 +183,8 @@ public abstract class Tag<M extends Model> {
 		return null;
 	}
 
-	@FunctionalInterface
-	public interface ModelConstructor<M extends Model> {
-		M build(Generic[] generics, StringExtractor stringExtractor);
-	}
-
 	public void addSelectionIndex(int value) {
 		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
-	}
-
-	// The form tells here :
-	protected void bindBiDirectionalSelection(Tag<GenericModel> subElement) {
-		addPostfixBinding(modelContext -> {
-			ObservableList<GenericModel> subContexts = modelContext.getSubContexts(subElement);
-			Generic selectedGeneric = ((GenericModel) modelContext).getGeneric();
-			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
-			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, modelContext);
-			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT, modelContext).getValue() : 0;
-			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
-			Property<Number> selectionIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null, genericModel -> subContexts.indexOf(genericModel)
-					+ selectionShift);
-			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
-				if (selection != null) {
-					Number oldIndex = (Number) getProperty(ReactorStatics.SELECTION_INDEX, modelContext).getValue();
-					Number newIndex = subContexts.indexOf(selection.getValue()) + selectionShift;
-					if (newIndex != oldIndex)
-						this.getProperty(ReactorStatics.SELECTION_INDEX, modelContext).setValue(newIndex);
-				}
-			});
-		});
-	}
-
-	protected void bindSelection(Tag<GenericModel> subElement) {
-		addPostfixBinding(model -> {
-			ObservableList<GenericModel> subContexts = model.getSubContexts(subElement);
-			Property<GenericModel> selection = getProperty(ReactorStatics.SELECTION, model);
-			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
-				if (selection != null)
-					while (change.next())
-						if (change.wasRemoved() && !change.wasAdded())
-							if (change.getRemoved().contains(selection.getValue()))
-								selection.setValue(null);
-			});
-		});
 	}
 
 	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
@@ -264,7 +225,7 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public <T extends Serializable> void bindActionToValueChangeListener(String propertyName, BiConsumer<M, T> listener) {
+	public <T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<M, T> listener) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<T> observable = getObservableValue(propertyName, modelContext);
 			observable.addListener((o, old, nva) -> listener.accept(modelContext, nva));
@@ -272,15 +233,16 @@ public abstract class Tag<M extends Model> {
 	}
 
 	public void createNewProperty(String propertyName) {
-		addPrefixBinding(modelContext -> {
-			modelContext.createNewProperty(this, propertyName);
-		});
+		addPrefixBinding(modelContext -> modelContext.createNewProperty(this, propertyName));
+	}
+
+	public <T> void createNewInitializedProperty(String propertyName, Function<M, T> getInitialValue) {
+		createNewProperty(propertyName);
+		initProperty(propertyName, getInitialValue);
 	}
 
 	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
-		addPrefixBinding(modelContext -> {
-			getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext));
-		});
+		addPrefixBinding(modelContext -> getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext)));
 	}
 
 	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {

@@ -48,7 +48,8 @@ public class GSBooleanHolderEditor extends GSSection {
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
+					addStyle("text-decoration", "none");
+					addStyle("height", "100%");
 					setText("×");
 					bindAction(GenericModel::remove);
 				}
@@ -63,7 +64,8 @@ public class GSBooleanHolderEditor extends GSSection {
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
-					addStyle("align-items", "center");
+					addStyle("text-decoration", "none");
+					addStyle("height", "100%");
 					setText("+");
 					bindAction(model -> {
 						Property<Serializable> observable = checkbox.getProperty(ReactorStatics.VALUE, model);

@@ -64,7 +64,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends GSInputTe
 		public GSInputTextEditorWithConversion(GSTag parent) {
 			super(parent);
 			initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
-			bindActionToValueChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+			addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
 				if (nva != null)
 					model.getGeneric().updateValue(nva);
 			});

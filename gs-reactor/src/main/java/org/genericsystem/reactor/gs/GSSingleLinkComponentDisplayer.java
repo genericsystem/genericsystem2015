@@ -2,7 +2,6 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.gstag.GSLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.StringExtractor;
 
 public class GSSingleLinkComponentDisplayer extends GSSection {
 
@@ -16,7 +15,7 @@ public class GSSingleLinkComponentDisplayer extends GSSection {
 		public GSLinkComponentsDisplayer(GSTag parent) {
 			super(parent);
 			// TODO: filter only once.
-			forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
 		}
 	}
 
@@ -24,7 +23,7 @@ public class GSSingleLinkComponentDisplayer extends GSSection {
 
 		public GSLinkComponentsTitleDisplayer(GSTag parent) {
 			super(parent);
-			forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 	}
 
@@ -32,7 +31,7 @@ public class GSSingleLinkComponentDisplayer extends GSSection {
 
 		public GSInstanceLinkComponentsTitleDisplayer(GSTag parent) {
 			super(parent);
-			forEach(StringExtractor.SIMPLE_CLASS_EXTRACTOR, gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2].getMeta())));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2].getMeta())));
 		}
 	}
 }

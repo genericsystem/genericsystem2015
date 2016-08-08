@@ -2,17 +2,17 @@ package org.genericsystem.reactor.gs;
 
 import java.util.Map;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSOption;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
-public class GSSelect extends GSTag {
+public class GSSelect extends GSTag implements SelectionDefaults {
 
 	public GSOption optionElement;
 
@@ -20,12 +20,11 @@ public class GSSelect extends GSTag {
 		super(parent, "select");
 		options();
 		init();
-		createNewProperty(ReactorStatics.SELECTION);
+		createSelectionProperty();
 		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
-		storeProperty(ReactorStatics.SELECTION_STRING,
-				model -> Bindings.createStringBinding(() -> getStringExtractor().apply(getProperty(ReactorStatics.SELECTION, model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null),
-						getProperty(ReactorStatics.SELECTION, model)));
+		storeProperty(ReactorStatics.SELECTION_STRING, model -> Bindings.createStringBinding(
+				() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null), getSelectionProperty(model)));
 	}
 
 	@Override
@@ -36,7 +35,7 @@ public class GSSelect extends GSTag {
 	protected void options() {
 		optionElement = new GSOption(this) {
 			{
-				bindText(GenericModel::getString);
+				bindGenericText();
 				forEach(GSSelect.this);
 			}
 		};
@@ -61,7 +60,7 @@ public class GSSelect extends GSTag {
 			});
 			optionElement.addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					model.getObservableStyles(optionElement).put("background-color", model.getString().getValue());
+					model.getObservableStyles(optionElement).put("background-color", getString(model).getValue());
 			});
 		}
 
@@ -83,7 +82,7 @@ public class GSSelect extends GSTag {
 		public ColorsSelect(GSTag parent) {
 			super(parent);
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
-			optionElement.bindStyle("background-color", ReactorStatics.TEXT, GenericModel::getString);
+			optionElement.bindStyle("background-color", ReactorStatics.TEXT, model -> getString(model));
 		}
 	}
 
@@ -91,10 +90,7 @@ public class GSSelect extends GSTag {
 
 		public InstanceCompositeSelect(GSTag parent) {
 			super(parent);
-			addPostfixBinding(modelContext -> {
-				int axe = pos(modelContext.getGenerics()[2], modelContext.getGenerics()[1]);
-				getProperty(ReactorStatics.SELECTION, modelContext).addListener((ov, ova, nva) -> modelContext.getGenerics()[2].updateComponent(((GenericModel) nva).getGeneric(), axe));
-			});
+			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[2].updateComponent(nva.getGeneric(), model.getGenerics()[2].getComponents().indexOf(model.getGenerics()[1]))));
 		}
 
 		@Override
