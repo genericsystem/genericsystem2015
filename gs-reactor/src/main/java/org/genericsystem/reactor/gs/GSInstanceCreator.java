@@ -39,7 +39,7 @@ public class GSInstanceCreator extends GSComposite {
 	protected void sections() {
 		new GSAttributeCreator(this, FlexDirection.ROW) {
 			{
-				forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+				forEach_(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 			}
 		};
 	}

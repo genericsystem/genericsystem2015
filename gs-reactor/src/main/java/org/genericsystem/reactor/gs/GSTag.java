@@ -20,19 +20,19 @@ public abstract class GSTag extends Tag<GenericModel> {
 		super(parent, tag);
 	}
 
-	public void forEachGeneric(ObservableListExtractor observableListExtractor) {
+	public void forEach_(ObservableListExtractor observableListExtractor) {
 		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, subElement) -> new GenericModel(model, GenericModel.addToGenerics(subElement, ((GenericModel) model).getGenerics())));
 	}
 
-	protected void forEachGeneric(GSTag parentCompositeElement) {
-		forEachGeneric(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
+	protected void forEach(GSTag parentCompositeElement) {
+		forEach_(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
 	}
 
 	// TODO
 	// 1) selection doesn't listen really
 	// 2) is the generic accumulation in context a good idea here ?
 	public void select(Function<Generic[], Generic> genericSupplier) {
-		forEachGeneric((ObservableListExtractor) gs -> {
+		forEach_((ObservableListExtractor) gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
 		});
@@ -54,9 +54,10 @@ public abstract class GSTag extends Tag<GenericModel> {
 	}
 
 	public void select(Class<?> genericClass) {
-		forEachGeneric((ObservableListExtractor) gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
+		forEach_((ObservableListExtractor) gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
 	}
 
+	// TODO change to use a property
 	public ObservableValue<String> getString(GenericModel model) {
 		return model.getString(getStringExtractor(model));
 	}

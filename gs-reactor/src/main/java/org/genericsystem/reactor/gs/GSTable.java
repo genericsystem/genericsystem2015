@@ -79,7 +79,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 			protected void sections() {
 				new LinkTitleDisplayer(this) {
 					{
-						forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+						forEach_(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 					}
 				};
 			}
@@ -113,7 +113,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 		Tag<GenericModel> selectableTag = new GSComposite(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEachGeneric(ObservableListExtractor.SUBINSTANCES);
+				forEach_(ObservableListExtractor.SUBINSTANCES);
 			}
 
 			@Override
@@ -143,10 +143,10 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 					{
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
-						forEachGeneric(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+						forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 						new GSInstanceCellDisplayer(this) {
 							{
-								forEachGeneric(ObservableListExtractor.HOLDERS);
+								forEach_(ObservableListExtractor.HOLDERS);
 							}
 						};
 					}

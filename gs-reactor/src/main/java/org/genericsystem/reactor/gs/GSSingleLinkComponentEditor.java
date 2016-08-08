@@ -60,7 +60,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentEditor(GSTag parent) {
 			super(parent);
-			forEachGeneric((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
 		}
 	}
 
@@ -68,7 +68,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentAdder(GSTag parent) {
 			super(parent, CompositeSelectWithEmptyEntry::new);
-			forEachGeneric((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[4])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[4])));
 		}
 	}
 
@@ -76,7 +76,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentCreator(GSTag parent) {
 			super(parent, CompositeSelectWithEmptyEntry::new);
-			forEachGeneric((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 	}
 }
