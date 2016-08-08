@@ -46,7 +46,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		});
 		new GSLabelDisplayer(this) {
 			{
-				select(gs -> !gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
+				select(gs -> !gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) && !gs[0].getLinks(gs[2]).isEmpty() ? gs[0] : null);
 			}
 		};
 	}
