@@ -43,7 +43,7 @@ public class Model {
 
 	public void createNewProperty(Tag<?> tag, String propertyName) {
 		assert viewContextsMap.keySet().contains(tag);
-		if (propertiesMap.get(tag).containsKey(propertyName))
+		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
 		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
 	}
