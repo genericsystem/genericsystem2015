@@ -72,8 +72,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 
 		@Override
 		protected void init() {
-			createNewProperty(ReactorStatics.SELECTION_SHIFT);
-			initProperty(ReactorStatics.SELECTION_SHIFT, model -> 1);
+			createNewInitializedProperty(ReactorStatics.SELECTION_SHIFT, model -> 1);
 		}
 	}
 

@@ -27,8 +27,7 @@ public class GSLinkEditor extends GSSection {
 
 	public GSLinkEditor(GSTag parent, GSLinkComponentConstructor constructor) {
 		super(parent, FlexDirection.ROW);
-		createNewProperty(ReactorStatics.COMPONENTS);
-		initProperty(ReactorStatics.COMPONENTS, model -> new ArrayList<Property<GenericModel>>());
+		createNewInitializedProperty(ReactorStatics.COMPONENTS, model -> new ArrayList<Property<GenericModel>>());
 		components = constructor.build(this);
 	}
 
