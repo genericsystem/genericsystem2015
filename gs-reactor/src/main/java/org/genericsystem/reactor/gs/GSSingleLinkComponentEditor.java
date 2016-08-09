@@ -42,7 +42,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		select.addPostfixBinding(model -> {
 			Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model.getParent());
 			if (selectedComponents != null)
-				selectedComponents.getValue().add(select.getProperty(ReactorStatics.SELECTION, model));
+				selectedComponents.getValue().add(select.getSelectionProperty(model));
 		});
 		new GSLabelDisplayer(this) {
 			{

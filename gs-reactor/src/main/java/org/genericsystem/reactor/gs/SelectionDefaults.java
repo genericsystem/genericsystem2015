@@ -20,6 +20,8 @@ import org.genericsystem.reactor.model.GenericModel;
  */
 public interface SelectionDefaults {
 
+	public static final String SELECTION = "selection";
+
 	// void addPrefixBinding(Consumer<GenericModel> consumer);
 
 	void addPostfixBinding(Consumer<GenericModel> consumer);
@@ -29,11 +31,11 @@ public interface SelectionDefaults {
 	<T> Property<T> getProperty(String property, Model model);
 
 	default void createSelectionProperty() {
-		createNewProperty(ReactorStatics.SELECTION);
+		createNewProperty(SELECTION);
 	}
 
 	default Property<GenericModel> getSelectionProperty(GenericModel model) {
-		return getProperty(ReactorStatics.SELECTION, model);
+		return getProperty(SELECTION, model);
 	}
 
 	default void bindBiDirectionalSelection(Tag<GenericModel> subElement) {

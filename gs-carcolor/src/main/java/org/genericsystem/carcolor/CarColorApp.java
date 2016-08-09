@@ -7,7 +7,6 @@ import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -17,6 +16,7 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.gs.SelectionDefaults;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -26,7 +26,7 @@ import io.vertx.core.http.ServerWebSocket;
  */
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
-public class CarColorApp extends GSApp {
+public class CarColorApp extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
@@ -34,7 +34,7 @@ public class CarColorApp extends GSApp {
 
 	public CarColorApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
-		createNewProperty(ReactorStatics.SELECTION);
+		createSelectionProperty();
 		addStyle("background-color", "#3393ff");
 
 		new GSHeader(this, "Generic System Reactor Live Demo", null, "", GSUserGuide::new, "");

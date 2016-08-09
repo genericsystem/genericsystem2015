@@ -8,7 +8,6 @@ import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSOption;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
@@ -23,8 +22,8 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 		createSelectionProperty();
 		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
-		storeProperty(ReactorStatics.SELECTION_STRING, model -> Bindings.createStringBinding(
-				() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? ((GenericModel) getProperty(ReactorStatics.SELECTION, model).getValue()).getGeneric() : null), getSelectionProperty(model)));
+		storeProperty(ReactorStatics.SELECTION_STRING,
+				model -> Bindings.createStringBinding(() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? getSelectionProperty(model).getValue().getGeneric() : null), getSelectionProperty(model)));
 	}
 
 	@Override

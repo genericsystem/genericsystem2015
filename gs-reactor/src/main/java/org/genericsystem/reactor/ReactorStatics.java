@@ -11,7 +11,6 @@ public class ReactorStatics {
 	public static final String INVALID = "invalid";
 	public static final String INVALID_LIST = "invalidList";
 	public static final String NEW_INSTANCE = "newInstance";
-	public static final String SELECTION = "selection";
 	public static final String SELECTION_INDEX = "selectionIndex";
 	public static final String SELECTION_SHIFT = "selectionShift";
 	public static final String SELECTION_STRING = "selectionString";
