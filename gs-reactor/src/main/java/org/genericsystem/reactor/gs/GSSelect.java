@@ -53,7 +53,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
 					Map<String, String> map = model.getObservableStyles(this);
 					ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
-					ObservableValue<String> observable = model.getObservableValue(this, ReactorStatics.SELECTION_STRING);
+					ObservableValue<String> observable = getObservableValue(ReactorStatics.SELECTION_STRING, model);
 					observable.addListener(listener);
 					map.put("background-color", observable.getValue());
 				}

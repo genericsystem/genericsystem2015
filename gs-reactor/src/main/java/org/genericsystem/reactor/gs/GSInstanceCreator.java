@@ -64,7 +64,7 @@ public class GSInstanceCreator extends GSComposite {
 								() -> Boolean.TRUE.equals(getInvalidList(model).stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
 								getInvalidList(model).stream().toArray(ObservableValue[]::new)));
 						bindAction(model -> {
-							Generic newInstance = model.getGeneric().setInstance((Serializable) model.getProperty(instanceValueInput.input, ReactorStatics.VALUE).getValue());
+							Generic newInstance = model.getGeneric().setInstance((Serializable) instanceValueInput.input.getProperty(ReactorStatics.VALUE, model).getValue());
 							for (Entry<Generic, Property<Serializable>> entry : getHoldersMap(model).entrySet())
 								if (entry.getValue().getValue() != null) {
 									newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
@@ -76,7 +76,7 @@ public class GSInstanceCreator extends GSComposite {
 									newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
 								entry.getValue().stream().forEach(sel -> sel.setValue(null));
 							}
-							model.getProperty(instanceValueInput.input, ReactorStatics.VALUE).setValue(null);
+							instanceValueInput.input.getProperty(ReactorStatics.VALUE, model).setValue(null);
 						});
 						setText("Add");
 						addStyle("width", "100%");

@@ -109,7 +109,7 @@ public abstract class Tag<M extends Model> {
 
 	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String propertyName) {
 		addPrefixBinding(modelContext -> {
-			ObservableValue<Boolean> optional = modelContext.getObservableValue(this, propertyName);
+			ObservableValue<Boolean> optional = getObservableValue(propertyName, modelContext);
 			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
 			Consumer<Boolean> consumer = bool -> {
 				if (Boolean.TRUE.equals(bool))
