@@ -107,7 +107,14 @@ section .adding .modal-content{
 }
 
 .buttonUser {
-	background-color: #9e9e9e;
+	margin-left: auto;
+    margin-right: auto;
+	background-color: #F2F3F4;
 	text-align: center;
 	color: black;
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 1.4em;
+	color: #4d4d4d;
+	height: 40px;
+	width: 100px;
 }
