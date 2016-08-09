@@ -72,8 +72,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 
 		@Override
 		protected void init() {
-			createNewProperty(ReactorStatics.SELECTION_SHIFT);
-			initProperty(ReactorStatics.SELECTION_SHIFT, model -> 1);
+			createNewInitializedProperty(ReactorStatics.SELECTION_SHIFT, model -> 1);
 		}
 	}
 
@@ -90,7 +89,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 
 		public InstanceCompositeSelect(GSTag parent) {
 			super(parent);
-			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[2].updateComponent(nva.getGeneric(), model.getGenerics()[2].getComponents().indexOf(model.getGenerics()[1]))));
+			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()))));
 		}
 
 		@Override

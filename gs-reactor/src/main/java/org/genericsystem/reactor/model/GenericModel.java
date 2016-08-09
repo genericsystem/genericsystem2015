@@ -28,6 +28,8 @@ public class GenericModel extends Model {
 	}
 
 	public static Generic[] addToGenerics(Generic generic, Generic[] generics) {
+		if (generics.length != 0 && generics[0].equals(generic))
+			return generics;
 		Generic[] result = new Generic[generics.length + 1];
 		result[0] = generic;
 		System.arraycopy(generics, 0, result, 1, generics.length);
@@ -41,7 +43,7 @@ public class GenericModel extends Model {
 	@Deprecated
 	// TODO try to remove this method
 	public ObservableValue<String> getString(StringExtractor stringExtractor) {
-		return new ReadOnlyStringWrapper(stringExtractor.apply(getGenerics()[0]));
+		return new ReadOnlyStringWrapper(stringExtractor.apply(getGeneric()));
 	}
 
 	public void remove() {

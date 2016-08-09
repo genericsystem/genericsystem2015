@@ -46,7 +46,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		});
 		new GSLabelDisplayer(this) {
 			{
-				select(gs -> !gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
+				select(gs -> !gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) && !gs[0].getLinks(gs[2]).isEmpty() ? gs[0] : null);
 			}
 		};
 	}
@@ -60,7 +60,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentEditor(GSTag parent) {
 			super(parent);
-			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[3])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 	}
 
@@ -68,7 +68,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentAdder(GSTag parent) {
 			super(parent, CompositeSelectWithEmptyEntry::new);
-			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[4])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 		}
 	}
 
@@ -76,7 +76,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 
 		public GSLinkComponentCreator(GSTag parent) {
 			super(parent, CompositeSelectWithEmptyEntry::new);
-			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 		}
 	}
 }

@@ -63,8 +63,9 @@ public class GSHolderEditor extends GSSection {
 					bindAction(model -> {
 						Property<Serializable> observable = input.getProperty(ReactorStatics.VALUE, model);
 						if (observable.getValue() != null) {
-							model.getGenerics()[3].addHolder(model.getGenerics()[2], observable.getValue());
+							Serializable newValue = observable.getValue();
 							observable.setValue(null);
+							model.getGenerics()[1].addHolder(model.getGeneric(), newValue);
 						}
 					});
 				}

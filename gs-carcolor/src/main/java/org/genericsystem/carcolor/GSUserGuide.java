@@ -22,8 +22,7 @@ public class GSUserGuide extends GSSection {
 			{
 
 				addStyleClass("modal");
-				createNewProperty(ReactorStatics.DISPLAY);
-				initProperty(ReactorStatics.DISPLAY, model -> "none");
+				createNewInitializedProperty(ReactorStatics.DISPLAY, model -> "none");
 				bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY);
 				new GSSection(this, FlexDirection.COLUMN) {
 					{
