@@ -17,6 +17,7 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.gstag.GSHeader;
 
 import io.vertx.core.http.ServerWebSocket;
 
