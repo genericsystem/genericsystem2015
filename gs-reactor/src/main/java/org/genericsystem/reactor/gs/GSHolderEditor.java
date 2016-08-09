@@ -78,8 +78,12 @@ public class GSHolderEditor extends GSSection {
 		public GSHolderCreator(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator) {
-				input.addPrefixBinding(model -> ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).put(model.getGeneric(), input.getProperty(ReactorStatics.VALUE, model)));
-				input.addPrefixBinding(model -> ((List<ObservableValue<Boolean>>) getProperty(ReactorStatics.INVALID_LIST, model).getValue()).add(input.getObservableValue(ReactorStatics.INVALID, model)));
+				input.addPrefixBinding(model -> {
+					Property<Map<Generic, Property<Serializable>>> holders = getProperty(ReactorStatics.HOLDERS_MAP, model);
+					holders.getValue().put(model.getGeneric(), input.getProperty(ReactorStatics.VALUE, model));
+					Property<List<ObservableValue<Boolean>>> invalids = getProperty(ReactorStatics.INVALID_LIST, model);
+					invalids.getValue().add(input.getObservableValue(ReactorStatics.INVALID, model));
+				});
 			}
 		}
 	}

@@ -42,17 +42,18 @@ public interface SelectionDefaults {
 			Generic selectedGeneric = modelContext.getGeneric();
 			Optional<GenericModel> selectedModel = subContexts.stream().filter(sub -> selectedGeneric.equals(sub.getGeneric())).findFirst();
 			Property<GenericModel> selection = getSelectionProperty(modelContext);// getProperty(ReactorStatics.SELECTION, modelContext);
-			int selectionShift = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext) != null ? (Integer) getProperty(ReactorStatics.SELECTION_SHIFT, modelContext).getValue() : 0;
+			Property<Integer> selectionShiftProperty = getProperty(ReactorStatics.SELECTION_SHIFT, modelContext);
+			int selectionShift = selectionShiftProperty != null ? selectionShiftProperty.getValue() : 0;
 			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
 			Property<Number> selectionIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null, genericModel -> subContexts.indexOf(genericModel)
-					+ selectionShift);
+			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (GenericModel) subContexts.get(number.intValue() - selectionShift) : null,
+					genericModel -> subContexts.indexOf(genericModel) + selectionShift);
 			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
 				if (selection != null) {
-					Number oldIndex = (Number) getProperty(ReactorStatics.SELECTION_INDEX, modelContext).getValue();
+					Property<Number> oldIndex = getProperty(ReactorStatics.SELECTION_INDEX, modelContext);
 					Number newIndex = subContexts.indexOf(selection.getValue()) + selectionShift;
-					if (newIndex != oldIndex)
-						this.getProperty(ReactorStatics.SELECTION_INDEX, modelContext).setValue(newIndex);
+					if (newIndex != oldIndex.getValue())
+						selectionIndex.setValue(newIndex);
 				}
 			});
 		});

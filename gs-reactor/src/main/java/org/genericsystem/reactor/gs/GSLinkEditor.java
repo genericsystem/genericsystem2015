@@ -61,8 +61,11 @@ public class GSLinkEditor extends GSSection {
 		public GSLinkCreator(GSTag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				addPostfixBinding(
-						model -> ((Map<Generic, List<Property<GenericModel>>>) getProperty(ReactorStatics.COMPONENTS_MAP, model).getValue()).put(model.getGeneric(), (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()));
+				addPostfixBinding(model -> {
+					Property<Map<Generic, List<Property<GenericModel>>>> componentsMap = getProperty(ReactorStatics.COMPONENTS_MAP, model);
+					Property<List<Property<GenericModel>>> components = getProperty(ReactorStatics.COMPONENTS, model);
+					componentsMap.getValue().put(model.getGeneric(), components.getValue());
+				});
 		}
 	}
 
@@ -77,16 +80,18 @@ public class GSLinkEditor extends GSSection {
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
 					setText("+");
-					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> {
-						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
-								.filter(gen -> gen != null).collect(Collectors.toList());
-						return selectedGenerics.size() + 1 == model.getGeneric().getComponents().size() ? "flex" : "none";
-					}, ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new)));
+					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> {
+						Property<List<Property<GenericModel>>> componentsList = getProperty(ReactorStatics.COMPONENTS, model);
+						return Bindings.createStringBinding(() -> {
+							List<Generic> selectedGenerics = componentsList.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+							return selectedGenerics.size() + 1 == model.getGeneric().getComponents().size() ? "flex" : "none";
+						}, componentsList.getValue().stream().toArray(Property[]::new));
+					});
 					bindAction(model -> {
 						try {
-							List<Property<GenericModel>> selectedComponents = (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue();
-							List<Generic> selectedGenerics = selectedComponents.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-							selectedComponents.stream().forEach(sel -> sel.setValue(null));
+							Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model);
+							List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+							selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
 							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
 						} catch (RollbackException e) {
 							e.printStackTrace();

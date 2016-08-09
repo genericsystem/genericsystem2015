@@ -83,7 +83,10 @@ public class GSBooleanHolderEditor extends GSSection {
 		public GSBooleanHolderCreator(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				checkbox.addPrefixBinding(model -> ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).put(model.getGeneric(), checkbox.getProperty(ReactorStatics.VALUE, model)));
+				checkbox.addPrefixBinding(model -> {
+					Property<Map<Generic, Property<Serializable>>> holders = getProperty(ReactorStatics.HOLDERS_MAP, model);
+					holders.getValue().put(model.getGeneric(), checkbox.getProperty(ReactorStatics.VALUE, model));
+				});
 		}
 	}
 }
