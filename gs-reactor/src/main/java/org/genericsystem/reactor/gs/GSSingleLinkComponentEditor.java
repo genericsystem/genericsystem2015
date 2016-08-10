@@ -72,9 +72,9 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		}
 	}
 
-	public static class GSLinkComponentCreator extends GSSingleLinkComponentEditor {
+	public static class GSLinkComponentBuilder extends GSSingleLinkComponentEditor {
 
-		public GSLinkComponentCreator(GSTag parent) {
+		public GSLinkComponentBuilder(GSTag parent) {
 			super(parent, CompositeSelectWithEmptyEntry::new);
 			forEach_((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 		}

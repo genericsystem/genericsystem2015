@@ -73,11 +73,11 @@ public class GSHolderEditor extends GSSection {
 		}
 	}
 
-	public static class GSHolderCreator extends GSHolderEditor {
+	public static class GSHolderBuilder extends GSHolderEditor {
 
-		public GSHolderCreator(GSTag parent) {
+		public GSHolderBuilder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator) {
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder) {
 				input.addPrefixBinding(model -> {
 					Property<Map<Generic, Property<Serializable>>> holders = getProperty(ReactorStatics.HOLDERS_MAP, model);
 					holders.getValue().put(model.getGeneric(), input.getProperty(ReactorStatics.VALUE, model));

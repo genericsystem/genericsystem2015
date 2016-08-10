@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.gs.FlexDirection;
-import org.genericsystem.reactor.gs.GSCellDisplayer.GSTagConstructor;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSTagConstructor;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTag;
 

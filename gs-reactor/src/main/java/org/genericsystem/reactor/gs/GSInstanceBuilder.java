@@ -7,23 +7,23 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gs.GSCellDisplayer.GSAttributeCreator;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderCreator;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSAttributeBuilder;
+import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderBuilder;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
-public class GSInstanceCreator extends GSComposite {
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+
+public class GSInstanceBuilder extends GSComposite {
 
 	private GSHolderEditor instanceValueInput;
 
-	public GSInstanceCreator(GSTag parent, FlexDirection flexDirection) {
+	public GSInstanceBuilder(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		createNewInitializedProperty(ReactorStatics.HOLDERS_MAP, model -> new HashMap<Generic, Property<Serializable>>());
 		createNewInitializedProperty(ReactorStatics.COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<GenericModel>>>());
@@ -32,12 +32,12 @@ public class GSInstanceCreator extends GSComposite {
 
 	@Override
 	protected void header() {
-		instanceValueInput = new GSHolderCreator(this);
+		instanceValueInput = new GSHolderBuilder(this);
 	}
 
 	@Override
 	protected void sections() {
-		new GSAttributeCreator(this, FlexDirection.ROW) {
+		new GSAttributeBuilder(this, FlexDirection.ROW) {
 			{
 				forEach_(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 			}

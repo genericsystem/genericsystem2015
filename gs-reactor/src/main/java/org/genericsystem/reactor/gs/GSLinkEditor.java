@@ -9,7 +9,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentAdder;
-import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentCreator;
+import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentBuilder;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentEditor;
 import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
@@ -52,15 +52,15 @@ public class GSLinkEditor extends GSSection {
 		}
 	}
 
-	public static class GSLinkCreator extends GSLinkEditor {
+	public static class GSLinkBuilder extends GSLinkEditor {
 
-		public GSLinkCreator(GSTag parent) {
-			this(parent, GSLinkComponentCreator::new);
+		public GSLinkBuilder(GSTag parent) {
+			this(parent, GSLinkComponentBuilder::new);
 		}
 
-		public GSLinkCreator(GSTag parent, GSLinkComponentConstructor constructor) {
+		public GSLinkBuilder(GSTag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder)
 				addPostfixBinding(model -> {
 					Property<Map<Generic, List<Property<GenericModel>>>> componentsMap = getProperty(ReactorStatics.COMPONENTS_MAP, model);
 					Property<List<Property<GenericModel>>> components = getProperty(ReactorStatics.COMPONENTS, model);
@@ -69,7 +69,7 @@ public class GSLinkEditor extends GSSection {
 		}
 	}
 
-	public static class GSLinkAdder extends GSLinkCreator {
+	public static class GSLinkAdder extends GSLinkBuilder {
 
 		public GSLinkAdder(GSTag parent) {
 			super(parent, GSLinkComponentAdder::new);

@@ -4,10 +4,10 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellAdder;
-import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditor;
-import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSCellDisplayer.InstanceLinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellAdder;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditorWithRemoval;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -90,7 +90,7 @@ public class GSEditor extends GSComposite {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new GSCellEditor(this) {
+								new GSSubcellEditor(this) {
 									{
 										select(gs -> gs[0]);
 									}
@@ -102,7 +102,7 @@ public class GSEditor extends GSComposite {
 								forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new GSCellEditor(this) {
+								new GSSubcellEditor(this) {
 									{
 										addStyle("flex", "1");
 										// forEach_ should work here, but it causes errors…
@@ -121,7 +121,7 @@ public class GSEditor extends GSComposite {
 										});
 									}
 								};
-								new GSCellEditorWithRemoval(this) {
+								new GSSubcellEditorWithRemoval(this) {
 									{
 										addStyle("flex", "1");
 										select__(model -> new ListBinding<GenericModel>() {
@@ -139,7 +139,7 @@ public class GSEditor extends GSComposite {
 										});
 									}
 								};
-								new GSCellAdder(this) {
+								new GSSubcellAdder(this) {
 									{
 										select__(model -> new ListBinding<GenericModel>() {
 											ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
