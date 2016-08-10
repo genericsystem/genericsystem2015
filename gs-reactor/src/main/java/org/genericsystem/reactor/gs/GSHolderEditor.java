@@ -54,6 +54,10 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderAdder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
+			input.addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+				if (nva != null)
+					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+			});
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");

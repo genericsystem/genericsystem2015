@@ -14,8 +14,8 @@ import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentE
 import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
 
 public class GSLinkEditor extends GSSection {
 
@@ -74,31 +74,21 @@ public class GSLinkEditor extends GSSection {
 		public GSLinkAdder(GSTag parent) {
 			super(parent, GSLinkComponentAdder::new);
 			addStyle("height", "100%");
-			new GSHyperLink(this) {
-				{
-					addStyle("justify-content", "center");
-					addStyle("text-decoration", "none");
-					addStyle("height", "100%");
-					setText("+");
-					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> {
-						Property<List<Property<GenericModel>>> componentsList = getProperty(ReactorStatics.COMPONENTS, model);
-						return Bindings.createStringBinding(() -> {
-							List<Generic> selectedGenerics = componentsList.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-							return selectedGenerics.size() + 1 == model.getGeneric().getComponents().size() ? "flex" : "none";
-						}, componentsList.getValue().stream().toArray(Property[]::new));
-					});
-					bindAction(model -> {
+			addPostfixBinding(model -> {
+				Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model);
+				ChangeListener<GenericModel> listener = (o, v, nva) -> {
+					List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+					if (selectedGenerics.size() + 1 == model.getGeneric().getComponents().size()) {
+						selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
 						try {
-							Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model);
-							List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-							selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
 							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}
-					});
-				}
-			};
+					}
+				};
+				selectedComponents.getValue().forEach(component -> component.addListener(listener));
+			});
 		}
 	}
 }

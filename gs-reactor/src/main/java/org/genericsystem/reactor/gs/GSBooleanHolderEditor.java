@@ -61,6 +61,10 @@ public class GSBooleanHolderEditor extends GSSection {
 
 		public GSBooleanHolderAdder(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
+			checkbox.addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+				if (nva != null)
+					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+			});
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
