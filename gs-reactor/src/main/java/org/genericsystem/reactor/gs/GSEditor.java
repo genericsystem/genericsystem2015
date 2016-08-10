@@ -1,5 +1,7 @@
 package org.genericsystem.reactor.gs;
 
+import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.gs.GSCellDisplayer.GSCellAdder;
@@ -100,9 +102,41 @@ public class GSEditor extends GSComposite {
 								forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
+								new GSCellEditor(this) {
+									{
+										addStyle("flex", "1");
+										// forEach_ should work here, but it causes errors…
+										select__(model -> new ListBinding<GenericModel>() {
+											ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+											{
+												bind(holders);
+											}
+
+											@Override
+											protected ObservableList<GenericModel> computeValue() {
+												return model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1
+														? FXCollections.observableArrayList(holders.stream().map(holder -> new GenericModel(model, GenericModel.addToGenerics(holder, model.getGenerics()))).collect(Collectors.toList()))
+														: FXCollections.emptyObservableList();
+											}
+										});
+									}
+								};
 								new GSCellEditorWithRemoval(this) {
 									{
-										forEach_(ObservableListExtractor.HOLDERS);
+										addStyle("flex", "1");
+										select__(model -> new ListBinding<GenericModel>() {
+											ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+											{
+												bind(holders);
+											}
+
+											@Override
+											protected ObservableList<GenericModel> computeValue() {
+												return (!model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1
+														? FXCollections.observableArrayList(holders.stream().map(holder -> new GenericModel(model, GenericModel.addToGenerics(holder, model.getGenerics()))).collect(Collectors.toList()))
+														: FXCollections.emptyObservableList();
+											}
+										});
 									}
 								};
 								new GSCellAdder(this) {

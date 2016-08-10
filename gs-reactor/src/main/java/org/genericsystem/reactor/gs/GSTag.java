@@ -28,9 +28,6 @@ public abstract class GSTag extends Tag<GenericModel> {
 		forEach_(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
 	}
 
-	// TODO
-	// 1) selection doesn't listen really
-	// 2) is the generic accumulation in context a good idea here ?
 	public void select(Function<Generic[], Generic> genericSupplier) {
 		forEach_((ObservableListExtractor) gs -> {
 			Generic generic = genericSupplier.apply(gs);
