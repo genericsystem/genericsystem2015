@@ -90,11 +90,7 @@ public class GSEditor extends GSComposite {
 							{
 								addStyle("flex", "1");
 								addStyle("overflow", "hidden");
-								new GSSubcellEditor(this) {
-									{
-										select(gs -> gs[0]);
-									}
-								};
+								new GSSubcellEditor(this);
 							}
 						};
 						new GSSection(this, FlexDirection.COLUMN) {
