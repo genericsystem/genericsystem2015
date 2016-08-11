@@ -21,6 +21,7 @@ import org.genericsystem.reactor.model.GenericModel;
 public interface SelectionDefaults {
 
 	public static final String SELECTION = "selection";
+	public static final String UPDATED_GENERIC = "updatedGeneric";
 
 	// void addPrefixBinding(Consumer<GenericModel> consumer);
 
@@ -32,10 +33,15 @@ public interface SelectionDefaults {
 
 	default void createSelectionProperty() {
 		createNewProperty(SELECTION);
+		createNewProperty(UPDATED_GENERIC);
 	}
 
 	default Property<GenericModel> getSelectionProperty(GenericModel model) {
 		return getProperty(SELECTION, model);
+	}
+
+	default Property<Generic> getUpdatedGenericProperty(GenericModel model) {
+		return getProperty(UPDATED_GENERIC, model);
 	}
 
 	default void bindBiDirectionalSelection(Tag<GenericModel> subElement) {
@@ -68,10 +74,16 @@ public interface SelectionDefaults {
 			subContexts.addListener((ListChangeListener<GenericModel>) change -> {
 				if (selection != null)
 					while (change.next())
-						if (change.wasRemoved() && !change.wasAdded())
-							if (change.getRemoved().contains(selection.getValue()))
-								selection.setValue(null);
+						if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().contains(selection.getValue()))
+							selection.setValue(null);
 			});
+			Property<Generic> updatedGeneric = getProperty(UPDATED_GENERIC, model);
+			if (selection != null && updatedGeneric != null)
+				updatedGeneric.addListener((o, v, nv) -> {
+					Optional<? extends GenericModel> updatedModel = subContexts.stream().filter(m -> m.getGeneric().equals(nv)).findFirst();
+					if (updatedModel.isPresent())
+						getSelectionProperty(model).setValue(updatedModel.get());
+				});
 		});
 	}
 }

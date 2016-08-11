@@ -3,6 +3,7 @@ package org.genericsystem.reactor.gs;
 import java.io.Serializable;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSInputText;
 import org.genericsystem.reactor.model.GenericModel;
@@ -10,6 +11,7 @@ import org.genericsystem.reactor.model.GenericModel;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
@@ -59,14 +61,18 @@ public class GSInputTextWithConversion<T extends Serializable> extends GSInputTe
 		return ApiStatics.STRING_CONVERTERS.get(clazz);
 	}
 
-	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> {
+	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> implements SelectionDefaults {
 
 		public GSInputTextEditorWithConversion(GSTag parent) {
 			super(parent);
 			initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
 			addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
-				if (nva != null)
-					model.getGeneric().updateValue(nva);
+				if (nva != null) {
+					Generic updatedGeneric = model.getGeneric().updateValue(nva);
+					Property<Generic> genericProperty = getUpdatedGenericProperty(model);
+					if (genericProperty != null)
+						genericProperty.setValue(updatedGeneric);
+				}
 			});
 		}
 
