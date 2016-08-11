@@ -54,6 +54,10 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderAdder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
+			input.addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+				if (nva != null)
+					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+			});
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
@@ -73,13 +77,17 @@ public class GSHolderEditor extends GSSection {
 		}
 	}
 
-	public static class GSHolderCreator extends GSHolderEditor {
+	public static class GSHolderBuilder extends GSHolderEditor {
 
-		public GSHolderCreator(GSTag parent) {
+		public GSHolderBuilder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator) {
-				input.addPrefixBinding(model -> ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).put(model.getGeneric(), model.getProperty(input, ReactorStatics.VALUE)));
-				input.addPrefixBinding(model -> ((List<ObservableValue<Boolean>>) getProperty(ReactorStatics.INVALID_LIST, model).getValue()).add(model.getObservableValue(input, ReactorStatics.INVALID)));
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder) {
+				input.addPrefixBinding(model -> {
+					Property<Map<Generic, Property<Serializable>>> holders = getProperty(ReactorStatics.HOLDERS_MAP, model);
+					holders.getValue().put(model.getGeneric(), input.getProperty(ReactorStatics.VALUE, model));
+					Property<List<ObservableValue<Boolean>>> invalids = getProperty(ReactorStatics.INVALID_LIST, model);
+					invalids.getValue().add(input.getObservableValue(ReactorStatics.INVALID, model));
+				});
 			}
 		}
 	}

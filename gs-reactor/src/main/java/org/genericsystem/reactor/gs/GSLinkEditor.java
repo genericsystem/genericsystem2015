@@ -9,13 +9,13 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentAdder;
-import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentCreator;
+import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentBuilder;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentEditor;
 import org.genericsystem.reactor.gstag.GSHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
 
 public class GSLinkEditor extends GSSection {
 
@@ -52,48 +52,43 @@ public class GSLinkEditor extends GSSection {
 		}
 	}
 
-	public static class GSLinkCreator extends GSLinkEditor {
+	public static class GSLinkBuilder extends GSLinkEditor {
 
-		public GSLinkCreator(GSTag parent) {
-			this(parent, GSLinkComponentCreator::new);
+		public GSLinkBuilder(GSTag parent) {
+			this(parent, GSLinkComponentBuilder::new);
 		}
 
-		public GSLinkCreator(GSTag parent, GSLinkComponentConstructor constructor) {
+		public GSLinkBuilder(GSTag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				addPostfixBinding(
-						model -> ((Map<Generic, List<Property<GenericModel>>>) getProperty(ReactorStatics.COMPONENTS_MAP, model).getValue()).put(model.getGeneric(), (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()));
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder)
+				addPostfixBinding(model -> {
+					Property<Map<Generic, List<Property<GenericModel>>>> componentsMap = getProperty(ReactorStatics.COMPONENTS_MAP, model);
+					Property<List<Property<GenericModel>>> components = getProperty(ReactorStatics.COMPONENTS, model);
+					componentsMap.getValue().put(model.getGeneric(), components.getValue());
+				});
 		}
 	}
 
-	public static class GSLinkAdder extends GSLinkCreator {
+	public static class GSLinkAdder extends GSLinkBuilder {
 
 		public GSLinkAdder(GSTag parent) {
 			super(parent, GSLinkComponentAdder::new);
 			addStyle("height", "100%");
-			new GSHyperLink(this) {
-				{
-					addStyle("justify-content", "center");
-					addStyle("text-decoration", "none");
-					addStyle("height", "100%");
-					setText("+");
-					bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> {
-						List<Generic> selectedGenerics = ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric())
-								.filter(gen -> gen != null).collect(Collectors.toList());
-						return selectedGenerics.size() + 1 == model.getGeneric().getComponents().size() ? "flex" : "none";
-					}, ((List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue()).stream().toArray(Property[]::new)));
-					bindAction(model -> {
+			addPostfixBinding(model -> {
+				Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model);
+				ChangeListener<GenericModel> listener = (o, v, nva) -> {
+					List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+					if (selectedGenerics.size() + 1 == model.getGeneric().getComponents().size()) {
+						selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
 						try {
-							List<Property<GenericModel>> selectedComponents = (List<Property<GenericModel>>) getProperty(ReactorStatics.COMPONENTS, model).getValue();
-							List<Generic> selectedGenerics = selectedComponents.stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-							selectedComponents.stream().forEach(sel -> sel.setValue(null));
 							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}
-					});
-				}
-			};
+					}
+				};
+				selectedComponents.getValue().forEach(component -> component.addListener(listener));
+			});
 		}
 	}
 }

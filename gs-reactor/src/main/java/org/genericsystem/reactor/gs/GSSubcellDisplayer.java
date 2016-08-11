@@ -3,14 +3,14 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
-import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderCreator;
+import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderBuilder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderAdder;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderCreator;
+import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderBuilder;
 import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkAdder;
-import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkCreator;
+import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkBuilder;
 import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSInstanceLinkComponentsTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsDisplayer;
@@ -19,22 +19,22 @@ import org.genericsystem.reactor.gstag.GSLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
-public class GSCellDisplayer extends GSSection {
+public class GSSubcellDisplayer extends GSSection {
 
 	protected final GSTagConstructor holderDisplayerConstructor;
 	protected final GSTagConstructor booleanHolderDisplayerConstructor;
 	protected final GSTagConstructor linkDisplayerConstructor;
 	private final boolean needMeta;
 
-	public GSCellDisplayer(GSTag parent, GSTagConstructor holderDisplayerConstructor, GSTagConstructor booleanHolderDisplayerConstructor, GSTagConstructor linkDisplayerConstructor) {
+	public GSSubcellDisplayer(GSTag parent, GSTagConstructor holderDisplayerConstructor, GSTagConstructor booleanHolderDisplayerConstructor, GSTagConstructor linkDisplayerConstructor) {
 		this(parent, FlexDirection.ROW, holderDisplayerConstructor, booleanHolderDisplayerConstructor, linkDisplayerConstructor);
 	}
 
-	public GSCellDisplayer(GSTag parent, FlexDirection direction, GSTagConstructor holderDisplayerConstructor, GSTagConstructor booleanHolderDisplayerConstructor, GSTagConstructor linkDisplayerConstructor) {
+	public GSSubcellDisplayer(GSTag parent, FlexDirection direction, GSTagConstructor holderDisplayerConstructor, GSTagConstructor booleanHolderDisplayerConstructor, GSTagConstructor linkDisplayerConstructor) {
 		this(parent, direction, holderDisplayerConstructor, booleanHolderDisplayerConstructor, linkDisplayerConstructor, true);
 	}
 
-	public GSCellDisplayer(GSTag parent, FlexDirection direction, GSTagConstructor holderDisplayerConstructor, GSTagConstructor booleanHolderDisplayerConstructor, GSTagConstructor linkDisplayerConstructor, boolean needMeta) {
+	public GSSubcellDisplayer(GSTag parent, FlexDirection direction, GSTagConstructor holderDisplayerConstructor, GSTagConstructor booleanHolderDisplayerConstructor, GSTagConstructor linkDisplayerConstructor, boolean needMeta) {
 		super(parent, direction);
 		this.holderDisplayerConstructor = holderDisplayerConstructor;
 		this.booleanHolderDisplayerConstructor = booleanHolderDisplayerConstructor;
@@ -85,21 +85,21 @@ public class GSCellDisplayer extends GSSection {
 		tag.addStyle("overflow", "hidden");
 	}
 
-	public static class GSCellEditor extends GSCellDisplayer {
+	public static class GSSubcellEditor extends GSSubcellDisplayer {
 
-		public GSCellEditor(GSTag parent) {
+		public GSSubcellEditor(GSTag parent) {
 			this(parent, FlexDirection.ROW);
 		}
 
-		public GSCellEditor(GSTag parent, FlexDirection direction) {
+		public GSSubcellEditor(GSTag parent, FlexDirection direction) {
 			this(parent, direction, GSHolderEditor::new, GSBooleanHolderEditor::new, GSLinkEditor::new);
 		}
 
-		public GSCellEditor(GSTag parent, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
+		public GSSubcellEditor(GSTag parent, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
 			this(parent, FlexDirection.ROW, holderEditorConstructor, booleanHolderEditorConstructor, linkEditorConstructor);
 		}
 
-		public GSCellEditor(GSTag parent, FlexDirection direction, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
+		public GSSubcellEditor(GSTag parent, FlexDirection direction, GSTagConstructor holderEditorConstructor, GSTagConstructor booleanHolderEditorConstructor, GSTagConstructor linkEditorConstructor) {
 			super(parent, direction, holderEditorConstructor, booleanHolderEditorConstructor, linkEditorConstructor, false);
 		}
 
@@ -111,31 +111,31 @@ public class GSCellDisplayer extends GSSection {
 		}
 	}
 
-	public static class GSCellEditorWithRemoval extends GSCellEditor {
+	public static class GSSubcellEditorWithRemoval extends GSSubcellEditor {
 
-		public GSCellEditorWithRemoval(GSTag parent) {
+		public GSSubcellEditorWithRemoval(GSTag parent) {
 			this(parent, FlexDirection.ROW);
 		}
 
-		public GSCellEditorWithRemoval(GSTag parent, FlexDirection direction) {
+		public GSSubcellEditorWithRemoval(GSTag parent, FlexDirection direction) {
 			super(parent, direction, GSHolderEditorWithRemoval::new, GSBooleanHolderEditorWithRemoval::new, GSLinkEditorWithRemoval::new);
 		}
 	}
 
-	public static class GSCellAdder extends GSCellEditor {
+	public static class GSSubcellAdder extends GSSubcellEditor {
 
-		public GSCellAdder(GSTag parent) {
+		public GSSubcellAdder(GSTag parent) {
 			this(parent, FlexDirection.ROW);
 		}
 
-		public GSCellAdder(GSTag parent, FlexDirection direction) {
+		public GSSubcellAdder(GSTag parent, FlexDirection direction) {
 			super(parent, direction, GSHolderAdder::new, GSBooleanHolderAdder::new, GSLinkAdder::new);
 		}
 	}
 
-	public static class GSInstanceCellDisplayer extends GSCellDisplayer {
+	public static class GSInstanceSubcellDisplayer extends GSSubcellDisplayer {
 
-		public GSInstanceCellDisplayer(GSTag parent) {
+		public GSInstanceSubcellDisplayer(GSTag parent) {
 			super(parent, GSLabelDisplayer::new, GSCheckBoxDisplayer::new, GSLinkComponentsDisplayer::new);
 		}
 
@@ -147,7 +147,7 @@ public class GSCellDisplayer extends GSSection {
 		}
 	}
 
-	public static class LinkTitleDisplayer extends GSCellDisplayer {
+	public static class LinkTitleDisplayer extends GSSubcellDisplayer {
 
 		public LinkTitleDisplayer(GSTag parent) {
 			this(parent, GSLabelDisplayer::new, GSCheckBoxDisplayer::new, GSLinkComponentsTitleDisplayer::new);
@@ -177,10 +177,10 @@ public class GSCellDisplayer extends GSSection {
 		GSTag build(GSTag parent);
 	}
 
-	public static class GSAttributeCreator extends GSCellEditor {
+	public static class GSAttributeBuilder extends GSSubcellEditor {
 
-		public GSAttributeCreator(GSTag parent, FlexDirection direction) {
-			super(parent, direction, GSHolderCreator::new, GSBooleanHolderCreator::new, GSLinkCreator::new);
+		public GSAttributeBuilder(GSTag parent, FlexDirection direction) {
+			super(parent, direction, GSHolderBuilder::new, GSBooleanHolderBuilder::new, GSLinkBuilder::new);
 		}
 
 		@Override

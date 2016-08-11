@@ -58,13 +58,12 @@ public class Model {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> ObservableValue<T> getObservableValue(Tag<?> tag, String propertyName) {
+	<T> ObservableValue<T> getObservableValue(Tag<?> tag, String propertyName) {
 		return (ObservableValue<T>) getProperties(tag).get(propertyName);
 	}
 
-	// TODO visibility should be package or protected to avoid direct access
 	@SuppressWarnings("unchecked")
-	public <T> Property<T> getProperty(Tag<?> tag, String propertyName) {
+	<T> Property<T> getProperty(Tag<?> tag, String propertyName) {
 		return (Property<T>) getProperties(tag).get(propertyName);
 	}
 

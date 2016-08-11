@@ -61,6 +61,10 @@ public class GSBooleanHolderEditor extends GSSection {
 
 		public GSBooleanHolderAdder(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
+			checkbox.addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+				if (nva != null)
+					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+			});
 			new GSHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
@@ -78,12 +82,15 @@ public class GSBooleanHolderEditor extends GSSection {
 		}
 	}
 
-	public static class GSBooleanHolderCreator extends GSBooleanHolderEditor {
+	public static class GSBooleanHolderBuilder extends GSBooleanHolderEditor {
 
-		public GSBooleanHolderCreator(GSTag parent) {
+		public GSBooleanHolderBuilder(GSTag parent) {
 			super(parent, GSCheckBoxWithValue::new);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceCreator)
-				checkbox.addPrefixBinding(model -> ((Map<Generic, Property<Serializable>>) getProperty(ReactorStatics.HOLDERS_MAP, model).getValue()).put(model.getGeneric(), model.getProperty(checkbox, ReactorStatics.VALUE)));
+			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder)
+				checkbox.addPrefixBinding(model -> {
+					Property<Map<Generic, Property<Serializable>>> holders = getProperty(ReactorStatics.HOLDERS_MAP, model);
+					holders.getValue().put(model.getGeneric(), checkbox.getProperty(ReactorStatics.VALUE, model));
+				});
 		}
 	}
 }

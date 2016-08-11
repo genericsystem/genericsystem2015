@@ -1,8 +1,8 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSCellDisplayer.GSInstanceCellDisplayer;
-import org.genericsystem.reactor.gs.GSCellDisplayer.LinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSHyperLink;
@@ -105,7 +105,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 	}
 
 	protected void columnsInputSection() {
-		new GSInstanceCreator(this, this.getReverseDirection());
+		new GSInstanceBuilder(this, this.getReverseDirection());
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("flex", "1");
 						addStyle("overflow", "hidden");
 						forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new GSInstanceCellDisplayer(this) {
+						new GSInstanceSubcellDisplayer(this) {
 							{
 								forEach_(ObservableListExtractor.HOLDERS);
 							}

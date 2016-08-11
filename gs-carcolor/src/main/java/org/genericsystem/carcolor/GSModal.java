@@ -24,7 +24,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
 		super(parent, direction);
 		addStyleClass("modal");
-		bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", this.getProperty(ReactorStatics.SELECTION, model)));
+		bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
 
 		new GSSection(this, FlexDirection.COLUMN) {
 			{
