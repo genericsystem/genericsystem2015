@@ -44,12 +44,18 @@ public class TodoApp extends HtmlApp<TodoList> {
 						new HtmlHeader<TodoList>(this) {
 							{
 								addStyleClass("header");
-								new HtmlH1<TodoList>(this).setText("todos");
+								new HtmlH1<TodoList>(this) {
+									{
+										setText(this, "todos");
+									}
+								};
 								new HtmlInputText<TodoList>(this) {
 									{
 										addStyleClass("new-todo");
-										bindAction(TodoList::create);
-										bindTextBidirectional(TodoList::getName);
+										bindAction(todoList -> {
+											todoList.create(todoList.getObservableAttributes(this).get(ReactorStatics.VALUE));
+											todoList.getObservableAttributes(this).put(ReactorStatics.VALUE, null);
+										});
 									}
 								};
 							}
@@ -93,7 +99,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 														};
 														new HtmlLabel<Todo>(this) {
 															{
-																bindText(Todo::getTodoString);
+																bindText(this, Todo::getTodoString);
 															}
 														};
 														new HtmlButton<Todo>(this) {
@@ -121,8 +127,16 @@ public class TodoApp extends HtmlApp<TodoList> {
 										new HtmlSpan<TodoList>(this) {
 											{
 												addStyleClass("todo-count");
-												new HtmlStrong<TodoList>(this).bindText(TodoList::getActiveCount);
-												new HtmlSpan<TodoList>(this).bindText(TodoList::getItems);
+												new HtmlStrong<TodoList>(this) {
+													{
+														bindText(this, TodoList::getActiveCount);
+													}
+												};
+												new HtmlSpan<TodoList>(this) {
+													{
+														bindText(this, TodoList::getItems);
+													}
+												};
 											}
 										};
 										new HtmlUl<TodoList>(this) {
@@ -149,7 +163,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 											{
 												addStyleClass("clear-completed");
 												bindAction(TodoList::removeCompleted);
-												bindText(TodoList::getClearCompleted);
+												bindText(this, TodoList::getClearCompleted);
 												bindOptionalStyleClass("hide", "hasNoCompleted", TodoList::getHasNoCompleted);
 											}
 										};
@@ -168,14 +182,14 @@ public class TodoApp extends HtmlApp<TodoList> {
 								new HtmlButton<TodoList>(this) {
 									{
 										addStyleClass("save");
-										bindText(TodoList::getSave);
+										bindText(this, TodoList::getSave);
 										bindAction(TodoList::save);
 									}
 								};
 								new HtmlButton<TodoList>(this) {
 									{
 										addStyleClass("cancel");
-										bindText(TodoList::getCancel);
+										bindText(this, TodoList::getCancel);
 										bindAction(TodoList::cancel);
 									}
 								};

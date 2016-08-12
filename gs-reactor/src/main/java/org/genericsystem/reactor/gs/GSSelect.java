@@ -80,7 +80,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 		public ColorsSelect(GSTag parent) {
 			super(parent);
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
-			optionElement.bindStyle("background-color", ReactorStatics.TEXT, model -> getGenericStringProperty(optionElement, model));
+			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(optionElement, model));
 		}
 	}
 

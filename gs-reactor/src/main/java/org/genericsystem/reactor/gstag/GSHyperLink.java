@@ -18,7 +18,7 @@ public class GSHyperLink extends GSTag implements SelectionDefaults {
 
 	public GSHyperLink(GSTag parent, String text) {
 		super(parent, "a");
-		setText(text);
+		setText(this, text);
 	}
 
 	public GSHyperLink(GSTag parent, String text, Consumer<GenericModel> action) {

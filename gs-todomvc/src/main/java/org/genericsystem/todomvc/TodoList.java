@@ -3,6 +3,10 @@ package org.genericsystem.todomvc;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
+import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Model;
+
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -15,11 +19,6 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Model;
 
 /**
  * @author Nicolas Feybesse
@@ -73,11 +72,9 @@ public class TodoList extends Model {
 		return items;
 	}
 
-	public void create() {
-		if (getName().getValue() != null) {
-			Generic todo = engine.find(Todos.class).addInstance(getName().getValue());
-			System.out.println("Add instance : " + getName().getValue());
-			name.setValue(null);
+	public void create(String name) {
+		if (name != null && !name.isEmpty()) {
+			engine.find(Todos.class).addInstance(name);
 		}
 	}
 

@@ -168,7 +168,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-bottom", "1px");
 						new GSButton(this) {
 							{
-								setText("Remove");
+								setText(this, "Remove");
 								bindAction(GenericModel::remove);
 								addStyle("width", "100%");
 								addStyle("height", "100%");

@@ -15,7 +15,7 @@ public class GSHeader extends GSSection {
 		if (tag1 != null) {
 			GSTag leftTag = tag1.build(this);
 			leftTag.addStyle("flex", "1");
-			leftTag.setText(string1);
+			setText(leftTag, string1);
 		} else {
 			GSTag leftTag = new GSSection(this, FlexDirection.COLUMN);
 			leftTag.addStyle("flex", "1");
@@ -28,7 +28,7 @@ public class GSHeader extends GSSection {
 		if (tag2 != null) {
 			GSTag rightTag = tag2.build(this);
 			rightTag.addStyle("flex", "1");
-			rightTag.setText(string2);
+			setText(rightTag, string2);
 		} else {
 			GSTag rightTag = new GSSection(this, FlexDirection.COLUMN);
 			rightTag.addStyle("flex", "1");

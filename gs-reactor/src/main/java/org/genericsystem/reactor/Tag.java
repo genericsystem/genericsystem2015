@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,11 +11,18 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.html.TextPropertyDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
@@ -32,17 +36,12 @@ import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 import javafx.util.StringConverter;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <N>
  */
-public abstract class Tag<M extends Model> {
+public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 
 	private static int count = 0;
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
@@ -89,10 +88,6 @@ public abstract class Tag<M extends Model> {
 
 	public ServerWebSocket getWebSocket() {
 		return getParent().getWebSocket();
-	}
-
-	protected <W, NODE extends HtmlDomNode> void addBidirectionalBinding(Function<NODE, Property<W>> applyOnNode, Function<M, Property<W>> applyOnModel) {
-		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).bindBidirectional(applyOnModel.apply((M) modelContext)));
 	}
 
 	public void addPrefixBinding(Consumer<M> consumer) {
@@ -314,18 +309,6 @@ public abstract class Tag<M extends Model> {
 		});
 	}
 
-	public void bindTextBidirectional(Function<M, Property<String>> applyOnModel) {
-		addBidirectionalBinding(HtmlDomNode::getTextProperty, applyOnModel);
-	}
-
-	public void setText(String value) {
-		addPrefixBinding(model -> model.getTextProperty(this).setValue(value));
-	}
-
-	public void bindText(Function<M, ObservableValue<String>> applyOnModel) {
-		addPrefixBinding(modelContext -> modelContext.getTextProperty(this).bind(applyOnModel.apply(modelContext)));
-	}
-
 	protected abstract HtmlDomNode createNode(String parentId);
 
 	protected List<Tag<?>> getChildren() {
@@ -366,12 +349,9 @@ public abstract class Tag<M extends Model> {
 
 		private final String id;
 		private final String parentId;
-		private final StringProperty text = new SimpleStringProperty();
 		private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 		private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 		private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
-
-		private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 		private final MapChangeListener<String, String> stylesListener = change -> {
 			if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
@@ -394,6 +374,10 @@ public abstract class Tag<M extends Model> {
 				sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementRemoved()));
 		};
 
+		public ChangeListener<String> getTextListener() {
+			return (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		}
+
 		public ObservableMap<String, String> getStyles() {
 			return styles;
 		}
@@ -406,7 +390,6 @@ public abstract class Tag<M extends Model> {
 			assert parentId != null;
 			this.parentId = parentId;
 			this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-			text.addListener(new WeakChangeListener<>(textListener));
 			styles.addListener(new WeakMapChangeListener<>(stylesListener));
 			styleClasses.addListener(new WeakSetChangeListener<>(styleClassesListener));
 			attributes.addListener(new WeakMapChangeListener<>(attributesListener));
@@ -447,10 +430,6 @@ public abstract class Tag<M extends Model> {
 			Property<String> property = new SimpleStringProperty(styles.get(propertyName));
 			property.addListener((c, o, n) -> styles.put(propertyName, n));
 			return property;
-		}
-
-		public StringProperty getTextProperty() {
-			return text;
 		}
 
 		public String getId() {
@@ -541,10 +520,8 @@ public abstract class Tag<M extends Model> {
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().getValue().accept(new Object());
-			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				getTextProperty().setValue(json.getString(TEXT_CONTENT));
+			if (UPDATE.equals(json.getString(MSG_TYPE)))
 				getAttributes().put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
-			}
 		}
 
 		public Property<Consumer<Object>> getEnterProperty() {

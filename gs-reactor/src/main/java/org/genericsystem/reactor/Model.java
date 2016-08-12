@@ -121,10 +121,6 @@ public class Model {
 		return viewContextsMap.get(element);
 	}
 
-	public Property<String> getTextProperty(Tag<?> element) {
-		return getViewContext(element).getNode().getTextProperty();
-	}
-
 	public ObservableSet<String> getObservableStyleClasses(Tag<?> element) {
 		return getViewContext(element).getNode().getStyleClasses();
 	}

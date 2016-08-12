@@ -17,7 +17,7 @@ public class HtmlHyperLink<M extends Model> extends Tag<M> {
 
 	public HtmlHyperLink(Tag<?> parent, String text) {
 		super(parent, "a");
-		setText(text);
+		setText(this, text);
 	}
 
 	public HtmlHyperLink(Tag<?> parent, String text, Consumer<M> action) {

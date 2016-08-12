@@ -50,7 +50,7 @@ public class GSBooleanHolderEditor extends GSSection {
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
-					setText("×");
+					setText(this, "×");
 					bindAction(GenericModel::remove);
 				}
 			};
@@ -70,7 +70,7 @@ public class GSBooleanHolderEditor extends GSSection {
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
-					setText("+");
+					setText(this, "+");
 					bindAction(model -> {
 						Property<Boolean> observable = checkbox.getProperty(ReactorStatics.VALUE, model);
 						Boolean newValue = observable.getValue();
