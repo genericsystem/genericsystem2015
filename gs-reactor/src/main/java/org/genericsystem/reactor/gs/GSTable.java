@@ -43,8 +43,8 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 				addStyle("justify-content", "center");
 				new GSH1(this) {
 					{
-						setStringExtractor(StringExtractor.MANAGEMENT);
-						bindGenericText();
+						setStringExtractor(this, StringExtractor.MANAGEMENT);
+						bindGenericText(this);
 					}
 				};
 			}
@@ -67,7 +67,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("align-items", "center");
 						new GSLabel(this) {
 							{
-								bindGenericText();
+								bindGenericText(this);
 							}
 						};
 
@@ -125,10 +125,10 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getString(modelContext).getValue() : "#bba5ff"));
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(this, modelContext).getValue() : "#bba5ff"));
 						new GSHyperLink(this) {
 							{
-								bindGenericText();
+								bindGenericText(this);
 								bindAction(model -> getSelectionProperty(model).setValue(model));
 							}
 						};

@@ -33,7 +33,11 @@ public class GSComposite extends GSSection {
 		new GSSection(this, GSComposite.this.getReverseDirection()) {
 			{
 				forEach(GSComposite.this);
-				new GSLabel(this).bindGenericText();
+				new GSLabel(this) {
+					{
+						bindGenericText(this);
+					}
+				};
 			}
 		};
 	}
@@ -59,8 +63,8 @@ public class GSComposite extends GSSection {
 					addStyle("background-color", "#ffa500");
 					new GSH1(this) {
 						{
-							setStringExtractor(StringExtractor.MANAGEMENT);
-							bindGenericText();
+							setStringExtractor(this, StringExtractor.MANAGEMENT);
+							bindGenericText(this);
 						}
 					};
 				};
@@ -82,9 +86,13 @@ public class GSComposite extends GSSection {
 		protected void sections() {
 			new GSSection(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
-					bindStyle("background-color", ReactorStatics.TEXT, model -> getString(model));
+					bindStyle("background-color", ReactorStatics.TEXT, model -> getGenericStringProperty(this, model));
 					forEach(ColorTitleCompositeFlexElement.this);
-					new GSLabel(this).bindGenericText();
+					new GSLabel(this) {
+						{
+							bindGenericText(this);
+						}
+					};
 				}
 			};
 		}
@@ -104,7 +112,7 @@ public class GSComposite extends GSSection {
 					new GSRadio(this);
 					new GSLabel(this) {
 						{
-							bindGenericText();
+							bindGenericText(this);
 						}
 					};
 				}
@@ -138,11 +146,11 @@ public class GSComposite extends GSSection {
 			flexSubElement = new GSSection(this, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
-					bindStyle("background-color", ReactorStatics.TEXT, model -> getString(model));
+					bindStyle("background-color", ReactorStatics.TEXT, model -> getGenericStringProperty(this, model));
 					new GSRadio(this);
 					new GSLabel(this) {
 						{
-							bindGenericText();
+							bindGenericText(this);
 						}
 					};
 				}

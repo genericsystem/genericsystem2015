@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderBuilder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
@@ -16,7 +15,6 @@ import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSInstanceLin
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsDisplayer;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSLabel.GSLabelDisplayer;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
 public class GSSubcellDisplayer extends GSSection {
@@ -76,7 +74,7 @@ public class GSSubcellDisplayer extends GSSection {
 		};
 	}
 
-	public void style(Tag<?> tag) {
+	public void style(GSTag tag) {
 		tag.addStyle("justify-content", "center");
 		tag.addStyle("align-items", "center");
 		tag.addStyle("flex", "1");
@@ -104,7 +102,7 @@ public class GSSubcellDisplayer extends GSSection {
 		}
 
 		@Override
-		public void style(Tag<?> tag) {
+		public void style(GSTag tag) {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#dda5e2");
@@ -140,10 +138,10 @@ public class GSSubcellDisplayer extends GSSection {
 		}
 
 		@Override
-		public void style(Tag<?> tag) {
+		public void style(GSTag tag) {
 			super.style(tag);
 			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
-					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(((GenericModel) modelContext).getGeneric().getMeta())) ? getString((GenericModel) modelContext).getValue() : "#dda5e2"));
+					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(tag, modelContext).getValue() : "#dda5e2"));
 		}
 	}
 
@@ -158,7 +156,7 @@ public class GSSubcellDisplayer extends GSSection {
 		}
 
 		@Override
-		public void style(Tag<?> tag) {
+		public void style(GSTag tag) {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#ffa5a5");
@@ -184,7 +182,7 @@ public class GSSubcellDisplayer extends GSSection {
 		}
 
 		@Override
-		public void style(Tag<?> tag) {
+		public void style(GSTag tag) {
 			tag.addStyle("flex", "1");
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#dda5a5");
