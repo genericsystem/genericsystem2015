@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gs;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
@@ -49,6 +50,20 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 
 	public void select__(Function<GenericModel, ObservableList<GenericModel>> applyOnModelContext) {
 		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, subElement) -> new GenericModel(model, subElement.getGenerics()));
+	}
+
+	public void select(BiFunction<GenericModel, ObservableList<Generic>, ObservableList<GenericModel>> applyOnModel) {
+		select__(model -> new ListBinding<GenericModel>() {
+			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+			{
+				bind(holders);
+			}
+
+			@Override
+			protected ObservableList<GenericModel> computeValue() {
+				return applyOnModel.apply(model, holders);
+			}
+		});
 	}
 
 	public void select(Class<?> genericClass) {
