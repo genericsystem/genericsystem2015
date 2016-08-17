@@ -23,8 +23,10 @@ import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
+import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.gs.SelectionDefaults;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
@@ -52,8 +54,20 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 				addStyle("justify-content", "center");
 			}
 		};
-
 		new GSEditor(this, FlexDirection.COLUMN).select_(model -> getSelectionProperty(model));
+		new GSStepEditor(this, FlexDirection.ROW) {
+			{
+				select_(model -> getSelectionProperty(model));
+				switcher_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+			}
+		};
+		new GSStepEditor(this, FlexDirection.COLUMN) {
+			{
+				select_(model -> getSelectionProperty(model));
+				switcher_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+			}
+		};
+
 		new GSTable(this).select(Color.class);
 
 		new GSTable(this).select(Engine.class);
