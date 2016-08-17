@@ -14,7 +14,7 @@ public class GSH1 extends GSTag {
 
 	public GSH1(GSTag parent, String text) {
 		super(parent, "h1");
-		setText(this, text);
+		setText(text);
 	}
 
 	@Override

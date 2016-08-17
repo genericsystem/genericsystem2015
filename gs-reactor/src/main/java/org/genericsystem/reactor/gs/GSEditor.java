@@ -43,8 +43,8 @@ public class GSEditor extends GSComposite {
 				addStyle("align-items", "center");
 				new GSH1(this) {
 					{
-						setStringExtractor(this, StringExtractor.TYPE_INSTANCE_EXTRACTOR);
-						bindGenericText(this);
+						setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
+						bindGenericText();
 					}
 				};
 			}

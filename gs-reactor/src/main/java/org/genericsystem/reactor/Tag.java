@@ -90,6 +90,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		return getParent().getWebSocket();
 	}
 
+	@Override
 	public void addPrefixBinding(Consumer<M> consumer) {
 		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
@@ -146,6 +147,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		model.setSubContexts(child, subModels);
 	}
 
+	@Override
 	public <T> Property<T> getProperty(String propertyName, Model model) {
 		return getProperty(propertyName, new Model[] { model });
 	}
@@ -244,6 +246,11 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
 	}
 
+	@Override
+	public <T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel) {
+		model.storePropertyWithoutCheck(this, propertyName, applyOnModel.apply(model));
+	}
+
 	public void addStyle(String propertyName, String value) {
 		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
 	}
@@ -307,6 +314,11 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 				return attributeValue.equals(string);
 			}
 		});
+	}
+
+	@Override
+	public ViewContext getViewContext(M model) {
+		return model.getViewContext(this);
 	}
 
 	protected abstract HtmlDomNode createNode(String parentId);

@@ -1,9 +1,10 @@
 package org.genericsystem.reactor.html;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.ViewContext;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
@@ -14,20 +15,26 @@ public interface TextPropertyDefaults<M extends Model> {
 
 	public static final String TEXT = "text";
 
-	default Property<String> getTextProperty(Tag<M> tag, M model) {
-		if (!model.containsProperty(tag, TEXT)) {
-			model.storeProperty(tag, TEXT, new SimpleStringProperty());
-			Property<String> text = tag.getProperty(TEXT, model);
-			text.addListener(new WeakChangeListener<>(model.getViewContext(tag).getNode().getTextListener()));
-		}
-		return tag.getProperty(TEXT, model);
+	<T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
+
+	void addPrefixBinding(Consumer<M> consumer);
+
+	<T> Property<T> getProperty(String property, Model model);
+
+	ViewContext getViewContext(M model);
+
+	default Property<String> getTextProperty(M model) {
+		storePropertyWithoutCheck(TEXT, model, m -> new SimpleStringProperty());
+		Property<String> text = getProperty(TEXT, model);
+		text.addListener(new WeakChangeListener<>(getViewContext(model).getNode().getTextListener()));
+		return text;
 	}
 
-	default void setText(Tag<M> tag, String value) {
-		tag.addPrefixBinding(model -> getTextProperty(tag, model).setValue(value));
+	default void setText(String value) {
+		addPrefixBinding(model -> getTextProperty(model).setValue(value));
 	}
 
-	default void bindText(Tag<M> tag, Function<M, ObservableValue<String>> applyOnModel) {
-		tag.addPrefixBinding(model -> getTextProperty(tag, model).bind(applyOnModel.apply(model)));
+	default void bindText(Function<M, ObservableValue<String>> applyOnModel) {
+		addPrefixBinding(model -> getTextProperty(model).bind(applyOnModel.apply(model)));
 	}
 }
