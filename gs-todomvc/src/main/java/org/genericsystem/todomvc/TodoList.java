@@ -51,7 +51,7 @@ public class TodoList extends Model {
 		this.engine = engine;
 		todos = new TransformationObservableList<>(engine.find(Todos.class).getObservableSubInstances(), g -> new Todo(this, g), todo -> new Observable[] { todo.getCompleted() });
 		filtered = new FilteredList<>(todos);
-		filtered.predicateProperty().bind(Bindings.createObjectBinding(() -> mode.getValue(), mode));
+		filtered.predicateProperty().bind(mode);
 		completedCount = Bindings.size(todos.filtered(COMPLETE));
 		activeCount = Bindings.size(todos.filtered(ACTIVE));
 		clearButtonText = Bindings.createStringBinding(() -> "Clear completed (" + completedCount.getValue() + ")", completedCount);
