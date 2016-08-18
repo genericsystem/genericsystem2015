@@ -58,13 +58,13 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		new GSStepEditor(this, FlexDirection.ROW) {
 			{
 				select_(model -> getSelectionProperty(model));
-				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
 			}
 		};
 		new GSStepEditor(this, FlexDirection.COLUMN) {
 			{
 				select_(model -> getSelectionProperty(model));
-				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
 			}
 		};
 

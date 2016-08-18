@@ -20,6 +20,7 @@ public interface SwitchDefaults {
 	public static final String SUBMODELS = "subModels";
 	public static final String INDEX = "index";
 	public static final String CURRENT_MODEL = "currentModel";
+	public static final String NAME_MODEL = "nameModel";
 
 	void addPrefixBinding(Consumer<GenericModel> consumer);
 
@@ -36,27 +37,38 @@ public interface SwitchDefaults {
 		return getProperty(CURRENT_MODEL, model);
 	}
 
+	default Property<GenericModel> getNameModel(GenericModel model) {
+		return getProperty(NAME_MODEL, model);
+	}
+
 	default Property<Integer> getIteratorIndexProperty(GenericModel model) {
 		return getProperty(INDEX, model);
 	}
 
-	default void switcher_(GSTag switchedTag, ObservableListExtractor observableListExtractor) {
-		switcher(switchedTag, model -> FXCollections.observableArrayList(observableListExtractor.apply(model.getGenerics()).stream().map(g -> new GenericModel(model, GenericModel.addToGenerics(g, model.getGenerics()))).collect(Collectors.toList())));
+	default void switcher_(GSTag switchedTag, ObservableListExtractor observableListExtractor, GSTag instanceNameTag) {
+		switcher(switchedTag, model -> FXCollections.observableArrayList(observableListExtractor.apply(model.getGenerics()).stream().map(g -> new GenericModel(model, GenericModel.addToGenerics(g, model.getGenerics()))).collect(Collectors.toList())),
+				instanceNameTag);
 	}
 
-	default void switcher(GSTag switchedTag, Function<GenericModel, ObservableList<GenericModel>> applyOnModel) {
+	default void switcher(GSTag switchedTag, Function<GenericModel, ObservableList<GenericModel>> applyOnModel, GSTag instanceNameTag) {
 		addPrefixBinding(model -> {
 			storePropertyWithoutCheck(SUBMODELS, model, m -> new SimpleObjectProperty<>(applyOnModel.apply(model)));
-			storePropertyWithoutCheck(CURRENT_MODEL, model, m -> new SimpleObjectProperty<>(getSwitchModels(model).get(0)));
-			storePropertyWithoutCheck(INDEX, model, m -> new ReadOnlyIntegerWrapper(0));
+			storePropertyWithoutCheck(CURRENT_MODEL, model, m -> new SimpleObjectProperty<>());
+			storePropertyWithoutCheck(NAME_MODEL, model, m -> new SimpleObjectProperty<>(model));
+			storePropertyWithoutCheck(INDEX, model, m -> new ReadOnlyIntegerWrapper(-1));
 		});
+		instanceNameTag.select_(model -> getNameModel(model));
 		switchedTag.select_(model -> getCurrentModel(model));
 	}
 
 	default void next(GenericModel model) {
 		Property<Integer> index = getIteratorIndexProperty(model);
 		ObservableList<GenericModel> models = getSwitchModels(model);
-		if (index.getValue() + 1 < models.size()) {
+		if (index.getValue() == -1) {
+			index.setValue(0);
+			getNameModel(model).setValue(null);
+			getCurrentModel(model).setValue(models.get(index.getValue()));
+		} else if (index.getValue() + 1 < models.size()) {
 			index.setValue(index.getValue() + 1);
 			getCurrentModel(model).setValue(models.get(index.getValue()));
 		}
@@ -68,6 +80,10 @@ public interface SwitchDefaults {
 		if (index.getValue() > 0) {
 			index.setValue(index.getValue() - 1);
 			getCurrentModel(model).setValue(models.get(index.getValue()));
+		} else if (index.getValue() == 0) {
+			index.setValue(-1);
+			getNameModel(model).setValue((GenericModel) model.getParent());
+			getCurrentModel(model).setValue(null);
 		}
 	}
 }
