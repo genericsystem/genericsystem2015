@@ -21,7 +21,7 @@ public class GSLabel extends GSTag {
 
 		public GSLabelDisplayer(GSTag parent) {
 			super(parent);
-			bindGenericText();
+			bindText();
 		}
 	}
 }

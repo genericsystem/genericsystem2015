@@ -35,7 +35,7 @@ public class GSComposite extends GSSection {
 				forEach(GSComposite.this);
 				new GSLabel(this) {
 					{
-						bindGenericText();
+						bindText();
 					}
 				};
 			}
@@ -64,7 +64,7 @@ public class GSComposite extends GSSection {
 					new GSH1(this) {
 						{
 							setStringExtractor(StringExtractor.MANAGEMENT);
-							bindGenericText();
+							bindText();
 						}
 					};
 				};
@@ -90,7 +90,7 @@ public class GSComposite extends GSSection {
 					forEach(ColorTitleCompositeFlexElement.this);
 					new GSLabel(this) {
 						{
-							bindGenericText();
+							bindText();
 						}
 					};
 				}
@@ -112,7 +112,7 @@ public class GSComposite extends GSSection {
 					new GSRadio(this);
 					new GSLabel(this) {
 						{
-							bindGenericText();
+							bindText();
 						}
 					};
 				}
@@ -150,7 +150,7 @@ public class GSComposite extends GSSection {
 					new GSRadio(this);
 					new GSLabel(this) {
 						{
-							bindGenericText();
+							bindText();
 						}
 					};
 				}

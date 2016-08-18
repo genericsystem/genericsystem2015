@@ -34,7 +34,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 	protected void options() {
 		optionElement = new GSOption(this) {
 			{
-				bindGenericText();
+				bindText();
 				forEach(GSSelect.this);
 			}
 		};

@@ -37,7 +37,7 @@ public class GSEditor extends GSComposite {
 				new GSH1(this) {
 					{
 						setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
-						bindGenericText();
+						bindText();
 					}
 				};
 			}
