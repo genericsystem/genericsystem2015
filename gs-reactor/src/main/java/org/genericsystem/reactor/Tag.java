@@ -103,7 +103,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
 	}
 
-	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String propertyName) {
+	public void bindOptionalStyleClass(String styleClass, String propertyName) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<Boolean> optional = getObservableValue(propertyName, modelContext);
 			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
@@ -118,7 +118,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		});
 	}
 
-	public <NODE extends HtmlDomNode> void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<M, ObservableValue<Boolean>> applyOnModel) {
+	public void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<M, ObservableValue<Boolean>> applyOnModel) {
 		storeProperty(modelPropertyName, applyOnModel);
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
