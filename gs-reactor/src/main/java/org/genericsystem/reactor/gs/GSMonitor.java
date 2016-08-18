@@ -15,13 +15,13 @@ public class GSMonitor extends GSSection {
 		addStyle("padding", "10px");
 		new GSButton(this) {
 			{
-				setText(this, "Save");
+				setText("Save");
 				bindAction(GenericModel::flush);
 			}
 		};
 		new GSButton(this) {
 			{
-				setText(this, "Cancel");
+				setText("Cancel");
 				bindAction(GenericModel::cancel);
 			}
 		};

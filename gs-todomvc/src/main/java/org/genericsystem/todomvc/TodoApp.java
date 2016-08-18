@@ -46,7 +46,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 								addStyleClass("header");
 								new HtmlH1<TodoList>(this) {
 									{
-										setText(this, "todos");
+										setText("todos");
 									}
 								};
 								new HtmlInputText<TodoList>(this) {
@@ -99,7 +99,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 														};
 														new HtmlLabel<Todo>(this) {
 															{
-																bindText(this, Todo::getTodoString);
+																bindText(Todo::getTodoString);
 															}
 														};
 														new HtmlButton<Todo>(this) {
@@ -129,12 +129,12 @@ public class TodoApp extends HtmlApp<TodoList> {
 												addStyleClass("todo-count");
 												new HtmlStrong<TodoList>(this) {
 													{
-														bindText(this, TodoList::getActiveCount);
+														bindText(TodoList::getActiveCount);
 													}
 												};
 												new HtmlSpan<TodoList>(this) {
 													{
-														bindText(this, TodoList::getItems);
+														bindText(TodoList::getItems);
 													}
 												};
 											}
@@ -163,7 +163,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 											{
 												addStyleClass("clear-completed");
 												bindAction(TodoList::removeCompleted);
-												bindText(this, TodoList::getClearCompleted);
+												bindText(TodoList::getClearCompleted);
 												bindOptionalStyleClass("hide", "hasNoCompleted", TodoList::getHasNoCompleted);
 											}
 										};
@@ -182,14 +182,14 @@ public class TodoApp extends HtmlApp<TodoList> {
 								new HtmlButton<TodoList>(this) {
 									{
 										addStyleClass("save");
-										bindText(this, TodoList::getSave);
+										bindText(TodoList::getSave);
 										bindAction(TodoList::save);
 									}
 								};
 								new HtmlButton<TodoList>(this) {
 									{
 										addStyleClass("cancel");
-										bindText(this, TodoList::getCancel);
+										bindText(TodoList::getCancel);
 										bindAction(TodoList::cancel);
 									}
 								};

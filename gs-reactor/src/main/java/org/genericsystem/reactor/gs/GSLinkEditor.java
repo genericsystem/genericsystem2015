@@ -45,7 +45,7 @@ public class GSLinkEditor extends GSSection {
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
-					setText(this, "×");
+					setText("×");
 					bindAction(GenericModel::remove);
 				}
 			};

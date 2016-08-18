@@ -78,7 +78,7 @@ public class GSInstanceBuilder extends GSComposite {
 							}
 							instanceValueInput.input.getProperty(ReactorStatics.VALUE, model).setValue(null);
 						});
-						setText(this, "Add");
+						setText("Add");
 						addStyle("width", "100%");
 						addStyle("height", "100%");
 					}

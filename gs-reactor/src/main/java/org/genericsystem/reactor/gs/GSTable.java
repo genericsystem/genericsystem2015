@@ -43,8 +43,8 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 				addStyle("justify-content", "center");
 				new GSH1(this) {
 					{
-						setStringExtractor(this, StringExtractor.MANAGEMENT);
-						bindGenericText(this);
+						setStringExtractor(StringExtractor.MANAGEMENT);
+						bindGenericText();
 					}
 				};
 			}
@@ -67,7 +67,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("align-items", "center");
 						new GSLabel(this) {
 							{
-								bindGenericText(this);
+								bindGenericText();
 							}
 						};
 
@@ -125,10 +125,10 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(this, modelContext).getValue() : "#bba5ff"));
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
 						new GSHyperLink(this) {
 							{
-								bindGenericText(this);
+								bindGenericText();
 								bindAction(model -> getSelectionProperty(model).setValue(model));
 							}
 						};
@@ -168,7 +168,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-bottom", "1px");
 						new GSButton(this) {
 							{
-								setText(this, "Remove");
+								setText("Remove");
 								bindAction(GenericModel::remove);
 								addStyle("width", "100%");
 								addStyle("height", "100%");

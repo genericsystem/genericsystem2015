@@ -4,13 +4,14 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.gs.SelectionDefaults;
+import org.genericsystem.reactor.gs.SwitchDefaults;
 import org.genericsystem.reactor.model.GenericModel;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class GSHyperLink extends GSTag implements SelectionDefaults {
+public class GSHyperLink extends GSTag implements SelectionDefaults, SwitchDefaults {
 
 	public GSHyperLink(GSTag parent) {
 		super(parent, "a");
@@ -18,7 +19,7 @@ public class GSHyperLink extends GSTag implements SelectionDefaults {
 
 	public GSHyperLink(GSTag parent, String text) {
 		super(parent, "a");
-		setText(this, text);
+		setText(text);
 	}
 
 	public GSHyperLink(GSTag parent, String text, Consumer<GenericModel> action) {
@@ -35,4 +36,8 @@ public class GSHyperLink extends GSTag implements SelectionDefaults {
 		return new ActionHtmlNode(parentId);
 	}
 
+	@Override
+	public GSTag getSwitchedTag() {
+		return null;
+	}
 }

@@ -34,7 +34,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 	protected void options() {
 		optionElement = new GSOption(this) {
 			{
-				bindGenericText(this);
+				bindGenericText();
 				forEach(GSSelect.this);
 			}
 		};
@@ -59,7 +59,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 			});
 			optionElement.addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					model.getObservableStyles(optionElement).put("background-color", getGenericStringProperty(optionElement, model).getValue());
+					model.getObservableStyles(optionElement).put("background-color", optionElement.getGenericStringProperty(model).getValue());
 			});
 		}
 
@@ -80,7 +80,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 		public ColorsSelect(GSTag parent) {
 			super(parent);
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
-			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(optionElement, model));
+			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> optionElement.getGenericStringProperty(model));
 		}
 	}
 

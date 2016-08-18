@@ -43,7 +43,7 @@ public class GSHolderEditor extends GSSection {
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
-					setText(this, "×");
+					setText("×");
 					bindAction(GenericModel::remove);
 				}
 			};
@@ -63,7 +63,7 @@ public class GSHolderEditor extends GSSection {
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
-					setText(this, "+");
+					setText("+");
 					bindAction(model -> {
 						Property<Serializable> observable = input.getProperty(ReactorStatics.VALUE, model);
 						if (observable.getValue() != null) {
