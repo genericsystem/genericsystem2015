@@ -27,8 +27,6 @@ public interface SwitchDefaults {
 
 	<T> Property<T> getProperty(String property, Model model);
 
-	GSTag getSwitchedTag();
-
 	default ObservableList<GenericModel> getSwitchModels(GenericModel model) {
 		Property<ObservableList<GenericModel>> modelsProperty = getProperty(SUBMODELS, model);
 		return modelsProperty != null ? modelsProperty.getValue() : null;
@@ -42,17 +40,17 @@ public interface SwitchDefaults {
 		return getProperty(INDEX, model);
 	}
 
-	default void switcher_(ObservableListExtractor observableListExtractor) {
-		switcher(model -> FXCollections.observableArrayList(observableListExtractor.apply(model.getGenerics()).stream().map(g -> new GenericModel(model, GenericModel.addToGenerics(g, model.getGenerics()))).collect(Collectors.toList())));
+	default void switcher_(GSTag switchedTag, ObservableListExtractor observableListExtractor) {
+		switcher(switchedTag, model -> FXCollections.observableArrayList(observableListExtractor.apply(model.getGenerics()).stream().map(g -> new GenericModel(model, GenericModel.addToGenerics(g, model.getGenerics()))).collect(Collectors.toList())));
 	}
 
-	default void switcher(Function<GenericModel, ObservableList<GenericModel>> applyOnModel) {
+	default void switcher(GSTag switchedTag, Function<GenericModel, ObservableList<GenericModel>> applyOnModel) {
 		addPrefixBinding(model -> {
 			storePropertyWithoutCheck(SUBMODELS, model, m -> new SimpleObjectProperty<>(applyOnModel.apply(model)));
 			storePropertyWithoutCheck(CURRENT_MODEL, model, m -> new SimpleObjectProperty<>(getSwitchModels(model).get(0)));
 			storePropertyWithoutCheck(INDEX, model, m -> new ReadOnlyIntegerWrapper(0));
 		});
-		getSwitchedTag().select_(model -> getCurrentModel(model));
+		switchedTag.select_(model -> getCurrentModel(model));
 	}
 
 	default void next(GenericModel model) {

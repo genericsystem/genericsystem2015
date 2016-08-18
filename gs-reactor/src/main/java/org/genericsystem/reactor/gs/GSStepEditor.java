@@ -5,7 +5,7 @@ import org.genericsystem.reactor.gstag.GSHyperLink;
 
 public class GSStepEditor extends GSEditor implements SwitchDefaults {
 
-	private GSTag switchedTag;
+	protected GSTag switchedTag;
 
 	public GSStepEditor(GSTag parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -13,11 +13,6 @@ public class GSStepEditor extends GSEditor implements SwitchDefaults {
 
 	public GSStepEditor(GSTag parent, FlexDirection direction) {
 		super(parent, direction);
-	}
-
-	@Override
-	public GSTag getSwitchedTag() {
-		return switchedTag;
 	}
 
 	@Override
