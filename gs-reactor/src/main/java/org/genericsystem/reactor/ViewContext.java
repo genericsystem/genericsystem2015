@@ -14,17 +14,31 @@ import org.genericsystem.reactor.Tag.HtmlDomNode;
  */
 public class ViewContext<M extends Model> {
 
-	private final ViewContext<?> parent;
-	private final Tag<M> element;
-	private final HtmlDomNode node;
+	private ViewContext<?> parent;
+	private Tag<M> element;
+	private HtmlDomNode node;
 	private Model modelContext;
 
-	private ViewContext(int indexInChildren, ViewContext<?> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
+	private ViewContext(int indexInChildren, Model modelContext, Tag<M> element, String rootId) {
+		init(null, modelContext, element, element.new HtmlDomNode(rootId));
+		node.sendAdd(0);
+		init(indexInChildren);
+	}
+
+	private ViewContext(int indexInChildren, ViewContext<?> parent, Model modelContext, Tag<M> element) {
+		init(parent, modelContext, element, element.createNode(parent.getNode().getId()));
+		init(indexInChildren);
+	}
+
+	private void init(ViewContext<?> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
 		this.parent = parent;
 		this.element = element;
 		assert node != null;
 		this.node = node;
 		this.modelContext = modelContext;
+	}
+
+	private void init(int indexInChildren) {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
@@ -46,7 +60,7 @@ public class ViewContext<M extends Model> {
 
 	public ViewContext<?> createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
 		int indexInChildren = computeIndex(index, element);
-		return new ViewContext<>(indexInChildren, this, childModelContext, element, element.createNode(node.getId()));
+		return new ViewContext<>(indexInChildren, this, childModelContext, element);
 	}
 
 	protected RootViewContext<?> getRootViewContext() {
@@ -112,8 +126,8 @@ public class ViewContext<M extends Model> {
 	public static class RootViewContext<M extends Model> extends ViewContext<M> {
 		private Map<String, HtmlDomNode> nodeById;
 
-		public RootViewContext(M rootModelContext, Tag<M> template, HtmlDomNode node) {
-			super(0, null, rootModelContext, template, node);
+		public RootViewContext(M rootModelContext, Tag<M> template, String rootId) {
+			super(0, rootModelContext, template, rootId);
 		}
 
 		@Override

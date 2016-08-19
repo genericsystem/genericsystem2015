@@ -20,10 +20,9 @@ public abstract class HtmlApp<M extends Model> extends HtmlSection<M> implements
 		this.webSocket = webSocket;
 	}
 
+	@Override
 	public HtmlApp<M> init(M rootModelContext, String rootId) {
-		HtmlDomNode rootNode = new HtmlDomNode(rootId);
-		rootNode.sendAdd(0);
-		rootViewContext = new RootViewContext<M>(rootModelContext, this, rootNode);
+		rootViewContext = new RootViewContext<M>(rootModelContext, this, rootId);
 		return this;
 	}
 
@@ -32,6 +31,7 @@ public abstract class HtmlApp<M extends Model> extends HtmlSection<M> implements
 		return webSocket;
 	}
 
+	@Override
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
 	}

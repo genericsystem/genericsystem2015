@@ -18,9 +18,7 @@ public class GSApp extends GSSection implements App<GenericModel> {
 
 	@Override
 	public GSApp init(GenericModel rootModelContext, String rootId) {
-		HtmlDomNode rootNode = new HtmlDomNode(rootId);
-		rootNode.sendAdd(0);
-		rootViewContext = new RootViewContext<GenericModel>(rootModelContext, this, rootNode);
+		rootViewContext = new RootViewContext<GenericModel>(rootModelContext, this, rootId);
 		return this;
 	}
 
@@ -29,6 +27,7 @@ public class GSApp extends GSSection implements App<GenericModel> {
 		return webSocket;
 	}
 
+	@Override
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
 	}
