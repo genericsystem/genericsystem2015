@@ -72,12 +72,7 @@ public class GSEditor extends GSComposite {
 				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "1");
-						new GSSection(this, FlexDirection.COLUMN) {
-							{
-								addStyle("flex", "1");
-								new GSSubcellEditor(this);
-							}
-						};
+						new GSSubcellEditor(this);
 						new GSAttributeOfInstanceEditor(this) {
 							{
 								forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
