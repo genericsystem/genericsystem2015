@@ -8,10 +8,8 @@ public class GSHeader extends GSSection {
 		super(parent, FlexDirection.ROW);
 		addStyle("justify-content", "space-around");
 		addStyle("padding", "10px");
-
 		if (tag1 != null) {
 			GSTag leftTag = tag1.build(this);
-			leftTag.addStyle("flex", "1");
 			leftTag.setText(string1);
 		} else {
 			GSTag leftTag = new GSSection(this, FlexDirection.COLUMN);
