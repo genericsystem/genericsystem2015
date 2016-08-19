@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
