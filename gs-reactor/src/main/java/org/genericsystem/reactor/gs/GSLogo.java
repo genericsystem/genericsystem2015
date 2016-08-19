@@ -6,10 +6,11 @@ public class GSLogo extends GSImg {
 
 	public GSLogo(GSTag parent) {
 		super(parent);
-		addAttribute("src", "logo.png");
+		addAttribute("src", "logoTransp.png");
 		addAttribute("alt", "logo");
-		addStyle("max-width", "80px");
-		addStyle("height", "60px");
+		addStyle("height", "100%");
+		addStyle("flex", "0 1 auto");
 	}
 
 }
+	
