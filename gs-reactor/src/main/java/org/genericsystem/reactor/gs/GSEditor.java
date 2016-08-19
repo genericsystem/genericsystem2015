@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
-import org.genericsystem.reactor.gstag.GSH1;
+import org.genericsystem.reactor.gstag.GSH2;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
@@ -34,7 +34,7 @@ public class GSEditor extends GSComposite {
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
 				addStyle("align-items", "center");
-				new GSH1(this) {
+				new GSH2(this) {
 					{
 						setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
 						bindText();

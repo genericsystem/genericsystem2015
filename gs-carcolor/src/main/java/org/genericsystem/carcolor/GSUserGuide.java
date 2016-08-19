@@ -64,15 +64,15 @@ public class GSUserGuide extends GSSection {
 								};
 								new GSUl(this) {
 									{
-										setText("Global Tips");
+										setText("General Tips");
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
 										GSLi li4 = new GSLi(this);
-										li1.setText("Use \"Add Button\" to add an entry in the cache");
-										li2.setText("Use the \"Remove Button\" to delete the entry in your cache");
-										li3.setText("Use \"Save Button\" to persist the cache");
-										li4.setText("Use \"Cancel Button\" to release the cache");
+										li1.setText("Click \"Add Button\" to add an entry in the cache");
+										li2.setText("Click the \"Remove Button\" to delete the entry in your cache");
+										li3.setText("Click \"Save Button\" to persist the cache");
+										li4.setText("Click \"Cancel Button\" to release the cache");
 
 									}
 								};
@@ -88,16 +88,20 @@ public class GSUserGuide extends GSSection {
 				};
 			}
 		};
-
-		new GSButton(this) {
+		new GSSection(this, FlexDirection.ROW) {
 			{
-				setText("User Guide");
-				addStyleClass("buttonUser");
-				addStyle("flex", "1/3");
+				addStyle("justify-content", "center");
+				new GSButton(this) {
+					{
+						setText("User Guide");
 
-				bindAction(model -> {
-					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
-				});
+						addStyle("flex", "0 1 auto");
+
+						bindAction(model -> {
+							gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
+						});
+					}
+				};
 			}
 		};
 	};
