@@ -6,7 +6,6 @@ import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.gstag.GSH2;
 import org.genericsystem.reactor.gstag.GSHyperLink;
-import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -56,23 +55,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 
 			@Override
 			protected void header() {
-				new GSSection(this, this.getDirection()) {
-					{
-						addStyle("flex", "1");
-						addStyle("color", "#ffffff");
-						addStyle("background-color", "#ffa5a5");
-						addStyle("margin-right", "1px");
-						addStyle("margin-bottom", "1px");
-						addStyle("justify-content", "center");
-						addStyle("align-items", "center");
-						new GSLabel(this) {
-							{
-								bindText();
-							}
-						};
-
-					};
-				};
+				new LinkTitleDisplayer(this);
 			}
 
 			@Override
