@@ -1,9 +1,6 @@
-package org.genericsystem.reactor.gstag;
+package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSTagConstructor;
-import org.genericsystem.reactor.gs.GSSection;
-import org.genericsystem.reactor.gs.GSTag;
 
 public class GSHeader extends GSSection {
 

@@ -163,6 +163,14 @@ public class GSSubcellDisplayer extends GSSection {
 		}
 	}
 
+	public static class InstanceTitleDisplayer extends InstanceLinkTitleDisplayer {
+
+		public InstanceTitleDisplayer(GSTag parent) {
+			super(parent);
+			select(gs -> gs[0].getMeta());
+		}
+	}
+
 	public static class InstanceLinkTitleDisplayer extends LinkTitleDisplayer {
 
 		public InstanceLinkTitleDisplayer(GSTag parent) {

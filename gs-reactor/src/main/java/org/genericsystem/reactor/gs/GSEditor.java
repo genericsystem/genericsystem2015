@@ -2,6 +2,7 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -36,7 +37,7 @@ public class GSEditor extends GSComposite {
 				new GSH1(this) {
 					{
 						setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
-						bindGenericText();
+						bindText();
 					}
 				};
 			}
@@ -56,11 +57,7 @@ public class GSEditor extends GSComposite {
 				new GSSection(this, GSEditor.this.getDirection()) {
 					{
 						addStyle("flex", "0.3");
-						new InstanceLinkTitleDisplayer(this) {
-							{
-								select(gs -> gs[0].getMeta());
-							}
-						};
+						new InstanceTitleDisplayer(this);
 						new InstanceLinkTitleDisplayer(this) {
 							{
 								forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
@@ -78,7 +75,6 @@ public class GSEditor extends GSComposite {
 						new GSSection(this, FlexDirection.COLUMN) {
 							{
 								addStyle("flex", "1");
-								addStyle("overflow", "hidden");
 								new GSSubcellEditor(this);
 							}
 						};

@@ -35,9 +35,4 @@ public class GSHyperLink extends GSTag implements SelectionDefaults, SwitchDefau
 	protected ActionHtmlNode createNode(String parentId) {
 		return new ActionHtmlNode(parentId);
 	}
-
-	@Override
-	public GSTag getSwitchedTag() {
-		return null;
-	}
 }
