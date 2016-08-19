@@ -2,6 +2,7 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
+import org.genericsystem.reactor.HtmlDomNode.InputTextHtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 

@@ -26,9 +26,8 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Root;
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Tag.HtmlDomNode;
 import org.genericsystem.reactor.appserver.PersistentApplication.App;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
@@ -100,7 +99,7 @@ public class ApplicationServer extends AbstractBackEnd {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = app.getNodeById(json.getString(Tag.ID));
+				HtmlDomNode node = app.getNodeById(json.getString(HtmlDomNode.ID));
 				if (node != null)
 					cache.safeConsum((x) -> node.handleMessage(json));
 			};

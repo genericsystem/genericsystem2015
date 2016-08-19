@@ -2,6 +2,7 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.BiConsumer;
 
+import org.genericsystem.reactor.HtmlDomNode.InputCheckHtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;

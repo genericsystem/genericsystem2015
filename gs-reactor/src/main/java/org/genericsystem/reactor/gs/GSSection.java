@@ -3,9 +3,8 @@ package org.genericsystem.reactor.gs;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.gstag.GSH1;
 
 public class GSSection extends GSTag {
 	private final FlexDirection direction;
@@ -44,13 +43,13 @@ public class GSSection extends GSTag {
 	}
 
 	public static class GenericRowWrapper extends GSSection {
-		public GenericRowWrapper(GSTag parent, FlexDirection direction, Consumer<Tag<?>> consumer) {
+		public GenericRowWrapper(GSTag parent, FlexDirection direction, Consumer<GSTag> consumer) {
 			super(parent, direction);
 			addStyle("justify-content", "center");
 			consumer.accept(this);
 		}
 
-		public <T> GenericRowWrapper(GSTag parent, FlexDirection direction, BiConsumer<Tag<?>, T> consumer, T arg) {
+		public <T> GenericRowWrapper(GSTag parent, FlexDirection direction, BiConsumer<GSTag, T> consumer, T arg) {
 			super(parent, direction);
 			addStyle("justify-content", "center");
 			consumer.accept(this, arg);
@@ -59,7 +58,7 @@ public class GSSection extends GSTag {
 
 	public static class GenericH1Section extends GenericRowWrapper {
 		public GenericH1Section(GSTag parent, String text) {
-			super(parent, FlexDirection.ROW, HtmlH1<GenericModel>::new, text);
+			super(parent, FlexDirection.ROW, GSH1::new, text);
 		}
 	}
 }

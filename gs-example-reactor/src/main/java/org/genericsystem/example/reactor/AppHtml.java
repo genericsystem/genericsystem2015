@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -36,8 +34,7 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
-	public AppHtml(Root engine, ServerWebSocket webSocket) {
-		super(webSocket);
+	public AppHtml(Root engine) {
 		addStyle("justify-content", "center");
 		new ColorsSelect(this).select(Color.class);
 		new ColorTitleCompositeFlexElement(this).select(Color.class);

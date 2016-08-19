@@ -2,6 +2,7 @@ package org.genericsystem.reactor.gstag;
 
 import java.util.function.Consumer;
 
+import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.gs.SelectionDefaults;
 import org.genericsystem.reactor.gs.SwitchDefaults;

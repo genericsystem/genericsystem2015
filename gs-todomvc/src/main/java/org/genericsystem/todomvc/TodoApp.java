@@ -1,7 +1,5 @@
 package org.genericsystem.todomvc;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -34,8 +32,7 @@ public class TodoApp extends HtmlApp<TodoList> {
 		ApplicationServer.sartSimpleWebApp(mainArgs, TodoApp.class, TodoList.class, "/todo/");
 	}
 
-	public TodoApp(Root engine, ServerWebSocket webSocket) {
-		super(webSocket);
+	public TodoApp(Root engine) {
 		new HtmlDiv<TodoList>(this) {
 			{
 				new HtmlSection<TodoList>(this) {

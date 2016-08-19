@@ -5,7 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.Tag.HtmlDomNode;
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
@@ -14,42 +14,40 @@ import org.genericsystem.reactor.Tag.HtmlDomNode;
  */
 public class ViewContext<M extends Model> {
 
-	private ViewContext<?> parent;
+	private ViewContext<M> parent;
 	private Tag<M> element;
-	private HtmlDomNode node;
+	protected HtmlDomNode node;
 	private Model modelContext;
 
-	private ViewContext(int indexInChildren, Model modelContext, Tag<M> element, String rootId) {
-		init(null, modelContext, element, element.new HtmlDomNode(rootId));
-		node.sendAdd(0);
-		init(indexInChildren);
+	private ViewContext() {
 	}
 
-	private ViewContext(int indexInChildren, ViewContext<?> parent, Model modelContext, Tag<M> element) {
+	private ViewContext(int indexInChildren, ViewContext<M> parent, Model modelContext, Tag<M> element) {
 		init(parent, modelContext, element, element.createNode(parent.getNode().getId()));
 		init(indexInChildren);
 	}
 
-	private void init(ViewContext<?> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
+	protected void init(ViewContext<M> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
 		this.parent = parent;
 		this.element = element;
 		assert node != null;
 		this.node = node;
+		node.viewContext = this;
 		this.modelContext = modelContext;
 	}
 
-	private void init(int indexInChildren) {
+	protected void init(int indexInChildren) {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.getPreFixedBindings())
+		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag<?> childElement : element.getChildren())
+		for (Tag childElement : element.getChildren())
 			if (childElement.getMetaBinding() != null)
 				childElement.getMetaBinding().accept(childElement, this);
 			else
 				createViewContextChild(null, modelContext, childElement);
-		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.getPostFixedBindings())
+		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
 			binding.accept(modelContext, getNode());
 	}
 
@@ -58,12 +56,12 @@ public class ViewContext<M extends Model> {
 		return (MODEL) modelContext;
 	}
 
-	public ViewContext<?> createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
+	public ViewContext<M> createViewContextChild(Integer index, Model childModelContext, Tag<M> element) {
 		int indexInChildren = computeIndex(index, element);
-		return new ViewContext<>(indexInChildren, this, childModelContext, element);
+		return new ViewContext<M>(indexInChildren, this, childModelContext, element);
 	}
 
-	protected RootViewContext<?> getRootViewContext() {
+	protected RootViewContext<M> getRootViewContext() {
 		return parent.getRootViewContext();
 	}
 
@@ -123,15 +121,28 @@ public class ViewContext<M extends Model> {
 		return indexInChildren;
 	}
 
+	public ServerWebSocket getWebSocket() {
+		return parent.getWebSocket();
+	}
+
 	public static class RootViewContext<M extends Model> extends ViewContext<M> {
 		private Map<String, HtmlDomNode> nodeById;
+		private final ServerWebSocket webSocket;
 
-		public RootViewContext(M rootModelContext, Tag<M> template, String rootId) {
-			super(0, rootModelContext, template, rootId);
+		public RootViewContext(M rootModelContext, Tag<M> template, String rootId, ServerWebSocket webSocket) {
+			this.webSocket = webSocket;
+			init(null, rootModelContext, template, new HtmlDomNode(rootId));
+			node.sendAdd(0);
+			init(0);
 		}
 
 		@Override
-		protected RootViewContext<?> getRootViewContext() {
+		public ServerWebSocket getWebSocket() {
+			return webSocket;
+		}
+
+		@Override
+		protected RootViewContext<M> getRootViewContext() {
 			return this;
 		}
 

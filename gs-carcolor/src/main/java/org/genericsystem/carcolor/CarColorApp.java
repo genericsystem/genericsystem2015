@@ -20,8 +20,6 @@ import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.gs.SelectionDefaults;
 
-import io.vertx.core.http.ServerWebSocket;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -34,8 +32,7 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
-	public CarColorApp(Root engine, ServerWebSocket webSocket) {
-		super(webSocket);
+	public CarColorApp(Root engine) {
 		createSelectionProperty();
 		addStyle("background-color", "#3393ff");
 
