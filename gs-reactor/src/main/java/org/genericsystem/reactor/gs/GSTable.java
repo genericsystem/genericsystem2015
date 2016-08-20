@@ -4,9 +4,8 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
-import org.genericsystem.reactor.gstag.GSH1;
+import org.genericsystem.reactor.gstag.GSH2;
 import org.genericsystem.reactor.gstag.GSHyperLink;
-import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -41,10 +40,10 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 				addStyle("margin-bottom", "1px");
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
-				new GSH1(this) {
+				new GSH2(this) {
 					{
-						setStringExtractor(this, StringExtractor.MANAGEMENT);
-						bindGenericText(this);
+						setStringExtractor(StringExtractor.MANAGEMENT);
+						bindText();
 					}
 				};
 			}
@@ -56,23 +55,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 
 			@Override
 			protected void header() {
-				new GSSection(this, this.getDirection()) {
-					{
-						addStyle("flex", "1");
-						addStyle("color", "#ffffff");
-						addStyle("background-color", "#ffa5a5");
-						addStyle("margin-right", "1px");
-						addStyle("margin-bottom", "1px");
-						addStyle("justify-content", "center");
-						addStyle("align-items", "center");
-						new GSLabel(this) {
-							{
-								bindGenericText(this);
-							}
-						};
-
-					};
-				};
+				new LinkTitleDisplayer(this);
 			}
 
 			@Override
@@ -125,10 +108,10 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(this, modelContext).getValue() : "#bba5ff"));
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
 						new GSHyperLink(this) {
 							{
-								bindGenericText(this);
+								bindText();
 								bindAction(model -> getSelectionProperty(model).setValue(model));
 							}
 						};
@@ -168,7 +151,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-bottom", "1px");
 						new GSButton(this) {
 							{
-								setText(this, "Remove");
+								setText("Remove");
 								bindAction(GenericModel::remove);
 								addStyle("width", "100%");
 								addStyle("height", "100%");

@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gstag;
 
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
 /**
@@ -14,7 +15,7 @@ public class GSH1 extends GSTag {
 
 	public GSH1(GSTag parent, String text) {
 		super(parent, "h1");
-		setText(this, text);
+		setText(text);
 	}
 
 	@Override

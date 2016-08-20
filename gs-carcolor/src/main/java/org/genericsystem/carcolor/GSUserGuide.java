@@ -31,7 +31,7 @@ public class GSUserGuide extends GSSection {
 						new HtmlHyperLink<GenericModel>(this) {
 							{
 								addStyleClass("close");
-								setText(this, "×");
+								setText("×");
 								bindAction(model -> {
 									this.getParent().getProperty(ReactorStatics.DISPLAY, model).setValue("none");
 								});
@@ -39,47 +39,47 @@ public class GSUserGuide extends GSSection {
 						};
 						new GSSection(this, FlexDirection.COLUMN) {
 							{
-								setText(this, "How to use CarColor Demo");
+								setText("How to use CarColor Demo");
 								new GSUl(this) {
 									{
-										setText(this, "Car(s) Managment");
+										setText("Car(s) Managment");
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
-										setText(li1, "Insert Car model");
-										setText(li2, "Select color in the ComboBox");
-										setText(li3, "Use \"add Button\" to update data");
+										li1.setText("Insert Car model");
+										li2.setText("Select color in the ComboBox");
+										li3.setText("Use \"add Button\" to update data");
 									}
 								};
 								new GSUl(this) {
 									{
-										setText(this, "Color Managment");
+										setText("Color Managment");
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
-										setText(li1, "Add new color");
-										setText(li2, "Select car in the ComboBox");
-										setText(li3, "Use \"add Button\" to update data");
+										li1.setText("Add new color");
+										li2.setText("Select car in the ComboBox");
+										li3.setText("Use \"add Button\" to update data");
 									}
 								};
 								new GSUl(this) {
 									{
-										setText(this, "Global Tips");
+										setText("General Tips");
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
 										GSLi li4 = new GSLi(this);
-										setText(li1, "Use \"Add Button\" to add an entry in the cache");
-										setText(li2, "Use the \"Remove Button\" to delete the entry in your cache");
-										setText(li3, "Use \"Save Button\" to persist the cache");
-										setText(li4, "Use \"Cancel Button\" to release the cache");
+										li1.setText("Click \"Add Button\" to add an entry in the cache");
+										li2.setText("Click the \"Remove Button\" to delete the entry in your cache");
+										li3.setText("Click \"Save Button\" to persist the cache");
+										li4.setText("Click \"Cancel Button\" to release the cache");
 
 									}
 								};
 								new GSSection(this, FlexDirection.COLUMN) {
 									{
 										addStyle("text-align", "center");
-										setText(this, "To plenty enjoy the power of GS-REACTOR, go to Learning / Get Started");
+										setText("To plenty enjoy the power of GS-REACTOR, go to Learning / Get Started");
 									}
 								};
 							}
@@ -88,16 +88,20 @@ public class GSUserGuide extends GSSection {
 				};
 			}
 		};
-
-		new GSButton(this) {
+		new GSSection(this, FlexDirection.ROW) {
 			{
-				setText(this, "User Guide");
-				addStyleClass("buttonUser");
-				addStyle("flex", "1/3");
+				addStyle("justify-content", "center");
+				new GSButton(this) {
+					{
+						setText("User Guide");
 
-				bindAction(model -> {
-					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
-				});
+						addStyle("flex", "0 1 auto");
+
+						bindAction(model -> {
+							gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
+						});
+					}
+				};
 			}
 		};
 	};

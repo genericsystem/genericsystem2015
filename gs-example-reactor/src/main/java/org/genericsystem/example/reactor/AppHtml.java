@@ -1,7 +1,5 @@
 package org.genericsystem.example.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -23,8 +21,10 @@ import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
+import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.gs.SelectionDefaults;
+import org.genericsystem.reactor.model.ObservableListExtractor;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
@@ -34,8 +34,7 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
-	public AppHtml(Root engine, ServerWebSocket webSocket) {
-		super(webSocket);
+	public AppHtml(Root engine) {
 		addStyle("justify-content", "center");
 		new ColorsSelect(this).select(Color.class);
 		new ColorTitleCompositeFlexElement(this).select(Color.class);
@@ -52,8 +51,20 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 				addStyle("justify-content", "center");
 			}
 		};
-
 		new GSEditor(this, FlexDirection.COLUMN).select_(model -> getSelectionProperty(model));
+		new GSStepEditor(this, FlexDirection.ROW) {
+			{
+				select_(model -> getSelectionProperty(model));
+				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
+			}
+		};
+		new GSStepEditor(this, FlexDirection.COLUMN) {
+			{
+				select_(model -> getSelectionProperty(model));
+				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
+			}
+		};
+
 		new GSTable(this).select(Color.class);
 
 		new GSTable(this).select(Engine.class);

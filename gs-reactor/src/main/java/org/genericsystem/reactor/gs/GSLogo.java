@@ -2,14 +2,18 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.gstag.GSImg;
 
-public class GSLogo extends GSImg {
+public class GSLogo extends GSSection {
 
 	public GSLogo(GSTag parent) {
-		super(parent);
-		addAttribute("src", "logo.png");
-		addAttribute("alt", "logo");
-		addStyle("max-width", "80px");
-		addStyle("height", "60px");
+		super(parent, FlexDirection.ROW);
+		new GSImg(this) {
+			{
+				addAttribute("src", "logoTransp.png");
+				addAttribute("alt", "logo");
+				addStyle("height", "100%");
+				addStyle("flex", "0 1 auto");
+			}
+		};
 	}
 
 }

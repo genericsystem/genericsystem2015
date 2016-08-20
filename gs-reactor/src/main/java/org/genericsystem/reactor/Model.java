@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -71,10 +71,15 @@ public class Model {
 		return propertiesMap.values();
 	}
 
-	public void storeProperty(Tag<?> tag, String propertyName, ObservableValue<?> value) {
+	protected void storeProperty(Tag<?> tag, String propertyName, ObservableValue<?> value) {
 		assert viewContextsMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
+		getProperties(tag).put(propertyName, (ObservableValue) value);
+	}
+
+	protected <T> void storePropertyWithoutCheck(Tag<?> tag, String propertyName, ObservableValue<T> value) {
+		assert viewContextsMap.keySet().contains(tag);
 		getProperties(tag).put(propertyName, (ObservableValue) value);
 	}
 

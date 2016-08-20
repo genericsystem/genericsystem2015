@@ -25,7 +25,7 @@ public class Todo extends Model {
 		this.generic = generic;
 		todoString = new ReadOnlyObjectWrapper<>(Objects.toString(generic));
 		ObservableValue<Generic> observableHolder = generic.getObservableHolder(generic.getRoot().find(Completed.class));
-		if (observableHolder.getValue() != null && Boolean.TRUE.equals((Boolean) observableHolder.getValue().getValue())) {
+		if (observableHolder.getValue() != null && Boolean.TRUE.equals(observableHolder.getValue().getValue())) {
 			completed.setValue(true);
 		}
 		// completed = Bindings.createBooleanBinding(() -> observableHolder.getValue() != null ? (Boolean) observableHolder.getValue().getValue() : false, observableHolder);

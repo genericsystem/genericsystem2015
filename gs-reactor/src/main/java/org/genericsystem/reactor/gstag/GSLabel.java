@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gstag;
 
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
 /**
@@ -21,7 +22,7 @@ public class GSLabel extends GSTag {
 
 		public GSLabelDisplayer(GSTag parent) {
 			super(parent);
-			bindGenericText(this);
+			bindText();
 		}
 	}
 }

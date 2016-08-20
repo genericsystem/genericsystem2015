@@ -2,14 +2,15 @@ package org.genericsystem.reactor.gs;
 
 import java.util.Map;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
+import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public class GSSelect extends GSTag implements SelectionDefaults {
 
@@ -34,7 +35,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 	protected void options() {
 		optionElement = new GSOption(this) {
 			{
-				bindGenericText(this);
+				bindText();
 				forEach(GSSelect.this);
 			}
 		};
@@ -59,7 +60,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 			});
 			optionElement.addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					model.getObservableStyles(optionElement).put("background-color", getGenericStringProperty(optionElement, model).getValue());
+					model.getObservableStyles(optionElement).put("background-color", optionElement.getGenericStringProperty(model).getValue());
 			});
 		}
 
@@ -80,7 +81,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 		public ColorsSelect(GSTag parent) {
 			super(parent);
 			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
-			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(optionElement, model));
+			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> optionElement.getGenericStringProperty(model));
 		}
 	}
 

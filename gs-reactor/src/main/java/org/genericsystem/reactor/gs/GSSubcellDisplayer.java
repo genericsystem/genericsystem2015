@@ -141,7 +141,7 @@ public class GSSubcellDisplayer extends GSSection {
 		public void style(GSTag tag) {
 			super.style(tag);
 			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
-					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(tag, modelContext).getValue() : "#dda5e2"));
+					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#dda5e2"));
 		}
 	}
 
@@ -160,6 +160,14 @@ public class GSSubcellDisplayer extends GSSection {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#ffa5a5");
+		}
+	}
+
+	public static class InstanceTitleDisplayer extends InstanceLinkTitleDisplayer {
+
+		public InstanceTitleDisplayer(GSTag parent) {
+			super(parent);
+			select(gs -> gs[0].getMeta());
 		}
 	}
 

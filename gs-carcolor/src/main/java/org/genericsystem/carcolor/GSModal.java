@@ -33,7 +33,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 				new GSHyperLink(this) {
 					{
 						addStyleClass("close");
-						setText(this, "×");
+						setText("×");
 						bindAction(model -> getSelectionProperty(model).setValue(null));
 					}
 				};

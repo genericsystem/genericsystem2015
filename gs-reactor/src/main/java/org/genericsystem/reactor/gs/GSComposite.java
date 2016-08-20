@@ -1,12 +1,14 @@
 package org.genericsystem.reactor.gs;
 
-import javafx.beans.binding.Bindings;
-
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.gstag.GSRadio;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -35,7 +37,7 @@ public class GSComposite extends GSSection {
 				forEach(GSComposite.this);
 				new GSLabel(this) {
 					{
-						bindGenericText(this);
+						bindText();
 					}
 				};
 			}
@@ -63,8 +65,8 @@ public class GSComposite extends GSSection {
 					addStyle("background-color", "#ffa500");
 					new GSH1(this) {
 						{
-							setStringExtractor(this, StringExtractor.MANAGEMENT);
-							bindGenericText(this);
+							setStringExtractor(StringExtractor.MANAGEMENT);
+							bindText();
 						}
 					};
 				};
@@ -86,11 +88,11 @@ public class GSComposite extends GSSection {
 		protected void sections() {
 			new GSSection(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
-					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(this, model));
+					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
 					forEach(ColorTitleCompositeFlexElement.this);
 					new GSLabel(this) {
 						{
-							bindGenericText(this);
+							bindText();
 						}
 					};
 				}
@@ -112,7 +114,7 @@ public class GSComposite extends GSSection {
 					new GSRadio(this);
 					new GSLabel(this) {
 						{
-							bindGenericText(this);
+							bindText();
 						}
 					};
 				}
@@ -146,11 +148,11 @@ public class GSComposite extends GSSection {
 			flexSubElement = new GSSection(this, ColorCompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(ColorCompositeRadio.this);
-					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(this, model));
+					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
 					new GSRadio(this);
 					new GSLabel(this) {
 						{
-							bindGenericText(this);
+							bindText();
 						}
 					};
 				}

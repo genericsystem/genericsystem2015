@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gstag;
 
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
 /**
@@ -16,5 +17,4 @@ public class GSP extends GSTag {
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);
 	}
-
 }

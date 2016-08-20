@@ -1,10 +1,11 @@
 package org.genericsystem.reactor.html;
 
-import io.vertx.core.http.ServerWebSocket;
-
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.appserver.PersistentApplication.App;
+
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
@@ -12,26 +13,19 @@ import org.genericsystem.reactor.appserver.PersistentApplication.App;
  */
 public abstract class HtmlApp<M extends Model> extends HtmlSection<M> implements App<M> {
 
-	private final ServerWebSocket webSocket;
 	private RootViewContext<M> rootViewContext;
 
-	public HtmlApp(ServerWebSocket webSocket) {
+	public HtmlApp() {
 		super(null);
-		this.webSocket = webSocket;
 	}
 
-	public HtmlApp<M> init(M rootModelContext, String rootId) {
-		HtmlDomNode rootNode = new HtmlDomNode(rootId);
-		rootNode.sendAdd(0);
-		rootViewContext = new RootViewContext<M>(rootModelContext, this, rootNode);
+	@Override
+	public HtmlApp<M> init(M rootModelContext, String rootId, ServerWebSocket webSocket) {
+		rootViewContext = new RootViewContext<M>(rootModelContext, this, rootId, webSocket);
 		return this;
 	}
 
 	@Override
-	public ServerWebSocket getWebSocket() {
-		return webSocket;
-	}
-
 	public HtmlDomNode getNodeById(String id) {
 		return rootViewContext.getNodeById(id);
 	}

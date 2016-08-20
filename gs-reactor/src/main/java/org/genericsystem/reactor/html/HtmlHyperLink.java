@@ -2,6 +2,7 @@ package org.genericsystem.reactor.html;
 
 import java.util.function.Consumer;
 
+import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 
@@ -17,7 +18,7 @@ public class HtmlHyperLink<M extends Model> extends Tag<M> {
 
 	public HtmlHyperLink(Tag<?> parent, String text) {
 		super(parent, "a");
-		setText(this, text);
+		setText(text);
 	}
 
 	public HtmlHyperLink(Tag<?> parent, String text, Consumer<M> action) {

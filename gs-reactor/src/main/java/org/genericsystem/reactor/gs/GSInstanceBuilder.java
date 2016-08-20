@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSAttributeBuilder;
 import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderBuilder;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSAttributeBuilder;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.GSButton;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -78,7 +79,7 @@ public class GSInstanceBuilder extends GSComposite {
 							}
 							instanceValueInput.input.getProperty(ReactorStatics.VALUE, model).setValue(null);
 						});
-						setText(this, "Add");
+						setText("Add");
 						addStyle("width", "100%");
 						addStyle("height", "100%");
 					}

@@ -1,9 +1,6 @@
-package org.genericsystem.reactor.gstag;
+package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSTagConstructor;
-import org.genericsystem.reactor.gs.GSSection;
-import org.genericsystem.reactor.gs.GSTag;
 
 public class GSHeader extends GSSection {
 
@@ -11,24 +8,24 @@ public class GSHeader extends GSSection {
 		super(parent, FlexDirection.ROW);
 		addStyle("justify-content", "space-around");
 		addStyle("padding", "10px");
-
 		if (tag1 != null) {
 			GSTag leftTag = tag1.build(this);
+			leftTag.setText(string1);
 			leftTag.addStyle("flex", "1");
-			setText(leftTag, string1);
 		} else {
 			GSTag leftTag = new GSSection(this, FlexDirection.COLUMN);
 			leftTag.addStyle("flex", "1");
 		}
-		new GenericH1Section(this, string) {
+		new GenericH2Section(this, string) {
 			{
 				addStyle("flex", "3");
+				addStyle("align-items", "center");
 			}
 		};
 		if (tag2 != null) {
 			GSTag rightTag = tag2.build(this);
+			rightTag.setText(string2);
 			rightTag.addStyle("flex", "1");
-			setText(rightTag, string2);
 		} else {
 			GSTag rightTag = new GSSection(this, FlexDirection.COLUMN);
 			rightTag.addStyle("flex", "1");

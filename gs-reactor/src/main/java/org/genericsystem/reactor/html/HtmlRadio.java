@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.html;
 
+import org.genericsystem.reactor.HtmlDomNode.InputCheckHtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
 
