@@ -1,9 +1,10 @@
 package org.genericsystem.reactor;
 
-import java.util.function.Consumer;
-
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
+
+import java.util.function.Consumer;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;

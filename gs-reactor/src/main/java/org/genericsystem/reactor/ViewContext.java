@@ -1,11 +1,13 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import io.vertx.core.http.ServerWebSocket;
+import org.genericsystem.reactor.Tag.RootTag;
 
 /**
  * @author Nicolas Feybesse
@@ -126,12 +128,12 @@ public class ViewContext<M extends Model> {
 	}
 
 	public static class RootViewContext<M extends Model> extends ViewContext<M> {
-		private Map<String, HtmlDomNode> nodeById;
+		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
 		private final ServerWebSocket webSocket;
 
-		public RootViewContext(M rootModelContext, Tag<M> template, String rootId, ServerWebSocket webSocket) {
+		public RootViewContext(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
 			this.webSocket = webSocket;
-			init(null, rootModelContext, template, new HtmlDomNode(rootId));
+			init(null, rootModelContext, (Tag<M>) template, new HtmlDomNode(rootId));
 			node.sendAdd(0);
 			init(0);
 		}
@@ -147,7 +149,7 @@ public class ViewContext<M extends Model> {
 		}
 
 		private Map<String, HtmlDomNode> getMap() {
-			return nodeById != null ? nodeById : (nodeById = new HashMap<>());
+			return nodeById;
 		}
 
 		public HtmlDomNode getNodeById(String id) {

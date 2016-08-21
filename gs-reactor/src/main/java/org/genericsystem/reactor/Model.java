@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -71,7 +71,7 @@ public class Model {
 		return propertiesMap.values();
 	}
 
-	protected void storeProperty(Tag<?> tag, String propertyName, ObservableValue<?> value) {
+	protected void storeProperty(Tag<?> tag, String propertyName, ObservableValue value) {
 		assert viewContextsMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
@@ -113,7 +113,7 @@ public class Model {
 			viewContext.destroy();
 		}
 		for (ObservableList<Model> subModels : subModelsMap.values()) {
-			((TransformationObservableList<?, Model>) subModels).unbind();
+			((TransformationObservableList) subModels).unbind();
 			for (Model subModel : subModels)
 				subModel.internalDestroy();
 		}
@@ -122,8 +122,9 @@ public class Model {
 		propertiesMap = new HashMap<>();
 	}
 
-	public ViewContext<?> getViewContext(Tag<?> element) {
-		return viewContextsMap.get(element);
+	@SuppressWarnings("unchecked")
+	public <M extends Model> ViewContext<M> getViewContext(Tag<?> element) {
+		return (ViewContext<M>) viewContextsMap.get(element);
 	}
 
 	public ObservableSet<String> getObservableStyleClasses(Tag<?> element) {
