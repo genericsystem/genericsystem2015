@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.ViewContext;
+import org.genericsystem.reactor.Tag;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,12 +21,10 @@ public interface TextPropertyDefaults<M extends Model> {
 
 	<T> Property<T> getProperty(String property, Model model);
 
-	ViewContext getViewContext(M model);
-
 	default Property<String> getTextProperty(M model) {
 		storePropertyWithoutCheck(TEXT, model, m -> new SimpleStringProperty());
 		Property<String> text = getProperty(TEXT, model);
-		text.addListener(new WeakChangeListener<>(getViewContext(model).getNode().getTextListener()));
+		text.addListener(new WeakChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getTextListener()));
 		return text;
 	}
 

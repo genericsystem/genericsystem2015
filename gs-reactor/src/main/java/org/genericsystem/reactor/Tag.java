@@ -303,11 +303,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		});
 	}
 
-	@Override
-	public ViewContext<M> getViewContext(M model) {
-		return model.getViewContext(this);
-	}
-
 	protected abstract HtmlDomNode createNode(String parentId);
 
 	protected List<Tag<?>> getChildren() {
