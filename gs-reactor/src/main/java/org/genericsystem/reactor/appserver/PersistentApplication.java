@@ -6,21 +6,22 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Root;
-import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag.RootTag;
+import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.html.HtmlApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PersistentApplication {
-	private final Class<? extends HtmlApp<?>> htmlAppClass;
+public class PersistentApplication<M extends Model> {
+	private final Class<? extends RootTag<M>> htmlAppClass;
+	private final RootTag<M> tagTree;
 	private final Root engine;
-	private final Class<? extends Model> modelClass;
+	private final Class<M> modelClass;
 	private final String rootId;
 	protected static Logger log = LoggerFactory.getLogger(PersistentApplication.class);
 
-	public PersistentApplication(Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, Root engine, String rootId) {
+	public PersistentApplication(Class<? extends RootTag<M>> htmlAppClass, Class<M> modelClass, Root engine, String rootId) {
 		this.htmlAppClass = htmlAppClass;
 		this.modelClass = modelClass;
 		this.engine = engine;
@@ -38,6 +39,11 @@ public class PersistentApplication {
 			cache.safeConsum(unused -> runner.run(getEngine()));
 			log.info("Script has run");
 		}
+		try {
+			tagTree = getApplicationClass().getConstructor(Root.class).newInstance(getEngine());
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public String getRootId() {
@@ -48,7 +54,7 @@ public class PersistentApplication {
 		return engine;
 	}
 
-	public Class<? extends App<?>> getApplicationClass() {
+	public Class<? extends RootTag<M>> getApplicationClass() {
 		return htmlAppClass;
 	}
 
@@ -56,16 +62,9 @@ public class PersistentApplication {
 		engine.close();
 	}
 
-	public static interface App<M extends Model> {
-		App<M> init(M rootModelContext, String rootId, ServerWebSocket webSocket);
-
-		HtmlDomNode getNodeById(String string);
-	}
-
-	@SuppressWarnings("unchecked")
-	public App<?> buildApp(ServerWebSocket socket) {
+	public RootViewContext<?> init(ServerWebSocket socket) {
 		try {
-			return ((App<Model>) getApplicationClass().getConstructor(Root.class).newInstance(getEngine())).init(modelClass.getConstructor(Root.class).newInstance(engine), rootId, socket);
+			return tagTree.init(modelClass.getConstructor(Root.class).newInstance(engine), rootId, socket);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}

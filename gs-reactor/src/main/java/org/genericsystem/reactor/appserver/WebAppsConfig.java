@@ -13,6 +13,7 @@ import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.html.HtmlApp;
@@ -50,7 +51,7 @@ public class WebAppsConfig extends JsonObject {
 		return getJsonObject("apps").getMap().keySet();
 	}
 
-	public Class<? extends HtmlApp<?>> getApplicationClass(String applicationPath) {
+	public Class<? extends RootTag<?>> getApplicationClass(String applicationPath) {
 		return getApplicationDeploymentConfig(applicationPath).getApplicationClass();
 	}
 
@@ -114,9 +115,9 @@ public class WebAppsConfig extends JsonObject {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends HtmlApp<?>> getApplicationClass() {
+		public Class<? extends RootTag<?>> getApplicationClass() {
 			try {
-				return (Class<? extends HtmlApp<?>>) Class.forName(getString("applicationClass"));
+				return (Class<? extends RootTag<?>>) Class.forName(getString("applicationClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
