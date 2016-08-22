@@ -23,14 +23,11 @@ public class GSBooleanHolderEditor extends GSSection {
 	public GSBooleanHolderEditor(GSTag parent, GSCheckBoxConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
-		addStyle("width", "100%");
-		addStyle("height", "100%");
 		new GSSection(this, FlexDirection.ROW) {
 			{
+				addStyle("flex", "1");
 				addStyle("justify-content", "center");
 				addStyle("align-items", "center");
-				addStyle("width", "100%");
-				addStyle("height", "100%");
 				checkbox = constructor.build(this);
 			}
 		};
@@ -49,7 +46,6 @@ public class GSBooleanHolderEditor extends GSSection {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
-					addStyle("height", "100%");
 					setText("×");
 					bindAction(GenericModel::remove);
 				}
@@ -69,7 +65,6 @@ public class GSBooleanHolderEditor extends GSSection {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
-					addStyle("height", "100%");
 					setText("+");
 					bindAction(model -> {
 						Property<Boolean> observable = checkbox.getProperty(ReactorStatics.VALUE, model);

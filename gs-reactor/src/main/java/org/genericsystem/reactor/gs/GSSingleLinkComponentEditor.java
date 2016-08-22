@@ -23,8 +23,6 @@ public class GSSingleLinkComponentEditor extends GSSection {
 	public GSSingleLinkComponentEditor(GSTag parent, GSSelectConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
-		addStyle("width", "100%");
-		addStyle("height", "100%");
 		addStyle("justify-content", "center");
 		addStyle("align-items", "center");
 		select = constructor.build(this);
