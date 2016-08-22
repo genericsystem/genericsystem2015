@@ -8,24 +8,24 @@ public class GSHeader extends GSSection {
 		super(parent, FlexDirection.ROW);
 		addStyle("justify-content", "space-around");
 		addStyle("padding", "10px");
-
 		if (tag1 != null) {
 			GSTag leftTag = tag1.build(this);
-			leftTag.addStyle("flex", "1");
 			leftTag.setText(string1);
+			leftTag.addStyle("flex", "1");
 		} else {
 			GSTag leftTag = new GSSection(this, FlexDirection.COLUMN);
 			leftTag.addStyle("flex", "1");
 		}
-		new GenericH1Section(this, string) {
+		new GenericH2Section(this, string) {
 			{
 				addStyle("flex", "3");
+				addStyle("align-items", "center");
 			}
 		};
 		if (tag2 != null) {
 			GSTag rightTag = tag2.build(this);
-			rightTag.addStyle("flex", "1");
 			rightTag.setText(string2);
+			rightTag.addStyle("flex", "1");
 		} else {
 			GSTag rightTag = new GSSection(this, FlexDirection.COLUMN);
 			rightTag.addStyle("flex", "1");

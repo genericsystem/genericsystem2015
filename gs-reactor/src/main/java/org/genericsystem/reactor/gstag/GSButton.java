@@ -9,6 +9,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;

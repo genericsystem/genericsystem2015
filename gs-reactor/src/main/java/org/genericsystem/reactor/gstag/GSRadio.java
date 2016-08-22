@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gstag;
 
+import org.genericsystem.reactor.HtmlDomNode.InputCheckHtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
 /**

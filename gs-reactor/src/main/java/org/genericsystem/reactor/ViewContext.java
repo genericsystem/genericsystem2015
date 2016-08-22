@@ -1,11 +1,13 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.Tag.HtmlDomNode;
+import org.genericsystem.reactor.Tag.RootTag;
 
 /**
  * @author Nicolas Feybesse
@@ -14,28 +16,40 @@ import org.genericsystem.reactor.Tag.HtmlDomNode;
  */
 public class ViewContext<M extends Model> {
 
-	private final ViewContext<?> parent;
-	private final Tag<M> element;
-	private final HtmlDomNode node;
+	private ViewContext<M> parent;
+	private Tag<M> element;
+	protected HtmlDomNode node;
 	private Model modelContext;
 
-	private ViewContext(int indexInChildren, ViewContext<?> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
+	private ViewContext() {
+	}
+
+	private ViewContext(int indexInChildren, ViewContext<M> parent, Model modelContext, Tag<M> element) {
+		init(parent, modelContext, element, element.createNode(parent.getNode().getId()));
+		init(indexInChildren);
+	}
+
+	protected void init(ViewContext<M> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
 		this.parent = parent;
 		this.element = element;
 		assert node != null;
 		this.node = node;
+		node.viewContext = this;
 		this.modelContext = modelContext;
+	}
+
+	protected void init(int indexInChildren) {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
-		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.getPreFixedBindings())
+		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag<?> childElement : element.getChildren())
+		for (Tag childElement : element.getChildren())
 			if (childElement.getMetaBinding() != null)
 				childElement.getMetaBinding().accept(childElement, this);
 			else
 				createViewContextChild(null, modelContext, childElement);
-		for (BiConsumer<Model, Tag<M>.HtmlDomNode> binding : element.getPostFixedBindings())
+		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
 			binding.accept(modelContext, getNode());
 	}
 
@@ -44,12 +58,12 @@ public class ViewContext<M extends Model> {
 		return (MODEL) modelContext;
 	}
 
-	public ViewContext<?> createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
+	public ViewContext<M> createViewContextChild(Integer index, Model childModelContext, Tag<M> element) {
 		int indexInChildren = computeIndex(index, element);
-		return new ViewContext<>(indexInChildren, this, childModelContext, element, element.createNode(node.getId()));
+		return new ViewContext<M>(indexInChildren, this, childModelContext, element);
 	}
 
-	protected RootViewContext<?> getRootViewContext() {
+	protected RootViewContext<M> getRootViewContext() {
 		return parent.getRootViewContext();
 	}
 
@@ -109,20 +123,33 @@ public class ViewContext<M extends Model> {
 		return indexInChildren;
 	}
 
-	public static class RootViewContext<M extends Model> extends ViewContext<M> {
-		private Map<String, HtmlDomNode> nodeById;
+	public ServerWebSocket getWebSocket() {
+		return parent.getWebSocket();
+	}
 
-		public RootViewContext(M rootModelContext, Tag<M> template, HtmlDomNode node) {
-			super(0, null, rootModelContext, template, node);
+	public static class RootViewContext<M extends Model> extends ViewContext<M> {
+		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
+		private final ServerWebSocket webSocket;
+
+		public RootViewContext(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
+			this.webSocket = webSocket;
+			init(null, rootModelContext, (Tag<M>) template, new HtmlDomNode(rootId));
+			node.sendAdd(0);
+			init(0);
 		}
 
 		@Override
-		protected RootViewContext<?> getRootViewContext() {
+		public ServerWebSocket getWebSocket() {
+			return webSocket;
+		}
+
+		@Override
+		protected RootViewContext<M> getRootViewContext() {
 			return this;
 		}
 
 		private Map<String, HtmlDomNode> getMap() {
-			return nodeById != null ? nodeById : (nodeById = new HashMap<>());
+			return nodeById;
 		}
 
 		public HtmlDomNode getNodeById(String id) {

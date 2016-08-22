@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,10 +25,9 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Root;
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.Tag.HtmlDomNode;
-import org.genericsystem.reactor.appserver.PersistentApplication.App;
+import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.html.HtmlApp;
@@ -41,7 +39,7 @@ import org.genericsystem.reactor.html.HtmlApp;
 
 public class ApplicationServer extends AbstractBackEnd {
 	protected static Logger log = LoggerFactory.getLogger(ApplicationServer.class);
-	protected Map<String, PersistentApplication> apps = new HashMap<>();
+	protected Map<String, PersistentApplication<?>> apps = new HashMap<>();
 
 	public ApplicationServer(WebAppsConfig options) {
 		super(options.getHost(), options.getPort());
@@ -78,9 +76,9 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	protected PersistentApplication buildApp(Class<? extends HtmlApp<?>> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, Root engine, String rootId) {
-		return new PersistentApplication(applicationClass, modelClass, engine, rootId);
-	}
+	// protected PersistentApplication buildApp(Class<? extends TagTree> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, Root engine, String rootId) {
+	// return new PersistentApplication(applicationClass, modelClass, engine, rootId);
+	// }
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
 
@@ -90,19 +88,24 @@ public class ApplicationServer extends AbstractBackEnd {
 
 		@Override
 		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
-			PersistentApplication application = apps.get(path);
+
+			PersistentApplication<?> application = apps.get(path);
 			if (application == null) {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			AbstractCache cache = application.getEngine().newCache();
-			App app = cache.safeSupply(() -> application.buildApp(socket));
+			RootViewContext<?> rootViewContext = cache.safeSupply(() -> application.init(socket));
+			// log.info("Open new socket : " + socket);
 			return buffer -> {
+				// log.info("Receive new message for socket : " + socket);
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = app.getNodeById(json.getString(Tag.ID));
-				if (node != null)
+				HtmlDomNode node = rootViewContext.getNodeById(json.getString(HtmlDomNode.ID));
+				if (node != null) {
 					cache.safeConsum((x) -> node.handleMessage(json));
+				} else
+					log.info("Can't find node id : " + json.getString(HtmlDomNode.ID));
 			};
 		}
 
@@ -116,7 +119,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
 						appPath = "";
 					// log.info("Request received with application path : " + appPath);
-					PersistentApplication application = apps.get("/" + appPath);
+					PersistentApplication<?> application = apps.get("/" + appPath);
 					if (application == null) {
 						request.response().end("No application is configured with path : /" + appPath);
 						log.info("No application is configured with path : /" + appPath);

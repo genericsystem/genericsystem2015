@@ -1,12 +1,14 @@
 package org.genericsystem.reactor.gs;
 
-import javafx.beans.binding.Bindings;
-
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.GSH1;
 import org.genericsystem.reactor.gstag.GSLabel;
 import org.genericsystem.reactor.gstag.GSRadio;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
