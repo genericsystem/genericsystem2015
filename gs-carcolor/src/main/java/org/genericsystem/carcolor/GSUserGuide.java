@@ -11,7 +11,7 @@ import org.genericsystem.reactor.html.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 public class GSUserGuide extends GSSection {
-
+	
 	public GSUserGuide(GSTag parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-direction", "column");
@@ -64,22 +64,22 @@ public class GSUserGuide extends GSSection {
 								};
 								new GSUl(this) {
 									{
-										setText("Global Tips");
+										setText("General Tips");
 										GSLi li1 = new GSLi(this);
 										GSLi li2 = new GSLi(this);
 										GSLi li3 = new GSLi(this);
 										GSLi li4 = new GSLi(this);
-										li1.setText("Use \"Add Button\" to add an entry in the cache");
-										li2.setText("Use the \"Remove Button\" to delete the entry in your cache");
-										li3.setText("Use \"Save Button\" to persist the cache");
-										li4.setText("Use \"Cancel Button\" to release the cache");
+										li1.setText("Clic \"Add Button\" to add an entry in the cache");
+										li2.setText("Clic the \"Remove Button\" to delete the entry in your cache");
+										li3.setText("Clic \"Save Button\" to persist the cache");
+										li4.setText("Clic \"Cancel Button\" to release the cache");
 
 									}
 								};
 								new GSSection(this, FlexDirection.COLUMN) {
 									{
 										addStyle("text-align", "center");
-										setText("To plenty enjoy the power of GS-REACTOR, go to Learning / Get Started");
+										setText("To fully enjoy the power of GS-REACTOR, go to Learning / Get Started");
 									}
 								};
 							}
@@ -89,16 +89,23 @@ public class GSUserGuide extends GSSection {
 			}
 		};
 
-		new GSButton(this) {
-			{
-				setText("User Guide");
-				addStyleClass("buttonUser");
-				addStyle("flex", "1/3");
-
-				bindAction(model -> {
-					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
-				});
-			}
-		};
+		new GSModalButton(this, gSection){{
+			setText("User Guide");
+			addStyleClass("buttonUser");
+			addStyle("flex", "1/3");
+			
+		}};
+		
+//		new GSButton(this) {
+//			{
+//				setText("User Guide");
+//				addStyleClass("buttonUser");
+//				addStyle("flex", "1/3");
+//
+//				bindAction(model -> {
+//					gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
+//				});
+//			}
+//		};
 	};
 }

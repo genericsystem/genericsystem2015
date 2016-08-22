@@ -1,6 +1,5 @@
 package org.genericsystem.carcolor;
 
-import org.genericsystem.carcolor.CarColorApp.CarColorScript;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -16,9 +15,11 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSHeader;
 import org.genericsystem.reactor.gs.GSLogo;
+import org.genericsystem.reactor.gs.GSModal;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.gs.SelectionDefaults;
+import org.genericsystem.carcolor.CarColorApp.CarColorScript;
 
 import io.vertx.core.http.ServerWebSocket;
 
@@ -36,6 +37,7 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 
 	public CarColorApp(Root engine, ServerWebSocket webSocket) {
 		super(webSocket);
+		
 		createSelectionProperty();
 		addStyle("background-color", "#3393ff");
 
