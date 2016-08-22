@@ -24,8 +24,7 @@ public class GSHolderEditor extends GSSection {
 	public GSHolderEditor(GSTag parent, GSInputTextConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
-		addStyle("width", "100%");
-		addStyle("height", "100%");
+
 		input = constructor.build(this);
 	}
 
