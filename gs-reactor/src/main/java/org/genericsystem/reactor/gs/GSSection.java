@@ -10,6 +10,10 @@ import org.genericsystem.reactor.gstag.GSH2;
 public class GSSection extends GSTag {
 	private final FlexDirection direction;
 
+	public GSSection(GSTag parent) {
+		this(parent, FlexDirection.COLUMN);
+	}
+
 	public GSSection(GSTag parent, FlexDirection direction) {
 		super(parent, "section");
 		this.direction = direction;
