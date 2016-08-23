@@ -16,6 +16,7 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSHeader;
 import org.genericsystem.reactor.gs.GSLogo;
+import org.genericsystem.reactor.gs.GSModal;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.gs.SelectionDefaults;
