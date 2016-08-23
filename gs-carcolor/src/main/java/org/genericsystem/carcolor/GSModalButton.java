@@ -31,22 +31,9 @@ public class GSModalButton extends GSTag{
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}
 
-	public List<ObservableValue<Boolean>> getInvalidList(GenericModel model) {
-		return this.<List<ObservableValue<Boolean>>> getProperty(ReactorStatics.INVALID_LIST, model).getValue();
-	}
-
-	public Map<Generic, Property<Serializable>> getHoldersMap(GenericModel model) {
-		return this.<Map<Generic, Property<Serializable>>> getProperty(ReactorStatics.HOLDERS_MAP, model).getValue();
-	}
-
-	public Map<Generic, List<Property<GenericModel>>> getComponentsMap(GenericModel model) {
-		return this.<Map<Generic, List<Property<GenericModel>>>> getProperty(ReactorStatics.COMPONENTS_MAP, model).getValue();
-	}
-
 	@Override
 	protected HtmlDomNode createNode(String parentId) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ActionHtmlNode(parentId);
 	}
 	
 }
