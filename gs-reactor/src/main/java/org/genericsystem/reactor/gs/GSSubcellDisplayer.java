@@ -106,6 +106,8 @@ public class GSSubcellDisplayer extends GSSection {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#dda5e2");
+			tag.addStyle("justify-content", "flex-start");
+			tag.addStyle("align-items", "stretch");
 		}
 	}
 
