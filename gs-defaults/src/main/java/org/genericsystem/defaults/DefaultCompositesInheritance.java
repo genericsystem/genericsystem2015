@@ -137,7 +137,24 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
-		return Bindings.valueAt(getObservableHolders(attribute, targets), 0);
+		return new ObjectBinding<T>() {
+			{
+				bind(getObservableHolders(attribute, targets));
+			}
+
+			@Override
+			protected T computeValue() {
+				return getHolders(attribute, targets).first();
+			}
+
+			@Override
+			protected void finalize() throws Throwable {
+				// TODO Auto-generated method stub
+				super.finalize();
+				System.out.println("FINALIZE");
+			}
+		};
+		// Bindings.createObjectBinding(() -> getHolders(attribute, targets).first(), getObservableHolders(attribute, targets));// Bindings.valueAt(getObservableHolders(attribute, targets), 0);
 	}
 
 	@SuppressWarnings("unchecked")

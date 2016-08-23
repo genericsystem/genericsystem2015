@@ -1,80 +1,150 @@
 package org.genericsystem.todomvc;
 
+import java.util.ArrayList;
+import java.util.function.Predicate;
+
+import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.html.HtmlApp;
-import org.genericsystem.reactor.html.HtmlButton;
-import org.genericsystem.reactor.html.HtmlCheckBox;
-import org.genericsystem.reactor.html.HtmlDiv;
-import org.genericsystem.reactor.html.HtmlFooter;
-import org.genericsystem.reactor.html.HtmlH1;
-import org.genericsystem.reactor.html.HtmlHeader;
-import org.genericsystem.reactor.html.HtmlHyperLink;
-import org.genericsystem.reactor.html.HtmlInputText;
-import org.genericsystem.reactor.html.HtmlLabel;
-import org.genericsystem.reactor.html.HtmlLi;
-import org.genericsystem.reactor.html.HtmlSection;
-import org.genericsystem.reactor.html.HtmlSpan;
-import org.genericsystem.reactor.html.HtmlStrong;
-import org.genericsystem.reactor.html.HtmlUl;
+import org.genericsystem.reactor.gs.GSApp;
+import org.genericsystem.reactor.gs.GSSection;
+import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.GSCheckBox;
+import org.genericsystem.reactor.gstag.GSDiv;
+import org.genericsystem.reactor.gstag.GSFooter;
+import org.genericsystem.reactor.gstag.GSH1;
+import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.GSInputText;
+import org.genericsystem.reactor.gstag.GSLabel;
+import org.genericsystem.reactor.gstag.GSLi;
+import org.genericsystem.reactor.gstag.GSSpan;
+import org.genericsystem.reactor.gstag.GSStrong;
+import org.genericsystem.reactor.gstag.GSUl;
+import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
+
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
  *
  */
 @DependsOnModel({ Todos.class, Completed.class })
-public class TodoApp extends HtmlApp<TodoList> {
+public class TodoApp extends GSApp {
+
+	public static final String FILTER_MODE = "mode";
+	public static final String TODOS = "todos";
+	public static final String FILTERED_TODOS = "filteredTodos";
+	public static final String ACTIVE_TODOS = "activeTodos";
+	public static final String COMPLETED_TODOS = "completedTodos";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleWebApp(mainArgs, TodoApp.class, TodoList.class, "/todo/");
+		ApplicationServer.sartSimpleGenericApp(mainArgs, TodoApp.class, "/todo/");
 	}
 
+	private Property<Predicate<Generic>> getModeProperty(Model model) {
+		return getProperty(FILTER_MODE, model);
+	}
+
+	private ObservableList<Generic> getTodos(Model model) {
+		return (ObservableList<Generic>) getProperty(TODOS, model).getValue();
+	}
+
+	private ObservableList<Generic> getFilteredTodos(Model model) {
+		return (ObservableList<Generic>) getProperty(FILTERED_TODOS, model).getValue();
+	}
+
+	private ObservableList<Generic> getActiveTodos(Model model) {
+		return (ObservableList<Generic>) getProperty(ACTIVE_TODOS, model).getValue();
+	}
+
+	private ObservableList<Generic> getCompletedTodos(Model model) {
+		return (ObservableList<Generic>) getProperty(COMPLETED_TODOS, model).getValue();
+	}
+
+	static Predicate<Generic> ALL = null;
+	static Predicate<Generic> ACTIVE = todo -> {
+		Generic completed = todo.getHolder(todo.getRoot().find(Completed.class));
+		System.out.println(todo + ", actif : " + (completed != null ? Boolean.FALSE.equals(completed.getValue()) : true));
+		return completed != null ? Boolean.FALSE.equals(completed.getValue()) : true;
+	};
+	static Predicate<Generic> COMPLETE = ACTIVE.negate();
+
 	public TodoApp(Root engine) {
-		new HtmlDiv<TodoList>(this) {
+
+		createNewInitializedProperty(TODOS, model -> {
+			ObservableList<Generic> todos = new ObservableListWrapperExtended<>(engine.find(Todos.class).getObservableSubInstances(), todo -> {
+				ObservableValue<Generic> completed = todo.getObservableHolder(todo.getRoot().find(Completed.class));
+				completed.addListener(c -> System.out.println("Completed changed." + c));
+				return new Observable[] { completed };
+			});
+			todos.addListener((ListChangeListener) c -> System.out.println("ttttttttttttt Changement de la liste des todos."));
+			return todos;
+		});
+		createNewInitializedProperty(FILTER_MODE, model -> ALL);
+		createNewInitializedProperty(FILTERED_TODOS, model -> {
+			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));
+			filtered.predicateProperty().bind(getModeProperty(model));
+			return filtered;
+		});
+		createNewInitializedProperty(ACTIVE_TODOS, model -> getTodos(model).filtered(ACTIVE));
+		createNewInitializedProperty(COMPLETED_TODOS, model -> getTodos(model).filtered(COMPLETE));
+
+		new GSDiv(this) {
 			{
-				new HtmlSection<TodoList>(this) {
+				new GSSection(this) {
 					{
 						addStyleClass("todoapp");
-						new HtmlHeader<TodoList>(this) {
+						new GSSection(this) {
 							{
 								addStyleClass("header");
-								new HtmlH1<TodoList>(this) {
+								new GSH1(this) {
 									{
 										setText("todos");
 									}
 								};
-								new HtmlInputText<TodoList>(this) {
+								new GSInputText(this) {
 									{
 										addStyleClass("new-todo");
-										bindAction(todoList -> {
-											todoList.create(todoList.getObservableAttributes(this).get(ReactorStatics.VALUE));
-											todoList.getObservableAttributes(this).put(ReactorStatics.VALUE, null);
+										bindAction(model -> {
+											String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
+											if (value != null && !value.isEmpty())
+												engine.find(Todos.class).addInstance(value);
+											model.getObservableAttributes(this).put(ReactorStatics.VALUE, null);
 										});
 									}
 								};
 							}
 						};
-						new HtmlSection<TodoList>(this) {
+						new GSSection(this) {
 							{
 								addStyleClass("main");
-
-								new HtmlUl<TodoList>(this) {
+								new GSUl(this) {
 									{
-
 										addStyleClass("todo-list");
-
-										new HtmlLi<Todo>(this) {
+										new GSLi(this) {
 											{
-												storeProperty(ReactorStatics.COMPLETED, Todo::getCompleted);
-												forEach(TodoList::getFiltered);
+												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
+												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
+														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
+												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
-												new HtmlDiv<Todo>(this) {
+												new GSDiv(this) {
 													{
 														addStyleClass("view");
-														new HtmlCheckBox<Todo>(this) {
+														new GSCheckBox(this) {
 															{
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
@@ -82,32 +152,23 @@ public class TodoApp extends HtmlApp<TodoList> {
 																		todo.getObservableAttributes(this).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																	}
 																});
-
-																// bindAction((model, value) -> {
-																// if (value == null || value.isEmpty()) {
-																// model.setCompletion(false);
-																// } else {
-																// model.setCompletion(true);
-																// }
-																// });
 																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.setCompletion((Boolean) nva));
+																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
 															}
 														};
-														new HtmlLabel<Todo>(this) {
+														new GSLabel(this) {
 															{
-																bindText(Todo::getTodoString);
+																bindText();
 															}
 														};
-														new HtmlButton<Todo>(this) {
+														new GSButton(this) {
 															{
 																addStyleClass("destroy");
-																bindAction(Todo::remove);
+																bindAction(GenericModel::remove);
 															}
 														};
 													}
 												};
-
 											}
 										};
 									}
@@ -115,79 +176,85 @@ public class TodoApp extends HtmlApp<TodoList> {
 							}
 						};
 
-						new HtmlFooter<TodoList>(this) {
+						new GSFooter(this) {
 							{
 								addStyleClass("footer");
-								bindOptionalStyleClass("hide", "hasNoTodo", TodoList::getHasNoTodo);
-								new HtmlDiv<Todo>(this) {
+								bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(model).size() == 0 ? true : false, getTodos(model)));
+								new GSDiv(this) {
 									{
-										new HtmlSpan<TodoList>(this) {
+										new GSSpan(this) {
 											{
 												addStyleClass("todo-count");
-												new HtmlStrong<TodoList>(this) {
+												new GSStrong(this) {
 													{
-														bindText(TodoList::getActiveCount);
-													}
-												};
-												new HtmlSpan<TodoList>(this) {
-													{
-														bindText(TodoList::getItems);
+														bindText(model -> Bindings.createStringBinding(() -> {
+															System.out.println("rrrrrrrrrrrrrr Changement de todo, recalcul du nombre d’items restant");
+															int size = getActiveTodos(model).size();
+															return size > 1 ? size + " items left" : "1 item left";
+														}, getActiveTodos(model)));
 													}
 												};
 											}
 										};
-										new HtmlUl<TodoList>(this) {
+										new GSUl(this) {
 											{
 												addStyleClass("filters");
-												new HtmlLi<TodoList>(this) {
+												new GSLi(this) {
 													{
-														new HtmlHyperLink<TodoList>(this, "All", TodoList::showAll).bindOptionalStyleClass("selected", "allMode", TodoList::getAllMode);
+														new GSHyperLink(this, "All", model -> getModeProperty(model).setValue(ALL)).bindOptionalStyleClass("selected", "allMode", model -> Bindings.equal((ObservableObjectValue) getModeProperty(model), ALL));
 													}
 												};
-												new HtmlLi<TodoList>(this) {
+												new GSLi(this) {
 													{
-														new HtmlHyperLink<TodoList>(this, "Actives", TodoList::showActive).bindOptionalStyleClass("selected", "activeMode", TodoList::getActiveMode);
+														new GSHyperLink(this, "Actives", model -> getModeProperty(model).setValue(ACTIVE)).bindOptionalStyleClass("selected", "activeMode",
+																model -> Bindings.equal((ObservableObjectValue) getModeProperty(model), ACTIVE));
 													}
 												};
-												new HtmlLi<TodoList>(this) {
+												new GSLi(this) {
 													{
-														new HtmlHyperLink<TodoList>(this, "Completes", TodoList::showCompleted).bindOptionalStyleClass("selected", "completeMode", TodoList::getCompletedMode);
+														new GSHyperLink(this, "Completes", model -> getModeProperty(model).setValue(COMPLETE)).bindOptionalStyleClass("selected", "completeMode",
+																model -> Bindings.equal((ObservableObjectValue) getModeProperty(model), COMPLETE));
 													}
 												};
 											}
 										};
-										new HtmlButton<TodoList>(this) {
+										new GSButton(this) {
 											{
 												addStyleClass("clear-completed");
-												bindAction(TodoList::removeCompleted);
-												bindText(TodoList::getClearCompleted);
-												bindOptionalStyleClass("hide", "hasNoCompleted", TodoList::getHasNoCompleted);
+												bindAction(model -> {
+													for (Generic todo : new ArrayList<>(getCompletedTodos(model)))
+														todo.remove();
+												});
+												bindText(model -> Bindings.createStringBinding(() -> {
+													System.out.println("cccccccccccc Changement todos, recalcul nombre items terminés");
+													return "Clear completed (" + getCompletedTodos(model).size() + ")";
+												}, getCompletedTodos(model)));
+												bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
 											}
 										};
-
 									}
 								};
 							}
 						};
 					}
 				};
-				new HtmlFooter<TodoList>(this) {
+				new GSFooter(this) {
 					{
-						new HtmlDiv<TodoList>(this) {
+						new GSDiv(this) {
 							{
 								addStyleClass("save-cancel");
-								new HtmlButton<TodoList>(this) {
+								new GSButton(this) {
 									{
 										addStyleClass("save");
-										bindText(TodoList::getSave);
-										bindAction(TodoList::save);
+										setText("Save");
+										bindAction(model -> engine.getCurrentCache().flush());
 									}
 								};
-								new HtmlButton<TodoList>(this) {
+								new GSButton(this) {
 									{
 										addStyleClass("cancel");
-										bindText(TodoList::getCancel);
-										bindAction(TodoList::cancel);
+										setText("Cancel");
+										bindAction(model -> engine.getCurrentCache().clear());
 									}
 								};
 							}

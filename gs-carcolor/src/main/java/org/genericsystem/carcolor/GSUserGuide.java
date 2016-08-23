@@ -91,15 +91,10 @@ public class GSUserGuide extends GSSection {
 		new GSSection(this, FlexDirection.ROW) {
 			{
 				addStyle("justify-content", "center");
-				new GSButton(this) {
+				new GSModalButton(this, gSection) {
 					{
 						setText("User Guide");
-
 						addStyle("flex", "0 1 auto");
-
-						bindAction(model -> {
-							gSection.getProperty(ReactorStatics.DISPLAY, model).setValue("flex");
-						});
 					}
 				};
 			}
