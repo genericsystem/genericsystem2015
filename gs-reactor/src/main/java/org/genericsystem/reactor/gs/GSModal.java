@@ -1,4 +1,4 @@
-package org.genericsystem.carcolor;
+package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 

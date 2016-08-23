@@ -9,15 +9,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
 import org.genericsystem.api.core.exceptions.AliveConstraintViolationException;
 import org.genericsystem.api.core.exceptions.AmbiguousSelectionException;
 import org.genericsystem.api.core.exceptions.MetaRuleConstraintViolationException;
+
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -291,11 +289,6 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 		if (iterator.hasNext())
 			getCurrentCache().discardWithException(new AmbiguousSelectionException(result.info() + " " + iterator.next().info()));
 		return result;
-	}
-
-	@Override
-	default ObservableValue<T> getFirstObservableValue(ObservableList<T> list) {
-		return Bindings.valueAt(list, 0);
 	}
 
 	@Override
