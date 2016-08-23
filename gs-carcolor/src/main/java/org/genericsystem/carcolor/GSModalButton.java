@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
@@ -25,11 +27,6 @@ public class GSModalButton extends GSTag{
 		
 	}		
 
-	@Override
-	protected Tag<GenericModel>.HtmlDomNode createNode(String parentId) {
-		return new ActionHtmlNode(parentId);
-	}
-	
 	public void bindAction(Consumer<GenericModel> consumer) {
 		addActionBinding(ActionHtmlNode::getActionProperty, consumer);
 	}
@@ -44,6 +41,12 @@ public class GSModalButton extends GSTag{
 
 	public Map<Generic, List<Property<GenericModel>>> getComponentsMap(GenericModel model) {
 		return this.<Map<Generic, List<Property<GenericModel>>>> getProperty(ReactorStatics.COMPONENTS_MAP, model).getValue();
+	}
+
+	@Override
+	protected HtmlDomNode createNode(String parentId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
