@@ -31,7 +31,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 public class AppHtml extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
+		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
 	public AppHtml(Root engine) {

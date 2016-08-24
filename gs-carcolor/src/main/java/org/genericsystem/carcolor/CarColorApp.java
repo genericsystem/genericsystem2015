@@ -30,7 +30,7 @@ import org.genericsystem.reactor.gs.SelectionDefaults;
 public class CarColorApp extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
+		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
 	public CarColorApp(Root engine) {

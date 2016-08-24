@@ -51,7 +51,7 @@ public class TodoApp extends GSApp {
 	public static final String COMPLETED_TODOS = "completedTodos";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, TodoApp.class, "/todo/");
+		ApplicationServer.startSimpleGenericApp(mainArgs, TodoApp.class, "/todo/");
 	}
 
 	private Property<Predicate<Generic>> getModeProperty(Model model) {
