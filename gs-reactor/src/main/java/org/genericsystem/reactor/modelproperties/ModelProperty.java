@@ -10,6 +10,7 @@ import javafx.beans.value.ObservableValue;
 
 public interface ModelProperty<M extends Model> {
 
+	// TODO: Delete if possible.
 	<T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
 
 	<T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel);
@@ -23,4 +24,6 @@ public interface ModelProperty<M extends Model> {
 	<T> ObservableValue<T> getObservableValue(String property, Model model);
 
 	void createNewProperty(String propertyName);
+
+	<T> void createNewInitializedProperty(String propertyName, M model, Function<M, T> getInitialValue);
 }

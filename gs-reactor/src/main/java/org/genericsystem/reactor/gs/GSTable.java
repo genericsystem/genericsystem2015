@@ -108,7 +108,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
 						addStyle("overflow", "hidden");
-						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+						addPrefixBinding(modelContext -> getDomNodeStyles(modelContext).put("background-color",
 								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
 						new HtmlHyperLink(this) {
 							{

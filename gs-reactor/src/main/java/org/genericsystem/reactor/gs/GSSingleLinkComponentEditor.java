@@ -29,11 +29,11 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		select.select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
 		select.addPostfixBinding(model -> {
 			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-				model.getObservableStyles(select).put("background-color", (String) select.getObservableValue(ReactorStatics.SELECTION_STRING, model).getValue());
+				select.getDomNodeStyles(model).put("background-color", (String) select.getObservableValue(ReactorStatics.SELECTION_STRING, model).getValue());
 		});
 		select.optionElement.addPrefixBinding(model -> {
 			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-				model.getObservableStyles(select.optionElement).put("background-color", select.optionElement.getGenericStringProperty(model).getValue());
+				select.optionElement.getDomNodeStyles(model).put("background-color", select.optionElement.getGenericStringProperty(model).getValue());
 		});
 		select.addStyle("width", "100%");
 		select.addStyle("height", "100%");

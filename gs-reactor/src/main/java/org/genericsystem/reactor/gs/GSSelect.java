@@ -52,7 +52,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 			super(parent);
 			addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
-					Map<String, String> map = model.getObservableStyles(this);
+					Map<String, String> map = getDomNodeStyles(model);
 					ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
 					ObservableValue<String> observable = getObservableValue(ReactorStatics.SELECTION_STRING, model);
 					observable.addListener(listener);
@@ -61,7 +61,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 			});
 			optionElement.addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					model.getObservableStyles(optionElement).put("background-color", optionElement.getGenericStringProperty(model).getValue());
+					optionElement.getDomNodeStyles(model).put("background-color", optionElement.getGenericStringProperty(model).getValue());
 			});
 		}
 

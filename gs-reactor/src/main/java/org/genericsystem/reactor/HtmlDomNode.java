@@ -51,7 +51,6 @@ public class HtmlDomNode {
 	private final String parentId;
 	ViewContext<?> viewContext;
 	private final ObservableSet<String> styleClasses = FXCollections.observableSet();
-	private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 	private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
@@ -81,8 +80,8 @@ public class HtmlDomNode {
 		return textListener;
 	}
 
-	public ObservableMap<String, String> getStyles() {
-		return styles;
+	public MapChangeListener<String, String> getStylesListener() {
+		return stylesListener;
 	}
 
 	public ObservableMap<String, String> getAttributes() {
@@ -93,7 +92,6 @@ public class HtmlDomNode {
 		assert parentId != null;
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-		styles.addListener(new WeakMapChangeListener<>(stylesListener));
 		styleClasses.addListener(new WeakSetChangeListener<>(styleClassesListener));
 		attributes.addListener(new WeakMapChangeListener<>(attributesListener));
 	}
@@ -131,12 +129,6 @@ public class HtmlDomNode {
 
 	public ObservableSet<String> getStyleClasses() {
 		return styleClasses;
-	}
-
-	public Property<String> getStyle(String propertyName) {
-		Property<String> property = new SimpleStringProperty(styles.get(propertyName));
-		property.addListener((c, o, n) -> styles.put(propertyName, n));
-		return property;
 	}
 
 	public String getId() {

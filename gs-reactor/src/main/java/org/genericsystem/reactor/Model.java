@@ -135,10 +135,6 @@ public class Model {
 		return getViewContext(element).getNode().getStyleClasses();
 	}
 
-	public ObservableMap<String, String> getObservableStyles(Tag<?> element) {
-		return getViewContext(element).getNode().getStyles();
-	}
-
 	public ObservableMap<String, String> getObservableAttributes(Tag<?> element) {
 		return getViewContext(element).getNode().getAttributes();
 	}
