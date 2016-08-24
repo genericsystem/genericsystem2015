@@ -18,9 +18,9 @@ import org.genericsystem.reactor.model.GenericModel;
  * @author Nicolas Feybesse
  *
  */
-public class GSButton extends GSTag {
+public class HtmlButton extends GSTag {
 
-	public GSButton(GSTag parent) {
+	public HtmlButton(GSTag parent) {
 		super(parent, "button");
 	}
 

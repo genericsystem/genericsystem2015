@@ -11,7 +11,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderBuilder;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSAttributeBuilder;
-import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
@@ -63,7 +63,7 @@ public class GSInstanceBuilder extends GSComposite {
 				addStyle("background-color", "#dda5a5");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
-				new GSButton(this) {
+				new HtmlButton(this) {
 					{
 
 						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(

@@ -26,7 +26,7 @@ public class Model {
 	protected Model parent;
 	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
-	private Map<Tag<?>, Map<String, ObservableValue<Object>>> propertiesMap = new HashMap<>();
+	private Map<Tag<?>, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
 
 	public Model getParent() {
 		return this.parent;
@@ -48,11 +48,11 @@ public class Model {
 		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
 	}
 
-	private Map<String, ObservableValue<Object>> getProperties(Tag<?> tag) {
-		Map<String, ObservableValue<Object>> properties = propertiesMap.get(tag);
+	private Map<String, ObservableValue<?>> getProperties(Tag<?> tag) {
+		Map<String, ObservableValue<?>> properties = propertiesMap.get(tag);
 		if (properties == null) {
 			assert viewContextsMap.keySet().contains(tag);
-			propertiesMap.put(tag, properties = new HashMap<String, ObservableValue<Object>>());
+			propertiesMap.put(tag, properties = new HashMap<String, ObservableValue<?>>());
 		}
 		return properties;
 	}
@@ -67,20 +67,20 @@ public class Model {
 		return (Property<T>) getProperties(tag).get(propertyName);
 	}
 
-	public Collection<Map<String, ObservableValue<Object>>> getPropertiesMaps() {
+	public Collection<Map<String, ObservableValue<?>>> getPropertiesMaps() {
 		return propertiesMap.values();
 	}
 
-	protected void storeProperty(Tag<?> tag, String propertyName, ObservableValue value) {
+	protected void storeProperty(Tag<?> tag, String propertyName, ObservableValue<?> value) {
 		assert viewContextsMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
-		getProperties(tag).put(propertyName, (ObservableValue) value);
+		getProperties(tag).put(propertyName, value);
 	}
 
-	protected <T> void storePropertyWithoutCheck(Tag<?> tag, String propertyName, ObservableValue<T> value) {
+	protected void storePropertyWithoutCheck(Tag<?> tag, String propertyName, ObservableValue<?> value) {
 		assert viewContextsMap.keySet().contains(tag);
-		getProperties(tag).put(propertyName, (ObservableValue) value);
+		getProperties(tag).put(propertyName, value);
 	}
 
 	public List<Model> subContexts() {
@@ -113,7 +113,7 @@ public class Model {
 			viewContext.destroy();
 		}
 		for (ObservableList<Model> subModels : subModelsMap.values()) {
-			((TransformationObservableList) subModels).unbind();
+			((TransformationObservableList<?, ?>) subModels).unbind();
 			for (Model subModel : subModels)
 				subModel.internalDestroy();
 		}

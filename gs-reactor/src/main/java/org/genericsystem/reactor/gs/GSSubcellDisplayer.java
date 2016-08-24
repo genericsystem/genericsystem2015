@@ -14,7 +14,7 @@ import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSInstanceLinkComponentsTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsDisplayer;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsTitleDisplayer;
-import org.genericsystem.reactor.gstag.GSLabel.GSLabelDisplayer;
+import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.StringExtractor;
 
 public class GSSubcellDisplayer extends GSSection {

@@ -7,9 +7,9 @@ import org.genericsystem.reactor.gs.GSTag;
  * @author Nicolas Feybesse
  *
  */
-public class GSCheckBox extends GSTag {
+public class HtmlCheckBox extends GSTag {
 
-	public GSCheckBox(GSTag parent) {
+	public HtmlCheckBox(GSTag parent) {
 		super(parent, "input");
 	}
 

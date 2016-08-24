@@ -7,7 +7,7 @@ import javafx.beans.property.Property;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
-import org.genericsystem.reactor.gstag.GSLabel.GSLabelDisplayer;
+import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;

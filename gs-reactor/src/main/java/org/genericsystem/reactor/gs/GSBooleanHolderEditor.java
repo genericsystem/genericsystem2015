@@ -6,15 +6,15 @@ import java.util.Map;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
-import org.genericsystem.reactor.gstag.GSCheckBox;
-import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.HtmlCheckBox;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
 
 public class GSBooleanHolderEditor extends GSSection {
 
-	protected GSCheckBox checkbox;
+	protected HtmlCheckBox checkbox;
 
 	public GSBooleanHolderEditor(GSTag parent) {
 		this(parent, GSCheckBoxEditor::new);
@@ -35,14 +35,14 @@ public class GSBooleanHolderEditor extends GSSection {
 
 	@FunctionalInterface
 	public interface GSCheckBoxConstructor {
-		GSCheckBox build(GSTag parent);
+		HtmlCheckBox build(GSTag parent);
 	}
 
 	public static class GSBooleanHolderEditorWithRemoval extends GSBooleanHolderEditor {
 
 		public GSBooleanHolderEditorWithRemoval(GSTag parent) {
 			super(parent);
-			new GSHyperLink(this) {
+			new HtmlHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
@@ -61,7 +61,7 @@ public class GSBooleanHolderEditor extends GSSection {
 				if (nva != null)
 					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
 			});
-			new GSHyperLink(this) {
+			new HtmlHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");

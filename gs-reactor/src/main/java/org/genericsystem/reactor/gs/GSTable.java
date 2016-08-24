@@ -3,9 +3,9 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
-import org.genericsystem.reactor.gstag.GSButton;
-import org.genericsystem.reactor.gstag.GSH2;
-import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.HtmlButton;
+import org.genericsystem.reactor.gstag.HtmlH2;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -40,7 +40,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 				addStyle("margin-bottom", "1px");
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
-				new GSH2(this) {
+				new HtmlH2(this) {
 					{
 						setStringExtractor(StringExtractor.MANAGEMENT);
 						bindText();
@@ -109,7 +109,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("overflow", "hidden");
 						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
 								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
-						new GSHyperLink(this) {
+						new HtmlHyperLink(this) {
 							{
 								bindText();
 								bindAction(model -> getSelectionProperty(model).setValue(model));
@@ -149,7 +149,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 						addStyle("background-color", "#dda5e2");
 						addStyle("margin-right", "1px");
 						addStyle("margin-bottom", "1px");
-						new GSButton(this) {
+						new HtmlButton(this) {
 							{
 								setText("Remove");
 								bindAction(GenericModel::remove);

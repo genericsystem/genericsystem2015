@@ -11,7 +11,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentAdder;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentBuilder;
 import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentEditor;
-import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
@@ -40,7 +40,7 @@ public class GSLinkEditor extends GSSection {
 
 		public GSLinkEditorWithRemoval(GSTag parent) {
 			super(parent);
-			new GSHyperLink(this) {
+			new HtmlHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");

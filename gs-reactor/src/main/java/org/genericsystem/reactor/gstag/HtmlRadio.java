@@ -1,16 +1,15 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.HtmlDomNode.InputCheckHtmlDomNode;
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSTag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlRadio<M extends Model> extends Tag<M> {
+public class HtmlRadio extends GSTag {
 
-	public HtmlRadio(Tag<?> parent) {
+	public HtmlRadio(GSTag parent) {
 		super(parent, "input");
 	}
 

@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -14,12 +14,17 @@ import javafx.beans.value.WeakChangeListener;
 public interface TextPropertyDefaults<M extends Model> {
 
 	public static final String TEXT = "text";
+	public static final String TEXT_BINDING = "binding";
 
 	<T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
+
+	<T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel);
 
 	void addPrefixBinding(Consumer<M> consumer);
 
 	<T> Property<T> getProperty(String property, Model model);
+
+	<T> ObservableValue<T> getObservableValue(String property, Model model);
 
 	default Property<String> getTextProperty(M model) {
 		storePropertyWithoutCheck(TEXT, model, m -> new SimpleStringProperty());
@@ -33,6 +38,7 @@ public interface TextPropertyDefaults<M extends Model> {
 	}
 
 	default void bindText(Function<M, ObservableValue<String>> applyOnModel) {
-		addPrefixBinding(model -> getTextProperty(model).bind(applyOnModel.apply(model)));
+		storeProperty(TEXT_BINDING, applyOnModel);
+		addPrefixBinding(model -> getTextProperty(model).bind(getObservableValue(TEXT_BINDING, model)));
 	}
 }
