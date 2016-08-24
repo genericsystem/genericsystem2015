@@ -18,16 +18,16 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 		super(parent, tag);
 	}
 
-	public void forEach_(ObservableListExtractor observableListExtractor) {
+	public void forEach(ObservableListExtractor observableListExtractor) {
 		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, subElement) -> new GenericModel(model, GenericModel.addToGenerics(subElement, ((GenericModel) model).getGenerics())));
 	}
 
 	protected void forEach(GSTag parentCompositeElement) {
-		forEach_(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
+		forEach(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
 	}
 
 	public void select(Function<Generic[], Generic> genericSupplier) {
-		forEach_((ObservableListExtractor) gs -> {
+		forEach((ObservableListExtractor) gs -> {
 			Generic generic = genericSupplier.apply(gs);
 			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
 		});
@@ -67,7 +67,7 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 	}
 
 	public void select(Class<?> genericClass) {
-		forEach_((ObservableListExtractor) gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
+		forEach((ObservableListExtractor) gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
 	}
 
 	public ObservableListExtractor getObservableListExtractor() {

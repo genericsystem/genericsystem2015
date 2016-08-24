@@ -109,13 +109,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
-		forEach(applyOnModel, (model, subElement) -> {
-			subElement.parent = model;
-			return subElement;
-		});
-	}
-
 	protected <MODEL extends Model, SUBELEMENT> void forEach(Function<MODEL, ObservableList<SUBELEMENT>> applyOnModel, BiFunction<MODEL, SUBELEMENT, M> modelBuilder) {
 		setMetaBinding((childElement, viewContext) -> {
 			MODEL model = viewContext.getModelContext();
@@ -150,6 +143,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		return null;
 	}
 
+	@Override
 	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
 		return getObservableValue(propertyName, new Model[] { model });
 	}
@@ -228,6 +222,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		addPrefixBinding(modelContext -> getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext)));
 	}
 
+	@Override
 	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
 		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
 	}
