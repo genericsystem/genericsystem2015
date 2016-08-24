@@ -4,6 +4,7 @@ import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
+import org.genericsystem.reactor.modelproperties.SwitchDefaults;
 
 public class GSStepEditor extends GSEditor implements SwitchDefaults {
 

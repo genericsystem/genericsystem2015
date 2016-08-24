@@ -7,6 +7,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlInputText;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;

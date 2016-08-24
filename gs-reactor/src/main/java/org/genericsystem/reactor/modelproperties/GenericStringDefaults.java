@@ -1,5 +1,6 @@
-package org.genericsystem.reactor.gs;
+package org.genericsystem.reactor.modelproperties;
 
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 
@@ -14,12 +15,13 @@ public interface GenericStringDefaults extends TextPropertyDefaults<GenericModel
 	public static final String EXTRACTOR = "extractor";
 
 	default ObservableValue<String> getGenericStringProperty(GenericModel model) {
-		storePropertyWithoutCheck(GENERIC_STRING, model, m -> new ReadOnlyStringWrapper(getStringExtractor(m).apply(m.getGeneric())));
+		if (!model.containsProperty((Tag<?>) this, GENERIC_STRING))
+			storeProperty(GENERIC_STRING, model, m -> new ReadOnlyStringWrapper(getStringExtractor(m).apply(m.getGeneric())));
 		return getProperty(GENERIC_STRING, model);
 	}
 
 	default void bindText() {
-		addPrefixBinding(model -> getTextProperty(model).bind(getGenericStringProperty(model)));
+		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getGenericStringProperty(model)));
 	}
 
 	default StringExtractor getStringExtractor(GenericModel model) {
@@ -28,6 +30,11 @@ public interface GenericStringDefaults extends TextPropertyDefaults<GenericModel
 	}
 
 	default void setStringExtractor(StringExtractor extractor) {
-		addPrefixBinding(model -> storePropertyWithoutCheck(EXTRACTOR, model, m -> new ReadOnlyObjectWrapper<>(extractor)));
+		addPrefixBinding(model -> {
+			if (!model.containsProperty((Tag<?>) this, EXTRACTOR))
+				storeProperty(EXTRACTOR, model, m -> new ReadOnlyObjectWrapper<>(extractor));
+			else
+				getProperty(EXTRACTOR, model).setValue(extractor);
+		});
 	}
 }

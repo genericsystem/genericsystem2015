@@ -9,15 +9,15 @@ import org.genericsystem.reactor.model.StringExtractor;
 
 public class GSRowDisplayer extends GSComposite {
 
-	
 	public GSRowDisplayer(GSTag parent) {
 		this(parent, FlexDirection.ROW);
 	}
-	
-	public GSRowDisplayer(GSTag parent, FlexDirection direction){
+
+	public GSRowDisplayer(GSTag parent, FlexDirection direction) {
 		super(parent, direction);
 	}
 
+	@Override
 	protected void header() {
 		new GSSection(this, this.getReverseDirection()) {
 			{
@@ -25,7 +25,7 @@ public class GSRowDisplayer extends GSComposite {
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
 				addStyle("overflow", "hidden");
-				addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
+				addPrefixBinding(modelContext -> getDomNodeStyles(modelContext).put("background-color",
 						"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
 				new HtmlHyperLink(this) {
 					{
@@ -38,22 +38,23 @@ public class GSRowDisplayer extends GSComposite {
 		};
 	}
 
+	@Override
 	protected void sections() {
 		new GSSection(this, FlexDirection.COLUMN) {
 			{
 				addStyle("flex", "1");
 				addStyle("overflow", "hidden");
-				forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+				forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 				new GSInstanceSubcellDisplayer(this) {
 					{
-						forEach_(ObservableListExtractor.HOLDERS);
+						forEach(ObservableListExtractor.HOLDERS);
 					}
 				};
 			}
 		};
 	}
 
-	
+	@Override
 	protected void footer() {
 		new GSSection(this, this.getDirection()) {
 			{
@@ -76,7 +77,6 @@ public class GSRowDisplayer extends GSComposite {
 				};
 			}
 		};
-	
-	
-	}	
+
+	}
 }

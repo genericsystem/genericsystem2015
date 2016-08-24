@@ -23,10 +23,14 @@ import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
  */
 public class Model {
 
-	protected Model parent;
+	private Model parent;
 	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
 	private Map<Tag<?>, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
+
+	public Model(Model parent) {
+		this.parent = parent;
+	}
 
 	public Model getParent() {
 		return this.parent;
@@ -78,11 +82,6 @@ public class Model {
 		getProperties(tag).put(propertyName, value);
 	}
 
-	protected void storePropertyWithoutCheck(Tag<?> tag, String propertyName, ObservableValue<?> value) {
-		assert viewContextsMap.keySet().contains(tag);
-		getProperties(tag).put(propertyName, value);
-	}
-
 	public List<Model> subContexts() {
 		return subModelsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}
@@ -129,10 +128,6 @@ public class Model {
 
 	public ObservableSet<String> getObservableStyleClasses(Tag<?> element) {
 		return getViewContext(element).getNode().getStyleClasses();
-	}
-
-	public ObservableMap<String, String> getObservableStyles(Tag<?> element) {
-		return getViewContext(element).getNode().getStyles();
 	}
 
 	public ObservableMap<String, String> getObservableAttributes(Tag<?> element) {

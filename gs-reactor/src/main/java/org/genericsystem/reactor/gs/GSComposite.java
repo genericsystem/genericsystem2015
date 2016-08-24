@@ -7,6 +7,7 @@ import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlRadio;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import javafx.beans.binding.Bindings;
 

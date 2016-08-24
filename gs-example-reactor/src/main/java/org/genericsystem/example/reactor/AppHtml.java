@@ -23,15 +23,15 @@ import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.gs.SelectionDefaults;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
 public class AppHtml extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
+		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
 	public AppHtml(Root engine) {

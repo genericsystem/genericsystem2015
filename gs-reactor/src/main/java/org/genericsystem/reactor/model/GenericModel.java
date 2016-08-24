@@ -17,7 +17,7 @@ public class GenericModel extends Model {
 	private final Generic[] generics;
 
 	public GenericModel(Model parent, Generic[] generics) {
-		this.parent = parent;
+		super(parent);
 		this.generics = generics;
 	}
 
