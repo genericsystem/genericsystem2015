@@ -49,7 +49,7 @@ public class HtmlDomNode {
 
 	private final String id;
 	private final String parentId;
-	ViewContext viewContext;
+	ViewContext<?> viewContext;
 	private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 	private final ObservableMap<String, String> styles = FXCollections.observableHashMap();
 	private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
@@ -75,8 +75,10 @@ public class HtmlDomNode {
 			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementRemoved()));
 	};
 
+	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+
 	public ChangeListener<String> getTextListener() {
-		return (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+		return textListener;
 	}
 
 	public ObservableMap<String, String> getStyles() {

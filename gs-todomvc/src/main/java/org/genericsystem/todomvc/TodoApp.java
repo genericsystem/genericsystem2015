@@ -1,7 +1,18 @@
 package org.genericsystem.todomvc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
+
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -27,16 +38,6 @@ import org.genericsystem.reactor.gstag.GSUl;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -59,40 +60,50 @@ public class TodoApp extends GSApp {
 	}
 
 	private ObservableList<Generic> getTodos(Model model) {
-		return (ObservableList<Generic>) getProperty(TODOS, model).getValue();
+		return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
 	}
 
 	private ObservableList<Generic> getFilteredTodos(Model model) {
-		return (ObservableList<Generic>) getProperty(FILTERED_TODOS, model).getValue();
+		return this.<ObservableList<Generic>> getProperty(FILTERED_TODOS, model).getValue();
 	}
 
 	private ObservableList<Generic> getActiveTodos(Model model) {
-		return (ObservableList<Generic>) getProperty(ACTIVE_TODOS, model).getValue();
+		return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
 	}
 
 	private ObservableList<Generic> getCompletedTodos(Model model) {
-		return (ObservableList<Generic>) getProperty(COMPLETED_TODOS, model).getValue();
+		return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
+	}
+
+	private Map<Generic, Observable[]> getExtractors(Model model) {
+		return this.<Map<Generic, Observable[]>> getProperty("extractorMap", model).getValue();
 	}
 
 	static Predicate<Generic> ALL = null;
 	static Predicate<Generic> ACTIVE = todo -> {
 		Generic completed = todo.getHolder(todo.getRoot().find(Completed.class));
-		System.out.println(todo + ", actif : " + (completed != null ? Boolean.FALSE.equals(completed.getValue()) : true));
 		return completed != null ? Boolean.FALSE.equals(completed.getValue()) : true;
 	};
 	static Predicate<Generic> COMPLETE = ACTIVE.negate();
 
 	public TodoApp(Root engine) {
 
-		createNewInitializedProperty(TODOS, model -> {
-			ObservableList<Generic> todos = new ObservableListWrapperExtended<>(engine.find(Todos.class).getObservableSubInstances(), todo -> {
-				ObservableValue<Generic> completed = todo.getObservableHolder(todo.getRoot().find(Completed.class));
-				completed.addListener(c -> System.out.println("Completed changed." + c));
-				return new Observable[] { completed };
-			});
-			todos.addListener((ListChangeListener) c -> System.out.println("ttttttttttttt Changement de la liste des todos."));
-			return todos;
+		createNewInitializedProperty("extractorMap", model -> new HashMap<Generic, Observable[]>() {
+
+			private static final long serialVersionUID = -435743147955810836L;
+
+			@Override
+			public Observable[] get(Object key) {
+				Observable[] result = super.get(key);
+				if (result == null) {
+					ObservableValue<Generic> o = ((Generic) key).getObservableHolder(((Generic) key).getRoot().find(Completed.class));
+					o.addListener((c, ov, nv) -> System.out.println("observableholderinvalidation " + nv));// why is this listener necessary ????
+					put((Generic) key, result = new Observable[] { o });
+				}
+				return result;
+			};
 		});
+		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(engine.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
 		createNewInitializedProperty(FILTER_MODE, model -> ALL);
 		createNewInitializedProperty(FILTERED_TODOS, model -> {
 			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));
@@ -137,8 +148,10 @@ public class TodoApp extends GSApp {
 										new GSLi(this) {
 											{
 												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
-												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
-														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
+												storeProperty(
+														ReactorStatics.COMPLETED,
+														model -> new SimpleBooleanProperty(getObservableValue("observableHolder", model).getValue() != null
+																&& Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
 												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new GSDiv(this) {
@@ -153,7 +166,10 @@ public class TodoApp extends GSApp {
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
+																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> {
+																	System.out.println("setHolder" + nva);
+																	model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva);
+																});
 															}
 														};
 														new GSLabel(this) {
@@ -188,9 +204,8 @@ public class TodoApp extends GSApp {
 												new GSStrong(this) {
 													{
 														bindText(model -> Bindings.createStringBinding(() -> {
-															System.out.println("rrrrrrrrrrrrrr Changement de todo, recalcul du nombre d’items restant");
 															int size = getActiveTodos(model).size();
-															return size > 1 ? size + " items left" : "1 item left";
+															return size + " item" + (size > 1 ? "s" : "") + " left";
 														}, getActiveTodos(model)));
 													}
 												};
@@ -201,19 +216,20 @@ public class TodoApp extends GSApp {
 												addStyleClass("filters");
 												new GSLi(this) {
 													{
-														new GSHyperLink(this, "All", model -> getModeProperty(model).setValue(ALL)).bindOptionalStyleClass("selected", "allMode", model -> Bindings.equal((ObservableObjectValue) getModeProperty(model), ALL));
+														new GSHyperLink(this, "All", model -> getModeProperty(model).setValue(ALL)).bindOptionalStyleClass("selected", "allMode",
+																model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ALL));
 													}
 												};
 												new GSLi(this) {
 													{
 														new GSHyperLink(this, "Actives", model -> getModeProperty(model).setValue(ACTIVE)).bindOptionalStyleClass("selected", "activeMode",
-																model -> Bindings.equal((ObservableObjectValue) getModeProperty(model), ACTIVE));
+																model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ACTIVE));
 													}
 												};
 												new GSLi(this) {
 													{
 														new GSHyperLink(this, "Completes", model -> getModeProperty(model).setValue(COMPLETE)).bindOptionalStyleClass("selected", "completeMode",
-																model -> Bindings.equal((ObservableObjectValue) getModeProperty(model), COMPLETE));
+																model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), COMPLETE));
 													}
 												};
 											}
@@ -221,14 +237,8 @@ public class TodoApp extends GSApp {
 										new GSButton(this) {
 											{
 												addStyleClass("clear-completed");
-												bindAction(model -> {
-													for (Generic todo : new ArrayList<>(getCompletedTodos(model)))
-														todo.remove();
-												});
-												bindText(model -> Bindings.createStringBinding(() -> {
-													System.out.println("cccccccccccc Changement todos, recalcul nombre items terminés");
-													return "Clear completed (" + getCompletedTodos(model).size() + ")";
-												}, getCompletedTodos(model)));
+												bindAction(model -> new ArrayList<>(getCompletedTodos(model)).forEach(Generic::remove));
+												bindText(model -> Bindings.createStringBinding(() -> "Clear completed (" + getCompletedTodos(model).size() + ")", getCompletedTodos(model)));
 												bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
 											}
 										};
@@ -257,6 +267,13 @@ public class TodoApp extends GSApp {
 										bindAction(model -> engine.getCurrentCache().clear());
 									}
 								};
+								// new GSButton(this) {
+								// {
+								// addStyleClass("cancel");
+								// setText("Garbage");
+								// bindAction(model -> System.gc());
+								// }
+								// };
 							}
 						};
 					}
