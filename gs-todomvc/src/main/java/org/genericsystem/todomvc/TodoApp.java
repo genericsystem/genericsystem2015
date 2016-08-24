@@ -94,11 +94,8 @@ public class TodoApp extends GSApp {
 			@Override
 			public Observable[] get(Object key) {
 				Observable[] result = super.get(key);
-				if (result == null) {
-					ObservableValue<Generic> o = ((Generic) key).getObservableHolder(((Generic) key).getRoot().find(Completed.class));
-					o.addListener((c, ov, nv) -> System.out.println("observableholderinvalidation " + nv));// why is this listener necessary ????
-					put((Generic) key, result = new Observable[] { o });
-				}
+				if (result == null)
+					put((Generic) key, result = new Observable[] { ((Generic) key).getObservableHolder(((Generic) key).getRoot().find(Completed.class)) });
 				return result;
 			};
 		});
@@ -163,10 +160,7 @@ public class TodoApp extends GSApp {
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> {
-																	System.out.println("setHolder" + nva);
-																	model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva);
-																});
+																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
 															}
 														};
 														new HtmlLabel(this) {
