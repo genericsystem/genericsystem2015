@@ -6,9 +6,9 @@ import org.genericsystem.reactor.HtmlDomNode.InputTextHtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
 
-public class GSInputText extends GSTag {
+public class HtmlInputText extends GSTag {
 
-	public GSInputText(GSTag parent) {
+	public HtmlInputText(GSTag parent) {
 		super(parent, "input");
 	}
 

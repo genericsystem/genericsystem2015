@@ -1,16 +1,15 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSTag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlLi<M extends Model> extends Tag<M> {
+public class HtmlLi extends GSTag {
 
-	public HtmlLi(Tag<?> parent) {
+	public HtmlLi(GSTag parent) {
 		super(parent, "li");
 	}
 

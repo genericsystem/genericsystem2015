@@ -5,15 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
@@ -23,20 +14,28 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSSection;
-import org.genericsystem.reactor.gstag.GSButton;
-import org.genericsystem.reactor.gstag.GSCheckBox;
-import org.genericsystem.reactor.gstag.GSDiv;
-import org.genericsystem.reactor.gstag.GSFooter;
-import org.genericsystem.reactor.gstag.GSH1;
-import org.genericsystem.reactor.gstag.GSHyperLink;
-import org.genericsystem.reactor.gstag.GSInputText;
-import org.genericsystem.reactor.gstag.GSLabel;
-import org.genericsystem.reactor.gstag.GSLi;
-import org.genericsystem.reactor.gstag.GSSpan;
-import org.genericsystem.reactor.gstag.GSStrong;
-import org.genericsystem.reactor.gstag.GSUl;
+import org.genericsystem.reactor.gstag.HtmlButton;
+import org.genericsystem.reactor.gstag.HtmlCheckBox;
+import org.genericsystem.reactor.gstag.HtmlDiv;
+import org.genericsystem.reactor.gstag.HtmlFooter;
+import org.genericsystem.reactor.gstag.HtmlH1;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
+import org.genericsystem.reactor.gstag.HtmlInputText;
+import org.genericsystem.reactor.gstag.HtmlLabel;
+import org.genericsystem.reactor.gstag.HtmlLi;
+import org.genericsystem.reactor.gstag.HtmlSpan;
+import org.genericsystem.reactor.gstag.HtmlStrong;
+import org.genericsystem.reactor.gstag.HtmlUl;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
+
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -113,7 +112,7 @@ public class TodoApp extends GSApp {
 		createNewInitializedProperty(ACTIVE_TODOS, model -> getTodos(model).filtered(ACTIVE));
 		createNewInitializedProperty(COMPLETED_TODOS, model -> getTodos(model).filtered(COMPLETE));
 
-		new GSDiv(this) {
+		new HtmlDiv(this) {
 			{
 				new GSSection(this) {
 					{
@@ -121,12 +120,12 @@ public class TodoApp extends GSApp {
 						new GSSection(this) {
 							{
 								addStyleClass("header");
-								new GSH1(this) {
+								new HtmlH1(this) {
 									{
 										setText("todos");
 									}
 								};
-								new GSInputText(this) {
+								new HtmlInputText(this) {
 									{
 										addStyleClass("new-todo");
 										bindAction(model -> {
@@ -142,22 +141,20 @@ public class TodoApp extends GSApp {
 						new GSSection(this) {
 							{
 								addStyleClass("main");
-								new GSUl(this) {
+								new HtmlUl(this) {
 									{
 										addStyleClass("todo-list");
-										new GSLi(this) {
+										new HtmlLi(this) {
 											{
 												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
-												storeProperty(
-														ReactorStatics.COMPLETED,
-														model -> new SimpleBooleanProperty(getObservableValue("observableHolder", model).getValue() != null
-																&& Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
+												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
+														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
 												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
-												new GSDiv(this) {
+												new HtmlDiv(this) {
 													{
 														addStyleClass("view");
-														new GSCheckBox(this) {
+														new HtmlCheckBox(this) {
 															{
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
@@ -172,12 +169,12 @@ public class TodoApp extends GSApp {
 																});
 															}
 														};
-														new GSLabel(this) {
+														new HtmlLabel(this) {
 															{
 																bindText();
 															}
 														};
-														new GSButton(this) {
+														new HtmlButton(this) {
 															{
 																addStyleClass("destroy");
 																bindAction(GenericModel::remove);
@@ -192,16 +189,16 @@ public class TodoApp extends GSApp {
 							}
 						};
 
-						new GSFooter(this) {
+						new HtmlFooter(this) {
 							{
 								addStyleClass("footer");
 								bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(model).size() == 0 ? true : false, getTodos(model)));
-								new GSDiv(this) {
+								new HtmlDiv(this) {
 									{
-										new GSSpan(this) {
+										new HtmlSpan(this) {
 											{
 												addStyleClass("todo-count");
-												new GSStrong(this) {
+												new HtmlStrong(this) {
 													{
 														bindText(model -> Bindings.createStringBinding(() -> {
 															int size = getActiveTodos(model).size();
@@ -211,30 +208,30 @@ public class TodoApp extends GSApp {
 												};
 											}
 										};
-										new GSUl(this) {
+										new HtmlUl(this) {
 											{
 												addStyleClass("filters");
-												new GSLi(this) {
+												new HtmlLi(this) {
 													{
-														new GSHyperLink(this, "All", model -> getModeProperty(model).setValue(ALL)).bindOptionalStyleClass("selected", "allMode",
+														new HtmlHyperLink(this, "All", model -> getModeProperty(model).setValue(ALL)).bindOptionalStyleClass("selected", "allMode",
 																model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ALL));
 													}
 												};
-												new GSLi(this) {
+												new HtmlLi(this) {
 													{
-														new GSHyperLink(this, "Actives", model -> getModeProperty(model).setValue(ACTIVE)).bindOptionalStyleClass("selected", "activeMode",
+														new HtmlHyperLink(this, "Actives", model -> getModeProperty(model).setValue(ACTIVE)).bindOptionalStyleClass("selected", "activeMode",
 																model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ACTIVE));
 													}
 												};
-												new GSLi(this) {
+												new HtmlLi(this) {
 													{
-														new GSHyperLink(this, "Completes", model -> getModeProperty(model).setValue(COMPLETE)).bindOptionalStyleClass("selected", "completeMode",
+														new HtmlHyperLink(this, "Completes", model -> getModeProperty(model).setValue(COMPLETE)).bindOptionalStyleClass("selected", "completeMode",
 																model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), COMPLETE));
 													}
 												};
 											}
 										};
-										new GSButton(this) {
+										new HtmlButton(this) {
 											{
 												addStyleClass("clear-completed");
 												bindAction(model -> new ArrayList<>(getCompletedTodos(model)).forEach(Generic::remove));
@@ -248,26 +245,26 @@ public class TodoApp extends GSApp {
 						};
 					}
 				};
-				new GSFooter(this) {
+				new HtmlFooter(this) {
 					{
-						new GSDiv(this) {
+						new HtmlDiv(this) {
 							{
 								addStyleClass("save-cancel");
-								new GSButton(this) {
+								new HtmlButton(this) {
 									{
 										addStyleClass("save");
 										setText("Save");
 										bindAction(model -> engine.getCurrentCache().flush());
 									}
 								};
-								new GSButton(this) {
+								new HtmlButton(this) {
 									{
 										addStyleClass("cancel");
 										setText("Cancel");
 										bindAction(model -> engine.getCurrentCache().clear());
 									}
 								};
-								new GSButton(this) {
+								new HtmlButton(this) {
 									{
 										addStyleClass("cancel");
 										setText("Garbage");

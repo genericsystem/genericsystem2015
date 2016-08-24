@@ -1,6 +1,6 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.gstag.GSButton;
+import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.GenericModel;
 
 public class GSMonitor extends GSSection {
@@ -13,13 +13,13 @@ public class GSMonitor extends GSSection {
 		super(parent, direction);
 		addStyle("justify-content", "space-around");
 		addStyle("padding", "10px");
-		new GSButton(this) {
+		new HtmlButton(this) {
 			{
 				setText("Save");
 				bindAction(GenericModel::flush);
 			}
 		};
-		new GSButton(this) {
+		new HtmlButton(this) {
 			{
 				setText("Cancel");
 				bindAction(GenericModel::cancel);

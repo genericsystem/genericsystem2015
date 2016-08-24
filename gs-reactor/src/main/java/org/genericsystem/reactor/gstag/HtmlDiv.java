@@ -3,20 +3,17 @@ package org.genericsystem.reactor.gstag;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
-public class GSImg extends GSTag {
-
-	public GSImg(GSTag parent) {
-		super(parent, "img");
-	}
-
-	public GSImg(GSTag parent, String url) {
-		super(parent, "img");
-		addAttribute("src", url);
+/**
+ * @author Nicolas Feybesse
+ *
+ */
+public class HtmlDiv extends GSTag {
+	public HtmlDiv(GSTag parent) {
+		super(parent, "div");
 	}
 
 	@Override
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);
 	}
-
 }

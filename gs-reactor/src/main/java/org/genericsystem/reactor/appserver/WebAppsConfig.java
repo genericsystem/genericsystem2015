@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -16,8 +14,9 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.html.HtmlApp;
 import org.genericsystem.reactor.model.RootModel;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -148,7 +147,7 @@ public class WebAppsConfig extends JsonObject {
 			addApplication("/", htmlAppClass, RootModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
 		}
 
-		public SimpleWebAppConfig(String[] mainArgs, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
+		public SimpleWebAppConfig(String[] mainArgs, Class<? extends GSApp> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
 			super(mainArgs);
 			addApplication("/", htmlAppClass, modelClass, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
 		}

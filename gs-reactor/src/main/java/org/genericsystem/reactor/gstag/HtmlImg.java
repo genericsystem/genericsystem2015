@@ -3,14 +3,15 @@ package org.genericsystem.reactor.gstag;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
-/**
- * @author Nicolas Feybesse
- *
- */
-public class GSFooter extends GSTag {
+public class HtmlImg extends GSTag {
 
-	public GSFooter(GSTag parent) {
-		super(parent, "footer");
+	public HtmlImg(GSTag parent) {
+		super(parent, "img");
+	}
+
+	public HtmlImg(GSTag parent, String url) {
+		super(parent, "img");
+		addAttribute("src", url);
 	}
 
 	@Override

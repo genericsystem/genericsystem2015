@@ -7,14 +7,15 @@ import org.genericsystem.reactor.gs.GSTag;
  * @author Nicolas Feybesse
  *
  */
-public class GSLi extends GSTag {
+public class HtmlSpan extends GSTag {
 
-	public GSLi(GSTag parent) {
-		super(parent, "li");
+	public HtmlSpan(GSTag parent) {
+		super(parent, "span");
 	}
 
 	@Override
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);
 	}
+
 }

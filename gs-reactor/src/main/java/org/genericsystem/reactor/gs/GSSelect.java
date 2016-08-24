@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gstag.GSOption;
+import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
@@ -14,7 +14,7 @@ import javafx.beans.value.ObservableValue;
 
 public class GSSelect extends GSTag implements SelectionDefaults {
 
-	public GSOption optionElement;
+	public HtmlOption optionElement;
 
 	private GSSelect(GSTag parent) {
 		super(parent, "select");
@@ -33,7 +33,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 	}
 
 	protected void options() {
-		optionElement = new GSOption(this) {
+		optionElement = new HtmlOption(this) {
 			{
 				bindText();
 				forEach(GSSelect.this);
@@ -66,7 +66,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 
 		@Override
 		protected void options() {
-			new GSOption(this);
+			new HtmlOption(this);
 			super.options();
 		}
 

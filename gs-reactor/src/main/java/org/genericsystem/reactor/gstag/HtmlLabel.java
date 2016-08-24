@@ -7,15 +7,10 @@ import org.genericsystem.reactor.gs.GSTag;
  * @author Nicolas Feybesse
  *
  */
-public class GSH2 extends GSTag {
+public class HtmlLabel extends GSTag {
 
-	public GSH2(GSTag parent) {
-		super(parent, "h2");
-	}
-
-	public GSH2(GSTag parent, String text) {
-		super(parent, "h2");
-		setText(text);
+	public HtmlLabel(GSTag parent) {
+		super(parent, "label");
 	}
 
 	@Override
@@ -23,4 +18,11 @@ public class GSH2 extends GSTag {
 		return new HtmlDomNode(parentId);
 	}
 
+	public static class GSLabelDisplayer extends HtmlLabel {
+
+		public GSLabelDisplayer(GSTag parent) {
+			super(parent);
+			bindText();
+		}
+	}
 }
