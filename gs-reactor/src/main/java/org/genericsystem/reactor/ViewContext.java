@@ -44,11 +44,11 @@ public class ViewContext<M extends Model> {
 			insertChild(indexInChildren);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag childElement : element.getChildren())
-			if (childElement.getMetaBinding() != null)
-				childElement.getMetaBinding().accept(childElement, this);
+		for (Tag childTag : element.getChildren())
+			if (childTag.getMetaBinding() != null)
+				childTag.getMetaBinding().accept(childTag, this);
 			else
-				createViewContextChild(null, modelContext, childElement);
+				createViewContextChild(null, modelContext, childTag);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
 			binding.accept(modelContext, getNode());
 	}

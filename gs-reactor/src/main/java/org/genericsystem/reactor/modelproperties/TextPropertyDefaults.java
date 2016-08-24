@@ -15,7 +15,7 @@ public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> 
 	public static final String TEXT = "text";
 	public static final String TEXT_BINDING = "binding";
 
-	default Property<String> getTextProperty(M model) {
+	default Property<String> getDomNodeTextProperty(M model) {
 		storePropertyWithoutCheck(TEXT, model, m -> new SimpleStringProperty());
 		Property<String> text = getProperty(TEXT, model);
 		text.addListener(new WeakChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getTextListener()));
@@ -23,11 +23,11 @@ public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> 
 	}
 
 	default void setText(String value) {
-		addPrefixBinding(model -> getTextProperty(model).setValue(value));
+		addPrefixBinding(model -> getDomNodeTextProperty(model).setValue(value));
 	}
 
 	default void bindText(Function<M, ObservableValue<String>> applyOnModel) {
 		storeProperty(TEXT_BINDING, applyOnModel);
-		addPrefixBinding(model -> getTextProperty(model).bind(getObservableValue(TEXT_BINDING, model)));
+		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getObservableValue(TEXT_BINDING, model)));
 	}
 }
