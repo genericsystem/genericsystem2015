@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.html.TextPropertyDefaults;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 

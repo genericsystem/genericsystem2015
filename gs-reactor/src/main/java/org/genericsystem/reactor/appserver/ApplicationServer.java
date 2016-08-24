@@ -1,15 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +20,16 @@ import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.html.HtmlApp;
+
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -60,7 +59,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	public static void sartSimpleWebApp(String[] mainArgs, Class<? extends HtmlApp<?>> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
+	public static void sartSimpleWebApp(String[] mainArgs, Class<? extends GSApp> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
 		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, modelClass, homePersistentDirectoryPath)).start();
 	}
 

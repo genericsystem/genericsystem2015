@@ -2,14 +2,14 @@ package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 
-import javafx.beans.binding.Bindings;
-
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.gs.SelectionDefaults;
-import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -30,7 +30,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 			{
 				addStyle("max-width", "40%");
 				addStyleClass("modal-content");
-				new GSHyperLink(this) {
+				new HtmlHyperLink(this) {
 					{
 						addStyleClass("close");
 						setText("×");

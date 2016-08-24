@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

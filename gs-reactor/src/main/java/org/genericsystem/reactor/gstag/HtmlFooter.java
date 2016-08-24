@@ -7,14 +7,15 @@ import org.genericsystem.reactor.gs.GSTag;
  * @author Nicolas Feybesse
  *
  */
-public class GSP extends GSTag {
+public class HtmlFooter extends GSTag {
 
-	public GSP(GSTag parent) {
-		super(parent, "p");
+	public HtmlFooter(GSTag parent) {
+		super(parent, "footer");
 	}
 
 	@Override
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);
 	}
+
 }

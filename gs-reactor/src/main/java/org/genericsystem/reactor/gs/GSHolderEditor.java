@@ -7,7 +7,7 @@ import java.util.Map;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
-import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
@@ -37,7 +37,7 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderEditorWithRemoval(GSTag parent) {
 			super(parent);
-			new GSHyperLink(this) {
+			new HtmlHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
@@ -57,7 +57,7 @@ public class GSHolderEditor extends GSSection {
 				if (nva != null)
 					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
 			});
-			new GSHyperLink(this) {
+			new HtmlHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");

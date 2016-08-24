@@ -3,10 +3,14 @@ package org.genericsystem.reactor.gstag;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
-public class GSOption extends GSTag {
+/**
+ * @author Nicolas Feybesse
+ *
+ */
+public class HtmlUl extends GSTag {
 
-	public GSOption(GSTag parent) {
-		super(parent, "option");
+	public HtmlUl(GSTag parent) {
+		super(parent, "ul");
 	}
 
 	@Override

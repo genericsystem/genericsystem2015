@@ -1,16 +1,15 @@
-package org.genericsystem.reactor.html;
+package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSTag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlP<M extends Model> extends Tag<M> {
+public class HtmlP extends GSTag {
 
-	public HtmlP(Tag<?> parent) {
+	public HtmlP(GSTag parent) {
 		super(parent, "p");
 	}
 
@@ -18,5 +17,4 @@ public class HtmlP<M extends Model> extends Tag<M> {
 	protected HtmlDomNode createNode(String parentId) {
 		return new HtmlDomNode(parentId);
 	}
-
 }

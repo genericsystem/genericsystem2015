@@ -3,9 +3,9 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gstag.GSH1;
-import org.genericsystem.reactor.gstag.GSLabel;
-import org.genericsystem.reactor.gstag.GSRadio;
+import org.genericsystem.reactor.gstag.HtmlH1;
+import org.genericsystem.reactor.gstag.HtmlLabel;
+import org.genericsystem.reactor.gstag.HtmlRadio;
 import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
@@ -35,7 +35,7 @@ public class GSComposite extends GSSection {
 		new GSSection(this, GSComposite.this.getReverseDirection()) {
 			{
 				forEach(GSComposite.this);
-				new GSLabel(this) {
+				new HtmlLabel(this) {
 					{
 						bindText();
 					}
@@ -63,7 +63,7 @@ public class GSComposite extends GSSection {
 				{
 					addStyle("justify-content", "center");
 					addStyle("background-color", "#ffa500");
-					new GSH1(this) {
+					new HtmlH1(this) {
 						{
 							setStringExtractor(StringExtractor.MANAGEMENT);
 							bindText();
@@ -90,7 +90,7 @@ public class GSComposite extends GSSection {
 				{
 					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
 					forEach(ColorTitleCompositeFlexElement.this);
-					new GSLabel(this) {
+					new HtmlLabel(this) {
 						{
 							bindText();
 						}
@@ -111,8 +111,8 @@ public class GSComposite extends GSSection {
 			new GSSection(this, CompositeRadio.this.getReverseDirection()) {
 				{
 					forEach(CompositeRadio.this);
-					new GSRadio(this);
-					new GSLabel(this) {
+					new HtmlRadio(this);
+					new HtmlLabel(this) {
 						{
 							bindText();
 						}
@@ -149,8 +149,8 @@ public class GSComposite extends GSSection {
 				{
 					forEach(ColorCompositeRadio.this);
 					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
-					new GSRadio(this);
-					new GSLabel(this) {
+					new HtmlRadio(this);
+					new HtmlLabel(this) {
 						{
 							bindText();
 						}

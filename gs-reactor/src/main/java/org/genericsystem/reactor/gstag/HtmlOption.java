@@ -3,14 +3,10 @@ package org.genericsystem.reactor.gstag;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
-/**
- * @author Nicolas Feybesse
- *
- */
-public class GSSpan extends GSTag {
+public class HtmlOption extends GSTag {
 
-	public GSSpan(GSTag parent) {
-		super(parent, "span");
+	public HtmlOption(GSTag parent) {
+		super(parent, "option");
 	}
 
 	@Override

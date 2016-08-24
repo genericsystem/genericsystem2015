@@ -78,7 +78,6 @@ public class ObservableListWrapperExtended<E> extends ObservableListWrapper<E> i
 
 	@Override
 	public void onChanged(Change<? extends E> change) {
-		System.out.println("------------- onChange dans ObservableListWrapperExtended");
 		while (change.next()) {
 			beginChange();
 			if (change.wasPermutated()) {
