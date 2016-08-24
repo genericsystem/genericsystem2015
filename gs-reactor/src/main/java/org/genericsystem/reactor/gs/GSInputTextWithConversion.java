@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gstag.GSInputText;
+import org.genericsystem.reactor.gstag.HtmlInputText;
 import org.genericsystem.reactor.model.GenericModel;
 
 import io.vertx.core.logging.Logger;
@@ -15,7 +15,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
-public class GSInputTextWithConversion<T extends Serializable> extends GSInputText {
+public class GSInputTextWithConversion<T extends Serializable> extends HtmlInputText {
 
 	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
 

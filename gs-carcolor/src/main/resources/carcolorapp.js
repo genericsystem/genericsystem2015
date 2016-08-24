@@ -176,10 +176,11 @@ function selectIndex(name){
 }
 
 window.onclick = function(event) {
-	var modal =  document.getElementsByClassName("modal")[0];
-	if (event.target == modal) {
-		if(modal.style.display != "none") {
-			document.getElementsByClassName("close")[0].click();
+	var modal = document.getElementsByClassName("modal");
+	var i;
+	for (i=0; i < modal.length; i++){
+		if(modal[i].style.display == "flex") {
+			document.getElementsByClassName("close")[i].click();
 		}
 	}
 }

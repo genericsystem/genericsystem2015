@@ -1,9 +1,9 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gstag.GSCheckBox;
+import org.genericsystem.reactor.gstag.HtmlCheckBox;
 
-public class GSCheckBoxWithValue extends GSCheckBox {
+public class GSCheckBoxWithValue extends HtmlCheckBox {
 
 	public GSCheckBoxWithValue(GSTag parent) {
 		super(parent);

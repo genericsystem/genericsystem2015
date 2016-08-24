@@ -3,9 +3,9 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
-import org.genericsystem.reactor.gstag.GSButton;
-import org.genericsystem.reactor.gstag.GSH2;
-import org.genericsystem.reactor.gstag.GSHyperLink;
+import org.genericsystem.reactor.gstag.HtmlButton;
+import org.genericsystem.reactor.gstag.HtmlH2;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -40,7 +40,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 				addStyle("margin-bottom", "1px");
 				addStyle("color", "red");
 				addStyle("justify-content", "center");
-				new GSH2(this) {
+				new HtmlH2(this) {
 					{
 						setStringExtractor(StringExtractor.MANAGEMENT);
 						bindText();
@@ -93,72 +93,10 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 
 	@Override
 	protected void sections() {
-		Tag<GenericModel> selectableTag = new GSComposite(this, this.getReverseDirection()) {
+		Tag<GenericModel> selectableTag = new GSRowDisplayer(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach_(ObservableListExtractor.SUBINSTANCES);
-			}
-
-			@Override
-			protected void header() {
-				new GSSection(this, this.getReverseDirection()) {
-					{
-						addStyle("flex", "1");
-						addStyle("margin-right", "1px");
-						addStyle("margin-bottom", "1px");
-						addStyle("overflow", "hidden");
-						addPrefixBinding(modelContext -> modelContext.getObservableStyles(this).put("background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
-						new GSHyperLink(this) {
-							{
-								bindText();
-								bindAction(model -> getSelectionProperty(model).setValue(model));
-							}
-						};
-
-					}
-				};
-			}
-
-			@Override
-			protected void sections() {
-				new GSSection(this, FlexDirection.COLUMN) {
-					{
-						addStyle("flex", "1");
-						addStyle("overflow", "hidden");
-						forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-						new GSInstanceSubcellDisplayer(this) {
-							{
-								forEach_(ObservableListExtractor.HOLDERS);
-							}
-						};
-					}
-				};
-			}
-
-			@Override
-			protected void footer() {
-				new GSSection(this, this.getDirection()) {
-					{
-						if (this.getDirection().equals(FlexDirection.ROW)) {
-							addStyle("flex", "0");
-							addStyle("min-width", "100px");
-						} else {
-							addStyle("flex", "1");
-						}
-						addStyle("background-color", "#dda5e2");
-						addStyle("margin-right", "1px");
-						addStyle("margin-bottom", "1px");
-						new GSButton(this) {
-							{
-								setText("Remove");
-								bindAction(GenericModel::remove);
-								addStyle("width", "100%");
-								addStyle("height", "100%");
-							}
-						};
-					}
-				};
 			}
 		};
 		bindSelection(selectableTag);

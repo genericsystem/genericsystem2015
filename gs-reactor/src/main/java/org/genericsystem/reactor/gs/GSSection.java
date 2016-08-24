@@ -4,8 +4,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.gstag.GSH1;
-import org.genericsystem.reactor.gstag.GSH2;
+import org.genericsystem.reactor.gstag.HtmlH1;
+import org.genericsystem.reactor.gstag.HtmlH2;
 
 public class GSSection extends GSTag {
 	private final FlexDirection direction;
@@ -63,13 +63,13 @@ public class GSSection extends GSTag {
 
 	public static class GenericH1Section extends GenericRowWrapper {
 		public GenericH1Section(GSTag parent, String text) {
-			super(parent, FlexDirection.ROW, GSH1::new, text);
+			super(parent, FlexDirection.ROW, HtmlH1::new, text);
 		}
 	}
 
 	public static class GenericH2Section extends GenericRowWrapper {
 		public GenericH2Section(GSTag parent, String text) {
-			super(parent, FlexDirection.ROW, GSH2::new, text);
+			super(parent, FlexDirection.ROW, HtmlH2::new, text);
 		}
 	}
 }

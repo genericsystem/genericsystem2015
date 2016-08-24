@@ -1,6 +1,6 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.gstag.GSLabel.GSLabelDisplayer;
+import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 public class GSSingleLinkComponentDisplayer extends GSSection {
