@@ -23,10 +23,14 @@ import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
  */
 public class Model {
 
-	protected Model parent;
+	private Model parent;
 	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
 	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
 	private Map<Tag<?>, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
+
+	public Model(Model parent) {
+		this.parent = parent;
+	}
 
 	public Model getParent() {
 		return this.parent;
