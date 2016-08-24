@@ -180,7 +180,7 @@ window.onclick = function(event) {
 	var i;
 	for (i=0; i < modal.length; i++){
 		if(modal[i].style.display == "flex") {
-			modal[i].style.display = "none";
+			document.getElementsByClassName("close")[i].click();
 		}
 	}
 }
