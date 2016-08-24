@@ -137,27 +137,31 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
-		return new ObjectBinding<T>() {
-
-			private ObservableList<T> strongref;
-
-			{
-				strongref = getObservableHolders(attribute, targets);
-				bind(strongref);
-			}
-
-			@Override
-			protected T computeValue() {
-				return getHolders(attribute, targets).first();
-			}
-
-			@Override
-			protected void finalize() throws Throwable {
-				// TODO Auto-generated method stub
-				super.finalize();
-				System.out.println("FINALIZE");
-			}
-		};
+		return Bindings.valueAt(getObservableHolders(attribute, targets), 0);
+		// return new ObjectBinding<T>() {
+		//
+		//
+		// private final ObservableList<T> strongref = getObservableHolders(attribute, targets);
+		//
+		// {
+		// bind(strongref);
+		// }
+		//
+		// @Override
+		// protected T computeValue() {
+		// return getHolders(attribute, targets).first();
+		// }
+		//
+		// @Override
+		// protected void finalize() throws Throwable {
+		// System.out.println("FINALIZE");
+		// }
+		//
+		// @Override
+		// public ObservableList<?> getDependencies() {
+		// return FXCollections.singletonObservableList(strongref);
+		// }
+		// };
 		// Bindings.createObjectBinding(() -> getHolders(attribute, targets).first(), getObservableHolders(attribute, targets));// Bindings.valueAt(getObservableHolders(attribute, targets), 0);
 	}
 
@@ -397,15 +401,13 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<Serializable> getObservableValues(T attribute, Serializable value, T... targets) {
-		// TODO ListBinging is evil, change for transformationlist
+		// TODO test
 		return new ListBinding<Serializable>() {
-			private final ObservableList<T> links;
+			private final ObservableList<T> links = getObservableLinks(attribute, value, targets);
 			{
-				links = getObservableLinks(attribute, value, targets);
 				bind(links);
 			}
 
-			@SuppressWarnings("restriction")
 			@Override
 			protected ObservableList<Serializable> computeValue() {
 				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
@@ -422,13 +424,11 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	default ObservableList<Serializable> getObservableValues(T attribute, T... targets) {
 		return new ListBinding<Serializable>() {
-			private final ObservableList<T> links;
+			private final ObservableList<T> links = getObservableLinks(attribute, targets);
 			{
-				links = getObservableLinks(attribute, targets);
 				bind(links);
 			}
 
-			@SuppressWarnings("restriction")
 			@Override
 			protected ObservableList<Serializable> computeValue() {
 				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(links.stream().map(x -> x.getValue()).collect(Collectors.toList())));
@@ -443,13 +443,11 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	default ObservableList<Serializable> getObservableValues(T attribute, int pos) {
 		return new ListBinding<Serializable>() {
-			private final ObservableList<T> holders;
+			private final ObservableList<T> holders = getObservableHolders(attribute, pos);
 			{
-				holders = getObservableHolders(attribute, pos);
 				bind(holders);
 			}
 
-			@SuppressWarnings("restriction")
 			@Override
 			protected ObservableList<Serializable> computeValue() {
 				return FXCollections.unmodifiableObservableList(new ObservableListWrapper<>(holders.stream().map(x -> x.getValue()).collect(Collectors.toList())));
@@ -483,9 +481,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLinkTargetComponent(T relation, T... targets) {
 		return new ObjectBinding<T>() {
-			private final ObservableValue<T> link;
+			private final ObservableValue<T> link = getObservableLink(relation, targets);
 			{
-				link = getObservableLink(relation, targets);
 				bind(link);
 			}
 
@@ -505,9 +502,8 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
 		return new ObjectBinding<T>() {
-			private final ObservableValue<T> link;
+			private final ObservableValue<T> link = getObservableLink(relation, value, targets);
 			{
-				link = getObservableLink(relation, value, targets);
 				bind(link);
 			}
 

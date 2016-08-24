@@ -267,13 +267,13 @@ public class TodoApp extends GSApp {
 										bindAction(model -> engine.getCurrentCache().clear());
 									}
 								};
-								// new GSButton(this) {
-								// {
-								// addStyleClass("cancel");
-								// setText("Garbage");
-								// bindAction(model -> System.gc());
-								// }
-								// };
+								new GSButton(this) {
+									{
+										addStyleClass("cancel");
+										setText("Garbage");
+										bindAction(model -> System.gc());
+									}
+								};
 							}
 						};
 					}
