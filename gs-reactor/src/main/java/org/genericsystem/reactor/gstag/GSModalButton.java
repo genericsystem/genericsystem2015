@@ -1,4 +1,4 @@
-package org.genericsystem.carcolor;
+package org.genericsystem.reactor.gstag;
 
 import java.io.Serializable;
 import java.util.List;
