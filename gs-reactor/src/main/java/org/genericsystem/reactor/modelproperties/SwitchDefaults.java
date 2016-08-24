@@ -1,32 +1,24 @@
-package org.genericsystem.reactor.gs;
+package org.genericsystem.reactor.modelproperties;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public interface SwitchDefaults {
+public interface SwitchDefaults extends ModelProperty<GenericModel> {
 
 	public static final String SUBMODELS = "subModels";
 	public static final String INDEX = "index";
 	public static final String CURRENT_MODEL = "currentModel";
 	public static final String NAME_MODEL = "nameModel";
-
-	void addPrefixBinding(Consumer<GenericModel> consumer);
-
-	<T> void storePropertyWithoutCheck(String propertyName, GenericModel model, Function<GenericModel, ObservableValue<T>> applyOnModel);
-
-	<T> Property<T> getProperty(String property, Model model);
 
 	default ObservableList<GenericModel> getSwitchModels(GenericModel model) {
 		Property<ObservableList<GenericModel>> modelsProperty = getProperty(SUBMODELS, model);

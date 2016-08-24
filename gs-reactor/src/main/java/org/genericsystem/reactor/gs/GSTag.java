@@ -7,6 +7,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;

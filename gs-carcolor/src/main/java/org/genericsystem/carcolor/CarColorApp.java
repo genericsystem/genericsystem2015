@@ -19,7 +19,7 @@ import org.genericsystem.reactor.gs.GSLogo;
 import org.genericsystem.reactor.gs.GSModal;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.gs.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 /**
  * @author Nicolas Feybesse

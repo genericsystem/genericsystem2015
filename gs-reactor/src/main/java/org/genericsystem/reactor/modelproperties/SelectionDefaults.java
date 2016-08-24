@@ -1,35 +1,25 @@
-package org.genericsystem.reactor.gs;
+package org.genericsystem.reactor.modelproperties;
 
 import java.util.Optional;
-import java.util.function.Consumer;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.model.GenericModel;
 
 import javafx.beans.property.Property;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.model.GenericModel;
-
 /**
  * @author Nicolas Feybesse
  *
  */
-public interface SelectionDefaults {
+public interface SelectionDefaults extends ModelProperty<GenericModel> {
 
 	public static final String SELECTION = "selection";
 	public static final String UPDATED_GENERIC = "updatedGeneric";
-
-	// void addPrefixBinding(Consumer<GenericModel> consumer);
-
-	void addPostfixBinding(Consumer<GenericModel> consumer);
-
-	void createNewProperty(String propertyName);
-
-	<T> Property<T> getProperty(String property, Model model);
 
 	default void createSelectionProperty() {
 		createNewProperty(SELECTION);

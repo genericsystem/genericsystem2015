@@ -4,9 +4,9 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.reactor.gs.GSTag;
-import org.genericsystem.reactor.gs.SelectionDefaults;
-import org.genericsystem.reactor.gs.SwitchDefaults;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.SwitchDefaults;
 
 /**
  * @author Nicolas Feybesse

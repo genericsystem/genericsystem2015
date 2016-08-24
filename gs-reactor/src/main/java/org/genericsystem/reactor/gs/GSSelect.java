@@ -7,6 +7,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;

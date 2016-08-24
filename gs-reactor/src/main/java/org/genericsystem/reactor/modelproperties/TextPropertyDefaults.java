@@ -1,6 +1,5 @@
-package org.genericsystem.reactor.gs;
+package org.genericsystem.reactor.modelproperties;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.genericsystem.reactor.Model;
@@ -11,20 +10,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 
-public interface TextPropertyDefaults<M extends Model> {
+public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> {
 
 	public static final String TEXT = "text";
 	public static final String TEXT_BINDING = "binding";
-
-	<T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
-
-	<T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel);
-
-	void addPrefixBinding(Consumer<M> consumer);
-
-	<T> Property<T> getProperty(String property, Model model);
-
-	<T> ObservableValue<T> getObservableValue(String property, Model model);
 
 	default Property<String> getTextProperty(M model) {
 		storePropertyWithoutCheck(TEXT, model, m -> new SimpleStringProperty());

@@ -14,7 +14,7 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
-import org.genericsystem.reactor.gs.TextPropertyDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +81,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
+	@Override
 	public void addPostfixBinding(Consumer<M> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
@@ -209,6 +210,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		});
 	}
 
+	@Override
 	public void createNewProperty(String propertyName) {
 		addPrefixBinding(modelContext -> modelContext.createNewProperty(this, propertyName));
 	}

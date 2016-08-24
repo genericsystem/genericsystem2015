@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gs;
+package org.genericsystem.reactor.modelproperties;
 
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
