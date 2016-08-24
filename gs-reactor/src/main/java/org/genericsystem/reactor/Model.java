@@ -82,11 +82,6 @@ public class Model {
 		getProperties(tag).put(propertyName, value);
 	}
 
-	protected void storePropertyWithoutCheck(Tag<?> tag, String propertyName, ObservableValue<?> value) {
-		assert viewContextsMap.keySet().contains(tag);
-		getProperties(tag).put(propertyName, value);
-	}
-
 	public List<Model> subContexts() {
 		return subModelsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
 	}

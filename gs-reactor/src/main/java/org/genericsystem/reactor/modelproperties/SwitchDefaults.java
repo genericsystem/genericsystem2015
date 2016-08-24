@@ -44,10 +44,10 @@ public interface SwitchDefaults extends ModelProperty<GenericModel> {
 
 	default void switcher(GSTag switchedTag, Function<GenericModel, ObservableList<GenericModel>> applyOnModel, GSTag instanceNameTag) {
 		addPrefixBinding(model -> {
-			storePropertyWithoutCheck(SUBMODELS, model, m -> new SimpleObjectProperty<>(applyOnModel.apply(model)));
-			storePropertyWithoutCheck(CURRENT_MODEL, model, m -> new SimpleObjectProperty<>());
-			storePropertyWithoutCheck(NAME_MODEL, model, m -> new SimpleObjectProperty<>(model));
-			storePropertyWithoutCheck(INDEX, model, m -> new ReadOnlyIntegerWrapper(-1));
+			storeProperty(SUBMODELS, model, m -> new SimpleObjectProperty<>(applyOnModel.apply(model)));
+			storeProperty(CURRENT_MODEL, model, m -> new SimpleObjectProperty<>());
+			storeProperty(NAME_MODEL, model, m -> new SimpleObjectProperty<>(model));
+			storeProperty(INDEX, model, m -> new ReadOnlyIntegerWrapper(-1));
 		});
 		instanceNameTag.select_(model -> getNameModel(model));
 		switchedTag.select_(model -> getCurrentModel(model));

@@ -16,10 +16,12 @@ public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> 
 	public static final String TEXT_BINDING = "binding";
 
 	default Property<String> getDomNodeTextProperty(M model) {
-		storePropertyWithoutCheck(TEXT, model, m -> new SimpleStringProperty());
-		Property<String> text = getProperty(TEXT, model);
-		text.addListener(new WeakChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getTextListener()));
-		return text;
+		if (!model.containsProperty((Tag<?>) this, TEXT)) {
+			storeProperty(TEXT, model, m -> new SimpleStringProperty());
+			Property<String> text = getProperty(TEXT, model);
+			text.addListener(new WeakChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getTextListener()));
+		}
+		return getProperty(TEXT, model);
 	}
 
 	default void setText(String value) {

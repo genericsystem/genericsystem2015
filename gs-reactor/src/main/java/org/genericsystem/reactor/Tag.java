@@ -237,8 +237,8 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	@Override
-	public <T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel) {
-		model.storePropertyWithoutCheck(this, propertyName, applyOnModel.apply(model));
+	public <T> void storeProperty(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel) {
+		model.storeProperty(this, propertyName, applyOnModel.apply(model));
 	}
 
 	@Override

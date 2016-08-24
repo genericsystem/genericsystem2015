@@ -10,8 +10,7 @@ import javafx.beans.value.ObservableValue;
 
 public interface ModelProperty<M extends Model> {
 
-	// TODO: Delete if possible.
-	<T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
+	<T> void storeProperty(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
 
 	<T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel);
 
