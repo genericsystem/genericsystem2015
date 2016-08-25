@@ -147,6 +147,18 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	@Override
+	public <T> Property<T> getInheritedProperty(String propertyName, Model[] model, Tag<?>[] tag) {
+		while (tag != null && model[0] != null) {
+			if (tag[0].metaBinding != null && model[0].getViewContext(tag[0].getParent()) == null)
+				model[0] = model[0].getParent();
+			tag[0] = tag[0].getParent();
+			if (model[0] != null && model[0].containsProperty(tag[0], propertyName))
+				return model[0].getProperty(tag[0], propertyName);
+		}
+		return null;
+	}
+
+	@Override
 	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
 		return getObservableValue(propertyName, new Model[] { model });
 	}
