@@ -16,7 +16,6 @@ import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
@@ -59,11 +58,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	public static void sartSimpleWebApp(String[] mainArgs, Class<? extends GSApp> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
-		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, modelClass, homePersistentDirectoryPath)).start();
-	}
-
-	public static void sartSimpleGenericApp(String[] mainArgs, Class<? extends GSApp> htmlAppClass, String homePersistentDirectoryPath) {
+	public static void startSimpleGenericApp(String[] mainArgs, Class<? extends GSApp> htmlAppClass, String homePersistentDirectoryPath) {
 		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, homePersistentDirectoryPath)).start();
 	}
 

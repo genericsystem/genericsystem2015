@@ -4,7 +4,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
-import org.genericsystem.carcolor.model.Diesel;
+import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -23,15 +23,15 @@ import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.gs.SelectionDefaults;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@DependsOnModel({ Car.class, Power.class, Diesel.class, Color.class, CarColor.class })
+@DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class })
 @RunScript(ExampleReactorScript.class)
 public class AppHtml extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
+		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
 	public AppHtml(Root engine) {
@@ -77,7 +77,7 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		public void run(Root engine) {
 			Generic car = engine.find(Car.class);
 			Generic power = engine.find(Power.class);
-			Generic diesel = engine.find(Diesel.class);
+			Generic diesel = engine.find(UsedCar.class);
 			car.setAttribute("Description");
 			Generic person = engine.setInstance("Person");
 			Generic category = engine.setInstance("Category");

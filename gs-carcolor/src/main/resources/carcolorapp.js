@@ -179,7 +179,8 @@ window.onclick = function(event) {
 	var modal = document.getElementsByClassName("modal");
 	var i;
 	for (i=0; i < modal.length; i++){
-		if(modal[i].style.display == "flex") {
+		var id = modal[i].id;
+		if(modal[i].style.display == "flex" && event.target.id == id) {
 			document.getElementsByClassName("close")[i].click();
 		}
 	}

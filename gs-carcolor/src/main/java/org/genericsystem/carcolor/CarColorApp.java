@@ -19,7 +19,7 @@ import org.genericsystem.reactor.gs.GSLogo;
 import org.genericsystem.reactor.gs.GSModal;
 import org.genericsystem.reactor.gs.GSMonitor;
 import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.gs.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 /**
  * @author Nicolas Feybesse
@@ -30,7 +30,7 @@ import org.genericsystem.reactor.gs.SelectionDefaults;
 public class CarColorApp extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
+		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
 	public CarColorApp(Root engine) {

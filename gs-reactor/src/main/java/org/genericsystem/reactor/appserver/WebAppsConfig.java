@@ -146,11 +146,6 @@ public class WebAppsConfig extends JsonObject {
 			super(mainArgs);
 			addApplication("/", htmlAppClass, RootModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
 		}
-
-		public SimpleWebAppConfig(String[] mainArgs, Class<? extends GSApp> htmlAppClass, Class<? extends Model> modelClass, String homePersistentDirectoryPath) {
-			super(mainArgs);
-			addApplication("/", htmlAppClass, modelClass, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
-		}
 	}
 
 	public String getRootId() {

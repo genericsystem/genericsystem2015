@@ -60,7 +60,7 @@ public class GSEditor extends GSComposite {
 						new InstanceTitleDisplayer(this);
 						new InstanceLinkTitleDisplayer(this) {
 							{
-								forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 						};
 					}
@@ -75,7 +75,7 @@ public class GSEditor extends GSComposite {
 						new GSSubcellEditor(this);
 						new GSAttributeOfInstanceEditor(this) {
 							{
-								forEach_(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 							}
 						};
 					}

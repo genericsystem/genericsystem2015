@@ -14,7 +14,8 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
-import org.genericsystem.reactor.gs.TextPropertyDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ import javafx.util.StringConverter;
  *
  * @param <N>
  */
-public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
+public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M> {
 
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
@@ -81,6 +82,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
+	@Override
 	public void addPostfixBinding(Consumer<M> consumer) {
 		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
@@ -107,13 +109,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 	public void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<M, ObservableValue<Boolean>> applyOnModel) {
 		storeProperty(modelPropertyName, applyOnModel);
 		bindOptionalStyleClass(styleClass, modelPropertyName);
-	}
-
-	public <MODEL extends Model> void forEach(Function<MODEL, ObservableList<M>> applyOnModel) {
-		forEach(applyOnModel, (model, subElement) -> {
-			subElement.parent = model;
-			return subElement;
-		});
 	}
 
 	protected <MODEL extends Model, SUBELEMENT> void forEach(Function<MODEL, ObservableList<SUBELEMENT>> applyOnModel, BiFunction<MODEL, SUBELEMENT, M> modelBuilder) {
@@ -150,6 +145,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		return null;
 	}
 
+	@Override
 	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
 		return getObservableValue(propertyName, new Model[] { model });
 	}
@@ -215,8 +211,15 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		});
 	}
 
+	@Override
 	public void createNewProperty(String propertyName) {
 		addPrefixBinding(modelContext -> modelContext.createNewProperty(this, propertyName));
+	}
+
+	@Override
+	public <T> void createNewInitializedProperty(String propertyName, M model, Function<M, T> getInitialValue) {
+		model.createNewProperty(this, propertyName);
+		getProperty(propertyName, model).setValue(getInitialValue.apply(model));
 	}
 
 	public <T> void createNewInitializedProperty(String propertyName, Function<M, T> getInitialValue) {
@@ -228,26 +231,28 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M> {
 		addPrefixBinding(modelContext -> getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext)));
 	}
 
+	@Override
 	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
 		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
 	}
 
 	@Override
-	public <T> void storePropertyWithoutCheck(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel) {
-		model.storePropertyWithoutCheck(this, propertyName, applyOnModel.apply(model));
+	public <T> void storeProperty(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel) {
+		model.storeProperty(this, propertyName, applyOnModel.apply(model));
 	}
 
+	@Override
 	public void addStyle(String propertyName, String value) {
-		addPrefixBinding(model -> model.getObservableStyles(this).put(propertyName, value));
+		addPrefixBinding(model -> getDomNodeStyles(model).put(propertyName, value));
 	}
 
 	public void bindStyle(String style, String modelPropertyName) {
-		bindMapElement(style, modelPropertyName, model -> model.getObservableStyles(this));
+		bindMapElement(style, modelPropertyName, model -> getDomNodeStyles(model));
 	}
 
 	public void bindStyle(String style, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
 		storeProperty(propertyName, applyOnModel);
-		bindMapElement(style, propertyName, model -> model.getObservableStyles(this));
+		bindMapElement(style, propertyName, model -> getDomNodeStyles(model));
 	}
 
 	public void addStyleClasses(String... styleClasses) {
