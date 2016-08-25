@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -127,9 +126,5 @@ public class Model {
 
 	public ObservableSet<String> getObservableStyleClasses(Tag<?> element) {
 		return getViewContext(element).getNode().getStyleClasses();
-	}
-
-	public Property<Number> getSelectionIndex(Tag<?> element) {
-		return getViewContext(element).<SelectableHtmlDomNode> getNode().getSelectionIndex();
 	}
 }

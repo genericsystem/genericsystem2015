@@ -9,7 +9,6 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
@@ -22,10 +21,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 		options();
 		init();
 		createSelectionProperty();
-		storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 		bindBiDirectionalSelection(optionElement);
-		storeProperty(ReactorStatics.SELECTION_STRING,
-				model -> Bindings.createStringBinding(() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? getSelectionProperty(model).getValue().getGeneric() : null), getSelectionProperty(model)));
 	}
 
 	@Override
@@ -54,7 +50,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
 					Map<String, String> map = getDomNodeStyles(model);
 					ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
-					ObservableValue<String> observable = getObservableValue(ReactorStatics.SELECTION_STRING, model);
+					ObservableValue<String> observable = getSelectionString(model);
 					observable.addListener(listener);
 					map.put("background-color", observable.getValue());
 				}
@@ -73,7 +69,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 
 		@Override
 		protected void init() {
-			createNewInitializedProperty(ReactorStatics.SELECTION_SHIFT, model -> 1);
+			setSelectionShift(1);
 		}
 	}
 
@@ -81,7 +77,7 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 
 		public ColorsSelect(GSTag parent) {
 			super(parent);
-			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
+			bindStyle("background-color", SELECTION_STRING);
 			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> optionElement.getGenericStringProperty(model));
 		}
 	}

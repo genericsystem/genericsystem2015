@@ -9,8 +9,6 @@ import org.genericsystem.reactor.gstag.HtmlRadio;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import javafx.beans.binding.Bindings;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -131,11 +129,8 @@ public class GSComposite extends GSSection {
 		public ColorCompositeRadio(GSTag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 			createSelectionProperty();
-			storeProperty(ReactorStatics.SELECTION_INDEX, model -> model.getSelectionIndex(this));
 			bindBiDirectionalSelection(flexSubElement);
-			storeProperty(ReactorStatics.SELECTION_STRING,
-					model -> Bindings.createStringBinding(() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? getSelectionProperty(model).getValue().getGeneric() : null), getSelectionProperty(model)));
-			bindStyle("background-color", ReactorStatics.SELECTION_STRING);
+			bindStyle("background-color", SELECTION_STRING);
 			addStyle("padding", "4px");
 		}
 

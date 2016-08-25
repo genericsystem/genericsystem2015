@@ -164,10 +164,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		return null;
 	}
 
-	public void addSelectionIndex(int value) {
-		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
-	}
-
 	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
 		addPrefixBinding(model -> {
 			Map<String, String> map = getMap.apply(model);
