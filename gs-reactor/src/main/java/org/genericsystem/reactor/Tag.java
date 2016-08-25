@@ -12,7 +12,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
@@ -38,7 +37,8 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
-	private BiConsumer<Tag<M>, ViewContext<M>> metaBinding;
+	private Function<Model, ObservableList<?>> metaBinding;
+	private BiFunction<Model, ?, M> modelBuilder;
 	private final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
 	private final List<BiConsumer<Model, HtmlDomNode>> postFixedBindings = new ArrayList<>();
 	private final Tag parent;
@@ -68,11 +68,15 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		return postFixedBindings;
 	}
 
-	protected BiConsumer<Tag<M>, ViewContext<M>> getMetaBinding() {
+	protected Function<Model, ObservableList<?>> getMetaBinding() {
 		return metaBinding;
 	}
 
-	protected void setMetaBinding(BiConsumer<Tag<M>, ViewContext<M>> metaBinding) {
+	protected BiFunction<Model, ?, M> getModelBuilder() {
+		return modelBuilder;
+	}
+
+	protected void setMetaBinding(Function<Model, ObservableList<?>> metaBinding) {
 		if (this.metaBinding != null)
 			throw new IllegalStateException("MetaBinding already defined");
 		this.metaBinding = metaBinding;
@@ -112,17 +116,9 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	protected <MODEL extends Model, SUBELEMENT> void forEach(Function<MODEL, ObservableList<SUBELEMENT>> applyOnModel, BiFunction<MODEL, SUBELEMENT, M> modelBuilder) {
-		setMetaBinding((childElement, viewContext) -> {
-			MODEL model = viewContext.getModelContext();
-			ObservableList<SUBELEMENT> subElements = applyOnModel.apply(model);
-			ObservableList<M> subModels = new TransformationObservableList<SUBELEMENT, M>(subElements, (index, subModel) -> {
-				M resultModel = modelBuilder.apply(model, subModel);
-				viewContext.createViewContextChild(index, resultModel, childElement);
-				return resultModel;
-			}, Model::destroy);
-			setSubModels(model, childElement, subModels);
-		});
+	protected <SUBELEMENT> void forEach(Function<Model, ObservableList<?>> applyOnModel, BiFunction<Model, SUBELEMENT, M> modelBuilder) {
+		setMetaBinding(applyOnModel);
+		this.modelBuilder = modelBuilder;
 	}
 
 	protected <SUBMODEL extends Model> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {

@@ -146,7 +146,7 @@ public class TodoApp extends GSApp {
 												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
 												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
 														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
-												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
+												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new HtmlDiv(this) {
 													{
