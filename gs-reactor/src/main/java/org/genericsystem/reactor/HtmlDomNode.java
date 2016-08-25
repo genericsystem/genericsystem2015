@@ -6,11 +6,8 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import javafx.collections.WeakSetChangeListener;
 
 public class HtmlDomNode {
 
@@ -44,7 +41,6 @@ public class HtmlDomNode {
 	private final String id;
 	private final String parentId;
 	ViewContext<?> viewContext;
-	private final ObservableSet<String> styleClasses = FXCollections.observableSet();
 	protected String type;
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
@@ -92,11 +88,14 @@ public class HtmlDomNode {
 		return attributesListener;
 	}
 
+	public SetChangeListener<String> getStyleClassesListener() {
+		return styleClassesListener;
+	}
+
 	public HtmlDomNode(String parentId) {
 		assert parentId != null;
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-		styleClasses.addListener(new WeakSetChangeListener<>(styleClassesListener));
 	}
 
 	public void sendAdd(int index) {
@@ -128,10 +127,6 @@ public class HtmlDomNode {
 
 	public ServerWebSocket getWebSocket() {
 		return viewContext.getWebSocket();
-	}
-
-	public ObservableSet<String> getStyleClasses() {
-		return styleClasses;
 	}
 
 	public String getId() {

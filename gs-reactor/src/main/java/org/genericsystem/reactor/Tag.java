@@ -14,6 +14,7 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ import javafx.util.StringConverter;
  *
  * @param <N>
  */
-public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M>, AttributesDefaults<M> {
+public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M>, AttributesDefaults<M>, StyleClassesDefaults<M> {
 
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
@@ -96,7 +97,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	public void bindOptionalStyleClass(String styleClass, String propertyName) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<Boolean> optional = getObservableValue(propertyName, modelContext);
-			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
+			Set<String> styleClasses = getDomNodeStyleClasses(modelContext);
 			Consumer<Boolean> consumer = bool -> {
 				if (Boolean.TRUE.equals(bool))
 					styleClasses.add(styleClass);
@@ -254,11 +255,11 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	public void addStyleClasses(String... styleClasses) {
-		addPrefixBinding(model -> model.getObservableStyleClasses(this).addAll(Arrays.asList(styleClasses)));
+		addPrefixBinding(model -> getDomNodeStyleClasses(model).addAll(Arrays.asList(styleClasses)));
 	}
 
 	public void addStyleClass(String styleClass) {
-		addPrefixBinding(model -> model.getObservableStyleClasses(this).add(styleClass));
+		addPrefixBinding(model -> getDomNodeStyleClasses(model).add(styleClass));
 	}
 
 	public void addAttribute(String attributeName, String value) {

@@ -13,7 +13,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 
 /**
  * @author Nicolas Feybesse
@@ -122,9 +121,5 @@ public class Model {
 	@SuppressWarnings("unchecked")
 	public <M extends Model> ViewContext<M> getViewContext(Tag<?> element) {
 		return (ViewContext<M>) viewContextsMap.get(element);
-	}
-
-	public ObservableSet<String> getObservableStyleClasses(Tag<?> element) {
-		return getViewContext(element).getNode().getStyleClasses();
 	}
 }
