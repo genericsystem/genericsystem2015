@@ -27,7 +27,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		createNewProperty(ReactorStatics.VALUE);
 		storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 			boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-			String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
+			String value = getDomNodeAttributes(model).get(ReactorStatics.VALUE);
 			if (value == null || value.trim().isEmpty())
 				return required;
 			try {
@@ -36,7 +36,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 			} catch (Exception e) {
 				return true;
 			}
-		}, model.getObservableAttributes(this)));
+		}, getDomNodeAttributes(model)));
 		bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
 		bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE);
 	}
@@ -44,13 +44,13 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 	private void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName) {
 		bindAction(model -> {
 			try {
-				getProperty(propertyName, model).setValue(getConverter(model).fromString(model.getObservableAttributes(this).get(attributeName)));
+				getProperty(propertyName, model).setValue(getConverter(model).fromString(getDomNodeAttributes(model).get(attributeName)));
 			} catch (Exception ignore) {
 				log.warn("Conversion exception : " + ignore.getMessage());
 			}
 		});
 		addPrefixBinding(model -> {
-			ChangeListener listener = (o, old, newValue) -> model.getObservableAttributes(this).put(attributeName, getConverter(model).toString((T) newValue));
+			ChangeListener listener = (o, old, newValue) -> getDomNodeAttributes(model).put(attributeName, getConverter(model).toString((T) newValue));
 			getProperty(propertyName, model).addListener(listener);
 		});
 	}
