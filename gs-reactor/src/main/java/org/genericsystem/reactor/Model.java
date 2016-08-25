@@ -7,15 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
-
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 
 /**
  * @author Nicolas Feybesse
@@ -124,17 +121,5 @@ public class Model {
 	@SuppressWarnings("unchecked")
 	public <M extends Model> ViewContext<M> getViewContext(Tag<?> element) {
 		return (ViewContext<M>) viewContextsMap.get(element);
-	}
-
-	public ObservableSet<String> getObservableStyleClasses(Tag<?> element) {
-		return getViewContext(element).getNode().getStyleClasses();
-	}
-
-	public ObservableMap<String, String> getObservableAttributes(Tag<?> element) {
-		return getViewContext(element).getNode().getAttributes();
-	}
-
-	public Property<Number> getSelectionIndex(Tag<?> element) {
-		return getViewContext(element).<SelectableHtmlDomNode> getNode().getSelectionIndex();
 	}
 }

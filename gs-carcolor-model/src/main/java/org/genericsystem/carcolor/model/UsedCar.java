@@ -9,6 +9,6 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 @Components(Car.class)
 @PropertyConstraint
 @InstanceValueClassConstraint(Boolean.class)
-public class Diesel {
+public class UsedCar {
 
 }

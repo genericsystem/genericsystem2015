@@ -2,9 +2,9 @@ package org.genericsystem.carcolor;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
+import org.genericsystem.reactor.gs.GSModalButton;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gs.GSTag;
-import org.genericsystem.reactor.gstag.GSModalButton;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLi;
 import org.genericsystem.reactor.gstag.HtmlUl;
@@ -91,6 +91,7 @@ public class GSUserGuide extends GSSection {
 				addStyle("justify-content", "center");
 				new GSModalButton(this, gSection) {
 					{
+						inheritStyle("background-color");
 						setText("User Guide");
 						addStyle("flex", "0 1 auto");
 					}

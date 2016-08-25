@@ -12,8 +12,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -33,15 +35,16 @@ import javafx.util.StringConverter;
  *
  * @param <N>
  */
-public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M> {
+public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M>, AttributesDefaults<M>, StyleClassesDefaults<M> {
 
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
-	private BiConsumer<Tag<M>, ViewContext<M>> metaBinding;
+	private Function<Model, ObservableList<?>> metaBinding;
+	private BiFunction<Model, ?, M> modelBuilder;
 	private final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
 	private final List<BiConsumer<Model, HtmlDomNode>> postFixedBindings = new ArrayList<>();
 	private final Tag parent;
-	private final List<Tag<?>> children = new ArrayList<>();
+	private final ObservableList<Tag<?>> children = FXCollections.observableArrayList();
 
 	@Override
 	public String toString() {
@@ -52,7 +55,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		this.tag = tag;
 		this.parent = parent;
 		if (parent != null)
-			parent.getChildren().add(this);
+			parent.getObservableChildren().add(this);
 	}
 
 	public String getTag() {
@@ -67,11 +70,15 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		return postFixedBindings;
 	}
 
-	protected BiConsumer<Tag<M>, ViewContext<M>> getMetaBinding() {
+	protected Function<Model, ObservableList<?>> getMetaBinding() {
 		return metaBinding;
 	}
 
-	protected void setMetaBinding(BiConsumer<Tag<M>, ViewContext<M>> metaBinding) {
+	protected BiFunction<Model, ?, M> getModelBuilder() {
+		return modelBuilder;
+	}
+
+	protected void setMetaBinding(Function<Model, ObservableList<?>> metaBinding) {
 		if (this.metaBinding != null)
 			throw new IllegalStateException("MetaBinding already defined");
 		this.metaBinding = metaBinding;
@@ -87,14 +94,10 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
 	}
 
-	protected <NODE extends HtmlDomNode> void addActionBinding(Function<NODE, Property<Consumer<Object>>> applyOnNode, Consumer<M> applyOnModel) {
-		preFixedBindings.add((modelContext, node) -> applyOnNode.apply((NODE) node).setValue(o -> applyOnModel.accept((M) modelContext)));
-	}
-
 	public void bindOptionalStyleClass(String styleClass, String propertyName) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<Boolean> optional = getObservableValue(propertyName, modelContext);
-			Set<String> styleClasses = modelContext.getObservableStyleClasses(this);
+			Set<String> styleClasses = getDomNodeStyleClasses(modelContext);
 			Consumer<Boolean> consumer = bool -> {
 				if (Boolean.TRUE.equals(bool))
 					styleClasses.add(styleClass);
@@ -111,21 +114,9 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	protected <MODEL extends Model, SUBELEMENT> void forEach(Function<MODEL, ObservableList<SUBELEMENT>> applyOnModel, BiFunction<MODEL, SUBELEMENT, M> modelBuilder) {
-		setMetaBinding((childElement, viewContext) -> {
-			MODEL model = viewContext.getModelContext();
-			ObservableList<SUBELEMENT> subElements = applyOnModel.apply(model);
-			ObservableList<M> subModels = new TransformationObservableList<SUBELEMENT, M>(subElements, (index, subModel) -> {
-				M resultModel = modelBuilder.apply(model, subModel);
-				viewContext.createViewContextChild(index, resultModel, childElement);
-				return resultModel;
-			}, Model::destroy);
-			setSubModels(model, childElement, subModels);
-		});
-	}
-
-	protected <SUBMODEL extends Model> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {
-		model.setSubContexts(child, subModels);
+	protected <SUBELEMENT> void forEach(Function<Model, ObservableList<?>> applyOnModel, BiFunction<Model, SUBELEMENT, M> modelBuilder) {
+		setMetaBinding(applyOnModel);
+		this.modelBuilder = modelBuilder;
 	}
 
 	@Override
@@ -146,6 +137,18 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	@Override
+	public <T> Property<T> getInheritedProperty(String propertyName, Model[] model, Tag<?>[] tag) {
+		while (tag != null && model[0] != null) {
+			if (tag[0].metaBinding != null && model[0].getViewContext(tag[0].getParent()) == null)
+				model[0] = model[0].getParent();
+			tag[0] = tag[0].getParent();
+			if (model[0] != null && model[0].containsProperty(tag[0], propertyName))
+				return model[0].getProperty(tag[0], propertyName);
+		}
+		return null;
+	}
+
+	@Override
 	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
 		return getObservableValue(propertyName, new Model[] { model });
 	}
@@ -160,10 +163,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 			tag = tag.getParent();
 		}
 		return null;
-	}
-
-	public void addSelectionIndex(int value) {
-		addPrefixBinding(modelContext -> modelContext.getSelectionIndex(this).setValue(value));
 	}
 
 	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
@@ -222,6 +221,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		getProperty(propertyName, model).setValue(getInitialValue.apply(model));
 	}
 
+	@Override
 	public <T> void createNewInitializedProperty(String propertyName, Function<M, T> getInitialValue) {
 		createNewProperty(propertyName);
 		initProperty(propertyName, getInitialValue);
@@ -241,7 +241,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		model.storeProperty(this, propertyName, applyOnModel.apply(model));
 	}
 
-	@Override
 	public void addStyle(String propertyName, String value) {
 		addPrefixBinding(model -> getDomNodeStyles(model).put(propertyName, value));
 	}
@@ -256,36 +255,36 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	public void addStyleClasses(String... styleClasses) {
-		addPrefixBinding(model -> model.getObservableStyleClasses(this).addAll(Arrays.asList(styleClasses)));
+		addPrefixBinding(model -> getDomNodeStyleClasses(model).addAll(Arrays.asList(styleClasses)));
 	}
 
 	public void addStyleClass(String styleClass) {
-		addPrefixBinding(model -> model.getObservableStyleClasses(this).add(styleClass));
+		addPrefixBinding(model -> getDomNodeStyleClasses(model).add(styleClass));
 	}
 
 	public void addAttribute(String attributeName, String value) {
-		addPrefixBinding(model -> model.getObservableAttributes(this).put(attributeName, value));
+		addPrefixBinding(model -> getDomNodeAttributes(model).put(attributeName, value));
 	}
 
 	public void bindAttribute(String attributeName, String propertyName) {
-		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
 
 	public void bindAttribute(String attributeName, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
 		storeProperty(propertyName, applyOnModel);
-		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
 
 	public void bindBiDirectionalAttribute(String propertyName, String attributeName) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this));
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model));
 	}
 
 	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, StringConverter<T> stringConverter) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), stringConverter);
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), stringConverter);
 	}
 
 	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), getStringConverter);
 	}
 
 	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue) {
@@ -293,7 +292,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue, String attributeValueFalse) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), new StringConverter<Boolean>() {
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), new StringConverter<Boolean>() {
 
 			@Override
 			public String toString(Boolean bool) {
@@ -309,7 +308,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 
 	protected abstract HtmlDomNode createNode(String parentId);
 
-	protected List<Tag<?>> getChildren() {
+	protected ObservableList<Tag<?>> getObservableChildren() {
 		return children;
 	}
 
