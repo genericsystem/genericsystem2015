@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
@@ -183,28 +182,16 @@ public class HtmlDomNode {
 
 	public static class InputTextHtmlDomNode extends HtmlDomNode {
 
-		private final Property<String> inputString = new SimpleStringProperty();
 		private final Property<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
 
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
-			inputString.addListener(new WeakChangeListener<>(inputListener));
-		}
-
-		private final ChangeListener<String> inputListener = (o, old, newValue) -> {
-			assert old != newValue;
-			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).encodePrettily());
-			sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())));
-		};
-
-		public Property<String> getInputString() {
-			return inputString;
 		}
 
 		@Override
 		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			return jsonObj.put("type", "text").put(TEXT_CONTENT, inputString.getValue());
+			return jsonObj.put("type", "text");
 		}
 
 		@Override
