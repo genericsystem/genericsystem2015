@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gs;
 
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderBuilder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
@@ -142,7 +141,7 @@ public class GSSubcellDisplayer extends GSSection {
 		@Override
 		public void style(GSTag tag) {
 			super.style(tag);
-			tag.addPrefixBinding(modelContext -> ((Model) modelContext).getObservableStyles(tag).put("background-color",
+			tag.addPrefixBinding(modelContext -> tag.getDomNodeStyles(modelContext).put("background-color",
 					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#dda5e2"));
 		}
 	}

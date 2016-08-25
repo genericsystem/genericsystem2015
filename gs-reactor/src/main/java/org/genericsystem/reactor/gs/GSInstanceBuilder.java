@@ -45,7 +45,7 @@ public class GSInstanceBuilder extends GSComposite {
 	protected void sections() {
 		new GSAttributeBuilder(this, FlexDirection.ROW) {
 			{
-				forEach_(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+				forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 			}
 		};
 	}

@@ -51,7 +51,7 @@ public class TodoApp extends GSApp {
 	public static final String COMPLETED_TODOS = "completedTodos";
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.sartSimpleGenericApp(mainArgs, TodoApp.class, "/todo/");
+		ApplicationServer.startSimpleGenericApp(mainArgs, TodoApp.class, "/todo/");
 	}
 
 	private Property<Predicate<Generic>> getModeProperty(Model model) {
@@ -258,13 +258,13 @@ public class TodoApp extends GSApp {
 										bindAction(model -> engine.getCurrentCache().clear());
 									}
 								};
-								new HtmlButton(this) {
-									{
-										addStyleClass("cancel");
-										setText("Garbage");
-										bindAction(model -> System.gc());
-									}
-								};
+								// new HtmlButton(this) {
+								// {
+								// addStyleClass("cancel");
+								// setText("Garbage");
+								// bindAction(model -> System.gc());
+								// }
+								// };
 							}
 						};
 					}

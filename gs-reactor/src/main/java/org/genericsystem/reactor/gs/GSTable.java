@@ -1,14 +1,12 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
-import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
-import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 /**
  * @author Nicolas Feybesse
@@ -62,7 +60,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 			protected void sections() {
 				new LinkTitleDisplayer(this) {
 					{
-						forEach_(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+						forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 					}
 				};
 			}
@@ -96,7 +94,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 		Tag<GenericModel> selectableTag = new GSRowDisplayer(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach_(ObservableListExtractor.SUBINSTANCES);
+				forEach(ObservableListExtractor.SUBINSTANCES);
 			}
 		};
 		bindSelection(selectableTag);
