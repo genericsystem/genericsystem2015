@@ -13,7 +13,6 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs.GSHeader;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlCheckBox;
