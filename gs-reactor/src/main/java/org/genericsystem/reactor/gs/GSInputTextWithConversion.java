@@ -28,8 +28,8 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
 			boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
 			String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
-			if (required && (value == null || value.trim().isEmpty()))
-				return true;
+			if (value == null || value.trim().isEmpty())
+				return required;
 			try {
 				getConverter(model).fromString(value);
 				return false;
