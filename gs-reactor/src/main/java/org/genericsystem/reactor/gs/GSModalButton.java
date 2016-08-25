@@ -1,12 +1,10 @@
-package org.genericsystem.reactor.gstag;
+package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gs.GSSection;
-import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
 
 public class GSModalButton extends GSTag {

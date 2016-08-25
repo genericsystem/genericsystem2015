@@ -13,12 +13,14 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gs.GSApp;
+import org.genericsystem.reactor.gs.GSHeader;
 import org.genericsystem.reactor.gs.GSSection;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlCheckBox;
 import org.genericsystem.reactor.gstag.HtmlDiv;
 import org.genericsystem.reactor.gstag.HtmlFooter;
 import org.genericsystem.reactor.gstag.HtmlH1;
+import org.genericsystem.reactor.gstag.HtmlHeader;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlInputText;
 import org.genericsystem.reactor.gstag.HtmlLabel;
@@ -114,7 +116,7 @@ public class TodoApp extends GSApp {
 				new GSSection(this) {
 					{
 						addStyleClass("todoapp");
-						new GSSection(this) {
+						new HtmlHeader(this) {
 							{
 								addStyleClass("header");
 								new HtmlH1(this) {
@@ -122,9 +124,10 @@ public class TodoApp extends GSApp {
 										setText("todos");
 									}
 								};
-								new HtmlInputText(this) {
+								HtmlInputText it = new HtmlInputText(this) {
 									{
 										addStyleClass("new-todo");
+										addAttribute("placeholder", "What needs to be done?");
 										bindAction(model -> {
 											String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
 											if (value != null && !value.isEmpty())
