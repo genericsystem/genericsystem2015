@@ -1,13 +1,15 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag.RootTag;
+
+import io.vertx.core.http.ServerWebSocket;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -38,16 +40,23 @@ public class ViewContext<M extends Model> {
 		this.modelContext = modelContext;
 	}
 
-	protected void init(int indexInChildren) {
+	protected <SUBELEMENT> void init(int indexInChildren) {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(indexInChildren);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag childTag : element.getChildren())
-			if (childTag.getMetaBinding() != null)
-				childTag.getMetaBinding().accept(childTag, this);
-			else
+		for (Tag childTag : element.getObservableChildren())
+			if (childTag.getMetaBinding() != null) {
+				Model model = getModelContext();
+				ObservableList<SUBELEMENT> subElements = (ObservableList<SUBELEMENT>) childTag.getMetaBinding().apply(model);
+				ObservableList<M> subModels = new TransformationObservableList<SUBELEMENT, M>(subElements, (index, subModel) -> {
+					M resultModel = (M) childTag.getModelBuilder().apply(model, subModel);
+					createViewContextChild(index, resultModel, childTag);
+					return resultModel;
+				}, Model::destroy);
+				element.setSubModels(model, childTag, subModels);
+			} else
 				createViewContextChild(null, modelContext, childTag);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
 			binding.accept(modelContext, getNode());
@@ -115,7 +124,7 @@ public class ViewContext<M extends Model> {
 
 	private int computeIndex(Integer nullable, Tag<?> childElement) {
 		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
-		for (Tag<?> child : element.getChildren()) {
+		for (Tag<?> child : element.getObservableChildren()) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeBySubElement.get(child);
