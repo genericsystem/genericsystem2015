@@ -118,10 +118,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		this.modelBuilder = modelBuilder;
 	}
 
-	protected <SUBMODEL extends Model> void setSubModels(Model model, Tag<?> child, ObservableList<SUBMODEL> subModels) {
-		model.setSubContexts(child, subModels);
-	}
-
 	@Override
 	public <T> Property<T> getProperty(String propertyName, Model model) {
 		return getProperty(propertyName, new Model[] { model });

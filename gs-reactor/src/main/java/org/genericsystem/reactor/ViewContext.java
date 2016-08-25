@@ -55,7 +55,7 @@ public class ViewContext<M extends Model> {
 					createViewContextChild(index, resultModel, childTag);
 					return resultModel;
 				}, Model::destroy);
-				element.setSubModels(model, childTag, subModels);
+				model.setSubContexts(childTag, subModels);
 			} else
 				createViewContextChild(null, modelContext, childTag);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
