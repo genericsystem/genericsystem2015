@@ -8,15 +8,12 @@ import java.util.function.Consumer;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 
 public class HtmlDomNode {
@@ -51,7 +48,6 @@ public class HtmlDomNode {
 	private final String parentId;
 	ViewContext<?> viewContext;
 	private final ObservableSet<String> styleClasses = FXCollections.observableSet();
-	private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
@@ -84,8 +80,8 @@ public class HtmlDomNode {
 		return stylesListener;
 	}
 
-	public ObservableMap<String, String> getAttributes() {
-		return attributes;
+	public MapChangeListener<String, String> getAttributesListener() {
+		return attributesListener;
 	}
 
 	public HtmlDomNode(String parentId) {
@@ -93,7 +89,6 @@ public class HtmlDomNode {
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		styleClasses.addListener(new WeakSetChangeListener<>(styleClassesListener));
-		attributes.addListener(new WeakMapChangeListener<>(attributesListener));
 	}
 
 	public void sendAdd(int index) {
@@ -187,28 +182,16 @@ public class HtmlDomNode {
 
 	public static class InputTextHtmlDomNode extends HtmlDomNode {
 
-		private final Property<String> inputString = new SimpleStringProperty();
 		private final Property<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
 
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
-			inputString.addListener(new WeakChangeListener<>(inputListener));
-		}
-
-		private final ChangeListener<String> inputListener = (o, old, newValue) -> {
-			assert old != newValue;
-			System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).encodePrettily());
-			sendMessage(fillJson(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId())));
-		};
-
-		public Property<String> getInputString() {
-			return inputString;
 		}
 
 		@Override
 		public JsonObject fillJson(JsonObject jsonObj) {
 			super.fillJson(jsonObj);
-			return jsonObj.put("type", "text").put(TEXT_CONTENT, inputString.getValue());
+			return jsonObj.put("type", "text");
 		}
 
 		@Override
@@ -216,7 +199,7 @@ public class HtmlDomNode {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().getValue().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				getAttributes().put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
+				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
 		}
 
 		public Property<Consumer<Object>> getEnterProperty() {
@@ -241,7 +224,7 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				getAttributes().put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
+				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
 		}
 	}
 }

@@ -129,10 +129,10 @@ public class TodoApp extends GSApp {
 										addStyleClass("new-todo");
 										addAttribute("placeholder", "What needs to be done?");
 										bindAction(model -> {
-											String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
+											String value = getDomNodeAttributes(model).get(ReactorStatics.VALUE);
 											if (value != null && !value.isEmpty())
 												engine.find(Todos.class).addInstance(value);
-											model.getObservableAttributes(this).put(ReactorStatics.VALUE, null);
+											getDomNodeAttributes(model).put(ReactorStatics.VALUE, null);
 										});
 									}
 								};
@@ -149,7 +149,7 @@ public class TodoApp extends GSApp {
 												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
 												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
 														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
-												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
+												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new HtmlDiv(this) {
 													{
@@ -159,7 +159,7 @@ public class TodoApp extends GSApp {
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
 																	if (Boolean.TRUE.equals(getObservableValue(ReactorStatics.COMPLETED, todo).getValue())) {
-																		todo.getObservableAttributes(this).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																		getDomNodeAttributes(todo).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
