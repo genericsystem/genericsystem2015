@@ -14,6 +14,7 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.ViewContext.RootViewContext;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ import javafx.util.StringConverter;
  *
  * @param <N>
  */
-public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M> {
+public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M>, AttributesDefaults<M> {
 
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
@@ -146,6 +147,18 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	@Override
+	public <T> Property<T> getInheritedProperty(String propertyName, Model[] model, Tag<?>[] tag) {
+		while (tag != null && model[0] != null) {
+			if (tag[0].metaBinding != null && model[0].getViewContext(tag[0].getParent()) == null)
+				model[0] = model[0].getParent();
+			tag[0] = tag[0].getParent();
+			if (model[0] != null && model[0].containsProperty(tag[0], propertyName))
+				return model[0].getProperty(tag[0], propertyName);
+		}
+		return null;
+	}
+
+	@Override
 	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
 		return getObservableValue(propertyName, new Model[] { model });
 	}
@@ -241,7 +254,6 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		model.storeProperty(this, propertyName, applyOnModel.apply(model));
 	}
 
-	@Override
 	public void addStyle(String propertyName, String value) {
 		addPrefixBinding(model -> getDomNodeStyles(model).put(propertyName, value));
 	}
@@ -264,28 +276,28 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	public void addAttribute(String attributeName, String value) {
-		addPrefixBinding(model -> model.getObservableAttributes(this).put(attributeName, value));
+		addPrefixBinding(model -> getDomNodeAttributes(model).put(attributeName, value));
 	}
 
 	public void bindAttribute(String attributeName, String propertyName) {
-		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
 
 	public void bindAttribute(String attributeName, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
 		storeProperty(propertyName, applyOnModel);
-		bindMapElement(attributeName, propertyName, model -> model.getObservableAttributes(this));
+		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
 
 	public void bindBiDirectionalAttribute(String propertyName, String attributeName) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this));
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model));
 	}
 
 	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, StringConverter<T> stringConverter) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), stringConverter);
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), stringConverter);
 	}
 
 	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), getStringConverter);
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), getStringConverter);
 	}
 
 	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue) {
@@ -293,7 +305,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	public void bindOptionalBiDirectionalAttribute(String propertyName, String attributeName, String attributeValue, String attributeValueFalse) {
-		bindBiDirectionalMapElement(propertyName, attributeName, model -> model.getObservableAttributes(this), new StringConverter<Boolean>() {
+		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), new StringConverter<Boolean>() {
 
 			@Override
 			public String toString(Boolean bool) {

@@ -126,10 +126,10 @@ public class TodoApp extends GSApp {
 									{
 										addStyleClass("new-todo");
 										bindAction(model -> {
-											String value = model.getObservableAttributes(this).get(ReactorStatics.VALUE);
+											String value = getDomNodeAttributes(model).get(ReactorStatics.VALUE);
 											if (value != null && !value.isEmpty())
 												engine.find(Todos.class).addInstance(value);
-											model.getObservableAttributes(this).put(ReactorStatics.VALUE, null);
+											getDomNodeAttributes(model).put(ReactorStatics.VALUE, null);
 										});
 									}
 								};
@@ -156,7 +156,7 @@ public class TodoApp extends GSApp {
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
 																	if (Boolean.TRUE.equals(getObservableValue(ReactorStatics.COMPLETED, todo).getValue())) {
-																		todo.getObservableAttributes(this).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																		getDomNodeAttributes(todo).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);

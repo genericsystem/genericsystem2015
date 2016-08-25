@@ -91,6 +91,7 @@ public class GSUserGuide extends GSSection {
 				addStyle("justify-content", "center");
 				new GSModalButton(this, gSection) {
 					{
+						inheritStyle("background-color");
 						setText("User Guide");
 						addStyle("flex", "0 1 auto");
 					}

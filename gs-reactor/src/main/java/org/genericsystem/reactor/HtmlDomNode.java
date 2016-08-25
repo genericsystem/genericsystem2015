@@ -13,10 +13,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import javafx.collections.WeakMapChangeListener;
 import javafx.collections.WeakSetChangeListener;
 
 public class HtmlDomNode {
@@ -51,7 +49,6 @@ public class HtmlDomNode {
 	private final String parentId;
 	ViewContext<?> viewContext;
 	private final ObservableSet<String> styleClasses = FXCollections.observableSet();
-	private final ObservableMap<String, String> attributes = FXCollections.observableHashMap();
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
@@ -84,8 +81,8 @@ public class HtmlDomNode {
 		return stylesListener;
 	}
 
-	public ObservableMap<String, String> getAttributes() {
-		return attributes;
+	public MapChangeListener<String, String> getAttributesListener() {
+		return attributesListener;
 	}
 
 	public HtmlDomNode(String parentId) {
@@ -93,7 +90,6 @@ public class HtmlDomNode {
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		styleClasses.addListener(new WeakSetChangeListener<>(styleClassesListener));
-		attributes.addListener(new WeakMapChangeListener<>(attributesListener));
 	}
 
 	public void sendAdd(int index) {
@@ -216,7 +212,7 @@ public class HtmlDomNode {
 			if (ADD.equals(json.getString(MSG_TYPE)))
 				getEnterProperty().getValue().accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				getAttributes().put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
+				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
 		}
 
 		public Property<Consumer<Object>> getEnterProperty() {
@@ -241,7 +237,7 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				getAttributes().put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
+				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
 		}
 	}
 }
