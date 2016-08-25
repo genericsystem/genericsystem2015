@@ -23,6 +23,7 @@ import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -42,7 +43,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	private final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
 	private final List<BiConsumer<Model, HtmlDomNode>> postFixedBindings = new ArrayList<>();
 	private final Tag parent;
-	private final List<Tag<?>> children = new ArrayList<>();
+	private final ObservableList<Tag<?>> children = FXCollections.observableArrayList();
 
 	@Override
 	public String toString() {
@@ -53,7 +54,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		this.tag = tag;
 		this.parent = parent;
 		if (parent != null)
-			parent.getChildren().add(this);
+			parent.getObservableChildren().add(this);
 	}
 
 	public String getTag() {
@@ -317,7 +318,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 
 	protected abstract HtmlDomNode createNode(String parentId);
 
-	protected List<Tag<?>> getChildren() {
+	protected ObservableList<Tag<?>> getObservableChildren() {
 		return children;
 	}
 

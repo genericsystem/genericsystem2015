@@ -46,7 +46,7 @@ public class ViewContext<M extends Model> {
 			insertChild(indexInChildren);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag childTag : element.getChildren())
+		for (Tag childTag : element.getObservableChildren())
 			if (childTag.getMetaBinding() != null) {
 				Model model = getModelContext();
 				ObservableList<SUBELEMENT> subElements = (ObservableList<SUBELEMENT>) childTag.getMetaBinding().apply(model);
@@ -124,7 +124,7 @@ public class ViewContext<M extends Model> {
 
 	private int computeIndex(Integer nullable, Tag<?> childElement) {
 		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
-		for (Tag<?> child : element.getChildren()) {
+		for (Tag<?> child : element.getObservableChildren()) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeBySubElement.get(child);
