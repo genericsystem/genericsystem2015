@@ -1,13 +1,11 @@
 package org.genericsystem.reactor;
 
+import org.genericsystem.reactor.modelproperties.ActionDefaults;
+
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
-import java.util.function.Consumer;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
@@ -135,19 +133,14 @@ public class HtmlDomNode {
 	}
 
 	public static class ActionHtmlNode extends HtmlDomNode {
+
 		public ActionHtmlNode(String parentId) {
 			super(parentId);
 		}
 
-		private final Property<Consumer<Object>> actionProperty = new SimpleObjectProperty<>();
-
-		public Property<Consumer<Object>> getActionProperty() {
-			return actionProperty;
-		}
-
 		@Override
 		public void handleMessage(JsonObject json) {
-			getActionProperty().getValue().accept(new Object());
+			((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
 		}
 	}
 
@@ -182,8 +175,6 @@ public class HtmlDomNode {
 
 	public static class InputTextHtmlDomNode extends HtmlDomNode {
 
-		private final Property<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
-
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
 		}
@@ -197,13 +188,9 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
-				getEnterProperty().getValue().accept(new Object());
+				((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE)))
 				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
-		}
-
-		public Property<Consumer<Object>> getEnterProperty() {
-			return enterProperty;
 		}
 	}
 
