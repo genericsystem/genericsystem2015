@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import org.genericsystem.reactor.modelproperties.ActionDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
@@ -12,9 +9,9 @@ import javafx.collections.SetChangeListener;
 public class HtmlDomNode {
 
 	static int count = 0;
-	static final String MSG_TYPE = "msgType";
-	static final String ADD = "A";
-	private static final String UPDATE = "U";
+	protected static final String MSG_TYPE = "msgType";
+	protected static final String ADD = "A";
+	protected static final String UPDATE = "U";
 	static final String REMOVE = "R";
 	static final String UPDATE_TEXT = "UT";
 	private static final String UPDATE_SELECTION = "US";
@@ -33,15 +30,14 @@ public class HtmlDomNode {
 	static final String ATTRIBUTE_NAME = "attributeName";
 	static final String ATTRIBUTE_VALUE = "attributeValue";
 	static final String STYLECLASS = "styleClass";
-	static final String TEXT_CONTENT = "textContent";
+	protected static final String TEXT_CONTENT = "textContent";
 	static final String TAG_HTML = "tagHtml";
-	private static final String ELT_TYPE = "eltType";
-	private static final String SELECTED_INDEX = "selectedIndex";
+	protected static final String ELT_TYPE = "eltType";
+	protected static final String SELECTED_INDEX = "selectedIndex";
 
 	private final String id;
 	private final String parentId;
-	ViewContext<?> viewContext;
-	protected String type;
+	protected ViewContext<?> viewContext;
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
@@ -135,73 +131,5 @@ public class HtmlDomNode {
 
 	public void handleMessage(JsonObject json) {
 
-	}
-
-	public static class ActionHtmlNode extends HtmlDomNode {
-
-		public ActionHtmlNode(String parentId) {
-			super(parentId);
-		}
-
-		@Override
-		public void handleMessage(JsonObject json) {
-			((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
-		}
-	}
-
-	public static class SelectableHtmlDomNode extends ActionHtmlNode {
-
-		public SelectableHtmlDomNode(String parentId) {
-			super(parentId);
-		}
-
-		@Override
-		public void handleMessage(JsonObject json) {
-			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				((SelectionDefaults) viewContext.getTag()).getSelectionIndex(viewContext.getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
-				// System.out.println("Selected index : " + getSelectionIndex().getValue());
-			}
-		}
-	}
-
-	public static class InputTextHtmlDomNode extends HtmlDomNode {
-
-		public InputTextHtmlDomNode(String parentId) {
-			super(parentId);
-		}
-
-		@Override
-		public JsonObject fillJson(JsonObject jsonObj) {
-			super.fillJson(jsonObj);
-			return jsonObj.put("type", "text");
-		}
-
-		@Override
-		public void handleMessage(JsonObject json) {
-			if (ADD.equals(json.getString(MSG_TYPE)))
-				((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
-			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
-		}
-	}
-
-	public static class InputCheckHtmlDomNode extends HtmlDomNode {
-
-		public InputCheckHtmlDomNode(String parentId, String type) {
-			super(parentId);
-			this.type = type;
-		}
-
-		@Override
-		public JsonObject fillJson(JsonObject jsonObj) {
-			super.fillJson(jsonObj);
-			return jsonObj.put("type", type);
-		}
-
-		@Override
-		public void handleMessage(JsonObject json) {
-			if ("checkbox".equals(json.getString(ELT_TYPE)))
-				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
-		}
 	}
 }

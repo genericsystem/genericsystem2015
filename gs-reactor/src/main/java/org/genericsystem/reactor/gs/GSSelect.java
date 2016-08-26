@@ -2,13 +2,14 @@ package org.genericsystem.reactor.gs;
 
 import java.util.Map;
 
-import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
+import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
@@ -25,8 +26,16 @@ public class GSSelect extends GSTag implements SelectionDefaults {
 	}
 
 	@Override
-	protected SelectableHtmlDomNode createNode(String parentId) {
-		return new SelectableHtmlDomNode(parentId);
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId) {
+
+			@Override
+			public void handleMessage(JsonObject json) {
+				if (UPDATE.equals(json.getString(MSG_TYPE))) {
+					((SelectionDefaults) viewContext.getTag()).getSelectionIndex(viewContext.getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+				}
+			}
+		};
 	}
 
 	protected void options() {

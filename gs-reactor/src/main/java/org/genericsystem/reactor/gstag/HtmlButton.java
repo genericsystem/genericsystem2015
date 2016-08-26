@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.HtmlDomNode.ActionHtmlNode;
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
@@ -13,6 +13,7 @@ import org.genericsystem.reactor.modelproperties.ActionDefaults;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -25,8 +26,14 @@ public class HtmlButton extends GSTag implements ActionDefaults<GenericModel> {
 	}
 
 	@Override
-	protected ActionHtmlNode createNode(String parentId) {
-		return new ActionHtmlNode(parentId);
+	protected HtmlDomNode createNode(String parentId) {
+		return new HtmlDomNode(parentId) {
+
+			@Override
+			public void handleMessage(JsonObject json) {
+				((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
+			}
+		};
 	}
 
 	public List<ObservableValue<Boolean>> getInvalidList(GenericModel model) {

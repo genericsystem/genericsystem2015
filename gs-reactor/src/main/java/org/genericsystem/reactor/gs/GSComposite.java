@@ -1,13 +1,14 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.HtmlDomNode.SelectableHtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlRadio;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -136,7 +137,15 @@ public class GSComposite extends GSSection {
 
 		@Override
 		protected HtmlDomNode createNode(String parentId) {
-			return new SelectableHtmlDomNode(parentId);
+			return new HtmlDomNode(parentId) {
+
+				@Override
+				public void handleMessage(JsonObject json) {
+					if (UPDATE.equals(json.getString(MSG_TYPE))) {
+						((SelectionDefaults) viewContext.getTag()).getSelectionIndex(viewContext.getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+					}
+				}
+			};
 		}
 
 		@Override
