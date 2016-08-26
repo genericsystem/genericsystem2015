@@ -5,6 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
@@ -29,14 +37,6 @@ import org.genericsystem.reactor.gstag.HtmlStrong;
 import org.genericsystem.reactor.gstag.HtmlUl;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
-
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -146,8 +146,10 @@ public class TodoApp extends GSApp {
 										new HtmlLi(this) {
 											{
 												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
-												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
-														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
+												storeProperty(
+														ReactorStatics.COMPLETED,
+														model -> new SimpleBooleanProperty(getObservableValue("observableHolder", model).getValue() != null
+																&& Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
 												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new HtmlDiv(this) {
