@@ -64,26 +64,35 @@ public class HtmlDomNode<M extends Model> {
 			insertChild(index);
 		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext, this);
-
-		int i = index;
 		for (Tag<?> childTag : tag.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
-				final int i_ = i;
-				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (ind, between) -> {
+				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
 					Model childModel = metaBinding.buildModel(modelContext, between);
-					HtmlDomNode<M> node = childTag.createNode(getId(), this, childModel, childTag);
-					node.init(i_ + ind);
+					createViewContextChild(i, childModel, childTag);
 					return childModel;
 				}, Model::destroy));
-			} else {
-				HtmlDomNode<M> node = childTag.createNode(getId(), this, modelContext, childTag);
-				node.init(i);
-			}
-			i += sizeBySubElement.get(childTag);
+			} else
+				createViewContextChild(null, modelContext, childTag);
 		}
 		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, this);
+	}
+
+	public void createViewContextChild(Integer index, Model childModelContext, Tag element) {
+		int indexInChildren = computeIndex(index, element);
+		HtmlDomNode<M> node = element.createNode(getId(), this, childModelContext, element);
+		node.init(indexInChildren);
+	}
+
+	private int computeIndex(Integer nullable, Tag<?> childElement) {
+		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
+		for (Tag<?> child : tag.getObservableChildren()) {
+			if (child == childElement)
+				return indexInChildren;
+			indexInChildren += sizeBySubElement.get(child);
+		}
+		return indexInChildren;
 	}
 
 	@SuppressWarnings("unchecked")
