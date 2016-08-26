@@ -2,6 +2,8 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.model.GenericModel;
 
@@ -19,7 +21,7 @@ public class GSApp extends GSSection implements RootTag<GenericModel> {
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId) {
+	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
 		throw new UnsupportedOperationException();
 	}
 }

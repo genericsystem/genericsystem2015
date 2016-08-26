@@ -49,13 +49,10 @@ public class HtmlDomNode<M extends Model> {
 	private Tag<M> tag;
 	private Model modelContext;
 
-	public HtmlDomNode(String parentId) {
+	public HtmlDomNode(String parentId, HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
 		assert parentId != null;
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-	}
-
-	protected void init(HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
 		this.parent = parent;
 		this.tag = tag;
 		this.modelContext = modelContext;
@@ -75,14 +72,12 @@ public class HtmlDomNode<M extends Model> {
 				final int i_ = i;
 				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (ind, between) -> {
 					Model childModel = metaBinding.buildModel(modelContext, between);
-					HtmlDomNode node = childTag.createNode(getId());
-					node.init(this, childModel, childTag);
+					HtmlDomNode<M> node = childTag.createNode(getId(), this, childModel, childTag);
 					node.init(i_ + ind);
 					return childModel;
 				}, Model::destroy));
 			} else {
-				HtmlDomNode node = childTag.createNode(getId());
-				node.init(this, modelContext, childTag);
+				HtmlDomNode<M> node = childTag.createNode(getId(), this, modelContext, childTag);
 				node.init(i);
 			}
 			i += sizeBySubElement.get(childTag);
@@ -238,9 +233,8 @@ public class HtmlDomNode<M extends Model> {
 		private final ServerWebSocket webSocket;
 
 		public RootHtmlDomNode(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
-			super(rootId);
+			super(rootId, null, rootModelContext, (Tag<M>) template);
 			this.webSocket = webSocket;
-			init(null, rootModelContext, (Tag<M>) template);
 			sendAdd(0);
 			init(0);
 		}

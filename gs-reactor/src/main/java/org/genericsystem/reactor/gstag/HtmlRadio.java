@@ -1,6 +1,8 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSTag;
 
 import io.vertx.core.json.JsonObject;
@@ -16,8 +18,8 @@ public class HtmlRadio extends GSTag {
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId) {
-		return new HtmlDomNode(parentId) {
+	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
+		return new HtmlDomNode(parentId, parent, modelContext, tag) {
 
 			@Override
 			public JsonObject fillJson(JsonObject jsonObj) {

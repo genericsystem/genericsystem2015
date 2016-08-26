@@ -1,7 +1,9 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlRadio;
@@ -137,8 +139,8 @@ public class GSComposite extends GSSection {
 		}
 
 		@Override
-		protected HtmlDomNode createNode(String parentId) {
-			return new HtmlDomNode(parentId) {
+		protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
+			return new HtmlDomNode(parentId, parent, modelContext, tag) {
 
 				@Override
 				public void handleMessage(JsonObject json) {

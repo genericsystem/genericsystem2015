@@ -3,7 +3,9 @@ package org.genericsystem.reactor.gs;
 import java.util.Map;
 
 import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -28,8 +30,8 @@ public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefa
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId) {
-		return new HtmlDomNode(parentId) {
+	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
+		return new HtmlDomNode(parentId, parent, modelContext, tag) {
 
 			@Override
 			public void handleMessage(JsonObject json) {

@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
 /**
@@ -17,10 +16,4 @@ public class HtmlH2 extends GSTag {
 		super(parent, "h2");
 		setText(text);
 	}
-
-	@Override
-	protected HtmlDomNode createNode(String parentId) {
-		return new HtmlDomNode(parentId);
-	}
-
 }

@@ -3,6 +3,8 @@ package org.genericsystem.reactor.gstag;
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
@@ -32,8 +34,8 @@ public class HtmlHyperLink extends GSTag implements SelectionDefaults, SwitchDef
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId) {
-		return new HtmlDomNode(parentId) {
+	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
+		return new HtmlDomNode(parentId, parent, modelContext, tag) {
 
 			@Override
 			public void handleMessage(JsonObject json) {
