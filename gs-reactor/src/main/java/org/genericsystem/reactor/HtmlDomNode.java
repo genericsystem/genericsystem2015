@@ -49,13 +49,10 @@ public class HtmlDomNode<M extends Model> {
 	private Tag<M> tag;
 	private Model modelContext;
 
-	public HtmlDomNode(String parentId) {
+	public HtmlDomNode(String parentId, HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
 		assert parentId != null;
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-	}
-
-	protected void init(HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
 		this.parent = parent;
 		this.tag = tag;
 		this.modelContext = modelContext;
@@ -67,28 +64,35 @@ public class HtmlDomNode<M extends Model> {
 			insertChild(index);
 		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext, this);
-
-		int i = index;
 		for (Tag<?> childTag : tag.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
-				final int i_ = i;
-				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (ind, between) -> {
+				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
 					Model childModel = metaBinding.buildModel(modelContext, between);
-					HtmlDomNode node = childTag.createNode(getId());
-					node.init(this, childModel, childTag);
-					node.init(i_ + ind);
+					createViewContextChild(i, childModel, childTag);
 					return childModel;
 				}, Model::destroy));
-			} else {
-				HtmlDomNode node = childTag.createNode(getId());
-				node.init(this, modelContext, childTag);
-				node.init(i);
-			}
-			i += sizeBySubElement.get(childTag);
+			} else
+				createViewContextChild(null, modelContext, childTag);
 		}
 		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, this);
+	}
+
+	public void createViewContextChild(Integer index, Model childModelContext, Tag element) {
+		int indexInChildren = computeIndex(index, element);
+		HtmlDomNode<M> node = element.createNode(getId(), this, childModelContext, element);
+		node.init(indexInChildren);
+	}
+
+	private int computeIndex(Integer nullable, Tag<?> childElement) {
+		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
+		for (Tag<?> child : tag.getObservableChildren()) {
+			if (child == childElement)
+				return indexInChildren;
+			indexInChildren += sizeBySubElement.get(child);
+		}
+		return indexInChildren;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -238,9 +242,8 @@ public class HtmlDomNode<M extends Model> {
 		private final ServerWebSocket webSocket;
 
 		public RootHtmlDomNode(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
-			super(rootId);
+			super(rootId, null, rootModelContext, (Tag<M>) template);
 			this.webSocket = webSocket;
-			init(null, rootModelContext, (Tag<M>) template);
 			sendAdd(0);
 			init(0);
 		}

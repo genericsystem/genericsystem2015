@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gs.GSTag;
 
 /**
@@ -11,10 +10,5 @@ public class HtmlLi extends GSTag {
 
 	public HtmlLi(GSTag parent) {
 		super(parent, "li");
-	}
-
-	@Override
-	protected HtmlDomNode createNode(String parentId) {
-		return new HtmlDomNode(parentId);
 	}
 }

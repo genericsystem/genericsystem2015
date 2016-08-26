@@ -3,7 +3,6 @@ package org.genericsystem.reactor.gs;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlH2;
 
@@ -28,11 +27,6 @@ public class GSSection extends GSTag {
 
 	public FlexDirection getReverseDirection() {
 		return getDirection().reverse();
-	}
-
-	@Override
-	protected HtmlDomNode createNode(String parentId) {
-		return new HtmlDomNode(parentId);
 	}
 
 	public static class GenericColumn extends GSSection {

@@ -129,12 +129,12 @@ public class ApiStatics {
 
 				@Override
 				public String toString(String string) {
-					return string;
+					return string != null && !string.trim().isEmpty() ? string.trim() : null;
 				}
 
 				@Override
 				public String fromString(String string) {
-					return string;
+					return string != null && !string.trim().isEmpty() ? string.trim() : null;
 				}
 
 			});
