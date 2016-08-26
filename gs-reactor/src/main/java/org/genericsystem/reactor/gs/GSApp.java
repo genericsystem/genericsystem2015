@@ -21,7 +21,7 @@ public class GSApp extends GSSection implements RootTag<GenericModel> {
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Model modelContext, Tag tag) {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -304,8 +304,8 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		});
 	}
 
-	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
-		return new HtmlDomNode(parentId, parent, modelContext, tag);
+	protected HtmlDomNode createNode(HtmlDomNode parent, Model modelContext, Tag tag) {
+		return new HtmlDomNode(parent, modelContext, tag);
 	};
 
 	protected ObservableList<Tag<?>> getObservableChildren() {

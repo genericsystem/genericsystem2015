@@ -44,14 +44,11 @@ public class HtmlDomNode<M extends Model> {
 	protected static final String SELECTED_INDEX = "selectedIndex";
 
 	private final String id;
-	private String parentId;// TODO: Remove
 	private HtmlDomNode<M> parent;
 	private Tag<M> tag;
 	private Model modelContext;
 
-	public HtmlDomNode(String parentId, HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
-		assert parentId != null;
-		this.parentId = parentId;
+	public HtmlDomNode(HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
 		this.tag = tag;
@@ -81,7 +78,7 @@ public class HtmlDomNode<M extends Model> {
 
 	public void createViewContextChild(Integer index, Model childModelContext, Tag element) {
 		int indexInChildren = computeIndex(index, element);
-		HtmlDomNode<M> node = element.createNode(getId(), this, childModelContext, element);
+		HtmlDomNode<M> node = element.createNode(this, childModelContext, element);
 		node.init(indexInChildren);
 	}
 
@@ -200,7 +197,7 @@ public class HtmlDomNode<M extends Model> {
 
 	public void sendAdd(int index) {
 		JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
-		jsonObj.put(PARENT_ID, parentId);
+		jsonObj.put(PARENT_ID, getParentId());
 		jsonObj.put(ID, id);
 		jsonObj.put(TAG_HTML, getTag().getTag());
 		jsonObj.put(NEXT_ID, index);
@@ -229,6 +226,10 @@ public class HtmlDomNode<M extends Model> {
 		return id;
 	}
 
+	public String getParentId() {
+		return parent.getId();
+	}
+
 	public Tag<M> getTag() {
 		return tag;
 	}
@@ -240,9 +241,11 @@ public class HtmlDomNode<M extends Model> {
 	public static class RootHtmlDomNode<M extends Model> extends HtmlDomNode<M> {
 		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
 		private final ServerWebSocket webSocket;
+		private final String rootId;
 
 		public RootHtmlDomNode(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
-			super(rootId, null, rootModelContext, (Tag<M>) template);
+			super(null, rootModelContext, (Tag<M>) template);
+			this.rootId = rootId;
 			this.webSocket = webSocket;
 			sendAdd(0);
 			init(0);
@@ -256,6 +259,11 @@ public class HtmlDomNode<M extends Model> {
 		@Override
 		protected RootHtmlDomNode<M> getRootHtmlDomNode() {
 			return this;
+		}
+
+		@Override
+		public String getParentId() {
+			return rootId;
 		}
 
 		private Map<String, HtmlDomNode> getMap() {

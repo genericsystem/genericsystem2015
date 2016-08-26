@@ -139,8 +139,8 @@ public class GSComposite extends GSSection {
 		}
 
 		@Override
-		protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
-			return new HtmlDomNode(parentId, parent, modelContext, tag) {
+		protected HtmlDomNode createNode(HtmlDomNode parent, Model modelContext, Tag tag) {
+			return new HtmlDomNode(parent, modelContext, tag) {
 
 				@Override
 				public void handleMessage(JsonObject json) {
