@@ -1,7 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -9,6 +7,8 @@ import java.util.function.BiConsumer;
 
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag.RootTag;
+
+import io.vertx.core.http.ServerWebSocket;
 
 /**
  * @author Nicolas Feybesse
@@ -18,7 +18,7 @@ import org.genericsystem.reactor.Tag.RootTag;
 public class ViewContext<M extends Model> {
 
 	private ViewContext<M> parent;
-	private Tag<M> element;
+	private Tag<M> tag;
 	protected HtmlDomNode node;
 	private Model modelContext;
 
@@ -30,44 +30,53 @@ public class ViewContext<M extends Model> {
 		init(indexInChildren);
 	}
 
-	protected void init(ViewContext<M> parent, Model modelContext, Tag<M> element, HtmlDomNode node) {
+	protected void init(ViewContext<M> parent, Model modelContext, Tag<M> tag, HtmlDomNode node) {
 		this.parent = parent;
-		this.element = element;
+		this.tag = tag;
 		assert node != null;
 		this.node = node;
 		node.viewContext = this;
 		this.modelContext = modelContext;
 	}
 
-	protected <BETWEEN> void init(int indexInChildren) {
+	// private int computeIndex(Integer nullable, Tag<?> childElement) {
+	// int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
+	// for (Tag<?> child : tag.getObservableChildren()) {
+	// if (child == childElement)
+	// return indexInChildren;
+	// indexInChildren += sizeBySubElement.get(child);
+	// }
+	// return indexInChildren;
+	// }
+
+	protected <BETWEEN> void init(int index) {
 		modelContext.register(this);
 		if (parent != null)
-			insertChild(indexInChildren);
-		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
+			insertChild(index);
+		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag<?> childTag : element.getObservableChildren()) {
+
+		int i = index;
+		for (Tag<?> childTag : tag.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
-				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (index, between) -> {
+				final int i_ = i;
+				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (ind, between) -> {
 					Model childModel = metaBinding.buildModel(modelContext, between);
-					createViewContextChild(index, childModel, childTag);
+					new ViewContext(i_ + ind, this, childModel, childTag);
 					return childModel;
 				}, Model::destroy));
 			} else
-				createViewContextChild(null, modelContext, childTag);
+				new ViewContext(i, this, modelContext, childTag);
+			i += sizeBySubElement.get(childTag);
 		}
-		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
+		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, getNode());
 	}
 
 	@SuppressWarnings("unchecked")
 	public <MODEL extends Model> MODEL getModelContext() {
 		return (MODEL) modelContext;
-	}
-
-	public void createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
-		int indexInChildren = computeIndex(index, element);
-		new ViewContext(indexInChildren, this, childModelContext, element);
 	}
 
 	protected RootViewContext<M> getRootViewContext() {
@@ -92,7 +101,7 @@ public class ViewContext<M extends Model> {
 	};
 
 	void insertChild(int index) {
-		parent.incrementSize(element);
+		parent.incrementSize(tag);
 		node.sendAdd(index);
 		getRootViewContext().add(node.getId(), node);
 	}
@@ -104,7 +113,7 @@ public class ViewContext<M extends Model> {
 		assert !destroyed : "Node : " + getNode().getId();
 		destroyed = true;
 		getRootViewContext().remove(node.getId());
-		parent.decrementSize(element);
+		parent.decrementSize(tag);
 	}
 
 	private void incrementSize(Tag<?> child) {
@@ -118,16 +127,6 @@ public class ViewContext<M extends Model> {
 			sizeBySubElement.remove(child);// remove map if empty
 		else
 			sizeBySubElement.put(child, size);
-	}
-
-	private int computeIndex(Integer nullable, Tag<?> childElement) {
-		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
-		for (Tag<?> child : element.getObservableChildren()) {
-			if (child == childElement)
-				return indexInChildren;
-			indexInChildren += sizeBySubElement.get(child);
-		}
-		return indexInChildren;
 	}
 
 	public ServerWebSocket getWebSocket() {
@@ -173,6 +172,6 @@ public class ViewContext<M extends Model> {
 	}
 
 	public Tag<M> getTag() {
-		return element;
+		return tag;
 	}
 }
