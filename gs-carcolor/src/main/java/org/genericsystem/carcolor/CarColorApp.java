@@ -33,7 +33,7 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
-	public CarColorApp(Root engine) {
+	public CarColorApp() {
 		createSelectionProperty();
 		addStyle("background-color", "#3393ff");
 

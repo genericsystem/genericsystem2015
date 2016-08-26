@@ -5,16 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
@@ -37,6 +28,14 @@ import org.genericsystem.reactor.gstag.HtmlStrong;
 import org.genericsystem.reactor.gstag.HtmlUl;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
+
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -86,7 +85,7 @@ public class TodoApp extends GSApp {
 	};
 	static Predicate<Generic> COMPLETE = ACTIVE.negate();
 
-	public TodoApp(Root engine) {
+	public TodoApp() {
 
 		createNewInitializedProperty("extractorMap", model -> new HashMap<Generic, Observable[]>() {
 
@@ -100,7 +99,7 @@ public class TodoApp extends GSApp {
 				return result;
 			};
 		});
-		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(engine.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
+		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(model.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
 		createNewInitializedProperty(FILTER_MODE, model -> ALL);
 		createNewInitializedProperty(FILTERED_TODOS, model -> {
 			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));
@@ -130,7 +129,7 @@ public class TodoApp extends GSApp {
 										bindAction(model -> {
 											String value = getDomNodeAttributes(model).get(ReactorStatics.VALUE);
 											if (value != null && !value.isEmpty())
-												engine.find(Todos.class).addInstance(value);
+												model.find(Todos.class).addInstance(value);
 											getDomNodeAttributes(model).put(ReactorStatics.VALUE, null);
 										});
 									}
@@ -146,11 +145,9 @@ public class TodoApp extends GSApp {
 										new HtmlLi(this) {
 											{
 												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
-												storeProperty(
-														ReactorStatics.COMPLETED,
-														model -> new SimpleBooleanProperty(getObservableValue("observableHolder", model).getValue() != null
-																&& Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
-												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
+												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
+														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
+												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new HtmlDiv(this) {
 													{
@@ -252,14 +249,14 @@ public class TodoApp extends GSApp {
 									{
 										addStyleClass("save");
 										setText("Save");
-										bindAction(model -> engine.getCurrentCache().flush());
+										bindAction(GenericModel::flush);
 									}
 								};
 								new HtmlButton(this) {
 									{
 										addStyleClass("cancel");
 										setText("Cancel");
-										bindAction(model -> engine.getCurrentCache().clear());
+										bindAction(GenericModel::cancel);
 									}
 								};
 								// new HtmlButton(this) {

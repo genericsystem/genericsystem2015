@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractCache;
@@ -12,6 +10,8 @@ import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class PersistentApplication<M extends Model> {
 	private final Class<? extends RootTag<M>> htmlAppClass;
@@ -40,8 +40,8 @@ public class PersistentApplication<M extends Model> {
 			log.info("Script has run");
 		}
 		try {
-			tagTree = getApplicationClass().getConstructor(Root.class).newInstance(getEngine());
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			tagTree = getApplicationClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}
 	}
