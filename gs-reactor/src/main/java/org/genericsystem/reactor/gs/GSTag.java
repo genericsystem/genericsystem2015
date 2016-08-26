@@ -20,7 +20,8 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 	}
 
 	public void forEach(ObservableListExtractor observableListExtractor) {
-		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, subElement) -> new GenericModel(model, GenericModel.addToGenerics((Generic) subElement, ((GenericModel) model).getGenerics())));
+
+		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, generic) -> new GenericModel(model, generic, ((GenericModel) model).getGenerics()));
 	}
 
 	protected void forEach(GSTag parentCompositeElement) {
@@ -50,7 +51,7 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 	}
 
 	public void select__(Function<GenericModel, ObservableList<GenericModel>> applyOnModelContext) {
-		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, subElement) -> new GenericModel(model, ((GenericModel) subElement).getGenerics()));
+		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, generic) -> new GenericModel(model, null, ((GenericModel) model).getGenerics()));
 	}
 
 	public void select(BiFunction<GenericModel, ObservableList<Generic>, ObservableList<GenericModel>> applyOnModel) {

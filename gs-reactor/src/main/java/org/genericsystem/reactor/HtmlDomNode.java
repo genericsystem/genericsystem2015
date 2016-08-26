@@ -1,20 +1,13 @@
 package org.genericsystem.reactor;
 
+import org.genericsystem.reactor.modelproperties.ActionDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-
-import java.util.function.Consumer;
-
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import javafx.collections.WeakSetChangeListener;
 
 public class HtmlDomNode {
 
@@ -43,11 +36,12 @@ public class HtmlDomNode {
 	static final String TEXT_CONTENT = "textContent";
 	static final String TAG_HTML = "tagHtml";
 	private static final String ELT_TYPE = "eltType";
+	private static final String SELECTED_INDEX = "selectedIndex";
 
 	private final String id;
 	private final String parentId;
 	ViewContext<?> viewContext;
-	private final ObservableSet<String> styleClasses = FXCollections.observableSet();
+	protected String type;
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
@@ -72,6 +66,16 @@ public class HtmlDomNode {
 
 	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
+	private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
+		// System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
+		// .encodePrettily());
+		sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
+	};
+
+	public ChangeListener<Number> getIndexListener() {
+		return indexListener;
+	}
+
 	public ChangeListener<String> getTextListener() {
 		return textListener;
 	}
@@ -84,11 +88,14 @@ public class HtmlDomNode {
 		return attributesListener;
 	}
 
+	public SetChangeListener<String> getStyleClassesListener() {
+		return styleClassesListener;
+	}
+
 	public HtmlDomNode(String parentId) {
 		assert parentId != null;
 		this.parentId = parentId;
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-		styleClasses.addListener(new WeakSetChangeListener<>(styleClassesListener));
 	}
 
 	public void sendAdd(int index) {
@@ -122,10 +129,6 @@ public class HtmlDomNode {
 		return viewContext.getWebSocket();
 	}
 
-	public ObservableSet<String> getStyleClasses() {
-		return styleClasses;
-	}
-
 	public String getId() {
 		return id;
 	}
@@ -135,54 +138,33 @@ public class HtmlDomNode {
 	}
 
 	public static class ActionHtmlNode extends HtmlDomNode {
+
 		public ActionHtmlNode(String parentId) {
 			super(parentId);
 		}
 
-		private final Property<Consumer<Object>> actionProperty = new SimpleObjectProperty<>();
-
-		public Property<Consumer<Object>> getActionProperty() {
-			return actionProperty;
-		}
-
 		@Override
 		public void handleMessage(JsonObject json) {
-			getActionProperty().getValue().accept(new Object());
+			((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
 		}
 	}
 
 	public static class SelectableHtmlDomNode extends ActionHtmlNode {
-		private static final String SELECTED_INDEX = "selectedIndex";
-
-		private Property<Number> selectionIndex = new SimpleIntegerProperty();
-
-		private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-			// System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
-			// .encodePrettily());
-			sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
-		};
 
 		public SelectableHtmlDomNode(String parentId) {
 			super(parentId);
-			selectionIndex.addListener(new WeakChangeListener<>(indexListener));
-		}
-
-		public Property<Number> getSelectionIndex() {
-			return selectionIndex;
 		}
 
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				getSelectionIndex().setValue(json.getInteger(SELECTED_INDEX));
+				((SelectionDefaults) viewContext.getTag()).getSelectionIndex(viewContext.getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
 				// System.out.println("Selected index : " + getSelectionIndex().getValue());
 			}
 		}
 	}
 
 	public static class InputTextHtmlDomNode extends HtmlDomNode {
-
-		private final Property<Consumer<Object>> enterProperty = new SimpleObjectProperty<>();
 
 		public InputTextHtmlDomNode(String parentId) {
 			super(parentId);
@@ -197,18 +179,13 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			if (ADD.equals(json.getString(MSG_TYPE)))
-				getEnterProperty().getValue().accept(new Object());
+				((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
 			if (UPDATE.equals(json.getString(MSG_TYPE)))
 				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
-		}
-
-		public Property<Consumer<Object>> getEnterProperty() {
-			return enterProperty;
 		}
 	}
 
 	public static class InputCheckHtmlDomNode extends HtmlDomNode {
-		private final String type;
 
 		public InputCheckHtmlDomNode(String parentId, String type) {
 			super(parentId);
