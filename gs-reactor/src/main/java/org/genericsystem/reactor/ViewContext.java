@@ -45,7 +45,7 @@ public class ViewContext<M extends Model> {
 			insertChild(indexInChildren);
 		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
 			binding.accept(modelContext, getNode());
-		for (Tag childTag : element.getObservableChildren()) {
+		for (Tag<?> childTag : element.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
 				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (index, between) -> {
@@ -65,9 +65,9 @@ public class ViewContext<M extends Model> {
 		return (MODEL) modelContext;
 	}
 
-	public ViewContext<M> createViewContextChild(Integer index, Model childModelContext, Tag<M> element) {
+	public void createViewContextChild(Integer index, Model childModelContext, Tag<?> element) {
 		int indexInChildren = computeIndex(index, element);
-		return new ViewContext<M>(indexInChildren, this, childModelContext, element);
+		new ViewContext(indexInChildren, this, childModelContext, element);
 	}
 
 	protected RootViewContext<M> getRootViewContext() {
