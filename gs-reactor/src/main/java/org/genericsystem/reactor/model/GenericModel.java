@@ -42,6 +42,10 @@ public class GenericModel extends Model {
 		getGeneric().remove();
 	}
 
+	public Generic find(Class<?> clazz) {
+		return getGeneric().getRoot().find(clazz);
+	}
+
 	public void flush() {
 		getGeneric().getCurrentCache().flush();
 	}

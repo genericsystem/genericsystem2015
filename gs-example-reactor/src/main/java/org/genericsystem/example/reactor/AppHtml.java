@@ -34,7 +34,7 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
 	}
 
-	public AppHtml(Root engine) {
+	public AppHtml() {
 		addStyle("justify-content", "center");
 		new ColorsSelect(this).select(Color.class);
 		new ColorTitleCompositeFlexElement(this).select(Color.class);

@@ -46,7 +46,7 @@ public class HtmlDomNode<M extends Model> {
 	private final String id;
 	private String parentId;// TODO: Remove
 	private HtmlDomNode<M> parent;
-	private Tag<M> element;
+	private Tag<M> tag;
 	private Model modelContext;
 
 	public HtmlDomNode(String parentId) {
@@ -55,43 +55,45 @@ public class HtmlDomNode<M extends Model> {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 	}
 
-	protected void init(HtmlDomNode<M> parent, Model modelContext, Tag<M> element) {
+	protected void init(HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
 		this.parent = parent;
-		this.element = element;
+		this.tag = tag;
 		this.modelContext = modelContext;
 	}
 
-	protected <BETWEEN> void init(int indexInChildren) {
+	protected <BETWEEN> void init(int index) {
 		modelContext.register(this);
 		if (parent != null)
-			insertChild(indexInChildren);
-		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
+			insertChild(index);
+		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext, this);
-		for (Tag<?> childTag : element.getObservableChildren()) {
+
+		int i = index;
+		for (Tag<?> childTag : tag.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
-				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (index, between) -> {
+				final int i_ = i;
+				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (ind, between) -> {
 					Model childModel = metaBinding.buildModel(modelContext, between);
-					createViewContextChild(index, childModel, childTag);
+					HtmlDomNode node = childTag.createNode(getId());
+					node.init(this, childModel, childTag);
+					node.init(i_ + ind);
 					return childModel;
 				}, Model::destroy));
-			} else
-				createViewContextChild(null, modelContext, childTag);
+			} else {
+				HtmlDomNode node = childTag.createNode(getId());
+				node.init(this, modelContext, childTag);
+				node.init(i);
+			}
+			i += sizeBySubElement.get(childTag);
 		}
-		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
+		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, this);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <MODEL extends Model> MODEL getModelContext() {
 		return (MODEL) modelContext;
-	}
-
-	public void createViewContextChild(Integer index, Model childModelContext, Tag element) {
-		int indexInChildren = computeIndex(index, element);
-		HtmlDomNode<M> node = element.createNode(getId());
-		node.init(this, childModelContext, element);
-		node.init(indexInChildren);
 	}
 
 	protected RootHtmlDomNode<M> getRootHtmlDomNode() {
@@ -111,7 +113,7 @@ public class HtmlDomNode<M extends Model> {
 	};
 
 	void insertChild(int index) {
-		parent.incrementSize(element);
+		parent.incrementSize(tag);
 		sendAdd(index);
 		getRootHtmlDomNode().add(getId(), this);
 	}
@@ -123,7 +125,7 @@ public class HtmlDomNode<M extends Model> {
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
 		getRootHtmlDomNode().remove(getId());
-		parent.decrementSize(element);
+		parent.decrementSize(tag);
 	}
 
 	private void incrementSize(Tag<?> child) {
@@ -137,16 +139,6 @@ public class HtmlDomNode<M extends Model> {
 			sizeBySubElement.remove(child);// remove map if empty
 		else
 			sizeBySubElement.put(child, size);
-	}
-
-	private int computeIndex(Integer nullable, Tag<?> childElement) {
-		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
-		for (Tag<?> child : element.getObservableChildren()) {
-			if (child == childElement)
-				return indexInChildren;
-			indexInChildren += sizeBySubElement.get(child);
-		}
-		return indexInChildren;
 	}
 
 	public ServerWebSocket getWebSocket() {
@@ -234,7 +226,7 @@ public class HtmlDomNode<M extends Model> {
 	}
 
 	public Tag<M> getTag() {
-		return element;
+		return tag;
 	}
 
 	public void handleMessage(JsonObject json) {

@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.common.Root;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -87,7 +87,7 @@ public class TodoApp extends GSApp {
 	};
 	static Predicate<Generic> COMPLETE = ACTIVE.negate();
 
-	public TodoApp(Root engine) {
+	public TodoApp() {
 
 		createNewInitializedProperty("extractorMap", model -> new HashMap<Generic, Observable[]>() {
 
@@ -101,7 +101,7 @@ public class TodoApp extends GSApp {
 				return result;
 			};
 		});
-		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(engine.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
+		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(model.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
 		createNewInitializedProperty(FILTER_MODE, model -> ALL);
 		createNewInitializedProperty(FILTERED_TODOS, model -> {
 			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));
@@ -131,7 +131,7 @@ public class TodoApp extends GSApp {
 										bindAction(model -> {
 											String value = getDomNodeAttributes(model).get("value");
 											if (value != null && !value.isEmpty())
-												engine.find(Todos.class).addInstance(value);
+												model.find(Todos.class).addInstance(value);
 											getDomNodeAttributes(model).put("value", null);
 										});
 									}
@@ -150,7 +150,7 @@ public class TodoApp extends GSApp {
 													Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
 													return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
 												});
-												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
+												forEach(model -> getFilteredTodos(model), MetaBinding.MODEL_BUILDER);
 												bindOptionalStyleClass(COMPLETED, COMPLETED);
 												new HtmlDiv(this) {
 													{
@@ -164,7 +164,7 @@ public class TodoApp extends GSApp {
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
+																addPropertyChangeListener(COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.find(Completed.class), nva));
 															}
 														};
 														new HtmlLabel(this) {
@@ -252,14 +252,14 @@ public class TodoApp extends GSApp {
 									{
 										addStyleClass("save");
 										setText("Save");
-										bindAction(model -> engine.getCurrentCache().flush());
+										bindAction(GenericModel::flush);
 									}
 								};
 								new HtmlButton(this) {
 									{
 										addStyleClass("cancel");
 										setText("Cancel");
-										bindAction(model -> engine.getCurrentCache().clear());
+										bindAction(GenericModel::cancel);
 									}
 								};
 								// new HtmlButton(this) {

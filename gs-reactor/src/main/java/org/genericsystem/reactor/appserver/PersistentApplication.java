@@ -40,8 +40,8 @@ public class PersistentApplication<M extends Model> {
 			log.info("Script has run");
 		}
 		try {
-			tagTree = getApplicationClass().getConstructor(Root.class).newInstance(getEngine());
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			tagTree = getApplicationClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}
 	}
