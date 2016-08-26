@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -144,10 +145,10 @@ public class TodoApp extends GSApp {
 										addStyleClass("todo-list");
 										new HtmlLi(this) {
 											{
-												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
+												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.find(Completed.class)));
 												storeProperty(ReactorStatics.COMPLETED, model -> new SimpleBooleanProperty(
 														getObservableValue("observableHolder", model).getValue() != null && Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
-												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
+												forEach(model -> getFilteredTodos(model), MetaBinding.MODEL_BUILDER);
 												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
 												new HtmlDiv(this) {
 													{
@@ -161,7 +162,7 @@ public class TodoApp extends GSApp {
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
+																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.find(Completed.class), nva));
 															}
 														};
 														new HtmlLabel(this) {

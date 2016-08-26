@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -20,7 +21,7 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 	}
 
 	public void forEach(ObservableListExtractor observableListExtractor) {
-		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
+		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), MetaBinding.MODEL_BUILDER);
 	}
 
 	protected void forEach(GSTag parentCompositeElement) {
@@ -50,7 +51,7 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 	}
 
 	public void select__(Function<GenericModel, ObservableList<GenericModel>> applyOnModelContext) {
-		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, subModel) -> new GenericModel(model, ((GenericModel) subModel).getGenerics()));
+		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), MetaBinding.MODEL_CLONER);
 	}
 
 	public void select(BiFunction<GenericModel, ObservableList<Generic>, ObservableList<GenericModel>> applyOnModel) {
