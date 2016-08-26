@@ -5,6 +5,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlRadio;
+import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -142,7 +143,7 @@ public class GSComposite extends GSSection {
 				@Override
 				public void handleMessage(JsonObject json) {
 					if (UPDATE.equals(json.getString(MSG_TYPE))) {
-						((SelectionDefaults) viewContext.getTag()).getSelectionIndex(viewContext.getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+						((SelectionDefaults) getTag()).getSelectionIndex((GenericModel) getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
 					}
 				}
 			};

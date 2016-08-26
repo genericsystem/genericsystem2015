@@ -24,7 +24,7 @@ public class HtmlButton extends GSTag implements ActionDefaults<GenericModel>, G
 
 			@Override
 			public void handleMessage(JsonObject json) {
-				((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
+				((ActionDefaults<?>) getTag()).getAction(getModelContext()).accept(new Object());
 			}
 		};
 	}

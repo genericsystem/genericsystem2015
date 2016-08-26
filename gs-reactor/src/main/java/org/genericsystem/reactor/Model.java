@@ -21,7 +21,7 @@ import javafx.collections.ObservableList;
 public class Model {
 
 	private Model parent;
-	private Map<Tag<?>, ViewContext<?>> viewContextsMap = new LinkedHashMap<>();
+	private Map<Tag<?>, HtmlDomNode<?>> htmlDomNodesMap = new LinkedHashMap<>();
 	private Map<Tag<?>, ObservableList<Model>> subModelsMap = new HashMap<>();
 	private Map<Tag<?>, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
 
@@ -43,7 +43,7 @@ public class Model {
 	}
 
 	public void createNewProperty(Tag<?> tag, String propertyName) {
-		assert viewContextsMap.keySet().contains(tag);
+		assert htmlDomNodesMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
 		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
@@ -52,7 +52,7 @@ public class Model {
 	private Map<String, ObservableValue<?>> getProperties(Tag<?> tag) {
 		Map<String, ObservableValue<?>> properties = propertiesMap.get(tag);
 		if (properties == null) {
-			assert viewContextsMap.keySet().contains(tag);
+			assert htmlDomNodesMap.keySet().contains(tag);
 			propertiesMap.put(tag, properties = new HashMap<String, ObservableValue<?>>());
 		}
 		return properties;
@@ -73,7 +73,7 @@ public class Model {
 	}
 
 	protected void storeProperty(Tag<?> tag, String propertyName, ObservableValue<?> value) {
-		assert viewContextsMap.keySet().contains(tag);
+		assert htmlDomNodesMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
 		getProperties(tag).put(propertyName, value);
@@ -89,13 +89,13 @@ public class Model {
 		subModelsMap.put(element, (ObservableList<Model>) subContexts);
 	}
 
-	public void register(ViewContext<?> viewContext) {
-		ViewContext<?> previous = viewContextsMap.put(viewContext.getTag(), viewContext);
+	public void register(HtmlDomNode<?> htmlDomNode) {
+		HtmlDomNode<?> previous = htmlDomNodesMap.put(htmlDomNode.getTag(), htmlDomNode);
 		assert previous == null;
 	}
 
 	public void destroy() {
-		viewContextsMap.values().iterator().next().getNode().sendRemove();
+		htmlDomNodesMap.values().iterator().next().sendRemove();
 		internalDestroy();
 	}
 
@@ -105,8 +105,8 @@ public class Model {
 		// System.out.println("InternalDestroy : " + this);
 		assert !destroyed;
 		destroyed = true;
-		for (ViewContext<?> viewContext : viewContextsMap.values()) {
-			viewContext.destroy();
+		for (HtmlDomNode<?> htmlDomNode : htmlDomNodesMap.values()) {
+			htmlDomNode.destroy();
 		}
 		for (ObservableList<Model> subModels : subModelsMap.values()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
@@ -114,12 +114,12 @@ public class Model {
 				subModel.internalDestroy();
 		}
 		subModelsMap = new HashMap<>();
-		viewContextsMap = new LinkedHashMap<>();
+		htmlDomNodesMap = new LinkedHashMap<>();
 		propertiesMap = new HashMap<>();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <M extends Model> ViewContext<M> getViewContext(Tag<?> element) {
-		return (ViewContext<M>) viewContextsMap.get(element);
+	public <M extends Model> HtmlDomNode<M> getHtmlDomNode(Tag<?> element) {
+		return (HtmlDomNode<M>) htmlDomNodesMap.get(element);
 	}
 }

@@ -15,7 +15,7 @@ public interface StyleClassesDefaults<M extends Model> extends ModelProperty<M> 
 		if (!model.containsProperty((Tag<?>) this, STYLE_CLASSES)) {
 			createNewInitializedProperty(STYLE_CLASSES, (M) model, m -> {
 				ObservableSet<String> styleClasses = FXCollections.observableSet();
-				styleClasses.addListener(new WeakSetChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getStyleClassesListener()));
+				styleClasses.addListener(new WeakSetChangeListener<>(model.getHtmlDomNode((Tag<?>) this).getStyleClassesListener()));
 				return styleClasses;
 			});
 		}

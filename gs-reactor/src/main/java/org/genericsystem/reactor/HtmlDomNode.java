@@ -1,12 +1,20 @@
 package org.genericsystem.reactor;
 
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Tag.RootTag;
+
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 
-public class HtmlDomNode {
+public class HtmlDomNode<M extends Model> {
 
 	static int count = 0;
 	protected static final String MSG_TYPE = "msgType";
@@ -36,8 +44,114 @@ public class HtmlDomNode {
 	protected static final String SELECTED_INDEX = "selectedIndex";
 
 	private final String id;
-	private final String parentId;
-	protected ViewContext<?> viewContext;
+	private String parentId;// TODO: Remove
+	private HtmlDomNode<M> parent;
+	private Tag<M> element;
+	private Model modelContext;
+
+	public HtmlDomNode(String parentId) {
+		assert parentId != null;
+		this.parentId = parentId;
+		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
+	}
+
+	protected void init(HtmlDomNode<M> parent, Model modelContext, Tag<M> element) {
+		this.parent = parent;
+		this.element = element;
+		this.modelContext = modelContext;
+	}
+
+	protected <BETWEEN> void init(int indexInChildren) {
+		modelContext.register(this);
+		if (parent != null)
+			insertChild(indexInChildren);
+		for (BiConsumer<Model, HtmlDomNode> binding : element.getPreFixedBindings())
+			binding.accept(modelContext, this);
+		for (Tag<?> childTag : element.getObservableChildren()) {
+			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+			if (metaBinding != null) {
+				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (index, between) -> {
+					Model childModel = metaBinding.buildModel(modelContext, between);
+					createViewContextChild(index, childModel, childTag);
+					return childModel;
+				}, Model::destroy));
+			} else
+				createViewContextChild(null, modelContext, childTag);
+		}
+		for (BiConsumer<Model, HtmlDomNode> binding : element.getPostFixedBindings())
+			binding.accept(modelContext, this);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <MODEL extends Model> MODEL getModelContext() {
+		return (MODEL) modelContext;
+	}
+
+	public void createViewContextChild(Integer index, Model childModelContext, Tag element) {
+		int indexInChildren = computeIndex(index, element);
+		HtmlDomNode<M> node = element.createNode(getId());
+		node.init(this, childModelContext, element);
+		node.init(indexInChildren);
+	}
+
+	protected RootHtmlDomNode<M> getRootHtmlDomNode() {
+		return parent.getRootHtmlDomNode();
+	}
+
+	private Map<Tag<?>, Integer> sizeBySubElement = new IdentityHashMap<Tag<?>, Integer>() {
+		private static final long serialVersionUID = 6725720602283055930L;
+
+		@Override
+		public Integer get(Object key) {
+			Integer size = super.get(key);
+			if (size == null)
+				put((Tag<?>) key, size = 0);
+			return size;
+		};
+	};
+
+	void insertChild(int index) {
+		parent.incrementSize(element);
+		sendAdd(index);
+		getRootHtmlDomNode().add(getId(), this);
+	}
+
+	private boolean destroyed = false;
+
+	void destroy() {
+		// System.out.println("Attempt to destroy : " + getNode().getId());
+		assert !destroyed : "Node : " + getId();
+		destroyed = true;
+		getRootHtmlDomNode().remove(getId());
+		parent.decrementSize(element);
+	}
+
+	private void incrementSize(Tag<?> child) {
+		sizeBySubElement.put(child, sizeBySubElement.get(child) + 1);
+	}
+
+	private void decrementSize(Tag<?> child) {
+		int size = sizeBySubElement.get(child) - 1;
+		assert size >= 0;
+		if (size == 0)
+			sizeBySubElement.remove(child);// remove map if empty
+		else
+			sizeBySubElement.put(child, size);
+	}
+
+	private int computeIndex(Integer nullable, Tag<?> childElement) {
+		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
+		for (Tag<?> child : element.getObservableChildren()) {
+			if (child == childElement)
+				return indexInChildren;
+			indexInChildren += sizeBySubElement.get(child);
+		}
+		return indexInChildren;
+	}
+
+	public ServerWebSocket getWebSocket() {
+		return parent.getWebSocket();
+	}
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
@@ -88,17 +202,11 @@ public class HtmlDomNode {
 		return styleClassesListener;
 	}
 
-	public HtmlDomNode(String parentId) {
-		assert parentId != null;
-		this.parentId = parentId;
-		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-	}
-
 	public void sendAdd(int index) {
 		JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
 		jsonObj.put(PARENT_ID, parentId);
 		jsonObj.put(ID, id);
-		jsonObj.put(TAG_HTML, viewContext.getTag().getTag());
+		jsonObj.put(TAG_HTML, getTag().getTag());
 		jsonObj.put(NEXT_ID, index);
 		fillJson(jsonObj);
 		// System.out.println(jsonObj.encodePrettily());
@@ -121,15 +229,54 @@ public class HtmlDomNode {
 		getWebSocket().writeFinalTextFrame(jsonObj.encode());
 	}
 
-	public ServerWebSocket getWebSocket() {
-		return viewContext.getWebSocket();
-	}
-
 	public String getId() {
 		return id;
 	}
 
+	public Tag<M> getTag() {
+		return element;
+	}
+
 	public void handleMessage(JsonObject json) {
 
+	}
+
+	public static class RootHtmlDomNode<M extends Model> extends HtmlDomNode<M> {
+		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
+		private final ServerWebSocket webSocket;
+
+		public RootHtmlDomNode(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
+			super(rootId);
+			this.webSocket = webSocket;
+			init(null, rootModelContext, (Tag<M>) template);
+			sendAdd(0);
+			init(0);
+		}
+
+		@Override
+		public ServerWebSocket getWebSocket() {
+			return webSocket;
+		}
+
+		@Override
+		protected RootHtmlDomNode<M> getRootHtmlDomNode() {
+			return this;
+		}
+
+		private Map<String, HtmlDomNode> getMap() {
+			return nodeById;
+		}
+
+		public HtmlDomNode getNodeById(String id) {
+			return getMap().get(id);
+		}
+
+		public void add(String id, HtmlDomNode domNode) {
+			getMap().put(id, domNode);
+		}
+
+		public void remove(String id) {
+			getMap().remove(id);
+		}
 	}
 }

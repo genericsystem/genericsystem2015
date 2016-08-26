@@ -19,7 +19,7 @@ public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> 
 		if (!model.containsProperty((Tag<?>) this, TEXT)) {
 			storeProperty(TEXT, model, m -> new SimpleStringProperty());
 			Property<String> text = getProperty(TEXT, model);
-			text.addListener(new WeakChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getTextListener()));
+			text.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag<?>) this).getTextListener()));
 		}
 		return getProperty(TEXT, model);
 	}

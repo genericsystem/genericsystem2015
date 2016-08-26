@@ -16,7 +16,7 @@ import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.ViewContext.RootViewContext;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
 
@@ -88,14 +88,14 @@ public class ApplicationServer extends AbstractBackEnd {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			AbstractCache cache = application.getEngine().newCache();
-			RootViewContext<?> rootViewContext = cache.safeSupply(() -> application.init(socket));
+			RootHtmlDomNode<?> rootHtmlDomNode = cache.safeSupply(() -> application.init(socket));
 			// log.info("Open new socket : " + socket);
 			return buffer -> {
 				// log.info("Receive new message for socket : " + socket);
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = rootViewContext.getNodeById(json.getString(HtmlDomNode.ID));
+				HtmlDomNode node = rootHtmlDomNode.getNodeById(json.getString(HtmlDomNode.ID));
 				if (node != null) {
 					cache.safeConsum((x) -> node.handleMessage(json));
 				} else

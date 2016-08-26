@@ -1,7 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +11,16 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,15 +29,6 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.ViewContext.RootViewContext;
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -127,7 +126,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		while (tag != null && model[0] != null) {
 			if (model[0].containsProperty(tag, propertyName))
 				return model[0].getProperty(tag, propertyName);
-			if (tag.metaBinding != null && model[0].getViewContext(tag.getParent()) == null)
+			if (tag.metaBinding != null && model[0].getHtmlDomNode(tag.getParent()) == null)
 				model[0] = model[0].getParent();
 			tag = tag.getParent();
 		}
@@ -137,7 +136,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	@Override
 	public <T> Property<T> getInheritedProperty(String propertyName, Model[] model, Tag<?>[] tag) {
 		while (tag != null && model[0] != null) {
-			if (tag[0].metaBinding != null && model[0].getViewContext(tag[0].getParent()) == null)
+			if (tag[0].metaBinding != null && model[0].getHtmlDomNode(tag[0].getParent()) == null)
 				model[0] = model[0].getParent();
 			tag[0] = tag[0].getParent();
 			if (model[0] != null && model[0].containsProperty(tag[0], propertyName))
@@ -156,7 +155,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		while (tag != null && model[0] != null) {
 			if (model[0].containsProperty(tag, propertyName))
 				return model[0].getObservableValue(tag, propertyName);
-			if (tag.metaBinding != null && model[0].getViewContext(tag.getParent()) == null)
+			if (tag.metaBinding != null && model[0].getHtmlDomNode(tag.getParent()) == null)
 				model[0] = model[0].getParent();
 			tag = tag.getParent();
 		}
@@ -225,6 +224,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		initProperty(propertyName, getInitialValue);
 	}
 
+	@Override
 	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
 		addPrefixBinding(modelContext -> getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext)));
 	}
@@ -316,8 +316,8 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	public static interface RootTag<M extends Model> {
-		default RootViewContext<M> init(M rootModelContext, String rootId, ServerWebSocket webSocket) {
-			return new RootViewContext<M>(rootModelContext, this, rootId, webSocket);
+		default RootHtmlDomNode<M> init(M rootModelContext, String rootId, ServerWebSocket webSocket) {
+			return new RootHtmlDomNode<M>(rootModelContext, this, rootId, webSocket);
 		}
 	}
 }

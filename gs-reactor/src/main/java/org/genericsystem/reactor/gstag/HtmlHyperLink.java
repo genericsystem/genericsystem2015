@@ -37,7 +37,7 @@ public class HtmlHyperLink extends GSTag implements SelectionDefaults, SwitchDef
 
 			@Override
 			public void handleMessage(JsonObject json) {
-				((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
+				((ActionDefaults<?>) getTag()).getAction(getModelContext()).accept(new Object());
 			}
 		};
 	}

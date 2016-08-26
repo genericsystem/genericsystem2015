@@ -1,17 +1,17 @@
 package org.genericsystem.reactor.appserver;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Root;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag.RootTag;
-import org.genericsystem.reactor.ViewContext.RootViewContext;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class PersistentApplication<M extends Model> {
 	private final Class<? extends RootTag<M>> htmlAppClass;
@@ -62,7 +62,7 @@ public class PersistentApplication<M extends Model> {
 		engine.close();
 	}
 
-	public RootViewContext<?> init(ServerWebSocket socket) {
+	public RootHtmlDomNode<?> init(ServerWebSocket socket) {
 		try {
 			return tagTree.init(modelClass.getConstructor(Root.class).newInstance(engine), rootId, socket);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {

@@ -17,7 +17,7 @@ public interface MapStringDefaults<M extends Model> extends ModelProperty<M> {
 		if (!model.containsProperty((Tag<?>) this, propertyName)) {
 			createNewInitializedProperty(propertyName, (M) model, m -> {
 				ObservableMap<String, String> map = FXCollections.observableHashMap();
-				map.addListener(new WeakMapChangeListener<>(getListener.apply(model.getViewContext((Tag<?>) this).getNode())));
+				map.addListener(new WeakMapChangeListener<>(getListener.apply(model.getHtmlDomNode((Tag<?>) this))));
 				return map;
 			});
 		}

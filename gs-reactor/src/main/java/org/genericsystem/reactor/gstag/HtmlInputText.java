@@ -26,9 +26,9 @@ public class HtmlInputText extends GSTag implements ActionDefaults<GenericModel>
 			@Override
 			public void handleMessage(JsonObject json) {
 				if (ADD.equals(json.getString(MSG_TYPE)))
-					((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
+					((ActionDefaults<?>) getTag()).getAction(getModelContext()).accept(new Object());
 				if (UPDATE.equals(json.getString(MSG_TYPE)))
-					viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put("value", json.getString(TEXT_CONTENT));
+					getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(TEXT_CONTENT));
 			}
 		};
 	}

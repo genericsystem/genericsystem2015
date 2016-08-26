@@ -34,7 +34,7 @@ public interface SelectionDefaults extends ModelProperty<GenericModel> {
 				model -> Bindings.createStringBinding(() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? getSelectionProperty(model).getValue().getGeneric() : null), getSelectionProperty(model)));
 		storeProperty(SELECTION_INDEX, model -> {
 			Property<Integer> index = new SimpleObjectProperty<>();
-			index.addListener(new WeakChangeListener<>(model.getViewContext((Tag<?>) this).getNode().getIndexListener()));
+			index.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag<?>) this).getIndexListener()));
 			return index;
 		});
 		createNewProperty(UPDATED_GENERIC);

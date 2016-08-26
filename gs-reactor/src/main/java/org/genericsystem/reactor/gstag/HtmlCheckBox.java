@@ -28,7 +28,7 @@ public class HtmlCheckBox extends GSTag {
 
 			@Override
 			public void handleMessage(JsonObject json) {
-				viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
+				getTag().getDomNodeAttributes(getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
 			}
 		};
 	}
