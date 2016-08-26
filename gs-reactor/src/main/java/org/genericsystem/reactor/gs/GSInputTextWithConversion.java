@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlInputText;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import io.vertx.core.logging.Logger;
@@ -16,7 +16,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
-public class GSInputTextWithConversion<T extends Serializable> extends HtmlInputText {
+public class GSInputTextWithConversion<T extends Serializable> extends HtmlInputText implements ConvertedValueDefaults {
 
 	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
 
@@ -24,10 +24,10 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		super(parent);
 		addStyle("width", "100%");
 		addStyle("height", "100%");
-		createNewProperty(ReactorStatics.VALUE);
-		storeProperty(ReactorStatics.INVALID, model -> Bindings.createBooleanBinding(() -> {
+		createConvertedValueProperty();
+		storeInvalidProperty(model -> Bindings.createBooleanBinding(() -> {
 			boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
-			String value = getDomNodeAttributes(model).get(ReactorStatics.VALUE);
+			String value = getDomNodeAttributes(model).get(VALUE);
 			if (value == null || value.trim().isEmpty())
 				return required;
 			try {
@@ -37,8 +37,8 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 				return true;
 			}
 		}, getDomNodeAttributes(model)));
-		bindOptionalStyleClass(ReactorStatics.INVALID, ReactorStatics.INVALID);
-		bindBiDirectionalAttributeOnEnter(ReactorStatics.VALUE, ReactorStatics.VALUE);
+		bindOptionalStyleClass(INVALID, INVALID);
+		bindBiDirectionalAttributeOnEnter(VALUE, VALUE);
 	}
 
 	private void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName) {
@@ -66,8 +66,8 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 		public GSInputTextEditorWithConversion(GSTag parent) {
 			super(parent);
-			initProperty(ReactorStatics.VALUE, model -> model.getGeneric().getValue());
-			addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+			initValueProperty(model -> model.getGeneric().getValue());
+			addConvertedValueChangeListener((model, nva) -> {
 				if (nva != null) {
 					Generic updatedGeneric = model.getGeneric().updateValue(nva);
 					Property<Generic> genericProperty = getUpdatedGenericProperty(model);

@@ -2,15 +2,14 @@ package org.genericsystem.reactor.gs;
 
 import java.util.List;
 
-import javafx.beans.property.Property;
-
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.property.Property;
 
 public class GSSingleLinkComponentEditor extends GSSection {
 
@@ -38,7 +37,7 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		select.addStyle("width", "100%");
 		select.addStyle("height", "100%");
 		select.addPostfixBinding(model -> {
-			Property<List<Property<GenericModel>>> selectedComponents = getProperty(ReactorStatics.COMPONENTS, model.getParent());
+			Property<List<Property<GenericModel>>> selectedComponents = select.getComponentsProperty(model);
 			if (selectedComponents != null)
 				selectedComponents.getValue().add(select.getSelectionProperty(model));
 		});

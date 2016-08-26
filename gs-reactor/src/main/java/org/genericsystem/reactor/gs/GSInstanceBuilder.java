@@ -1,8 +1,6 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -14,20 +12,21 @@ import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSAttributeBuilder;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-public class GSInstanceBuilder extends GSComposite {
+public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults {
 
 	private GSHolderEditor instanceValueInput;
 
 	public GSInstanceBuilder(GSTag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
-		createNewInitializedProperty(ReactorStatics.HOLDERS_MAP, model -> new HashMap<Generic, Property<Serializable>>());
-		createNewInitializedProperty(ReactorStatics.COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<GenericModel>>>());
-		createNewInitializedProperty(ReactorStatics.INVALID_LIST, model -> new ArrayList<ObservableValue<Boolean>>());
+		createHoldersMapProperty();
+		createComponentsMapProperty();
+		createInvalidListProperty();
 	}
 
 	@Override
@@ -65,12 +64,11 @@ public class GSInstanceBuilder extends GSComposite {
 				addStyle("margin-bottom", "1px");
 				new HtmlButton(this) {
 					{
-
-						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(
-								() -> Boolean.TRUE.equals(getInvalidList(model).stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
-								getInvalidList(model).stream().toArray(ObservableValue[]::new)));
+						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED,
+								model -> Bindings.createStringBinding(() -> Boolean.TRUE.equals(getInvalidList(model).stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
+										getInvalidList(model).stream().toArray(ObservableValue[]::new)));
 						bindAction(model -> {
-							Generic newInstance = model.getGeneric().setInstance((Serializable) instanceValueInput.input.getProperty(ReactorStatics.VALUE, model).getValue());
+							Generic newInstance = model.getGeneric().setInstance(instanceValueInput.input.getConvertedValueProperty(model).getValue());
 							for (Entry<Generic, Property<Serializable>> entry : getHoldersMap(model).entrySet())
 								if (entry.getValue().getValue() != null) {
 									newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
@@ -82,7 +80,7 @@ public class GSInstanceBuilder extends GSComposite {
 									newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
 								entry.getValue().stream().forEach(sel -> sel.setValue(null));
 							}
-							instanceValueInput.input.getProperty(ReactorStatics.VALUE, model).setValue(null);
+							instanceValueInput.input.getConvertedValueProperty(model).setValue(null);
 						});
 						setText("Add");
 						addStyle("width", "100%");

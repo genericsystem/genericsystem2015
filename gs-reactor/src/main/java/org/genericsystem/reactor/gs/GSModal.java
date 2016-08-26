@@ -2,10 +2,6 @@ package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.gs.FlexDirection;
-import org.genericsystem.reactor.gs.GSSection;
-import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -24,7 +20,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
 		super(parent, direction);
 		addStyleClass("modal");
-		bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
+		bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
 
 		new GSSection(this, FlexDirection.COLUMN) {
 			{

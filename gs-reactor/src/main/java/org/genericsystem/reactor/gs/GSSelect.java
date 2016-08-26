@@ -7,13 +7,14 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class GSSelect extends GSTag implements SelectionDefaults {
+public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefaults {
 
 	public HtmlOption optionElement;
 

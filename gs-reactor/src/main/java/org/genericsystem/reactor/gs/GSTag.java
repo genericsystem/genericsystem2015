@@ -7,6 +7,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.DisplayDefaults;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 
 import javafx.beans.binding.ListBinding;
@@ -14,13 +15,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public abstract class GSTag extends Tag<GenericModel> implements GenericStringDefaults {
+public abstract class GSTag extends Tag<GenericModel> implements GenericStringDefaults, DisplayDefaults {
 	public GSTag(GSTag parent, String tag) {
 		super(parent, tag);
 	}
 
 	public void forEach(ObservableListExtractor observableListExtractor) {
-		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
+		super.forEach(model -> observableListExtractor.apply(((GenericModel) model).getGenerics()), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
 	}
 
 	protected void forEach(GSTag parentCompositeElement) {
@@ -50,7 +51,7 @@ public abstract class GSTag extends Tag<GenericModel> implements GenericStringDe
 	}
 
 	public void select__(Function<GenericModel, ObservableList<GenericModel>> applyOnModelContext) {
-		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, subModel) -> new GenericModel(model, ((GenericModel) subModel).getGenerics()));
+		super.forEach(model -> applyOnModelContext.apply((GenericModel) model), (model, subModel) -> new GenericModel(model, subModel.getGenerics()));
 	}
 
 	public void select(BiFunction<GenericModel, ObservableList<Generic>, ObservableList<GenericModel>> applyOnModel) {

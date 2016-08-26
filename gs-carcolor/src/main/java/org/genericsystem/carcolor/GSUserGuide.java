@@ -1,6 +1,5 @@
 package org.genericsystem.carcolor;
 
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSModalButton;
 import org.genericsystem.reactor.gs.GSSection;
@@ -20,8 +19,8 @@ public class GSUserGuide extends GSSection {
 		GSSection gSection = new GSSection(this, FlexDirection.COLUMN) {
 			{
 				addStyleClass("modal");
-				createNewInitializedProperty(ReactorStatics.DISPLAY, model -> "none");
-				bindStyle(ReactorStatics.DISPLAY, ReactorStatics.DISPLAY);
+				createInitializedDisplayProperty("none");
+				bindStyle(DISPLAY, DISPLAY);
 				new GSSection(this, FlexDirection.COLUMN) {
 					{
 						addStyle("max-width", "40%");
@@ -31,7 +30,7 @@ public class GSUserGuide extends GSSection {
 								addStyleClass("close");
 								setText("×");
 								bindAction(model -> {
-									getProperty(ReactorStatics.DISPLAY, model).setValue("none");
+									getDisplayProperty(model).setValue("none");
 								});
 							}
 						};

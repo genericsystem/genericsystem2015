@@ -1,17 +1,13 @@
 package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.GenericModel;
+import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
 import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 
 public class GSHolderEditor extends GSSection {
 
@@ -53,7 +49,7 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderAdder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
-			input.addPropertyChangeListener(ReactorStatics.VALUE, (model, nva) -> {
+			input.addConvertedValueChangeListener((model, nva) -> {
 				if (nva != null)
 					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
 			});
@@ -64,7 +60,7 @@ public class GSHolderEditor extends GSSection {
 					addStyle("height", "100%");
 					setText("+");
 					bindAction(model -> {
-						Property<Serializable> observable = input.getProperty(ReactorStatics.VALUE, model);
+						Property<Serializable> observable = input.getConvertedValueProperty(model);
 						if (observable.getValue() != null) {
 							Serializable newValue = observable.getValue();
 							observable.setValue(null);
@@ -76,16 +72,14 @@ public class GSHolderEditor extends GSSection {
 		}
 	}
 
-	public static class GSHolderBuilder extends GSHolderEditor {
+	public static class GSHolderBuilder extends GSHolderEditor implements GSBuilderDefaults {
 
 		public GSHolderBuilder(GSTag parent) {
 			super(parent, GSInputTextWithConversion::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder) {
 				input.addPrefixBinding(model -> {
-					Property<Map<Generic, Property<Serializable>>> holders = getProperty(ReactorStatics.HOLDERS_MAP, model);
-					holders.getValue().put(model.getGeneric(), input.getProperty(ReactorStatics.VALUE, model));
-					Property<List<ObservableValue<Boolean>>> invalids = getProperty(ReactorStatics.INVALID_LIST, model);
-					invalids.getValue().add(input.getObservableValue(ReactorStatics.INVALID, model));
+					getHoldersMap(model).put(model.getGeneric(), input.getConvertedValueProperty(model));
+					getInvalidList(model).add(input.getInvalidObservable(model));
 				});
 			}
 		}

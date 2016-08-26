@@ -24,6 +24,8 @@ public interface ModelProperty<M extends Model> {
 
 	void createNewProperty(String propertyName);
 
+	<T> void initProperty(String propertyName, Function<M, T> getInitialValue);
+
 	<T> void createNewInitializedProperty(String propertyName, Function<M, T> getInitialValue);
 
 	<T> void createNewInitializedProperty(String propertyName, M model, Function<M, T> getInitialValue);

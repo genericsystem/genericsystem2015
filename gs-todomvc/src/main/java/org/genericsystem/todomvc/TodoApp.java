@@ -5,14 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
@@ -38,6 +30,14 @@ import org.genericsystem.reactor.gstag.HtmlUl;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
 
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+
 /**
  * @author Nicolas Feybesse
  *
@@ -49,6 +49,7 @@ public class TodoApp extends GSApp {
 	public static final String TODOS = "todos";
 	public static final String FILTERED_TODOS = "filteredTodos";
 	public static final String ACTIVE_TODOS = "activeTodos";
+	public static final String COMPLETED = "completed";
 	public static final String COMPLETED_TODOS = "completedTodos";
 
 	public static void main(String[] mainArgs) {
@@ -128,10 +129,10 @@ public class TodoApp extends GSApp {
 										addStyleClass("new-todo");
 										addAttribute("placeholder", "What needs to be done?");
 										bindAction(model -> {
-											String value = getDomNodeAttributes(model).get(ReactorStatics.VALUE);
+											String value = getDomNodeAttributes(model).get("value");
 											if (value != null && !value.isEmpty())
 												engine.find(Todos.class).addInstance(value);
-											getDomNodeAttributes(model).put(ReactorStatics.VALUE, null);
+											getDomNodeAttributes(model).put("value", null);
 										});
 									}
 								};
@@ -145,13 +146,12 @@ public class TodoApp extends GSApp {
 										addStyleClass("todo-list");
 										new HtmlLi(this) {
 											{
-												storeProperty("observableHolder", model -> model.getGeneric().getObservableHolder(model.getGeneric().getRoot().find(Completed.class)));
-												storeProperty(
-														ReactorStatics.COMPLETED,
-														model -> new SimpleBooleanProperty(getObservableValue("observableHolder", model).getValue() != null
-																&& Boolean.TRUE.equals(((Generic) getObservableValue("observableHolder", model).getValue()).getValue()) ? true : false));
-												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics((Generic) generic, ((GenericModel) model).getGenerics())));
-												bindOptionalStyleClass(ReactorStatics.COMPLETED, ReactorStatics.COMPLETED);
+												storeProperty(COMPLETED, model -> {
+													Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
+													return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
+												});
+												forEach(model -> getFilteredTodos(model), (model, generic) -> new GenericModel(model, GenericModel.addToGenerics(generic, ((GenericModel) model).getGenerics())));
+												bindOptionalStyleClass(COMPLETED, COMPLETED);
 												new HtmlDiv(this) {
 													{
 														addStyleClass("view");
@@ -159,12 +159,12 @@ public class TodoApp extends GSApp {
 															{
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
-																	if (Boolean.TRUE.equals(getObservableValue(ReactorStatics.COMPLETED, todo).getValue())) {
+																	if (Boolean.TRUE.equals(getObservableValue(COMPLETED, todo).getValue())) {
 																		getDomNodeAttributes(todo).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 																	}
 																});
-																bindOptionalBiDirectionalAttribute(ReactorStatics.COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(ReactorStatics.COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
+																bindOptionalBiDirectionalAttribute(COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+																addPropertyChangeListener(COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.getGeneric().getRoot().find(Completed.class), nva));
 															}
 														};
 														new HtmlLabel(this) {

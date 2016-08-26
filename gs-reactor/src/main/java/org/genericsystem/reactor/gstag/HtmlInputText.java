@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
@@ -29,7 +28,7 @@ public class HtmlInputText extends GSTag implements ActionDefaults<GenericModel>
 				if (ADD.equals(json.getString(MSG_TYPE)))
 					((ActionDefaults<?>) viewContext.getTag()).getAction(viewContext.getModelContext()).accept(new Object());
 				if (UPDATE.equals(json.getString(MSG_TYPE)))
-					viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put(ReactorStatics.VALUE, json.getString(TEXT_CONTENT));
+					viewContext.getTag().getDomNodeAttributes(viewContext.getModelContext()).put("value", json.getString(TEXT_CONTENT));
 			}
 		};
 	}
