@@ -1,20 +1,22 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.RootTag;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 
-public class HtmlDomNode<M extends Model> {
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Tag.RootTag;
+
+public class HtmlDomNode {
 
 	static int count = 0;
 	protected static final String MSG_TYPE = "msgType";
@@ -44,47 +46,79 @@ public class HtmlDomNode<M extends Model> {
 	protected static final String SELECTED_INDEX = "selectedIndex";
 
 	private final String id;
-	private HtmlDomNode<M> parent;
-	private Tag<M> tag;
-	private Model modelContext;
+	private HtmlDomNode parent;
+	private Tag tag;
+	private Context modelContext;
 
-	public HtmlDomNode(HtmlDomNode<M> parent, Model modelContext, Tag<M> tag) {
+	public HtmlDomNode(HtmlDomNode parent, Context modelContext, Tag tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
 		this.tag = tag;
 		this.modelContext = modelContext;
 	}
 
+	<BETWEEN> ListChangeListener<Tag> getListChangeListener() {
+		return change -> {
+			while (change.next()) {
+				if (change.wasRemoved()) {
+					for (Tag childTag : change.getRemoved()) {
+						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+						if (metaBinding != null) {
+							modelContext.getSubContexts(childTag).removeAll();// destroy subcontexts
+							modelContext.removeSubContexts(childTag);// remove tag ref
+						}
+						sizeBySubElement.remove(childTag);
+					}
+				}
+				if (change.wasAdded()) {
+					int index = change.getFrom();
+					for (Tag childTag : change.getAddedSubList()) {
+						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+						if (metaBinding != null) {
+							modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
+								Context childModel = metaBinding.buildModel(modelContext, between);
+								createViewContextChild(i, childModel, childTag);
+								return childModel;
+							}, Context::destroy));
+						} else
+							createViewContextChild(index++, modelContext, childTag);
+					}
+				}
+			}
+
+		};
+	}
+
 	protected <BETWEEN> void init(int index) {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(index);
-		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPreFixedBindings())
+		for (BiConsumer<Context, HtmlDomNode> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext, this);
-		for (Tag<?> childTag : tag.getObservableChildren()) {
+		for (Tag childTag : tag.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
-				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Model>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
-					Model childModel = metaBinding.buildModel(modelContext, between);
+				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
+					Context childModel = metaBinding.buildModel(modelContext, between);
 					createViewContextChild(i, childModel, childTag);
 					return childModel;
-				}, Model::destroy));
+				}, Context::destroy));
 			} else
 				createViewContextChild(null, modelContext, childTag);
 		}
-		for (BiConsumer<Model, HtmlDomNode> binding : tag.getPostFixedBindings())
+		for (BiConsumer<Context, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, this);
 	}
 
-	public void createViewContextChild(Integer index, Model childModelContext, Tag element) {
+	public void createViewContextChild(Integer index, Context childModelContext, Tag element) {
 		int indexInChildren = computeIndex(index, element);
-		HtmlDomNode<M> node = element.createNode(this, childModelContext, element);
+		HtmlDomNode node = element.createNode(this, childModelContext, element);
 		node.init(indexInChildren);
 	}
 
-	private int computeIndex(Integer nullable, Tag<?> childElement) {
+	private int computeIndex(Integer nullable, Tag childElement) {
 		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
-		for (Tag<?> child : tag.getObservableChildren()) {
+		for (Tag child : tag.getObservableChildren()) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeBySubElement.get(child);
@@ -92,23 +126,22 @@ public class HtmlDomNode<M extends Model> {
 		return indexInChildren;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <MODEL extends Model> MODEL getModelContext() {
-		return (MODEL) modelContext;
+	public Context getModelContext() {
+		return modelContext;
 	}
 
-	protected RootHtmlDomNode<M> getRootHtmlDomNode() {
+	protected RootHtmlDomNode getRootHtmlDomNode() {
 		return parent.getRootHtmlDomNode();
 	}
 
-	private Map<Tag<?>, Integer> sizeBySubElement = new IdentityHashMap<Tag<?>, Integer>() {
+	private Map<Tag, Integer> sizeBySubElement = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
 		public Integer get(Object key) {
 			Integer size = super.get(key);
 			if (size == null)
-				put((Tag<?>) key, size = 0);
+				put((Tag) key, size = 0);
 			return size;
 		};
 	};
@@ -129,11 +162,11 @@ public class HtmlDomNode<M extends Model> {
 		parent.decrementSize(tag);
 	}
 
-	private void incrementSize(Tag<?> child) {
+	private void incrementSize(Tag child) {
 		sizeBySubElement.put(child, sizeBySubElement.get(child) + 1);
 	}
 
-	private void decrementSize(Tag<?> child) {
+	private void decrementSize(Tag child) {
 		int size = sizeBySubElement.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
@@ -230,7 +263,7 @@ public class HtmlDomNode<M extends Model> {
 		return parent.getId();
 	}
 
-	public Tag<M> getTag() {
+	public Tag getTag() {
 		return tag;
 	}
 
@@ -238,13 +271,13 @@ public class HtmlDomNode<M extends Model> {
 
 	}
 
-	public static class RootHtmlDomNode<M extends Model> extends HtmlDomNode<M> {
+	public static class RootHtmlDomNode extends HtmlDomNode {
 		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
 		private final ServerWebSocket webSocket;
 		private final String rootId;
 
-		public RootHtmlDomNode(M rootModelContext, RootTag<M> template, String rootId, ServerWebSocket webSocket) {
-			super(null, rootModelContext, (Tag<M>) template);
+		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, ServerWebSocket webSocket) {
+			super(null, rootModelContext, (Tag) rootTag);
 			this.rootId = rootId;
 			this.webSocket = webSocket;
 			sendAdd(0);
@@ -257,7 +290,7 @@ public class HtmlDomNode<M extends Model> {
 		}
 
 		@Override
-		protected RootHtmlDomNode<M> getRootHtmlDomNode() {
+		protected RootHtmlDomNode getRootHtmlDomNode() {
 			return this;
 		}
 

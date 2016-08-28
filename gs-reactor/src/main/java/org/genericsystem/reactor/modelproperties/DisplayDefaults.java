@@ -1,10 +1,10 @@
 package org.genericsystem.reactor.modelproperties;
 
-import org.genericsystem.reactor.model.GenericModel;
-
 import javafx.beans.property.Property;
 
-public interface DisplayDefaults extends ModelProperty<GenericModel> {
+import org.genericsystem.reactor.Context;
+
+public interface DisplayDefaults extends ModelProperty {
 
 	public static final String DISPLAY = "display";
 
@@ -12,7 +12,7 @@ public interface DisplayDefaults extends ModelProperty<GenericModel> {
 		createNewInitializedProperty(DISPLAY, model -> initialValue);
 	}
 
-	default Property<String> getDisplayProperty(GenericModel model) {
+	default Property<String> getDisplayProperty(Context model) {
 		return getProperty(DISPLAY, model);
 	}
 }

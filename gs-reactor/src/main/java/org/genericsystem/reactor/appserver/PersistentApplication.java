@@ -1,27 +1,27 @@
 package org.genericsystem.reactor.appserver;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.lang.reflect.InvocationTargetException;
 
 import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Root;
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.http.ServerWebSocket;
-
-public class PersistentApplication<M extends Model> {
-	private final Class<? extends RootTag<M>> htmlAppClass;
-	private final RootTag<M> tagTree;
+public class PersistentApplication {
+	private final Class<? extends RootTag> htmlAppClass;
+	private final RootTag tagTree;
 	private final Root engine;
-	private final Class<M> modelClass;
+	private final Class<Context> modelClass;
 	private final String rootId;
 	protected static Logger log = LoggerFactory.getLogger(PersistentApplication.class);
 
-	public PersistentApplication(Class<? extends RootTag<M>> htmlAppClass, Class<M> modelClass, Root engine, String rootId) {
+	public PersistentApplication(Class<? extends RootTag> htmlAppClass, Class<Context> modelClass, Root engine, String rootId) {
 		this.htmlAppClass = htmlAppClass;
 		this.modelClass = modelClass;
 		this.engine = engine;
@@ -54,7 +54,7 @@ public class PersistentApplication<M extends Model> {
 		return engine;
 	}
 
-	public Class<? extends RootTag<M>> getApplicationClass() {
+	public Class<? extends RootTag> getApplicationClass() {
 		return htmlAppClass;
 	}
 
@@ -62,7 +62,7 @@ public class PersistentApplication<M extends Model> {
 		engine.close();
 	}
 
-	public RootHtmlDomNode<?> init(ServerWebSocket socket) {
+	public RootHtmlDomNode init(ServerWebSocket socket) {
 		try {
 			return tagTree.init(modelClass.getConstructor(Root.class).newInstance(engine), rootId, socket);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {

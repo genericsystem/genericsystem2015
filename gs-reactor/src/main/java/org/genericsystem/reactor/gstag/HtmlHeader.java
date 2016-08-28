@@ -1,9 +1,9 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.Tag;
 
-public class HtmlHeader extends GSTag {
-	public HtmlHeader(GSTag parent) {
+public class HtmlHeader extends Tag {
+	public HtmlHeader(Tag parent) {
 		super(parent, "header");
 	}
 }

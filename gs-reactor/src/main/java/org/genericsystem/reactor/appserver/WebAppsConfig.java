@@ -1,5 +1,7 @@
 package org.genericsystem.reactor.appserver;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -9,14 +11,12 @@ import org.genericsystem.common.EnginesDeploymentConfig.EngineDeploymentConfig;
 import org.genericsystem.common.Root;
 import org.genericsystem.common.Statics;
 import org.genericsystem.kernel.Engine;
-import org.genericsystem.reactor.Model;
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.model.RootModel;
-
-import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -50,11 +50,11 @@ public class WebAppsConfig extends JsonObject {
 		return getJsonObject("apps").getMap().keySet();
 	}
 
-	public Class<? extends RootTag<?>> getApplicationClass(String applicationPath) {
+	public Class<? extends RootTag> getApplicationClass(String applicationPath) {
 		return getApplicationDeploymentConfig(applicationPath).getApplicationClass();
 	}
 
-	public Class<? extends Model> getModelClass(String applicationPath) {
+	public Class<Context> getModelClass(String applicationPath) {
 		return getApplicationDeploymentConfig(applicationPath).getModelClass();
 	}
 
@@ -71,7 +71,7 @@ public class WebAppsConfig extends JsonObject {
 		return dependOn != null ? dependOn.value() : new Class[] {};
 	}
 
-	public WebAppsConfig addApplication(String path, Class<? extends Tag<?>> htmlAppClass, Class<? extends Model> modelClass, Class<? extends Root> engineClass, String persistentDirectoryPath) {
+	public WebAppsConfig addApplication(String path, Class<? extends Tag> htmlAppClass, Class<? extends Context> modelClass, Class<? extends Root> engineClass, String persistentDirectoryPath) {
 		getJsonObject("apps").put(path, new ApplicationDeploymentConfig(htmlAppClass, modelClass, engineClass, persistentDirectoryPath, getModelClasses(htmlAppClass)));
 		return this;
 	}
@@ -106,7 +106,7 @@ public class WebAppsConfig extends JsonObject {
 			assert getString("applicationClass") != null;
 		}
 
-		public ApplicationDeploymentConfig(Class<? extends Tag<?>> applicationClass, Class<? extends Model> modelClass, Class<? extends Root> engineClass, String repositoryPath, Class<?>... classes) {
+		public ApplicationDeploymentConfig(Class<? extends Tag> applicationClass, Class<? extends Context> modelClass, Class<? extends Root> engineClass, String repositoryPath, Class<?>... classes) {
 			super(repositoryPath, classes);
 			put("applicationClass", applicationClass.getName());
 			put("modelClass", modelClass.getName());
@@ -114,9 +114,9 @@ public class WebAppsConfig extends JsonObject {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends RootTag<?>> getApplicationClass() {
+		public Class<? extends RootTag> getApplicationClass() {
 			try {
-				return (Class<? extends RootTag<?>>) Class.forName(getString("applicationClass"));
+				return (Class<? extends RootTag>) Class.forName(getString("applicationClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
@@ -132,9 +132,9 @@ public class WebAppsConfig extends JsonObject {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<? extends Model> getModelClass() {
+		public Class<Context> getModelClass() {
 			try {
-				return (Class<? extends Model>) Class.forName(getString("modelClass"));
+				return (Class<Context>) Class.forName(getString("modelClass"));
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}

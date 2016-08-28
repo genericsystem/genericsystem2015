@@ -3,7 +3,6 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
@@ -14,11 +13,11 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
  */
 public class GSTable extends GSComposite implements SelectionDefaults {
 
-	public GSTable(GSTag parent) {
+	public GSTable(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
 	}
 
-	public GSTable(GSTag parent, FlexDirection flexDirection) {
+	public GSTable(Tag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}
@@ -91,7 +90,7 @@ public class GSTable extends GSComposite implements SelectionDefaults {
 
 	@Override
 	protected void sections() {
-		Tag<GenericModel> selectableTag = new GSRowDisplayer(this, this.getReverseDirection()) {
+		Tag selectableTag = new GSRowDisplayer(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				forEach(ObservableListExtractor.SUBINSTANCES);

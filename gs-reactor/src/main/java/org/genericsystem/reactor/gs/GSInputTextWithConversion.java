@@ -1,26 +1,28 @@
 package org.genericsystem.reactor.gs;
 
-import java.io.Serializable;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.gstag.HtmlInputText;
-import org.genericsystem.reactor.model.GenericModel;
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
+import java.io.Serializable;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gstag.HtmlInputText;
+import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
 public class GSInputTextWithConversion<T extends Serializable> extends HtmlInputText implements ConvertedValueDefaults {
 
 	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
 
-	public GSInputTextWithConversion(GSTag parent) {
+	public GSInputTextWithConversion(Tag parent) {
 		super(parent);
 		addStyle("width", "100%");
 		addStyle("height", "100%");
@@ -55,7 +57,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		});
 	}
 
-	public StringConverter<T> getConverter(GenericModel model) {
+	public StringConverter<T> getConverter(Context model) {
 		Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
 		if (clazz == null)
 			clazz = String.class;
@@ -64,7 +66,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> implements SelectionDefaults {
 
-		public GSInputTextEditorWithConversion(GSTag parent) {
+		public GSInputTextEditorWithConversion(Tag parent) {
 			super(parent);
 			initValueProperty(model -> model.getGeneric().getValue());
 			addConvertedValueChangeListener((model, nva) -> {
@@ -78,7 +80,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		}
 
 		@Override
-		public StringConverter<T> getConverter(GenericModel model) {
+		public StringConverter<T> getConverter(Context model) {
 			Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
 			if (clazz == null) {
 				if (model.getGeneric().getValue() != null)

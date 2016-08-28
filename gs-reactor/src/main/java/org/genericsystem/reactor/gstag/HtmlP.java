@@ -1,14 +1,14 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.Tag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlP extends GSTag {
+public class HtmlP extends Tag {
 
-	public HtmlP(GSTag parent) {
+	public HtmlP(Tag parent) {
 		super(parent, "p");
 	}
 }

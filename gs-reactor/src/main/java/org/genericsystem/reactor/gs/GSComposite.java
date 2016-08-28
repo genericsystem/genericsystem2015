@@ -1,17 +1,16 @@
 package org.genericsystem.reactor.gs;
 
+import io.vertx.core.json.JsonObject;
+
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlRadio;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
-import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -19,11 +18,11 @@ import io.vertx.core.json.JsonObject;
  */
 public class GSComposite extends GSSection {
 
-	public GSComposite(GSTag parent) {
+	public GSComposite(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSComposite(GSTag parent, FlexDirection flexDirection) {
+	public GSComposite(Tag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		header();
 		sections();
@@ -52,11 +51,11 @@ public class GSComposite extends GSSection {
 
 	public static class TitleCompositeFlexElement extends GSComposite {
 
-		public TitleCompositeFlexElement(GSTag parent, FlexDirection flexDirection) {
+		public TitleCompositeFlexElement(Tag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 		}
 
-		public TitleCompositeFlexElement(GSTag parent) {
+		public TitleCompositeFlexElement(Tag parent) {
 			this(parent, FlexDirection.COLUMN);
 		}
 
@@ -79,11 +78,11 @@ public class GSComposite extends GSSection {
 
 	public static class ColorTitleCompositeFlexElement extends TitleCompositeFlexElement {
 
-		public ColorTitleCompositeFlexElement(GSTag parent, FlexDirection flexDirection) {
+		public ColorTitleCompositeFlexElement(Tag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 		}
 
-		public ColorTitleCompositeFlexElement(GSTag parent) {
+		public ColorTitleCompositeFlexElement(Tag parent) {
 			this(parent, FlexDirection.COLUMN);
 		}
 
@@ -105,7 +104,7 @@ public class GSComposite extends GSSection {
 
 	public static class CompositeRadio extends GSComposite {
 
-		public CompositeRadio(GSTag parent, FlexDirection flexDirection) {
+		public CompositeRadio(Tag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 		}
 
@@ -128,9 +127,9 @@ public class GSComposite extends GSSection {
 
 	public static class ColorCompositeRadio extends GSComposite implements SelectionDefaults {
 
-		private GSTag flexSubElement;
+		private Tag flexSubElement;
 
-		public ColorCompositeRadio(GSTag parent, FlexDirection flexDirection) {
+		public ColorCompositeRadio(Tag parent, FlexDirection flexDirection) {
 			super(parent, flexDirection);
 			createSelectionProperty();
 			bindBiDirectionalSelection(flexSubElement);
@@ -139,13 +138,13 @@ public class GSComposite extends GSSection {
 		}
 
 		@Override
-		protected HtmlDomNode createNode(HtmlDomNode parent, Model modelContext, Tag tag) {
+		protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext, Tag tag) {
 			return new HtmlDomNode(parent, modelContext, tag) {
 
 				@Override
 				public void handleMessage(JsonObject json) {
 					if (UPDATE.equals(json.getString(MSG_TYPE))) {
-						((SelectionDefaults) getTag()).getSelectionIndex((GenericModel) getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+						((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
 					}
 				}
 			};

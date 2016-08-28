@@ -1,5 +1,7 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,16 +13,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -30,29 +23,40 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.DisplayDefaults;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Nicolas Feybesse
  *
  * @param <N>
  */
-public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, StylesDefaults<M>, AttributesDefaults<M>, StyleClassesDefaults<M> {
+public abstract class Tag implements TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults {
 
 	private static final Logger log = LoggerFactory.getLogger(Tag.class);
 	private final String tag;
 	private MetaBinding<?> metaBinding;
-	// private Function<Model, ObservableList<?>> metaBinding;
-	// private BiFunction<Model, ?, M> modelBuilder;
-	private final List<BiConsumer<Model, HtmlDomNode>> preFixedBindings = new ArrayList<>();
-	private final List<BiConsumer<Model, HtmlDomNode>> postFixedBindings = new ArrayList<>();
+	private final List<BiConsumer<Context, HtmlDomNode>> preFixedBindings = new ArrayList<>();
+	private final List<BiConsumer<Context, HtmlDomNode>> postFixedBindings = new ArrayList<>();
 	private final Tag parent;
-	private final ObservableList<Tag<?>> children = FXCollections.observableArrayList();
+	private final ObservableList<Tag> children = FXCollections.observableArrayList();
 
 	@Override
 	public String toString() {
 		return tag + " " + getClass().getName();
 	}
 
-	protected Tag(Tag<?> parent, String tag) {
+	protected Tag(Tag parent, String tag) {
 		this.tag = tag;
 		this.parent = parent;
 		if (parent != null)
@@ -63,11 +67,11 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		return tag;
 	}
 
-	protected List<BiConsumer<Model, HtmlDomNode>> getPreFixedBindings() {
+	protected List<BiConsumer<Context, HtmlDomNode>> getPreFixedBindings() {
 		return preFixedBindings;
 	}
 
-	protected List<BiConsumer<Model, HtmlDomNode>> getPostFixedBindings() {
+	protected List<BiConsumer<Context, HtmlDomNode>> getPostFixedBindings() {
 		return postFixedBindings;
 	}
 
@@ -83,13 +87,13 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	@Override
-	public void addPrefixBinding(Consumer<M> consumer) {
-		preFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
+	public void addPrefixBinding(Consumer<Context> consumer) {
+		preFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
 	@Override
-	public void addPostfixBinding(Consumer<M> consumer) {
-		postFixedBindings.add((modelContext, node) -> consumer.accept((M) modelContext));
+	public void addPostfixBinding(Consumer<Context> consumer) {
+		postFixedBindings.add((modelContext, node) -> consumer.accept(modelContext));
 	}
 
 	public void bindOptionalStyleClass(String styleClass, String propertyName) {
@@ -107,54 +111,110 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		});
 	}
 
-	public void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<M, ObservableValue<Boolean>> applyOnModel) {
+	public void bindOptionalStyleClass(String styleClass, String modelPropertyName, Function<Context, ObservableValue<Boolean>> applyOnModel) {
 		storeProperty(modelPropertyName, applyOnModel);
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	protected <BETWEEN> void forEach(Function<Model, ObservableList<BETWEEN>> applyOnModel, BiFunction<Model, BETWEEN, Model> modelBuilder) {
+	protected <BETWEEN> void forEach(Function<Context, ObservableList<BETWEEN>> applyOnModel, BiFunction<Context, BETWEEN, Context> modelBuilder) {
 		setMetaBinding(new MetaBinding<BETWEEN>(applyOnModel, modelBuilder));
 	}
 
-	@Override
-	public <T> Property<T> getProperty(String propertyName, Model model) {
-		return getProperty(propertyName, new Model[] { model });
+	public void forEach(ObservableListExtractor observableListExtractor) {
+		forEach(model -> observableListExtractor.apply(model.getGenerics()), MetaBinding.MODEL_BUILDER);
 	}
 
-	private <T> Property<T> getProperty(String propertyName, Model[] model) {
-		Tag<?> tag = this;
-		while (tag != null && model[0] != null) {
-			if (model[0].containsProperty(tag, propertyName))
-				return model[0].getProperty(tag, propertyName);
-			if (tag.metaBinding != null && model[0].getHtmlDomNode(tag.getParent()) == null)
-				model[0] = model[0].getParent();
+	protected void forEach(Tag parentCompositeElement) {
+		forEach(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
+	}
+
+	public void select(Function<Generic[], Generic> genericSupplier) {
+		forEach((ObservableListExtractor) gs -> {
+			Generic generic = genericSupplier.apply(gs);
+			return generic != null ? FXCollections.singletonObservableList(generic) : FXCollections.emptyObservableList();
+		});
+	}
+
+	public void select_(Function<Context, ObservableValue<Context>> applyOnModelContext) {
+		select__(model -> new ListBinding<Context>() {
+			ObservableValue<Context> ov = applyOnModelContext.apply(model);
+			{
+				bind(ov);
+			}
+
+			@Override
+			protected ObservableList<Context> computeValue() {
+				Context model = ov.getValue();
+				return model != null ? FXCollections.singletonObservableList(model) : FXCollections.emptyObservableList();
+			}
+		});
+	}
+
+	public void select__(Function<Context, ObservableList<Context>> applyOnModelContext) {
+		forEach(model -> applyOnModelContext.apply(model), MetaBinding.MODEL_CLONER);
+	}
+
+	public void select(BiFunction<Context, ObservableList<Generic>, ObservableList<Context>> applyOnModel) {
+		select__(model -> new ListBinding<Context>() {
+			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+			{
+				bind(holders);
+			}
+
+			@Override
+			protected ObservableList<Context> computeValue() {
+				return applyOnModel.apply(model, holders);
+			}
+		});
+	}
+
+	public void select(Class<?> genericClass) {
+		forEach((ObservableListExtractor) gs -> FXCollections.singletonObservableList(gs[0].getRoot().find(genericClass)));
+	}
+
+	public ObservableListExtractor getObservableListExtractor() {
+		return ObservableListExtractor.SUBINSTANCES;
+	}
+
+	@Override
+	public <T> Property<T> getProperty(String propertyName, Context model) {
+		return getProperty(propertyName, new Context[] { model });
+	}
+
+	private <T> Property<T> getProperty(String propertyName, Context[] models) {
+		Tag tag = this;
+		while (tag != null && models[0] != null) {
+			if (models[0].containsProperty(tag, propertyName))
+				return models[0].getProperty(tag, propertyName);
+			if (tag.metaBinding != null && models[0].getHtmlDomNode(tag.getParent()) == null)
+				models[0] = models[0].getParent();
 			tag = tag.getParent();
 		}
 		return null;
 	}
 
 	@Override
-	public <T> Property<T> getInheritedProperty(String propertyName, Model[] model, Tag<?>[] tag) {
+	public <T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag) {
 		while (tag != null && model[0] != null) {
 			if (tag[0].metaBinding != null && model[0].getHtmlDomNode(tag[0].getParent()) == null)
 				model[0] = model[0].getParent();
 			tag[0] = tag[0].getParent();
 			if (model[0] != null && model[0].containsProperty(tag[0], propertyName))
-				return model[0].getProperty(tag[0], propertyName);
+				return model[0].<T> getProperty(tag[0], propertyName);
 		}
 		return null;
 	}
 
 	@Override
-	public <T> ObservableValue<T> getObservableValue(String propertyName, Model model) {
-		return getObservableValue(propertyName, new Model[] { model });
+	public <T> ObservableValue<T> getObservableValue(String propertyName, Context model) {
+		return getObservableValue(propertyName, new Context[] { model });
 	}
 
-	private <T> ObservableValue<T> getObservableValue(String propertyName, Model[] model) {
-		Tag<?> tag = this;
+	private <T> ObservableValue<T> getObservableValue(String propertyName, Context[] model) {
+		Tag tag = this;
 		while (tag != null && model[0] != null) {
 			if (model[0].containsProperty(tag, propertyName))
-				return model[0].getObservableValue(tag, propertyName);
+				return model[0].<T> getObservableValue(tag, propertyName);
 			if (tag.metaBinding != null && model[0].getHtmlDomNode(tag.getParent()) == null)
 				model[0] = model[0].getParent();
 			tag = tag.getParent();
@@ -162,7 +222,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		return null;
 	}
 
-	private void bindMapElement(String name, String propertyName, Function<Model, Map<String, String>> getMap) {
+	private void bindMapElement(String name, String propertyName, Function<Context, Map<String, String>> getMap) {
 		addPrefixBinding(model -> {
 			Map<String, String> map = getMap.apply(model);
 			ChangeListener<String> listener = (o, old, newValue) -> map.put(name, newValue);
@@ -172,15 +232,15 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		});
 	}
 
-	private void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap) {
+	private void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap) {
 		bindBiDirectionalMapElement(propertyName, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
 	}
 
-	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
+	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
 		bindBiDirectionalMapElement(propertyName, name, getMap, model -> stringConverter);
 	}
 
-	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Model, ObservableMap<String, String>> getMap, Function<M, StringConverter<T>> getStringConverter) {
+	private <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap, Function<Context, StringConverter<T>> getStringConverter) {
 		addPrefixBinding(modelContext -> {
 			ObservableMap<String, String> map = getMap.apply(modelContext);
 			StringConverter<T> stringConverter = getStringConverter.apply(modelContext);
@@ -200,7 +260,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		});
 	}
 
-	public <T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<M, T> listener) {
+	public <T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener) {
 		addPrefixBinding(modelContext -> {
 			ObservableValue<T> observable = getObservableValue(propertyName, modelContext);
 			observable.addListener((o, old, nva) -> listener.accept(modelContext, nva));
@@ -213,29 +273,29 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 	}
 
 	@Override
-	public <T> void createNewInitializedProperty(String propertyName, M model, Function<M, T> getInitialValue) {
+	public <T> void createNewInitializedProperty(String propertyName, Context model, Function<Context, T> getInitialValue) {
 		model.createNewProperty(this, propertyName);
 		getProperty(propertyName, model).setValue(getInitialValue.apply(model));
 	}
 
 	@Override
-	public <T> void createNewInitializedProperty(String propertyName, Function<M, T> getInitialValue) {
+	public <T> void createNewInitializedProperty(String propertyName, Function<Context, T> getInitialValue) {
 		createNewProperty(propertyName);
 		initProperty(propertyName, getInitialValue);
 	}
 
 	@Override
-	public <T> void initProperty(String propertyName, Function<M, T> getInitialValue) {
+	public <T> void initProperty(String propertyName, Function<Context, T> getInitialValue) {
 		addPrefixBinding(modelContext -> getProperty(propertyName, modelContext).setValue(getInitialValue.apply(modelContext)));
 	}
 
 	@Override
-	public <T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel) {
+	public <T> void storeProperty(String propertyName, Function<Context, ObservableValue<T>> applyOnModel) {
 		addPrefixBinding(modelContext -> modelContext.storeProperty(this, propertyName, applyOnModel.apply(modelContext)));
 	}
 
 	@Override
-	public <T> void storeProperty(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel) {
+	public <T> void storeProperty(String propertyName, Context model, Function<Context, ObservableValue<T>> applyOnModel) {
 		model.storeProperty(this, propertyName, applyOnModel.apply(model));
 	}
 
@@ -247,7 +307,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		bindMapElement(style, modelPropertyName, model -> getDomNodeStyles(model));
 	}
 
-	public void bindStyle(String style, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
+	public void bindStyle(String style, String propertyName, Function<Context, ObservableValue<String>> applyOnModel) {
 		storeProperty(propertyName, applyOnModel);
 		bindMapElement(style, propertyName, model -> getDomNodeStyles(model));
 	}
@@ -268,7 +328,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
 
-	public void bindAttribute(String attributeName, String propertyName, Function<M, ObservableValue<String>> applyOnModel) {
+	public void bindAttribute(String attributeName, String propertyName, Function<Context, ObservableValue<String>> applyOnModel) {
 		storeProperty(propertyName, applyOnModel);
 		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}
@@ -281,7 +341,7 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), stringConverter);
 	}
 
-	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<M, StringConverter<T>> getStringConverter) {
+	public <T extends Serializable> void bindBiDirectionalAttribute(String propertyName, String attributeName, Function<Context, StringConverter<T>> getStringConverter) {
 		bindBiDirectionalMapElement(propertyName, attributeName, model -> getDomNodeAttributes(model), getStringConverter);
 	}
 
@@ -304,22 +364,22 @@ public abstract class Tag<M extends Model> implements TextPropertyDefaults<M>, S
 		});
 	}
 
-	protected HtmlDomNode createNode(HtmlDomNode parent, Model modelContext, Tag tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext, Tag tag) {
 		return new HtmlDomNode(parent, modelContext, tag);
 	};
 
-	protected ObservableList<Tag<?>> getObservableChildren() {
+	protected ObservableList<Tag> getObservableChildren() {
 		return children;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <COMPONENT extends Tag<?>> COMPONENT getParent() {
+	public <COMPONENT extends Tag> COMPONENT getParent() {
 		return (COMPONENT) parent;
 	}
 
-	public static interface RootTag<M extends Model> {
-		default RootHtmlDomNode<M> init(M rootModelContext, String rootId, ServerWebSocket webSocket) {
-			return new RootHtmlDomNode<M>(rootModelContext, this, rootId, webSocket);
+	public static interface RootTag {
+		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {
+			return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
 		}
 	}
 }

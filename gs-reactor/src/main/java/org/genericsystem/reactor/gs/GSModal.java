@@ -2,10 +2,11 @@ package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 
+import javafx.beans.binding.Bindings;
+
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
-import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -13,11 +14,11 @@ import javafx.beans.binding.Bindings;
  */
 public class GSModal extends GSSection implements SelectionDefaults {
 
-	public GSModal(GSTag parent, Consumer<GSTag> contentTagConsumer) {
+	public GSModal(Tag parent, Consumer<Tag> contentTagConsumer) {
 		this(parent, FlexDirection.COLUMN, contentTagConsumer);
 	}
 
-	public GSModal(GSTag parent, FlexDirection direction, Consumer<GSTag> contentTagConsumer) {
+	public GSModal(Tag parent, FlexDirection direction, Consumer<Tag> contentTagConsumer) {
 		super(parent, direction);
 		addStyleClass("modal");
 		bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));

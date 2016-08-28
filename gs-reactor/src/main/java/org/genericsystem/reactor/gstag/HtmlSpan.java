@@ -1,14 +1,14 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.Tag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlSpan extends GSTag {
+public class HtmlSpan extends Tag {
 
-	public HtmlSpan(GSTag parent) {
+	public HtmlSpan(Tag parent) {
 		super(parent, "span");
 	}
 }

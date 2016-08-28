@@ -1,10 +1,11 @@
 package org.genericsystem.reactor.gs;
 
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlImg;
 
 public class GSLogo extends GSSection {
 
-	public GSLogo(GSTag parent) {
+	public GSLogo(Tag parent) {
 		super(parent, FlexDirection.ROW);
 		new HtmlImg(this) {
 			{

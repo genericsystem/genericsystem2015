@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.model.GenericModel;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-public interface GSBuilderDefaults extends ModelProperty<GenericModel> {
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Context;
+
+public interface GSBuilderDefaults extends ModelProperty {
 
 	public static final String COMPONENTS_MAP = "componentsMap";
 	public static final String HOLDERS_MAP = "holdersMap";
@@ -23,22 +23,22 @@ public interface GSBuilderDefaults extends ModelProperty<GenericModel> {
 	}
 
 	default void createComponentsMapProperty() {
-		createNewInitializedProperty(COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<GenericModel>>>());
+		createNewInitializedProperty(COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<Context>>>());
 	};
 
 	default void createInvalidListProperty() {
 		createNewInitializedProperty(INVALID_LIST, model -> new ArrayList<ObservableValue<Boolean>>());
 	};
 
-	default List<ObservableValue<Boolean>> getInvalidList(GenericModel model) {
+	default List<ObservableValue<Boolean>> getInvalidList(Context model) {
 		return this.<List<ObservableValue<Boolean>>> getProperty(INVALID_LIST, model).getValue();
 	}
 
-	default Map<Generic, Property<Serializable>> getHoldersMap(GenericModel model) {
+	default Map<Generic, Property<Serializable>> getHoldersMap(Context model) {
 		return this.<Map<Generic, Property<Serializable>>> getProperty(HOLDERS_MAP, model).getValue();
 	}
 
-	default Map<Generic, List<Property<GenericModel>>> getComponentsMap(GenericModel model) {
-		return this.<Map<Generic, List<Property<GenericModel>>>> getProperty(COMPONENTS_MAP, model).getValue();
+	default Map<Generic, List<Property<Context>>> getComponentsMap(Context model) {
+		return this.<Map<Generic, List<Property<Context>>>> getProperty(COMPONENTS_MAP, model).getValue();
 	}
 }

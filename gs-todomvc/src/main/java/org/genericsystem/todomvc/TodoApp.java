@@ -5,10 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -27,16 +35,7 @@ import org.genericsystem.reactor.gstag.HtmlLi;
 import org.genericsystem.reactor.gstag.HtmlSpan;
 import org.genericsystem.reactor.gstag.HtmlStrong;
 import org.genericsystem.reactor.gstag.HtmlUl;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.todomvc.Todos.Completed;
-
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -56,27 +55,27 @@ public class TodoApp extends GSApp {
 		ApplicationServer.startSimpleGenericApp(mainArgs, TodoApp.class, "/todo/");
 	}
 
-	private Property<Predicate<Generic>> getModeProperty(Model model) {
+	private Property<Predicate<Generic>> getModeProperty(Context model) {
 		return getProperty(FILTER_MODE, model);
 	}
 
-	private ObservableList<Generic> getTodos(Model model) {
+	private ObservableList<Generic> getTodos(Context model) {
 		return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
 	}
 
-	private ObservableList<Generic> getFilteredTodos(Model model) {
+	private ObservableList<Generic> getFilteredTodos(Context model) {
 		return this.<ObservableList<Generic>> getProperty(FILTERED_TODOS, model).getValue();
 	}
 
-	private ObservableList<Generic> getActiveTodos(Model model) {
+	private ObservableList<Generic> getActiveTodos(Context model) {
 		return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
 	}
 
-	private ObservableList<Generic> getCompletedTodos(Model model) {
+	private ObservableList<Generic> getCompletedTodos(Context model) {
 		return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
 	}
 
-	private Map<Generic, Observable[]> getExtractors(Model model) {
+	private Map<Generic, Observable[]> getExtractors(Context model) {
 		return this.<Map<Generic, Observable[]>> getProperty("extractorMap", model).getValue();
 	}
 
@@ -124,7 +123,7 @@ public class TodoApp extends GSApp {
 										setText("todos");
 									}
 								};
-								HtmlInputText it = new HtmlInputText(this) {
+								new HtmlInputText(this) {
 									{
 										addStyleClass("new-todo");
 										addAttribute("placeholder", "What needs to be done?");
@@ -175,7 +174,7 @@ public class TodoApp extends GSApp {
 														new HtmlButton(this) {
 															{
 																addStyleClass("destroy");
-																bindAction(GenericModel::remove);
+																bindAction(Context::remove);
 															}
 														};
 													}
@@ -252,14 +251,14 @@ public class TodoApp extends GSApp {
 									{
 										addStyleClass("save");
 										setText("Save");
-										bindAction(GenericModel::flush);
+										bindAction(Context::flush);
 									}
 								};
 								new HtmlButton(this) {
 									{
 										addStyleClass("cancel");
 										setText("Cancel");
-										bindAction(GenericModel::cancel);
+										bindAction(Context::cancel);
 									}
 								};
 								// new HtmlButton(this) {
