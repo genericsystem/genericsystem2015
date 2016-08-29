@@ -1,28 +1,29 @@
 package org.genericsystem.reactor.gs;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlButton;
-import org.genericsystem.reactor.model.GenericModel;
 
 public class GSMonitor extends GSSection {
 
-	public GSMonitor(GSTag parent) {
+	public GSMonitor(Tag parent) {
 		this(parent, FlexDirection.ROW);
 	}
 
-	public GSMonitor(GSTag parent, FlexDirection direction) {
+	public GSMonitor(Tag parent, FlexDirection direction) {
 		super(parent, direction);
 		addStyle("justify-content", "space-around");
 		addStyle("padding", "10px");
 		new HtmlButton(this) {
 			{
 				setText("Save");
-				bindAction(GenericModel::flush);
+				bindAction(Context::flush);
 			}
 		};
 		new HtmlButton(this) {
 			{
 				setText("Cancel");
-				bindAction(GenericModel::cancel);
+				bindAction(Context::cancel);
 			}
 		};
 		// new GSButton(this) {

@@ -2,24 +2,24 @@ package org.genericsystem.reactor.modelproperties;
 
 import java.util.function.Function;
 
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
-
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 
-public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> {
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+
+public interface TextPropertyDefaults extends ModelProperty {
 
 	public static final String TEXT = "text";
 	public static final String TEXT_BINDING = "binding";
 
-	default Property<String> getDomNodeTextProperty(M model) {
-		if (!model.containsProperty((Tag<?>) this, TEXT)) {
+	default Property<String> getDomNodeTextProperty(Context model) {
+		if (!model.containsProperty((Tag) this, TEXT)) {
 			storeProperty(TEXT, model, m -> new SimpleStringProperty());
 			Property<String> text = getProperty(TEXT, model);
-			text.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag<?>) this).getTextListener()));
+			text.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag) this).getTextListener()));
 		}
 		return getProperty(TEXT, model);
 	}
@@ -28,7 +28,7 @@ public interface TextPropertyDefaults<M extends Model> extends ModelProperty<M> 
 		addPrefixBinding(model -> getDomNodeTextProperty(model).setValue(value));
 	}
 
-	default void bindText(Function<M, ObservableValue<String>> applyOnModel) {
+	default void bindText(Function<Context, ObservableValue<String>> applyOnModel) {
 		storeProperty(TEXT_BINDING, applyOnModel);
 		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getObservableValue(TEXT_BINDING, model)));
 	}

@@ -1,20 +1,20 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.Tag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlLabel extends GSTag {
+public class HtmlLabel extends Tag {
 
-	public HtmlLabel(GSTag parent) {
+	public HtmlLabel(Tag parent) {
 		super(parent, "label");
 	}
 
 	public static class GSLabelDisplayer extends HtmlLabel {
 
-		public GSLabelDisplayer(GSTag parent) {
+		public GSLabelDisplayer(Tag parent) {
 			super(parent);
 			bindText();
 		}

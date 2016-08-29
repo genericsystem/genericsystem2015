@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gs;
 
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
@@ -8,14 +9,14 @@ import org.genericsystem.reactor.modelproperties.SwitchDefaults;
 
 public class GSStepEditor extends GSEditor implements SwitchDefaults {
 
-	protected GSTag switchedTag;
-	protected GSTag instanceNameTag;
+	protected Tag switchedTag;
+	protected Tag instanceNameTag;
 
-	public GSStepEditor(GSTag parent) {
+	public GSStepEditor(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSStepEditor(GSTag parent, FlexDirection direction) {
+	public GSStepEditor(Tag parent, FlexDirection direction) {
 		super(parent, direction);
 	}
 
@@ -41,7 +42,7 @@ public class GSStepEditor extends GSEditor implements SwitchDefaults {
 
 	public static class StepNavigator extends GSSection {
 
-		public StepNavigator(GSTag parent, FlexDirection direction) {
+		public StepNavigator(Tag parent, FlexDirection direction) {
 			super(parent, direction);
 			addStyle("justify-content", "space-between");
 			new HtmlHyperLink(this) {

@@ -1,26 +1,25 @@
 package org.genericsystem.reactor.gstag;
 
+import io.vertx.core.json.JsonObject;
+
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSTag;
-
-import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlCheckBox extends GSTag {
+public class HtmlCheckBox extends Tag {
 
-	public HtmlCheckBox(GSTag parent) {
+	public HtmlCheckBox(Tag parent) {
 		super(parent, "input");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
-		return new HtmlDomNode(parentId, parent, modelContext, tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override
 			public JsonObject fillJson(JsonObject jsonObj) {

@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.Tag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlDiv extends GSTag {
-	public HtmlDiv(GSTag parent) {
+public class HtmlDiv extends Tag {
+	public HtmlDiv(Tag parent) {
 		super(parent, "div");
 	}
 }

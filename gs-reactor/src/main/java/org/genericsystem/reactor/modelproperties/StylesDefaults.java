@@ -1,26 +1,26 @@
 package org.genericsystem.reactor.modelproperties;
 
-import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
-import org.genericsystem.reactor.Tag;
-
 import javafx.beans.property.Property;
 import javafx.collections.ObservableMap;
 
-public interface StylesDefaults<M extends Model> extends MapStringDefaults<M> {
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.Tag;
+
+public interface StylesDefaults extends MapStringDefaults {
 
 	public static final String STYLES = "styles";
 
-	<T> Property<T> getInheritedProperty(String propertyName, Model[] model, Tag<?>[] tag);
+	<T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag);
 
-	default ObservableMap<String, String> getDomNodeStyles(Model model) {
+	default ObservableMap<String, String> getDomNodeStyles(Context model) {
 		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener);
 	}
 
 	default void inheritStyle(String styleName) {
 		addPrefixBinding(model -> {
-			Model[] modelArray = new Model[] { model };
-			Tag<?>[] tagArray = new Tag<?>[] { (Tag<?>) this };
+			Context[] modelArray = new Context[] { model };
+			Tag[] tagArray = new Tag[] { (Tag) this };
 			Property<ObservableMap<String, String>> styles = getInheritedProperty(STYLES, modelArray, tagArray);
 			while (styles != null)
 				if (styles.getValue().containsKey(styleName)) {

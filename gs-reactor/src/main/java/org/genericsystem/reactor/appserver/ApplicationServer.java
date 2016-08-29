@@ -1,5 +1,15 @@
 package org.genericsystem.reactor.appserver;
 
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,16 +30,6 @@ import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
 
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 /**
  * @author Nicolas Feybesse
  *
@@ -37,7 +37,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 public class ApplicationServer extends AbstractBackEnd {
 	protected static Logger log = LoggerFactory.getLogger(ApplicationServer.class);
-	protected Map<String, PersistentApplication<?>> apps = new HashMap<>();
+	protected Map<String, PersistentApplication> apps = new HashMap<>();
 
 	public ApplicationServer(WebAppsConfig options) {
 		super(options.getHost(), options.getPort());
@@ -83,12 +83,12 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
 
-			PersistentApplication<?> application = apps.get(path);
+			PersistentApplication application = apps.get(path);
 			if (application == null) {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			AbstractCache cache = application.getEngine().newCache();
-			RootHtmlDomNode<?> rootHtmlDomNode = cache.safeSupply(() -> application.init(socket));
+			RootHtmlDomNode rootHtmlDomNode = cache.safeSupply(() -> application.init(socket));
 			// log.info("Open new socket : " + socket);
 			return buffer -> {
 				// log.info("Receive new message for socket : " + socket);
@@ -113,7 +113,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					if (appPath.endsWith(".js") || appPath.endsWith(".css") || appPath.endsWith(".ico") || appPath.endsWith(".jpg") || appPath.endsWith(".png"))
 						appPath = "";
 					// log.info("Request received with application path : " + appPath);
-					PersistentApplication<?> application = apps.get("/" + appPath);
+					PersistentApplication application = apps.get("/" + appPath);
 					if (application == null) {
 						request.response().end("No application is configured with path : /" + appPath);
 						log.info("No application is configured with path : /" + appPath);

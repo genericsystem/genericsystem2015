@@ -1,16 +1,16 @@
 package org.genericsystem.carcolor;
 
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSModalButton;
 import org.genericsystem.reactor.gs.GSSection;
-import org.genericsystem.reactor.gs.GSTag;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLi;
 import org.genericsystem.reactor.gstag.HtmlUl;
 
 public class GSUserGuide extends GSSection {
 
-	public GSUserGuide(GSTag parent) {
+	public GSUserGuide(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-direction", "column");
 		addStyle("flex-wrap", "nowrap");

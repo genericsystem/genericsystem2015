@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gs;
 
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
@@ -14,11 +15,11 @@ import org.genericsystem.reactor.model.StringExtractor;
  */
 public class GSEditor extends GSComposite {
 
-	public GSEditor(GSTag parent) {
+	public GSEditor(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSEditor(GSTag parent, FlexDirection flexDirection) {
+	public GSEditor(Tag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
 		addStyle("flex", "1");
 	}

@@ -2,22 +2,23 @@ package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
 
+import javafx.beans.property.Property;
+
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-
-import javafx.beans.property.Property;
 
 public class GSBooleanHolderEditor extends GSSection {
 
 	protected GSCheckBoxWithValue checkbox;
 
-	public GSBooleanHolderEditor(GSTag parent) {
+	public GSBooleanHolderEditor(Tag parent) {
 		this(parent, GSCheckBoxEditor::new);
 	}
 
-	public GSBooleanHolderEditor(GSTag parent, GSCheckBoxConstructor constructor) {
+	public GSBooleanHolderEditor(Tag parent, GSCheckBoxConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
 		new GSSection(this, FlexDirection.ROW) {
@@ -32,19 +33,19 @@ public class GSBooleanHolderEditor extends GSSection {
 
 	@FunctionalInterface
 	public interface GSCheckBoxConstructor {
-		GSCheckBoxWithValue build(GSTag parent);
+		GSCheckBoxWithValue build(Tag parent);
 	}
 
 	public static class GSBooleanHolderEditorWithRemoval extends GSBooleanHolderEditor {
 
-		public GSBooleanHolderEditorWithRemoval(GSTag parent) {
+		public GSBooleanHolderEditorWithRemoval(Tag parent) {
 			super(parent);
 			new HtmlHyperLink(this) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("text-decoration", "none");
 					setText("×");
-					bindAction(GenericModel::remove);
+					bindAction(Context::remove);
 				}
 			};
 		}
@@ -52,7 +53,7 @@ public class GSBooleanHolderEditor extends GSSection {
 
 	public static class GSBooleanHolderAdder extends GSBooleanHolderEditor {
 
-		public GSBooleanHolderAdder(GSTag parent) {
+		public GSBooleanHolderAdder(Tag parent) {
 			super(parent, GSCheckBoxWithValue::new);
 			checkbox.addConvertedValueChangeListener((model, nva) -> {
 				if (nva != null)
@@ -76,7 +77,7 @@ public class GSBooleanHolderEditor extends GSSection {
 
 	public static class GSBooleanHolderBuilder extends GSBooleanHolderEditor implements GSBuilderDefaults {
 
-		public GSBooleanHolderBuilder(GSTag parent) {
+		public GSBooleanHolderBuilder(Tag parent) {
 			super(parent, GSCheckBoxWithValue::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder)
 				checkbox.addPrefixBinding(model -> getHoldersMap(model).put(model.getGeneric(), checkbox.getConvertedValueProperty(model)));

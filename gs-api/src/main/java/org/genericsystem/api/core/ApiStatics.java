@@ -4,8 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.genericsystem.api.core.IGeneric.SystemProperty;
-
 import javafx.util.StringConverter;
 import javafx.util.converter.BooleanStringConverter;
 import javafx.util.converter.DoubleStringConverter;
@@ -13,6 +11,8 @@ import javafx.util.converter.FloatStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LongStringConverter;
 import javafx.util.converter.ShortStringConverter;
+
+import org.genericsystem.api.core.IGeneric.SystemProperty;
 
 /**
  * Statics constants and methods useful when dealing with Generics.
@@ -56,8 +56,7 @@ public class ApiStatics {
 	 */
 	public static final int CONCRETE = 2;
 	/**
-	 * Indicates the level which corresponds to feelings. Feelings are data which are released by the concretes : for example, the mood of a person, its
-	 * emotions and so on.
+	 * Indicates the level which corresponds to feelings. Feelings are data which are released by the concretes : for example, the mood of a person, its emotions and so on.
 	 */
 	public static final int SENSOR = 3;
 
@@ -172,4 +171,5 @@ public class ApiStatics {
 	public static <T extends IGeneric<T>> boolean areOverridesReached(List<T> supers, List<T> overrides) {
 		return overrides.stream().allMatch(override -> supers.stream().anyMatch(superVertex -> superVertex.inheritsFrom(override)));
 	}
+
 }

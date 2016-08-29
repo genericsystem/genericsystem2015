@@ -2,22 +2,23 @@ package org.genericsystem.reactor.gs;
 
 import java.io.Serializable;
 
+import javafx.beans.property.Property;
+
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-
-import javafx.beans.property.Property;
 
 public class GSHolderEditor extends GSSection {
 
 	protected GSInputTextWithConversion<?> input;
 
-	public GSHolderEditor(GSTag parent) {
+	public GSHolderEditor(Tag parent) {
 		this(parent, GSInputTextEditorWithConversion::new);
 	}
 
-	public GSHolderEditor(GSTag parent, GSInputTextConstructor constructor) {
+	public GSHolderEditor(Tag parent, GSInputTextConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
 
@@ -26,12 +27,12 @@ public class GSHolderEditor extends GSSection {
 
 	@FunctionalInterface
 	public interface GSInputTextConstructor {
-		GSInputTextWithConversion<?> build(GSTag parent);
+		GSInputTextWithConversion<?> build(Tag parent);
 	}
 
 	public static class GSHolderEditorWithRemoval extends GSHolderEditor {
 
-		public GSHolderEditorWithRemoval(GSTag parent) {
+		public GSHolderEditorWithRemoval(Tag parent) {
 			super(parent);
 			new HtmlHyperLink(this) {
 				{
@@ -39,7 +40,7 @@ public class GSHolderEditor extends GSSection {
 					addStyle("text-decoration", "none");
 					addStyle("height", "100%");
 					setText("×");
-					bindAction(GenericModel::remove);
+					bindAction(Context::remove);
 				}
 			};
 		}
@@ -47,7 +48,7 @@ public class GSHolderEditor extends GSSection {
 
 	public static class GSHolderAdder extends GSHolderEditor {
 
-		public GSHolderAdder(GSTag parent) {
+		public GSHolderAdder(Tag parent) {
 			super(parent, GSInputTextWithConversion::new);
 			input.addConvertedValueChangeListener((model, nva) -> {
 				if (nva != null)
@@ -74,7 +75,7 @@ public class GSHolderEditor extends GSSection {
 
 	public static class GSHolderBuilder extends GSHolderEditor implements GSBuilderDefaults {
 
-		public GSHolderBuilder(GSTag parent) {
+		public GSHolderBuilder(Tag parent) {
 			super(parent, GSInputTextWithConversion::new);
 			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder) {
 				input.addPrefixBinding(model -> {

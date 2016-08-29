@@ -1,18 +1,18 @@
 package org.genericsystem.reactor.gstag;
 
-import org.genericsystem.reactor.gs.GSTag;
+import org.genericsystem.reactor.Tag;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlH1 extends GSTag {
+public class HtmlH1 extends Tag {
 
-	public HtmlH1(GSTag parent) {
+	public HtmlH1(Tag parent) {
 		super(parent, "h1");
 	}
 
-	public HtmlH1(GSTag parent, String text) {
+	public HtmlH1(Tag parent, String text) {
 		super(parent, "h1");
 		setText(text);
 	}

@@ -3,30 +3,30 @@ package org.genericsystem.reactor.modelproperties;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.reactor.Model;
-
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-public interface ModelProperty<M extends Model> {
+import org.genericsystem.reactor.Context;
 
-	<T> void storeProperty(String propertyName, M model, Function<M, ObservableValue<T>> applyOnModel);
+public interface ModelProperty {
 
-	<T> void storeProperty(String propertyName, Function<M, ObservableValue<T>> applyOnModel);
+	<T> void storeProperty(String propertyName, Context model, Function<Context, ObservableValue<T>> applyOnModel);
 
-	void addPrefixBinding(Consumer<M> consumer);
+	<T> void storeProperty(String propertyName, Function<Context, ObservableValue<T>> applyOnModel);
 
-	void addPostfixBinding(Consumer<M> consumer);
+	void addPrefixBinding(Consumer<Context> consumer);
 
-	<T> Property<T> getProperty(String property, Model model);
+	void addPostfixBinding(Consumer<Context> consumer);
 
-	<T> ObservableValue<T> getObservableValue(String property, Model model);
+	<T> Property<T> getProperty(String property, Context model);
+
+	<T> ObservableValue<T> getObservableValue(String property, Context model);
 
 	void createNewProperty(String propertyName);
 
-	<T> void initProperty(String propertyName, Function<M, T> getInitialValue);
+	<T> void initProperty(String propertyName, Function<Context, T> getInitialValue);
 
-	<T> void createNewInitializedProperty(String propertyName, Function<M, T> getInitialValue);
+	<T> void createNewInitializedProperty(String propertyName, Function<Context, T> getInitialValue);
 
-	<T> void createNewInitializedProperty(String propertyName, M model, Function<M, T> getInitialValue);
+	<T> void createNewInitializedProperty(String propertyName, Context model, Function<Context, T> getInitialValue);
 }

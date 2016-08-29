@@ -1,19 +1,20 @@
 package org.genericsystem.reactor.gs;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
 public class GSRowDisplayer extends GSComposite {
 
-	public GSRowDisplayer(GSTag parent) {
+	public GSRowDisplayer(Tag parent) {
 		this(parent, FlexDirection.ROW);
 	}
 
-	public GSRowDisplayer(GSTag parent, FlexDirection direction) {
+	public GSRowDisplayer(Tag parent, FlexDirection direction) {
 		super(parent, direction);
 	}
 
@@ -70,7 +71,7 @@ public class GSRowDisplayer extends GSComposite {
 				new HtmlButton(this) {
 					{
 						setText("Remove");
-						bindAction(GenericModel::remove);
+						bindAction(Context::remove);
 						addStyle("width", "100%");
 						addStyle("height", "100%");
 					}

@@ -1,27 +1,27 @@
 package org.genericsystem.reactor.gs;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.Map;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Model;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlOption;
-import org.genericsystem.reactor.model.GenericModel;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import io.vertx.core.json.JsonObject;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
-public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefaults {
+public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaults {
 
 	public HtmlOption optionElement;
 
-	private GSSelect(GSTag parent) {
+	private GSSelect(Tag parent) {
 		super(parent, "select");
 		options();
 		init();
@@ -30,13 +30,13 @@ public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefa
 	}
 
 	@Override
-	protected HtmlDomNode createNode(String parentId, HtmlDomNode parent, Model modelContext, Tag tag) {
-		return new HtmlDomNode(parentId, parent, modelContext, tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override
 			public void handleMessage(JsonObject json) {
 				if (UPDATE.equals(json.getString(MSG_TYPE))) {
-					((SelectionDefaults) getTag()).getSelectionIndex((GenericModel) getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+					((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
 				}
 			}
 		};
@@ -57,7 +57,7 @@ public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefa
 
 	public static class CompositeSelectWithEmptyEntry extends GSSelect {
 
-		public CompositeSelectWithEmptyEntry(GSTag parent) {
+		public CompositeSelectWithEmptyEntry(Tag parent) {
 			super(parent);
 			addPrefixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
@@ -88,7 +88,7 @@ public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefa
 
 	public static class ColorsSelect extends GSSelect {
 
-		public ColorsSelect(GSTag parent) {
+		public ColorsSelect(Tag parent) {
 			super(parent);
 			bindStyle("background-color", SELECTION_STRING);
 			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> optionElement.getGenericStringProperty(model));
@@ -97,7 +97,7 @@ public class GSSelect extends GSTag implements SelectionDefaults, ComponentsDefa
 
 	public static class InstanceCompositeSelect extends GSSelect {
 
-		public InstanceCompositeSelect(GSTag parent) {
+		public InstanceCompositeSelect(Tag parent) {
 			super(parent);
 			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()))));
 		}

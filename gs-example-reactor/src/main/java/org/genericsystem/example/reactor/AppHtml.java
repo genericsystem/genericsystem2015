@@ -47,20 +47,20 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		new GSTable(this, FlexDirection.ROW).select(Car.class);
 		new GSEditor(this, FlexDirection.ROW) {
 			{
-				select_(model -> getSelectionProperty(model));
+				select__(model -> getSelectionProperty(model));
 				addStyle("justify-content", "center");
 			}
 		};
-		new GSEditor(this, FlexDirection.COLUMN).select_(model -> getSelectionProperty(model));
+		new GSEditor(this, FlexDirection.COLUMN).select__(model -> getSelectionProperty(model));
 		new GSStepEditor(this, FlexDirection.ROW) {
 			{
-				select_(model -> getSelectionProperty(model));
+				select__(model -> getSelectionProperty(model));
 				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
 			}
 		};
 		new GSStepEditor(this, FlexDirection.COLUMN) {
 			{
-				select_(model -> getSelectionProperty(model));
+				select__(model -> getSelectionProperty(model));
 				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
 			}
 		};
