@@ -36,7 +36,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 				};
 				new GSSection(this, FlexDirection.COLUMN) {
 					{
-						select_(model -> getSelectionProperty(model));
+						select__(model -> getSelectionProperty(model));
 						contentTagConsumer.accept(this);
 					}
 				};

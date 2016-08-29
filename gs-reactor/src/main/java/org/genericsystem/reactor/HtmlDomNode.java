@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 
@@ -57,37 +56,37 @@ public class HtmlDomNode {
 		this.modelContext = modelContext;
 	}
 
-	<BETWEEN> ListChangeListener<Tag> getListChangeListener() {
-		return change -> {
-			while (change.next()) {
-				if (change.wasRemoved()) {
-					for (Tag childTag : change.getRemoved()) {
-						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-						if (metaBinding != null) {
-							modelContext.getSubContexts(childTag).removeAll();// destroy subcontexts
-							modelContext.removeSubContexts(childTag);// remove tag ref
-						}
-						sizeBySubElement.remove(childTag);
-					}
-				}
-				if (change.wasAdded()) {
-					int index = change.getFrom();
-					for (Tag childTag : change.getAddedSubList()) {
-						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-						if (metaBinding != null) {
-							modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
-								Context childModel = metaBinding.buildModel(modelContext, between);
-								createViewContextChild(i, childModel, childTag);
-								return childModel;
-							}, Context::destroy));
-						} else
-							createViewContextChild(index++, modelContext, childTag);
-					}
-				}
-			}
-
-		};
-	}
+	// <BETWEEN> ListChangeListener<Tag> getListChangeListener() {
+	// return change -> {
+	// while (change.next()) {
+	// if (change.wasRemoved()) {
+	// for (Tag childTag : change.getRemoved()) {
+	// MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+	// if (metaBinding != null) {
+	// modelContext.getSubContexts(childTag).removeAll();// destroy subcontexts
+	// modelContext.removeSubContexts(childTag);// remove tag ref
+	// }
+	// sizeBySubTag.remove(childTag);
+	// }
+	// }
+	// if (change.wasAdded()) {
+	// int index = change.getFrom();
+	// for (Tag childTag : change.getAddedSubList()) {
+	// MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+	// if (metaBinding != null) {
+	// modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
+	// Context childModel = metaBinding.buildModel(modelContext, between);
+	// createChildDomNode(i, childModel, childTag);
+	// return childModel;
+	// }, Context::destroy));
+	// } else
+	// createChildDomNode(index++, modelContext, childTag);
+	// }
+	// }
+	// }
+	//
+	// };
+	// }
 
 	protected <BETWEEN> void init(int index) {
 		modelContext.register(this);
@@ -100,28 +99,25 @@ public class HtmlDomNode {
 			if (metaBinding != null) {
 				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
 					Context childModel = metaBinding.buildModel(modelContext, between);
-					createViewContextChild(i, childModel, childTag);
+					createChildDomNode(i, childModel, childTag);
 					return childModel;
 				}, Context::destroy));
 			} else
-				createViewContextChild(null, modelContext, childTag);
+				createChildDomNode(0, modelContext, childTag);
 		}
 		for (BiConsumer<Context, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, this);
 	}
 
-	public void createViewContextChild(Integer index, Context childModelContext, Tag element) {
-		int indexInChildren = computeIndex(index, element);
-		HtmlDomNode node = element.createNode(this, childModelContext, element);
-		node.init(indexInChildren);
+	public void createChildDomNode(int index, Context childContext, Tag childTag) {
+		childTag.createNode(this, childContext).init(computeIndex(index, childTag));
 	}
 
-	private int computeIndex(Integer nullable, Tag childElement) {
-		int indexInChildren = nullable == null ? sizeBySubElement.get(childElement) : nullable;
+	private int computeIndex(int indexInChildren, Tag childElement) {
 		for (Tag child : tag.getObservableChildren()) {
 			if (child == childElement)
 				return indexInChildren;
-			indexInChildren += sizeBySubElement.get(child);
+			indexInChildren += sizeBySubTag.get(child);
 		}
 		return indexInChildren;
 	}
@@ -134,7 +130,7 @@ public class HtmlDomNode {
 		return parent.getRootHtmlDomNode();
 	}
 
-	private Map<Tag, Integer> sizeBySubElement = new IdentityHashMap<Tag, Integer>() {
+	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 
 		@Override
@@ -163,16 +159,16 @@ public class HtmlDomNode {
 	}
 
 	private void incrementSize(Tag child) {
-		sizeBySubElement.put(child, sizeBySubElement.get(child) + 1);
+		sizeBySubTag.put(child, sizeBySubTag.get(child) + 1);
 	}
 
 	private void decrementSize(Tag child) {
-		int size = sizeBySubElement.get(child) - 1;
+		int size = sizeBySubTag.get(child) - 1;
 		assert size >= 0;
 		if (size == 0)
-			sizeBySubElement.remove(child);// remove map if empty
+			sizeBySubTag.remove(child);// remove map if empty
 		else
-			sizeBySubElement.put(child, size);
+			sizeBySubTag.put(child, size);
 	}
 
 	public ServerWebSocket getWebSocket() {

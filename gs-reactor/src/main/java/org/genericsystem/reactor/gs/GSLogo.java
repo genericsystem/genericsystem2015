@@ -7,12 +7,11 @@ public class GSLogo extends GSSection {
 
 	public GSLogo(Tag parent) {
 		super(parent, FlexDirection.ROW);
-		new HtmlImg(this) {
+		addStyle("flex", "0 1 auto");
+		new HtmlImg(this, "logoTransp.png") {
 			{
-				addAttribute("src", "logoTransp.png");
 				addAttribute("alt", "logo");
 				addStyle("height", "100%");
-				addStyle("flex", "0 1 auto");
 			}
 		};
 	}

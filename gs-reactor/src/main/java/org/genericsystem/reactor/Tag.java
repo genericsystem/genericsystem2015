@@ -25,6 +25,7 @@ import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
@@ -116,16 +117,16 @@ public abstract class Tag implements TextPropertyDefaults, StylesDefaults, Attri
 		bindOptionalStyleClass(styleClass, modelPropertyName);
 	}
 
-	protected <BETWEEN> void forEach(Function<Context, ObservableList<BETWEEN>> applyOnModel, BiFunction<Context, BETWEEN, Context> modelBuilder) {
-		setMetaBinding(new MetaBinding<BETWEEN>(applyOnModel, modelBuilder));
+	protected void forEach2(Function<Context, ObservableList<Generic>> applyOnModel) {
+		setMetaBinding(MetaBinding.forEachMetaBinding(applyOnModel));
 	}
 
 	public void forEach(ObservableListExtractor observableListExtractor) {
-		forEach(model -> observableListExtractor.apply(model.getGenerics()), MetaBinding.MODEL_BUILDER);
+		forEach2(model -> observableListExtractor.apply(model.getGenerics()));
 	}
 
-	protected void forEach(Tag parentCompositeElement) {
-		forEach(gs -> parentCompositeElement.getObservableListExtractor().apply(gs));
+	protected void forEach(Tag parent) {
+		forEach(gs -> parent.getObservableListExtractor().apply(gs));
 	}
 
 	public void select(Function<Generic[], Generic> genericSupplier) {
@@ -135,8 +136,13 @@ public abstract class Tag implements TextPropertyDefaults, StylesDefaults, Attri
 		});
 	}
 
-	public void select_(Function<Context, ObservableValue<Context>> applyOnModelContext) {
-		select__(model -> new ListBinding<Context>() {
+	protected void select_(Function<Context, ObservableList<Context>> applyOnModel) {
+		setMetaBinding(MetaBinding.selectMetaBinding(applyOnModel));
+	}
+
+	public void select__(Function<Context, ObservableValue<Context>> applyOnModelContext) {
+		// fix probable issues with transmitSuccessiveInvalidations
+		select_(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Context>() {
 			ObservableValue<Context> ov = applyOnModelContext.apply(model);
 			{
 				bind(ov);
@@ -147,15 +153,13 @@ public abstract class Tag implements TextPropertyDefaults, StylesDefaults, Attri
 				Context model = ov.getValue();
 				return model != null ? FXCollections.singletonObservableList(model) : FXCollections.emptyObservableList();
 			}
-		});
+		}));
 	}
 
-	public void select__(Function<Context, ObservableList<Context>> applyOnModelContext) {
-		forEach(model -> applyOnModelContext.apply(model), MetaBinding.MODEL_CLONER);
-	}
-
+	// TODO try call select_(Function<Context, ObservableValue<Context>> applyOnModelContext) in place, transmitSuccessiveInvalidations will probably fix issues
+	@Deprecated
 	public void select(BiFunction<Context, ObservableList<Generic>, ObservableList<Context>> applyOnModel) {
-		select__(model -> new ListBinding<Context>() {
+		select_(model -> new ListBinding<Context>() {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
 			{
 				bind(holders);
@@ -364,8 +368,8 @@ public abstract class Tag implements TextPropertyDefaults, StylesDefaults, Attri
 		});
 	}
 
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext, Tag tag) {
-		return new HtmlDomNode(parent, modelContext, tag);
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+		return new HtmlDomNode(parent, modelContext, this);
 	};
 
 	protected ObservableList<Tag> getObservableChildren() {

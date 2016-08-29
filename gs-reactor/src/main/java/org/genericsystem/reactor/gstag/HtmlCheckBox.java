@@ -18,8 +18,8 @@ public class HtmlCheckBox extends Tag {
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext, Tag tag) {
-		return new HtmlDomNode(parent, modelContext, tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override
 			public JsonObject fillJson(JsonObject jsonObj) {

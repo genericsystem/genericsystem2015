@@ -30,8 +30,8 @@ public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaul
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext, Tag tag) {
-		return new HtmlDomNode(parent, modelContext, tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override
 			public void handleMessage(JsonObject json) {

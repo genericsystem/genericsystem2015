@@ -5,7 +5,6 @@ import io.vertx.core.http.ServerWebSocket;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 
 public class GSApp extends GSSection implements RootTag {
@@ -20,7 +19,7 @@ public class GSApp extends GSSection implements RootTag {
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext, Tag tag) {
+	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 		throw new UnsupportedOperationException();
 	}
 }

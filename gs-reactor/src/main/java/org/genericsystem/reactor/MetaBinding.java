@@ -11,6 +11,9 @@ public class MetaBinding<BETWEEN> {
 	private final Function<Context, ObservableList<BETWEEN>> betweenChildren;
 	private final BiFunction<Context, BETWEEN, Context> modelBuilder;
 
+	private static BiFunction<Context, Generic, Context> MODEL_BUILDER = (model, generic) -> new Context(model, Context.addToGenerics(generic, model.getGenerics()));
+	private static BiFunction<Context, Context, Context> MODEL_CLONER = (model, subModel) -> new Context(model, subModel.getGenerics());
+
 	public MetaBinding(Function<Context, ObservableList<BETWEEN>> betweenChildren, BiFunction<Context, BETWEEN, Context> modelBuilder) {
 		this.betweenChildren = betweenChildren;
 		this.modelBuilder = modelBuilder;
@@ -24,7 +27,12 @@ public class MetaBinding<BETWEEN> {
 		return modelBuilder.apply(parent, betweenChild);
 	}
 
-	public static BiFunction<Context, Generic, Context> MODEL_BUILDER = (model, generic) -> new Context(model, Context.addToGenerics(generic, model.getGenerics()));
+	static MetaBinding<Context> selectMetaBinding(Function<Context, ObservableList<Context>> betweenChildren) {
+		return new MetaBinding<Context>(betweenChildren, MODEL_CLONER);
+	}
 
-	public static BiFunction<Context, Context, Context> MODEL_CLONER = (model, subModel) -> new Context(model, subModel.getGenerics());
+	static MetaBinding<Generic> forEachMetaBinding(Function<Context, ObservableList<Generic>> betweenChildren) {
+		return new MetaBinding<Generic>(betweenChildren, MODEL_BUILDER);
+	}
+
 }

@@ -8,8 +8,8 @@ public class HtmlImg extends Tag {
 		super(parent, "img");
 	}
 
-	public HtmlImg(Tag parent, String url) {
+	public HtmlImg(Tag parent, String imageName) {
 		super(parent, "img");
-		addAttribute("src", url);
+		addAttribute("src", imageName);
 	}
 }

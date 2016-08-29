@@ -16,7 +16,6 @@ import javafx.collections.transformation.FilteredList;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
@@ -149,7 +148,7 @@ public class TodoApp extends GSApp {
 													Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
 													return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
 												});
-												forEach(model -> getFilteredTodos(model), MetaBinding.MODEL_BUILDER);
+												forEach2(model -> getFilteredTodos(model));
 												bindOptionalStyleClass(COMPLETED, COMPLETED);
 												new HtmlDiv(this) {
 													{

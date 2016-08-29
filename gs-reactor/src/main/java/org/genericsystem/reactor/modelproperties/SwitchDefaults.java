@@ -48,8 +48,8 @@ public interface SwitchDefaults extends ModelProperty {
 			storeProperty(NAME_MODEL, model, m -> new SimpleObjectProperty<>(model));
 			storeProperty(INDEX, model, m -> new ReadOnlyIntegerWrapper(-1));
 		});
-		instanceNameTag.select_(model -> getNameModel(model));
-		switchedTag.select_(model -> getCurrentModel(model));
+		instanceNameTag.select__(model -> getNameModel(model));
+		switchedTag.select__(model -> getCurrentModel(model));
 	}
 
 	default void next(Context model) {

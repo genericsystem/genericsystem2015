@@ -7,22 +7,22 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.IGeneric;
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
-import org.genericsystem.defaults.tools.AbstractMinimalChangesObservableList.MinimalChangesObservableList;
-import org.genericsystem.defaults.tools.InheritanceComputer;
-import org.genericsystem.defaults.tools.ObservableInheritanceComputer2;
-
-import com.sun.javafx.collections.ObservableListWrapper;
-
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.IGeneric;
+import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
+import org.genericsystem.defaults.tools.AbstractMinimalChangesObservableList.MinimalChangesObservableList;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.defaults.tools.InheritanceComputer;
+import org.genericsystem.defaults.tools.ObservableInheritanceComputer2;
+
+import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
  * @author Nicolas Feybesse
@@ -37,12 +37,6 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	//
 
-	static <U> Binding<U> transmitSuccessiveInvalidations(Binding<U> binding) {
-		binding.addListener((o, v, nv) -> {
-		});
-		return binding;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	default T getAttribute(Serializable value, T... targets) {
@@ -51,7 +45,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableAttribute(Serializable value, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableAttributes(value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableAttributes(value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -62,7 +56,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableAttribute(T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableAttributes(targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableAttributes(targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,7 +126,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, Serializable value, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -143,7 +137,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableHolder(T attribute, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableHolders(attribute, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -204,7 +198,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableRelation(Serializable value, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableRelations(value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableRelations(value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -215,7 +209,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableRelation(T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableRelations(targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableRelations(targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -270,7 +264,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLink(T relation, Serializable value, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, value, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, value, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -281,7 +275,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLink(T relation, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, targets), 0));
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.valueAt(getObservableLinks(relation, targets), 0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -337,7 +331,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<Serializable> getObservableValue(T attribute, Serializable value, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
 			ObservableValue<T> holder = getObservableHolder(attribute, value, targets);
 			return holder.getValue() != null ? holder.getValue().getValue() : null;
 		}, getObservableHolder(attribute, value, targets)));
@@ -352,7 +346,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<Serializable> getObservableValue(T attribute, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
 			ObservableValue<T> holder = getObservableHolder(attribute, targets);
 			return holder.getValue() != null ? holder.getValue().getValue() : null;
 		}, getObservableHolder(attribute, targets)));
@@ -366,7 +360,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<Serializable> getObservableValues(T attribute, Serializable value, T... targets) {
-		return (ListBinding<Serializable>) transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
+		return BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
 			private final ObservableList<T> links = getObservableLinks(attribute, value, targets);
 			{
 				bind(links);
@@ -387,7 +381,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableList<Serializable> getObservableValues(T attribute, T... targets) {
-		return (ListBinding<Serializable>) transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
+		return BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
 			private final ObservableList<T> links = getObservableLinks(attribute, targets);
 			{
 				bind(links);
@@ -406,7 +400,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	}
 
 	default ObservableList<Serializable> getObservableValues(T attribute, int pos) {
-		return (ListBinding<Serializable>) transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
+		return BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Serializable>() {
 			private final ObservableList<T> holders = getObservableHolders(attribute, pos);
 			{
 				bind(holders);
@@ -444,7 +438,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservableLinkTargetComponent(T relation, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
 			ObservableValue<T> link = getObservableLink(relation, targets);
 			return link.getValue() != null ? link.getValue().getTargetComponent() : null;
 		}, getObservableLink(relation, targets)));
@@ -458,7 +452,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 
 	@SuppressWarnings("unchecked")
 	default ObservableValue<T> getObservablecLinkTargetComponent(T relation, Serializable value, T... targets) {
-		return transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
+		return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> {
 			ObservableValue<T> link = getObservableLink(relation, value, targets);
 			return link.getValue() != null ? link.getValue().getTargetComponent() : null;
 		}, getObservableLink(relation, value, targets)));
