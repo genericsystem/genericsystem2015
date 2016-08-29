@@ -1,6 +1,8 @@
 Generic System
 ==============
 
+[![Join the chat at https://gitter.im/genericsystemGS/Lobby](https://badges.gitter.im/genericsystemGS/Lobby.svg)](https://gitter.im/genericsystemGS/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 What is Generic System ?
 ------------------------
 Generic System (GS) is an innovative **open source** information engine implemented in Java 
