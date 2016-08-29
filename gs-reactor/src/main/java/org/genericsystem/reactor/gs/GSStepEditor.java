@@ -21,21 +21,21 @@ public class GSStepEditor extends GSEditor implements SwitchDefaults {
 	}
 
 	@Override
-	protected void sections() {
-		instanceNameTag = new GSSection(this, getDirection()) {
+	protected void content() {
+		instanceNameTag = new GSSection(this, flexDirection) {
 			{
 				addStyle("flex", "1");
 				new InstanceTitleDisplayer(this).addStyle("flex", "0.3");
 				new GSSubcellEditor(this);
-				new StepNavigator(this, getReverseDirection());
+				new StepNavigator(this, flexDirection.reverse());
 			}
 		};
-		switchedTag = new GSSection(this, getDirection()) {
+		switchedTag = new GSSection(this, flexDirection) {
 			{
 				addStyle("flex", "1");
 				new InstanceLinkTitleDisplayer(this).addStyle("flex", "0.3");
 				new GSAttributeOfInstanceEditor(this);
-				new StepNavigator(this, getReverseDirection());
+				new StepNavigator(this, flexDirection.reverse());
 			}
 		};
 	}

@@ -36,6 +36,23 @@ public class GSSection extends Tag {
 		}
 	}
 
+	public static class TitledColumn extends GenericColumn {
+		protected final FlexDirection flexDirection; // For the content’s direction.
+
+		public TitledColumn(Tag parent, FlexDirection flexDirection) {
+			super(parent);
+			this.flexDirection = flexDirection;
+			titleHeader();
+			content();
+		}
+
+		protected void titleHeader() {
+		}
+
+		protected void content() {
+		}
+	}
+
 	public static class GenericRow extends GSSection {
 		public GenericRow(Tag parent) {
 			super(parent, FlexDirection.ROW);
