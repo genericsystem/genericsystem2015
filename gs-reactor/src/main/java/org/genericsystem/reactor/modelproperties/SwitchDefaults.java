@@ -13,7 +13,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
-public interface SwitchDefaults extends ModelProperty {
+public interface SwitchDefaults extends ContextProperty {
 
 	public static final String SUBMODELS = "subModels";
 	public static final String INDEX = "index";

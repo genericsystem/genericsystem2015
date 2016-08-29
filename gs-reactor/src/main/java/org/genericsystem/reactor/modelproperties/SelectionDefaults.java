@@ -20,7 +20,7 @@ import org.genericsystem.reactor.model.StringExtractor;
  * @author Nicolas Feybesse
  *
  */
-public interface SelectionDefaults extends ModelProperty {
+public interface SelectionDefaults extends ContextProperty {
 
 	public static final String SELECTION = "selection";
 	public static final String UPDATED_GENERIC = "updatedGeneric";

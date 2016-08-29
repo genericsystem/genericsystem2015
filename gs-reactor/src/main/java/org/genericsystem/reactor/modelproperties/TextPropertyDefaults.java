@@ -10,7 +10,7 @@ import javafx.beans.value.WeakChangeListener;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 
-public interface TextPropertyDefaults extends ModelProperty {
+public interface TextPropertyDefaults extends ContextProperty {
 
 	public static final String TEXT = "text";
 	public static final String TEXT_BINDING = "binding";

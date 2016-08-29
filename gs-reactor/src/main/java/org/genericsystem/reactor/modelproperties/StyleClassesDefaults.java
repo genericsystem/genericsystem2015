@@ -7,7 +7,7 @@ import javafx.collections.WeakSetChangeListener;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 
-public interface StyleClassesDefaults extends ModelProperty {
+public interface StyleClassesDefaults extends ContextProperty {
 
 	public static final String STYLE_CLASSES = "styleClasses";
 

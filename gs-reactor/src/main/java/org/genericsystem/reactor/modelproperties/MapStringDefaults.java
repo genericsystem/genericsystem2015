@@ -11,7 +11,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 
-public interface MapStringDefaults extends ModelProperty {
+public interface MapStringDefaults extends ContextProperty {
 
 	default ObservableMap<String, String> getDomNodeMap(Context model, String propertyName, Function<HtmlDomNode, MapChangeListener<String, String>> getListener) {
 		if (!model.containsProperty((Tag) this, propertyName)) {

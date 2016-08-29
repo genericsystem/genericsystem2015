@@ -12,7 +12,7 @@ import javafx.beans.value.ObservableValue;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 
-public interface GSBuilderDefaults extends ModelProperty {
+public interface GSBuilderDefaults extends ContextProperty {
 
 	public static final String COMPONENTS_MAP = "componentsMap";
 	public static final String HOLDERS_MAP = "holdersMap";
