@@ -21,7 +21,6 @@ public class GSHolderEditor extends GSSection {
 	public GSHolderEditor(Tag parent, GSInputTextConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
-
 		input = constructor.build(this);
 	}
 
@@ -77,12 +76,12 @@ public class GSHolderEditor extends GSSection {
 
 		public GSHolderBuilder(Tag parent) {
 			super(parent, GSInputTextWithConversion::new);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder) {
-				input.addPrefixBinding(model -> {
-					getHoldersMap(model).put(model.getGeneric(), input.getConvertedValueProperty(model));
-					getInvalidList(model).add(input.getInvalidObservable(model));
-				});
-			}
+			input.addPrefixBinding(model -> {
+				if (getHoldersMapProperty(model) != null)
+					getHoldersMapProperty(model).getValue().put(model.getGeneric(), input.getConvertedValueProperty(model));
+				if (getInvalidListProperty(model) != null)
+					getInvalidListProperty(model).getValue().add(input.getInvalidObservable(model));
+			});
 		}
 	}
 }
