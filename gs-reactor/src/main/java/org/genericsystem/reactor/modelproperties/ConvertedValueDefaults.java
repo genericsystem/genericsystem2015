@@ -9,7 +9,7 @@ import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.reactor.Context;
 
-public interface ConvertedValueDefaults extends ModelProperty {
+public interface ConvertedValueDefaults extends ContextProperty {
 
 	public static final String VALUE = "value";
 	public static final String INVALID = "invalid";

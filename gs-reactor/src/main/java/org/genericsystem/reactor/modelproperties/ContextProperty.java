@@ -8,7 +8,7 @@ import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.reactor.Context;
 
-public interface ModelProperty {
+public interface ContextProperty {
 
 	<T> void storeProperty(String propertyName, Context model, Function<Context, ObservableValue<T>> applyOnModel);
 

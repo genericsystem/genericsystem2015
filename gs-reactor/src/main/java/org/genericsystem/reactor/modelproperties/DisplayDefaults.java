@@ -4,7 +4,7 @@ import javafx.beans.property.Property;
 
 import org.genericsystem.reactor.Context;
 
-public interface DisplayDefaults extends ModelProperty {
+public interface DisplayDefaults extends ContextProperty {
 
 	public static final String DISPLAY = "display";
 

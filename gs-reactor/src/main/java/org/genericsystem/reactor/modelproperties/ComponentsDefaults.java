@@ -7,7 +7,7 @@ import javafx.beans.property.Property;
 
 import org.genericsystem.reactor.Context;
 
-public interface ComponentsDefaults extends ModelProperty {
+public interface ComponentsDefaults extends ContextProperty {
 
 	public static final String COMPONENTS = "components";
 

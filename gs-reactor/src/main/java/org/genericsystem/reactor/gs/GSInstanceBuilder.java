@@ -5,23 +5,24 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderBuilder;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSAttributeBuilder;
+import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
+import org.genericsystem.reactor.modelproperties.SwitchDefaults;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
 
 public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults {
 
-	private GSHolderEditor instanceValueInput;
+	protected GSHolderEditor instanceValueInput;
 
 	public GSInstanceBuilder(Tag parent, FlexDirection flexDirection) {
 		super(parent, flexDirection);
@@ -32,11 +33,10 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 
 	@Override
 	protected void header() {
-		instanceValueInput = new GSHolderBuilder(this) {
+		instanceValueInput = new GSHolderEditor(this, GSInputTextWithConversion::new) {
 			{
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
-
 			}
 		};
 	}
@@ -65,17 +65,18 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 				addStyle("margin-bottom", "1px");
 				new HtmlButton(this) {
 					{
-						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(
-								() -> Boolean.TRUE.equals(getInvalidList(model).stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
-								getInvalidList(model).stream().toArray(ObservableValue[]::new)));
+						bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED,
+								model -> Bindings.createStringBinding(
+										() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
+										getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
 						bindAction(model -> {
 							Generic newInstance = model.getGeneric().setInstance(instanceValueInput.input.getConvertedValueProperty(model).getValue());
-							for (Entry<Generic, Property<Serializable>> entry : getHoldersMap(model).entrySet())
+							for (Entry<Generic, Property<Serializable>> entry : getHoldersMapProperty(model).getValue().entrySet())
 								if (entry.getValue().getValue() != null) {
 									newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
 									entry.getValue().setValue(null);
 								}
-							for (Entry<Generic, List<Property<Context>>> entry : getComponentsMap(model).entrySet()) {
+							for (Entry<Generic, List<Property<Context>>> entry : getComponentsMapProperty(model).getValue().entrySet()) {
 								List<Generic> selectedGenerics = entry.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 								if (!selectedGenerics.isEmpty() && selectedGenerics.size() + 1 == entry.getKey().getComponents().size())
 									newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
@@ -90,5 +91,39 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 				};
 			}
 		};
+	}
+
+	public static class GSStepInstanceBuilder extends GSInstanceBuilder implements SwitchDefaults {
+
+		protected Tag switchedTag;
+		protected Tag instanceNameTag;
+
+		public GSStepInstanceBuilder(Tag parent, FlexDirection flexDirection) {
+			super(parent, flexDirection);
+		}
+
+		@Override
+		protected void header() {
+			instanceNameTag = new GSSection(this, getDirection()) {
+				{
+					addStyle("flex", "1");
+					new LinkTitleDisplayer(this).addStyle("flex", "0.3");
+					instanceValueInput = new GSHolderEditor(this, GSInputTextWithConversion::new);
+					new StepNavigator(this, getReverseDirection());
+				}
+			};
+		}
+
+		@Override
+		protected void sections() {
+			switchedTag = new GSSection(this, getDirection()) {
+				{
+					addStyle("flex", "1");
+					new LinkTitleDisplayer(this).addStyle("flex", "0.3");
+					new GSAttributeBuilder(this, FlexDirection.ROW);
+					new StepNavigator(this, getReverseDirection());
+				}
+			};
+		}
 	}
 }

@@ -30,6 +30,7 @@ function onMessageReceived(evt) {
 					msgType : "A",
 					nodeId : this.id
 				}));
+				return false;
 			};
 			break;
 		case "button":

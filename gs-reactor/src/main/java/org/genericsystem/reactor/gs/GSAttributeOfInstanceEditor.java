@@ -1,15 +1,18 @@
 package org.genericsystem.reactor.gs;
 
-import java.util.stream.Collectors;
-
-import javafx.collections.FXCollections;
-
 import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.reactor.Context;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellAdder;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditorWithRemoval;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ListBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class GSAttributeOfInstanceEditor extends GSSection {
 
@@ -20,22 +23,42 @@ public class GSAttributeOfInstanceEditor extends GSSection {
 		new GSSubcellEditor(this) {
 			{
 				addStyle("flex", "1");
-				// forEach_ should work here, but it causes errors…
-				select((model, holders) -> model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1 ? FXCollections.observableArrayList(holders.stream()
-						.map(holder -> new Context(model, Context.addToGenerics(holder, model.getGenerics()))).collect(Collectors.toList())) : FXCollections.emptyObservableList());
+				forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
+					ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+					{
+						bind(holders);
+					}
+
+					@Override
+					protected ObservableList<Generic> computeValue() {
+						return model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
+					}
+				}));
 			}
 		};
 		new GSSubcellEditorWithRemoval(this) {
 			{
 				addStyle("flex", "1");
-				select((model, holders) -> (!model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? FXCollections.observableArrayList(holders.stream()
-						.map(holder -> new Context(model, Context.addToGenerics(holder, model.getGenerics()))).collect(Collectors.toList())) : FXCollections.emptyObservableList());
+				forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
+					ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+					{
+						bind(holders);
+					}
+
+					@Override
+					protected ObservableList<Generic> computeValue() {
+						return (!model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
+					}
+				}));
 			}
 		};
 		new GSSubcellAdder(this) {
 			{
-				select((model, holders) -> holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
-						|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? FXCollections.singletonObservableList(model) : FXCollections.emptyObservableList());
+				select__(model -> Bindings.createObjectBinding(() -> {
+					ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+					return holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
+							|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null;
+				}, ObservableListExtractor.HOLDERS.apply(model.getGenerics())));
 			}
 		};
 	}

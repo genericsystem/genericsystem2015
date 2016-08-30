@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSSection.TitledColumn;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
@@ -13,7 +14,7 @@ import org.genericsystem.reactor.model.StringExtractor;
  *
  * @param <M>
  */
-public class GSEditor extends GSComposite {
+public class GSEditor extends TitledColumn {
 
 	public GSEditor(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -25,7 +26,7 @@ public class GSEditor extends GSComposite {
 	}
 
 	@Override
-	protected void header() {
+	protected void titleHeader() {
 		new GSSection(this, GSEditor.this.getReverseDirection()) {
 			{
 				addStyle("flex", "0.3");
@@ -46,16 +47,15 @@ public class GSEditor extends GSComposite {
 	}
 
 	@Override
-	protected void sections() {
-
-		new GSComposite(this, GSEditor.this.getReverseDirection()) {
+	protected void content() {
+		new GSComposite(this, flexDirection.reverse()) {
 			{
 				addStyle("flex", "1");
 			}
 
 			@Override
 			protected void header() {
-				new GSSection(this, GSEditor.this.getDirection()) {
+				new GSSection(this, flexDirection) {
 					{
 						addStyle("flex", "0.3");
 						new InstanceTitleDisplayer(this);
@@ -70,7 +70,7 @@ public class GSEditor extends GSComposite {
 
 			@Override
 			protected void sections() {
-				new GSSection(this, GSEditor.this.getDirection()) {
+				new GSSection(this, flexDirection) {
 					{
 						addStyle("flex", "1");
 						new GSSubcellEditor(this);

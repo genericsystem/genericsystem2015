@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 
-public interface ActionDefaults extends ModelProperty {
+public interface ActionDefaults extends ContextProperty {
 
 	public static final String ACTION = "action";
 
