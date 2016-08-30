@@ -2,15 +2,14 @@ package org.genericsystem.reactor.gs;
 
 import java.util.List;
 
-import javafx.beans.property.Property;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.property.Property;
 
 public class GSSingleLinkComponentEditor extends GSSection {
 
@@ -27,14 +26,6 @@ public class GSSingleLinkComponentEditor extends GSSection {
 		addStyle("align-items", "center");
 		select = constructor.build(this);
 		select.select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
-		select.addPostfixBinding(model -> {
-			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-				select.getDomNodeStyles(model).put("background-color", select.getSelectionString(model).getValue());
-		});
-		select.optionElement.addPrefixBinding(model -> {
-			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-				select.optionElement.getDomNodeStyles(model).put("background-color", select.optionElement.getGenericStringProperty(model).getValue());
-		});
 		select.addStyle("width", "100%");
 		select.addStyle("height", "100%");
 		select.addPostfixBinding(model -> {

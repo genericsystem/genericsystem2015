@@ -20,7 +20,6 @@ import org.genericsystem.reactor.gs.GSComposite.ColorCompositeRadio;
 import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
-import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -36,7 +35,6 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 
 	public AppHtml() {
 		addStyle("justify-content", "center");
-		new ColorsSelect(this).select(Color.class);
 		new ColorTitleCompositeFlexElement(this).select(Color.class);
 		new ColorCompositeRadio(this, FlexDirection.ROW).select(Color.class);
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
