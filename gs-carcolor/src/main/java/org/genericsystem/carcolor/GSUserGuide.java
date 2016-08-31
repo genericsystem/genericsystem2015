@@ -3,12 +3,12 @@ package org.genericsystem.carcolor;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSModalButton;
-import org.genericsystem.reactor.gs.GSSection;
+import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLi;
 import org.genericsystem.reactor.gstag.HtmlUl;
 
-public class GSUserGuide extends GSSection {
+public class GSUserGuide extends GSDiv {
 
 	public GSUserGuide(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
@@ -16,12 +16,12 @@ public class GSUserGuide extends GSSection {
 		addStyle("flex-wrap", "nowrap");
 		addStyle("justify-content", "center");
 
-		GSSection gSection = new GSSection(this, FlexDirection.COLUMN) {
+		GSDiv gSection = new GSDiv(this, FlexDirection.COLUMN) {
 			{
 				addStyleClass("modal");
 				createInitializedDisplayProperty("none");
 				bindStyle(DISPLAY, DISPLAY);
-				new GSSection(this, FlexDirection.COLUMN) {
+				new GSDiv(this, FlexDirection.COLUMN) {
 					{
 						addStyle("max-width", "40%");
 						addStyleClass("modal-content");
@@ -34,7 +34,7 @@ public class GSUserGuide extends GSSection {
 								});
 							}
 						};
-						new GSSection(this, FlexDirection.COLUMN) {
+						new GSDiv(this, FlexDirection.COLUMN) {
 							{
 								setText("How to use CarColor Demo");
 								new HtmlUl(this) {
@@ -73,7 +73,7 @@ public class GSUserGuide extends GSSection {
 
 									}
 								};
-								new GSSection(this, FlexDirection.COLUMN) {
+								new GSDiv(this, FlexDirection.COLUMN) {
 									{
 										addStyle("text-align", "center");
 										setText("To plenty enjoy the power of GS-REACTOR, go to Learning / Get Started");
@@ -85,7 +85,7 @@ public class GSUserGuide extends GSSection {
 				};
 			}
 		};
-		new GSSection(this, FlexDirection.ROW) {
+		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("justify-content", "center");
 				new GSModalButton(this, gSection) {

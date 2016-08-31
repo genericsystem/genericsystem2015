@@ -12,7 +12,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
  * @author Nicolas Feybesse
  *
  */
-public class GSModal extends GSSection implements SelectionDefaults {
+public class GSModal extends GSDiv implements SelectionDefaults {
 
 	public GSModal(Tag parent, Consumer<Tag> contentTagConsumer) {
 		this(parent, FlexDirection.COLUMN, contentTagConsumer);
@@ -23,7 +23,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 		addStyleClass("modal");
 		bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
 
-		new GSSection(this, FlexDirection.COLUMN) {
+		new GSDiv(this, FlexDirection.COLUMN) {
 			{
 				addStyle("max-width", "40%");
 				addStyleClass("modal-content");
@@ -34,7 +34,7 @@ public class GSModal extends GSSection implements SelectionDefaults {
 						bindAction(model -> getSelectionProperty(model).setValue(null));
 					}
 				};
-				new GSSection(this, FlexDirection.COLUMN) {
+				new GSDiv(this, FlexDirection.COLUMN) {
 					{
 						select__(model -> getSelectionProperty(model));
 						contentTagConsumer.accept(this);

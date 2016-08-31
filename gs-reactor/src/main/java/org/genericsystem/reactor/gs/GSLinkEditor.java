@@ -17,7 +17,7 @@ import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
-public class GSLinkEditor extends GSSection implements ComponentsDefaults {
+public class GSLinkEditor extends GSDiv implements ComponentsDefaults {
 
 	protected GSSingleLinkComponentEditor components;
 

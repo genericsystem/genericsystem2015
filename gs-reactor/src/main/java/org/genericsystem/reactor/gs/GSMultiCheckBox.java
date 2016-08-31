@@ -9,7 +9,7 @@ import org.genericsystem.reactor.model.StringExtractor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 
-public class GSMultiCheckBox extends GSSection {
+public class GSMultiCheckBox extends GSDiv {
 
 	public GSMultiCheckBox(Tag parent) {
 		this(parent, FlexDirection.COLUMN);

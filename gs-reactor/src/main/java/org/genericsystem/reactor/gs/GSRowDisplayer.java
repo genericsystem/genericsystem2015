@@ -20,7 +20,7 @@ public class GSRowDisplayer extends GSComposite {
 
 	@Override
 	protected void header() {
-		new GSSection(this, this.getReverseDirection()) {
+		new GSDiv(this, this.getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				addStyle("margin-right", "1px");
@@ -41,7 +41,7 @@ public class GSRowDisplayer extends GSComposite {
 
 	@Override
 	protected void sections() {
-		new GSSection(this, FlexDirection.COLUMN) {
+		new GSDiv(this, FlexDirection.COLUMN) {
 			{
 				addStyle("flex", "1");
 				addStyle("overflow", "hidden");
@@ -57,7 +57,7 @@ public class GSRowDisplayer extends GSComposite {
 
 	@Override
 	protected void footer() {
-		new GSSection(this, this.getDirection()) {
+		new GSDiv(this, this.getDirection()) {
 			{
 				if (this.getDirection().equals(FlexDirection.ROW)) {
 					addStyle("flex", "0");

@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlImg;
 
-public class GSLogo extends GSSection {
+public class GSLogo extends GSDiv {
 
 	public GSLogo(Tag parent) {
 		super(parent, FlexDirection.ROW);

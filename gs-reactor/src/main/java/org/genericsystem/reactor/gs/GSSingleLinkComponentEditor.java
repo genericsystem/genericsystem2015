@@ -11,7 +11,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 
 import javafx.beans.property.Property;
 
-public class GSSingleLinkComponentEditor extends GSSection {
+public class GSSingleLinkComponentEditor extends GSDiv {
 
 	protected GSSelect select;
 

@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 
-public class StepNavigator extends GSSection {
+public class StepNavigator extends GSDiv {
 
 	public StepNavigator(Tag parent, FlexDirection direction) {
 		super(parent, direction);

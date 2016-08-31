@@ -52,7 +52,7 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 
 	@Override
 	protected void footer() {
-		new GSSection(this, this.getDirection()) {
+		new GSDiv(this, this.getDirection()) {
 			{
 				if (this.getDirection().equals(FlexDirection.ROW)) {
 					addStyle("flex", "0");
@@ -104,7 +104,7 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 
 		@Override
 		protected void header() {
-			instanceNameTag = new GSSection(this, getDirection()) {
+			instanceNameTag = new GSDiv(this, getDirection()) {
 				{
 					addStyle("flex", "1");
 					new LinkTitleDisplayer(this).addStyle("flex", "0.3");
@@ -116,7 +116,7 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 
 		@Override
 		protected void sections() {
-			switchedTag = new GSSection(this, getDirection()) {
+			switchedTag = new GSDiv(this, getDirection()) {
 				{
 					addStyle("flex", "1");
 					new LinkTitleDisplayer(this).addStyle("flex", "0.3");

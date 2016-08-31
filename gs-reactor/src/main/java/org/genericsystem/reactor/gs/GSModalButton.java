@@ -5,7 +5,7 @@ import org.genericsystem.reactor.gstag.HtmlButton;
 
 public class GSModalButton extends HtmlButton {
 
-	public GSModalButton(Tag parent, GSSection gSection) {
+	public GSModalButton(Tag parent, GSDiv gSection) {
 		super(parent);
 		bindAction(model -> gSection.getDisplayProperty(model).setValue("flex"));
 	}

@@ -10,7 +10,7 @@ import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorW
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
-public class GSHolderEditor extends GSSection {
+public class GSHolderEditor extends GSDiv {
 
 	protected GSInputTextWithConversion<?> input;
 

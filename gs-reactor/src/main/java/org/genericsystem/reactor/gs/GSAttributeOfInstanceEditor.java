@@ -14,13 +14,13 @@ import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class GSAttributeOfInstanceEditor extends GSSection {
+public class GSAttributeOfInstanceEditor extends GSDiv {
 
 	public GSAttributeOfInstanceEditor(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex", "1");
 		addStyle("overflow", "hidden");
-		new GSMultiCheckBox(this, ((GSSection) parent).getReverseDirection()) {
+		new GSMultiCheckBox(this, ((GSDiv) parent).getReverseDirection()) {
 			{
 				addStyle("flex", "1");
 				select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION) ? gs[0] : null);

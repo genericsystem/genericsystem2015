@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSSection.TitledColumn;
+import org.genericsystem.reactor.gs.GSDiv.TitledColumn;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -25,7 +25,7 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 
 	@Override
 	protected void titleHeader() {
-		new GSSection(this, FlexDirection.ROW) {
+		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
@@ -71,7 +71,7 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 
 					@Override
 					protected void footer() {
-						new GSSection(this, this.getDirection()) {
+						new GSDiv(this, this.getDirection()) {
 							{
 								if (this.getDirection().equals(FlexDirection.ROW)) {
 									addStyle("flex", "0");
