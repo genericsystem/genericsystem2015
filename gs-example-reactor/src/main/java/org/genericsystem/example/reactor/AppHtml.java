@@ -4,8 +4,8 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
-import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.carcolor.model.Power;
+import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
@@ -20,7 +20,6 @@ import org.genericsystem.reactor.gs.GSComposite.ColorCompositeRadio;
 import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSMonitor;
-import org.genericsystem.reactor.gs.GSSelect.ColorsSelect;
 import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -36,7 +35,6 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 
 	public AppHtml() {
 		addStyle("justify-content", "center");
-		new ColorsSelect(this).select(Color.class);
 		new ColorTitleCompositeFlexElement(this).select(Color.class);
 		new ColorCompositeRadio(this, FlexDirection.ROW).select(Color.class);
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
