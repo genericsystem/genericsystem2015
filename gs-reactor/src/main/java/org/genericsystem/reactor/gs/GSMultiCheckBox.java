@@ -19,22 +19,23 @@ public class GSMultiCheckBox extends GSSection {
 		super(parent, flexDirection);
 		addStyle("flex-wrap", "wrap");
 
-		new GenericRow(this) {
-
-			private Tag checkbox;
-
+		new HtmlLabel(this) {
 			{
 				addStyle("flex", "1");
 				addStyle("justify-content", "center");
 				addStyle("align-items", "center");
+				addStyle("text-align", "center");
 				forEach(gs -> ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])).stream().toArray(Generic[]::new)));
 				addPrefixBinding(model -> {
 					if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
 						addStyle(model, "background-color", getGenericStringProperty(model).getValue());
 				});
-
-				checkbox = new GSCheckBoxWithValue(this) {
+				bindText();
+				new GSCheckBoxWithValue(this) {
 					{
+						addStyle("float", "left");
+						addStyle("vertical-align", "middle");
+						addStyle("margin", "4px");
 						initValueProperty(context -> context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric()) != null ? true : false);
 						storeProperty("exists", context -> {
 							ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()).getValue() != null ? true : false,
@@ -51,15 +52,6 @@ public class GSMultiCheckBox extends GSSection {
 									link.remove();
 							}
 						});
-					}
-				};
-
-				new HtmlLabel(this) {
-					{
-						addStyle("flex", "1");
-						addStyle("text-align", "center");
-						addPrefixBinding(context -> addAttribute(context, "for", context.getHtmlDomNode(checkbox).getId()));
-						bindText();
 					}
 				};
 			}
