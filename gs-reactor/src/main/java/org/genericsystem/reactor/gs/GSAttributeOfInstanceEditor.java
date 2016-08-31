@@ -20,45 +20,57 @@ public class GSAttributeOfInstanceEditor extends GSSection {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex", "1");
 		addStyle("overflow", "hidden");
-		new GSSubcellEditor(this) {
+		new GSMultiCheckBox(this, ((GSSection) parent).getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-					ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-					{
-						bind(holders);
-					}
-
-					@Override
-					protected ObservableList<Generic> computeValue() {
-						return model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
-					}
-				}));
+				select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION) ? gs[0] : null);
 			}
 		};
-		new GSSubcellEditorWithRemoval(this) {
+		new GenericColumn(this) {
 			{
 				addStyle("flex", "1");
-				forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-					ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+				select(gs -> (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? gs[0] : null);
+				new GSSubcellEditor(this) {
 					{
-						bind(holders);
-					}
+						addStyle("flex", "1");
+						forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
+							ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+							{
+								bind(holders);
+							}
 
-					@Override
-					protected ObservableList<Generic> computeValue() {
-						return (!model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
+							@Override
+							protected ObservableList<Generic> computeValue() {
+								return model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
+							}
+						}));
 					}
-				}));
-			}
-		};
-		new GSSubcellAdder(this) {
-			{
-				select__(model -> Bindings.createObjectBinding(() -> {
-					ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-					return holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
-							|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null;
-				}, ObservableListExtractor.HOLDERS.apply(model.getGenerics())));
+				};
+				new GSSubcellEditorWithRemoval(this) {
+					{
+						addStyle("flex", "1");
+						forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
+							ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+							{
+								bind(holders);
+							}
+
+							@Override
+							protected ObservableList<Generic> computeValue() {
+								return (!model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
+							}
+						}));
+					}
+				};
+				new GSSubcellAdder(this) {
+					{
+						select__(model -> Bindings.createObjectBinding(() -> {
+							ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
+							return holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
+									|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null;
+						}, ObservableListExtractor.HOLDERS.apply(model.getGenerics())));
+					}
+				};
 			}
 		};
 	}
