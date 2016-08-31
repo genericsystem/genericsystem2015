@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSDiv.TitledColumn;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -12,7 +11,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
  * @author Nicolas Feybesse
  *
  */
-public class GSTable extends TitledColumn implements SelectionDefaults {
+public class GSTable extends TitledSection implements SelectionDefaults {
 
 	public GSTable(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
