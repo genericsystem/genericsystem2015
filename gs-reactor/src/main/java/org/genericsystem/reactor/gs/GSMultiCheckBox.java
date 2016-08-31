@@ -40,7 +40,10 @@ public class GSMultiCheckBox extends GSDiv {
 						storeProperty("exists", context -> {
 							ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()).getValue() != null ? true : false,
 									context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()));
-							exists.addListener((o, v, nva) -> getConvertedValueProperty(context).setValue(nva));
+							exists.addListener((o, v, nva) -> {
+								if (!context.isDestroyed())
+									getConvertedValueProperty(context).setValue(nva);
+							});
 							return exists;
 						});
 						addConvertedValueChangeListener((context, nva) -> {

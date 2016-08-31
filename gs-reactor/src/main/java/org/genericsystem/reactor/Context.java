@@ -27,6 +27,7 @@ public class Context {
 	private Map<Tag, ObservableList<Context>> subModelsMap = new HashMap<>();
 	private Map<Tag, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
 	private final Generic[] generics;
+	private boolean destroyed = false;
 
 	public Context(Context parent, Generic[] generics) {
 		this.parent = parent;
@@ -101,8 +102,6 @@ public class Context {
 		internalDestroy();
 	}
 
-	public boolean destroyed = false;
-
 	public void internalDestroy() {
 		// System.out.println("InternalDestroy : " + this);
 		assert !destroyed;
@@ -157,4 +156,7 @@ public class Context {
 		getGeneric().getCurrentCache().clear();
 	}
 
+	public boolean isDestroyed() {
+		return destroyed;
+	}
 }
