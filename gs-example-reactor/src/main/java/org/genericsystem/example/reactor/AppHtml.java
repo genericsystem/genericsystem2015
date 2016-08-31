@@ -3,9 +3,10 @@ package org.genericsystem.example.reactor;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
+import org.genericsystem.carcolor.model.CarColor2;
 import org.genericsystem.carcolor.model.Color;
-import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.carcolor.model.Power;
+import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
@@ -25,7 +26,7 @@ import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class })
+@DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
 public class AppHtml extends GSApp implements SelectionDefaults {
 

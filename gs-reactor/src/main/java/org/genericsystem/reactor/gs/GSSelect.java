@@ -36,7 +36,7 @@ public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaul
 		});
 		optionElement.addPrefixBinding(model -> {
 			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-				optionElement.getDomNodeStyles(model).put("background-color", optionElement.getGenericStringProperty(model).getValue());
+				optionElement.addStyle(model, "background-color", optionElement.getGenericStringProperty(model).getValue());
 		});
 	}
 
@@ -90,7 +90,7 @@ public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaul
 			super(parent);
 			addPostfixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					getDomNodeStyles(model).put("background-color", getSelectionString(model).getValue());
+					addStyle(model, "background-color", getSelectionString(model).getValue());
 			});
 			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()))));
 		}
