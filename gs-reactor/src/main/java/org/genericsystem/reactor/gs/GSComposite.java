@@ -112,6 +112,7 @@ public class GSComposite extends GSSection {
 		protected void sections() {
 			new GSSection(this, CompositeRadio.this.getReverseDirection()) {
 				{
+					addStyle("flex", "1");
 					forEach(CompositeRadio.this);
 					new HtmlRadio(this);
 					new HtmlLabel(this) {
@@ -152,14 +153,20 @@ public class GSComposite extends GSSection {
 
 		@Override
 		protected void sections() {
-			flexSubElement = new GSSection(this, ColorCompositeRadio.this.getReverseDirection()) {
+			flexSubElement = new HtmlLabel(this) {
 				{
+					addStyle("flex", "1");
+					addStyle("justify-content", "center");
+					addStyle("align-items", "center");
+					addStyle("text-align", "center");
 					forEach(ColorCompositeRadio.this);
+					bindText();
 					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
-					new HtmlRadio(this);
-					new HtmlLabel(this) {
+					new HtmlRadio(this) {
 						{
-							bindText();
+							addStyle("float", "left");
+							addStyle("vertical-align", "middle");
+							addStyle("margin", "4px");
 						}
 					};
 				}
