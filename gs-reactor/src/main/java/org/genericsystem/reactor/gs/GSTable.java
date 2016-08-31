@@ -79,7 +79,6 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 								} else {
 									addStyle("flex", "1");
 								}
-								addStyle("min-width", "100px");
 								addStyle("background-color", "#ffa5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
