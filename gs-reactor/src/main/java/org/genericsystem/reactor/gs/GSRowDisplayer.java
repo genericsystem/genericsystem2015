@@ -2,7 +2,6 @@ package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSInstanceSubcellDisplayer;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -46,9 +45,16 @@ public class GSRowDisplayer extends GSComposite {
 				addStyle("flex", "1");
 				addStyle("overflow", "hidden");
 				forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-				new GSInstanceSubcellDisplayer(this) {
+				new GSSubcellDisplayer(this) {
 					{
 						forEach(ObservableListExtractor.HOLDERS);
+					}
+
+					@Override
+					public void style(Tag tag) {
+						super.style(tag);
+						tag.addPrefixBinding(modelContext -> tag.getDomNodeStyles(modelContext).put("background-color",
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#dda5e2"));
 					}
 				};
 			}

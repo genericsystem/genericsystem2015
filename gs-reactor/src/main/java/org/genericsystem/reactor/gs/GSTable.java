@@ -89,7 +89,7 @@ public class GSTable extends TitledSection implements SelectionDefaults {
 			}
 
 			protected void columnsInputSection() {
-				new GSInstanceBuilder(this, this.getReverseDirection());
+				new GSInstanceBuilder(this, this.getReverseDirection()).addStyle("flex", "1");
 			}
 
 			@Override
