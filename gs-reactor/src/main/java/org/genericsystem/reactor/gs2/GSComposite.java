@@ -11,11 +11,8 @@ import org.genericsystem.reactor.gs.GSDiv;
 
 public abstract class GSComposite extends GSDiv {
 
-	private final MetaTag metaTag;
-
 	public GSComposite(GSComposite parent, MetaTag metaTag) {
 		super(parent, FlexDirection.COLUMN);
-		this.metaTag = metaTag;
 		for (MetaTag subMetaTag : metaTag.getSubNodes())
 			createChild(subMetaTag);
 	}
@@ -28,10 +25,6 @@ public abstract class GSComposite extends GSDiv {
 		}
 	}
 
-	public MetaTag getMetaTag() {
-		return metaTag;
-	}
-
 	public Stream<Tag> tags(Class<? extends GSComposite>... classes) {
 		return tags(Arrays.asList(classes));
 	}
@@ -39,6 +32,6 @@ public abstract class GSComposite extends GSDiv {
 	private Stream<Tag> tags(List<Class<? extends GSComposite>> classes) {
 		if (classes.isEmpty())
 			return Stream.empty();
-		return getObservableChildren().stream().filter(tag -> classes.get(0) == null || classes.get(0).equals(((GSComposite) tag).getMetaTag().getBuilder())).flatMap(tag -> ((GSComposite) tag).tags(classes.subList(1, classes.size())));
+		return getObservableChildren().stream().filter(tag -> classes.get(0) == null || classes.get(0).equals(tag.getClass())).flatMap(tag -> ((GSComposite) tag).tags(classes.subList(1, classes.size())));
 	}
 }
