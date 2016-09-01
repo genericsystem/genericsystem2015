@@ -4,6 +4,7 @@ import org.genericsystem.reactor.gs2.GSCell.GSFirstCell;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowCell;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowFirstCell;
 import org.genericsystem.reactor.gs2.GSRow.GSFirstRow;
+import org.genericsystem.reactor.gs2.GSSubCell.GSFirstSubCell;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 public class GSTable extends GSComposite {
@@ -63,4 +64,17 @@ public class GSTable extends GSComposite {
 		}
 	}
 
+	public static class GSSubCellTableMetaTag extends MetaTag {
+		public GSSubCellTableMetaTag() {
+			super(null, new MetaTag(GSRow.class, new MetaTag(GSCell.class, new MetaTag(GSFirstSubCell.class), new MetaTag(GSSubCell.class))));
+		}
+	}
+
+	public static class GSSubCellTable extends GSTable {
+
+		public GSSubCellTable(GSComposite parent) {
+			super(parent, new GSSubCellTableMetaTag());
+			tags(GSRow.class, GSCell.class, GSSubCell.class).forEach(gsrow -> gsrow.forEach(ObservableListExtractor.HOLDERS));
+		}
+	}
 }
