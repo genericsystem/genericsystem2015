@@ -7,7 +7,7 @@ import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.Tag.RootTag;
 
-public class GSApp extends GSSection implements RootTag {
+public class GSApp extends GSDiv implements RootTag {
 
 	public GSApp() {
 		super(null, FlexDirection.COLUMN);

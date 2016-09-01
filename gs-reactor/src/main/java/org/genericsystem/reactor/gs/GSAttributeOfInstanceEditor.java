@@ -14,22 +14,22 @@ import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class GSAttributeOfInstanceEditor extends GSSection {
+public class GSAttributeOfInstanceEditor extends GSDiv {
 
 	public GSAttributeOfInstanceEditor(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex", "1");
 		addStyle("overflow", "hidden");
-		new GSMultiCheckBox(this, ((GSSection) parent).getReverseDirection()) {
+		new GSMultiCheckBox(this, ((GSDiv) parent).getReverseDirection()) {
 			{
 				addStyle("flex", "1");
-				select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION) ? gs[0] : null);
+				select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 			}
 		};
 		new GenericColumn(this) {
 			{
 				addStyle("flex", "1");
-				select(gs -> (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? gs[0] : null);
+				select(gs -> gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 				new GSSubcellEditor(this) {
 					{
 						addStyle("flex", "1");
@@ -64,11 +64,14 @@ public class GSAttributeOfInstanceEditor extends GSSection {
 				};
 				new GSSubcellAdder(this) {
 					{
-						select__(model -> Bindings.createObjectBinding(() -> {
+						select__(model -> {
 							ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-							return holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
-									|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null;
-						}, ObservableListExtractor.HOLDERS.apply(model.getGenerics())));
+							return Bindings
+									.createObjectBinding(
+											() -> holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
+													|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null,
+											ObservableListExtractor.HOLDERS.apply(model.getGenerics()));
+						});
 					}
 				};
 			}

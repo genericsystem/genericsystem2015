@@ -16,7 +16,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
  * @author Nicolas Feybesse
  *
  */
-public class GSComposite extends GSSection {
+public class GSComposite extends GSDiv {
 
 	public GSComposite(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -34,7 +34,7 @@ public class GSComposite extends GSSection {
 	}
 
 	protected void sections() {
-		new GSSection(this, GSComposite.this.getReverseDirection()) {
+		new GSDiv(this, GSComposite.this.getReverseDirection()) {
 			{
 				forEach(GSComposite.this);
 				new HtmlLabel(this) {
@@ -61,7 +61,7 @@ public class GSComposite extends GSSection {
 
 		@Override
 		protected void header() {
-			new GSSection(this, FlexDirection.ROW) {
+			new GSDiv(this, FlexDirection.ROW) {
 				{
 					addStyle("justify-content", "center");
 					addStyle("background-color", "#ffa500");
@@ -88,7 +88,7 @@ public class GSComposite extends GSSection {
 
 		@Override
 		protected void sections() {
-			new GSSection(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
+			new GSDiv(this, ColorTitleCompositeFlexElement.this.getReverseDirection()) {
 				{
 					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
 					forEach(ColorTitleCompositeFlexElement.this);
@@ -110,8 +110,9 @@ public class GSComposite extends GSSection {
 
 		@Override
 		protected void sections() {
-			new GSSection(this, CompositeRadio.this.getReverseDirection()) {
+			new GSDiv(this, CompositeRadio.this.getReverseDirection()) {
 				{
+					addStyle("flex", "1");
 					forEach(CompositeRadio.this);
 					new HtmlRadio(this);
 					new HtmlLabel(this) {
@@ -152,14 +153,20 @@ public class GSComposite extends GSSection {
 
 		@Override
 		protected void sections() {
-			flexSubElement = new GSSection(this, ColorCompositeRadio.this.getReverseDirection()) {
+			flexSubElement = new HtmlLabel(this) {
 				{
+					addStyle("flex", "1");
+					addStyle("justify-content", "center");
+					addStyle("align-items", "center");
+					addStyle("text-align", "center");
 					forEach(ColorCompositeRadio.this);
+					bindText();
 					bindStyle("background-color", ReactorStatics.BACKGROUND, model -> getGenericStringProperty(model));
-					new HtmlRadio(this);
-					new HtmlLabel(this) {
+					new HtmlRadio(this) {
 						{
-							bindText();
+							addStyle("float", "left");
+							addStyle("vertical-align", "middle");
+							addStyle("margin", "4px");
 						}
 					};
 				}

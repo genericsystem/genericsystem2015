@@ -10,7 +10,7 @@ import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
-public class GSBooleanHolderEditor extends GSSection {
+public class GSBooleanHolderEditor extends GSDiv {
 
 	protected GSCheckBoxWithValue checkbox;
 
@@ -21,7 +21,7 @@ public class GSBooleanHolderEditor extends GSSection {
 	public GSBooleanHolderEditor(Tag parent, GSCheckBoxConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
-		new GSSection(this, FlexDirection.ROW) {
+		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("flex", "1");
 				addStyle("justify-content", "center");
