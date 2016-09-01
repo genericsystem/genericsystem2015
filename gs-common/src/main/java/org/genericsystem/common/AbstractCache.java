@@ -82,6 +82,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return getTs();
 	}
 
+	@Override
+	public boolean contains(Generic generic) {
+		return differentialProperty.getValue().getAdds().contains(generic);
+	}
+
 	protected abstract IDifferential<Generic> buildTransaction();
 
 	public AbstractCache(Root root) {
@@ -278,6 +283,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return getDifferential().getCacheLevel();
 	}
 
+	@Override
 	public ObservableIntegerValue getCacheLevelObservableValue() {
 		return cacheLevel;
 	}

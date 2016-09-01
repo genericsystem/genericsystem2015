@@ -26,6 +26,12 @@ public class GSMonitor extends GSSection {
 				bindAction(Context::cancel);
 			}
 		};
+		// new HtmlButton(this) {
+		// {
+		// setText("traverse");
+		// bindAction(Context::traverse);
+		// }
+		// };
 		// new GSButton(this) {
 		// {
 		// setText("Collect");

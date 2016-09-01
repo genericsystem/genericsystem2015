@@ -28,6 +28,10 @@ section .adding {
 }
  */
 
+.opaque{
+	opacity : 0.65;
+}
+
 .invalid {
 	background : white;
 	animation: invalideffect 0.5s 5 forwards;

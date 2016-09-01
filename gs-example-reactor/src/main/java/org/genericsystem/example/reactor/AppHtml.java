@@ -20,7 +20,7 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs.GSComposite.ColorCompositeRadio;
 import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.gs.GSEditor;
-import org.genericsystem.reactor.gs.GSMonitor;
+import org.genericsystem.reactor.gs.GSMonitorExtended;
 import org.genericsystem.reactor.gs.GSStepEditor;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -67,7 +67,7 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		new GSTable(this).select(Color.class);
 
 		new GSTable(this).select(Engine.class);
-		new GSMonitor(this).addStyle("background-color", "#ffa500");
+		new GSMonitorExtended(this).addStyle("background-color", "#ffa500");
 	}
 
 	public static class ExampleReactorScript implements Script {
