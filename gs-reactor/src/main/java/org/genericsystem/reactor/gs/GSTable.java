@@ -63,6 +63,7 @@ public class GSTable extends TitledSection implements SelectionDefaults {
 					protected void sections() {
 						new LinkTitleDisplayer(this) {
 							{
+								addStyle("overflow", "hidden");
 								forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 							}
 						};

@@ -39,7 +39,6 @@ public class GSSubcellDisplayer extends GSDiv {
 		this.linkDisplayerConstructor = linkDisplayerConstructor;
 		this.needMeta = needMeta;
 		addStyle("flex", "1");
-		addStyle("overflow", "hidden");
 		content();
 	}
 
@@ -80,7 +79,6 @@ public class GSSubcellDisplayer extends GSDiv {
 		tag.addStyle("flex", "1");
 		tag.addStyle("margin-right", "1px");
 		tag.addStyle("margin-bottom", "1px");
-		tag.addStyle("overflow", "hidden");
 	}
 
 	public static class GSSubcellEditor extends GSSubcellDisplayer {
@@ -198,7 +196,6 @@ public class GSSubcellDisplayer extends GSDiv {
 			tag.addStyle("background-color", "#dda5a5");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addStyle("overflow", "hidden");
 		}
 	}
 }

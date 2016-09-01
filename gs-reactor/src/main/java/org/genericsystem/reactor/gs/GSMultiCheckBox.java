@@ -16,12 +16,12 @@ public class GSMultiCheckBox extends GSDiv {
 	}
 
 	public GSMultiCheckBox(Tag parent, FlexDirection flexDirection) {
-		super(parent, flexDirection);
+		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-wrap", "wrap");
 
 		new HtmlLabel(this) {
 			{
-				addStyle("flex", "1");
+				addStyle("flex", "1 0 auto");
 				addStyle("justify-content", "center");
 				addStyle("align-items", "center");
 				addStyle("text-align", "center");
