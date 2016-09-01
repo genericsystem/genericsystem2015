@@ -4,18 +4,19 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gstag.HtmlDiv;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlH2;
 
-public class GSSection extends Tag {
+public class GSDiv extends HtmlDiv {
 	private final FlexDirection direction;
 
-	public GSSection(Tag parent) {
+	public GSDiv(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSSection(Tag parent, FlexDirection direction) {
-		super(parent, "section");
+	public GSDiv(Tag parent, FlexDirection direction) {
+		super(parent);
 		this.direction = direction;
 		addStyle("display", "flex");
 		addStyle("flex-direction", direction.toString());
@@ -30,36 +31,19 @@ public class GSSection extends Tag {
 		return getDirection().reverse();
 	}
 
-	public static class GenericColumn extends GSSection {
+	public static class GenericColumn extends GSDiv {
 		public GenericColumn(Tag parent) {
 			super(parent, FlexDirection.COLUMN);
 		}
 	}
 
-	public static class TitledColumn extends GenericColumn {
-		protected final FlexDirection flexDirection; // For the content’s direction.
-
-		public TitledColumn(Tag parent, FlexDirection flexDirection) {
-			super(parent);
-			this.flexDirection = flexDirection;
-			titleHeader();
-			content();
-		}
-
-		protected void titleHeader() {
-		}
-
-		protected void content() {
-		}
-	}
-
-	public static class GenericRow extends GSSection {
+	public static class GenericRow extends GSDiv {
 		public GenericRow(Tag parent) {
 			super(parent, FlexDirection.ROW);
 		}
 	}
 
-	public static class GenericRowWrapper extends GSSection {
+	public static class GenericRowWrapper extends GSDiv {
 		public GenericRowWrapper(Tag parent, FlexDirection direction, Consumer<Tag> consumer) {
 			super(parent, direction);
 			addStyle("justify-content", "center");

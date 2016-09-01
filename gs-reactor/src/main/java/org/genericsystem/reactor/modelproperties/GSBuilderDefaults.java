@@ -30,15 +30,15 @@ public interface GSBuilderDefaults extends ContextProperty {
 		createNewInitializedProperty(INVALID_LIST, model -> new ArrayList<ObservableValue<Boolean>>());
 	};
 
-	default List<ObservableValue<Boolean>> getInvalidList(Context model) {
-		return this.<List<ObservableValue<Boolean>>> getProperty(INVALID_LIST, model).getValue();
+	default Property<List<ObservableValue<Boolean>>> getInvalidListProperty(Context model) {
+		return getProperty(INVALID_LIST, model);
 	}
 
-	default Map<Generic, Property<Serializable>> getHoldersMap(Context model) {
-		return this.<Map<Generic, Property<Serializable>>> getProperty(HOLDERS_MAP, model).getValue();
+	default Property<Map<Generic, Property<Serializable>>> getHoldersMapProperty(Context model) {
+		return getProperty(HOLDERS_MAP, model);
 	}
 
-	default Map<Generic, List<Property<Context>>> getComponentsMap(Context model) {
-		return this.<Map<Generic, List<Property<Context>>>> getProperty(COMPONENTS_MAP, model).getValue();
+	default Property<Map<Generic, List<Property<Context>>>> getComponentsMapProperty(Context model) {
+		return getProperty(COMPONENTS_MAP, model);
 	}
 }

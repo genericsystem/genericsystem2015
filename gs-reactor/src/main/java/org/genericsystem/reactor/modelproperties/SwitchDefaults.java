@@ -1,80 +1,74 @@
 package org.genericsystem.reactor.modelproperties;
 
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
+import javafx.beans.property.Property;
+import javafx.collections.ObservableList;
+
 public interface SwitchDefaults extends ContextProperty {
 
-	public static final String SUBMODELS = "subModels";
 	public static final String INDEX = "index";
-	public static final String CURRENT_MODEL = "currentModel";
-	public static final String NAME_MODEL = "nameModel";
+	public static final String INSTANCE_NAME_TAG = "instanceNameTag";
+	public static final String SWITCHED_TAG = "switchedTag";
 
-	default ObservableList<Context> getSwitchModels(Context model) {
-		Property<ObservableList<Context>> modelsProperty = getProperty(SUBMODELS, model);
-		return modelsProperty != null ? modelsProperty.getValue() : null;
+	public void addStyle(Context context, String propertyName, String value);
+
+	default Tag getInstanceNameTag(Context context) {
+		return this.<Tag> getProperty(INSTANCE_NAME_TAG, context).getValue();
 	}
 
-	default Property<Context> getCurrentModel(Context model) {
-		return getProperty(CURRENT_MODEL, model);
+	default Tag getSwitchedTag(Context context) {
+		return this.<Tag> getProperty(SWITCHED_TAG, context).getValue();
 	}
 
-	default Property<Context> getNameModel(Context model) {
-		return getProperty(NAME_MODEL, model);
-	}
-
-	default Property<Integer> getIteratorIndexProperty(Context model) {
-		return getProperty(INDEX, model);
+	default Property<Integer> getIteratorIndexProperty(Context context) {
+		return getProperty(INDEX, context);
 	}
 
 	default void switcher_(Tag switchedTag, ObservableListExtractor observableListExtractor, Tag instanceNameTag) {
-		switcher(switchedTag, model -> FXCollections.observableArrayList(observableListExtractor.apply(model.getGenerics()).stream().map(g -> new Context(model, Context.addToGenerics(g, model.getGenerics()))).collect(Collectors.toList())), instanceNameTag);
-	}
-
-	default void switcher(Tag switchedTag, Function<Context, ObservableList<Context>> applyOnModel, Tag instanceNameTag) {
-		addPrefixBinding(model -> {
-			storeProperty(SUBMODELS, model, m -> new SimpleObjectProperty<>(applyOnModel.apply(model)));
-			storeProperty(CURRENT_MODEL, model, m -> new SimpleObjectProperty<>());
-			storeProperty(NAME_MODEL, model, m -> new SimpleObjectProperty<>(model));
-			storeProperty(INDEX, model, m -> new ReadOnlyIntegerWrapper(-1));
+		addPrefixBinding(context -> {
+			createNewInitializedProperty(INDEX, context, m -> -1);
+			createNewInitializedProperty(INSTANCE_NAME_TAG, context, c -> instanceNameTag);
+			createNewInitializedProperty(SWITCHED_TAG, context, c -> switchedTag);
 		});
-		instanceNameTag.select__(model -> getNameModel(model));
-		switchedTag.select__(model -> getCurrentModel(model));
+		instanceNameTag.addStyle("display", "flex");
+		switchedTag.forEach(observableListExtractor);
+		switchedTag.addPrefixBinding(context -> switchedTag.getDomNodeStyles(context).put("display", "none"));
 	}
 
-	default void next(Context model) {
-		Property<Integer> index = getIteratorIndexProperty(model);
-		ObservableList<Context> models = getSwitchModels(model);
+	default void next(Context context) {
+		Property<Integer> index = getIteratorIndexProperty(context);
+		Tag switchedTag = getSwitchedTag(context);
+		ObservableList<Context> contexts = context.getSubContexts(switchedTag);
+		if (contexts == null)
+			contexts = context.getParent().getSubContexts(switchedTag);
 		if (index.getValue() == -1) {
 			index.setValue(0);
-			getNameModel(model).setValue(null);
-			getCurrentModel(model).setValue(models.get(index.getValue()));
-		} else if (index.getValue() + 1 < models.size()) {
+			getInstanceNameTag(context).addStyle(context, "display", "none");
+			switchedTag.addStyle(contexts.get(0), "display", "flex");
+		} else if (index.getValue() + 1 < contexts.size()) {
+			switchedTag.addStyle(contexts.get(index.getValue()), "display", "none");
+			switchedTag.addStyle(contexts.get(index.getValue() + 1), "display", "flex");
 			index.setValue(index.getValue() + 1);
-			getCurrentModel(model).setValue(models.get(index.getValue()));
 		}
 	}
 
-	default void prev(Context model) {
-		Property<Integer> index = getIteratorIndexProperty(model);
-		ObservableList<Context> models = getSwitchModels(model);
+	default void prev(Context context) {
+		Property<Integer> index = getIteratorIndexProperty(context);
+		Tag switchedTag = getSwitchedTag(context);
+		ObservableList<Context> contexts = context.getSubContexts(switchedTag);
+		if (contexts == null)
+			contexts = context.getParent().getSubContexts(getSwitchedTag(context));
 		if (index.getValue() > 0) {
+			switchedTag.addStyle(contexts.get(index.getValue()), "display", "none");
+			switchedTag.addStyle(contexts.get(index.getValue() - 1), "display", "flex");
 			index.setValue(index.getValue() - 1);
-			getCurrentModel(model).setValue(models.get(index.getValue()));
 		} else if (index.getValue() == 0) {
 			index.setValue(-1);
-			getNameModel(model).setValue(model.getParent());
-			getCurrentModel(model).setValue(null);
+			getInstanceNameTag(context).addStyle(context.getParent(), "display", "flex");
+			switchedTag.addStyle(contexts.get(0), "display", "none");
 		}
 	}
 }

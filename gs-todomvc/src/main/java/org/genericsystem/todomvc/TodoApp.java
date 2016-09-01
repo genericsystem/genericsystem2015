@@ -20,7 +20,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs.GSSection;
+import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlCheckBox;
 import org.genericsystem.reactor.gstag.HtmlDiv;
@@ -111,7 +111,7 @@ public class TodoApp extends GSApp {
 
 		new HtmlDiv(this) {
 			{
-				new GSSection(this) {
+				new GSDiv(this) {
 					{
 						addStyleClass("todoapp");
 						new HtmlHeader(this) {
@@ -136,7 +136,7 @@ public class TodoApp extends GSApp {
 								};
 							}
 						};
-						new GSSection(this) {
+						new GSDiv(this) {
 							{
 								addStyleClass("main");
 								new HtmlUl(this) {

@@ -4,7 +4,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
-public class GSSingleLinkComponentDisplayer extends GSSection {
+public class GSSingleLinkComponentDisplayer extends GSDiv {
 
 	public GSSingleLinkComponentDisplayer(Tag parent) {
 		super(parent, FlexDirection.ROW);

@@ -1,21 +1,19 @@
 package org.genericsystem.reactor.gs;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.Map;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import io.vertx.core.json.JsonObject;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaults {
 
@@ -27,6 +25,19 @@ public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaul
 		init();
 		createSelectionProperty();
 		bindBiDirectionalSelection(optionElement);
+		addPrefixBinding(model -> {
+			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
+				Map<String, String> map = getDomNodeStyles(model);
+				ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
+				ObservableValue<String> observable = getSelectionString(model);
+				observable.addListener(listener);
+				map.put("background-color", observable.getValue());
+			}
+		});
+		optionElement.addPrefixBinding(model -> {
+			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+				optionElement.addStyle(model, "background-color", optionElement.getGenericStringProperty(model).getValue());
+		});
 	}
 
 	@Override
@@ -59,19 +70,6 @@ public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaul
 
 		public CompositeSelectWithEmptyEntry(Tag parent) {
 			super(parent);
-			addPrefixBinding(model -> {
-				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
-					Map<String, String> map = getDomNodeStyles(model);
-					ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
-					ObservableValue<String> observable = getSelectionString(model);
-					observable.addListener(listener);
-					map.put("background-color", observable.getValue());
-				}
-			});
-			optionElement.addPrefixBinding(model -> {
-				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					optionElement.getDomNodeStyles(model).put("background-color", optionElement.getGenericStringProperty(model).getValue());
-			});
 		}
 
 		@Override
@@ -86,19 +84,14 @@ public class GSSelect extends Tag implements SelectionDefaults, ComponentsDefaul
 		}
 	}
 
-	public static class ColorsSelect extends GSSelect {
-
-		public ColorsSelect(Tag parent) {
-			super(parent);
-			bindStyle("background-color", SELECTION_STRING);
-			optionElement.bindStyle("background-color", ReactorStatics.BACKGROUND, model -> optionElement.getGenericStringProperty(model));
-		}
-	}
-
 	public static class InstanceCompositeSelect extends GSSelect {
 
 		public InstanceCompositeSelect(Tag parent) {
 			super(parent);
+			addPostfixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+					addStyle(model, "background-color", getSelectionString(model).getValue());
+			});
 			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()))));
 		}
 

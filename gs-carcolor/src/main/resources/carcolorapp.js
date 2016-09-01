@@ -107,6 +107,9 @@ function onMessageReceived(evt) {
 		case "section": 
 			elt.classList.add("adding");
 			break;
+		case "div":
+			elt.classList.add("adding");
+			break;
 		case "header": 
 			elt.classList.add("adding");
 			break;

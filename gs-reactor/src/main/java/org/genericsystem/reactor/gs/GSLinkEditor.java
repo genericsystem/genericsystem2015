@@ -17,7 +17,7 @@ import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
-public class GSLinkEditor extends GSSection implements ComponentsDefaults {
+public class GSLinkEditor extends GSDiv implements ComponentsDefaults {
 
 	protected GSSingleLinkComponentEditor components;
 
@@ -60,8 +60,10 @@ public class GSLinkEditor extends GSSection implements ComponentsDefaults {
 
 		public GSLinkBuilder(Tag parent, GSLinkComponentConstructor constructor) {
 			super(parent, constructor);
-			if (parent != null && parent.getParent() != null && parent.getParent().getParent() instanceof GSInstanceBuilder)
-				addPostfixBinding(model -> getComponentsMap(model).put(model.getGeneric(), getComponentsProperty(model).getValue()));
+			addPostfixBinding(model -> {
+				if (getComponentsMapProperty(model) != null)
+					getComponentsMapProperty(model).getValue().put(model.getGeneric(), getComponentsProperty(model).getValue());
+			});
 		}
 	}
 

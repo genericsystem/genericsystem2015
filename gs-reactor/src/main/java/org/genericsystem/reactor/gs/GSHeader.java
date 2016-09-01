@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.TagConstructor;
 
-public class GSHeader extends GSSection {
+public class GSHeader extends GSDiv {
 
 	public GSHeader(Tag parent, String string, TagConstructor tag1, String string1, TagConstructor tag2, String string2) {
 		super(parent, FlexDirection.ROW);
@@ -14,7 +14,7 @@ public class GSHeader extends GSSection {
 			leftTag.setText(string1);
 			leftTag.addStyle("flex", "1");
 		} else {
-			Tag leftTag = new GSSection(this, FlexDirection.COLUMN);
+			Tag leftTag = new GSDiv(this, FlexDirection.COLUMN);
 			leftTag.addStyle("flex", "1");
 		}
 		new GenericH2Section(this, string) {
@@ -28,7 +28,7 @@ public class GSHeader extends GSSection {
 			rightTag.setText(string2);
 			rightTag.addStyle("flex", "1");
 		} else {
-			Tag rightTag = new GSSection(this, FlexDirection.COLUMN);
+			Tag rightTag = new GSDiv(this, FlexDirection.COLUMN);
 			rightTag.addStyle("flex", "1");
 		}
 	};

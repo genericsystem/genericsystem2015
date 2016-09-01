@@ -17,7 +17,7 @@ import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkCompone
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.StringExtractor;
 
-public class GSSubcellDisplayer extends GSSection {
+public class GSSubcellDisplayer extends GSDiv {
 
 	protected final TagConstructor holderDisplayerConstructor;
 	protected final TagConstructor booleanHolderDisplayerConstructor;
@@ -44,7 +44,7 @@ public class GSSubcellDisplayer extends GSSection {
 	}
 
 	public void content() {
-		new GSSection(this, this.getDirection()) {
+		new GSDiv(this, this.getDirection()) {
 			{
 				style(this);
 				if (needMeta)
@@ -54,7 +54,7 @@ public class GSSubcellDisplayer extends GSSection {
 				holderDisplayerConstructor.build(this);
 			}
 		};
-		new GSSection(this, this.getDirection()) {
+		new GSDiv(this, this.getDirection()) {
 			{
 				style(this);
 				if (needMeta)
@@ -64,7 +64,7 @@ public class GSSubcellDisplayer extends GSSection {
 				booleanHolderDisplayerConstructor.build(this);
 			}
 		};
-		new GSSection(this, this.getDirection()) {
+		new GSDiv(this, this.getDirection()) {
 			{
 				addStyle("flex", "1");
 				select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
