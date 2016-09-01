@@ -46,13 +46,17 @@ public interface ISignature<T extends ISignature<T>> {
 	List<T> getComponents();
 
 	/**
-	 * Returns the <code>JSonId</code> of this signature.
+	 * Returns the unique id of this signature.
 	 *
-	 * @return the <code>JSonObject</code> representing this signature.
+	 * @return the design date representing this signature.
 	 */
-
 	long getTs();
 
+	/**
+	 * Returns the birth ts of this signature.
+	 *
+	 * @return the ts of the transaction that make alive this signature.
+	 */
 	long getBirthTs();
 
 }

@@ -1,19 +1,18 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Tag.RootTag;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
-
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.RootTag;
 
 public class HtmlDomNode {
 
