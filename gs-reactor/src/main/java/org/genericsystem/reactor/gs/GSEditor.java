@@ -28,10 +28,10 @@ public class GSEditor extends TitledSection {
 		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("flex", "0.3");
-				addStyle("background-color", "#ffa500");
+				addStyle("background-color", "#EA4500");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
-				addStyle("color", "red");
+				addStyle("color", "White");
 				addStyle("justify-content", "center");
 				addStyle("align-items", "center");
 				new HtmlH2(this) {

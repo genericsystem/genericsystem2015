@@ -54,6 +54,9 @@ public abstract class AbstractWebSocketsServer {
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
+
+				webSocket.closeHandler((v) -> System.out.println("close the webSocket"));
+				;
 			});
 
 			addHttpHandler(httpServer);

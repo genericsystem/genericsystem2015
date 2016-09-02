@@ -35,9 +35,9 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 
 	public CarColorApp() {
 		createSelectionProperty();
-		addStyle("background-color", "#3393ff");
+		addStyle("background-color", "#00afeb");
 
-		new GSHeader(this, "Generic System Reactor Live Demo", GSLogo::new, "", GSUserGuide::new, "");
+		new GSHeader(this, "Reactor Live Demo", GSLogo::new, "", GSUserGuide::new, "");
 		new GSTable(this).select(Car.class);
 		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
 		new GSTable(this).select(Color.class);

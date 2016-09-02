@@ -129,7 +129,6 @@ public class GSSubcellDisplayer extends GSDiv {
 		public void style(Tag tag) {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
-			tag.addStyle("background-color", "#dda5e2");
 			tag.addStyle("justify-content", "flex-start");
 			tag.addStyle("align-items", "stretch");
 		}
@@ -289,7 +288,7 @@ public class GSSubcellDisplayer extends GSDiv {
 		public void style(Tag tag) {
 			super.style(tag);
 			tag.addStyle("color", "#ffffff");
-			tag.addStyle("background-color", "#ffa5a5");
+			tag.addStyle("background-color", "#ea0084");
 		}
 	}
 
@@ -334,7 +333,7 @@ public class GSSubcellDisplayer extends GSDiv {
 		public void style(Tag tag) {
 			tag.addStyle("flex", "1");
 			tag.addStyle("color", "#ffffff");
-			tag.addStyle("background-color", "#dda5a5");
+			tag.addStyle("background-color", "#e5ed00");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
 		}

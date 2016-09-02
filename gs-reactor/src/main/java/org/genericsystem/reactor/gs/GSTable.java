@@ -26,10 +26,10 @@ public class GSTable extends TitledSection implements SelectionDefaults {
 	protected void titleHeader() {
 		new GSDiv(this, FlexDirection.ROW) {
 			{
-				addStyle("background-color", "#ffa500");
+				addStyle("background-color", "#EA4500");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
-				addStyle("color", "red");
+				addStyle("color", "White");
 				addStyle("justify-content", "center");
 				new HtmlH2(this) {
 					{
@@ -79,7 +79,7 @@ public class GSTable extends TitledSection implements SelectionDefaults {
 								} else {
 									addStyle("flex", "1");
 								}
-								addStyle("background-color", "#ffa5a5");
+								addStyle("background-color", "#ea0084");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
 							}
