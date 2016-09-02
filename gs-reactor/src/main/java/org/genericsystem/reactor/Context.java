@@ -1,6 +1,5 @@
 package org.genericsystem.reactor;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,6 +28,7 @@ public class Context {
 	private Map<Tag, ObservableList<Context>> subContextsMap = new HashMap<>();
 	private Map<Tag, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
 	private final Generic[] generics;
+	private boolean destroyed = false;
 
 	public Context(Context parent, Generic[] generics) {
 		this.parent = parent;
@@ -102,8 +102,6 @@ public class Context {
 		htmlDomNodesMap.values().iterator().next().sendRemove();
 		internalDestroy();
 	}
-
-	public boolean destroyed = false;
 
 	public void internalDestroy() {
 		// System.out.println("InternalDestroy : " + this);
@@ -182,15 +180,12 @@ public class Context {
 	}
 
 	public void traverse() {
-		// System.out.println("traverse " + Arrays.toString(getGenerics()) + " "
-		// + isOpaque());
-		if (isOpaque()) {
-			// Tag tag = new ArrayList<>(htmlDomNodesMap.keySet()).get(0);
-			System.out.println("removeStyleClasse Opaque" + Arrays.toString(getGenerics()));
+		if (isOpaque())
 			htmlDomNodesMap.keySet().stream().forEach(tag -> tag.removeStyleClass(this, "opaque"));
-		}
 		subContextsMap.values().stream().flatMap(c -> c.stream()).forEach(Context::traverse);
-
 	}
 
+	public boolean isDestroyed() {
+		return destroyed;
+	}
 }

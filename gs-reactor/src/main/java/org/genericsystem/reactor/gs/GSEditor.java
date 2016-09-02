@@ -1,10 +1,8 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSSection.TitledColumn;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
-import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -14,7 +12,7 @@ import org.genericsystem.reactor.model.StringExtractor;
  *
  * @param <M>
  */
-public class GSEditor extends TitledColumn {
+public class GSEditor extends TitledSection {
 
 	public GSEditor(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -27,7 +25,7 @@ public class GSEditor extends TitledColumn {
 
 	@Override
 	protected void titleHeader() {
-		new GSSection(this, GSEditor.this.getReverseDirection()) {
+		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("flex", "0.3");
 				addStyle("background-color", "#ffa500");
@@ -55,10 +53,10 @@ public class GSEditor extends TitledColumn {
 
 			@Override
 			protected void header() {
-				new GSSection(this, flexDirection) {
+				new GSDiv(this, flexDirection) {
 					{
 						addStyle("flex", "0.3");
-						new InstanceTitleDisplayer(this);
+						new InstanceLinkTitleDisplayer(this).select(gs -> gs[0].getMeta());
 						new InstanceLinkTitleDisplayer(this) {
 							{
 								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
@@ -70,7 +68,7 @@ public class GSEditor extends TitledColumn {
 
 			@Override
 			protected void sections() {
-				new GSSection(this, flexDirection) {
+				new GSDiv(this, flexDirection) {
 					{
 						addStyle("flex", "1");
 						new GSSubcellEditor(this);

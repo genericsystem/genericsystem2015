@@ -4,7 +4,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlButton;
 
-public class GSMonitor extends GSSection {
+public class GSMonitor extends GSDiv {
 
 	public GSMonitor(Tag parent) {
 		this(parent, FlexDirection.ROW);

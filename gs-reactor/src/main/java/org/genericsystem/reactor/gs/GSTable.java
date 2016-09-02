@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gs;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSSection.TitledColumn;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.LinkTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -12,7 +11,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
  * @author Nicolas Feybesse
  *
  */
-public class GSTable extends TitledColumn implements SelectionDefaults {
+public class GSTable extends TitledSection implements SelectionDefaults {
 
 	public GSTable(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
@@ -25,7 +24,7 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 
 	@Override
 	protected void titleHeader() {
-		new GSSection(this, FlexDirection.ROW) {
+		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("background-color", "#ffa500");
 				addStyle("margin-right", "1px");
@@ -64,6 +63,7 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 					protected void sections() {
 						new LinkTitleDisplayer(this) {
 							{
+								addStyle("overflow", "hidden");
 								forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 							}
 						};
@@ -71,7 +71,7 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 
 					@Override
 					protected void footer() {
-						new GSSection(this, this.getDirection()) {
+						new GSDiv(this, this.getDirection()) {
 							{
 								if (this.getDirection().equals(FlexDirection.ROW)) {
 									addStyle("flex", "0");
@@ -79,7 +79,6 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 								} else {
 									addStyle("flex", "1");
 								}
-								addStyle("min-width", "100px");
 								addStyle("background-color", "#ffa5a5");
 								addStyle("margin-right", "1px");
 								addStyle("margin-bottom", "1px");
@@ -90,7 +89,7 @@ public class GSTable extends TitledColumn implements SelectionDefaults {
 			}
 
 			protected void columnsInputSection() {
-				new GSInstanceBuilder(this, this.getReverseDirection());
+				new GSInstanceBuilder(this, this.getReverseDirection()).addStyle("flex", "1");
 			}
 
 			@Override

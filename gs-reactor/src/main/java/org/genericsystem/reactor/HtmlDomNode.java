@@ -1,6 +1,5 @@
 package org.genericsystem.reactor;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -74,7 +73,10 @@ public class HtmlDomNode {
 	// for (Tag childTag : change.getAddedSubList()) {
 	// MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 	// if (metaBinding != null) {
-	// modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
+	// modelContext.setSubContexts(childTag, new
+	// TransformationObservableList<BETWEEN,
+	// Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) ->
+	// {
 	// Context childModel = metaBinding.buildModel(modelContext, between);
 	// createChildDomNode(i, childModel, childTag);
 	// return childModel;
@@ -110,12 +112,8 @@ public class HtmlDomNode {
 	}
 
 	public void createChildDomNode(int index, Context childContext, Tag childTag) {
-
-		if (childContext.isOpaque()) {
-			System.out.println("addStyle Opaque " + Arrays.toString(childContext.getGenerics()));
+		if (childContext.isOpaque())
 			childTag.addStyleClass("opaque");
-		}
-
 		childTag.createNode(this, childContext).init(computeIndex(index, childTag));
 	}
 
@@ -205,7 +203,9 @@ public class HtmlDomNode {
 	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 	private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
-		// System.out.println(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0)
+		// System.out.println(new JsonObject().put(MSG_TYPE,
+		// UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue !=
+		// null ? newValue : 0)
 		// .encodePrettily());
 		sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
 	};
@@ -247,12 +247,14 @@ public class HtmlDomNode {
 
 	public void sendRemove() {
 		sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
-		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id).encodePrettily());
+		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID,
+		// id).encodePrettily());
 	}
 
 	public void sendMessage(JsonObject jsonObj) {
 		jsonObj.put("count", count++);
-		// if (jsonObj.getString(MSG_TYPE).equals(ADD) || jsonObj.getString(MSG_TYPE).equals(REMOVE))
+		// if (jsonObj.getString(MSG_TYPE).equals(ADD) ||
+		// jsonObj.getString(MSG_TYPE).equals(REMOVE))
 		// System.out.println(jsonObj.encodePrettily());
 		getWebSocket().writeFinalTextFrame(jsonObj.encode());
 	}
