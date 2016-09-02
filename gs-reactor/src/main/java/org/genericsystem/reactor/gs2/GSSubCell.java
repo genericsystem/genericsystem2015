@@ -1,28 +1,30 @@
 package org.genericsystem.reactor.gs2;
 
+import org.genericsystem.reactor.Tag;
+
 public class GSSubCell extends GSComposite {
 
-	public GSSubCell(GSCell parent, MetaTag metaTag) {
-		super(parent, metaTag);
+	public GSSubCell(Tag parent, MetaTag metaTag) {
+		super(parent, metaTag, ((GSComposite) parent).getReverseDirection());
 	}
 
 	public static class GSFirstSubCell extends GSSubCell {
 
-		public GSFirstSubCell(GSCell parent, MetaTag metaTag) {
+		public GSFirstSubCell(Tag parent, MetaTag metaTag) {
 			super(parent, metaTag);
 		}
 	}
 
 	public static class GSFirstCellFirstSubCell extends GSSubCell {
 
-		public GSFirstCellFirstSubCell(GSCell parent, MetaTag metaTag) {
+		public GSFirstCellFirstSubCell(Tag parent, MetaTag metaTag) {
 			super(parent, metaTag);
 		}
 	}
 
 	public static class GSFirstCellSubCell extends GSSubCell {
 
-		public GSFirstCellSubCell(GSCell parent, MetaTag metaTag) {
+		public GSFirstCellSubCell(Tag parent, MetaTag metaTag) {
 			super(parent, metaTag);
 		}
 	}
