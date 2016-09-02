@@ -14,6 +14,7 @@ import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -161,6 +162,11 @@ public class Context {
 
 	public ObservableIntegerValue getCacheLevelObservableValue() {
 		return getGeneric().getCurrentCache().getCacheLevelObservableValue();
+	}
+
+	public ObservableLongValue getTsObservableValue() {
+
+		return getGeneric().getCurrentCache().getTsObservableValue();
 	}
 
 	public void mount() {

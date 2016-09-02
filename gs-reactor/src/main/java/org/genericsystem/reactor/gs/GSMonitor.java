@@ -1,8 +1,18 @@
 package org.genericsystem.reactor.gs;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
+import org.genericsystem.common.Statics;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlButton;
+import org.genericsystem.reactor.gstag.HtmlLabel;
+
+import javafx.beans.binding.Bindings;
 
 public class GSMonitor extends GSDiv {
 
@@ -26,12 +36,17 @@ public class GSMonitor extends GSDiv {
 				bindAction(Context::cancel);
 			}
 		};
-		// new HtmlButton(this) {
-		// {
-		// setText("traverse");
-		// bindAction(Context::traverse);
-		// }
-		// };
+		new HtmlLabel(this) {
+			{
+				bindText(context -> Bindings.createStringBinding(() -> {
+					Long tsMs = (Long) context.getTsObservableValue().getValue() / Statics.MILLI_TO_NANOSECONDS;
+					Date dateMs = new Date(tsMs);
+					Instant instant = Instant.ofEpochMilli(dateMs.getTime());
+					LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault());
+					return "Last update : " + ldt.format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss"));
+				}, context.getTsObservableValue()));
+			}
+		};
 		// new GSButton(this) {
 		// {
 		// setText("Collect");
