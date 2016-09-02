@@ -112,9 +112,10 @@ public class HtmlDomNode {
 	}
 
 	public void createChildDomNode(int index, Context childContext, Tag childTag) {
-		if (childContext.isOpaque())
-			childTag.addStyleClass("opaque");
+
 		childTag.createNode(this, childContext).init(computeIndex(index, childTag));
+		if (childContext.isOpaque())
+			childTag.addStyleClass(childContext, "opaque");
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {

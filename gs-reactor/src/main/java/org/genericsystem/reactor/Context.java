@@ -156,7 +156,6 @@ public class Context {
 	}
 
 	public void cancel() {
-		traverse();
 		getGeneric().getCurrentCache().clear();
 	}
 
