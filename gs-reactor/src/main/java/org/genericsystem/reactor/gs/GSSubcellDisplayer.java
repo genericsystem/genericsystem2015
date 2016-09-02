@@ -80,9 +80,10 @@ public class GSSubcellDisplayer extends GSDiv {
 	}
 
 	public TagConstructor getLinkDisplayerConstructor() {
-		return tag -> new GSLabelDisplayer(tag) {
+		return tag -> new GSDiv(tag, ((GSDiv) tag).getDirection()) {
 			{
 				forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+				new GSLabelDisplayer(this);
 			}
 		};
 	}
@@ -278,9 +279,10 @@ public class GSSubcellDisplayer extends GSDiv {
 
 		@Override
 		public TagConstructor getLinkDisplayerConstructor() {
-			return tag -> new GSLabelDisplayer(tag) {
+			return tag -> new GSDiv(tag, ((GSDiv) tag).getDirection()) {
 				{
 					forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+					new GSLabelDisplayer(this);
 				}
 			};
 		}
@@ -301,9 +303,10 @@ public class GSSubcellDisplayer extends GSDiv {
 
 		@Override
 		public TagConstructor getLinkDisplayerConstructor() {
-			return tag -> new GSLabelDisplayer(tag) {
+			return tag -> new GSDiv(tag, ((GSDiv) tag).getDirection()) {
 				{
 					forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+					new GSLabelDisplayer(this);
 				}
 			};
 		}
