@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 
+import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableLongValue;
+
 /**
  * @author Nicolas Feybesse
  *
@@ -37,4 +40,10 @@ public interface DefaultCache<T extends DefaultGeneric<T>> extends DefaultContex
 	long shiftTs();
 
 	void unmount();
+
+	ObservableIntegerValue getCacheLevelObservableValue();
+
+	ObservableLongValue getTsObservableValue();
+
+	boolean contains(T generic);
 }

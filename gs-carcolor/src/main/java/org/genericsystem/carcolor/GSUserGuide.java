@@ -54,7 +54,7 @@ public class GSUserGuide extends GSDiv {
 										HtmlLi li1 = new HtmlLi(this);
 										HtmlLi li2 = new HtmlLi(this);
 										HtmlLi li3 = new HtmlLi(this);
-										li1.setText("Add new color");
+										li1.setText("Add new color of any CSS color style (ex : Black, rgb(0,0,0), #000000, ...)");
 										li2.setText("Select car in the ComboBox");
 										li3.setText("Use \"add Button\" to update data");
 									}

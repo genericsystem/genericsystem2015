@@ -1,14 +1,16 @@
 package org.genericsystem.common;
 
 import java.util.stream.Stream;
-import javafx.beans.Observable;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.ObservableBase;
+
+import javafx.beans.Observable;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 /**
  * @author Nicolas Feybesse
@@ -28,6 +30,10 @@ public class Differential implements IDifferential<Generic> {
 		return adds.stream().filter(g -> {
 			return g.getTs() == Long.MAX_VALUE && g.isAlive();
 		});
+	}
+
+	public PseudoConcurrentCollection<Generic> getAdds() {
+		return adds;
 	}
 
 	public IDifferential<Generic> getSubDifferential() {

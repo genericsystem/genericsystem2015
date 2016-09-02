@@ -310,12 +310,20 @@ public abstract class Tag implements TextPropertyDefaults, StylesDefaults, Attri
 		addPrefixBinding(model -> getDomNodeStyleClasses(model).add(styleClass));
 	}
 
+	public void addStyleClass(Context context, String styleClass) {
+		getDomNodeStyleClasses(context).add(styleClass);
+	}
+
 	public void addAttribute(String attributeName, String value) {
 		addPrefixBinding(model -> getDomNodeAttributes(model).put(attributeName, value));
 	}
 
 	public void addAttribute(Context context, String attributeName, String value) {
 		getDomNodeAttributes(context).put(attributeName, value);
+	}
+
+	public void removeStyleClass(Context context, String styleClass) {
+		getDomNodeStyleClasses(context).remove(styleClass);
 	}
 
 	public void bindAttribute(String attributeName, String propertyName) {

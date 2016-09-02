@@ -71,6 +71,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 	protected final ObjectProperty<IDifferential<Generic>> transactionProperty;
 	protected final ObjectProperty<Differential> differentialProperty = new SimpleObjectProperty<>();;
 	private ObservableIntegerValue cacheLevel;
+	private ObservableLongValue ts;
 	private final ContextEventListener<Generic> listener;
 	private Map<Generic, ObservableList<Generic>> dependenciesAsOservableListCacheMap = new HashMap<>();
 
@@ -80,6 +81,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		transactionProperty.set(buildTransaction());
 		listener.triggersRefreshEvent();
 		return getTs();
+	}
+
+	@Override
+	public boolean contains(Generic generic) {
+		return differentialProperty.getValue().getAdds().contains(generic);
 	}
 
 	protected abstract IDifferential<Generic> buildTransaction();
@@ -95,7 +101,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		this.listener = listener;
 		transactionProperty = new SimpleObjectProperty<>(buildTransaction());
 		cacheLevel = Bindings.createIntegerBinding(() -> differentialProperty.get().getCacheLevel(), differentialProperty);
-
+		ts = Bindings.createLongBinding(() -> transactionProperty.get().getTs(), transactionProperty);
 		initialize();
 	}
 
@@ -117,6 +123,11 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	public long getTs() {
 		return getTransaction().getTs();
+	}
+
+	@Override
+	public ObservableLongValue getTsObservableValue() {
+		return ts;
 	}
 
 	@Override
@@ -278,6 +289,7 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		return getDifferential().getCacheLevel();
 	}
 
+	@Override
 	public ObservableIntegerValue getCacheLevelObservableValue() {
 		return cacheLevel;
 	}
