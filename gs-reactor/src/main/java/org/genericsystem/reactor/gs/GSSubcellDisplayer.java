@@ -1,45 +1,42 @@
 package org.genericsystem.reactor.gs;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderAdder;
 import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderBuilder;
-import org.genericsystem.reactor.gs.GSBooleanHolderEditor.GSBooleanHolderEditorWithRemoval;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderAdder;
 import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderBuilder;
-import org.genericsystem.reactor.gs.GSHolderEditor.GSHolderEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkAdder;
 import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkBuilder;
-import org.genericsystem.reactor.gs.GSLinkEditor.GSLinkEditorWithRemoval;
-import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSInstanceLinkComponentsTitleDisplayer;
-import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsDisplayer;
-import org.genericsystem.reactor.gs.GSSingleLinkComponentDisplayer.GSLinkComponentsTitleDisplayer;
+import org.genericsystem.reactor.gs.GSSingleLinkComponentEditor.GSLinkComponentAdder;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
-import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
+
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
 
 public class GSSubcellDisplayer extends GSDiv {
 
-	protected final TagConstructor holderDisplayerConstructor;
-	protected final TagConstructor booleanHolderDisplayerConstructor;
-	protected final TagConstructor linkDisplayerConstructor;
 	private final boolean needMeta;
 
-	public GSSubcellDisplayer(Tag parent, TagConstructor holderDisplayerConstructor, TagConstructor booleanHolderDisplayerConstructor, TagConstructor linkDisplayerConstructor) {
-		this(parent, FlexDirection.ROW, holderDisplayerConstructor, booleanHolderDisplayerConstructor, linkDisplayerConstructor);
+	public GSSubcellDisplayer(Tag parent) {
+		this(parent, FlexDirection.ROW);
 	}
 
-	public GSSubcellDisplayer(Tag parent, FlexDirection direction, TagConstructor holderDisplayerConstructor, TagConstructor booleanHolderDisplayerConstructor, TagConstructor linkDisplayerConstructor) {
-		this(parent, direction, holderDisplayerConstructor, booleanHolderDisplayerConstructor, linkDisplayerConstructor, true);
+	public GSSubcellDisplayer(Tag parent, FlexDirection direction) {
+		this(parent, direction, true);
 	}
 
-	public GSSubcellDisplayer(Tag parent, FlexDirection direction, TagConstructor holderDisplayerConstructor, TagConstructor booleanHolderDisplayerConstructor, TagConstructor linkDisplayerConstructor, boolean needMeta) {
+	public GSSubcellDisplayer(Tag parent, FlexDirection direction, boolean needMeta) {
 		super(parent, direction);
-		this.holderDisplayerConstructor = holderDisplayerConstructor;
-		this.booleanHolderDisplayerConstructor = booleanHolderDisplayerConstructor;
-		this.linkDisplayerConstructor = linkDisplayerConstructor;
 		this.needMeta = needMeta;
 		addStyle("flex", "1");
-		addStyle("overflow", "hidden");
 		content();
 	}
 
@@ -51,7 +48,7 @@ public class GSSubcellDisplayer extends GSDiv {
 					select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 				else
 					select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-				holderDisplayerConstructor.build(this);
+				getHolderDisplayerConstructor().build(this);
 			}
 		};
 		new GSDiv(this, this.getDirection()) {
@@ -61,15 +58,31 @@ public class GSSubcellDisplayer extends GSDiv {
 					select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 				else
 					select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-				booleanHolderDisplayerConstructor.build(this);
+				getBooleanHolderDisplayerConstructor().build(this);
 			}
 		};
 		new GSDiv(this, this.getDirection()) {
 			{
 				addStyle("flex", "1");
 				select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
-				Tag components = linkDisplayerConstructor.build(this);
+				Tag components = getLinkDisplayerConstructor().build(this);
 				style(components);
+			}
+		};
+	}
+
+	public TagConstructor getHolderDisplayerConstructor() {
+		return GSLabelDisplayer::new;
+	}
+
+	public TagConstructor getBooleanHolderDisplayerConstructor() {
+		return GSCheckBoxDisplayer::new;
+	}
+
+	public TagConstructor getLinkDisplayerConstructor() {
+		return tag -> new GSLabelDisplayer(tag) {
+			{
+				forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
 			}
 		};
 	}
@@ -80,7 +93,11 @@ public class GSSubcellDisplayer extends GSDiv {
 		tag.addStyle("flex", "1");
 		tag.addStyle("margin-right", "1px");
 		tag.addStyle("margin-bottom", "1px");
-		tag.addStyle("overflow", "hidden");
+	}
+
+	@FunctionalInterface
+	public interface TagConstructor {
+		Tag build(Tag parent);
 	}
 
 	public static class GSSubcellEditor extends GSSubcellDisplayer {
@@ -90,15 +107,22 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 
 		public GSSubcellEditor(Tag parent, FlexDirection direction) {
-			this(parent, direction, GSHolderEditor::new, GSBooleanHolderEditor::new, GSLinkEditor::new);
+			super(parent, direction, false);
 		}
 
-		public GSSubcellEditor(Tag parent, TagConstructor holderEditorConstructor, TagConstructor booleanHolderEditorConstructor, TagConstructor linkEditorConstructor) {
-			this(parent, FlexDirection.ROW, holderEditorConstructor, booleanHolderEditorConstructor, linkEditorConstructor);
+		@Override
+		public TagConstructor getHolderDisplayerConstructor() {
+			return GSHolderEditor::new;
 		}
 
-		public GSSubcellEditor(Tag parent, FlexDirection direction, TagConstructor holderEditorConstructor, TagConstructor booleanHolderEditorConstructor, TagConstructor linkEditorConstructor) {
-			super(parent, direction, holderEditorConstructor, booleanHolderEditorConstructor, linkEditorConstructor, false);
+		@Override
+		public TagConstructor getBooleanHolderDisplayerConstructor() {
+			return GSBooleanHolderEditor::new;
+		}
+
+		@Override
+		public TagConstructor getLinkDisplayerConstructor() {
+			return GSLinkEditor::new;
 		}
 
 		@Override
@@ -118,7 +142,46 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 
 		public GSSubcellEditorWithRemoval(Tag parent, FlexDirection direction) {
-			super(parent, direction, GSHolderEditorWithRemoval::new, GSBooleanHolderEditorWithRemoval::new, GSLinkEditorWithRemoval::new);
+			super(parent, direction);
+		}
+
+		@Override
+		public TagConstructor getHolderDisplayerConstructor() {
+			return tag -> new GSHolderEditor(tag) {
+				{
+					removalLink(this);
+				}
+			};
+		}
+
+		@Override
+		public TagConstructor getBooleanHolderDisplayerConstructor() {
+			return tag -> new GSBooleanHolderEditor(tag) {
+				{
+					removalLink(this);
+				}
+			};
+		}
+
+		@Override
+		public TagConstructor getLinkDisplayerConstructor() {
+			return tag -> new GSLinkEditor(tag) {
+				{
+					removalLink(this);
+				}
+			};
+		}
+
+		private void removalLink(Tag tag) {
+			new HtmlHyperLink(tag) {
+				{
+					addStyle("justify-content", "center");
+					addStyle("text-decoration", "none");
+					addStyle("height", "100%");
+					setText("×");
+					bindAction(Context::remove);
+				}
+			};
 		}
 	}
 
@@ -129,32 +192,97 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 
 		public GSSubcellAdder(Tag parent, FlexDirection direction) {
-			super(parent, direction, GSHolderAdder::new, GSBooleanHolderAdder::new, GSLinkAdder::new);
-		}
-	}
-
-	public static class GSInstanceSubcellDisplayer extends GSSubcellDisplayer {
-
-		public GSInstanceSubcellDisplayer(Tag parent) {
-			super(parent, GSLabelDisplayer::new, GSCheckBoxDisplayer::new, GSLinkComponentsDisplayer::new);
+			super(parent, direction);
 		}
 
 		@Override
-		public void style(Tag tag) {
-			super.style(tag);
-			tag.addPrefixBinding(modelContext -> tag.getDomNodeStyles(modelContext).put("background-color",
-					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#dda5e2"));
+		public TagConstructor getHolderDisplayerConstructor() {
+			return tag -> new GSHolderEditor(tag, GSInputTextWithConversion::new) {
+				{
+					input.addConvertedValueChangeListener((model, nva) -> {
+						if (nva != null)
+							model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+					});
+					new HtmlHyperLink(this) {
+						{
+							addStyle("justify-content", "center");
+							addStyle("text-decoration", "none");
+							addStyle("height", "100%");
+							setText("+");
+							bindAction(context -> addHolder(context, input));
+						}
+					};
+				}
+			};
+		}
+
+		@Override
+		public TagConstructor getBooleanHolderDisplayerConstructor() {
+			return tag -> new GSBooleanHolderEditor(tag, GSCheckBoxWithValue::new) {
+				{
+					checkbox.addConvertedValueChangeListener((model, nva) -> {
+						if (nva != null)
+							model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+					});
+					new HtmlHyperLink(this) {
+						{
+							addStyle("justify-content", "center");
+							addStyle("text-decoration", "none");
+							setText("+");
+							bindAction(context -> addHolder(context, checkbox));
+						}
+					};
+				}
+			};
+		}
+
+		@Override
+		public TagConstructor getLinkDisplayerConstructor() {
+			return tag -> new GSLinkEditor(tag, GSLinkComponentAdder::new) {
+				{
+					addStyle("height", "100%");
+					addPostfixBinding(model -> {
+						Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
+						ChangeListener<Context> listener = (o, v, nva) -> {
+							List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+							if (selectedGenerics.size() + 1 == model.getGeneric().getComponents().size()) {
+								selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
+								try {
+									model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
+								} catch (RollbackException e) {
+									e.printStackTrace();
+								}
+							}
+						};
+						selectedComponents.getValue().forEach(component -> component.addListener(listener));
+					});
+				}
+			};
+		}
+
+		private void addHolder(Context context, ConvertedValueDefaults tag) {
+			Property<Serializable> observable = tag.getConvertedValueProperty(context);
+			if (observable.getValue() != null) {
+				Serializable newValue = observable.getValue();
+				observable.setValue(null);
+				context.getGenerics()[1].addHolder(context.getGeneric(), newValue);
+			}
 		}
 	}
 
 	public static class LinkTitleDisplayer extends GSSubcellDisplayer {
 
 		public LinkTitleDisplayer(Tag parent) {
-			this(parent, GSLabelDisplayer::new, GSCheckBoxDisplayer::new, GSLinkComponentsTitleDisplayer::new);
+			super(parent, FlexDirection.ROW);
 		}
 
-		public LinkTitleDisplayer(Tag parent, TagConstructor holderDisplayerConstructor, TagConstructor booleanHolderDisplayerConstructor, TagConstructor linkDisplayerConstructor) {
-			super(parent, FlexDirection.ROW, holderDisplayerConstructor, booleanHolderDisplayerConstructor, linkDisplayerConstructor);
+		@Override
+		public TagConstructor getLinkDisplayerConstructor() {
+			return tag -> new GSLabelDisplayer(tag) {
+				{
+					forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+				}
+			};
 		}
 
 		@Override
@@ -165,30 +293,41 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 	}
 
-	public static class InstanceTitleDisplayer extends InstanceLinkTitleDisplayer {
-
-		public InstanceTitleDisplayer(Tag parent) {
-			super(parent);
-			select(gs -> gs[0].getMeta());
-		}
-	}
-
 	public static class InstanceLinkTitleDisplayer extends LinkTitleDisplayer {
 
 		public InstanceLinkTitleDisplayer(Tag parent) {
-			super(parent, GSLabelDisplayer::new, GSCheckBoxDisplayer::new, GSInstanceLinkComponentsTitleDisplayer::new);
+			super(parent);
 		}
-	}
 
-	@FunctionalInterface
-	public interface TagConstructor {
-		Tag build(Tag parent);
+		@Override
+		public TagConstructor getLinkDisplayerConstructor() {
+			return tag -> new GSLabelDisplayer(tag) {
+				{
+					forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+				}
+			};
+		}
 	}
 
 	public static class GSAttributeBuilder extends GSSubcellEditor {
 
 		public GSAttributeBuilder(Tag parent, FlexDirection direction) {
-			super(parent, direction, GSHolderBuilder::new, GSBooleanHolderBuilder::new, GSLinkBuilder::new);
+			super(parent, direction);
+		}
+
+		@Override
+		public TagConstructor getHolderDisplayerConstructor() {
+			return GSHolderBuilder::new;
+		}
+
+		@Override
+		public TagConstructor getBooleanHolderDisplayerConstructor() {
+			return GSBooleanHolderBuilder::new;
+		}
+
+		@Override
+		public TagConstructor getLinkDisplayerConstructor() {
+			return GSLinkBuilder::new;
 		}
 
 		@Override
@@ -198,7 +337,6 @@ public class GSSubcellDisplayer extends GSDiv {
 			tag.addStyle("background-color", "#dda5a5");
 			tag.addStyle("margin-right", "1px");
 			tag.addStyle("margin-bottom", "1px");
-			tag.addStyle("overflow", "hidden");
 		}
 	}
 }

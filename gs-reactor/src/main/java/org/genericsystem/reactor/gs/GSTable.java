@@ -63,6 +63,7 @@ public class GSTable extends TitledSection implements SelectionDefaults {
 					protected void sections() {
 						new LinkTitleDisplayer(this) {
 							{
+								addStyle("overflow", "hidden");
 								forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
 							}
 						};
@@ -88,7 +89,7 @@ public class GSTable extends TitledSection implements SelectionDefaults {
 			}
 
 			protected void columnsInputSection() {
-				new GSInstanceBuilder(this, this.getReverseDirection());
+				new GSInstanceBuilder(this, this.getReverseDirection()).addStyle("flex", "1");
 			}
 
 			@Override

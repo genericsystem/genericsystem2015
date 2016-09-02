@@ -3,7 +3,6 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.GSSubcellEditor;
 import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceLinkTitleDisplayer;
-import org.genericsystem.reactor.gs.GSSubcellDisplayer.InstanceTitleDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -57,7 +56,7 @@ public class GSEditor extends TitledSection {
 				new GSDiv(this, flexDirection) {
 					{
 						addStyle("flex", "0.3");
-						new InstanceTitleDisplayer(this);
+						new InstanceLinkTitleDisplayer(this).select(gs -> gs[0].getMeta());
 						new InstanceLinkTitleDisplayer(this) {
 							{
 								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
