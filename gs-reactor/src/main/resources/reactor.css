@@ -24,6 +24,10 @@ section .adding {
 }
 
 
+.opaque{
+	opacity : 0.65;
+}
+
 /* section .removing {
 	animation: disappeareffect 2s forwards;
 }

@@ -10,64 +10,26 @@ import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
-import org.genericsystem.kernel.Engine;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs.GSComposite.ColorCompositeRadio;
-import org.genericsystem.reactor.gs.GSComposite.ColorTitleCompositeFlexElement;
-import org.genericsystem.reactor.gs.GSEditor;
-import org.genericsystem.reactor.gs.GSMonitorExtended;
-import org.genericsystem.reactor.gs.GSStepEditor;
-import org.genericsystem.reactor.gs.GSTable;
-import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.gs2.GSTable.GSSubSubCellTable;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-public class AppHtml extends GSApp implements SelectionDefaults {
+public class AppHtml2 extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
+		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml2.class, "/example-reactor");
 	}
 
-	public AppHtml() {
+	public AppHtml2() {
 		addStyle("justify-content", "center");
-		new ColorTitleCompositeFlexElement(this).select(Color.class);
-		new ColorCompositeRadio(this, FlexDirection.ROW).select(Color.class);
-		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
-
-		select(gs -> gs[0]);
-		createSelectionProperty();
-		new GSTable(this).select(Car.class);
-		new GSTable(this, FlexDirection.ROW).select(Car.class);
-		new GSEditor(this, FlexDirection.ROW) {
-			{
-				select__(model -> getSelectionProperty(model));
-				addStyle("justify-content", "center");
-			}
-		};
-		new GSEditor(this, FlexDirection.COLUMN).select__(model -> getSelectionProperty(model));
-		new GSStepEditor(this, FlexDirection.ROW) {
-			{
-				select__(model -> getSelectionProperty(model));
-				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
-			}
-		};
-		new GSStepEditor(this, FlexDirection.COLUMN) {
-			{
-				select__(model -> getSelectionProperty(model));
-				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
-			}
-		};
-
-		new GSTable(this).select(Color.class);
-
-		new GSTable(this).select(Engine.class);
-		new GSMonitorExtended(this).addStyle("background-color", "#ffa500");
+		new GSSubSubCellTable(this).select(Color.class);
+		new GSSubSubCellTable(this).select(Car.class);
 	}
 
 	public static class ExampleReactorScript implements Script {
@@ -96,6 +58,10 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 			Generic jsnow = person.setInstance("Jon Snow");
 			Generic driver = category.setInstance("Driver");
 			Generic owner = category.setInstance("Owner");
+			category.setInstance("Passenger");
+			person.setInstance("Chuck Norris");
+			person.setInstance("Barack Obama");
+			person.setInstance("Donald Trump");
 			Generic audiS4 = car.setInstance("Audi S4");
 			audiS4.setHolder(power, 333);
 			audiS4.setHolder(diesel, false);

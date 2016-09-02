@@ -11,15 +11,19 @@ import org.genericsystem.reactor.gs.GSDiv;
 
 public abstract class GSComposite extends GSDiv {
 
-	public GSComposite(GSComposite parent, MetaTag metaTag) {
-		super(parent, FlexDirection.COLUMN);
+	public GSComposite(Tag parent, MetaTag metaTag) {
+		this(parent, metaTag, FlexDirection.COLUMN);
+	}
+
+	public GSComposite(Tag parent, MetaTag metaTag, FlexDirection flexDirection) {
+		super(parent, flexDirection);
 		for (MetaTag subMetaTag : metaTag.getSubNodes())
 			createChild(subMetaTag);
 	}
 
 	protected <TAG extends GSComposite> void createChild(MetaTag subMetaTag) {
 		try {
-			subMetaTag.<TAG> getBuilder().getConstructor(GSComposite.class, MetaTag.class).newInstance(this, subMetaTag);
+			subMetaTag.<TAG> getBuilder().getConstructor(Tag.class, MetaTag.class).newInstance(this, subMetaTag);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}
@@ -31,7 +35,7 @@ public abstract class GSComposite extends GSDiv {
 
 	private Stream<Tag> tags(List<Class<? extends GSComposite>> classes) {
 		if (classes.isEmpty())
-			return Stream.empty();
-		return getObservableChildren().stream().filter(tag -> classes.get(0) == null || classes.get(0).equals(tag.getClass())).flatMap(tag -> ((GSComposite) tag).tags(classes.subList(1, classes.size())));
+			return Stream.of(new Tag[] { this });
+		return getObservableChildren().stream().filter(tag -> classes.get(0).equals(tag.getClass())).flatMap(tag -> ((GSComposite) tag).tags(classes.subList(1, classes.size())));
 	}
 }

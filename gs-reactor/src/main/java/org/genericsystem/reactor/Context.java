@@ -1,20 +1,22 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableLongValue;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -24,7 +26,7 @@ public class Context {
 	protected static Logger log = LoggerFactory.getLogger(Context.class);
 	private Context parent;
 	private Map<Tag, HtmlDomNode> htmlDomNodesMap = new LinkedHashMap<>();
-	private Map<Tag, ObservableList<Context>> subModelsMap = new HashMap<>();
+	private Map<Tag, ObservableList<Context>> subContextsMap = new HashMap<>();
 	private Map<Tag, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
 	private final Generic[] generics;
 	private boolean destroyed = false;
@@ -39,7 +41,7 @@ public class Context {
 	}
 
 	public ObservableList<Context> getSubContexts(Tag tag) {
-		return subModelsMap.get(tag);
+		return subContextsMap.get(tag);
 	}
 
 	public boolean containsProperty(Tag tag, String propertyName) {
@@ -84,12 +86,12 @@ public class Context {
 	}
 
 	public void removeSubContexts(Tag tag) {
-		subModelsMap.remove(tag);
+		subContextsMap.remove(tag);
 	}
 
 	void setSubContexts(Tag tag, ObservableList<Context> subContexts) {
-		assert subModelsMap.get(tag) == null;
-		subModelsMap.put(tag, subContexts);
+		assert subContextsMap.get(tag) == null;
+		subContextsMap.put(tag, subContexts);
 	}
 
 	public void register(HtmlDomNode htmlDomNode) {
@@ -109,12 +111,12 @@ public class Context {
 		for (HtmlDomNode htmlDomNode : htmlDomNodesMap.values()) {
 			htmlDomNode.destroy();
 		}
-		for (ObservableList<Context> subModels : subModelsMap.values()) {
+		for (ObservableList<Context> subModels : subContextsMap.values()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
 			for (Context subModel : subModels)
 				subModel.internalDestroy();
 		}
-		subModelsMap = new HashMap<>();
+		subContextsMap = new HashMap<>();
 		htmlDomNodesMap = new LinkedHashMap<>();
 		propertiesMap = new HashMap<>();
 	}
@@ -149,11 +151,44 @@ public class Context {
 	}
 
 	public void flush() {
+		traverse();
 		getGeneric().getCurrentCache().flush();
 	}
 
 	public void cancel() {
+		traverse();
 		getGeneric().getCurrentCache().clear();
+	}
+
+	public ObservableIntegerValue getCacheLevelObservableValue() {
+		return getGeneric().getCurrentCache().getCacheLevelObservableValue();
+	}
+
+	public ObservableLongValue getTsObservableValue() {
+
+		return getGeneric().getCurrentCache().getTsObservableValue();
+	}
+
+	public void mount() {
+		getGeneric().getCurrentCache().mount();
+	}
+
+	public void unmount() {
+		getGeneric().getCurrentCache().unmount();
+	}
+
+	public boolean isOpaque() {
+		return getGeneric().getCurrentCache().contains(getGeneric());
+	}
+
+	public long shiftTs() throws RollbackException {
+		return getGeneric().getCurrentCache().shiftTs();
+	}
+
+	public void traverse() {
+		if (isOpaque())
+			htmlDomNodesMap.keySet().stream().forEach(tag -> tag.removeStyleClass(this, "opaque"));
+		subContextsMap.values().stream().flatMap(c -> c.stream()).forEach(Context::traverse);
 	}
 
 	public boolean isDestroyed() {
