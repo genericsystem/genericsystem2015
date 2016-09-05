@@ -1,12 +1,9 @@
 package org.genericsystem.kernel;
 
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractCache;
@@ -16,11 +13,18 @@ import org.genericsystem.common.EnginesDeploymentConfig.DefaultPathSingleEngineD
 import org.genericsystem.common.GSBuffer;
 import org.genericsystem.common.Protocol;
 
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.ServerWebSocket;
+
 /**
  * @author Nicolas Feybesse
  *
  */
 public class EngineServer extends AbstractBackEnd {
+
+	private Set<AbstractCache> caches = Collections.newSetFromMap(new ConcurrentHashMap<AbstractCache, Boolean>());
 
 	public static void main(String[] args) {
 		new EngineServer(new DefaultPathSingleEngineDeployment("/", null)).start();
@@ -94,6 +98,11 @@ public class EngineServer extends AbstractBackEnd {
 		public void addHttpHandler(HttpServer httpServer) {
 			// TODO Auto-generated method stub
 
+		}
+
+		@Override
+		public Handler<Void> getCloseHandler(ServerWebSocket socket) {
+			return (v) -> System.out.println("Close socket");
 		}
 	}
 
