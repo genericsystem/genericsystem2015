@@ -26,7 +26,7 @@ public class GSStepEditor extends GSEditor implements SwitchDefaults {
 				new InstanceLinkTitleDisplayer(this) {
 					{
 						addStyle("flex", "0.3");
-						select(gs -> gs[0].getMeta());
+						select(gs -> gs[1]);
 					}
 				};
 				new GSSubcellEditor(this);
