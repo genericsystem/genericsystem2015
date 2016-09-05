@@ -1,25 +1,26 @@
 package org.genericsystem.reactor.gstag;
 
-import io.vertx.core.json.JsonObject;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagImpl;
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlButton extends Tag implements ActionDefaults, GSBuilderDefaults {
+public class HtmlButton extends TagImpl implements ActionDefaults, GSBuilderDefaults {
 
 	public HtmlButton(Tag parent) {
 		super(parent, "button");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+	public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override

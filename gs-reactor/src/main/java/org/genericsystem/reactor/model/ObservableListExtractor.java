@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.Generic;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.common.Generic;
 
 @FunctionalInterface
 public interface ObservableListExtractor extends Function<Generic[], ObservableList<Generic>> {

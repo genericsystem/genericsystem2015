@@ -13,8 +13,6 @@ public interface SwitchDefaults extends ContextProperty {
 	public static final String INSTANCE_NAME_TAG = "instanceNameTag";
 	public static final String SWITCHED_TAG = "switchedTag";
 
-	public void addStyle(Context context, String propertyName, String value);
-
 	default Tag getInstanceNameTag(Context context) {
 		return this.<Tag> getProperty(INSTANCE_NAME_TAG, context).getValue();
 	}

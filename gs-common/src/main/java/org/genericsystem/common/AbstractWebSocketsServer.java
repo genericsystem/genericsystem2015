@@ -32,6 +32,8 @@ public abstract class AbstractWebSocketsServer {
 
 	public abstract Handler<Buffer> getHandler(String path, ServerWebSocket socket);
 
+	public abstract Handler<Void> getCloseHandler(ServerWebSocket socket);
+
 	public abstract void addHttpHandler(HttpServer httpServer);
 
 	public void start() {
@@ -48,12 +50,15 @@ public abstract class AbstractWebSocketsServer {
 			HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port).setHost(host));
 
 			httpServer.websocketHandler(webSocket -> {
+
 				String path = webSocket.path();
 				webSocket.handler(getHandler(path, webSocket));
 				webSocket.exceptionHandler(e -> {
 					e.printStackTrace();
 					throw new IllegalStateException(e);
 				});
+
+				webSocket.closeHandler(getCloseHandler(webSocket));
 			});
 
 			addHttpHandler(httpServer);

@@ -36,6 +36,7 @@ public class GSMonitor extends GSDiv {
 				bindAction(Context::cancel);
 			}
 		};
+		middlePart();
 		new HtmlLabel(this) {
 			{
 				bindText(context -> Bindings.createStringBinding(() -> {
@@ -47,12 +48,15 @@ public class GSMonitor extends GSDiv {
 				}, context.getTsObservableValue()));
 			}
 		};
-		// new GSButton(this) {
+		// new HtmlButton(this) {
 		// {
 		// setText("Collect");
 		// bindAction(model -> System.gc());
 		// }
 		// };
+	}
+
+	protected void middlePart() {
 	}
 
 }

@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
+
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
 
 public interface GSBuilderDefaults extends ContextProperty {
 

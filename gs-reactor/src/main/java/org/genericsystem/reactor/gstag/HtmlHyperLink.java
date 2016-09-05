@@ -1,21 +1,22 @@
 package org.genericsystem.reactor.gstag;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagImpl;
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.SwitchDefaults;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlHyperLink extends Tag implements SelectionDefaults, SwitchDefaults, ActionDefaults {
+public class HtmlHyperLink extends TagImpl implements SelectionDefaults, SwitchDefaults, ActionDefaults {
 
 	public HtmlHyperLink(Tag parent) {
 		super(parent, "a");
@@ -32,7 +33,7 @@ public class HtmlHyperLink extends Tag implements SelectionDefaults, SwitchDefau
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+	public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override

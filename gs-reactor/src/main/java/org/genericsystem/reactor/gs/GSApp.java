@@ -1,11 +1,11 @@
 package org.genericsystem.reactor.gs;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.Tag.RootTag;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public class GSApp extends GSDiv implements RootTag {
 
@@ -19,7 +19,7 @@ public class GSApp extends GSDiv implements RootTag {
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+	public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 		throw new UnsupportedOperationException();
 	}
 }

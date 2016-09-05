@@ -1,8 +1,9 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagImpl;
 
-public class HtmlImg extends Tag {
+public class HtmlImg extends TagImpl {
 
 	public HtmlImg(Tag parent) {
 		super(parent, "img");

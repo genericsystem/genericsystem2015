@@ -60,7 +60,6 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 				} else {
 					addStyle("flex", "1");
 				}
-				addStyle("background-color", "#dda5a5");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
 				new HtmlButton(this) {

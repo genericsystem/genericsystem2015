@@ -2,13 +2,13 @@ package org.genericsystem.reactor.modelproperties;
 
 import java.util.function.Function;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 
 public interface TextPropertyDefaults extends ContextProperty {
 

@@ -156,7 +156,6 @@ public class Context {
 	}
 
 	public void cancel() {
-		traverse();
 		getGeneric().getCurrentCache().clear();
 	}
 
@@ -178,6 +177,7 @@ public class Context {
 	}
 
 	public boolean isOpaque() {
+		// System.out.println(getGeneric().info() + getGeneric().getCurrentCache().contains(getGeneric()));
 		return getGeneric().getCurrentCache().contains(getGeneric());
 	}
 

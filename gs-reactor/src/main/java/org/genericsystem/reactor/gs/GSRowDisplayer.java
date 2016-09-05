@@ -26,9 +26,10 @@ public class GSRowDisplayer extends GSComposite {
 				addStyle("margin-bottom", "1px");
 				addStyle("overflow", "hidden");
 				addPrefixBinding(modelContext -> getDomNodeStyles(modelContext).put("background-color",
-						"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#bba5ff"));
+						"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#3393FF"));
 				new HtmlHyperLink(this) {
 					{
+						addStyle("color", "White");
 						bindText();
 						bindAction(model -> getSelectionProperty(model).setValue(model));
 					}
@@ -54,7 +55,7 @@ public class GSRowDisplayer extends GSComposite {
 					public void style(Tag tag) {
 						super.style(tag);
 						tag.addPrefixBinding(modelContext -> tag.getDomNodeStyles(modelContext).put("background-color",
-								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#dda5e2"));
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
 					}
 				};
 			}
@@ -71,7 +72,6 @@ public class GSRowDisplayer extends GSComposite {
 				} else {
 					addStyle("flex", "1");
 				}
-				addStyle("background-color", "#dda5e2");
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
 				new HtmlButton(this) {
