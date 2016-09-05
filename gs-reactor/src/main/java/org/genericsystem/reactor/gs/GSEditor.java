@@ -56,7 +56,7 @@ public class GSEditor extends TitledSection {
 				new GSDiv(this, flexDirection) {
 					{
 						addStyle("flex", "0.3");
-						new InstanceLinkTitleDisplayer(this).select(gs -> gs[0].getMeta());
+						new InstanceLinkTitleDisplayer(this).select(gs -> gs[1]);
 						new InstanceLinkTitleDisplayer(this) {
 							{
 								forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);

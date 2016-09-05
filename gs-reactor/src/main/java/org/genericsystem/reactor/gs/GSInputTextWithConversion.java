@@ -1,14 +1,6 @@
 package org.genericsystem.reactor.gs;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.io.Serializable;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
@@ -17,6 +9,13 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlInputText;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.util.StringConverter;
 
 public class GSInputTextWithConversion<T extends Serializable> extends HtmlInputText implements ConvertedValueDefaults {
 
@@ -81,7 +80,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 		@Override
 		public StringConverter<T> getConverter(Context model) {
-			Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
+			Class<?> clazz = model.getGenerics()[1].getInstanceValueClassConstraint();
 			if (clazz == null) {
 				if (model.getGeneric().getValue() != null)
 					clazz = model.getGeneric().getValue().getClass();

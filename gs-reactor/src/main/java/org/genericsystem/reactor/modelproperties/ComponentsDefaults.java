@@ -3,9 +3,9 @@ package org.genericsystem.reactor.modelproperties;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.property.Property;
-
 import org.genericsystem.reactor.Context;
+
+import javafx.beans.property.Property;
 
 public interface ComponentsDefaults extends ContextProperty {
 

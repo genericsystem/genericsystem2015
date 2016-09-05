@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.gs;
 
-import io.vertx.core.json.JsonObject;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
@@ -11,6 +9,8 @@ import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlRadio;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
@@ -139,7 +139,7 @@ public class GSComposite extends GSDiv {
 		}
 
 		@Override
-		protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
 
 				@Override
