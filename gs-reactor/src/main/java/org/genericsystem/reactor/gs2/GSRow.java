@@ -1,14 +1,16 @@
 package org.genericsystem.reactor.gs2;
 
+import org.genericsystem.reactor.Tag;
+
 public class GSRow extends GSComposite {
 
-	public GSRow(GSTable parent, MetaTag metaTag) {
-		super(parent, metaTag);
+	public GSRow(Tag parent, MetaTag metaTag) {
+		super(parent, metaTag, ((GSComposite) parent).getReverseDirection());
 	}
 
 	public static class GSFirstRow extends GSRow {
 
-		public GSFirstRow(GSTable parent, MetaTag metaTag) {
+		public GSFirstRow(Tag parent, MetaTag metaTag) {
 			super(parent, metaTag);
 		}
 	}

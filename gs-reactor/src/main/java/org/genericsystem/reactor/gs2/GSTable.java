@@ -1,10 +1,11 @@
 package org.genericsystem.reactor.gs2;
 
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstCell;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowCell;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowFirstCell;
 import org.genericsystem.reactor.gs2.GSRow.GSFirstRow;
-import org.genericsystem.reactor.gs2.GSSubCell.GSFirstSubCell;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 public class GSTable extends GSComposite {
@@ -15,14 +16,23 @@ public class GSTable extends GSComposite {
 		}
 	}
 
-	public GSTable(GSComposite parent) {
+	public GSTable(Tag parent) {
 		this(parent, new TableMetaTag());
 	}
 
-	public GSTable(GSComposite parent, MetaTag metaTag) {
+	public GSTable(Tag parent, MetaTag metaTag) {
 		super(parent, metaTag);
-		tags(GSRow.class).forEach(gsrow -> gsrow.forEach(ObservableListExtractor.SUBINSTANCES));
-		tags(GSRow.class, GSCell.class).forEach(gsrow -> gsrow.forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES));
+		tags(GSRow.class).forEach(gsrow -> {
+			gsrow.forEach(ObservableListExtractor.SUBINSTANCES);
+			gsrow.addStyle("flex", "1");
+		});
+		tags(GSRow.class, GSCell.class).forEach(gscell -> {
+			gscell.forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
+			gscell.addStyle("flex", "1");
+			gscell.addStyle("flex-direction", ((GSDiv) gscell.getParent()).getReverseDirection().toString());
+			gscell.addStyle("margin-bottom", "1px");
+			gscell.addStyle("margin-right", "1px");
+		});
 	}
 
 	public static class GSFirstRowTableMetaTag extends MetaTag {
@@ -33,7 +43,7 @@ public class GSTable extends GSComposite {
 
 	public class GSFirstRowTable extends GSTable {
 
-		public GSFirstRowTable(GSComposite parent) {
+		public GSFirstRowTable(Tag parent) {
 			super(parent, new GSFirstRowTableMetaTag());
 		}
 	}
@@ -46,7 +56,7 @@ public class GSTable extends GSComposite {
 
 	public class GSFirstColumnTable extends GSTable {
 
-		public GSFirstColumnTable(GSComposite parent) {
+		public GSFirstColumnTable(Tag parent) {
 			super(parent, new GSFirstColumnTableMetaTag());
 		}
 	}
@@ -59,22 +69,42 @@ public class GSTable extends GSComposite {
 
 	public static class GSFirstRowFirstColumnTable extends GSTable {
 
-		public GSFirstRowFirstColumnTable(GSComposite parent) {
+		public GSFirstRowFirstColumnTable(Tag parent) {
 			super(parent, new GSFirstRowFirstColumnTableMetaTag());
 		}
 	}
 
-	public static class GSSubCellTableMetaTag extends MetaTag {
-		public GSSubCellTableMetaTag() {
-			super(null, new MetaTag(GSRow.class, new MetaTag(GSCell.class, new MetaTag(GSFirstSubCell.class), new MetaTag(GSSubCell.class))));
+	public static class GSSubSubCellTableMetaTag extends MetaTag {
+
+		public GSSubSubCellTableMetaTag() {
+			super(null, new MetaTag(GSRow.class, new MetaTag(GSCell.class, new MetaTag(GSSubCell.class, new MetaTag(GSValueSubCell.class), new MetaTag(GSComponentSubCell.class)))));
 		}
 	}
 
-	public static class GSSubCellTable extends GSTable {
+	public static class GSSubSubCellTable extends GSTable {
 
-		public GSSubCellTable(GSComposite parent) {
-			super(parent, new GSSubCellTableMetaTag());
-			tags(GSRow.class, GSCell.class, GSSubCell.class).forEach(gsrow -> gsrow.forEach(ObservableListExtractor.HOLDERS));
+		public GSSubSubCellTable(Tag parent) {
+			super(parent, new GSSubSubCellTableMetaTag());
+			tags(GSRow.class, GSCell.class, GSSubCell.class).forEach(gssubcell -> {
+				gssubcell.forEach(ObservableListExtractor.HOLDERS);
+				gssubcell.addStyle("flex", "1");
+			});
+			tags(GSRow.class, GSCell.class, GSSubCell.class, GSComponentSubCell.class).forEach(t -> {
+				t.forEach(gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+				t.addStyle("flex", "1");
+				t.addStyle("justify-content", "center");
+				t.addStyle("align-items", "center");
+				t.addStyle("margin-bottom", "1px");
+				t.addStyle("margin-right", "1px");
+				t.addStyle("background-color", "#e5e400");
+			});
+			tags(GSRow.class, GSCell.class, GSSubCell.class, GSValueSubCell.class).forEach(t -> {
+				t.select(gs -> gs[1].getComponents().size() == 1 ? gs[0] : null);
+				t.addStyle("justify-content", "center");
+				t.addStyle("align-items", "center");
+				t.addStyle("flex", "1");
+				t.addStyle("background-color", "#e5e400");
+			});
 		}
 	}
 }
