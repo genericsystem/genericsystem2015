@@ -1,12 +1,13 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagImpl;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlH2 extends Tag {
+public class HtmlH2 extends TagImpl {
 
 	public HtmlH2(Tag parent) {
 		super(parent, "h2");

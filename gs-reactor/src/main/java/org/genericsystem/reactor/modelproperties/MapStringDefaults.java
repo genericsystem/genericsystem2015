@@ -2,14 +2,14 @@ package org.genericsystem.reactor.modelproperties;
 
 import java.util.function.Function;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.Tag;
+
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.collections.WeakMapChangeListener;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Tag;
 
 public interface MapStringDefaults extends ContextProperty {
 

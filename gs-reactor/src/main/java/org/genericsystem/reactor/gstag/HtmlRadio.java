@@ -1,23 +1,24 @@
 package org.genericsystem.reactor.gstag;
 
-import io.vertx.core.json.JsonObject;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagImpl;
+
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlRadio extends Tag {
+public class HtmlRadio extends TagImpl {
 
 	public HtmlRadio(Tag parent) {
 		super(parent, "input");
 	}
 
 	@Override
-	protected HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+	public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 		return new HtmlDomNode(parent, modelContext, this) {
 
 			@Override

@@ -1,12 +1,14 @@
 package org.genericsystem.reactor.modelproperties;
 
+import java.io.Serializable;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.reactor.Context;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
-
-import org.genericsystem.reactor.Context;
 
 public interface ContextProperty {
 
@@ -29,4 +31,8 @@ public interface ContextProperty {
 	<T> void createNewInitializedProperty(String propertyName, Function<Context, T> getInitialValue);
 
 	<T> void createNewInitializedProperty(String propertyName, Context model, Function<Context, T> getInitialValue);
+
+	public void addStyle(Context context, String propertyName, String value);
+
+	<T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener);
 }

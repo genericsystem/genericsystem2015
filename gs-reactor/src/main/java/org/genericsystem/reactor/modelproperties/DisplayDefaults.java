@@ -1,8 +1,8 @@
 package org.genericsystem.reactor.modelproperties;
 
-import javafx.beans.property.Property;
-
 import org.genericsystem.reactor.Context;
+
+import javafx.beans.property.Property;
 
 public interface DisplayDefaults extends ContextProperty {
 

@@ -1,11 +1,11 @@
 package org.genericsystem.reactor.modelproperties;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.WeakSetChangeListener;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
 
 public interface StyleClassesDefaults extends ContextProperty {
 

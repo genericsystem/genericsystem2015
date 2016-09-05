@@ -4,17 +4,15 @@ import java.io.Serializable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.genericsystem.reactor.Context;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
-
-import org.genericsystem.reactor.Context;
 
 public interface ConvertedValueDefaults extends ContextProperty {
 
 	public static final String VALUE = "value";
 	public static final String INVALID = "invalid";
-
-	<T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener);
 
 	default void createConvertedValueProperty() {
 		createNewProperty(VALUE);

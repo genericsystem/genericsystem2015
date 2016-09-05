@@ -2,6 +2,12 @@ package org.genericsystem.reactor.modelproperties;
 
 import java.util.Optional;
 
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.model.StringExtractor;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -10,17 +16,11 @@ import javafx.beans.value.WeakChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.model.StringExtractor;
-
 /**
  * @author Nicolas Feybesse
  *
  */
-public interface SelectionDefaults extends ContextProperty {
+public interface SelectionDefaults extends Tag {
 
 	public static final String SELECTION = "selection";
 	public static final String UPDATED_GENERIC = "updatedGeneric";
@@ -34,7 +34,7 @@ public interface SelectionDefaults extends ContextProperty {
 				model -> Bindings.createStringBinding(() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? getSelectionProperty(model).getValue().getGeneric() : null), getSelectionProperty(model)));
 		storeProperty(SELECTION_INDEX, model -> {
 			Property<Integer> index = new SimpleObjectProperty<>();
-			index.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag) this).getIndexListener()));
+			index.addListener(new WeakChangeListener<>(model.getHtmlDomNode(this).getIndexListener()));
 			return index;
 		});
 		createNewProperty(UPDATED_GENERIC);
@@ -74,8 +74,7 @@ public interface SelectionDefaults extends ContextProperty {
 			int selectionShift = getSelectionShift(modelContext);
 			selection.setValue(selectedModel.isPresent() ? selectedModel.get() : null);
 			Property<Integer> selectionIndex = getSelectionIndex(modelContext);
-			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (Context) subContexts.get(number.intValue() - selectionShift) : null, genericModel -> subContexts.indexOf(genericModel)
-					+ selectionShift);
+			BidirectionalBinding.bind(selectionIndex, selection, number -> number.intValue() - selectionShift >= 0 ? (Context) subContexts.get(number.intValue() - selectionShift) : null, genericModel -> subContexts.indexOf(genericModel) + selectionShift);
 			subContexts.addListener((ListChangeListener<Context>) change -> {
 				if (selection != null) {
 					Integer newIndex = subContexts.indexOf(selection.getValue()) + selectionShift;
