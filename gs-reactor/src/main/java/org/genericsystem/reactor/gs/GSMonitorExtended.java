@@ -15,6 +15,10 @@ public class GSMonitorExtended extends GSMonitor {
 
 	public GSMonitorExtended(Tag parent, FlexDirection direction) {
 		super(parent, direction);
+	}
+
+	@Override
+	protected void middlePart() {
 		createNewProperty("Ts");
 		new HtmlButton(this) {
 			{
@@ -39,7 +43,5 @@ public class GSMonitorExtended extends GSMonitor {
 				bindAction(Context::shiftTs);
 			}
 		};
-
 	}
-
 }

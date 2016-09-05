@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.AbstractBackEnd;
 import org.genericsystem.common.AbstractWebSocketsServer;
 import org.genericsystem.common.GSBuffer;
+import org.genericsystem.common.GSVertx;
 import org.genericsystem.common.Root;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.HtmlDomNode;
@@ -21,12 +23,14 @@ import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gs.GSApp;
 
+import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.impl.EventLoopContext;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -55,7 +59,6 @@ public class ApplicationServer extends AbstractBackEnd {
 			String directoryPath = options.getPersistentDirectoryPath(applicationPath);
 			String path = directoryPath != null ? directoryPath : "/";
 			apps.put(applicationPath, new PersistentApplication(options.getApplicationClass(applicationPath), options.getModelClass(applicationPath), roots.get(path), options.getRootId()));
-
 		}
 	}
 
@@ -77,17 +80,17 @@ public class ApplicationServer extends AbstractBackEnd {
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
 
-		public void cachesShiftTs() {
-			for (Cache cache : caches.values()) {
-				cache.shiftTs();
-			}
-		}
-
-		private Map<ServerWebSocket, Cache> caches = new ConcurrentHashMap<ServerWebSocket, Cache>();
+		private Map<Cache, Map<ServerWebSocket, Context>> caches = new ConcurrentHashMap<Cache, Map<ServerWebSocket, Context>>();
 
 		public WebSocketsServer(String host, int port) {
 			super(host, port);
-			// GSVertx.vertx().getVertx().setPeriodic(5000, l -> cachesShiftTs());
+
+			GSVertx.vertx().getVertx().setPeriodic(1000, l -> caches.forEach((cache, map) -> {
+				((EventLoopContext) map.values().stream().findFirst().get()).executeAsync(v -> {
+					if (caches.containsKey(cache))
+						cache.safeConsum((f) -> cache.shiftTs());
+				});
+			}));
 		}
 
 		@Override
@@ -99,7 +102,9 @@ public class ApplicationServer extends AbstractBackEnd {
 			}
 			Cache cache = (Cache) application.getEngine().newCache();
 			RootHtmlDomNode rootHtmlDomNode = cache.safeSupply(() -> application.init(socket));
-			caches.put(socket, cache);
+			Map<ServerWebSocket, Context> map = new ConcurrentHashMap<ServerWebSocket, Context>();
+			map.put(socket, GSVertx.vertx().getVertx().getOrCreateContext());
+			caches.put(cache, map);
 			// log.info("Open new socket : " + socket);
 			return buffer -> {
 				// log.info("Receive new message for socket : " + socket);
@@ -118,7 +123,11 @@ public class ApplicationServer extends AbstractBackEnd {
 		public Handler<Void> getCloseHandler(ServerWebSocket socket) {
 			return (v) -> {
 				System.out.println("Close socket");
-				caches.remove(socket);
+				for (Entry<Cache, Map<ServerWebSocket, Context>> entry : caches.entrySet()) {
+					if (entry.getValue().keySet().contains(socket))
+						caches.remove(entry.getKey());
+				}
+
 			};
 		}
 
