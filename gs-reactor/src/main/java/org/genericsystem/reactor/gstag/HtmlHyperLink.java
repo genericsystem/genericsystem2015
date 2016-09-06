@@ -18,6 +18,10 @@ import io.vertx.core.json.JsonObject;
  */
 public class HtmlHyperLink extends TagImpl implements SelectionDefaults, SwitchDefaults, ActionDefaults {
 
+	public HtmlHyperLink() {
+		super("a");
+	}
+
 	public HtmlHyperLink(Tag parent) {
 		super(parent, "a");
 	}

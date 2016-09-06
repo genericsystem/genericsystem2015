@@ -2,6 +2,7 @@ package org.genericsystem.reactor;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
@@ -352,6 +354,45 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	public static interface RootTag {
 		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {
 			return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
+		}
+	}
+
+	public static interface TreeRootTag extends Tag {
+
+		public HashMap<Class<? extends TagImpl>, TagImpl> getNodes();
+
+		public List<Class<? extends TagImpl>> getSpecifiedClasses();
+
+		public void setSpecifiedClasses(List<Class<? extends TagImpl>> specifiedClasses);
+
+		default TagImpl find(Class<? extends TagImpl> tagClass) {
+			Class<? extends TagImpl> searchedClass = tagClass;
+			for (Class<? extends TagImpl> clazz : getSpecifiedClasses())
+				if (tagClass.isAssignableFrom(clazz))
+					searchedClass = clazz;
+
+			if (getNodes().get(searchedClass) == null) {
+				TagImpl newTag = null;
+				Parent parent = searchedClass.getAnnotation(Parent.class);
+				try {
+					newTag = searchedClass.newInstance();
+				} catch (IllegalAccessException | InstantiationException e) {
+					throw new IllegalStateException(e);
+				}
+				if (parent != null)
+					newTag.setParent(find(parent.value()));
+				else
+					newTag.setParent(this);
+				getNodes().put(searchedClass, newTag);
+			}
+
+			return getNodes().get(searchedClass);
+		}
+
+		default void createTree(Class<? extends TagImpl>... tags) {
+			setSpecifiedClasses(Arrays.asList(tags));
+			for (Class<? extends TagImpl> clazz : tags)
+				find(clazz);
 		}
 	}
 }

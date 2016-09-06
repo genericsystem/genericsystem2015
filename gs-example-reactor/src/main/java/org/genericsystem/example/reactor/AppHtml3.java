@@ -16,11 +16,13 @@ import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs3.Table.BooleanDisplayer;
 import org.genericsystem.reactor.gs3.Table.BooleanValueSubCell;
 import org.genericsystem.reactor.gs3.Table.Cell;
+import org.genericsystem.reactor.gs3.Table.ComponentLabel;
 import org.genericsystem.reactor.gs3.Table.ComponentSubCell;
 import org.genericsystem.reactor.gs3.Table.Row;
 import org.genericsystem.reactor.gs3.Table.RowName;
 import org.genericsystem.reactor.gs3.Table.RowNameDisplayer;
 import org.genericsystem.reactor.gs3.Table.SubCell;
+import org.genericsystem.reactor.gs3.Table.SubCell2;
 import org.genericsystem.reactor.gs3.Table.ValueDisplayer;
 import org.genericsystem.reactor.gs3.Table.ValueSubCell;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
@@ -39,13 +41,19 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 	public AppHtml3() {
 		addStyle("justify-content", "center");
 		createSelectionProperty();
-		createTable().select(Car.class);
-		createTable().select(Color.class);
+
+		TreeRootTag table1 = new TreeRootTagImpl(this);
+		table1.createTree(RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class, SubCell2.class);
+		initTable(table1);
+		table1.select(Car.class);
+
+		TreeRootTag table2 = new TreeRootTagImpl(this);
+		table2.createTree(RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class);
+		initTable(table2);
+		table2.select(Color.class);
 	}
 
-	public TreeRootTagImpl createTable() {
-		TreeRootTagImpl table = new TreeRootTagImpl(this);
-
+	public void initTable(TreeRootTag table) {
 		Tag row = table.find(Row.class);
 		row.forEach(ObservableListExtractor.SUBINSTANCES);
 		row.addStyle("flex", "1");
@@ -103,7 +111,5 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		table.find(ComponentSubCell.class).bindText();
 		table.find(ValueDisplayer.class).bindText();
 		table.find(BooleanDisplayer.class);
-
-		return table;
 	}
 }

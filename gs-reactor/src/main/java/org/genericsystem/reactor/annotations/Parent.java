@@ -10,5 +10,5 @@ import org.genericsystem.reactor.TagImpl;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 public @interface Parent {
-	Class<? extends TagImpl>[] value();
+	Class<? extends TagImpl> value();
 }

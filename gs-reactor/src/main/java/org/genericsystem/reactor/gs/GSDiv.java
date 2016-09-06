@@ -11,8 +11,19 @@ import org.genericsystem.reactor.gstag.HtmlH2;
 public class GSDiv extends HtmlDiv {
 	private final FlexDirection direction;
 
+	public GSDiv() {
+		this(FlexDirection.COLUMN);
+	}
+
 	public GSDiv(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
+	}
+
+	public GSDiv(FlexDirection direction) {
+		this.direction = direction;
+		addStyle("display", "flex");
+		addStyle("flex-direction", direction.toString());
+		addStyle("flex-wrap", "nowrap");
 	}
 
 	public GSDiv(Tag parent, FlexDirection direction) {
