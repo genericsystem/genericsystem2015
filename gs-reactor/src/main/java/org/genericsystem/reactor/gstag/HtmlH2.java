@@ -9,6 +9,10 @@ import org.genericsystem.reactor.TagImpl;
  */
 public class HtmlH2 extends TagImpl {
 
+	public HtmlH2() {
+		super("h2");
+	}
+
 	public HtmlH2(Tag parent) {
 		super(parent, "h2");
 	}

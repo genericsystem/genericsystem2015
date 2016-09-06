@@ -23,7 +23,7 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 	private GSSelect(Tag parent) {
 		super(parent, "select");
 		options();
-		init();
+		initSelect();
 		createSelectionProperty();
 		bindBiDirectionalSelection(optionElement);
 		addPrefixBinding(model -> {
@@ -63,7 +63,7 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 		};
 	}
 
-	protected void init() {
+	protected void initSelect() {
 
 	}
 
@@ -80,7 +80,7 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 		}
 
 		@Override
-		protected void init() {
+		protected void initSelect() {
 			setSelectionShift(1);
 		}
 	}
