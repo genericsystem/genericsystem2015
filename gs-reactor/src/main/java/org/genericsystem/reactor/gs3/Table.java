@@ -12,27 +12,38 @@ import org.genericsystem.reactor.model.StringExtractor;
 
 public class Table extends GSDiv {
 
-	public Table() {
-		super(FlexDirection.COLUMN);
+	@Override
+	public void init() {
+		addStyle("flex", "1");
 	}
 
-	@Parent(Table.class)
+	public static class HorizontalTable extends Table {
+
+		@Override
+		public void init() {
+			super.init();
+			setDirection(FlexDirection.ROW);
+		}
+	}
+
 	public static class Title extends GSDiv {
 
-		public Title() {
-			addStyle("flex-direction", FlexDirection.ROW.toString());
+		@Override
+		public void init() {
 			addStyle("background-color", "#EA4500");
 			addStyle("margin-right", "1px");
 			addStyle("margin-bottom", "1px");
 			addStyle("color", "White");
 			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
 		}
 	}
 
 	@Parent(Title.class)
 	public static class TitleContent extends HtmlH2 {
 
-		public TitleContent() {
+		@Override
+		public void init() {
 			setStringExtractor(StringExtractor.MANAGEMENT);
 			bindText();
 		}
@@ -41,17 +52,20 @@ public class Table extends GSDiv {
 	@Parent(Table.class)
 	public static class Row extends GSDiv {
 
-		public Row() {
+		@Override
+		public void init() {
 			forEach(ObservableListExtractor.SUBINSTANCES);
+			reverseDirection();
 			addStyle("flex", "1");
-			addStyle("flex-direction", FlexDirection.ROW.toString());
 		}
 	}
 
 	@Parent(Row.class)
 	public static class RowName extends GSDiv {
 
-		public RowName() {
+		@Override
+		public void init() {
+			keepDirection();
 			addStyle("flex", "1");
 			addStyle("margin-right", "1px");
 			addStyle("margin-bottom", "1px");
@@ -63,7 +77,8 @@ public class Table extends GSDiv {
 	@Parent(RowName.class)
 	public static class RowNameDisplayer extends HtmlHyperLink {
 
-		public RowNameDisplayer() {
+		@Override
+		public void init() {
 			addStyle("color", "White");
 			bindText();
 			bindAction(model -> getSelectionProperty(model).setValue(model));
@@ -73,10 +88,10 @@ public class Table extends GSDiv {
 	@Parent(Row.class)
 	public static class Cell extends GSDiv {
 
-		public Cell() {
+		@Override
+		public void init() {
 			forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
 			addStyle("flex", "1");
-			addStyle("flex-direction", FlexDirection.COLUMN.toString());
 			addStyle("margin-bottom", "1px");
 			addStyle("margin-right", "1px");
 		}
@@ -85,17 +100,20 @@ public class Table extends GSDiv {
 	@Parent(Cell.class)
 	public static class SubCell extends GSDiv {
 
-		public SubCell() {
+		@Override
+		public void init() {
 			forEach(ObservableListExtractor.HOLDERS);
+			setDirection(FlexDirection.ROW);
 			addStyle("flex", "1");
-			addStyle("flex-direction", FlexDirection.ROW.toString());
 		}
 	}
 
 	@Parent(Cell.class)
 	public static class SubCell2 extends SubCell {
 
-		public SubCell2() {
+		@Override
+		public void init() {
+			super.init();
 			addStyle("border", "1px solid red");
 		}
 	}
@@ -103,8 +121,10 @@ public class Table extends GSDiv {
 	@Parent(SubCell.class)
 	public static class ComponentSubCell extends GSDiv {
 
-		public ComponentSubCell() {
+		@Override
+		public void init() {
 			forEach(gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+			setDirection(FlexDirection.ROW);
 			addStyle("flex", "1");
 			addStyle("justify-content", "center");
 			addStyle("align-items", "center");
@@ -121,8 +141,10 @@ public class Table extends GSDiv {
 	@Parent(SubCell.class)
 	public static class BooleanValueSubCell extends GSDiv {
 
-		public BooleanValueSubCell() {
+		@Override
+		public void init() {
 			select(gs -> gs[1].getComponents().size() == 1 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
+			setDirection(FlexDirection.ROW);
 			addStyle("justify-content", "center");
 			addStyle("align-items", "center");
 			addStyle("flex", "1");
@@ -137,8 +159,10 @@ public class Table extends GSDiv {
 	@Parent(SubCell.class)
 	public static class ValueSubCell extends GSDiv {
 
-		public ValueSubCell() {
+		@Override
+		public void init() {
 			select(gs -> gs[1].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
+			setDirection(FlexDirection.ROW);
 			addStyle("justify-content", "center");
 			addStyle("align-items", "center");
 			addStyle("flex", "1");
