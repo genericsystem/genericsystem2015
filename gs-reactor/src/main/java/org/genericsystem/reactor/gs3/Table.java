@@ -50,6 +50,97 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(Table.class)
+	public static class TitleRow extends GSDiv {
+
+		@Override
+		public void init() {
+			reverseDirection();
+			addStyle("flex", "1");
+		}
+	}
+
+	@Parent(TitleRow.class)
+	public static class TypeName extends GSDiv {
+
+		@Override
+		public void init() {
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
+			addStyle("flex", "1");
+			addStyle("margin-right", "1px");
+			addStyle("margin-bottom", "1px");
+			addStyle("color", "#ffffff");
+			addStyle("background-color", "#ea0084");
+		}
+	}
+
+	@Parent(TypeName.class)
+	public static class TypeNameDisplayer extends GSLabelDisplayer {
+	}
+
+	@Parent(TitleRow.class)
+	public static class TypeAttribute extends GSDiv {
+
+		@Override
+		public void init() {
+			forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+			addStyle("flex", "1");
+			setDirection(FlexDirection.ROW);
+		}
+	}
+
+	@Parent(TypeAttribute.class)
+	public static class AttributeName extends GSDiv {
+
+		@Override
+		public void init() {
+			select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
+			addStyle("flex", "1");
+			addStyle("margin-right", "1px");
+			addStyle("margin-bottom", "1px");
+			addStyle("color", "#ffffff");
+			addStyle("background-color", "#ea0084");
+		}
+	}
+
+	@Parent(AttributeName.class)
+	public static class AttributeNameDisplayer extends GSLabelDisplayer {
+	}
+
+	@Parent(TypeAttribute.class)
+	public static class RelationName extends GSDiv {
+
+		@Override
+		public void init() {
+			select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
+			addStyle("flex", "1");
+			setDirection(FlexDirection.ROW);
+		}
+	}
+
+	@Parent(RelationName.class)
+	public static class ComponentName extends GSDiv {
+
+		@Override
+		public void init() {
+			forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
+			addStyle("flex", "1");
+			addStyle("margin-right", "1px");
+			addStyle("margin-bottom", "1px");
+			addStyle("color", "#ffffff");
+			addStyle("background-color", "#ea0084");
+		}
+	}
+
+	@Parent(ComponentName.class)
+	public static class ComponentNameDisplayer extends GSLabelDisplayer {
+	}
+
+	@Parent(Table.class)
 	public static class Row extends GSDiv {
 
 		@Override
