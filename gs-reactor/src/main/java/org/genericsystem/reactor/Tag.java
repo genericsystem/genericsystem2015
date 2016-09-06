@@ -348,6 +348,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	public ObservableList<Tag> getObservableChildren();
 
+	default void init() {
+	}
+
 	@SuppressWarnings("unchecked")
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
@@ -383,6 +386,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 					newTag.setParent(find(parent.value()));
 				else
 					newTag.setParent(this);
+				newTag.init();
 				getNodes().put(searchedClass, newTag);
 			}
 
