@@ -85,8 +85,9 @@ public class TagImpl implements Tag {
 
 		private List<Class<? extends TagImpl>> specifiedClasses;
 
-		public TreeRootTagImpl(Tag parent) {
+		public TreeRootTagImpl(Tag parent, Class<? extends TagImpl>... specifiedClasses) {
 			super(parent);
+			createTree(specifiedClasses);
 		}
 
 		@Override

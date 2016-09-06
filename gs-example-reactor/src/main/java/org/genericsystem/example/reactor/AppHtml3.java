@@ -42,13 +42,11 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		addStyle("justify-content", "center");
 		createSelectionProperty();
 
-		TreeRootTag table1 = new TreeRootTagImpl(this);
-		table1.createTree(RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class, SubCell2.class);
+		TreeRootTag table1 = new TreeRootTagImpl(this, RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class, SubCell2.class);
 		initTable(table1);
 		table1.select(Car.class);
 
-		TreeRootTag table2 = new TreeRootTagImpl(this);
-		table2.createTree(RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class);
+		TreeRootTag table2 = new TreeRootTagImpl(this, RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class);
 		initTable(table2);
 		table2.select(Color.class);
 	}
