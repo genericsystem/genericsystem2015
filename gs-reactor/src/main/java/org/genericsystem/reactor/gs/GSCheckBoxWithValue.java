@@ -7,6 +7,11 @@ import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 
 public class GSCheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDefaults {
 
+	public GSCheckBoxWithValue() {
+		createConvertedValueProperty();
+		bindOptionalBiDirectionalAttribute(VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
+	}
+
 	public GSCheckBoxWithValue(Tag parent) {
 		super(parent);
 		createConvertedValueProperty();
@@ -14,6 +19,11 @@ public class GSCheckBoxWithValue extends HtmlCheckBox implements ConvertedValueD
 	}
 
 	public static class GSCheckBoxEditor extends GSCheckBoxWithValue {
+
+		public GSCheckBoxEditor() {
+			initValueProperty(model -> (Boolean) model.getGeneric().getValue());
+			addConvertedValueChangeListener((model, nva) -> model.getGeneric().updateValue(nva));
+		}
 
 		public GSCheckBoxEditor(Tag parent) {
 			super(parent);
@@ -23,6 +33,10 @@ public class GSCheckBoxWithValue extends HtmlCheckBox implements ConvertedValueD
 	}
 
 	public static class GSCheckBoxDisplayer extends GSCheckBoxEditor {
+
+		public GSCheckBoxDisplayer() {
+			addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
+		}
 
 		public GSCheckBoxDisplayer(Tag parent) {
 			super(parent);

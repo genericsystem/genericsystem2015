@@ -8,6 +8,11 @@ import org.genericsystem.reactor.TagImpl;
  *
  */
 public class HtmlDiv extends TagImpl {
+
+	public HtmlDiv() {
+		super("div");
+	}
+
 	public HtmlDiv(Tag parent) {
 		super(parent, "div");
 	}

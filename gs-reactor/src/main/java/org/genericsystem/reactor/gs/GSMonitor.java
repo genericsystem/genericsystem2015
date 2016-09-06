@@ -48,12 +48,12 @@ public class GSMonitor extends GSDiv {
 				}, context.getTsObservableValue()));
 			}
 		};
-		// new HtmlButton(this) {
-		// {
-		// setText("Collect");
-		// bindAction(model -> System.gc());
-		// }
-		// };
+		new HtmlButton(this) {
+			{
+				setText("Collect");
+				bindAction(model -> System.gc());
+			}
+		};
 	}
 
 	protected void middlePart() {

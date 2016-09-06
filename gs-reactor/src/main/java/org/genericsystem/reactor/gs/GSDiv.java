@@ -8,27 +8,60 @@ import org.genericsystem.reactor.gstag.HtmlDiv;
 import org.genericsystem.reactor.gstag.HtmlH1;
 import org.genericsystem.reactor.gstag.HtmlH2;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+
 public class GSDiv extends HtmlDiv {
-	private final FlexDirection direction;
+	private final Property<FlexDirection> direction = new SimpleObjectProperty<>();
+
+	public GSDiv() {
+		this(FlexDirection.COLUMN);
+	}
 
 	public GSDiv(Tag parent) {
 		this(parent, FlexDirection.COLUMN);
 	}
 
-	public GSDiv(Tag parent, FlexDirection direction) {
-		super(parent);
-		this.direction = direction;
+	public GSDiv(FlexDirection direction) {
+		setDirection(direction);
 		addStyle("display", "flex");
-		addStyle("flex-direction", direction.toString());
 		addStyle("flex-wrap", "nowrap");
 	}
 
+	public GSDiv(Tag parent, FlexDirection direction) {
+		super(parent);
+		setDirection(direction);
+		addStyle("display", "flex");
+		addStyle("flex-wrap", "nowrap");
+	}
+
+	public void setDirection(FlexDirection direction) {
+		this.direction.setValue(direction);
+		addStyle("flex-direction", direction.toString());
+	}
+
 	public FlexDirection getDirection() {
-		return direction;
+		return direction.getValue();
 	}
 
 	public FlexDirection getReverseDirection() {
-		return getDirection().reverse();
+		return direction.getValue().reverse();
+	}
+
+	public Property<FlexDirection> getDirectionProperty() {
+		return direction;
+	}
+
+	public void reverseDirection() {
+		Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
+		setDirection(parentDirection.getValue().reverse());
+		parentDirection.addListener((o, v, nv) -> setDirection(nv.reverse()));
+	}
+
+	public void keepDirection() {
+		Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
+		setDirection(parentDirection.getValue());
+		parentDirection.addListener((o, v, nv) -> setDirection(nv));
 	}
 
 	public static class GenericColumn extends GSDiv {

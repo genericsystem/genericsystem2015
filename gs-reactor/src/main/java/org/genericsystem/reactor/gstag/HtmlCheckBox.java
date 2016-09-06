@@ -14,6 +14,10 @@ import io.vertx.core.json.JsonObject;
  */
 public class HtmlCheckBox extends TagImpl {
 
+	public HtmlCheckBox() {
+		super("input");
+	}
+
 	public HtmlCheckBox(Tag parent) {
 		super(parent, "input");
 	}

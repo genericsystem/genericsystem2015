@@ -1,13 +1,11 @@
 package org.genericsystem.reactor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.gs.GSDiv;
 
 import javafx.collections.FXCollections;
@@ -19,14 +17,22 @@ public class TagImpl implements Tag {
 	private MetaBinding<?> metaBinding;
 	private final List<BiConsumer<Context, HtmlDomNode>> preFixedBindings = new ArrayList<>();
 	private final List<BiConsumer<Context, HtmlDomNode>> postFixedBindings = new ArrayList<>();
-	private final Tag parent;
+	private Tag parent;
 	private final ObservableList<Tag> children = FXCollections.observableArrayList();
 
 	protected TagImpl(Tag parent, String tag) {
 		this.tag = tag;
+		setParent(parent);
+	}
+
+	protected void setParent(Tag parent) {
 		this.parent = parent;
 		if (parent != null)
 			parent.getObservableChildren().add(this);
+	}
+
+	protected TagImpl(String tag) {
+		this.tag = tag;
 	}
 
 	@Override
@@ -73,27 +79,30 @@ public class TagImpl implements Tag {
 		return (COMPONENT) parent;
 	}
 
-	public static class TreeRootTagImpl extends GSDiv {
+	public static class TreeRootTagImpl extends GSDiv implements TreeRootTag {
 
 		private final HashMap<Class<? extends TagImpl>, TagImpl> nodes = new LinkedHashMap<Class<? extends TagImpl>, TagImpl>();
 
-		public TreeRootTagImpl(Tag parent) {
+		private List<Class<? extends TagImpl>> specifiedClasses;
+
+		public TreeRootTagImpl(Tag parent, Class<? extends TagImpl>... specifiedClasses) {
 			super(parent);
+			createTree(specifiedClasses);
 		}
 
-		public TagImpl find(Class<? extends TagImpl> tagClass) {
-			if (nodes.get(tagClass) == null) {
-				Parent parent = tagClass.getAnnotation(Parent.class);
-				try {
-					if (parent != null)
-						nodes.put(tagClass, tagClass.getConstructor(Tag.class).newInstance(find(parent.value()[0])));
-					else
-						nodes.put(tagClass, tagClass.getConstructor(Tag.class).newInstance(this));
-				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-			return nodes.get(tagClass);
+		@Override
+		public HashMap<Class<? extends TagImpl>, TagImpl> getNodes() {
+			return nodes;
+		}
+
+		@Override
+		public List<Class<? extends TagImpl>> getSpecifiedClasses() {
+			return specifiedClasses;
+		}
+
+		@Override
+		public void setSpecifiedClasses(List<Class<? extends TagImpl>> specifiedClasses) {
+			this.specifiedClasses = specifiedClasses;
 		}
 	}
 }
