@@ -19,6 +19,10 @@ public class HtmlLabel extends TagImpl {
 
 	public static class GSLabelDisplayer extends HtmlLabel {
 
+		public GSLabelDisplayer() {
+			bindText();
+		}
+
 		public GSLabelDisplayer(Tag parent) {
 			super(parent);
 			bindText();
