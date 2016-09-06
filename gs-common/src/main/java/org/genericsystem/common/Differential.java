@@ -103,23 +103,4 @@ public class Differential implements IDifferential<Generic> {
 	public final Observable getObservable(Generic generic) {
 		return ObservableBase.createObservable(getSubDifferential().getObservable(generic), adds.getFilteredInvalidator(generic, generic::isDirectAncestorOf), removes.getFilteredInvalidator(generic, generic::isDirectAncestorOf));
 	}
-
-	// @Override
-	// public final CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-	// return getSubDifferential().getDependenciesPromise(generic).<Snapshot<Generic>> thenApply(subSnapshot -> new Snapshot<Generic>() {
-	// @Override
-	// public Generic get(Object o) {
-	// Generic result = adds.get(o);
-	// if (result != null)
-	// return generic.isDirectAncestorOf(result) ? result : null;
-	// return !removes.contains(o) ? subSnapshot.get(o) : null;
-	// }
-	//
-	// @Override
-	// public Stream<Generic> stream() {
-	// return Stream.concat(adds.contains(generic) ? Stream.empty() : subSnapshot.stream().filter(x -> !removes.contains(x)), adds.stream().filter(x -> generic.isDirectAncestorOf(x)));
-	// }
-	// });
-	// }
-
 }

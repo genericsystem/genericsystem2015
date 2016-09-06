@@ -352,11 +352,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 		public final Observable getObservable(Generic generic) {
 			return transactionProperty;
 		}
-
-		// @Override
-		// public final CompletableFuture<Snapshot<Generic>> getDependenciesPromise(Generic generic) {
-		// return transactionProperty.get().getDependenciesPromise(generic);
-		// }
 	}
 
 	public static interface ContextEventListener<X> {
