@@ -15,7 +15,9 @@ import org.genericsystem.reactor.gs3.Table.AttributeNameDisplayer;
 import org.genericsystem.reactor.gs3.Table.BooleanDisplayer;
 import org.genericsystem.reactor.gs3.Table.ComponentLabel;
 import org.genericsystem.reactor.gs3.Table.ComponentNameDisplayer;
+import org.genericsystem.reactor.gs3.Table.EmptyCell;
 import org.genericsystem.reactor.gs3.Table.HorizontalTable;
+import org.genericsystem.reactor.gs3.Table.RemoveButton;
 import org.genericsystem.reactor.gs3.Table.RowNameDisplayer;
 import org.genericsystem.reactor.gs3.Table.SubCell2;
 import org.genericsystem.reactor.gs3.Table.TitleContent;
@@ -35,13 +37,14 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		addStyle("justify-content", "center");
 		createSelectionProperty();
 
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class).select(Car.class);
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class, HorizontalTable.class)
-				.select(Car.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
+				RemoveButton.class).select(Car.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
+				RemoveButton.class, HorizontalTable.class).select(Car.class);
 
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class, SubCell2.class)
-				.select(Color.class);
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, BooleanDisplayer.class, ValueDisplayer.class, HorizontalTable.class)
-				.select(Color.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
+				RemoveButton.class, SubCell2.class).select(Color.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
+				RemoveButton.class, HorizontalTable.class).select(Color.class);
 	}
 }

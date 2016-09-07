@@ -1,9 +1,11 @@
 package org.genericsystem.reactor.gs3;
 
+import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gs.GSDiv;
+import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
@@ -140,6 +142,32 @@ public class Table extends GSDiv {
 	public static class ComponentNameDisplayer extends GSLabelDisplayer {
 	}
 
+	@Parent(TitleRow.class)
+	public static class EmptyCell extends GSDiv {
+
+		@Override
+		public void init() {
+			keepDirection();
+			if (this.getDirection().equals(FlexDirection.ROW)) {
+				addStyle("flex", "0");
+				addStyle("min-width", "100px");
+			} else {
+				addStyle("flex", "1");
+			}
+			getDirectionProperty().addListener((o, v, nv) -> {
+				if (FlexDirection.ROW.equals(nv)) {
+					addStyle("flex", "0");
+					addStyle("min-width", "100px");
+				} else {
+					addStyle("flex", "1");
+				}
+			});
+			addStyle("background-color", "#ea0084");
+			addStyle("margin-right", "1px");
+			addStyle("margin-bottom", "1px");
+		}
+	}
+
 	@Parent(Table.class)
 	public static class Row extends GSDiv {
 
@@ -263,5 +291,42 @@ public class Table extends GSDiv {
 
 	@Parent(ValueSubCell.class)
 	public static class ValueDisplayer extends GSLabelDisplayer {
+	}
+
+	@Parent(Row.class)
+	public static class RemoveButtonDiv extends GSDiv {
+
+		@Override
+		public void init() {
+			keepDirection();
+			if (FlexDirection.ROW.equals(getDirection())) {
+				addStyle("flex", "0");
+				addStyle("min-width", "100px");
+			} else {
+				addStyle("flex", "1");
+			}
+			getDirectionProperty().addListener((o, v, nv) -> {
+				if (FlexDirection.ROW.equals(nv)) {
+					addStyle("flex", "0");
+					addStyle("min-width", "100px");
+				} else {
+					addStyle("flex", "1");
+				}
+			});
+			addStyle("margin-right", "1px");
+			addStyle("margin-bottom", "1px");
+		}
+	}
+
+	@Parent(RemoveButtonDiv.class)
+	public static class RemoveButton extends HtmlButton {
+
+		@Override
+		public void init() {
+			setText("Remove");
+			bindAction(Context::remove);
+			addStyle("width", "100%");
+			addStyle("height", "100%");
+		}
 	}
 }
