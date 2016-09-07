@@ -2,7 +2,6 @@ package org.genericsystem.reactor.gs3;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.Parent;
-import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
@@ -12,33 +11,12 @@ import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
-public class Table extends GSDiv {
+public class Table extends GSDiv implements FlexStyle {
 
-	@Override
-	public void init() {
-		addStyle("flex", "1");
+	public static class HorizontalTable extends Table implements RowFlexStyle {
 	}
 
-	public static class HorizontalTable extends Table {
-
-		@Override
-		public void init() {
-			super.init();
-			setDirection(FlexDirection.ROW);
-		}
-	}
-
-	public static class Title extends GSDiv {
-
-		@Override
-		public void init() {
-			addStyle("background-color", "#EA4500");
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-			addStyle("color", "White");
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-		}
+	public static class Title extends GSDiv implements TitleStyle {
 	}
 
 	@Parent(Title.class)
@@ -52,28 +30,11 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(Table.class)
-	public static class TitleRow extends GSDiv {
-
-		@Override
-		public void init() {
-			reverseDirection();
-			addStyle("flex", "1");
-		}
+	public static class TitleRow extends GSDiv implements RowStyle {
 	}
 
 	@Parent(TitleRow.class)
-	public static class TypeName extends GSDiv {
-
-		@Override
-		public void init() {
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-			addStyle("flex", "1");
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-			addStyle("color", "#ffffff");
-			addStyle("background-color", "#ea0084");
-		}
+	public static class TypeName extends GSDiv implements TitleLineCellStyle {
 	}
 
 	@Parent(TypeName.class)
@@ -81,29 +42,20 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(TitleRow.class)
-	public static class TypeAttribute extends GSDiv {
+	public static class TypeAttribute extends GSDiv implements RowFlexStyle {
 
 		@Override
 		public void init() {
 			forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
-			addStyle("flex", "1");
-			setDirection(FlexDirection.ROW);
 		}
 	}
 
 	@Parent(TypeAttribute.class)
-	public static class AttributeName extends GSDiv {
+	public static class AttributeName extends GSDiv implements TitleLineCellStyle {
 
 		@Override
 		public void init() {
 			select(gs -> gs[0].getComponents().size() < 2 ? gs[0] : null);
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-			addStyle("flex", "1");
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-			addStyle("color", "#ffffff");
-			addStyle("background-color", "#ea0084");
 		}
 	}
 
@@ -112,29 +64,20 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(TypeAttribute.class)
-	public static class RelationName extends GSDiv {
+	public static class RelationName extends GSDiv implements RowFlexStyle {
 
 		@Override
 		public void init() {
 			select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
-			addStyle("flex", "1");
-			setDirection(FlexDirection.ROW);
 		}
 	}
 
 	@Parent(RelationName.class)
-	public static class ComponentName extends GSDiv {
+	public static class ComponentName extends GSDiv implements TitleLineCellStyle {
 
 		@Override
 		public void init() {
 			forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-			addStyle("flex", "1");
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-			addStyle("color", "#ffffff");
-			addStyle("background-color", "#ea0084");
 		}
 	}
 
@@ -143,113 +86,56 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(TitleRow.class)
-	public static class EmptyCell extends GSDiv {
-
-		@Override
-		public void init() {
-			keepDirection();
-			if (this.getDirection().equals(FlexDirection.ROW)) {
-				addStyle("flex", "0");
-				addStyle("min-width", "100px");
-			} else {
-				addStyle("flex", "1");
-			}
-			getDirectionProperty().addListener((o, v, nv) -> {
-				if (FlexDirection.ROW.equals(nv)) {
-					addStyle("flex", "0");
-					addStyle("min-width", "100px");
-				} else {
-					addStyle("flex", "1");
-				}
-			});
-			addStyle("background-color", "#ea0084");
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-		}
+	public static class EmptyCell extends GSDiv implements RemoveStyle {
 	}
 
 	@Parent(Table.class)
-	public static class Row extends GSDiv {
+	public static class Row extends GSDiv implements RowStyle {
 
 		@Override
 		public void init() {
 			forEach(ObservableListExtractor.SUBINSTANCES);
-			reverseDirection();
-			addStyle("flex", "1");
 		}
 	}
 
 	@Parent(Row.class)
-	public static class RowName extends GSDiv {
-
-		@Override
-		public void init() {
-			keepDirection();
-			addStyle("flex", "1");
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-			addStyle("overflow", "hidden");
-			addPrefixBinding(modelContext -> addStyle(modelContext, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#3393FF"));
-		}
+	public static class RowName extends GSDiv implements CellStyle {
 	}
 
 	@Parent(RowName.class)
-	public static class RowNameDisplayer extends HtmlHyperLink {
+	public static class RowNameDisplayer extends HtmlHyperLink implements RowNameStyle {
 
 		@Override
 		public void init() {
-			addStyle("color", "White");
 			bindText();
 			bindAction(model -> getSelectionProperty(model).setValue(model));
 		}
 	}
 
 	@Parent(Row.class)
-	public static class Cell extends GSDiv {
+	public static class Cell extends GSDiv implements CellStyle {
 
 		@Override
 		public void init() {
 			forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-			addStyle("flex", "1");
-			addStyle("margin-bottom", "1px");
-			addStyle("margin-right", "1px");
 		}
 	}
 
 	@Parent(Cell.class)
-	public static class SubCell extends GSDiv {
+	public static class SubCell extends GSDiv implements RowFlexStyle {
 
 		@Override
 		public void init() {
 			forEach(ObservableListExtractor.HOLDERS);
-			setDirection(FlexDirection.ROW);
-			addStyle("flex", "1");
-		}
-	}
-
-	@Parent(Cell.class)
-	public static class SubCell2 extends SubCell {
-
-		@Override
-		public void init() {
-			super.init();
-			addStyle("border", "1px solid red");
 		}
 	}
 
 	@Parent(SubCell.class)
-	public static class ComponentSubCell extends GSDiv {
+	public static class ComponentSubCell extends GSDiv implements SubCellStyle {
 
 		@Override
 		public void init() {
 			forEach(gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
-			setDirection(FlexDirection.ROW);
-			addStyle("flex", "1");
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-			addStyle("margin-bottom", "1px");
-			addStyle("margin-right", "1px");
-			addPrefixBinding(modelContext -> addStyle(modelContext, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
 		}
 	}
 
@@ -258,16 +144,11 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(SubCell.class)
-	public static class BooleanValueSubCell extends GSDiv {
+	public static class BooleanValueSubCell extends GSDiv implements SubCellStyle {
 
 		@Override
 		public void init() {
 			select(gs -> gs[1].getComponents().size() == 1 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-			setDirection(FlexDirection.ROW);
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-			addStyle("flex", "1");
-			addStyle("background-color", "#e5ed00");
 		}
 	}
 
@@ -276,16 +157,11 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(SubCell.class)
-	public static class ValueSubCell extends GSDiv {
+	public static class ValueSubCell extends GSDiv implements SubCellStyle {
 
 		@Override
 		public void init() {
 			select(gs -> gs[1].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-			setDirection(FlexDirection.ROW);
-			addStyle("justify-content", "center");
-			addStyle("align-items", "center");
-			addStyle("flex", "1");
-			addStyle("background-color", "#e5ed00");
 		}
 	}
 
@@ -294,39 +170,16 @@ public class Table extends GSDiv {
 	}
 
 	@Parent(Row.class)
-	public static class RemoveButtonDiv extends GSDiv {
-
-		@Override
-		public void init() {
-			keepDirection();
-			if (FlexDirection.ROW.equals(getDirection())) {
-				addStyle("flex", "0");
-				addStyle("min-width", "100px");
-			} else {
-				addStyle("flex", "1");
-			}
-			getDirectionProperty().addListener((o, v, nv) -> {
-				if (FlexDirection.ROW.equals(nv)) {
-					addStyle("flex", "0");
-					addStyle("min-width", "100px");
-				} else {
-					addStyle("flex", "1");
-				}
-			});
-			addStyle("margin-right", "1px");
-			addStyle("margin-bottom", "1px");
-		}
+	public static class RemoveButtonDiv extends GSDiv implements RemoveStyle {
 	}
 
 	@Parent(RemoveButtonDiv.class)
-	public static class RemoveButton extends HtmlButton {
+	public static class RemoveButton extends HtmlButton implements RemoveButtonStyle {
 
 		@Override
 		public void init() {
 			setText("Remove");
 			bindAction(Context::remove);
-			addStyle("width", "100%");
-			addStyle("height", "100%");
 		}
 	}
 }

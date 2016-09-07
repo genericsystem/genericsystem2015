@@ -43,7 +43,7 @@ public class GSSubcellDisplayer extends GSDiv {
 	public void content() {
 		new GSDiv(this, this.getDirection()) {
 			{
-				style(this);
+				subCellStyle(this);
 				if (needMeta)
 					select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 				else
@@ -53,7 +53,7 @@ public class GSSubcellDisplayer extends GSDiv {
 		};
 		new GSDiv(this, this.getDirection()) {
 			{
-				style(this);
+				subCellStyle(this);
 				if (needMeta)
 					select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getMeta().getInstanceValueClassConstraint()) ? gs[0] : null);
 				else
@@ -66,7 +66,7 @@ public class GSSubcellDisplayer extends GSDiv {
 				addStyle("flex", "1");
 				select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
 				Tag components = getLinkDisplayerConstructor().build(this);
-				style(components);
+				subCellStyle(components);
 			}
 		};
 	}
@@ -88,7 +88,7 @@ public class GSSubcellDisplayer extends GSDiv {
 		};
 	}
 
-	public void style(Tag tag) {
+	public void subCellStyle(Tag tag) {
 		tag.addStyle("justify-content", "center");
 		tag.addStyle("align-items", "center");
 		tag.addStyle("flex", "1");
@@ -127,8 +127,8 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 
 		@Override
-		public void style(Tag tag) {
-			super.style(tag);
+		public void subCellStyle(Tag tag) {
+			super.subCellStyle(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("justify-content", "flex-start");
 			tag.addStyle("align-items", "stretch");
@@ -287,8 +287,8 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 
 		@Override
-		public void style(Tag tag) {
-			super.style(tag);
+		public void subCellStyle(Tag tag) {
+			super.subCellStyle(tag);
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#ea0084");
 		}
@@ -333,7 +333,7 @@ public class GSSubcellDisplayer extends GSDiv {
 		}
 
 		@Override
-		public void style(Tag tag) {
+		public void subCellStyle(Tag tag) {
 			tag.addStyle("flex", "1");
 			tag.addStyle("color", "#ffffff");
 			tag.addStyle("background-color", "#e5ed00");
