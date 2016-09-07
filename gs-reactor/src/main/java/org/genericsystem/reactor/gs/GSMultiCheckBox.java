@@ -18,6 +18,7 @@ public class GSMultiCheckBox extends GSDiv {
 	public GSMultiCheckBox(Tag parent, FlexDirection flexDirection) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex-wrap", "wrap");
+		addStyle("overflow", "auto");
 
 		new HtmlLabel(this) {
 			{

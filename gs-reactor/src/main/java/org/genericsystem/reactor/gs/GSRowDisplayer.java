@@ -52,8 +52,8 @@ public class GSRowDisplayer extends GSComposite {
 					}
 
 					@Override
-					public void style(Tag tag) {
-						super.style(tag);
+					public void subCellStyle(Tag tag) {
+						super.subCellStyle(tag);
 						tag.addPrefixBinding(modelContext -> tag.getDomNodeStyles(modelContext).put("background-color",
 								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? tag.getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
 					}
