@@ -22,6 +22,7 @@ public class GSHeader extends GSDiv {
 				addStyle("flex", "3");
 				addStyle("align-items", "center");
 				addStyle("color", "White");
+				addStyle("text-shadow", "1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue");
 			}
 		};
 		if (tag2 != null) {

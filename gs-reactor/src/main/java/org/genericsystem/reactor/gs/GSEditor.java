@@ -49,6 +49,7 @@ public class GSEditor extends TitledSection {
 		new GSComposite(this, flexDirection.reverse()) {
 			{
 				addStyle("flex", "1");
+				addStyle("height", "100%");
 			}
 
 			@Override
