@@ -21,9 +21,14 @@ public class GSUserGuide extends GSDiv {
 				addStyleClass("modal");
 				createInitializedDisplayProperty("none");
 				bindStyle(DISPLAY, DISPLAY);
+
 				new GSDiv(this, FlexDirection.COLUMN) {
 					{
+						addStyle("-webkit-border-radius", "30px");
+						addStyle("border-radius", "30px");
+						addStyle("-moz-border-radius", "30px");
 						addStyle("max-width", "40%");
+
 						addStyleClass("modal-content");
 						new HtmlHyperLink(this) {
 							{
@@ -36,6 +41,7 @@ public class GSUserGuide extends GSDiv {
 						};
 						new GSDiv(this, FlexDirection.COLUMN) {
 							{
+								addStyle("padding", "35px");
 								setText("How to use CarColor Demo");
 								new HtmlUl(this) {
 									{
