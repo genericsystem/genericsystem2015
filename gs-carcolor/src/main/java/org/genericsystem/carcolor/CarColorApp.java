@@ -42,8 +42,25 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
 		new GSDiv(this, FlexDirection.ROW) {
 			{
-				new GSTable(this).select(Car.class);
-				new GSTable(this).select(Color.class);
+				addStyle("flex-wrap", "wrap");
+				new GSTable(this) {
+					{
+						select(Car.class);
+						addStyle("margin", "10px");
+						addStyle("padding", "10px");
+						addStyle("border-radius", "10px");
+						addStyle("background-color", "white");
+					}
+				};
+				new GSTable(this) {
+					{
+						select(Color.class);
+						addStyle("margin", "10px");
+						addStyle("padding", "10px");
+						addStyle("border-radius", "10px");
+						addStyle("background-color", "white");
+					}
+				};
 			}
 		};
 		new GSMonitor(this);
