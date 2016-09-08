@@ -2,11 +2,11 @@ package org.genericsystem.reactor.gs;
 
 import java.util.function.Consumer;
 
-import javafx.beans.binding.Bindings;
-
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import javafx.beans.binding.Bindings;
 
 /**
  * @author Nicolas Feybesse
@@ -26,6 +26,9 @@ public class GSModal extends GSDiv implements SelectionDefaults {
 		new GSDiv(this, FlexDirection.COLUMN) {
 			{
 				addStyle("max-width", "40%");
+				addStyle("padding", "10px");
+				addStyle("border-radius", "10px");
+				addStyle("background-color", "white");
 				addStyleClass("modal-content");
 				new HtmlHyperLink(this) {
 					{

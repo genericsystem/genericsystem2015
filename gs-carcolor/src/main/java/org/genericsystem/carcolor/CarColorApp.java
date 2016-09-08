@@ -39,7 +39,11 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 		addStyle("background-color", "#00afeb");
 
 		new GSHeader(this, "Reactor Live Demo", GSLogo::new, "", GSUserGuide::new, "");
-		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN).addStyle("min-height", "300px"));
+		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN) {
+			{
+				addStyle("min-height", "300px");
+			}
+		});
 		new GSDiv(this, FlexDirection.ROW) {
 			{
 				addStyle("flex-wrap", "wrap");
