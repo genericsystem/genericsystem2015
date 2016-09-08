@@ -8,14 +8,26 @@ public class GSHolderEditor extends GSDiv {
 
 	protected GSInputTextWithConversion<?> input;
 
+	public GSHolderEditor() {
+		this(GSInputTextEditorWithConversion::new);
+	}
+
 	public GSHolderEditor(Tag parent) {
 		this(parent, GSInputTextEditorWithConversion::new);
+	}
+
+	public GSHolderEditor(GSInputTextConstructor constructor) {
+		super(FlexDirection.ROW);
+		addStyle("flex", "1");
+		input = constructor.build(this);
+		input.addStyle("flex", "1 1 100%");
 	}
 
 	public GSHolderEditor(Tag parent, GSInputTextConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
 		input = constructor.build(this);
+		input.addStyle("flex", "1 1 100%");
 	}
 
 	@FunctionalInterface

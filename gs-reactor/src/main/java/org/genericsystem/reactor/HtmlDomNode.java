@@ -100,12 +100,15 @@ public class HtmlDomNode {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
 				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
-					Context childModel = metaBinding.buildModel(modelContext, between);
-					createChildDomNode(i, childModel, childTag);
-					return childModel;
+					Context childContext = metaBinding.buildModel(modelContext, between);
+					createChildDomNode(i, childContext, childTag);
+					if (childContext.isOpaque())
+						childTag.addStyleClass(childContext, "opaque");
+					return childContext;
 				}, Context::destroy));
 			} else
 				createChildDomNode(0, modelContext, childTag);
+
 		}
 		for (BiConsumer<Context, HtmlDomNode> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext, this);
@@ -113,8 +116,7 @@ public class HtmlDomNode {
 
 	public void createChildDomNode(int index, Context childContext, Tag childTag) {
 		childTag.createNode(this, childContext).init(computeIndex(index, childTag));
-		if (childContext.isOpaque())
-			childTag.addStyleClass(childContext, "opaque");
+
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {

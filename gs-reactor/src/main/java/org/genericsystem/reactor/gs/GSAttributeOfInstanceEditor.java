@@ -16,12 +16,22 @@ import javafx.collections.ObservableList;
 
 public class GSAttributeOfInstanceEditor extends GSDiv {
 
+	public GSAttributeOfInstanceEditor() {
+		super(FlexDirection.COLUMN);
+		initEditor();
+	}
+
 	public GSAttributeOfInstanceEditor(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
+		initEditor();
+	}
+
+	public void initEditor() {
 		addStyle("flex", "1");
 		addStyle("overflow", "auto");
-		new GSMultiCheckBox(this, ((GSDiv) parent).getReverseDirection()) {
+		new GSMultiCheckBox(this) {
 			{
+				// reverseDirection();
 				addStyle("flex", "1");
 				select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 			}

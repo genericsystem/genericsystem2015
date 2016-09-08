@@ -65,6 +65,10 @@ public class GSDiv extends HtmlDiv {
 	}
 
 	public static class GenericColumn extends GSDiv {
+		public GenericColumn() {
+			super(FlexDirection.COLUMN);
+		}
+
 		public GenericColumn(Tag parent) {
 			super(parent, FlexDirection.COLUMN);
 		}

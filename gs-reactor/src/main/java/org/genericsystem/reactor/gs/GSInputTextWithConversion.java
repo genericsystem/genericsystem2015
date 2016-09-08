@@ -21,10 +21,16 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
 
+	public GSInputTextWithConversion() {
+		initInput();
+	}
+
 	public GSInputTextWithConversion(Tag parent) {
 		super(parent);
-		addStyle("width", "100%");
-		addStyle("height", "100%");
+		initInput();
+	}
+
+	protected void initInput() {
 		createConvertedValueProperty();
 		storeInvalidProperty(model -> Bindings.createBooleanBinding(() -> {
 			boolean required = model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION);
@@ -65,8 +71,16 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> implements SelectionDefaults {
 
+		public GSInputTextEditorWithConversion() {
+		}
+
 		public GSInputTextEditorWithConversion(Tag parent) {
 			super(parent);
+		}
+
+		@Override
+		protected void initInput() {
+			super.initInput();
 			initValueProperty(model -> model.getGeneric().getValue());
 			addConvertedValueChangeListener((model, nva) -> {
 				if (nva != null) {

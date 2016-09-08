@@ -10,13 +10,19 @@ import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-public class Table extends GSDiv implements FlexStyle {
+public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 
 	public static class HorizontalTable extends Table implements RowFlexStyle {
 	}
 
 	public static class Title extends GSDiv implements TitleStyle {
+	}
+
+	@Override
+	public void postfix() {
+		bindSelection(find(Row.class));
 	}
 
 	@Parent(Title.class)
@@ -174,7 +180,7 @@ public class Table extends GSDiv implements FlexStyle {
 	}
 
 	@Parent(RemoveButtonDiv.class)
-	public static class RemoveButton extends HtmlButton implements RemoveButtonStyle {
+	public static class RemoveButton extends HtmlButton implements FullSizeStyle {
 
 		@Override
 		public void init() {

@@ -10,6 +10,10 @@ import io.vertx.core.json.JsonObject;
 
 public class HtmlInputText extends TagImpl implements ActionDefaults {
 
+	public HtmlInputText() {
+		super("input");
+	}
+
 	public HtmlInputText(Tag parent) {
 		super(parent, "input");
 	}

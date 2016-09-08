@@ -9,7 +9,7 @@ body {
 	line-height: 1.4em;
 	background: #eaeaea;
 	color: #4d4d4d;
-	width: 1200px;
+	width: 100%;
 	margin: 0 auto;
 	font-smoothing: antialiased;
 	display: flex;
@@ -29,7 +29,16 @@ section .adding {
  */
 
 .opaque{
-	opacity : 0.65;
+	font-style : italic;
+	font-weight : bold;
+	font-size : 108%;
+	background-color : white;
+	-webkit-backface-visibility: hidden;
+	-webkit-filter: opacity(89%);
+  	-moz-filter: opacity(89%);
+  	-o-filter: opacity(89%);
+  	-ms-filter: opacity(89%);
+  	filter: opacity(89%);
 }
 
 .invalid {
@@ -73,8 +82,8 @@ section .adding {
 		text-align:right;
 		text-decoration: none;
 		position:  absolute;
-		right: 5px;
-		top: 0px;
+		right: 10px;
+		top: 10px;
 }
 
 .modal {
@@ -94,7 +103,6 @@ section .adding {
 	position: relative;
     background-color: #fefefe;
     margin: auto;
-    padding: 0;
     border: 1px solid #888;
     width: 100%;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
@@ -112,6 +120,9 @@ section .adding .modal-content{
 }
 
 .buttonUser {
+			-webkit-border-radius: 30px;
+-moz-border-radius: 30px;
+border-radius: 30px;
 	margin-left: auto;
     margin-right: auto;
 	background-color: #F2F3F4;

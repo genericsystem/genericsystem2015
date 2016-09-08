@@ -354,6 +354,13 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default void style() {
 	}
 
+	default void postfix() {
+	}
+
+	default TagImpl find(Class<? extends TagImpl> tagClass) {
+		return getParent().find(tagClass);
+	}
+
 	@SuppressWarnings("unchecked")
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
@@ -371,6 +378,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 		public void setSpecifiedClasses(List<Class<? extends TagImpl>> specifiedClasses);
 
+		@Override
 		default TagImpl find(Class<? extends TagImpl> tagClass) {
 			Class<? extends TagImpl> searchedClass = tagClass;
 			for (Class<? extends TagImpl> clazz : getSpecifiedClasses())
@@ -401,6 +409,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			setSpecifiedClasses(Arrays.asList(tags));
 			for (Class<? extends TagImpl> clazz : tags)
 				find(clazz);
+			for (Tag tag : getNodes().values())
+				tag.postfix();
 		}
 	}
 }
