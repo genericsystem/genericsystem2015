@@ -20,10 +20,19 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 
 	public HtmlOption optionElement;
 
+	public GSSelect() {
+		super("select");
+		initSelect();
+	}
+
 	private GSSelect(Tag parent) {
 		super(parent, "select");
-		options();
 		initSelect();
+	}
+
+	protected void initSelect() {
+		options();
+		initProperties();
 		createSelectionProperty();
 		bindBiDirectionalSelection(optionElement);
 		addPrefixBinding(model -> {
@@ -63,7 +72,7 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 		};
 	}
 
-	protected void initSelect() {
+	protected void initProperties() {
 
 	}
 
@@ -80,15 +89,23 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 		}
 
 		@Override
-		protected void initSelect() {
+		protected void initProperties() {
 			setSelectionShift(1);
 		}
 	}
 
 	public static class InstanceCompositeSelect extends GSSelect {
 
+		public InstanceCompositeSelect() {
+		}
+
 		public InstanceCompositeSelect(Tag parent) {
 			super(parent);
+		}
+
+		@Override
+		protected void initSelect() {
+			super.initSelect();
 			addPostfixBinding(model -> {
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
 					addStyle(model, "background-color", getSelectionString(model).getValue());

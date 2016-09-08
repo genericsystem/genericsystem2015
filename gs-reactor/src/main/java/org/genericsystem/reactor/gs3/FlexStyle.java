@@ -40,6 +40,15 @@ public interface FlexStyle extends Tag {
 		}
 	}
 
+	public static interface ColumnFlexStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1");
+			setDirection(FlexDirection.COLUMN);
+		}
+	}
+
 	public static interface RowStyle extends FlexStyle {
 
 		@Override
@@ -138,12 +147,133 @@ public interface FlexStyle extends Tag {
 		}
 	}
 
-	public static interface RemoveButtonStyle extends FlexStyle {
+	public static interface FullSizeStyle extends FlexStyle {
 
 		@Override
 		default void style() {
-			addStyle("width", "100%");
+			addStyle("flex", "1 1 100%");
+		}
+	}
+
+	public static interface EditorContentStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			keepDirection();
+			addStyle("flex", "1");
 			addStyle("height", "100%");
+		}
+	}
+
+	public static interface LinkTitlesStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			reverseDirection();
+			addStyle("flex", "0.3");
+		}
+	}
+
+	public static interface ReversedFlexStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			reverseDirection();
+			addStyle("flex", "1");
+		}
+	}
+
+	public static interface SubCellEditorStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1");
+			addStyle("margin-right", "1px");
+			addStyle("margin-bottom", "1px");
+			addStyle("color", "#ffffff");
+		}
+	}
+
+	public static interface ComponentEditorStyle extends SubCellEditorStyle {
+
+		@Override
+		default void style() {
+			SubCellEditorStyle.super.style();
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
+		}
+	}
+
+	public static interface AttributeEditorStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1");
+			addStyle("flex-direction", "column");
+			addStyle("overflow", "auto");
+		}
+	}
+
+	public static interface MultiCheckboxStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1");
+			setDirection(FlexDirection.COLUMN);
+			addStyle("flex-wrap", "wrap");
+			addStyle("overflow", "auto");
+		}
+	}
+
+	public static interface CheckboxLabelStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1 0 auto");
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
+			addStyle("text-align", "center");
+			addPrefixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+					addStyle(model, "background-color", getGenericStringProperty(model).getValue());
+			});
+		}
+	}
+
+	public static interface CheckboxStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("float", "left");
+			addStyle("vertical-align", "middle");
+			addStyle("margin", "4px");
+		}
+	}
+
+	public static interface AttributeEditionColumnStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1");
+			addStyle("flex-wrap", "wrap");
+		}
+	}
+
+	public static interface SubcellEditorContainerStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1 0 auto");
+		}
+	}
+
+	public static interface CenteredFlex extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("flex", "1");
+			addStyle("justify-content", "center");
+			addStyle("align-items", "center");
 		}
 	}
 }
