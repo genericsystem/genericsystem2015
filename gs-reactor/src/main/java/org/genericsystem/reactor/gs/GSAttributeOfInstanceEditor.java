@@ -19,6 +19,7 @@ public class GSAttributeOfInstanceEditor extends GSDiv {
 	public GSAttributeOfInstanceEditor(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
 		addStyle("flex", "1");
+		addStyle("overflow", "auto");
 		new GSMultiCheckBox(this, ((GSDiv) parent).getReverseDirection()) {
 			{
 				addStyle("flex", "1");

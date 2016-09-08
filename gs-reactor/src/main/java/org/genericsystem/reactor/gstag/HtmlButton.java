@@ -15,6 +15,10 @@ import io.vertx.core.json.JsonObject;
  */
 public class HtmlButton extends TagImpl implements ActionDefaults, GSBuilderDefaults {
 
+	public HtmlButton() {
+		super("button");
+	}
+
 	public HtmlButton(Tag parent) {
 		super(parent, "button");
 	}
