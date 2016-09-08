@@ -27,15 +27,16 @@ public class GSModal extends GSDiv implements SelectionDefaults {
 			{
 				addStyle("max-width", "40%");
 				addStyleClass("modal-content");
-				new HtmlHyperLink(this) {
-					{
-						addStyleClass("close");
-						setText("×");
-						bindAction(model -> getSelectionProperty(model).setValue(null));
-					}
-				};
+
 				new GSDiv(this, FlexDirection.COLUMN) {
 					{
+						new HtmlHyperLink(this) {
+							{
+								addStyleClass("close");
+								setText("×");
+								bindAction(model -> getSelectionProperty(model).setValue(null));
+							}
+						};
 						select__(model -> getSelectionProperty(model));
 						contentTagConsumer.accept(this);
 					}
