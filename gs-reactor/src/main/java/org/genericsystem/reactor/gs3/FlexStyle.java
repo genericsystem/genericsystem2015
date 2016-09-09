@@ -152,6 +152,8 @@ public interface FlexStyle extends Tag {
 		@Override
 		default void style() {
 			addStyle("flex", "1 1 100%");
+			addStyle("height", "100%");
+			addStyle("width", "100%");
 		}
 	}
 
@@ -187,6 +189,7 @@ public interface FlexStyle extends Tag {
 
 		@Override
 		default void style() {
+			setDirection(FlexDirection.ROW);
 			addStyle("flex", "1");
 			addStyle("margin-right", "1px");
 			addStyle("margin-bottom", "1px");
@@ -210,6 +213,7 @@ public interface FlexStyle extends Tag {
 		default void style() {
 			addStyle("flex", "1");
 			addStyle("flex-direction", "column");
+			addStyle("flex-wrap", "wrap");
 			addStyle("overflow", "auto");
 		}
 	}
@@ -263,6 +267,7 @@ public interface FlexStyle extends Tag {
 
 		@Override
 		default void style() {
+			setDirection(FlexDirection.ROW);
 			addStyle("flex", "1 0 auto");
 		}
 	}
@@ -274,6 +279,16 @@ public interface FlexStyle extends Tag {
 			addStyle("flex", "1");
 			addStyle("justify-content", "center");
 			addStyle("align-items", "center");
+		}
+	}
+
+	public static interface ActionLinkStyle extends FlexStyle {
+
+		@Override
+		default void style() {
+			addStyle("justify-content", "center");
+			addStyle("text-decoration", "none");
+			addStyle("height", "100%");
 		}
 	}
 }

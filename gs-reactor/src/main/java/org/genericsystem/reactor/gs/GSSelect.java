@@ -78,6 +78,9 @@ public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDe
 
 	public static class CompositeSelectWithEmptyEntry extends GSSelect {
 
+		public CompositeSelectWithEmptyEntry() {
+		}
+
 		public CompositeSelectWithEmptyEntry(Tag parent) {
 			super(parent);
 		}
