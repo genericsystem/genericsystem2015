@@ -1,8 +1,11 @@
 package org.genericsystem.reactor.gs3;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
@@ -10,27 +13,30 @@ import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gs.GSDiv;
+import org.genericsystem.reactor.gs.GSInputTextWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
+import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gs3.FlexStyle.RowFlexStyle;
-import org.genericsystem.reactor.gs3.Table.ComponentName;
-import org.genericsystem.reactor.gs3.Table.RelationName;
-import org.genericsystem.reactor.gs3.Table.Title;
-import org.genericsystem.reactor.gs3.Table.TitleContent;
-import org.genericsystem.reactor.gs3.Table.TypeAttribute;
-import org.genericsystem.reactor.gs3.Table.TypeName;
+import org.genericsystem.reactor.gs3.GSTable.ComponentName;
+import org.genericsystem.reactor.gs3.GSTable.RelationName;
+import org.genericsystem.reactor.gs3.GSTable.Title;
+import org.genericsystem.reactor.gs3.GSTable.TitleContent;
+import org.genericsystem.reactor.gs3.GSTable.TypeAttribute;
+import org.genericsystem.reactor.gs3.GSTable.TypeName;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
+import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class GSEditor extends GSDiv implements RowFlexStyle {
@@ -172,23 +178,12 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 		}
 	}
 
-	// Used when there is only one holder and it’s required so can’t be removed: allow only edition.
 	@Parent(AttributeEditionColumn.class)
 	public static class SubcellEditor extends GSDiv implements SubcellEditorContainerStyle {
 
 		@Override
 		public void init() {
-			forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-				{
-					bind(holders);
-				}
-
-				@Override
-				protected ObservableList<Generic> computeValue() {
-					return model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
-				}
-			}));
+			forEach(ObservableListExtractor.HOLDERS);
 		}
 	}
 
@@ -227,7 +222,7 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 
 	// Edition of links.
 	@Parent(SubcellEditor.class)
-	public static class LinkEditor extends GSDiv implements FlexStyle, ComponentsDefaults {
+	public static class LinkEditor extends GSDiv implements RowFlexStyle, ComponentsDefaults {
 
 		@Override
 		public void init() {
@@ -269,29 +264,24 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 		}
 	}
 
-	// Used when the holders/links can be removed: there is no required constraint or there are at least two holders.
-	// TODO: Finish.
-	@Parent(AttributeEditionColumn.class)
-	public static class SubcellEditorWithRemoval extends GSDiv implements SubcellEditorContainerStyle {
+	// Hyperlink to remove a holder/link. Displayed only if there is no required constraint on the given attribute/relation,
+	// or there is a required constraint but there are at least two holders/links for the given attribute/relation.
+	@Parent(SubcellEditor.class)
+	public static class RemovalLink extends HtmlHyperLink implements ActionLinkStyle {
 
 		@Override
 		public void init() {
-			forEach2(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Generic>() {
-				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-				{
-					bind(holders);
-				}
-
-				@Override
-				protected ObservableList<Generic> computeValue() {
-					return (!model.getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? FXCollections.observableArrayList(holders) : FXCollections.emptyObservableList();
-				}
-			}));
+			setText("×");
+			bindAction(Context::remove);
+			select__(context -> {
+				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics());
+				return BindingsTools
+						.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
+			});
 		}
 	}
 
 	// To add a new holder/link if it’s possible.
-	// TODO: Finish.
 	@Parent(AttributeEditionColumn.class)
 	public static class SubcellAdder extends GSDiv implements SubcellEditorContainerStyle {
 
@@ -301,6 +291,141 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
 				return Bindings.createObjectBinding(() -> holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
 						|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null, ObservableListExtractor.HOLDERS.apply(model.getGenerics()));
+			});
+		}
+	}
+
+	// Addition of non-boolean holders.
+	@Parent(SubcellAdder.class)
+	public static class HolderAdder extends GSDiv implements SubCellEditorStyle {
+
+		@Override
+		public void init() {
+			select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
+		}
+	}
+
+	@Parent(HolderAdder.class)
+	public static class HolderAdderInput extends GSInputTextWithConversion implements FullSizeStyle {
+
+		@Override
+		public void init() {
+			addConvertedValueChangeListener((model, nva) -> {
+				if (nva != null)
+					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+			});
+		}
+	}
+
+	// Hyperlink to create the holder. Displayed only for holders, not for links.
+	public static class AdditionLink extends HtmlHyperLink implements ActionLinkStyle {
+
+		@Override
+		public void init() {
+			setText("+");
+		}
+
+		protected void addHolder(Context context, ConvertedValueDefaults tag) {
+			Property<Serializable> observable = tag.getConvertedValueProperty(context);
+			if (observable.getValue() != null) {
+				Serializable newValue = observable.getValue();
+				observable.setValue(null);
+				context.getGenerics()[1].addHolder(context.getGeneric(), newValue);
+			}
+		}
+	}
+
+	@Parent(HolderAdder.class)
+	public static class HolderAdditionLink extends AdditionLink {
+
+		@Override
+		public void postfix() {
+			bindAction(context -> addHolder(context, (ConvertedValueDefaults) find(HolderAdderInput.class)));
+		}
+	}
+
+	// Addition of boolean holders.
+	@Parent(SubcellAdder.class)
+	public static class BooleanHolderAdder extends GSDiv implements SubCellEditorStyle {
+
+		@Override
+		public void init() {
+			select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
+		}
+	}
+
+	@Parent(BooleanHolderAdder.class)
+	public static class CheckboxContainerAddDiv extends GSDiv implements CenteredFlex {
+
+	}
+
+	@Parent(CheckboxContainerAddDiv.class)
+	public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
+
+		@Override
+		public void init() {
+			addConvertedValueChangeListener((model, nva) -> {
+				if (nva != null)
+					model.getGenerics()[1].addHolder(model.getGeneric(), nva);
+			});
+		}
+	}
+
+	@Parent(BooleanHolderAdder.class)
+	public static class BooleanHolderAdditionLink extends AdditionLink {
+
+		@Override
+		public void postfix() {
+			bindAction(context -> addHolder(context, (ConvertedValueDefaults) find(BooleanHolderAdderInput.class)));
+		}
+	}
+
+	// Addition of links.
+	@Parent(SubcellAdder.class)
+	public static class LinkAdder extends GSDiv implements RowFlexStyle, ComponentsDefaults {
+
+		@Override
+		public void init() {
+			select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
+			createComponentsListProperty();
+			addPostfixBinding(model -> {
+				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
+				ChangeListener<Context> listener = (o, v, nva) -> {
+					List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+					if (selectedGenerics.size() + 1 == model.getGeneric().getComponents().size()) {
+						selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
+						try {
+							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
+						} catch (RollbackException e) {
+							e.printStackTrace();
+						}
+					}
+				};
+				selectedComponents.getValue().forEach(component -> component.addListener(listener));
+			});
+		}
+	}
+
+	@Parent(LinkAdder.class)
+	public static class ComponentAdder extends GSDiv implements ComponentEditorStyle {
+
+		@Override
+		public void init() {
+			forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
+		}
+	}
+
+	// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.
+	@Parent(ComponentAdder.class)
+	public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry implements FullSizeStyle {
+
+		@Override
+		public void init() {
+			select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
+			addPostfixBinding(model -> {
+				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
+				if (selectedComponents != null)
+					selectedComponents.getValue().add(getSelectionProperty(model));
 			});
 		}
 	}
