@@ -92,7 +92,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	}
 
 	@Parent(TitleRow.class)
-	public static class EmptyCell extends GSDiv implements RemoveStyle {
+	public static class EmptyCell extends GSDiv implements ButtonStyle {
 	}
 
 	@Parent(Table.class)
@@ -176,7 +176,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	}
 
 	@Parent(Row.class)
-	public static class RemoveButtonDiv extends GSDiv implements RemoveStyle {
+	public static class RemoveButtonDiv extends GSDiv implements ButtonStyle {
 	}
 
 	@Parent(RemoveButtonDiv.class)

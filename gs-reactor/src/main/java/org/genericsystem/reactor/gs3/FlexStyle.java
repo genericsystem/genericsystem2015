@@ -107,7 +107,7 @@ public interface FlexStyle extends Tag {
 		}
 	}
 
-	public static interface RemoveStyle extends FlexStyle {
+	public static interface ButtonStyle extends FlexStyle {
 
 		@Override
 		default void style() {

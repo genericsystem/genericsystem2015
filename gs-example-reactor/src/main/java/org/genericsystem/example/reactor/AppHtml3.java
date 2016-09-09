@@ -28,6 +28,11 @@ import org.genericsystem.reactor.gs3.GSEditor.InstanceType;
 import org.genericsystem.reactor.gs3.GSEditor.InstanceTypeAttribute;
 import org.genericsystem.reactor.gs3.GSEditor.RemovalLink;
 import org.genericsystem.reactor.gs3.GSEditor.ReversedRelationDisplayer;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButton;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.BooleanHolderBuilderInput;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.ComponentBuilderSelect;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.HolderBuilderInput;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.InstanceNameBuilderInput;
 import org.genericsystem.reactor.gs3.Table.AttributeNameDisplayer;
 import org.genericsystem.reactor.gs3.Table.BooleanDisplayer;
 import org.genericsystem.reactor.gs3.Table.ComponentLabel;
@@ -53,10 +58,10 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		addStyle("justify-content", "center");
 		createSelectionProperty();
 
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
-				RemoveButton.class).select(Car.class);
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
-				RemoveButton.class, HorizontalTable.class).select(Car.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class,
+				ComponentBuilderSelect.class, AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class).select(Car.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class,
+				ComponentBuilderSelect.class, AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class, HorizontalTable.class).select(Car.class);
 
 		new TreeRootTagImpl(this, EditorTitleContent.class, HorizontalGSEditor.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceComponentName.class, InstanceType.class, InstanceTypeAttribute.class,
 				InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class,
@@ -65,7 +70,7 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 				Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class,
 				HolderAdderInput.class, HolderAdditionLink.class, ComponentAdderSelect.class).select__(context -> getSelectionProperty(context));
 
-		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class,
-				RemoveButton.class).select(Color.class);
+		new TreeRootTagImpl(this, TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class,
+				ComponentBuilderSelect.class, AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class).select(Color.class);
 	}
 }
