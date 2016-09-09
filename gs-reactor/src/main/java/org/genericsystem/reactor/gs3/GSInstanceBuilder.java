@@ -24,7 +24,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-@Parent(Table.class)
+@Parent(GSTable.class)
 public class GSInstanceBuilder extends GSDiv implements ReversedFlexStyle, GSBuilderDefaults {
 
 	@Override

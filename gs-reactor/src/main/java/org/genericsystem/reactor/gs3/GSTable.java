@@ -12,9 +12,9 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
+public class GSTable extends GSDiv implements FlexStyle, SelectionDefaults {
 
-	public static class HorizontalTable extends Table implements RowFlexStyle {
+	public static class HorizontalTable extends GSTable implements RowFlexStyle {
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	}
 
 	// Line/column with the names of the attributes and components of relations.
-	@Parent(Table.class)
+	@Parent(GSTable.class)
 	public static class TitleRow extends GSDiv implements RowStyle {
 	}
 
@@ -104,7 +104,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	}
 
 	// Row/column displaying an instance.
-	@Parent(Table.class)
+	@Parent(GSTable.class)
 	public static class Row extends GSDiv implements RowStyle {
 
 		@Override

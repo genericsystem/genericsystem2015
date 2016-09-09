@@ -33,17 +33,17 @@ import org.genericsystem.reactor.gs3.GSInstanceBuilder.BooleanHolderBuilderInput
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.ComponentBuilderSelect;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.InstanceNameBuilderInput;
-import org.genericsystem.reactor.gs3.Table.AttributeNameDisplayer;
-import org.genericsystem.reactor.gs3.Table.BooleanDisplayer;
-import org.genericsystem.reactor.gs3.Table.ComponentLabel;
-import org.genericsystem.reactor.gs3.Table.ComponentNameDisplayer;
-import org.genericsystem.reactor.gs3.Table.EmptyCell;
-import org.genericsystem.reactor.gs3.Table.HorizontalTable;
-import org.genericsystem.reactor.gs3.Table.RemoveButton;
-import org.genericsystem.reactor.gs3.Table.RowNameDisplayer;
-import org.genericsystem.reactor.gs3.Table.TitleContent;
-import org.genericsystem.reactor.gs3.Table.TypeNameDisplayer;
-import org.genericsystem.reactor.gs3.Table.ValueDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.AttributeNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.BooleanDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.ComponentLabel;
+import org.genericsystem.reactor.gs3.GSTable.ComponentNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.EmptyCell;
+import org.genericsystem.reactor.gs3.GSTable.HorizontalTable;
+import org.genericsystem.reactor.gs3.GSTable.RemoveButton;
+import org.genericsystem.reactor.gs3.GSTable.RowNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleContent;
+import org.genericsystem.reactor.gs3.GSTable.TypeNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.ValueDisplayer;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
