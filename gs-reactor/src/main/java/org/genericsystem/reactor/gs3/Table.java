@@ -17,12 +17,13 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class HorizontalTable extends Table implements RowFlexStyle {
 	}
 
-	public static class Title extends GSDiv implements TitleStyle {
-	}
-
 	@Override
 	public void postfix() {
 		bindSelection(find(Row.class));
+	}
+
+	// Main title.
+	public static class Title extends GSDiv implements TitleStyle {
 	}
 
 	@Parent(Title.class)
@@ -35,10 +36,12 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// Line/column with the names of the attributes and components of relations.
 	@Parent(Table.class)
 	public static class TitleRow extends GSDiv implements RowStyle {
 	}
 
+	// Name of the given type.
 	@Parent(TitleRow.class)
 	public static class TypeName extends GSDiv implements TitleLineCellStyle {
 	}
@@ -47,6 +50,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class TypeNameDisplayer extends GSLabelDisplayer {
 	}
 
+	// Names of the attributes/relations.
 	@Parent(TitleRow.class)
 	public static class TypeAttribute extends GSDiv implements RowFlexStyle {
 
@@ -56,6 +60,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// Names of the attributes.
 	@Parent(TypeAttribute.class)
 	public static class AttributeName extends GSDiv implements TitleLineCellStyle {
 
@@ -69,6 +74,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class AttributeNameDisplayer extends GSLabelDisplayer {
 	}
 
+	// Div containing the names of the components of a relation.
 	@Parent(TypeAttribute.class)
 	public static class RelationName extends GSDiv implements RowFlexStyle {
 
@@ -78,6 +84,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// Names of the components of a relation.
 	@Parent(RelationName.class)
 	public static class ComponentName extends GSDiv implements TitleLineCellStyle {
 
@@ -91,10 +98,12 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class ComponentNameDisplayer extends GSLabelDisplayer {
 	}
 
+	// EmptyCell corresponding to the “Remove” or “Add” button of other lines.
 	@Parent(TitleRow.class)
 	public static class EmptyCell extends GSDiv implements ButtonStyle {
 	}
 
+	// Row/column displaying an instance.
 	@Parent(Table.class)
 	public static class Row extends GSDiv implements RowStyle {
 
@@ -104,6 +113,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// Name of the instance.
 	@Parent(Row.class)
 	public static class RowName extends GSDiv implements CellStyle {
 	}
@@ -118,6 +128,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// Cell for each attribute of the given instance.
 	@Parent(Row.class)
 	public static class Cell extends GSDiv implements CellStyle {
 
@@ -127,6 +138,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// Subcell for each holder/link corresponding to the given attribute.
 	@Parent(Cell.class)
 	public static class SubCell extends GSDiv implements RowFlexStyle {
 
@@ -136,6 +148,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 		}
 	}
 
+	// To display the components of a link.
 	@Parent(SubCell.class)
 	public static class ComponentSubCell extends GSDiv implements SubCellStyle {
 
@@ -149,6 +162,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class ComponentLabel extends GSLabelDisplayer {
 	}
 
+	// Boolean holders.
 	@Parent(SubCell.class)
 	public static class BooleanValueSubCell extends GSDiv implements SubCellStyle {
 
@@ -162,6 +176,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class BooleanDisplayer extends GSCheckBoxDisplayer {
 	}
 
+	// Value of the holder/link. Display only if it’s a holder (not a link) and it’s not a boolean.
 	@Parent(SubCell.class)
 	public static class ValueSubCell extends GSDiv implements SubCellStyle {
 
@@ -175,6 +190,7 @@ public class Table extends GSDiv implements FlexStyle, SelectionDefaults {
 	public static class ValueDisplayer extends GSLabelDisplayer {
 	}
 
+	// Button to delete the instance.
 	@Parent(Row.class)
 	public static class RemoveButtonDiv extends GSDiv implements ButtonStyle {
 	}
