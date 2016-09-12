@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -18,12 +24,11 @@ import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorW
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gs3.FlexStyle.RowFlexStyle;
-import org.genericsystem.reactor.gs3.GSTable.ComponentName;
-import org.genericsystem.reactor.gs3.GSTable.RelationName;
-import org.genericsystem.reactor.gs3.GSTable.Title;
-import org.genericsystem.reactor.gs3.GSTable.TitleContent;
-import org.genericsystem.reactor.gs3.GSTable.TypeAttribute;
-import org.genericsystem.reactor.gs3.GSTable.TypeName;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName;
+import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
@@ -32,12 +37,6 @@ import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 
 public class GSEditor extends GSDiv implements RowFlexStyle {
 
@@ -49,14 +48,18 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 		}
 	}
 
-	// Title.
-	@Parent(Title.class)
-	public static class EditorTitleContent extends TitleContent {
+	@Parent(GSEditor.class)
+	// Main title.
+	public static class EditorTitle extends GSDiv implements TitleStyle {
 
-		@Override
-		public void init() {
-			setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
-			bindText();
+		@Parent(EditorTitle.class)
+		public static class EditorTitleContent extends HtmlH2 {
+
+			@Override
+			public void init() {
+				setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
+				bindText();
+			}
 		}
 	}
 
@@ -147,15 +150,17 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 		@Override
 		public void init() {
 			initValueProperty(context -> context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric()) != null ? true : false);
-			storeProperty("exists", context -> {
-				ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()).getValue() != null ? true : false,
-						context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()));
-				exists.addListener((o, v, nva) -> {
-					if (!context.isDestroyed())
-						getConvertedValueProperty(context).setValue(nva);
-				});
-				return exists;
-			});
+			storeProperty(
+					"exists",
+					context -> {
+						ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()).getValue() != null ? true : false,
+								context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()));
+						exists.addListener((o, v, nva) -> {
+							if (!context.isDestroyed())
+								getConvertedValueProperty(context).setValue(nva);
+						});
+						return exists;
+					});
 			addConvertedValueChangeListener((context, nva) -> {
 				if (Boolean.TRUE.equals(nva))
 					context.getGenerics()[2].setHolder(context.getGenerics()[1], null, context.getGeneric());
@@ -275,8 +280,8 @@ public class GSEditor extends GSDiv implements RowFlexStyle {
 			bindAction(Context::remove);
 			select__(context -> {
 				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics());
-				return BindingsTools
-						.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
+				return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(
+						() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
 			});
 		}
 	}

@@ -1,5 +1,7 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,22 +12,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.annotations.Parent;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.DisplayDefaults;
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -35,6 +21,23 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.Parent;
+import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.DisplayDefaults;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -51,7 +54,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	public List<BiConsumer<Context, HtmlDomNode>> getPostFixedBindings();
 
-	@SuppressWarnings("unchecked")
 	public <BETWEEN> MetaBinding<BETWEEN> getMetaBinding();
 
 	public <BETWEEN> void setMetaBinding(MetaBinding<BETWEEN> metaBinding);
@@ -136,7 +138,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	@Override
 	default <T> Property<T> getProperty(String propertyName, Context model) {
 		class PropertyComputer {
-			<T> Property<T> getProperty(String propertyName, Context[] models) {
+			Property<T> getProperty(String propertyName, Context[] models) {
 				Tag tag = Tag.this;
 				while (tag != null && models[0] != null) {
 					if (models[0].containsProperty(tag, propertyName))
@@ -167,7 +169,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default <T> ObservableValue<T> getObservableValue(String propertyName, Context model) {
 
 		class ObservableValueComputer {
-			<T> ObservableValue<T> getObservableValue(String propertyName, Context[] model) {
+			ObservableValue<T> getObservableValue(String propertyName, Context[] model) {
 				Tag tag = Tag.this;
 				while (tag != null && model[0] != null) {
 					if (model[0].containsProperty(tag, propertyName))
@@ -361,7 +363,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return getParent().find(tagClass);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
 	public static interface RootTag {
@@ -387,16 +388,42 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 			if (getNodes().get(searchedClass) == null) {
 				TagImpl newTag = null;
-				Parent parent = searchedClass.getAnnotation(Parent.class);
 				try {
 					newTag = searchedClass.newInstance();
 				} catch (IllegalAccessException | InstantiationException e) {
 					throw new IllegalStateException(e);
 				}
+
+				Parent parent = searchedClass.getAnnotation(Parent.class);
+
+				Class<? extends TagImpl> parentClass = null;
 				if (parent != null)
-					newTag.setParent(find(parent.value()));
-				else
-					newTag.setParent(this);
+					parentClass = parent.value();
+				else {
+					Class<? extends TagImpl> enclosing = (Class<? extends TagImpl>) searchedClass.getEnclosingClass();
+					if (enclosing != null && !enclosing.isAssignableFrom(searchedClass)) {
+						parentClass = enclosing;
+						System.out.println("" + searchedClass + enclosing);
+					}
+				}
+
+				newTag.setParent(parentClass != null ? find(parentClass) : this);
+				ForEach forEach = searchedClass.getAnnotation(ForEach.class);
+				if (forEach != null) {
+					try {
+						newTag.forEach(forEach.value().newInstance().get());
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+				}
+				Select select = searchedClass.getAnnotation(Select.class);
+				if (select != null) {
+					try {
+						newTag.select(select.value().newInstance().get());
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+				}
 				newTag.init();
 				newTag.style();
 				getNodes().put(searchedClass, newTag);

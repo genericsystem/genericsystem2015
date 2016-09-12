@@ -1,11 +1,11 @@
 package org.genericsystem.reactor.gs3;
 
+import javafx.beans.property.Property;
+
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-
-import javafx.beans.property.Property;
 
 public interface FlexStyle extends Tag {
 

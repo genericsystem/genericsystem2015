@@ -20,7 +20,7 @@ import org.genericsystem.reactor.gs3.GSEditor.BooleanHolderEditorInput;
 import org.genericsystem.reactor.gs3.GSEditor.Checkbox;
 import org.genericsystem.reactor.gs3.GSEditor.ComponentAdderSelect;
 import org.genericsystem.reactor.gs3.GSEditor.DirectRelationComponentEditor;
-import org.genericsystem.reactor.gs3.GSEditor.EditorTitleContent;
+import org.genericsystem.reactor.gs3.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gs3.GSEditor.HolderAdderInput;
 import org.genericsystem.reactor.gs3.GSEditor.HolderAdditionLink;
 import org.genericsystem.reactor.gs3.GSEditor.HolderEditorInput;
@@ -36,17 +36,17 @@ import org.genericsystem.reactor.gs3.GSInstanceBuilder.BooleanHolderBuilderInput
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.ComponentBuilderSelect;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.InstanceNameBuilderInput;
-import org.genericsystem.reactor.gs3.GSTable.AttributeNameDisplayer;
-import org.genericsystem.reactor.gs3.GSTable.BooleanDisplayer;
-import org.genericsystem.reactor.gs3.GSTable.ComponentLabel;
-import org.genericsystem.reactor.gs3.GSTable.ComponentNameDisplayer;
-import org.genericsystem.reactor.gs3.GSTable.EmptyCell;
 import org.genericsystem.reactor.gs3.GSTable.HorizontalTable;
-import org.genericsystem.reactor.gs3.GSTable.RemoveButton;
-import org.genericsystem.reactor.gs3.GSTable.RowNameDisplayer;
-import org.genericsystem.reactor.gs3.GSTable.TitleContent;
-import org.genericsystem.reactor.gs3.GSTable.TypeNameDisplayer;
-import org.genericsystem.reactor.gs3.GSTable.ValueDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.Row.Cell.SubCell.BooleanValueSubCell.BooleanDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.Row.Cell.SubCell.ComponentSubCell.ComponentLabel;
+import org.genericsystem.reactor.gs3.GSTable.Row.Cell.SubCell.ValueSubCell.ValueDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.Row.RemoveButtonDiv.RemoveButton;
+import org.genericsystem.reactor.gs3.GSTable.Row.RowName.RowNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TableTitle.TableTitleContent;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.EmptyCell;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
@@ -61,7 +61,7 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		addStyle("justify-content", "center");
 		createSelectionProperty();
 
-		Class<? extends TagImpl>[] tableClasses = new Class[] { TitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class,
+		Class<? extends TagImpl>[] tableClasses = new Class[] { TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class,
 				BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class };
 		Class<? extends TagImpl>[] editorClasses = new Class[] { EditorTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceComponentName.class, InstanceType.class, InstanceTypeAttribute.class,
 				InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class,

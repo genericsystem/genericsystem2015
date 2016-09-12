@@ -2,12 +2,13 @@ package org.genericsystem.reactor.model;
 
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import org.genericsystem.common.Generic;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.common.Generic;
 
 @FunctionalInterface
 public interface ObservableListExtractor extends Function<Generic[], ObservableList<Generic>> {
@@ -54,4 +55,82 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		// holders.addListener((ListChangeListener) c -> System.out.println(c));
 		return holders;
 	};
+
+	public static final ObservableListExtractor OTHER_COMPONENTS_1 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1]));
+
+	public static final ObservableListExtractor OTHER_COMPONENTS_2 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2]));
+
+	public static class ATTRIBUTES_OF_TYPE implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return ATTRIBUTES_OF_TYPE;
+		}
+	}
+
+	public static class OTHER_COMPONENTS_1 implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return OTHER_COMPONENTS_1;
+		}
+	}
+
+	public static class SUBINSTANCES implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return SUBINSTANCES;
+		}
+	}
+
+	public static class ATTRIBUTES_OF_INSTANCES implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return ATTRIBUTES_OF_INSTANCES;
+		}
+	}
+
+	public static class HOLDERS implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return HOLDERS;
+		}
+	}
+
+	public static class OTHER_COMPONENTS_2 implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return OTHER_COMPONENTS_2;
+		}
+	}
+
+	public static interface ObservableValueSelector extends Function<Generic[], Generic> {
+
+		public static class STRICT_ATTRIBUTE_SELECTOR implements Supplier<ObservableValueSelector> {
+			@Override
+			public ObservableValueSelector get() {
+				return gs -> gs[0].getComponents().size() < 2 ? gs[0] : null;
+			}
+		}
+
+		public static class RELATION_SELECTOR implements Supplier<ObservableValueSelector> {
+			@Override
+			public ObservableValueSelector get() {
+				return gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null;
+			}
+		}
+
+		public static class CHECK_BOX_DISPLAYER implements Supplier<ObservableValueSelector> {
+			@Override
+			public ObservableValueSelector get() {
+				return gs -> gs[1].getComponents().size() == 1 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
+			}
+		}
+
+		public static class LABEL_DISPLAYER implements Supplier<ObservableValueSelector> {
+			@Override
+			public ObservableValueSelector get() {
+				return gs -> gs[1].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
+			}
+		}
+	}
+
 }
