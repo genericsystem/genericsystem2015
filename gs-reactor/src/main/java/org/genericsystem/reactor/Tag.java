@@ -1,10 +1,7 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,23 +9,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javafx.beans.binding.ListBinding;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.util.StringConverter;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Parent;
-import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
@@ -38,6 +22,17 @@ import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.util.StringConverter;
 
 /**
  * @author Nicolas Feybesse
@@ -371,73 +366,73 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		}
 	}
 
-	public static interface TreeRootTag extends Tag {
-
-		public HashMap<Class<? extends TagImpl>, TagImpl> getNodes();
-
-		public List<Class<? extends TagImpl>> getSpecifiedClasses();
-
-		public void setSpecifiedClasses(List<Class<? extends TagImpl>> specifiedClasses);
-
-		@Override
-		default TagImpl find(Class<? extends TagImpl> tagClass) {
-			Class<? extends TagImpl> searchedClass = tagClass;
-			for (Class<? extends TagImpl> clazz : getSpecifiedClasses())
-				if (tagClass.isAssignableFrom(clazz))
-					searchedClass = clazz;
-
-			if (getNodes().get(searchedClass) == null) {
-				TagImpl newTag = null;
-				try {
-					newTag = searchedClass.newInstance();
-				} catch (IllegalAccessException | InstantiationException e) {
-					throw new IllegalStateException(e);
-				}
-
-				Parent parent = searchedClass.getAnnotation(Parent.class);
-
-				Class<? extends TagImpl> parentClass = null;
-				if (parent != null)
-					parentClass = parent.value();
-				else {
-					Class<? extends TagImpl> enclosing = (Class<? extends TagImpl>) searchedClass.getEnclosingClass();
-					if (enclosing != null && !enclosing.isAssignableFrom(searchedClass)) {
-						parentClass = enclosing;
-						System.out.println("" + searchedClass + enclosing);
-					}
-				}
-
-				newTag.setParent(parentClass != null ? find(parentClass) : this);
-				ForEach forEach = searchedClass.getAnnotation(ForEach.class);
-				if (forEach != null) {
-					try {
-						newTag.forEach(forEach.value().newInstance().get());
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				}
-				Select select = searchedClass.getAnnotation(Select.class);
-				if (select != null) {
-					try {
-						newTag.select(select.value().newInstance().get());
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				}
-				newTag.init();
-				newTag.style();
-				getNodes().put(searchedClass, newTag);
-			}
-
-			return getNodes().get(searchedClass);
-		}
-
-		default void createTree(Class<? extends TagImpl>... tags) {
-			setSpecifiedClasses(Arrays.asList(tags));
-			for (Class<? extends TagImpl> clazz : tags)
-				find(clazz);
-			for (Tag tag : getNodes().values())
-				tag.postfix();
-		}
-	}
+	// public static interface TreeRootTag extends Tag {
+	//
+	// public HashMap<Class<? extends TagImpl>, TagImpl> getNodes();
+	//
+	// public List<Class<? extends TagImpl>> getSpecifiedClasses();
+	//
+	// public void setSpecifiedClasses(List<Class<? extends TagImpl>> specifiedClasses);
+	//
+	// @Override
+	// default TagImpl find(Class<? extends TagImpl> tagClass) {
+	// Class<? extends TagImpl> searchedClass = tagClass;
+	// for (Class<? extends TagImpl> clazz : getSpecifiedClasses())
+	// if (tagClass.isAssignableFrom(clazz))
+	// searchedClass = clazz;
+	//
+	// if (getNodes().get(searchedClass) == null) {
+	// TagImpl newTag = null;
+	// try {
+	// newTag = searchedClass.newInstance();
+	// } catch (IllegalAccessException | InstantiationException e) {
+	// throw new IllegalStateException(e);
+	// }
+	//
+	// Parent parent = searchedClass.getAnnotation(Parent.class);
+	//
+	// Class<? extends TagImpl> parentClass = null;
+	// if (parent != null)
+	// parentClass = parent.value();
+	// else {
+	// Class<? extends TagImpl> enclosing = (Class<? extends TagImpl>) searchedClass.getEnclosingClass();
+	// if (enclosing != null && !enclosing.isAssignableFrom(searchedClass)) {
+	// parentClass = enclosing;
+	// System.out.println("" + searchedClass + enclosing);
+	// }
+	// }
+	//
+	// newTag.setParent(parentClass != null ? find(parentClass) : this);
+	// ForEach forEach = searchedClass.getAnnotation(ForEach.class);
+	// if (forEach != null) {
+	// try {
+	// newTag.forEach(forEach.value().newInstance().get());
+	// } catch (InstantiationException | IllegalAccessException e) {
+	// throw new IllegalStateException(e);
+	// }
+	// }
+	// Select select = searchedClass.getAnnotation(Select.class);
+	// if (select != null) {
+	// try {
+	// newTag.select(select.value().newInstance().get());
+	// } catch (InstantiationException | IllegalAccessException e) {
+	// throw new IllegalStateException(e);
+	// }
+	// }
+	// newTag.init();
+	// newTag.style();
+	// getNodes().put(searchedClass, newTag);
+	// }
+	//
+	// return getNodes().get(searchedClass);
+	// }
+	//
+	// default void createTree(Class<? extends TagImpl>... tags) {
+	// setSpecifiedClasses(Arrays.asList(tags));
+	// for (Class<? extends TagImpl> clazz : tags)
+	// find(clazz);
+	// for (Tag tag : getNodes().values())
+	// tag.postfix();
+	// }
+	// }
 }

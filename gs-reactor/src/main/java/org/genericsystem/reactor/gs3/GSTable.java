@@ -1,11 +1,29 @@
 package org.genericsystem.reactor.gs3;
 
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.RootTagImpl;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Parent;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gs.GSDiv;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButton;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.BooleanHolderBuilderInput;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.ComponentBuilderSelect;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.HolderBuilderInput;
+import org.genericsystem.reactor.gs3.GSInstanceBuilder.InstanceNameBuilderInput;
+import org.genericsystem.reactor.gs3.GSTable.Row.Cell.SubCell.BooleanValueSubCell.BooleanDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.Row.Cell.SubCell.ComponentSubCell.ComponentLabel;
+import org.genericsystem.reactor.gs3.GSTable.Row.Cell.SubCell.ValueSubCell.ValueDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.Row.RemoveButtonDiv.RemoveButton;
+import org.genericsystem.reactor.gs3.GSTable.Row.RowName.RowNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TableTitle.TableTitleContent;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.EmptyCell;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
@@ -23,9 +41,20 @@ import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-public class GSTable extends GSDiv implements FlexStyle, SelectionDefaults {
+@ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class,
+		BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class })
+public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults, Tag {
 
+	public GSTable(Tag parent) {
+		super(parent, GSTable.class.getAnnotation(ReactorDependencies.class).value());
+	}
+
+	// No enclosing class parent automatic for this GSTable extention
 	public static class HorizontalTable extends GSTable implements RowFlexStyle {
+
+		public HorizontalTable(Tag parent) {
+			super(parent);
+		}
 	}
 
 	@Override
