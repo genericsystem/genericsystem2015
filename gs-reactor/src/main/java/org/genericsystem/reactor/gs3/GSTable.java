@@ -33,23 +33,23 @@ import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_TYP
 import org.genericsystem.reactor.model.ObservableListExtractor.HOLDERS;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_1;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;
-import org.genericsystem.reactor.model.ObservableListExtractor.ObservableValueSelector.CHECK_BOX_DISPLAYER;
-import org.genericsystem.reactor.model.ObservableListExtractor.ObservableValueSelector.LABEL_DISPLAYER;
-import org.genericsystem.reactor.model.ObservableListExtractor.ObservableValueSelector.RELATION_SELECTOR;
-import org.genericsystem.reactor.model.ObservableListExtractor.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES;
+import org.genericsystem.reactor.model.ObservableValueSelector.CHECK_BOX_DISPLAYER;
+import org.genericsystem.reactor.model.ObservableValueSelector.LABEL_DISPLAYER;
+import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR;
+import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class,
-		BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class })
+@ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class,
+		AddButton.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class, ValueDisplayer.class, RemoveButton.class })
 public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults, Tag {
 
 	public GSTable(Tag parent) {
 		super(parent, GSTable.class.getAnnotation(ReactorDependencies.class).value());
 	}
 
-	// No enclosing class parent automatic for this GSTable extention
+	// No automatic enclosing class parent for this GSTable extention
 	public static class HorizontalTable extends GSTable implements RowFlexStyle {
 
 		public HorizontalTable(Tag parent) {

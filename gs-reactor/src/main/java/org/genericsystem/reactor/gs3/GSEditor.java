@@ -15,7 +15,10 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.RootTagImpl;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Parent;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gs.GSDiv;
@@ -24,8 +27,25 @@ import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorW
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gs3.FlexStyle.RowFlexStyle;
+import org.genericsystem.reactor.gs3.GSEditor.BooleanHolderAdderInput;
+import org.genericsystem.reactor.gs3.GSEditor.BooleanHolderAdditionLink;
+import org.genericsystem.reactor.gs3.GSEditor.BooleanHolderEditorInput;
+import org.genericsystem.reactor.gs3.GSEditor.Checkbox;
+import org.genericsystem.reactor.gs3.GSEditor.ComponentAdderSelect;
+import org.genericsystem.reactor.gs3.GSEditor.DirectRelationComponentEditor;
+import org.genericsystem.reactor.gs3.GSEditor.EditorTitle.EditorTitleContent;
+import org.genericsystem.reactor.gs3.GSEditor.HolderAdderInput;
+import org.genericsystem.reactor.gs3.GSEditor.HolderAdditionLink;
+import org.genericsystem.reactor.gs3.GSEditor.HolderEditorInput;
+import org.genericsystem.reactor.gs3.GSEditor.InstanceComponentName;
+import org.genericsystem.reactor.gs3.GSEditor.InstanceNameEditor;
+import org.genericsystem.reactor.gs3.GSEditor.InstanceType;
+import org.genericsystem.reactor.gs3.GSEditor.InstanceTypeAttribute;
+import org.genericsystem.reactor.gs3.GSEditor.RemovalLink;
+import org.genericsystem.reactor.gs3.GSEditor.ReversedRelationDisplayer;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName;
+//import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName;
 import org.genericsystem.reactor.gstag.HtmlH2;
@@ -38,9 +58,20 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-public class GSEditor extends GSDiv implements RowFlexStyle {
+@ReactorDependencies({ EditorTitleContent.class, InstanceComponentName.class, InstanceType.class, InstanceTypeAttribute.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class,
+		BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class, ComponentAdderSelect.class })
+public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
+	public GSEditor(Tag parent) {
+		super(parent, GSEditor.class.getAnnotation(ReactorDependencies.class).value());
+	}
+
+	// No automatic enclosing class parent for this GSTable extention
 	public static class HorizontalGSEditor extends GSEditor implements ColumnFlexStyle, SelectionDefaults {
+
+		public HorizontalGSEditor(Tag parent) {
+			super(parent);
+		}
 
 		@Override
 		public void style() {

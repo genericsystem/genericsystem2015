@@ -57,7 +57,7 @@ public class RootTagImpl extends GSDiv implements Tag {
 					// System.out.println(tagClass + " " + enclosing);
 				}
 			}
-			System.out.println(parentClass + " " + getClass());
+			System.out.println(tagClass + " " + parentClass + " on " + getClass());
 			newTag.setParent(parentClass != null && !parentClass.isAssignableFrom(getClass()) ? find(parentClass) : this);
 			ForEach forEach = tagClass.getAnnotation(ForEach.class);
 			if (forEach != null) {

@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
-import org.genericsystem.reactor.model.ObservableListExtractor.ObservableValueSelector;
+import org.genericsystem.reactor.model.ObservableValueSelector;
 
 /**
  * @author Nicolas Feybesse

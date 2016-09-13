@@ -102,35 +102,4 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
-	public static interface ObservableValueSelector extends Function<Generic[], Generic> {
-
-		public static class STRICT_ATTRIBUTE_SELECTOR implements Supplier<ObservableValueSelector> {
-			@Override
-			public ObservableValueSelector get() {
-				return gs -> gs[0].getComponents().size() < 2 ? gs[0] : null;
-			}
-		}
-
-		public static class RELATION_SELECTOR implements Supplier<ObservableValueSelector> {
-			@Override
-			public ObservableValueSelector get() {
-				return gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null;
-			}
-		}
-
-		public static class CHECK_BOX_DISPLAYER implements Supplier<ObservableValueSelector> {
-			@Override
-			public ObservableValueSelector get() {
-				return gs -> gs[1].getComponents().size() == 1 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
-			}
-		}
-
-		public static class LABEL_DISPLAYER implements Supplier<ObservableValueSelector> {
-			@Override
-			public ObservableValueSelector get() {
-				return gs -> gs[1].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
-			}
-		}
-	}
-
 }
