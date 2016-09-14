@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Parent;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.gs.GSDiv;
 
@@ -26,9 +27,32 @@ public class RootTagImpl extends GSDiv implements Tag {
 		};
 	};
 
-	public RootTagImpl(Tag parent, Class<? extends TagImpl>... specifiedClasses) {
+	public RootTagImpl() {
+		super();
+		Class<? extends TagImpl> parentClass = getParentTagClass(getClass());
+		if (parentClass == null)
+			throw new IllegalStateException("Unable to find parent class of : " + getClass());
+		setParent(find(parentClass));
+		for (Class<? extends TagImpl> clazz : parentClass.getAnnotation(ReactorDependencies.class).value())
+			find(clazz);
+		for (Tag tag : nodes.values())
+			tag.postfix();
+	}
+
+	public Class<? extends TagImpl> getParentTagClass(Class<? extends TagImpl> tagClass) {
+		Parent parent = tagClass.getAnnotation(Parent.class);
+		if (parent != null)
+			return parent.value();
+		Class<? extends TagImpl> enclosing = (Class<? extends TagImpl>) tagClass.getEnclosingClass();
+		if (enclosing != null && !enclosing.isAssignableFrom(tagClass))
+			return enclosing;
+		return null;
+
+	}
+
+	public RootTagImpl(Tag parent, Class<? extends TagImpl> parentClass) {
 		super(parent);
-		for (Class<? extends TagImpl> clazz : specifiedClasses)
+		for (Class<? extends TagImpl> clazz : parentClass.getAnnotation(ReactorDependencies.class).value())
 			find(clazz);
 		for (Tag tag : nodes.values())
 			tag.postfix();
@@ -45,18 +69,7 @@ public class RootTagImpl extends GSDiv implements Tag {
 				throw new IllegalStateException(e);
 			}
 
-			Parent parent = tagClass.getAnnotation(Parent.class);
-
-			Class<? extends TagImpl> parentClass = null;
-			if (parent != null)
-				parentClass = parent.value();
-			else {
-				Class<? extends TagImpl> enclosing = (Class<? extends TagImpl>) tagClass.getEnclosingClass();
-				if (enclosing != null && !enclosing.isAssignableFrom(tagClass)) {
-					parentClass = enclosing;
-					// System.out.println(tagClass + " " + enclosing);
-				}
-			}
+			Class<? extends TagImpl> parentClass = getParentTagClass(tagClass);
 			System.out.println(tagClass + " " + parentClass + " on " + getClass());
 			newTag.setParent(parentClass != null && !parentClass.isAssignableFrom(getClass()) ? find(parentClass) : this);
 			ForEach forEach = tagClass.getAnnotation(ForEach.class);

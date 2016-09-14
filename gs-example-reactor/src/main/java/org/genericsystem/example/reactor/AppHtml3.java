@@ -11,8 +11,8 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs3.GSEditor;
 import org.genericsystem.reactor.gs3.GSTable;
+import org.genericsystem.reactor.gs3.GSTable.HorizontalTable;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
@@ -34,10 +34,10 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		// BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class, ComponentAdderSelect.class };
 
 		new GSTable(this).select(Car.class);
-		// new RootTagImpl(this, Stream.concat(Stream.of(tableClasses), Stream.of(HorizontalTable.class)).toArray(Class[]::new)).select(Car.class);
+		new HorizontalTable(this).select(Car.class);
 
 		// new RootTagImpl(this, Stream.concat(Stream.of(editorClasses), Stream.of(HorizontalGSEditor.class)).toArray(Class[]::new)).select__(context -> getSelectionProperty(context));
-		new GSEditor(this).select__(this::getSelectionProperty);
+		// new GSEditor(this).select__(this::getSelectionProperty);
 
 		new GSTable(this).select(Color.class);
 	}
