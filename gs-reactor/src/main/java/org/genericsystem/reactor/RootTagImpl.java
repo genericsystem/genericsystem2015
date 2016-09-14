@@ -40,6 +40,8 @@ public class RootTagImpl extends GSDiv implements Tag {
 
 	public RootTagImpl(Tag parent) {
 		super(parent);
+		init();
+		style();
 		nodes.put(getClass(), this);
 		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
 		if(deps!=null)

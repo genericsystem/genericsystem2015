@@ -29,12 +29,12 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 		addStyle("justify-content", "center");
 		createSelectionProperty();
 
-//		new GSTable(this).select(Car.class);
+		new GSTable(this).select(Car.class);
 		new HorizontalTable(this).select(Car.class);
 
-//		new HorizontalGSEditor(this).select__(context -> getSelectionProperty(context));
-//		new GSEditor(this).select__(this::getSelectionProperty);
-//
-//		new GSTable(this).select(Color.class);
+		new GSEditor(this).select__(this::getSelectionProperty);
+		new HorizontalGSEditor(this).select__(this::getSelectionProperty);
+		
+		new GSTable(this).select(Color.class);
 	}
 }

@@ -43,6 +43,7 @@ import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.InstanceT
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.InstanceTypeAttribute;
 import org.genericsystem.reactor.gs3.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
@@ -54,7 +55,7 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@ReactorDependencies({ EditorTitleContent.class, InstanceType.class, InstanceTypeAttribute.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class,
+@ReactorDependencies({ EditorTitleContent.class, InstanceType.class, InstanceTypeAttribute.class,AttributeNameDisplayer.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class,
 		HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class, ComponentAdderSelect.class })
 public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
@@ -62,7 +63,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 		super(parent);
 	}
 
-	// No automatic enclosing class parent for this GSTable extention
+	// No automatic enclosing class parent for this GSEditor extention
 	public static class HorizontalGSEditor extends GSEditor implements ColumnFlexStyle, SelectionDefaults {
 
 		public HorizontalGSEditor(Tag parent) {

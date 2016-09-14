@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 
 import org.genericsystem.common.Generic;
 
+
 @FunctionalInterface
 public interface ObservableListExtractor extends Function<Generic[], ObservableList<Generic>> {
 

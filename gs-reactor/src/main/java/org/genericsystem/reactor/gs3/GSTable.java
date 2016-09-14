@@ -1,4 +1,4 @@
-	package org.genericsystem.reactor.gs3;
+package org.genericsystem.reactor.gs3;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.RootTagImpl;
