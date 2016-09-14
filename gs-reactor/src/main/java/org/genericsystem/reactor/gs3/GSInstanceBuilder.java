@@ -5,18 +5,12 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-
-import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.RootTagImpl;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.TagImpl;
 import org.genericsystem.reactor.annotations.Parent;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion;
@@ -33,17 +27,21 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+
 @Parent(GSTable.class)
-@Dependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
+@ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
 public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle, GSBuilderDefaults {
 
 	public GSInstanceBuilder() {
 		super();
 	}
 
-	public GSInstanceBuilder(Tag parent, Class<? extends TagImpl>[] specifiedClasses) {
-		super(parent, GSInstanceBuilder.class);
-	}
+//	public GSInstanceBuilder(Tag parent) {
+//		super(parent, GSInstanceBuilder.class);
+//	}
 
 	@Override
 	public void init() {

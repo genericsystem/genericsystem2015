@@ -36,6 +36,7 @@ public interface FlexStyle extends Tag {
 		@Override
 		default void style() {
 			addStyle("flex", "1");
+			System.out.println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
 			setDirection(FlexDirection.ROW);
 		}
 	}

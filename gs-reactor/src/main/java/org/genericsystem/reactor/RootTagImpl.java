@@ -29,16 +29,25 @@ public class RootTagImpl extends GSDiv implements Tag {
 
 	public RootTagImpl() {
 		super();
-		Class<? extends TagImpl> parentClass = getParentTagClass(getClass());
-		if (parentClass == null)
-			throw new IllegalStateException("Unable to find parent class of : " + getClass());
-		setParent(find(parentClass));
-		for (Class<? extends TagImpl> clazz : parentClass.getAnnotation(ReactorDependencies.class).value())
-			find(clazz);
+		nodes.put(getClass(), this);
+		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
+		if(deps!=null)
+			for (Class<? extends TagImpl> clazz : deps.value())
+				find(clazz);
 		for (Tag tag : nodes.values())
 			tag.postfix();
 	}
 
+	public RootTagImpl(Tag parent) {
+		super(parent);
+		nodes.put(getClass(), this);
+		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
+		if(deps!=null)
+			for (Class<? extends TagImpl> clazz : deps.value())
+				find(clazz);
+		for (Tag tag : nodes.values())
+			tag.postfix();
+	}
 	public Class<? extends TagImpl> getParentTagClass(Class<? extends TagImpl> tagClass) {
 		Parent parent = tagClass.getAnnotation(Parent.class);
 		if (parent != null)
@@ -50,32 +59,27 @@ public class RootTagImpl extends GSDiv implements Tag {
 
 	}
 
-	public RootTagImpl(Tag parent, Class<? extends TagImpl> parentClass) {
-		super(parent);
-		for (Class<? extends TagImpl> clazz : parentClass.getAnnotation(ReactorDependencies.class).value())
-			find(clazz);
-		for (Tag tag : nodes.values())
-			tag.postfix();
-	}
 
 	@Override
 	public TagImpl find(Class<? extends TagImpl> tagClass) {
 		TagImpl result = nodes.get(tagClass);
 		if (result == null) {
-			TagImpl newTag = null;
+			
 			try {
-				newTag = tagClass.newInstance();
+				result = tagClass.newInstance();
 			} catch (IllegalAccessException | InstantiationException e) {
-				throw new IllegalStateException(e);
+				throw new IllegalStateException();
 			}
-
 			Class<? extends TagImpl> parentClass = getParentTagClass(tagClass);
 			System.out.println(tagClass + " " + parentClass + " on " + getClass());
-			newTag.setParent(parentClass != null && !parentClass.isAssignableFrom(getClass()) ? find(parentClass) : this);
+			if(parentClass==null || parentClass.isAssignableFrom(getClass())) 
+				result.setParent(this);
+			else
+				result.setParent(find(parentClass));
 			ForEach forEach = tagClass.getAnnotation(ForEach.class);
 			if (forEach != null) {
 				try {
-					newTag.forEach(forEach.value().newInstance().get());
+					result.forEach(forEach.value().newInstance().get());
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}
@@ -83,14 +87,14 @@ public class RootTagImpl extends GSDiv implements Tag {
 			Select select = tagClass.getAnnotation(Select.class);
 			if (select != null) {
 				try {
-					newTag.select(select.value().newInstance().get());
+					result.select(select.value().newInstance().get());
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}
 			}
-			newTag.init();
-			newTag.style();
-			nodes.put(tagClass, result = newTag);
+			result.init();
+			result.style();
+			nodes.put(tagClass, result);
 		}
 		return result;
 	}

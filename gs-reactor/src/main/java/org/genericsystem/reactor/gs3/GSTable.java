@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gs3;
+	package org.genericsystem.reactor.gs3;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.RootTagImpl;
@@ -45,9 +45,9 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @ReactorDependencies({ TableTitleContent.class, GSInstanceBuilder.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
 public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults, Tag {
-
+	
 	public GSTable(Tag parent) {
-		super(parent, GSTable.class);
+		super(parent);
 	}
 
 	// No automatic enclosing class parent for this GSTable extention

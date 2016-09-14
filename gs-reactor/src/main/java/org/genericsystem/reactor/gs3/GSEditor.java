@@ -59,7 +59,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 	public GSEditor(Tag parent) {
-		super(parent, GSEditor.class);
+		super(parent);
 	}
 
 	// No automatic enclosing class parent for this GSTable extention
