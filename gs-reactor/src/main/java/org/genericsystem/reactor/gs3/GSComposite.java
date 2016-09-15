@@ -1,8 +1,8 @@
 package org.genericsystem.reactor.gs3;
 
-import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.annotations.Parent;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowFirstCell;
 import org.genericsystem.reactor.gs3.GSComposite.GSComponent.GSContentComponent;
@@ -17,9 +17,11 @@ import org.genericsystem.reactor.gs3.GSComposite.GSTable.GSRowCell.GSContentRowC
 import org.genericsystem.reactor.gs3.GSComposite.GSTable.GSRowCell.GSContentRowFirstCell;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 
-@Dependencies(GSContentComponent.class)
+@ReactorDependencies(GSContentComponent.class)
 public class GSComposite extends RootTagImpl {
+	
 	public static class GSComponent extends GSDiv {
+		
 		public static class GSHeaderComponent extends GSComponent {
 
 		}
@@ -33,17 +35,19 @@ public class GSComposite extends RootTagImpl {
 		}
 	}
 
-	@Dependencies({ GSHeaderComponent.class, GSContentComponent.class })
+	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSHeaderComposite extends GSComposite {
 
 	}
 
-	@Dependencies({ GSHeaderComponent.class, GSContentComponent.class, GSFooterComponent.class })
+	
+
+	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class, GSFooterComponent.class })
 	public static class GSHeaderFooterComposite extends GSComposite {
 
 	}
 
-	@Dependencies({ GSFirstRowFirstCell.class, GSContentRowContentCell.class, GSContentRowFirstCell.class, GSContentRowContentCell.class })
+	@ReactorDependencies({ GSFirstRowFirstCell.class, GSContentRowContentCell.class, GSContentRowFirstCell.class, GSContentRowContentCell.class })
 	public static class GSTable extends GSHeaderComposite {
 		public static class GSFirstRow extends GSHeaderComposite {
 
@@ -69,7 +73,7 @@ public class GSComposite extends RootTagImpl {
 		}
 	}
 
-	@Dependencies({ GSLabel00.class, GSLabel10.class, GSLabel01.class, GSLabel11.class })
+	@ReactorDependencies({ GSLabel00.class, GSLabel10.class, GSLabel01.class, GSLabel11.class })
 	public static class GSLabeledTable extends GSTable {
 
 		@Parent(GSFirstRowFirstCell.class)

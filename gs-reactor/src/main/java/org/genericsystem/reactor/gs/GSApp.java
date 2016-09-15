@@ -3,14 +3,15 @@ package org.genericsystem.reactor.gs;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.Tag.RootTag;
 
 import io.vertx.core.http.ServerWebSocket;
 
-public class GSApp extends GSDiv implements RootTag {
+public class GSApp extends RootTagImpl implements RootTag {
 
 	public GSApp() {
-		super(null, FlexDirection.COLUMN);
+		super(null);
 	}
 
 	@Override

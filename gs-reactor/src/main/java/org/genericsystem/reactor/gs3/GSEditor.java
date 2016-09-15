@@ -4,12 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -44,7 +38,10 @@ import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.InstanceT
 import org.genericsystem.reactor.gs3.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeAttribute.RelationName.InstanceComponentName;
 import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName;
+import org.genericsystem.reactor.gs3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel;
@@ -55,7 +52,13 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@ReactorDependencies({ EditorTitleContent.class, InstanceType.class, InstanceTypeAttribute.class,AttributeNameDisplayer.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class,
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
+@ReactorDependencies({ EditorTitleContent.class, InstanceType.class,TypeNameDisplayer.class, InstanceTypeAttribute.class,AttributeNameDisplayer.class, ComponentNameDisplayer.class,InstanceComponentName.class,InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class,
 		HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class, ComponentAdderSelect.class })
 public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
@@ -98,6 +101,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 		@Parent(EditorContent.class)
 		public static class LinkTitles extends GSDiv implements LinkTitlesStyle {
 			@Parent(LinkTitles.class)
+			//@ReactorDependencies(TypeNameDisplayer.class)
 			public static class InstanceType extends TypeName {
 
 				@Override

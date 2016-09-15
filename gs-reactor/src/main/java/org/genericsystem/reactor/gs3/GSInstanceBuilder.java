@@ -17,6 +17,8 @@ import org.genericsystem.reactor.gs.GSInputTextWithConversion;
 import org.genericsystem.reactor.gs3.FlexStyle.ReversedFlexStyle;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
+//import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
+//import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButtonDiv.AddButton;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
