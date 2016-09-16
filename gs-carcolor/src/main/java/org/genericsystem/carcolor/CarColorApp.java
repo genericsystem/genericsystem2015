@@ -19,6 +19,7 @@ import org.genericsystem.reactor.gs.GSHeader;
 import org.genericsystem.reactor.gs.GSLogo;
 import org.genericsystem.reactor.gs.GSModal;
 import org.genericsystem.reactor.gs.GSMonitor;
+import org.genericsystem.reactor.gs.GSResponsive;
 import org.genericsystem.reactor.gs.GSTable;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -44,29 +45,16 @@ public class CarColorApp extends GSApp implements SelectionDefaults {
 				addStyle("min-height", "300px");
 			}
 		});
-		new GSDiv(this, FlexDirection.ROW) {
+		new GSResponsive(this, FlexDirection.COLUMN, firstSection -> new GSTable(firstSection) {
 			{
-				addStyle("flex-wrap", "wrap");
-				new GSTable(this) {
-					{
-						select(Car.class);
-						addStyle("margin", "10px");
-						addStyle("padding", "10px");
-						addStyle("border-radius", "10px");
-						addStyle("background-color", "white");
-					}
-				};
-				new GSTable(this) {
-					{
-						select(Color.class);
-						addStyle("margin", "10px");
-						addStyle("padding", "10px");
-						addStyle("border-radius", "10px");
-						addStyle("background-color", "white");
-					}
-				};
+				select(Car.class);
 			}
-		};
+		}, secondSection -> new GSTable(secondSection) {
+			{
+				select(Color.class);
+			}
+		});
+
 		new GSMonitor(this);
 	}
 
