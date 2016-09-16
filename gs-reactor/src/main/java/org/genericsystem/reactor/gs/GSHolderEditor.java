@@ -27,7 +27,7 @@ public class GSHolderEditor extends GSDiv {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
 		input = constructor.build(this);
-		input.addStyle("flex", "1");
+		input.addStyle("flex", "1 1 100%");
 	}
 
 	@FunctionalInterface
