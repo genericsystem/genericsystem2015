@@ -151,7 +151,7 @@ public interface FlexStyle extends Tag {
 
 		@Override
 		default void style() {
-			addStyle("flex", "1 1 100%");
+			addStyle("flex", "1");
 			addStyle("height", "100%");
 			addStyle("width", "100%");
 		}
