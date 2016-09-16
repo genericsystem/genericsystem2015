@@ -10,7 +10,12 @@ import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Styles;
+import org.genericsystem.reactor.annotations.Style.AlignItems;
+import org.genericsystem.reactor.annotations.Style.BackgroundColor;
+import org.genericsystem.reactor.annotations.Style.FlexDirection;
+import org.genericsystem.reactor.annotations.Style.FlexGrow;
+import org.genericsystem.reactor.annotations.Style.FlexWrap;
+import org.genericsystem.reactor.annotations.Style.JustifyContent;
 import org.genericsystem.reactor.gs.GSDiv;
 
 public class RootTagImpl extends GSDiv implements Tag {
@@ -105,10 +110,24 @@ public class RootTagImpl extends GSDiv implements Tag {
 			DirectSelect directSelect = tagClass.getAnnotation(DirectSelect.class);
 			if (directSelect != null)
 				result.select(directSelect.value());
-			Styles styles = tagClass.getAnnotation(Styles.class);
-			if (styles != null)
-				for (Style style : styles.value())
-					result.addStyle(style.propertyName(), style.propertyValue());
+			BackgroundColor backgroundColor = tagClass.getAnnotation(BackgroundColor.class);
+			if (backgroundColor != null)
+				result.addStyle("background-color", backgroundColor.value());
+			FlexDirection flexDirection = tagClass.getAnnotation(FlexDirection.class);
+			if (flexDirection != null)
+				result.addStyle("flex-direction", flexDirection.value());
+			FlexWrap flexWrap = tagClass.getAnnotation(FlexWrap.class);
+			if (flexWrap != null)
+				result.addStyle("flex-wrap", flexWrap.value());
+			FlexGrow flexGrow = tagClass.getAnnotation(FlexGrow.class);
+			if (flexGrow != null)
+				result.addStyle("flex-grow", flexGrow.value());
+			AlignItems alignItems = tagClass.getAnnotation(AlignItems.class);
+			if (alignItems != null)
+				result.addStyle("align-items", alignItems.value());
+			JustifyContent justifyContent = tagClass.getAnnotation(JustifyContent.class);
+			if (justifyContent != null)
+				result.addStyle("justify-content", justifyContent.value());
 			Style style = tagClass.getAnnotation(Style.class);
 			if (style != null)
 				result.addStyle(style.propertyName(), style.propertyValue());

@@ -3,11 +3,10 @@ package org.genericsystem.reactor.gs3;
 import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Style.FlexGrow;
 import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowFirstCell;
-import org.genericsystem.reactor.gs3.GSComposite.GSComponent.GSContentComponent;
-import org.genericsystem.reactor.gs3.GSComposite.GSComponent.GSFooterComponent;
-import org.genericsystem.reactor.gs3.GSComposite.GSComponent.GSHeaderComponent;
+import org.genericsystem.reactor.gs3.GSComposite.GSContentComponent;
 import org.genericsystem.reactor.gs3.GSComposite.GSLabeledTable.GSLabel00;
 import org.genericsystem.reactor.gs3.GSComposite.GSLabeledTable.GSLabel01;
 import org.genericsystem.reactor.gs3.GSComposite.GSLabeledTable.GSLabel10;
@@ -19,28 +18,24 @@ import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 
 @ReactorDependencies(GSContentComponent.class)
 public class GSComposite extends RootTagImpl {
-	
-	public static class GSComponent extends GSDiv {
-		
-		public static class GSHeaderComponent extends GSComponent {
 
-		}
+	public static class GSHeaderComponent extends GSComposite {
 
-		public static class GSContentComponent extends GSComponent {
+	}
 
-		}
+	@FlexGrow("1")
+	public static class GSContentComponent extends GSComposite {
 
-		public static class GSFooterComponent extends GSComponent {
+	}
 
-		}
+	public static class GSFooterComponent extends GSComposite {
+
 	}
 
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSHeaderComposite extends GSComposite {
 
 	}
-
-	
 
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class, GSFooterComponent.class })
 	public static class GSHeaderFooterComposite extends GSComposite {
