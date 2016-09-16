@@ -20,14 +20,14 @@ public class GSHolderEditor extends GSDiv {
 		super(FlexDirection.ROW);
 		addStyle("flex", "1");
 		input = constructor.build(this);
-		input.addStyle("flex", "1 1 100%");
+		input.addStyle("flex", "1");
 	}
 
 	public GSHolderEditor(Tag parent, GSInputTextConstructor constructor) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "1");
 		input = constructor.build(this);
-		input.addStyle("flex", "1 1 100%");
+		input.addStyle("flex", "1");
 	}
 
 	@FunctionalInterface
