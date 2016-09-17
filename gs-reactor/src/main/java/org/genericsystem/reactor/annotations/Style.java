@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
+@Inherited
 public @interface Style {
 	String propertyName();
 
@@ -27,7 +28,7 @@ public @interface Style {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	public @interface FlexGrow {
+	public @interface Flex {
 		String value();
 	}
 
@@ -56,6 +57,20 @@ public @interface Style {
 	@Target({ ElementType.TYPE })
 	@Inherited
 	public @interface JustifyContent {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface Overflow {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface Color {
 		String value();
 	}
 

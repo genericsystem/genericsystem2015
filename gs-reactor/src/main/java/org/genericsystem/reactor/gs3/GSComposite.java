@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gs3;
 import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.Style.FlexGrow;
+import org.genericsystem.reactor.annotations.Style.Flex;
 import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs2.GSCell.GSFirstRowFirstCell;
 import org.genericsystem.reactor.gs3.GSComposite.GSContentComponent;
@@ -23,7 +23,7 @@ public class GSComposite extends RootTagImpl {
 
 	}
 
-	@FlexGrow("1")
+	@Flex("1")
 	public static class GSContentComponent extends GSComposite {
 
 	}

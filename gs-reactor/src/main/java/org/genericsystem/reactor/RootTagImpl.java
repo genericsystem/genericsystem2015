@@ -12,10 +12,12 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.AlignItems;
 import org.genericsystem.reactor.annotations.Style.BackgroundColor;
+import org.genericsystem.reactor.annotations.Style.Color;
+import org.genericsystem.reactor.annotations.Style.Flex;
 import org.genericsystem.reactor.annotations.Style.FlexDirection;
-import org.genericsystem.reactor.annotations.Style.FlexGrow;
 import org.genericsystem.reactor.annotations.Style.FlexWrap;
 import org.genericsystem.reactor.annotations.Style.JustifyContent;
+import org.genericsystem.reactor.annotations.Style.Overflow;
 import org.genericsystem.reactor.gs.GSDiv;
 
 public class RootTagImpl extends GSDiv implements Tag {
@@ -119,15 +121,22 @@ public class RootTagImpl extends GSDiv implements Tag {
 			FlexWrap flexWrap = tagClass.getAnnotation(FlexWrap.class);
 			if (flexWrap != null)
 				result.addStyle("flex-wrap", flexWrap.value());
-			FlexGrow flexGrow = tagClass.getAnnotation(FlexGrow.class);
-			if (flexGrow != null)
-				result.addStyle("flex-grow", flexGrow.value());
+			Flex flex = tagClass.getAnnotation(Flex.class);
+			if (flex != null)
+				result.addStyle("flex", flex.value());
 			AlignItems alignItems = tagClass.getAnnotation(AlignItems.class);
 			if (alignItems != null)
 				result.addStyle("align-items", alignItems.value());
 			JustifyContent justifyContent = tagClass.getAnnotation(JustifyContent.class);
 			if (justifyContent != null)
 				result.addStyle("justify-content", justifyContent.value());
+			Overflow overlflow = tagClass.getAnnotation(Overflow.class);
+			if (overlflow != null)
+				result.addStyle("overflow", overlflow.value());
+			Color color = tagClass.getAnnotation(Color.class);
+			if (color != null)
+				result.addStyle("color", color.value());
+
 			Style style = tagClass.getAnnotation(Style.class);
 			if (style != null)
 				result.addStyle(style.propertyName(), style.propertyValue());

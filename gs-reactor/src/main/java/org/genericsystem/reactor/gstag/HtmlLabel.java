@@ -17,6 +17,7 @@ public class HtmlLabel extends TagImpl {
 		super(parent, "label");
 	}
 
+	// @Style(propertyName = "width", propertyValue = "100%")
 	public static class GSLabelDisplayer extends HtmlLabel {
 
 		public GSLabelDisplayer() {
