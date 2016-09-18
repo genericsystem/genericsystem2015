@@ -19,6 +19,7 @@ import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion;
 import org.genericsystem.reactor.gs3.FlexStyle.ReversedFlexStyle;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
+import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
 //import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
 //import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButtonDiv.AddButton;
@@ -118,7 +119,7 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 
 		// Creation of links.
 		@Parent(BuilderCell.class)
-		public static class LinkBuilder extends FlexStyle.LinkEditor implements GSBuilderDefaults {
+		public static class LinkBuilder extends LinkEditor implements GSBuilderDefaults {
 
 			@Override
 			public void init() {

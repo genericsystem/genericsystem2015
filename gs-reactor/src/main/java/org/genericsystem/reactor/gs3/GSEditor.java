@@ -241,7 +241,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 
 								// Edition of links.
 								@Parent(SubcellEditor.class)
-								public static class LinkEditor extends GSDiv implements FlexStyle.RowFlexStyle, ComponentsDefaults {
+								public static class LinkEditor extends GSDiv implements ComponentsDefaults, FlexStyle.RowFlexStyle {
 
 									@Override
 									public void init() {
@@ -383,7 +383,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 
 									// Addition of links.
 									@Parent(SubcellAdder.class)
-									public static class LinkAdder extends GSDiv implements FlexStyle.RowFlexStyle, ComponentsDefaults {
+									public static class LinkAdder extends GSDiv implements ComponentsDefaults, FlexStyle.RowFlexStyle {
 
 										@Override
 										public void init() {
