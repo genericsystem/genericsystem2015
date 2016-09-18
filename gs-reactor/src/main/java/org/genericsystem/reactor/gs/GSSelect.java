@@ -5,7 +5,6 @@ import java.util.Map;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.TagImpl;
 import org.genericsystem.reactor.gstag.HtmlOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -16,7 +15,7 @@ import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class GSSelect extends TagImpl implements SelectionDefaults, ComponentsDefaults {
+public class GSSelect extends GSTagImpl implements SelectionDefaults, ComponentsDefaults {
 
 	public HtmlOption optionElement;
 

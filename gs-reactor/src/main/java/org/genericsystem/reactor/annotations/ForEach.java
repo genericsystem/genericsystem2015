@@ -18,4 +18,18 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 @Inherited
 public @interface ForEach {
 	Class<? extends Supplier<ObservableListExtractor>> value();
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ParentForEach {
+		int pos() default 0;
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ChildForEach {
+		Class<? extends Supplier<ObservableListExtractor>>[] value();
+	}
 }

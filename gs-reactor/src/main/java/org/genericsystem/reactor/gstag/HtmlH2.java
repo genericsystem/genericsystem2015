@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.TagImpl;
+import org.genericsystem.reactor.gs.GSTagImpl;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlH2 extends TagImpl {
+public class HtmlH2 extends GSTagImpl {
 
 	public HtmlH2() {
 		super("h2");

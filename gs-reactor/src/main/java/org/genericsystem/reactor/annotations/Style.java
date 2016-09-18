@@ -28,6 +28,20 @@ public @interface Style {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
+	public @interface ParentFlexDirection {
+		int pos() default 0;
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ChildFlexDirection {
+		String[] value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
 	public @interface Flex {
 		String value();
 	}
@@ -73,5 +87,4 @@ public @interface Style {
 	public @interface Color {
 		String value();
 	}
-
 }

@@ -10,12 +10,12 @@ import org.genericsystem.example.reactor.AppHtml.ExampleReactorScript;
 import org.genericsystem.example.reactor.AppHtml4.GSAttributesComposite;
 import org.genericsystem.example.reactor.AppHtml4.GSAttributesComposite.GSAttributesContentComponent;
 import org.genericsystem.example.reactor.AppHtml4.GSComposite.GSContentComponent;
+import org.genericsystem.example.reactor.AppHtml4.GSComposite.GSContentComponent.GSContentComponentLabel;
 import org.genericsystem.example.reactor.AppHtml4.GSInstanceRowLabeledAttributesComposite.GSHeaderComponent_;
 import org.genericsystem.example.reactor.AppHtml4.GSInstanceRowLabeledAttributesComposite.GSHeaderComponent_.GSHeaderComponentLabel2;
 import org.genericsystem.example.reactor.AppHtml4.GSInstanceRowLabeledAttributesComposite.GSRowInstanceAttributesContentComponent;
 import org.genericsystem.example.reactor.AppHtml4.GSInstancesComposite;
 import org.genericsystem.example.reactor.AppHtml4.GSInstancesComposite.GSInstancesContentComponent;
-import org.genericsystem.example.reactor.AppHtml4.GSInstancesComposite.GSInstancesContentComponent.GSContentComponentLabel;
 import org.genericsystem.example.reactor.AppHtml4.GSRowInstancesComposite;
 import org.genericsystem.example.reactor.AppHtml4.GSRowLabeledTypeAttributesComposite;
 import org.genericsystem.example.reactor.AppHtml4.GSRowLabeledTypeAttributesComposite.GSTypeAttributesContentComponent;
@@ -26,7 +26,6 @@ import org.genericsystem.example.reactor.AppHtml4.GSTypeLabeledInstancesComposit
 import org.genericsystem.example.reactor.AppHtml4.GSTypeRowLabeledTypeAttributesComposite;
 import org.genericsystem.example.reactor.AppHtml4.GSTypeRowLabeledTypeAttributesComposite.GSHeaderComponent;
 import org.genericsystem.example.reactor.AppHtml4.GSTypeRowLabeledTypeAttributesComposite.GSHeaderComponent.GSHeaderComponentLabel;
-import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -40,6 +39,7 @@ import org.genericsystem.reactor.annotations.Style.FlexWrap;
 import org.genericsystem.reactor.annotations.Style.Overflow;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gs.GSApp;
+import org.genericsystem.reactor.gs3.CompositeTagImpl;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
@@ -60,11 +60,15 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 	@Flex("1 1 0%")
 	@Overflow("hidden")
 	@ReactorDependencies({ GSContentComponent.class })
-	public static abstract class GSComposite extends RootTagImpl {
+	public static abstract class GSComposite extends CompositeTagImpl {
 		@Flex("1 1 0%")
 		@Overflow("hidden")
-		public static class GSContentComponent extends RootTagImpl {
+		@ReactorDependencies({ GSContentComponentLabel.class })
+		public static class GSContentComponent extends CompositeTagImpl {
+			@Overflow("hidden")
+			public static class GSContentComponentLabel extends GSLabelDisplayer {
 
+			}
 		}
 	}
 
@@ -73,14 +77,8 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 	@ReactorDependencies({ GSInstancesContentComponent.class })
 	public static class GSInstancesComposite extends GSComposite {
 		@ForEach(ObservableListExtractor.SUBINSTANCES.class)
-		@ReactorDependencies({ GSContentComponentLabel.class })
-		@Flex("1 1 0%")
-		@Overflow("hidden")
 		public static class GSInstancesContentComponent extends GSContentComponent {
-			@Overflow("hidden")
-			public static class GSContentComponentLabel extends GSLabelDisplayer {
 
-			}
 		}
 	}
 
@@ -111,7 +109,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		@Flex("1 1 0%")
 		@Overflow("hidden")
 		@ReactorDependencies({ GSHeaderComponentLabel2.class })
-		public static class GSHeaderComponent_ extends RootTagImpl {
+		public static class GSHeaderComponent_ extends CompositeTagImpl {
 			public static class GSHeaderComponentLabel2 extends GSLabelDisplayer {
 
 			}
@@ -143,7 +141,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		@Overflow("hidden")
 		@FlexDirection("row")
 		@ReactorDependencies({ GSHeaderComponentLabel.class })
-		public static class GSHeaderComponent extends RootTagImpl {
+		public static class GSHeaderComponent extends CompositeTagImpl {
 			public static class GSHeaderComponentLabel extends GSLabelDisplayer {
 
 			}

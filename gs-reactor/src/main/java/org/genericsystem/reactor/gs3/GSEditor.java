@@ -4,12 +4,17 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
@@ -52,15 +57,10 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
-@ReactorDependencies({ EditorTitleContent.class, InstanceType.class,TypeNameDisplayer.class, InstanceTypeAttribute.class,AttributeNameDisplayer.class, ComponentNameDisplayer.class,InstanceComponentName.class,InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class,
-		HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class, ComponentAdderSelect.class })
-public class GSEditor extends RootTagImpl implements RowFlexStyle {
+@ReactorDependencies({ EditorTitleContent.class, InstanceType.class, TypeNameDisplayer.class, InstanceTypeAttribute.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceComponentName.class, InstanceNameEditor.class, Checkbox.class,
+		ReversedRelationDisplayer.class, DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class,
+		HolderAdditionLink.class, ComponentAdderSelect.class })
+public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 
 	public GSEditor(Tag parent) {
 		super(parent);
@@ -81,7 +81,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 	@Parent(GSEditor.class)
 	// Main title.
-	public static class EditorTitle extends GSDiv implements TitleStyle {
+	public static class EditorTitle extends GSDiv implements FlexStyle.TitleStyle {
 
 		@Parent(EditorTitle.class)
 		public static class EditorTitleContent extends HtmlH2 {
@@ -96,12 +96,12 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 	// Content.
 	@Parent(GSEditor.class)
-	public static class EditorContent extends GSDiv implements EditorContentStyle {
+	public static class EditorContent extends GSDiv implements FlexStyle.EditorContentStyle {
 		// Line/column with the names of the attributes and components of relations.
 		@Parent(EditorContent.class)
-		public static class LinkTitles extends GSDiv implements LinkTitlesStyle {
+		public static class LinkTitles extends GSDiv implements FlexStyle.LinkTitlesStyle {
 			@Parent(LinkTitles.class)
-			//@ReactorDependencies(TypeNameDisplayer.class)
+			// @ReactorDependencies(TypeNameDisplayer.class)
 			public static class InstanceType extends TypeName {
 
 				@Override
@@ -122,11 +122,11 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 		// Edition itself.
 		@Parent(EditorContent.class)
-		public static class InstanceEdition extends GSDiv implements ReversedFlexStyle {
+		public static class InstanceEdition extends GSDiv implements FlexStyle.ReversedFlexStyle {
 
 			// Edition of the name of the instance.
 			@Parent(InstanceEdition.class)
-			public static class InstanceNameEditorDiv extends GSDiv implements SubCellEditorStyle {
+			public static class InstanceNameEditorDiv extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 				@Parent(InstanceNameEditorDiv.class)
 				public static class InstanceNameEditor extends GSInputTextEditorWithConversion implements FullSizeStyle {
@@ -134,7 +134,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 				// Edition of the holders/links.
 				@Parent(InstanceEdition.class)
-				public static class InstanceAttributeEditor extends GSDiv implements AttributeEditorStyle {
+				public static class InstanceAttributeEditor extends GSDiv implements FlexStyle.AttributeEditorStyle {
 
 					@Override
 					public void init() {
@@ -143,7 +143,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 					// Multiple checkboxes : for binary relations without the singular constraint.
 					@Parent(InstanceAttributeEditor.class)
-					public static class MultiCheckbox extends GSDiv implements MultiCheckboxStyle {
+					public static class MultiCheckbox extends GSDiv implements FlexStyle.MultiCheckboxStyle {
 
 						@Override
 						public void init() {
@@ -151,7 +151,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 						}
 
 						@Parent(MultiCheckbox.class)
-						public static class CheckboxLabel extends HtmlLabel implements CheckboxLabelStyle {
+						public static class CheckboxLabel extends HtmlLabel implements FlexStyle.CheckboxLabelStyle {
 
 							@Override
 							public void init() {
@@ -191,7 +191,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 						// Edition of other attributes.
 						@Parent(InstanceAttributeEditor.class)
-						public static class AttributeEditionColumn extends GenericColumn implements AttributeEditionColumnStyle {
+						public static class AttributeEditionColumn extends GenericColumn implements FlexStyle.AttributeEditionColumnStyle {
 
 							@Override
 							public void init() {
@@ -199,7 +199,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 							}
 
 							@Parent(AttributeEditionColumn.class)
-							public static class SubcellEditor extends GSDiv implements SubcellEditorContainerStyle {
+							public static class SubcellEditor extends GSDiv implements FlexStyle.SubcellEditorContainerStyle {
 
 								@Override
 								public void init() {
@@ -208,7 +208,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 								// Edition of non-boolean holders.
 								@Parent(SubcellEditor.class)
-								public static class HolderEditor extends GSDiv implements SubCellEditorStyle {
+								public static class HolderEditor extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 									@Override
 									public void init() {
@@ -223,7 +223,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 								// Edition of boolean holders.
 								@Parent(SubcellEditor.class)
-								public static class BooleanHolderEditor extends GSDiv implements SubCellEditorStyle {
+								public static class BooleanHolderEditor extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 									@Override
 									public void init() {
@@ -231,7 +231,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 									}
 
 									@Parent(BooleanHolderEditor.class)
-									public static class CheckboxContainerDiv extends GSDiv implements CenteredFlex {
+									public static class CheckboxContainerDiv extends GSDiv implements FlexStyle.CenteredFlex {
 										@Parent(CheckboxContainerDiv.class)
 										public static class BooleanHolderEditorInput extends GSCheckBoxEditor {
 										}
@@ -241,7 +241,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 								// Edition of links.
 								@Parent(SubcellEditor.class)
-								public static class LinkEditor extends GSDiv implements RowFlexStyle, ComponentsDefaults {
+								public static class LinkEditor extends GSDiv implements FlexStyle.RowFlexStyle, ComponentsDefaults {
 
 									@Override
 									public void init() {
@@ -306,7 +306,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 							// To add a new holder/link if it’s possible.
 							@Parent(AttributeEditionColumn.class)
-							public static class SubcellAdder extends GSDiv implements SubcellEditorContainerStyle {
+							public static class SubcellAdder extends GSDiv implements FlexStyle.SubcellEditorContainerStyle {
 
 								@Override
 								public void init() {
@@ -319,7 +319,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 								// Addition of non-boolean holders.
 								@Parent(SubcellAdder.class)
-								public static class HolderAdder extends GSDiv implements SubCellEditorStyle {
+								public static class HolderAdder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 									@Override
 									public void init() {
@@ -349,7 +349,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 									// Addition of boolean holders.
 									@Parent(SubcellAdder.class)
-									public static class BooleanHolderAdder extends GSDiv implements SubCellEditorStyle {
+									public static class BooleanHolderAdder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 										@Override
 										public void init() {
@@ -357,7 +357,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 										}
 
 										@Parent(BooleanHolderAdder.class)
-										public static class CheckboxContainerAddDiv extends GSDiv implements CenteredFlex {
+										public static class CheckboxContainerAddDiv extends GSDiv implements FlexStyle.CenteredFlex {
 											@Parent(CheckboxContainerAddDiv.class)
 											public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
 
@@ -383,7 +383,7 @@ public class GSEditor extends RootTagImpl implements RowFlexStyle {
 
 									// Addition of links.
 									@Parent(SubcellAdder.class)
-									public static class LinkAdder extends GSDiv implements RowFlexStyle, ComponentsDefaults {
+									public static class LinkAdder extends GSDiv implements FlexStyle.RowFlexStyle, ComponentsDefaults {
 
 										@Override
 										public void init() {

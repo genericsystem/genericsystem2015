@@ -6,11 +6,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.reactor.TagImpl;
+import org.genericsystem.reactor.gs.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Inherited
 public @interface Parent {
-	Class<? extends TagImpl> value();
+	Class<? extends GSTagImpl> value();
 }

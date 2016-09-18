@@ -3,12 +3,12 @@ package org.genericsystem.reactor.gstag;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.TagImpl;
+import org.genericsystem.reactor.gs.GSTagImpl;
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
 
 import io.vertx.core.json.JsonObject;
 
-public class HtmlInputText extends TagImpl implements ActionDefaults {
+public class HtmlInputText extends GSTagImpl implements ActionDefaults {
 
 	public HtmlInputText() {
 		super("input");
