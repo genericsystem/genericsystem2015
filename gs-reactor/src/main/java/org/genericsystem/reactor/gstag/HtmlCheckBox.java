@@ -4,7 +4,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.TagImpl;
+import org.genericsystem.reactor.gs.GSTagImpl;
 
 import io.vertx.core.json.JsonObject;
 
@@ -12,7 +12,7 @@ import io.vertx.core.json.JsonObject;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlCheckBox extends TagImpl {
+public class HtmlCheckBox extends GSTagImpl {
 
 	public HtmlCheckBox() {
 		super("input");

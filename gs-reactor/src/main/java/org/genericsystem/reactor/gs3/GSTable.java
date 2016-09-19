@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gs3;
 
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Parent;
@@ -44,8 +43,8 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @ReactorDependencies({ TableTitleContent.class, GSInstanceBuilder.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
-public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults, Tag {
-	
+public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDefaults, Tag {
+
 	public GSTable(Tag parent) {
 		super(parent);
 	}
@@ -63,7 +62,7 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 		bindSelection(find(Row.class));
 	}
 
-	public static class TableTitle extends GSDiv implements TitleStyle {
+	public static class TableTitle extends GSDiv implements FlexStyle.TitleStyle {
 
 		public static class TableTitleContent extends HtmlH2 {
 			@Override
@@ -74,17 +73,17 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 		}
 	}
 
-	public static class TitleRow extends GSDiv implements RowStyle {
-		public static class TypeName extends GSDiv implements TitleLineCellStyle {
+	public static class TitleRow extends GSDiv implements FlexStyle.RowStyle {
+		public static class TypeName extends GSDiv implements FlexStyle.TitleLineCellStyle {
 			public static class TypeNameDisplayer extends GSLabelDisplayer {
 			}
 		}
 
 		@ForEach(ATTRIBUTES_OF_TYPE.class)
-		public static class TypeAttribute extends GSDiv implements RowFlexStyle {
+		public static class TypeAttribute extends GSDiv implements FlexStyle.RowFlexStyle {
 
 			@Select(STRICT_ATTRIBUTE_SELECTOR.class)
-			public static class AttributeName extends GSDiv implements TitleLineCellStyle {
+			public static class AttributeName extends GSDiv implements FlexStyle.TitleLineCellStyle {
 
 				public static class AttributeNameDisplayer extends GSLabelDisplayer {
 
@@ -92,10 +91,10 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 			}
 
 			@Select(RELATION_SELECTOR.class)
-			public static class RelationName extends GSDiv implements RowFlexStyle {
+			public static class RelationName extends GSDiv implements FlexStyle.RowFlexStyle {
 
 				@ForEach(OTHER_COMPONENTS_1.class)
-				public static class ComponentName extends GSDiv implements TitleLineCellStyle {
+				public static class ComponentName extends GSDiv implements FlexStyle.TitleLineCellStyle {
 
 					public static class ComponentNameDisplayer extends GSLabelDisplayer {
 					}
@@ -118,9 +117,9 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 	}
 
 	@ForEach(SUBINSTANCES.class)
-	public static class Row extends GSDiv implements RowStyle {
+	public static class Row extends GSDiv implements FlexStyle.RowStyle {
 
-		public static class RowName extends GSDiv implements CellStyle {
+		public static class RowName extends GSDiv implements FlexStyle.CellStyle {
 
 			public static class RowNameDisplayer extends HtmlHyperLink implements RowNameStyle {
 
@@ -133,20 +132,20 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 		}
 
 		@ForEach(ATTRIBUTES_OF_INSTANCES.class)
-		public static class Cell extends GSDiv implements CellStyle {
+		public static class Cell extends GSDiv implements FlexStyle.CellStyle {
 
 			@ForEach(HOLDERS.class)
-			public static class SubCell extends GSDiv implements RowFlexStyle {
+			public static class SubCell extends GSDiv implements FlexStyle.RowFlexStyle {
 
 				@ForEach(OTHER_COMPONENTS_2.class)
-				public static class ComponentSubCell extends GSDiv implements SubCellStyle {
+				public static class ComponentSubCell extends GSDiv implements FlexStyle.SubCellStyle {
 
 					public static class ComponentLabel extends GSLabelDisplayer {
 					}
 				}
 
 				@Select(CHECK_BOX_DISPLAYER.class)
-				public static class BooleanValueSubCell extends GSDiv implements SubCellStyle {
+				public static class BooleanValueSubCell extends GSDiv implements FlexStyle.SubCellStyle {
 
 					@Parent(BooleanValueSubCell.class)
 					public static class BooleanDisplayer extends GSCheckBoxDisplayer {
@@ -154,7 +153,7 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 				}
 
 				@Select(LABEL_DISPLAYER.class)
-				public static class ValueSubCell extends GSDiv implements SubCellStyle {
+				public static class ValueSubCell extends GSDiv implements FlexStyle.SubCellStyle {
 
 					public static class ValueDisplayer extends GSLabelDisplayer {
 					}
@@ -164,7 +163,7 @@ public class GSTable extends RootTagImpl implements FlexStyle, SelectionDefaults
 		}
 
 		// Button to delete the instance.
-		public static class RemoveButtonDiv extends GSDiv implements ButtonStyle {
+		public static class RemoveButtonDiv extends GSDiv implements FlexStyle.ButtonStyle {
 			public static class RemoveButton extends HtmlButton implements FullSizeStyle {
 
 				@Override

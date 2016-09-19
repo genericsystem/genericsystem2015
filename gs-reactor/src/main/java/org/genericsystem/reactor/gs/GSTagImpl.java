@@ -1,4 +1,4 @@
-package org.genericsystem.reactor;
+package org.genericsystem.reactor.gs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,12 @@ import java.util.function.BiConsumer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-public class TagImpl implements Tag {
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.MetaBinding;
+import org.genericsystem.reactor.Tag;
+
+public class GSTagImpl implements Tag {
 
 	private final String tag;
 	private MetaBinding<?> metaBinding;
@@ -16,18 +21,18 @@ public class TagImpl implements Tag {
 	private Tag parent;
 	private final ObservableList<Tag> children = FXCollections.observableArrayList();
 
-	protected TagImpl(Tag parent, String tag) {
+	protected GSTagImpl(Tag parent, String tag) {
 		this.tag = tag;
 		setParent(parent);
 	}
 
-	protected void setParent(Tag parent) {
+	public void setParent(Tag parent) {
 		this.parent = parent;
 		if (parent != null)
 			parent.getObservableChildren().add(this);
 	}
 
-	protected TagImpl(String tag) {
+	protected GSTagImpl(String tag) {
 		this.tag = tag;
 	}
 

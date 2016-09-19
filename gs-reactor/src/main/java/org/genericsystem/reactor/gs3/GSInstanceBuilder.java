@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.RootTagImpl;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
@@ -29,21 +32,17 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-
 @Parent(GSTable.class)
 @ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
-public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle, GSBuilderDefaults {
+public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexStyle, GSBuilderDefaults {
 
 	public GSInstanceBuilder() {
 		super();
 	}
 
-//	public GSInstanceBuilder(Tag parent) {
-//		super(parent, GSInstanceBuilder.class);
-//	}
+	// public GSInstanceBuilder(Tag parent) {
+	// super(parent, GSInstanceBuilder.class);
+	// }
 
 	@Override
 	public void init() {
@@ -54,7 +53,7 @@ public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle,
 
 	// For the creation of the instance’s value.
 	@Parent(GSInstanceBuilder.class)
-	public static class InstanceNameBuilder extends GSDiv implements SubCellEditorStyle {
+	public static class InstanceNameBuilder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 		@Parent(InstanceNameBuilder.class)
 		public static class InstanceNameBuilderInput extends GSInputTextWithConversion implements FullSizeStyle {
 		}
@@ -62,7 +61,7 @@ public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle,
 
 	// Creation of holders/links.
 	@Parent(GSInstanceBuilder.class)
-	public static class BuilderCell extends GSDiv implements SubCellEditorStyle {
+	public static class BuilderCell extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 		@Override
 		public void init() {
@@ -71,7 +70,7 @@ public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle,
 
 		// Creation of non-boolean holders.
 		@Parent(BuilderCell.class)
-		public static class HolderBuilder extends GSDiv implements SubCellEditorStyle {
+		public static class HolderBuilder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 			@Override
 			public void init() {
@@ -95,7 +94,7 @@ public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle,
 
 		// Creation of boolean holders.
 		@Parent(BuilderCell.class)
-		public static class BooleanHolderBuilder extends GSDiv implements SubCellEditorStyle {
+		public static class BooleanHolderBuilder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 			@Override
 			public void init() {
@@ -103,7 +102,7 @@ public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle,
 			}
 
 			@Parent(BooleanHolderBuilder.class)
-			public static class CheckboxContainerBuildDiv extends GSDiv implements CenteredFlex {
+			public static class CheckboxContainerBuildDiv extends GSDiv implements FlexStyle.CenteredFlex {
 				@Parent(CheckboxContainerBuildDiv.class)
 				public static class BooleanHolderBuilderInput extends GSCheckBoxWithValue implements GSBuilderDefaults {
 
@@ -148,7 +147,7 @@ public class GSInstanceBuilder extends RootTagImpl implements ReversedFlexStyle,
 
 	// “Add” button.
 	@Parent(GSInstanceBuilder.class)
-	public static class AddButtonDiv extends GSDiv implements ButtonStyle {
+	public static class AddButtonDiv extends GSDiv implements FlexStyle.ButtonStyle {
 		@Parent(AddButtonDiv.class)
 		public static class AddButton extends HtmlButton implements FullSizeStyle {
 

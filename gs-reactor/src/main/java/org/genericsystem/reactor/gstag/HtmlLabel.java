@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.TagImpl;
+import org.genericsystem.reactor.gs.GSTagImpl;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlLabel extends TagImpl {
+public class HtmlLabel extends GSTagImpl {
 
 	public HtmlLabel() {
 		super("label");
@@ -17,6 +17,7 @@ public class HtmlLabel extends TagImpl {
 		super(parent, "label");
 	}
 
+	// @Style(propertyName = "width", propertyValue = "100%")
 	public static class GSLabelDisplayer extends HtmlLabel {
 
 		public GSLabelDisplayer() {
