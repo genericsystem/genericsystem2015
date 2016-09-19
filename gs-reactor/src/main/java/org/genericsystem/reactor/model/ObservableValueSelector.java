@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.model;
 
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 

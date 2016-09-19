@@ -27,7 +27,6 @@ import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
-import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_TYPE;
 import org.genericsystem.reactor.model.ObservableListExtractor.HOLDERS;
@@ -44,6 +43,10 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @ReactorDependencies({ TableTitleContent.class, GSInstanceBuilder.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
 public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDefaults, Tag {
+
+	public GSTable() {
+		super();
+	}
 
 	public GSTable(Tag parent) {
 		super(parent);
@@ -101,12 +104,9 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 				}
 
 				@Parent(RelationName.class)
+				@ForEach(OTHER_COMPONENTS_2.class)
 				public static class InstanceComponentName extends ComponentName {
 
-					@Override
-					public void init() {
-						forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
-					}
 				}
 			}
 		}

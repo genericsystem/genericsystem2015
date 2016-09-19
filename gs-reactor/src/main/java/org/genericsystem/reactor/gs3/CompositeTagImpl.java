@@ -95,7 +95,7 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 			try {
 				result = tagClass.newInstance();
 			} catch (IllegalAccessException | InstantiationException e) {
-				throw new IllegalStateException();
+				throw new IllegalStateException(e);
 			}
 			Class<? extends GSTagImpl> parentClass = getParentTagClass(tagClass);
 			result.setParent(parentClass != null ? find(parentClass) : this);

@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
@@ -18,10 +14,8 @@ import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion;
 import org.genericsystem.reactor.gs3.FlexStyle.ReversedFlexStyle;
-import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
-import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
-//import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
-//import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
+import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellAdder.HolderAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
+import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.InstanceEdition.InstanceNameEditorDiv.InstanceAttributeEditor.MultiCheckbox.AttributeEditionColumn.SubcellEditor.LinkEditor;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButtonDiv.AddButton;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
@@ -31,6 +25,10 @@ import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
 
 @Parent(GSTable.class)
 @ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
@@ -154,9 +152,10 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 			@Override
 			public void init() {
 				setText("Add");
-				bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED, model -> Bindings.createStringBinding(
-						() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "", getInvalidListProperty(model)
-								.getValue().stream().toArray(ObservableValue[]::new)));
+				bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED,
+						model -> Bindings.createStringBinding(
+								() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
+								getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
 				bindAction(model -> {
 					ConvertedValueDefaults input = (ConvertedValueDefaults) find(InstanceNameBuilderInput.class);
 					Generic newInstance = model.getGeneric().setInstance(input.getConvertedValueProperty(model).getValue());
