@@ -14,19 +14,20 @@ import org.genericsystem.example.reactor.AppHtml5.GSTypeAttributesRow;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite.GSHeaderComponent_;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite.GSHeaderComponent_.GSTypeAttributesRow_;
-import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite.GSInstancesContentComponent_;
-import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite.GSInstancesContentComponent_.GSInstanceAttributesRow_;
+import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite.GSInstanceContentComponent_;
+import org.genericsystem.example.reactor.AppHtml5.GSTypeLabeledInstancesComposite.GSInstanceContentComponent_.GSInstanceAttributesRow_;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite;
-import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstancesContentComponent__;
-import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstancesContentComponent__.GSInstanceAttributesRow__;
-import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstancesContentComponent__.GSInstanceAttributesRow__.GSHoldersContentComponent;
-import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstancesContentComponent__.GSInstanceAttributesRow__.GSHoldersContentComponent.GSHolders_;
+import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__;
+import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__.GSInstanceAttributesRow__;
+import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__.GSInstanceAttributesRow__.GSHoldersContentComponent;
+import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__.GSInstanceAttributesRow__.GSHoldersContentComponent.GSHolders_;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.AlignItems;
 import org.genericsystem.reactor.annotations.Style.BackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ChildFlexDirection;
 import org.genericsystem.reactor.annotations.Style.Flex;
@@ -80,7 +81,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@DirectSelect(Car.class)
 	@FlexDirection("row")
 	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
-	@ChildFlexDirection("row")
+	@ChildFlexDirection("row")	
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributesRow extends GSComposite {
 
@@ -103,7 +104,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@DirectSelect(Car.class)
-	@ReactorDependencies({ GSHeaderComponent_.class, GSInstancesContentComponent_.class })
+	@ReactorDependencies({ GSHeaderComponent_.class, GSInstanceContentComponent_.class })
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
 		@ReactorDependencies({ GSTypeAttributesRow_.class })
 		public static class GSHeaderComponent_ extends GSHeaderComponent {
@@ -113,7 +114,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 		}
 
 		@ReactorDependencies({ GSInstanceAttributesRow_.class })
-		public static class GSInstancesContentComponent_ extends GSContentComponent {
+		public static class GSInstanceContentComponent_ extends GSContentComponent {
 			public static class GSInstanceAttributesRow_ extends GSInstanceAttributesRow {
 
 			}
@@ -121,10 +122,10 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@DirectSelect(Car.class)
-	@ReactorDependencies({ GSHeaderComponent_.class, GSInstancesContentComponent__.class })
+	@ReactorDependencies({ GSHeaderComponent_.class, GSInstanceContentComponent__.class })
 	public static class GSTypeTableInstancesComposite extends GSTypeLabeledInstancesComposite {
 		@ReactorDependencies({ GSInstanceAttributesRow__.class })
-		public static class GSInstancesContentComponent__ extends GSInstancesContentComponent_ {
+		public static class GSInstanceContentComponent__ extends GSInstanceContentComponent_ {
 			@ReactorDependencies({ GSHeaderComponent.class, GSHoldersContentComponent.class })
 			public static class GSInstanceAttributesRow__ extends GSInstanceAttributesRow_ {
 				@ReactorDependencies({ GSHolders_.class })
