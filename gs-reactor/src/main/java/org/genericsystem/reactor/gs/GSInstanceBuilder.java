@@ -37,6 +37,7 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 			{
 				addStyle("margin-right", "1px");
 				addStyle("margin-bottom", "1px");
+				addStyle("overflow", "hidden");
 			}
 		};
 	}
@@ -46,6 +47,7 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 		new GSAttributeBuilder(this, FlexDirection.ROW) {
 			{
 				forEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE);
+				addStyle("overflow", "hidden");
 			}
 		};
 	}
