@@ -39,7 +39,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@ReactorDependencies({ TableTitleContent.class, GSInstanceBuilder.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
+@ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, GSInstanceBuilder.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
 public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDefaults, Tag {
 
