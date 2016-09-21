@@ -21,6 +21,7 @@ public class GSResponsive extends GSDiv implements SelectionDefaults {
 					tag.addStyle("padding", "10px");
 					tag.addStyle("border-radius", "10px");
 					tag.addStyle("background-color", "white");
+					tag.addStyle("min-width", "10cm");
 				}
 			}
 		};
