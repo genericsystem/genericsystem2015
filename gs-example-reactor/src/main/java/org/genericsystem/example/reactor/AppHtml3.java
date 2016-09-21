@@ -34,7 +34,7 @@ public class AppHtml3 extends GSApp implements SelectionDefaults {
 
 		new GSEditor(this).select__(this::getSelectionProperty);
 		new HorizontalGSEditor(this).select__(this::getSelectionProperty);
-		
+
 		new GSTable(this).select(Color.class);
 	}
 }

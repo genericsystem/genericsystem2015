@@ -3,7 +3,6 @@ package org.genericsystem.reactor.gs3;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
@@ -103,7 +102,6 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 					}
 				}
 
-				@Parent(RelationName.class)
 				@ForEach(OTHER_COMPONENTS_2.class)
 				public static class InstanceComponentName extends ComponentName {
 
@@ -147,7 +145,6 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 				@Select(CHECK_BOX_DISPLAYER.class)
 				public static class BooleanValueSubCell extends GSDiv implements FlexStyle.SubCellStyle {
 
-					@Parent(BooleanValueSubCell.class)
 					public static class BooleanDisplayer extends GSCheckBoxDisplayer {
 					}
 				}

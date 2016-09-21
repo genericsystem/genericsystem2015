@@ -89,7 +89,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 	// Main title.
 	public static class EditorTitle extends GSDiv implements FlexStyle.TitleStyle {
 
-		@Parent(EditorTitle.class)
 		public static class EditorTitleContent extends HtmlH2 {
 
 			@Override
@@ -104,9 +103,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 	@Parent(GSEditor.class)
 	public static class EditorContent extends GSDiv implements FlexStyle.EditorContentStyle {
 		// Line/column with the names of the attributes and components of relations.
-		@Parent(EditorContent.class)
 		public static class LinkTitles extends GSDiv implements FlexStyle.LinkTitlesStyle {
-			// @Parent(LinkTitles.class)
 			public static class InstanceType extends GSDiv implements FlexStyle.TitleLineCellStyle {
 
 				@Override
@@ -144,7 +141,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 		}
 
 		// Edition itself.
-		@Parent(EditorContent.class)
 		public static class InstanceEdition extends GSDiv implements FlexStyle.ReversedFlexStyle {
 
 			// Edition of the name of the instance.
@@ -207,7 +203,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 				}
 
 				// Edition of other attributes.
-				@Parent(InstanceAttributeEditor.class)
 				public static class AttributeEditionColumn extends GenericColumn implements FlexStyle.AttributeEditionColumnStyle {
 
 					@Override
@@ -215,7 +210,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						select(gs -> gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 					}
 
-					@Parent(AttributeEditionColumn.class)
 					public static class SubcellEditor extends GSDiv implements FlexStyle.SubcellEditorContainerStyle {
 
 						@Override
@@ -224,7 +218,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Edition of non-boolean holders.
-						@Parent(SubcellEditor.class)
 						public static class HolderEditor extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 							@Override
@@ -232,14 +225,12 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							@Parent(HolderEditor.class)
 							public static class HolderEditorInput extends GSInputTextEditorWithConversion implements FullSizeStyle {
 							}
 
 						}
 
 						// Edition of boolean holders.
-						@Parent(SubcellEditor.class)
 						public static class BooleanHolderEditor extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 							@Override
@@ -247,7 +238,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							@Parent(BooleanHolderEditor.class)
 							public static class CheckboxContainerDiv extends GSDiv implements FlexStyle.CenteredFlex {
 								@Parent(CheckboxContainerDiv.class)
 								public static class BooleanHolderEditorInput extends GSCheckBoxEditor {
@@ -257,7 +247,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Edition of links.
-						@Parent(SubcellEditor.class)
 						public static class LinkEditor extends GSDiv implements ComponentsDefaults, FlexStyle.RowFlexStyle {
 
 							@Override
@@ -266,7 +255,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								createComponentsListProperty();
 							}
 
-							@Parent(LinkEditor.class)
 							public static class ComponentEditor extends GSDiv implements ComponentEditorStyle {
 
 								@Override
@@ -275,7 +263,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								}
 
 								// TODO: Finish decomposition of InstanceCompositeSelect.
-								@Parent(ComponentEditor.class)
 								public static class DirectRelationComponentEditor extends InstanceCompositeSelect implements FullSizeStyle {
 
 									@Override
@@ -289,7 +276,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 									}
 								}
 
-								@Parent(ComponentEditor.class)
 								public static class ReversedRelationDisplayer extends GSLabelDisplayer {
 
 									@Override
@@ -304,7 +290,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 
 						// Hyperlink to remove a holder/link. Displayed only if there is no required constraint on the given attribute/relation,
 						// or there is a required constraint but there are at least two holders/links for the given attribute/relation.
-						@Parent(SubcellEditor.class)
 						public static class RemovalLink extends HtmlHyperLink implements ActionLinkStyle {
 
 							@Override
@@ -322,7 +307,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 					}
 
 					// To add a new holder/link if it’s possible.
-					@Parent(AttributeEditionColumn.class)
 					public static class SubcellAdder extends GSDiv implements FlexStyle.SubcellEditorContainerStyle {
 
 						@Override
@@ -338,7 +322,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Addition of non-boolean holders.
-						@Parent(SubcellAdder.class)
 						public static class HolderAdder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 							@Override
@@ -346,7 +329,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							@Parent(HolderAdder.class)
 							public static class HolderAdderInput extends GSInputTextWithConversion implements FullSizeStyle {
 
 								@Override
@@ -358,7 +340,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								}
 							}
 
-							@Parent(HolderAdder.class)
 							public static class HolderAdditionLink extends AdditionLink {
 
 								@Override
@@ -369,7 +350,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Addition of boolean holders.
-						@Parent(SubcellAdder.class)
 						public static class BooleanHolderAdder extends GSDiv implements FlexStyle.SubCellEditorStyle {
 
 							@Override
@@ -377,9 +357,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							@Parent(BooleanHolderAdder.class)
 							public static class CheckboxContainerAddDiv extends GSDiv implements FlexStyle.CenteredFlex {
-								@Parent(CheckboxContainerAddDiv.class)
 								public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
 
 									@Override
@@ -391,7 +369,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 									}
 								}
 
-								@Parent(BooleanHolderAdder.class)
 								public static class BooleanHolderAdditionLink extends AdditionLink {
 
 									@Override
@@ -403,7 +380,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Addition of links.
-						@Parent(SubcellAdder.class)
 						public static class LinkAdder extends GSDiv implements ComponentsDefaults, FlexStyle.RowFlexStyle {
 
 							@Override
@@ -427,7 +403,6 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 								});
 							}
 
-							@Parent(LinkAdder.class)
 							public static class ComponentAdder extends GSDiv implements ComponentEditorStyle {
 
 								@Override
