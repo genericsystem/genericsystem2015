@@ -13,7 +13,6 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs.GSEditor;
 import org.genericsystem.reactor.gs.GSHeader;
 import org.genericsystem.reactor.gs.GSLogo;
