@@ -70,9 +70,12 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 		style();
 		nodes.put(getClass(), this);
 		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
-		if (deps != null)
+		if (deps != null) {
+			System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
+			System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
 			for (Class<? extends GSTagImpl> clazz : deps.value())
 				find(clazz);
+		}
 		for (Tag tag : nodes.values())
 			tag.postfix();
 	}
@@ -85,7 +88,6 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 		if (enclosing != null && !enclosing.isAssignableFrom(tagClass))
 			return enclosing;
 		return null;
-
 	}
 
 	@Override
