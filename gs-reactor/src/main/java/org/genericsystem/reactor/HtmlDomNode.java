@@ -3,7 +3,7 @@ package org.genericsystem.reactor;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag.RootTag;
@@ -94,8 +94,8 @@ public class HtmlDomNode {
 		modelContext.register(this);
 		if (parent != null)
 			insertChild(index);
-		for (BiConsumer<Context, HtmlDomNode> binding : tag.getPreFixedBindings())
-			binding.accept(modelContext, this);
+		for (Consumer<Context> binding : tag.getPreFixedBindings())
+			binding.accept(modelContext);
 		for (Tag childTag : tag.getObservableChildren()) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
@@ -110,8 +110,8 @@ public class HtmlDomNode {
 				createChildDomNode(0, modelContext, childTag);
 
 		}
-		for (BiConsumer<Context, HtmlDomNode> binding : tag.getPostFixedBindings())
-			binding.accept(modelContext, this);
+		for (Consumer<Context> binding : tag.getPostFixedBindings())
+			binding.accept(modelContext);
 	}
 
 	public void createChildDomNode(int index, Context childContext, Tag childTag) {
