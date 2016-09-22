@@ -117,7 +117,7 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 
 		// Creation of links.
 		@Parent(BuilderCell.class)
-		public static class LinkBuilder extends LinkEditor implements GSBuilderDefaults {
+		public static class LinkBuilder extends LinkEditor implements org.genericsystem.reactor.modelproperties.GSBuilderDefaults {
 
 			@Override
 			public void init() {

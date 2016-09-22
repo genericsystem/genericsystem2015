@@ -74,6 +74,13 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
+	public static class COMPONENTS implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			return COMPONENTS;
+		}
+	}
+
 	public static class SUBINSTANCES implements Supplier<ObservableListExtractor> {
 		@Override
 		public ObservableListExtractor get() {
