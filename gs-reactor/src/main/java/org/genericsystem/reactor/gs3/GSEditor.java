@@ -41,7 +41,6 @@ import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.TypeAttri
 import org.genericsystem.reactor.gs3.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
-import org.genericsystem.reactor.gstag.HtmlLabel;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
@@ -49,7 +48,6 @@ import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_
 import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
-import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -166,7 +164,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 					}
 
-					public static class CheckboxLabel extends HtmlLabel implements FlexStyle.CheckboxLabelStyle {
+					public static class CheckboxLabel extends org.genericsystem.reactor.gstag.HtmlLabel implements FlexStyle.CheckboxLabelStyle {
 
 						@Override
 						public void init() {
@@ -247,7 +245,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Edition of links.
-						public static class LinkEditor extends GSDiv implements ComponentsDefaults, FlexStyle.RowFlexStyle {
+						public static class LinkEditor extends GSDiv implements org.genericsystem.reactor.modelproperties.ComponentsDefaults, FlexStyle.RowFlexStyle {
 
 							@Override
 							public void init() {
@@ -380,7 +378,7 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 						}
 
 						// Addition of links.
-						public static class LinkAdder extends GSDiv implements ComponentsDefaults, FlexStyle.RowFlexStyle {
+						public static class LinkAdder extends GSDiv implements org.genericsystem.reactor.modelproperties.ComponentsDefaults, FlexStyle.RowFlexStyle {
 
 							@Override
 							public void init() {
