@@ -52,22 +52,18 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 
 	public CompositeTagImpl() {
 		super();
-		nodes.put(getClass(), this);
-		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
-		if (deps != null) {
-			System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
-			System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
-			for (Class<? extends GSTagImpl> clazz : deps.value())
-				find(clazz);
-		}
-		for (Tag tag : nodes.values())
-			tag.postfix();
+		initComposite();
 	}
 
 	public CompositeTagImpl(Tag parent) {
 		super(parent);
 		init();
 		style();
+		initComposite();
+		processAnnotations(getClass(), this);
+	}
+
+	private void initComposite() {
 		nodes.put(getClass(), this);
 		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
 		if (deps != null) {
