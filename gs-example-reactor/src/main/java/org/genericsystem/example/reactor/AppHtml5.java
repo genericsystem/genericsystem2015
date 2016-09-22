@@ -196,7 +196,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	public static class Unit {
 	}
 
-	@org.genericsystem.reactor.annotations.DirectSelect(Power.class)
+	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent_.class, GSInstanceContentComponent__.class })
 	public static class GSTypeTableInstancesComposite extends GSTypeLabeledInstancesComposite {
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSInstanceAttributesRow__.class })

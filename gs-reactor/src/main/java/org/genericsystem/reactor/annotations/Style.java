@@ -87,4 +87,18 @@ public @interface Style {
 	public @interface Color {
 		String value();
 	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface MarginRight {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface MarginBottom {
+		String value();
+	}
 }
