@@ -349,9 +349,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default void init() {
 	}
 
-	default void style() {
-	}
-
 	default void postfix() {
 	}
 

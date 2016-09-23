@@ -42,13 +42,14 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Style.BackgroundColor;
-import org.genericsystem.reactor.annotations.Style.ChildFlexDirection;
-import org.genericsystem.reactor.annotations.Style.Flex;
-import org.genericsystem.reactor.annotations.Style.FlexDirection;
-import org.genericsystem.reactor.annotations.Style.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles;
+import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.appserver.ApplicationServer;
+import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gs3.GSComposite;
 import org.genericsystem.reactor.gs3.GSComposite.GSContentComponent;
@@ -60,7 +61,6 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @RunScript(ExampleReactorScript.class)
 @ReactorDependencies({ GSInstancesComposite.class, GSRowInstancesComposite.class, GSTypeAttributes.class, GSTypeAttributesRow.class, GSTypeLabeledInstancesComposite.class, GSTypeTableInstancesComposite.class, TestCell.class })
 @FlexWrap("wrap")
-@FlexDirection("row")
 @Flex("1 1 0%")
 public class AppHtml5 extends GSApp implements SelectionDefaults {
 
@@ -68,7 +68,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml5.class, "/example-reactor");
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Green")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Green")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSInstancesComposite extends org.genericsystem.reactor.gs3.GSComposite {
@@ -76,7 +76,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Blue")
-	@FlexDirection("row")
+	@FlexDirectionStyle(FlexDirection.ROW)
 	@DirectSelect(Car.class)
 	@ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSRowInstancesComposite extends GSComposite {
@@ -92,9 +92,9 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Purple")
-	@Style.Color("White")
+	@Styles.Color("White")
 	@DirectSelect(Car.class)
-	@FlexDirection("row")
+	@FlexDirectionStyle(FlexDirection.ROW)
 	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ChildFlexDirection("row")
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
@@ -102,16 +102,16 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Orange")
-	@org.genericsystem.reactor.annotations.Style.FlexDirection("row")
-	@org.genericsystem.reactor.annotations.Style.ChildFlexDirection("row")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Orange")
+	@org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle(FlexDirection.ROW)
+	@org.genericsystem.reactor.annotations.Styles.ChildFlexDirection("row")
 	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSInstanceAttributesRow extends org.genericsystem.reactor.gs3.GSComposite {
 
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Brown")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Brown")
 	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(ObservableListExtractor.HOLDERS.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSContentComponent.class })
 	public static class GSHolders extends org.genericsystem.reactor.gs3.GSComposite {
@@ -119,7 +119,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Pink")
-	@FlexDirection("row")
+	@FlexDirectionStyle(FlexDirection.ROW)
 	@ChildForEach(ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSValueComponents extends GSComposite {

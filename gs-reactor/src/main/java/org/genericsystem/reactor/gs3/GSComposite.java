@@ -2,10 +2,10 @@ package org.genericsystem.reactor.gs3;
 
 import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.Style.ChildFlexDirection;
-import org.genericsystem.reactor.annotations.Style.Flex;
-import org.genericsystem.reactor.annotations.Style.Overflow;
-import org.genericsystem.reactor.annotations.Style.ParentFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.annotations.Styles.Overflow;
+import org.genericsystem.reactor.annotations.Styles.ParentFlexDirection;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 
 @Flex("1 1 0%")

@@ -5,8 +5,20 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.Styles.Color;
+import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Styles.Height;
+import org.genericsystem.reactor.annotations.Styles.MarginBottom;
+import org.genericsystem.reactor.annotations.Styles.MarginRight;
+import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.Width;
+import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gs.GSDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.ButtonDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSTitleDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSTitleLineCellDiv;
 //import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButtonDiv.AddButton;
 //import org.genericsystem.reactor.gs3.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 //import org.genericsystem.reactor.gs3.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
@@ -37,11 +49,13 @@ import org.genericsystem.reactor.model.ObservableValueSelector.LABEL_DISPLAYER;
 import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, GSInstanceBuilder.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
-public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDefaults, Tag {
+@Flex("1")
+public class GSTable extends CompositeTagImpl implements SelectionDefaults, Tag {
 
 	public GSTable() {
 		super();
@@ -52,7 +66,8 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 	}
 
 	// No automatic enclosing class parent for this GSTable extention
-	public static class HorizontalTable extends GSTable implements RowFlexStyle {
+	@FlexDirectionStyle(FlexDirection.ROW)
+	public static class HorizontalTable extends GSTable {
 
 		public HorizontalTable(Tag parent) {
 			super(parent);
@@ -64,7 +79,7 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 		bindSelection(find(Row.class));
 	}
 
-	public static class TableTitle extends GSDiv implements FlexStyle.TitleStyle {
+	public static class TableTitle extends GSTitleDiv {
 
 		public static class TableTitleContent extends HtmlH2 {
 			@Override
@@ -75,17 +90,21 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 		}
 	}
 
-	public static class TitleRow extends GSDiv implements FlexStyle.RowStyle {
-		public static class TypeName extends GSDiv implements FlexStyle.TitleLineCellStyle {
+	@ReverseFlexDirection
+	@Flex("1")
+	public static class TitleRow extends GSDiv {
+		public static class TypeName extends GSTitleLineCellDiv {
 			public static class TypeNameDisplayer extends GSLabelDisplayer {
 			}
 		}
 
 		@ForEach(ATTRIBUTES_OF_TYPE.class)
-		public static class TypeAttribute extends GSDiv implements FlexStyle.RowFlexStyle {
+		@Flex("1")
+		@FlexDirectionStyle(FlexDirection.ROW)
+		public static class TypeAttribute extends GSDiv {
 
 			@Select(STRICT_ATTRIBUTE_SELECTOR.class)
-			public static class AttributeName extends GSDiv implements FlexStyle.TitleLineCellStyle {
+			public static class AttributeName extends GSTitleLineCellDiv {
 
 				public static class AttributeNameDisplayer extends GSLabelDisplayer {
 
@@ -93,10 +112,12 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 			}
 
 			@Select(RELATION_SELECTOR.class)
-			public static class RelationName extends GSDiv implements FlexStyle.RowFlexStyle {
+			@Flex("1")
+			@FlexDirectionStyle(FlexDirection.ROW)
+			public static class RelationName extends GSDiv {
 
 				@ForEach(OTHER_COMPONENTS_1.class)
-				public static class ComponentName extends GSDiv implements FlexStyle.TitleLineCellStyle {
+				public static class ComponentName extends GSTitleLineCellDiv {
 
 					public static class ComponentNameDisplayer extends GSLabelDisplayer {
 					}
@@ -110,47 +131,57 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 		}
 
 		// EmptyCell corresponding to the “Remove” or “Add” button of other lines.
-		public static class EmptyCell extends GSDiv implements ButtonStyle {
+		public static class EmptyCell extends ButtonDiv {
 		}
 	}
 
 	@ForEach(SUBINSTANCES.class)
-	public static class Row extends GSDiv implements FlexStyle.RowStyle {
+	@ReverseFlexDirection
+	@Flex("1")
+	public static class Row extends GSDiv {
 
-		public static class RowName extends GSDiv implements FlexStyle.CellStyle {
+		public static class RowName extends GSCellDiv {
 
-			public static class RowNameDisplayer extends HtmlHyperLink implements RowNameStyle {
+			@Flex("1")
+			@Color("white")
+			@MarginRight("1px")
+			@MarginBottom("1px")
+			public static class RowNameDisplayer extends HtmlHyperLink {
 
 				@Override
 				public void init() {
 					bindText();
 					bindAction(model -> getSelectionProperty(model).setValue(model));
+					addPrefixBinding(modelContext -> addStyle(modelContext, "background-color",
+							"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) this).getGenericStringProperty(modelContext).getValue() : "#3393FF"));
 				}
 			}
 		}
 
 		@ForEach(ATTRIBUTES_OF_INSTANCES.class)
-		public static class Cell extends GSDiv implements FlexStyle.CellStyle {
+		public static class Cell extends GSCellDiv {
 
 			@ForEach(HOLDERS.class)
-			public static class SubCell extends GSDiv implements FlexStyle.RowFlexStyle {
+			@Flex("1")
+			@FlexDirectionStyle(FlexDirection.ROW)
+			public static class SubCell extends GSDiv {
 
 				@ForEach(OTHER_COMPONENTS_2.class)
-				public static class ComponentSubCell extends GSDiv implements FlexStyle.SubCellStyle {
+				public static class ComponentSubCell extends GSSubcellDiv {
 
 					public static class ComponentLabel extends GSLabelDisplayer {
 					}
 				}
 
 				@Select(CHECK_BOX_DISPLAYER.class)
-				public static class BooleanValueSubCell extends GSDiv implements FlexStyle.SubCellStyle {
+				public static class BooleanValueSubCell extends GSSubcellDiv {
 
 					public static class BooleanDisplayer extends GSCheckBoxDisplayer {
 					}
 				}
 
 				@Select(LABEL_DISPLAYER.class)
-				public static class ValueSubCell extends GSDiv implements FlexStyle.SubCellStyle {
+				public static class ValueSubCell extends GSSubcellDiv {
 
 					public static class ValueDisplayer extends GSLabelDisplayer {
 					}
@@ -160,8 +191,11 @@ public class GSTable extends CompositeTagImpl implements FlexStyle, SelectionDef
 		}
 
 		// Button to delete the instance.
-		public static class RemoveButtonDiv extends GSDiv implements FlexStyle.ButtonStyle {
-			public static class RemoveButton extends HtmlButton implements FullSizeStyle {
+		public static class RemoveButtonDiv extends ButtonDiv {
+			@Flex("1")
+			@Height("100%")
+			@Width("100%")
+			public static class RemoveButton extends HtmlButton {
 
 				@Override
 				public void init() {

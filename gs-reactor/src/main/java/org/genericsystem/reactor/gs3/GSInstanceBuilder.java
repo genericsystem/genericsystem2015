@@ -10,10 +10,16 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.annotations.Styles.Height;
+import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
-import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion;
-import org.genericsystem.reactor.gs3.FlexStyle.ReversedFlexStyle;
+import org.genericsystem.reactor.gs3.GSCellDiv.ButtonDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.CenteredFlexDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSComponentEditorDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSSubcellEditorDiv;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor;
 import org.genericsystem.reactor.gs3.GSInstanceBuilder.AddButtonDiv.AddButton;
@@ -32,7 +38,9 @@ import javafx.beans.value.ObservableValue;
 
 @Parent(GSTable.class)
 @ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
-public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexStyle, GSBuilderDefaults {
+@Flex("1")
+@ReverseFlexDirection
+public class GSInstanceBuilder extends CompositeTagImpl implements GSBuilderDefaults {
 
 	public GSInstanceBuilder() {
 		super();
@@ -51,15 +59,18 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 
 	// For the creation of the instance’s value.
 	@Parent(GSInstanceBuilder.class)
-	public static class InstanceNameBuilder extends GSDiv implements FlexStyle.SubCellEditorStyle {
+	public static class InstanceNameBuilder extends GSSubcellEditorDiv {
 		@Parent(InstanceNameBuilder.class)
-		public static class InstanceNameBuilderInput extends GSInputTextWithConversion implements FullSizeStyle {
+		@Flex("1")
+		@Height("100%")
+		@Width("100%")
+		public static class InstanceNameBuilderInput extends GSInputTextWithConversion {
 		}
 	}
 
 	// Creation of holders/links.
 	@Parent(GSInstanceBuilder.class)
-	public static class BuilderCell extends GSDiv implements FlexStyle.SubCellEditorStyle {
+	public static class BuilderCell extends GSSubcellEditorDiv {
 
 		@Override
 		public void init() {
@@ -68,7 +79,7 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 
 		// Creation of non-boolean holders.
 		@Parent(BuilderCell.class)
-		public static class HolderBuilder extends GSDiv implements FlexStyle.SubCellEditorStyle {
+		public static class HolderBuilder extends GSSubcellEditorDiv {
 
 			@Override
 			public void init() {
@@ -76,7 +87,10 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 			}
 
 			@Parent(HolderBuilder.class)
-			public static class HolderBuilderInput extends GSInputTextWithConversion implements FullSizeStyle, GSBuilderDefaults {
+			@Flex("1")
+			@Height("100%")
+			@Width("100%")
+			public static class HolderBuilderInput extends GSInputTextWithConversion implements GSBuilderDefaults {
 
 				@Override
 				public void init() {
@@ -92,7 +106,7 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 
 		// Creation of boolean holders.
 		@Parent(BuilderCell.class)
-		public static class BooleanHolderBuilder extends GSDiv implements FlexStyle.SubCellEditorStyle {
+		public static class BooleanHolderBuilder extends GSSubcellEditorDiv {
 
 			@Override
 			public void init() {
@@ -100,7 +114,7 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 			}
 
 			@Parent(BooleanHolderBuilder.class)
-			public static class CheckboxContainerBuildDiv extends GSDiv implements FlexStyle.CenteredFlex {
+			public static class CheckboxContainerBuildDiv extends CenteredFlexDiv {
 				@Parent(CheckboxContainerBuildDiv.class)
 				public static class BooleanHolderBuilderInput extends GSCheckBoxWithValue implements GSBuilderDefaults {
 
@@ -129,7 +143,7 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 			}
 
 			@Parent(LinkBuilder.class)
-			public static class ComponentBuilder extends GSDiv implements ComponentEditorStyle {
+			public static class ComponentBuilder extends GSComponentEditorDiv {
 
 				@Override
 				public void init() {
@@ -145,9 +159,12 @@ public class GSInstanceBuilder extends CompositeTagImpl implements ReversedFlexS
 
 	// “Add” button.
 	@Parent(GSInstanceBuilder.class)
-	public static class AddButtonDiv extends GSDiv implements FlexStyle.ButtonStyle {
+	public static class AddButtonDiv extends ButtonDiv {
 		@Parent(AddButtonDiv.class)
-		public static class AddButton extends HtmlButton implements FullSizeStyle {
+		@Flex("1")
+		@Height("100%")
+		@Width("100%")
+		public static class AddButton extends HtmlButton {
 
 			@Override
 			public void init() {
