@@ -52,22 +52,18 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 
 	public CompositeTagImpl() {
 		super();
-		nodes.put(getClass(), this);
-		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
-		if (deps != null) {
-			System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
-			System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
-			for (Class<? extends GSTagImpl> clazz : deps.value())
-				find(clazz);
-		}
-		for (Tag tag : nodes.values())
-			tag.postfix();
+		initComposite();
 	}
 
 	public CompositeTagImpl(Tag parent) {
 		super(parent);
 		init();
 		style();
+		initComposite();
+		processAnnotations(getClass(), this);
+	}
+
+	private void initComposite() {
 		nodes.put(getClass(), this);
 		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
 		if (deps != null) {
@@ -121,16 +117,17 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 				}
 			}
 		} else {
-
 			ChildForEach childForEach = result.getParent().getClass().getAnnotation(ChildForEach.class);
 			if (childForEach != null) {
 				try {
-					result.forEach(childForEach.value()[parentForEach.pos()].newInstance().get());
+					if (childForEach.decorate().isAssignableFrom(result.getClass()))
+						result.forEach(childForEach.forEach().newInstance().get());
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}
 			} else
 				System.out.println("Warning : unable to find childForEach on : " + result.getParent().getClass().getSimpleName() + " for : " + tagClass.getSimpleName());
+
 		}
 
 		Select select = tagClass.getAnnotation(Select.class);

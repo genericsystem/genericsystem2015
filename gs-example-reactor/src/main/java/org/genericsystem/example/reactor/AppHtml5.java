@@ -70,7 +70,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Green")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
-	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSInstancesComposite extends org.genericsystem.reactor.gs3.GSComposite {
 
 	}
@@ -78,14 +78,14 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@BackgroundColor("Blue")
 	@FlexDirection("row")
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSRowInstancesComposite extends GSComposite {
 
 	}
 
 	@BackgroundColor("Red")
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributes extends GSComposite {
 
@@ -95,7 +95,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@Style.Color("White")
 	@DirectSelect(Car.class)
 	@FlexDirection("row")
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ChildFlexDirection("row")
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributesRow extends GSComposite {
@@ -105,14 +105,14 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Orange")
 	@org.genericsystem.reactor.annotations.Style.FlexDirection("row")
 	@org.genericsystem.reactor.annotations.Style.ChildFlexDirection("row")
-	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSInstanceAttributesRow extends org.genericsystem.reactor.gs3.GSComposite {
 
 	}
 
 	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Brown")
-	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(ObservableListExtractor.HOLDERS.class)
+	@org.genericsystem.reactor.annotations.ForEach.ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.HOLDERS.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSContentComponent.class })
 	public static class GSHolders extends org.genericsystem.reactor.gs3.GSComposite {
 
@@ -120,7 +120,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Pink")
 	@FlexDirection("row")
-	@ChildForEach(ObservableListExtractor.COMPONENTS.class)
+	@ChildForEach(decorate = GSContentComponent.class, forEach = ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSValueComponents extends GSComposite {
 
@@ -196,7 +196,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	public static class Unit {
 	}
 
-	@org.genericsystem.reactor.annotations.DirectSelect(Power.class)
+	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent_.class, GSInstanceContentComponent__.class })
 	public static class GSTypeTableInstancesComposite extends GSTypeLabeledInstancesComposite {
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSInstanceAttributesRow__.class })
