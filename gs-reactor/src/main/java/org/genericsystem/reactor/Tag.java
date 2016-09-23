@@ -1,7 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -10,16 +8,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javafx.beans.binding.ListBinding;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
@@ -36,6 +24,17 @@ import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.util.StringConverter;
+
 /**
  * @author Nicolas Feybesse
  *
@@ -47,9 +46,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	public String getTag();
 
-	public List<BiConsumer<Context, HtmlDomNode>> getPreFixedBindings();
+	public List<Consumer<Context>> getPreFixedBindings();
 
-	public List<BiConsumer<Context, HtmlDomNode>> getPostFixedBindings();
+	public List<Consumer<Context>> getPostFixedBindings();
 
 	public <BETWEEN> MetaBinding<BETWEEN> getMetaBinding();
 
@@ -57,12 +56,12 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	@Override
 	default void addPrefixBinding(Consumer<Context> consumer) {
-		getPreFixedBindings().add((modelContext, node) -> consumer.accept(modelContext));
+		getPreFixedBindings().add(consumer);
 	}
 
 	@Override
 	default void addPostfixBinding(Consumer<Context> consumer) {
-		getPostFixedBindings().add((modelContext, node) -> consumer.accept(modelContext));
+		getPostFixedBindings().add(consumer);
 	}
 
 	default void bindOptionalStyleClass(String styleClass, String propertyName) {

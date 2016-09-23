@@ -2,22 +2,21 @@ package org.genericsystem.reactor.gs;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.MetaBinding;
+import org.genericsystem.reactor.Tag;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.MetaBinding;
-import org.genericsystem.reactor.Tag;
 
 public class GSTagImpl implements Tag {
 
 	private final String tag;
 	private MetaBinding<?> metaBinding;
-	private final List<BiConsumer<Context, HtmlDomNode>> preFixedBindings = new ArrayList<>();
-	private final List<BiConsumer<Context, HtmlDomNode>> postFixedBindings = new ArrayList<>();
+	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();
+	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
 	private Tag parent;
 	private final ObservableList<Tag> children = FXCollections.observableArrayList();
 
@@ -47,12 +46,12 @@ public class GSTagImpl implements Tag {
 	}
 
 	@Override
-	public List<BiConsumer<Context, HtmlDomNode>> getPreFixedBindings() {
+	public List<Consumer<Context>> getPreFixedBindings() {
 		return preFixedBindings;
 	}
 
 	@Override
-	public List<BiConsumer<Context, HtmlDomNode>> getPostFixedBindings() {
+	public List<Consumer<Context>> getPostFixedBindings() {
 		return postFixedBindings;
 	}
 

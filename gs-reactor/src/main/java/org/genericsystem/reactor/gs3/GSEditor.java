@@ -14,6 +14,15 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.AlignItems;
+import org.genericsystem.reactor.annotations.Style.BackgroundColor;
+import org.genericsystem.reactor.annotations.Style.Color;
+import org.genericsystem.reactor.annotations.Style.Flex;
+import org.genericsystem.reactor.annotations.Style.FlexDirection;
+import org.genericsystem.reactor.annotations.Style.JustifyContent;
+import org.genericsystem.reactor.annotations.Style.MarginBottom;
+import org.genericsystem.reactor.annotations.Style.MarginRight;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gs.GSDiv;
@@ -21,7 +30,6 @@ import org.genericsystem.reactor.gs.GSInputTextWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
-import org.genericsystem.reactor.gs3.FlexStyle.RowFlexStyle;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.CheckboxContainerAddDiv.BooleanHolderAdderInput;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.CheckboxContainerAddDiv.BooleanHolderAdditionLink;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.HolderAdder.HolderAdderInput;
@@ -60,7 +68,9 @@ import javafx.collections.ObservableList;
 @ReactorDependencies({ EditorTitleContent.class, InstanceType.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class,
 		DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class,
 		ComponentAdderSelect.class })
-public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
+@Flex("1")
+@FlexDirection("row")
+public class GSEditor extends CompositeTagImpl {
 
 	public GSEditor() {
 		super();
@@ -70,22 +80,28 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 		super(parent);
 	}
 
-	// No automatic enclosing class parent for this GSEditor extention
-	public static class HorizontalGSEditor extends GSEditor implements ColumnFlexStyle, SelectionDefaults {
+	// No automatic enclosing class parent for this GSEditor extension
+	@FlexDirection("column")
+	public static class HorizontalGSEditor extends GSEditor implements SelectionDefaults {
 
 		public HorizontalGSEditor(Tag parent) {
 			super(parent);
 		}
 
-		@Override
-		public void style() {
-			ColumnFlexStyle.super.style();
-		}
+		// @Override
+		// public void style() {
+		// ColumnFlexStyle.super.style();
+		// }
 	}
 
-	@Parent(GSEditor.class)
 	// Main title.
-	public static class EditorTitle extends GSDiv implements FlexStyle.TitleStyle {
+	@BackgroundColor("#EA4500")
+	@MarginRight("1px")
+	@MarginBottom("1px")
+	@Color("White")
+	@JustifyContent("center")
+	@AlignItems("center")
+	public static class EditorTitle extends GSDiv {
 
 		public static class EditorTitleContent extends HtmlH2 {
 
@@ -99,7 +115,10 @@ public class GSEditor extends CompositeTagImpl implements RowFlexStyle {
 
 	// Content.
 	@Parent(GSEditor.class)
-	public static class EditorContent extends GSDiv implements FlexStyle.EditorContentStyle {
+	// keepDirection();
+	@Flex("1")
+	@Style(propertyName = "height", propertyValue = "100%")
+	public static class EditorContent extends GSDiv {
 		// Line/column with the names of the attributes and components of relations.
 		public static class LinkTitles extends GSDiv implements FlexStyle.LinkTitlesStyle {
 			public static class InstanceType extends GSDiv implements FlexStyle.TitleLineCellStyle {
