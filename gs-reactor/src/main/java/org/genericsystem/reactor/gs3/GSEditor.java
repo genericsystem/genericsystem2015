@@ -79,7 +79,7 @@ import javafx.collections.ObservableList;
 		ComponentAdderSelect.class })
 @Flex("1")
 @FlexDirectionStyle(FlexDirection.ROW)
-public class GSEditor extends CompositeTagImpl {
+public class GSEditor extends GSCompositeDiv {
 
 	public GSEditor() {
 		super();

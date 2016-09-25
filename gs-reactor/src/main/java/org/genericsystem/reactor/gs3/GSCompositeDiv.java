@@ -1,6 +1,8 @@
 package org.genericsystem.reactor.gs3;
 
-import java.util.Arrays;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -11,6 +13,8 @@ import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
 import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
+import org.genericsystem.reactor.annotations.ReactorDependencies.ParentReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
@@ -36,28 +40,28 @@ import org.genericsystem.reactor.gs.GSTagImpl;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
-public class CompositeTagImpl extends GSDiv implements Tag {
+public class GSCompositeDiv extends GSDiv implements Tag {
 
 	public static final Logger log = LoggerFactory.getLogger(Tag.class);
 
-	private final HashMap<Class<? extends GSTagImpl>, GSTagImpl> nodes = new LinkedHashMap<Class<? extends GSTagImpl>, GSTagImpl>() {
+	private final HashMap<Class<? extends Tag>, Tag> nodes = new LinkedHashMap<Class<? extends Tag>, Tag>() {
 		private static final long serialVersionUID = -6835018021862236920L;
 
 		@Override
-		public GSTagImpl get(Object key) {
-			Class<? extends GSTagImpl> searchClass = (Class<? extends GSTagImpl>) key;
-			GSTagImpl tag = super.get(searchClass);
+		public Tag get(Object key) {
+			Class<? extends Tag> searchClass = (Class<? extends Tag>) key;
+			Tag tag = super.get(searchClass);
 			if (tag == null)
-				for (Class<? extends GSTagImpl> clazz : keySet()) {
+				for (Class<? extends Tag> clazz : keySet()) {
 					if (searchClass.isAssignableFrom(clazz)) {
 						if (tag == null) {
 							tag = super.get(clazz);
-							System.out.println("search : " + searchClass.getSimpleName() + " find polymorphic class : " + CompositeTagImpl.this.getClass().getSimpleName());
+							if (!searchClass.equals(GSCompositeDiv.this.getClass()))
+								System.out.println("Search : " + searchClass.getSimpleName() + " find polymorphic class : " + GSCompositeDiv.this.getClass().getSimpleName());
+							else
+								break;
 						} else
-							System.out.println("Warning : Found several results for class : " + searchClass.getSimpleName() + " on : " + CompositeTagImpl.this.getClass().getSimpleName() + " exact paths for them : " + searchClass + " " + getClass());
+							System.out.println("Warning : Found several results for class : " + searchClass.getSimpleName() + " on : " + GSCompositeDiv.this.getClass().getSimpleName() + " exact paths for them : " + searchClass + " " + getClass());
 					}
 				}
 			return tag;
@@ -65,12 +69,12 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 
 	};
 
-	public CompositeTagImpl() {
+	public GSCompositeDiv() {
 		super();
 		initComposite();
 	}
 
-	public CompositeTagImpl(Tag parent) {
+	public GSCompositeDiv(Tag parent) {
 		super(parent);
 		init();
 		initComposite();
@@ -79,10 +83,28 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 
 	private void initComposite() {
 		nodes.put(getClass(), this);
+
+		ParentReactorDependencies parentDependencies = getClass().getAnnotation(ParentReactorDependencies.class);
+		if (parentDependencies == null) {
+			ReactorDependencies dependencies = getClass().getAnnotation(ReactorDependencies.class);
+			if (dependencies != null) {
+				// System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
+				// System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
+				for (Class<? extends GSTagImpl> clazz : dependencies.value())
+					find(clazz);
+			}
+		} else {
+			ChildReactorDependencies childDependencies = getParentTagClass(getClass()).getAnnotation(ChildReactorDependencies.class);
+			if (childDependencies != null) {
+				find(childDependencies.value()[parentDependencies.pos()]);
+			} else
+				log.warn("Warning : unable to find ChildReactorDependencies on : " + getParentTagClass(getClass()).getSimpleName() + " for : " + getClass().getSimpleName());
+		}
+
 		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
 		if (deps != null) {
-			System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
-			System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
+			// System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
+			// System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
 			for (Class<? extends GSTagImpl> clazz : deps.value())
 				find(clazz);
 		}
@@ -90,7 +112,7 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 			tag.postfix();
 	}
 
-	private static Class<? extends GSTagImpl> getParentTagClass(Class<? extends GSTagImpl> tagClass) {
+	private static Class<? extends Tag> getParentTagClass(Class<? extends Tag> tagClass) {
 		Parent parent = tagClass.getAnnotation(Parent.class);
 		if (parent != null)
 			return parent.value();
@@ -101,16 +123,16 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 	}
 
 	@Override
-	public GSTagImpl find(Class<? extends GSTagImpl> tagClass) {
-		GSTagImpl result = nodes.get(tagClass);
+	public <T extends Tag> T find(Class<T> tagClass) {
+		T result = (T) nodes.get(tagClass);
 		if (result == null) {
 			try {
 				result = tagClass.newInstance();
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}
-			Class<? extends GSTagImpl> parentClass = getParentTagClass(tagClass);
-			result.setParent(parentClass != null ? find(parentClass) : this);
+			Class<? extends Tag> parentClass = getParentTagClass(tagClass);
+			((GSTagImpl) result).setParent(parentClass != null ? find(parentClass) : this);
 			processAnnotations(tagClass, result);
 			result.init();
 			nodes.put(tagClass, result);
@@ -118,7 +140,7 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 		return result;
 	}
 
-	private static void processAnnotations(Class<? extends GSTagImpl> tagClass, Tag result) {
+	private static <T extends Tag> void processAnnotations(Class<T> tagClass, Tag result) {
 		ParentForEach parentForEach = tagClass.getAnnotation(ParentForEach.class);
 		if (parentForEach == null) {
 			ForEach forEach = tagClass.getAnnotation(ForEach.class);
@@ -183,8 +205,8 @@ public class CompositeTagImpl extends GSDiv implements Tag {
 			result.addStyle("background-color", backgroundColor.value());
 
 		if (tagClass.getAnnotation(GenericBackgroundColor.class) != null)
-			result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
-					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
+			result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result)
+					.getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
 		FlexWrap flexWrap = tagClass.getAnnotation(FlexWrap.class);
 		if (flexWrap != null)
 			result.addStyle("flex-wrap", flexWrap.value());

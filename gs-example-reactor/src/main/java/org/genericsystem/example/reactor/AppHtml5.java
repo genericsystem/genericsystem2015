@@ -16,8 +16,7 @@ import org.genericsystem.example.reactor.AppHtml5.AudiTT;
 import org.genericsystem.example.reactor.AppHtml5.AudiTT.AudiTTGreen;
 import org.genericsystem.example.reactor.AppHtml5.AudiTT.AudiTTPower;
 import org.genericsystem.example.reactor.AppHtml5.AudiTT.Green;
-import org.genericsystem.example.reactor.AppHtml5.GSCell.GSCellContentComponent;
-import org.genericsystem.example.reactor.AppHtml5.GSCell.GSCellContentComponent.GSSubcell;
+import org.genericsystem.example.reactor.AppHtml5.GSCell.GSSubcell;
 import org.genericsystem.example.reactor.AppHtml5.GSInstancesComposite;
 import org.genericsystem.example.reactor.AppHtml5.GSRowInstancesComposite;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeAttributes;
@@ -34,13 +33,16 @@ import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.
 import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__.GSInstanceAttributesRow__.GSHoldersContentComponent.GSCell__;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__.GSInstanceAttributesRow__.GSInstanceNameComponent;
 import org.genericsystem.example.reactor.AppHtml5.GSTypeTableInstancesComposite.GSInstanceContentComponent__.GSInstanceAttributesRow__.GSInstanceNameComponent.GSInstanceNameSubcell_;
+import org.genericsystem.example.reactor.AppHtml5.GSValueComponents;
 import org.genericsystem.example.reactor.AppHtml5.TestCell;
 import org.genericsystem.example.reactor.AppHtml5.TestCell.GSCell_;
 import org.genericsystem.example.reactor.AppHtml5.Unit;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
+import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
@@ -59,7 +61,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class, AudiTT.class, Green.class, AudiTTGreen.class, AudiTTPower.class, Unit.class })
 @RunScript(ExampleReactorScript.class)
-@ReactorDependencies({ GSInstancesComposite.class, GSRowInstancesComposite.class, GSTypeAttributes.class, GSTypeAttributesRow.class, GSTypeLabeledInstancesComposite.class, GSTypeTableInstancesComposite.class, TestCell.class })
+@ReactorDependencies({ GSInstancesComposite.class, GSRowInstancesComposite.class, GSTypeAttributes.class, GSTypeAttributesRow.class, GSValueComponents.class, GSTypeLabeledInstancesComposite.class, GSTypeTableInstancesComposite.class, TestCell.class })
 @FlexWrap("wrap")
 @Flex("1 1 0%")
 public class AppHtml5 extends GSApp implements SelectionDefaults {
@@ -118,7 +120,8 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	}
 
-	@BackgroundColor("Pink")
+	@DirectSelect(Power.class)
+	@BackgroundColor("Yellow")
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@ChildForEach(ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
@@ -162,18 +165,27 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 		}
 	}
 
-	@org.genericsystem.reactor.annotations.ReactorDependencies(GSCellContentComponent.class)
-	public static class GSCell extends GSHolders {
-		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSSubcell.class })
-		public static class GSCellContentComponent extends GSContentComponent {
-			public static class GSSubcell extends GSValueComponents {
+	// @org.genericsystem.reactor.annotations.ReactorDependencies(GSCellContentComponent.class)
+	// public static class GSCell extends GSHolders {
+	// @org.genericsystem.reactor.annotations.ReactorDependencies({ GSSubcell.class })
+	// public static class GSCellContentComponent extends GSContentComponent {
+	// public static class GSSubcell extends GSValueComponents {
+	//
+	// }
+	// }
+	// }
 
-			}
+	@ChildReactorDependencies(GSSubcell.class)
+	public static class GSCell extends GSHolders {
+		@Parent(GSContentComponent.class)
+		public static class GSSubcell extends GSValueComponents {
+
 		}
 	}
 
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent_.class, GSInstanceContentComponent_.class })
+	@ChildReactorDependencies(GSInstanceContentComponent_.class)
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSTypeAttributesRow_.class })
 		public static class GSHeaderComponent_ extends GSHeaderComponent {
@@ -198,6 +210,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent_.class, GSInstanceContentComponent__.class })
+	@ChildReactorDependencies(GSInstanceContentComponent__.class)
 	public static class GSTypeTableInstancesComposite extends GSTypeLabeledInstancesComposite {
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSInstanceAttributesRow__.class })
 		public static class GSInstanceContentComponent__ extends GSInstanceContentComponent_ {

@@ -40,7 +40,7 @@ import javafx.beans.value.ObservableValue;
 @ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
 @Flex("1")
 @ReverseFlexDirection
-public class GSInstanceBuilder extends CompositeTagImpl implements GSBuilderDefaults {
+public class GSInstanceBuilder extends GSCompositeDiv implements GSBuilderDefaults {
 
 	public GSInstanceBuilder() {
 		super();

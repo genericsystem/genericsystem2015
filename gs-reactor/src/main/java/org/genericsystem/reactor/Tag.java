@@ -1,5 +1,7 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -9,22 +11,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.gs.GSTagImpl;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.DisplayDefaults;
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -34,6 +20,20 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.DisplayDefaults;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -352,7 +352,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default void postfix() {
 	}
 
-	default GSTagImpl find(Class<? extends GSTagImpl> tagClass) {
+	default <T extends Tag> T find(Class<T> tagClass) {
 		return getParent().find(tagClass);
 	}
 

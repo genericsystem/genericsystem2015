@@ -58,11 +58,11 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 	@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
 	@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSContentComponent.class })
-	public static abstract class GSComposite extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+	public static abstract class GSComposite extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 		@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
 		@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSContentComponentLabel.class })
-		public static class GSContentComponent extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+		public static class GSContentComponent extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 			@Overflow("hidden")
 			public static class GSContentComponentLabel extends GSLabelDisplayer {
 
@@ -107,7 +107,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
 		@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponentLabel2.class })
-		public static class GSHeaderComponent_ extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+		public static class GSHeaderComponent_ extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 			public static class GSHeaderComponentLabel2 extends GSLabelDisplayer {
 
 			}
@@ -139,7 +139,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 		@org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle(FlexDirection.ROW)
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponentLabel.class })
-		public static class GSHeaderComponent extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+		public static class GSHeaderComponent extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 			public static class GSHeaderComponentLabel extends GSLabelDisplayer {
 
 			}
