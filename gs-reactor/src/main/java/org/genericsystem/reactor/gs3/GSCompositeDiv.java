@@ -1,8 +1,5 @@
 package org.genericsystem.reactor.gs3;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -11,10 +8,9 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
 import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
-import org.genericsystem.reactor.annotations.ReactorDependencies.ParentReactorDependencies;
+import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependenciesMult;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
@@ -39,6 +35,9 @@ import org.genericsystem.reactor.gs.GSDiv;
 import org.genericsystem.reactor.gs.GSTagImpl;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class GSCompositeDiv extends GSDiv implements Tag {
 
@@ -70,56 +69,43 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 	};
 
 	public GSCompositeDiv() {
-		super();
-		initComposite();
 	}
 
 	public GSCompositeDiv(Tag parent) {
 		super(parent);
-		init();
 		initComposite();
 		processAnnotations(getClass(), this);
+		init();
 	}
 
 	private void initComposite() {
 		nodes.put(getClass(), this);
 
-		ParentReactorDependencies parentDependencies = getClass().getAnnotation(ParentReactorDependencies.class);
-		if (parentDependencies == null) {
-			ReactorDependencies dependencies = getClass().getAnnotation(ReactorDependencies.class);
-			if (dependencies != null) {
-				// System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
-				// System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
-				for (Class<? extends GSTagImpl> clazz : dependencies.value())
-					find(clazz);
-			}
-		} else {
-			ChildReactorDependencies childDependencies = getParentTagClass(getClass()).getAnnotation(ChildReactorDependencies.class);
-			if (childDependencies != null) {
-				find(childDependencies.value()[parentDependencies.pos()]);
-			} else
-				log.warn("Warning : unable to find ChildReactorDependencies on : " + getParentTagClass(getClass()).getSimpleName() + " for : " + getClass().getSimpleName());
-		}
-
-		ReactorDependencies deps = getClass().getAnnotation(ReactorDependencies.class);
-		if (deps != null) {
-			// System.out.println("Declaring classes :   " + Arrays.toString(getClass().getDeclaredClasses()));
+		ReactorDependencies dependencies = getClass().getAnnotation(ReactorDependencies.class);
+		if (dependencies != null) {
+			// System.out.println("Declaring classes : " + Arrays.toString(getClass().getDeclaredClasses()));
 			// System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
-			for (Class<? extends GSTagImpl> clazz : deps.value())
+			for (Class<? extends GSTagImpl> clazz : dependencies.value())
 				find(clazz);
+		}
+		if (getParent() != null) {
+			ChildReactorDependenciesMult childDependenciesMult = getParent().getClass().getAnnotation(ChildReactorDependenciesMult.class);
+			if (childDependenciesMult != null) {
+				for (ChildReactorDependencies cd : childDependenciesMult.value()) {
+					if (cd.decorate().isAssignableFrom(getClass()))
+						find(cd.value());
+				}
+			} else {
+				ChildReactorDependencies childDependencies = getParent().getClass().getAnnotation(ChildReactorDependencies.class);
+				if (childDependencies != null) {
+					if (childDependencies.decorate().isAssignableFrom(getClass()))
+						find(childDependencies.value());
+				} else
+					log.warn("Warning : unable to find ChildReactorDependencies on : " + getParent().getClass().getSimpleName() + " for : " + getClass().getSimpleName());
+			}
 		}
 		for (Tag tag : nodes.values())
 			tag.postfix();
-	}
-
-	private static Class<? extends Tag> getParentTagClass(Class<? extends Tag> tagClass) {
-		Parent parent = tagClass.getAnnotation(Parent.class);
-		if (parent != null)
-			return parent.value();
-		Class<? extends GSTagImpl> enclosing = (Class<? extends GSTagImpl>) tagClass.getEnclosingClass();
-		if (enclosing != null && !enclosing.isAssignableFrom(tagClass))
-			return enclosing;
-		return null;
 	}
 
 	@Override
@@ -131,8 +117,9 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}
-			Class<? extends Tag> parentClass = getParentTagClass(tagClass);
-			((GSTagImpl) result).setParent(parentClass != null ? find(parentClass) : this);
+			((GSTagImpl) result).setParent(this);
+			if (GSCompositeDiv.class.isAssignableFrom(tagClass))
+				((GSCompositeDiv) result).initComposite();
 			processAnnotations(tagClass, result);
 			result.init();
 			nodes.put(tagClass, result);
@@ -205,8 +192,8 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			result.addStyle("background-color", backgroundColor.value());
 
 		if (tagClass.getAnnotation(GenericBackgroundColor.class) != null)
-			result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result)
-					.getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
+			result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
+					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
 		FlexWrap flexWrap = tagClass.getAnnotation(FlexWrap.class);
 		if (flexWrap != null)
 			result.addStyle("flex-wrap", flexWrap.value());
