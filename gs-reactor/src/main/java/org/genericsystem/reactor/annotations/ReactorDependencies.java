@@ -17,4 +17,19 @@ import org.genericsystem.reactor.gs.GSTagImpl;
 @Inherited
 public @interface ReactorDependencies {
 	Class<? extends GSTagImpl>[] value();
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ParentReactorDependencies {
+		int pos() default 0;
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ChildReactorDependencies {
+		Class<? extends GSTagImpl>[] value();
+	}
+
 }

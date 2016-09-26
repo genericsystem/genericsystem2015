@@ -31,12 +31,13 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.Style.BackgroundColor;
-import org.genericsystem.reactor.annotations.Style.Flex;
-import org.genericsystem.reactor.annotations.Style.FlexDirection;
-import org.genericsystem.reactor.annotations.Style.FlexWrap;
-import org.genericsystem.reactor.annotations.Style.Overflow;
+import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.appserver.ApplicationServer;
+import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSApp;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -47,7 +48,6 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @RunScript(ExampleReactorScript.class)
 @ReactorDependencies({ GSInstancesComposite.class, GSRowInstancesComposite.class, GSAttributesComposite.class, GSRowLabeledTypeAttributesComposite.class, GSTypeRowLabeledTypeAttributesComposite.class, GSTypeLabeledInstancesComposite.class })
 @FlexWrap("wrap")
-@FlexDirection("row")
 @Flex("1 1 0%")
 public class AppHtml4 extends GSApp implements SelectionDefaults {
 
@@ -55,14 +55,14 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml4.class, "/example-reactor");
 	}
 
-	@org.genericsystem.reactor.annotations.Style.Flex("1 1 0%")
-	@org.genericsystem.reactor.annotations.Style.Overflow("hidden")
+	@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
+	@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSContentComponent.class })
-	public static abstract class GSComposite extends org.genericsystem.reactor.gs3.CompositeTagImpl {
-		@org.genericsystem.reactor.annotations.Style.Flex("1 1 0%")
-		@org.genericsystem.reactor.annotations.Style.Overflow("hidden")
+	public static abstract class GSComposite extends org.genericsystem.reactor.gs3.GSCompositeDiv {
+		@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
+		@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSContentComponentLabel.class })
-		public static class GSContentComponent extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+		public static class GSContentComponent extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 			@Overflow("hidden")
 			public static class GSContentComponentLabel extends GSLabelDisplayer {
 
@@ -70,7 +70,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		}
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Green")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Green")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSInstancesContentComponent.class })
 	public static class GSInstancesComposite extends GSComposite {
@@ -81,13 +81,13 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Blue")
-	@FlexDirection("row")
+	@FlexDirectionStyle(FlexDirection.ROW)
 	@DirectSelect(Car.class)
 	public static class GSRowInstancesComposite extends GSInstancesComposite {
 
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Red")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Red")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSAttributesContentComponent.class })
 	public static class GSAttributesComposite extends GSInstancesComposite {
@@ -97,17 +97,17 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		}
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Orange")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Orange")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
-	@org.genericsystem.reactor.annotations.Style.FlexDirection("row")
-	@org.genericsystem.reactor.annotations.Style.Flex("1 1 0%")
-	@org.genericsystem.reactor.annotations.Style.Overflow("hidden")
+	@org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle(FlexDirection.ROW)
+	@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
+	@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent_.class, GSRowInstanceAttributesContentComponent.class })
 	public static class GSInstanceRowLabeledAttributesComposite extends GSRowLabeledTypeAttributesComposite {
-		@org.genericsystem.reactor.annotations.Style.Flex("1 1 0%")
-		@org.genericsystem.reactor.annotations.Style.Overflow("hidden")
+		@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
+		@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponentLabel2.class })
-		public static class GSHeaderComponent_ extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+		public static class GSHeaderComponent_ extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 			public static class GSHeaderComponentLabel2 extends GSLabelDisplayer {
 
 			}
@@ -119,27 +119,27 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		}
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Purple")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Purple")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
-	@org.genericsystem.reactor.annotations.Style.FlexDirection("row")
+	@org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle(FlexDirection.ROW)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSTypeAttributesContentComponent.class })
 	public static class GSRowLabeledTypeAttributesComposite extends GSAttributesComposite {
-		@FlexDirection("row")
+		@FlexDirectionStyle(FlexDirection.ROW)
 		public static class GSTypeAttributesContentComponent extends GSAttributesContentComponent {
 
 		}
 	}
 
-	@org.genericsystem.reactor.annotations.Style.BackgroundColor("Grey")
-	@org.genericsystem.reactor.annotations.Style.Color("White")
+	@org.genericsystem.reactor.annotations.Styles.BackgroundColor("Grey")
+	@org.genericsystem.reactor.annotations.Styles.Color("White")
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent.class, GSTypeAttributesContentComponent.class })
 	public static class GSTypeRowLabeledTypeAttributesComposite extends GSRowLabeledTypeAttributesComposite {
-		@org.genericsystem.reactor.annotations.Style.Flex("1 1 0%")
-		@org.genericsystem.reactor.annotations.Style.Overflow("hidden")
-		@org.genericsystem.reactor.annotations.Style.FlexDirection("row")
+		@org.genericsystem.reactor.annotations.Styles.Flex("1 1 0%")
+		@org.genericsystem.reactor.annotations.Styles.Overflow("hidden")
+		@org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle(FlexDirection.ROW)
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponentLabel.class })
-		public static class GSHeaderComponent extends org.genericsystem.reactor.gs3.CompositeTagImpl {
+		public static class GSHeaderComponent extends org.genericsystem.reactor.gs3.GSCompositeDiv {
 			public static class GSHeaderComponentLabel extends GSLabelDisplayer {
 
 			}
@@ -149,13 +149,13 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 	@org.genericsystem.reactor.annotations.DirectSelect(Car.class)
 	@org.genericsystem.reactor.annotations.ReactorDependencies({ GSHeaderComponent___.class, GSInstancesContentComponent__.class })
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
-		@FlexDirection("row")
+		@FlexDirectionStyle(FlexDirection.ROW)
 		public static class GSHeaderComponent___ extends GSTypeRowLabeledTypeAttributesComposite {
 
 		}
 
 		@org.genericsystem.reactor.annotations.ReactorDependencies({ GSInstanceRowLabeledAttributesComposite_.class })
-		@org.genericsystem.reactor.annotations.Style.FlexDirection("row")
+		@org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle(FlexDirection.ROW)
 		public static class GSInstancesContentComponent__ extends GSInstancesContentComponent {
 			public static class GSInstanceRowLabeledAttributesComposite_ extends GSInstanceRowLabeledAttributesComposite {
 

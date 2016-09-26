@@ -2,27 +2,46 @@ package org.genericsystem.reactor.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * @author Nicolas Feybesse
- *
- */
+import org.genericsystem.reactor.gs.FlexDirection;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Inherited
-public @interface Style {
-	String propertyName();
-
-	String propertyValue();
+public @interface Styles {
+	Style[] value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	public @interface FlexDirection {
-		String value();
+	@Repeatable(Styles.class)
+	public @interface Style {
+		String propertyName();
+
+		String propertyValue();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface FlexDirectionStyle {
+		FlexDirection value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface KeepFlexDirection {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ReverseFlexDirection {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -58,6 +77,12 @@ public @interface Style {
 	@Inherited
 	public @interface BackgroundColor {
 		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface GenericBackgroundColor {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -99,6 +124,20 @@ public @interface Style {
 	@Target({ ElementType.TYPE })
 	@Inherited
 	public @interface MarginBottom {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface Height {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface Width {
 		String value();
 	}
 }

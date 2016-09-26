@@ -14,15 +14,17 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Style.AlignItems;
-import org.genericsystem.reactor.annotations.Style.BackgroundColor;
-import org.genericsystem.reactor.annotations.Style.Color;
-import org.genericsystem.reactor.annotations.Style.Flex;
-import org.genericsystem.reactor.annotations.Style.FlexDirection;
-import org.genericsystem.reactor.annotations.Style.JustifyContent;
-import org.genericsystem.reactor.annotations.Style.MarginBottom;
-import org.genericsystem.reactor.annotations.Style.MarginRight;
+import org.genericsystem.reactor.annotations.Styles.AlignItems;
+import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.Height;
+import org.genericsystem.reactor.annotations.Styles.JustifyContent;
+import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Styles.Width;
+import org.genericsystem.reactor.gs.FlexDirection;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gs.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gs.GSDiv;
@@ -30,8 +32,16 @@ import org.genericsystem.reactor.gs.GSInputTextWithConversion;
 import org.genericsystem.reactor.gs.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gs.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gs.GSSelect.InstanceCompositeSelect;
+import org.genericsystem.reactor.gs3.GSCellDiv.CenteredFlexDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSActionLink;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSComponentEditorDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSSubcellEditorDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSTitleDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.GSTitleLineCellDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.SubcellEditorContainerDiv;
+import org.genericsystem.reactor.gs3.GSCellDiv.WrappedColumnDiv;
+import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.BooleanHolderAdditionLink;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.CheckboxContainerAddDiv.BooleanHolderAdderInput;
-import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.CheckboxContainerAddDiv.BooleanHolderAdditionLink;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.HolderAdder.HolderAdderInput;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.HolderAdder.HolderAdditionLink;
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
@@ -48,7 +58,6 @@ import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.TypeAttri
 import org.genericsystem.reactor.gs3.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.gs3.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gstag.HtmlH2;
-import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
@@ -69,8 +78,8 @@ import javafx.collections.ObservableList;
 		DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class,
 		ComponentAdderSelect.class })
 @Flex("1")
-@FlexDirection("row")
-public class GSEditor extends CompositeTagImpl {
+@FlexDirectionStyle(FlexDirection.ROW)
+public class GSEditor extends GSCompositeDiv {
 
 	public GSEditor() {
 		super();
@@ -81,27 +90,16 @@ public class GSEditor extends CompositeTagImpl {
 	}
 
 	// No automatic enclosing class parent for this GSEditor extension
-	@FlexDirection("column")
+	@FlexDirectionStyle(FlexDirection.COLUMN)
 	public static class HorizontalGSEditor extends GSEditor implements SelectionDefaults {
 
 		public HorizontalGSEditor(Tag parent) {
 			super(parent);
 		}
-
-		// @Override
-		// public void style() {
-		// ColumnFlexStyle.super.style();
-		// }
 	}
 
 	// Main title.
-	@BackgroundColor("#EA4500")
-	@MarginRight("1px")
-	@MarginBottom("1px")
-	@Color("White")
-	@JustifyContent("center")
-	@AlignItems("center")
-	public static class EditorTitle extends GSDiv {
+	public static class EditorTitle extends GSTitleDiv {
 
 		public static class EditorTitleContent extends HtmlH2 {
 
@@ -115,13 +113,16 @@ public class GSEditor extends CompositeTagImpl {
 
 	// Content.
 	@Parent(GSEditor.class)
-	// keepDirection();
+	@KeepFlexDirection
 	@Flex("1")
 	@Style(propertyName = "height", propertyValue = "100%")
 	public static class EditorContent extends GSDiv {
 		// Line/column with the names of the attributes and components of relations.
-		public static class LinkTitles extends GSDiv implements FlexStyle.LinkTitlesStyle {
-			public static class InstanceType extends GSDiv implements FlexStyle.TitleLineCellStyle {
+		@ReverseFlexDirection
+		@Flex("0.3")
+		public static class LinkTitles extends GSDiv {
+
+			public static class InstanceType extends GSTitleLineCellDiv {
 
 				@Override
 				public void init() {
@@ -134,10 +135,12 @@ public class GSEditor extends CompositeTagImpl {
 			}
 
 			@ForEach(ATTRIBUTES_OF_INSTANCES.class)
-			public static class TypeAttribute extends GSDiv implements FlexStyle.RowFlexStyle {
+			@Flex("1")
+			@FlexDirectionStyle(FlexDirection.ROW)
+			public static class TypeAttribute extends GSDiv {
 
 				@Select(STRICT_ATTRIBUTE_SELECTOR.class)
-				public static class AttributeName extends GSDiv implements FlexStyle.TitleLineCellStyle {
+				public static class AttributeName extends GSTitleLineCellDiv {
 
 					public static class AttributeNameDisplayer extends GSLabelDisplayer {
 
@@ -145,10 +148,12 @@ public class GSEditor extends CompositeTagImpl {
 				}
 
 				@Select(RELATION_SELECTOR.class)
-				public static class RelationName extends GSDiv implements FlexStyle.RowFlexStyle {
+				@Flex("1")
+				@FlexDirectionStyle(FlexDirection.ROW)
+				public static class RelationName extends GSDiv {
 
 					@ForEach(OTHER_COMPONENTS_2.class)
-					public static class ComponentName extends GSDiv implements FlexStyle.TitleLineCellStyle {
+					public static class ComponentName extends GSTitleLineCellDiv {
 
 						public static class ComponentNameDisplayer extends GSLabelDisplayer {
 						}
@@ -158,17 +163,22 @@ public class GSEditor extends CompositeTagImpl {
 		}
 
 		// Edition itself.
-		public static class InstanceEdition extends GSDiv implements FlexStyle.ReversedFlexStyle {
+		@Flex("1")
+		@ReverseFlexDirection
+		public static class InstanceEdition extends GSDiv {
 
 			// Edition of the name of the instance.
-			public static class InstanceNameEditorDiv extends GSDiv implements FlexStyle.SubCellEditorStyle {
+			public static class InstanceNameEditorDiv extends GSSubcellEditorDiv {
 
-				public static class InstanceNameEditor extends GSInputTextEditorWithConversion implements FullSizeStyle {
+				@Flex("1")
+				@Height("100%")
+				@Width("100%")
+				public static class InstanceNameEditor extends GSInputTextEditorWithConversion {
 				}
 			}
 
 			// Edition of the holders/links.
-			public static class InstanceAttributeEditor extends GSDiv implements FlexStyle.AttributeEditorStyle {
+			public static class InstanceAttributeEditor extends WrappedColumnDiv {
 
 				@Override
 				public void init() {
@@ -176,22 +186,33 @@ public class GSEditor extends CompositeTagImpl {
 				}
 
 				// Multiple checkboxes : for binary relations without the singular constraint.
-				public static class MultiCheckbox extends GSDiv implements FlexStyle.MultiCheckboxStyle {
+				public static class MultiCheckbox extends WrappedColumnDiv {
 
 					@Override
 					public void init() {
 						select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 					}
 
-					public static class CheckboxLabel extends org.genericsystem.reactor.gstag.HtmlLabel implements FlexStyle.CheckboxLabelStyle {
+					@Flex("1 0 auto")
+					@JustifyContent("center")
+					@AlignItems("center")
+					@Style(propertyName = "text-align", propertyValue = "center")
+					public static class CheckboxLabel extends org.genericsystem.reactor.gstag.HtmlLabel {
 
 						@Override
 						public void init() {
 							bindText();
 							forEach(gs -> ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])).stream().toArray(Generic[]::new)));
+							addPrefixBinding(model -> {
+								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+									addStyle(model, "background-color", getGenericStringProperty(model).getValue());
+							});
 						}
 
-						public static class Checkbox extends GSCheckBoxWithValue implements CheckboxStyle {
+						@Style(propertyName = "float", propertyValue = "left")
+						@Style(propertyName = "vertical-align", propertyValue = "middle")
+						@Style(propertyName = "margin", propertyValue = "4px")
+						public static class Checkbox extends GSCheckBoxWithValue {
 
 							@Override
 							public void init() {
@@ -220,14 +241,16 @@ public class GSEditor extends CompositeTagImpl {
 				}
 
 				// Edition of other attributes.
-				public static class AttributeEditionColumn extends GenericColumn implements FlexStyle.AttributeEditionColumnStyle {
+				@Flex("1")
+				@FlexWrap("wrap")
+				public static class AttributeEditionColumn extends GenericColumn {
 
 					@Override
 					public void init() {
 						select(gs -> gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 					}
 
-					public static class SubcellEditor extends GSDiv implements FlexStyle.SubcellEditorContainerStyle {
+					public static class SubcellEditor extends SubcellEditorContainerDiv {
 
 						@Override
 						public void init() {
@@ -235,27 +258,30 @@ public class GSEditor extends CompositeTagImpl {
 						}
 
 						// Edition of non-boolean holders.
-						public static class HolderEditor extends GSDiv implements FlexStyle.SubCellEditorStyle {
+						public static class HolderEditor extends GSSubcellEditorDiv {
 
 							@Override
 							public void init() {
 								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							public static class HolderEditorInput extends GSInputTextEditorWithConversion implements FullSizeStyle {
+							@Flex("1")
+							@Height("100%")
+							@Width("100%")
+							public static class HolderEditorInput extends GSInputTextEditorWithConversion {
 							}
 
 						}
 
 						// Edition of boolean holders.
-						public static class BooleanHolderEditor extends GSDiv implements FlexStyle.SubCellEditorStyle {
+						public static class BooleanHolderEditor extends GSSubcellEditorDiv {
 
 							@Override
 							public void init() {
 								select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							public static class CheckboxContainerDiv extends GSDiv implements FlexStyle.CenteredFlex {
+							public static class CheckboxContainerDiv extends CenteredFlexDiv {
 								@Parent(CheckboxContainerDiv.class)
 								public static class BooleanHolderEditorInput extends GSCheckBoxEditor {
 								}
@@ -264,7 +290,9 @@ public class GSEditor extends CompositeTagImpl {
 						}
 
 						// Edition of links.
-						public static class LinkEditor extends GSDiv implements org.genericsystem.reactor.modelproperties.ComponentsDefaults, FlexStyle.RowFlexStyle {
+						@Flex("1")
+						@FlexDirectionStyle(FlexDirection.ROW)
+						public static class LinkEditor extends GSDiv implements org.genericsystem.reactor.modelproperties.ComponentsDefaults {
 
 							@Override
 							public void init() {
@@ -272,7 +300,7 @@ public class GSEditor extends CompositeTagImpl {
 								createComponentsListProperty();
 							}
 
-							public static class ComponentEditor extends GSDiv implements ComponentEditorStyle {
+							public static class ComponentEditor extends GSComponentEditorDiv {
 
 								@Override
 								public void init() {
@@ -280,7 +308,10 @@ public class GSEditor extends CompositeTagImpl {
 								}
 
 								// TODO: Finish decomposition of InstanceCompositeSelect.
-								public static class DirectRelationComponentEditor extends InstanceCompositeSelect implements FullSizeStyle {
+								@Flex("1")
+								@Height("100%")
+								@Width("100%")
+								public static class DirectRelationComponentEditor extends InstanceCompositeSelect {
 
 									@Override
 									public void init() {
@@ -307,7 +338,7 @@ public class GSEditor extends CompositeTagImpl {
 
 						// Hyperlink to remove a holder/link. Displayed only if there is no required constraint on the given attribute/relation,
 						// or there is a required constraint but there are at least two holders/links for the given attribute/relation.
-						public static class RemovalLink extends HtmlHyperLink implements ActionLinkStyle {
+						public static class RemovalLink extends GSActionLink {
 
 							@Override
 							public void init() {
@@ -324,7 +355,7 @@ public class GSEditor extends CompositeTagImpl {
 					}
 
 					// To add a new holder/link if it’s possible.
-					public static class SubcellAdder extends GSDiv implements FlexStyle.SubcellEditorContainerStyle {
+					public static class SubcellAdder extends SubcellEditorContainerDiv {
 
 						@Override
 						public void init() {
@@ -339,14 +370,17 @@ public class GSEditor extends CompositeTagImpl {
 						}
 
 						// Addition of non-boolean holders.
-						public static class HolderAdder extends GSDiv implements FlexStyle.SubCellEditorStyle {
+						public static class HolderAdder extends GSSubcellEditorDiv {
 
 							@Override
 							public void init() {
 								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							public static class HolderAdderInput extends GSInputTextWithConversion implements FullSizeStyle {
+							@Flex("1")
+							@Height("100%")
+							@Width("100%")
+							public static class HolderAdderInput extends GSInputTextWithConversion {
 
 								@Override
 								public void init() {
@@ -367,14 +401,14 @@ public class GSEditor extends CompositeTagImpl {
 						}
 
 						// Addition of boolean holders.
-						public static class BooleanHolderAdder extends GSDiv implements FlexStyle.SubCellEditorStyle {
+						public static class BooleanHolderAdder extends GSSubcellEditorDiv {
 
 							@Override
 							public void init() {
 								select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							public static class CheckboxContainerAddDiv extends GSDiv implements FlexStyle.CenteredFlex {
+							public static class CheckboxContainerAddDiv extends CenteredFlexDiv {
 								public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
 
 									@Override
@@ -385,19 +419,21 @@ public class GSEditor extends CompositeTagImpl {
 										});
 									}
 								}
+							}
 
-								public static class BooleanHolderAdditionLink extends AdditionLink {
+							public static class BooleanHolderAdditionLink extends AdditionLink {
 
-									@Override
-									public void postfix() {
-										bindAction(context -> addHolder(context, (ConvertedValueDefaults) find(BooleanHolderAdderInput.class)));
-									}
+								@Override
+								public void postfix() {
+									bindAction(context -> addHolder(context, (ConvertedValueDefaults) find(BooleanHolderAdderInput.class)));
 								}
 							}
 						}
 
 						// Addition of links.
-						public static class LinkAdder extends GSDiv implements org.genericsystem.reactor.modelproperties.ComponentsDefaults, FlexStyle.RowFlexStyle {
+						@Flex("1")
+						@FlexDirectionStyle(FlexDirection.ROW)
+						public static class LinkAdder extends GSDiv implements org.genericsystem.reactor.modelproperties.ComponentsDefaults {
 
 							@Override
 							public void init() {
@@ -420,7 +456,7 @@ public class GSEditor extends CompositeTagImpl {
 								});
 							}
 
-							public static class ComponentAdder extends GSDiv implements ComponentEditorStyle {
+							public static class ComponentAdder extends GSComponentEditorDiv {
 
 								@Override
 								public void init() {
@@ -429,7 +465,10 @@ public class GSEditor extends CompositeTagImpl {
 
 								// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.
 								@Parent(ComponentAdder.class)
-								public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry implements FullSizeStyle {
+								@Flex("1")
+								@Height("100%")
+								@Width("100%")
+								public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry {
 
 									@Override
 									public void init() {
@@ -447,7 +486,7 @@ public class GSEditor extends CompositeTagImpl {
 				}
 
 				// Hyperlink to create the holder. Displayed only for holders, not for links.
-				public static class AdditionLink extends HtmlHyperLink implements ActionLinkStyle {
+				public static class AdditionLink extends GSActionLink {
 
 					@Override
 					public void init() {

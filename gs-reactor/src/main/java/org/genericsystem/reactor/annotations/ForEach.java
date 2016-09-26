@@ -23,15 +23,13 @@ public @interface ForEach {
 	@Target({ ElementType.TYPE })
 	@Inherited
 	public @interface ParentForEach {
-
+		int pos() default 0;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
 	public @interface ChildForEach {
-		Class<?> decorate();
-
-		Class<? extends Supplier<ObservableListExtractor>> forEach();
+		Class<? extends Supplier<ObservableListExtractor>>[] value();
 	}
 }
