@@ -14,6 +14,7 @@ import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.Select.ChildSelect;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
@@ -147,6 +148,18 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 				throw new IllegalStateException(e);
 			}
 		}
+
+		if (result.getParent() != null) {
+			ChildSelect[] childSelects = result.getParent().getClass().getAnnotationsByType(ChildSelect.class);
+			for (ChildSelect childSelect : childSelects)
+				if (childSelect.decorate().isAssignableFrom(result.getClass()))
+					try {
+						result.select(childSelect.value().newInstance().get());
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+		}
+
 		ParentFlexDirection parentFlexDirection = tagClass.getAnnotation(ParentFlexDirection.class);
 		if (parentFlexDirection == null) {
 			FlexDirectionStyle flexDirection = tagClass.getAnnotation(FlexDirectionStyle.class);

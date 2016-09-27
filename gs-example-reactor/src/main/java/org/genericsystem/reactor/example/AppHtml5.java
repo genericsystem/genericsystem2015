@@ -17,6 +17,7 @@ import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
+import org.genericsystem.reactor.annotations.Select.ChildSelect;
 import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
@@ -47,6 +48,7 @@ import org.genericsystem.reactor.example.AppHtml5.GSValueComponents;
 import org.genericsystem.reactor.example.AppHtml5.TestCell;
 import org.genericsystem.reactor.example.AppHtml5.Unit;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class, AudiTT.class, Green.class, AudiTTGreen.class, AudiTTPower.class, Unit.class })
@@ -117,6 +119,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@ChildForEach(ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
+	@ChildSelect(decorate = GSHeaderComponent.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
 	public static class GSValueComponents extends GSComposite {
 
 	}
