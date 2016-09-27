@@ -17,9 +17,25 @@ import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.Select.ChildSelect;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.ChildAlignItems;
+import org.genericsystem.reactor.annotations.Styles.ChildBackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.ChildColor;
+import org.genericsystem.reactor.annotations.Styles.ChildFlex;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ChildFlexWrap;
+import org.genericsystem.reactor.annotations.Styles.ChildGenericBackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.ChildHeight;
+import org.genericsystem.reactor.annotations.Styles.ChildJustifyContent;
+import org.genericsystem.reactor.annotations.Styles.ChildKeepFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ChildMarginBottom;
+import org.genericsystem.reactor.annotations.Styles.ChildMarginRight;
+import org.genericsystem.reactor.annotations.Styles.ChildOverflow;
+import org.genericsystem.reactor.annotations.Styles.ChildReverseFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ChildStyle;
+import org.genericsystem.reactor.annotations.Styles.ChildWidth;
 import org.genericsystem.reactor.annotations.Styles.Color;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
@@ -31,7 +47,6 @@ import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.MarginBottom;
 import org.genericsystem.reactor.annotations.Styles.MarginRight;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
-import org.genericsystem.reactor.annotations.Styles.ParentFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
@@ -159,19 +174,110 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 				throw new IllegalStateException(e);
 			}
 		}
-		ParentFlexDirection parentFlexDirection = tagClass.getAnnotation(ParentFlexDirection.class);
-		if (parentFlexDirection == null) {
-			FlexDirectionStyle flexDirection = tagClass.getAnnotation(FlexDirectionStyle.class);
-			if (flexDirection != null) {
-				if (GSDiv.class.isAssignableFrom(result.getClass()))
-					((GSDiv) result).setDirection(flexDirection.value());
-				else
-					log.warn("Warning: FlexDirectionStyle is applicable only to GSDiv extensions.");
-			}
-		} else {
-			ChildFlexDirection childFlexDirection = result.getParent().getClass().getAnnotation(ChildFlexDirection.class);
-			if (childFlexDirection != null)
-				result.addStyle("flex-direction", childFlexDirection.value()[parentFlexDirection.pos()]);
+
+		if (result.getParent() != null) {
+			Class<?> parentClass = result.getParent().getClass();
+
+			ChildSelect[] childSelects = parentClass.getAnnotationsByType(ChildSelect.class);
+			for (ChildSelect childSelect : childSelects)
+				if (childSelect.decorate().isAssignableFrom(result.getClass()))
+					try {
+						result.select(childSelect.value().newInstance().get());
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+
+			ChildStyle[] childStyles = parentClass.getAnnotationsByType(ChildStyle.class);
+			for (ChildStyle childStyle : childStyles)
+				if (childStyle.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle(childStyle.name(), childStyle.value());
+
+			ChildFlexDirection[] childFlexDirections = parentClass.getAnnotationsByType(ChildFlexDirection.class);
+			for (ChildFlexDirection childFlexDirection : childFlexDirections)
+				if (childFlexDirection.decorate().isAssignableFrom(result.getClass()))
+					if (GSDiv.class.isAssignableFrom(result.getClass()))
+						((GSDiv) result).setDirection(childFlexDirection.value());
+					else
+						log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
+
+			// Not working properly.
+			ChildKeepFlexDirection childKeepFlexDirection = result.getParent().getClass().getAnnotation(ChildKeepFlexDirection.class);
+			if (childKeepFlexDirection != null)
+				for (Class<? extends GSTagImpl> clazz : childKeepFlexDirection.value())
+					if (clazz.isAssignableFrom(result.getClass()))
+						if (GSDiv.class.isAssignableFrom(result.getClass()))
+							((GSDiv) result).keepDirection();
+						else
+							log.warn("Warning: KeepFlexDirection is applicable only to GSDiv extensions.");
+
+			ChildReverseFlexDirection childReverseFlexDirection = parentClass.getAnnotation(ChildReverseFlexDirection.class);
+			if (childReverseFlexDirection != null)
+				for (Class<? extends GSTagImpl> clazz : childReverseFlexDirection.value())
+					if (clazz.isAssignableFrom(result.getClass()))
+						if (GSDiv.class.isAssignableFrom(result.getClass())) {
+
+							System.out.println("Inversion de direction");
+							((GSDiv) result).reverseDirection();
+						} else
+							log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
+
+			ChildFlex[] childFlexs = parentClass.getAnnotationsByType(ChildFlex.class);
+			for (ChildFlex childFlex : childFlexs)
+				if (childFlex.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("flex", childFlex.value());
+			ChildFlexWrap[] childFlexWraps = parentClass.getAnnotationsByType(ChildFlexWrap.class);
+			for (ChildFlexWrap childFlexWrap : childFlexWraps)
+				if (childFlexWrap.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("flex-wrap", childFlexWrap.value());
+			ChildBackgroundColor[] childBackgroundColors = parentClass.getAnnotationsByType(ChildBackgroundColor.class);
+			for (ChildBackgroundColor childBackgroundColor : childBackgroundColors)
+				if (childBackgroundColor.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("background-color", childBackgroundColor.value());
+			ChildGenericBackgroundColor[] childGenericBackgroundColors = parentClass.getAnnotationsByType(ChildGenericBackgroundColor.class);
+			for (ChildGenericBackgroundColor childGenericBackgroundColor : childGenericBackgroundColors)
+				if (childGenericBackgroundColor.decorate().isAssignableFrom(result.getClass()))
+					result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
+							"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
+			ChildAlignItems[] childAlignItemss = parentClass.getAnnotationsByType(ChildAlignItems.class);
+			for (ChildAlignItems childAlignItems : childAlignItemss)
+				if (childAlignItems.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("align-items", childAlignItems.value());
+			ChildJustifyContent[] childJustifyContents = parentClass.getAnnotationsByType(ChildJustifyContent.class);
+			for (ChildJustifyContent childJustifyContent : childJustifyContents)
+				if (childJustifyContent.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("justify-content", childJustifyContent.value());
+			ChildOverflow[] childOverflows = parentClass.getAnnotationsByType(ChildOverflow.class);
+			for (ChildOverflow childOverflow : childOverflows)
+				if (childOverflow.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("overflow", childOverflow.value());
+			ChildColor[] childColors = parentClass.getAnnotationsByType(ChildColor.class);
+			for (ChildColor childColor : childColors)
+				if (childColor.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("color", childColor.value());
+			ChildMarginRight[] childMarginRights = parentClass.getAnnotationsByType(ChildMarginRight.class);
+			for (ChildMarginRight childMarginRight : childMarginRights)
+				if (childMarginRight.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("margin-right", childMarginRight.value());
+			ChildMarginBottom[] childMarginBottoms = parentClass.getAnnotationsByType(ChildMarginBottom.class);
+			for (ChildMarginBottom childMarginBottom : childMarginBottoms)
+				if (childMarginBottom.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("margin-bottom", childMarginBottom.value());
+			ChildHeight[] childHeights = parentClass.getAnnotationsByType(ChildHeight.class);
+			for (ChildHeight childHeight : childHeights)
+				if (childHeight.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("height", childHeight.value());
+			ChildWidth[] childWidths = parentClass.getAnnotationsByType(ChildWidth.class);
+			for (ChildWidth childWidth : childWidths)
+				if (childWidth.decorate().isAssignableFrom(result.getClass()))
+					result.addStyle("width", childWidth.value());
+		}
+
+		FlexDirectionStyle flexDirection = tagClass.getAnnotation(FlexDirectionStyle.class);
+		if (flexDirection != null) {
+			if (GSDiv.class.isAssignableFrom(result.getClass()))
+				((GSDiv) result).setDirection(flexDirection.value());
+			else
+				log.warn("Warning: FlexDirectionStyle is applicable only to GSDiv extensions.");
 		}
 
 		if (tagClass.getAnnotation(KeepFlexDirection.class) != null)
@@ -226,8 +332,8 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			result.addStyle("width", width.value());
 
 		Style[] styles = tagClass.getAnnotationsByType(Style.class);
-		for (Style style_ : styles)
-			result.addStyle(style_.propertyName(), style_.propertyValue());
+		for (Style style : styles)
+			result.addStyle(style.propertyName(), style.propertyValue());
 	}
 
 	private final static ProxyFactory PROXY_FACTORY = new ProxyFactory();
