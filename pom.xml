@@ -29,7 +29,7 @@
 		<testng.version>6.8.21</testng.version>
 		<slf4j.version>1.7.10</slf4j.version>
 		<javassist.version>3.19.0-GA</javassist.version>
-		<vertx.version>3.2.0</vertx.version>
+		<vertx.version>3.3.0</vertx.version>
 
 		<json.version>1.0.4</json.version>
 		<json-api.version>1.0</json-api.version>

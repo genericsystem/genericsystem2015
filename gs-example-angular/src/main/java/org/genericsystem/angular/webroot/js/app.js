@@ -9,7 +9,6 @@ angular.module('CrudApp', []).config(['$routeProvider', function ($routeProvider
 }]);
 
 function IndexCtrl($scope, $http, $location){
-
 	$http.get('/api/types').success(function(data){	
 		$scope.choices = data;		
 		$scope.select = function(choice){
@@ -28,25 +27,17 @@ function ListCtrl($scope, $http, $route) {
 		$scope.instances = data;		
 	});	
 
-	$scope.flush = function(instance){
-		$http.put('/api/'+path, instance).succes(function (data) {
-			$scope.instances = data;			
-		});
-	};
-	$scope.shift = function (instance) {
-		var shiftInst = confirm('Are you absolutely sure you want to shift?');
-		if (shiftInst) {
-			$http.post('/api/'+path+'/shift/');
-			$route.reload();
-		}		
-	}; 
-	$scope.clear = function (instance) {
-		var deleteInstances = confirm('Are you absolutely sure you want to delete?');
-		if (deleteInstances) {
-			$http.delete('/api/'+path+'/clear/');			
-			$route.reload();			
-		}			
-	};	
+	<button class="btn btn-success" ng-click="commit(instance)">
+	Save <span class="glyphicon glyphicon-floppy-disk" />
+	</button>
+ 
+	<button class="btn btn-warning" ng-click="shift(instance)">
+	Shift <span class="glyphicon glyphicon-fast-forward" />
+	</button>
+ 
+	<button class="btn btn-danger" ng-click="clear(instance)">
+	Cancel <span class="glyphicon glyphicon-trash" />
+	</button>
 }
 
 function AddCtrl($scope, $http, $location) {
