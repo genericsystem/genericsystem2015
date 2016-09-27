@@ -11,15 +11,15 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.gs.FlexDirection;
-import org.genericsystem.reactor.gs.GSApp;
-import org.genericsystem.reactor.gs.GSEditor;
-import org.genericsystem.reactor.gs.GSHeader;
-import org.genericsystem.reactor.gs.GSLogo;
-import org.genericsystem.reactor.gs.GSModal;
-import org.genericsystem.reactor.gs.GSMonitor;
-import org.genericsystem.reactor.gs.GSResponsive;
-import org.genericsystem.reactor.gs.GSTable;
+import org.genericsystem.reactor.az.FlexDirection;
+import org.genericsystem.reactor.az.GSApp;
+import org.genericsystem.reactor.az.GSEditor;
+import org.genericsystem.reactor.az.GSHeader;
+import org.genericsystem.reactor.az.GSLogo;
+import org.genericsystem.reactor.az.GSModal;
+import org.genericsystem.reactor.az.GSMonitor;
+import org.genericsystem.reactor.az.GSResponsive;
+import org.genericsystem.reactor.az.GSTable;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 /**

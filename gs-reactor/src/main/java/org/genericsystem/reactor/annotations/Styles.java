@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.reactor.gs.FlexDirection;
+import org.genericsystem.reactor.az.FlexDirection;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
