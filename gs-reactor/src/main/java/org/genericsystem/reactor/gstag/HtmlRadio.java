@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gstag;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSTagImpl;
+import org.genericsystem.reactor.az.GSTagImpl;
 
 import io.vertx.core.json.JsonObject;
 
@@ -13,8 +13,12 @@ import io.vertx.core.json.JsonObject;
  */
 public class HtmlRadio extends GSTagImpl {
 
+	public HtmlRadio() {
+
+	}
+
 	public HtmlRadio(Tag parent) {
-		super(parent, "input");
+		super(parent);
 	}
 
 	@Override
@@ -27,5 +31,10 @@ public class HtmlRadio extends GSTagImpl {
 				return jsonObj.put("type", "radio");
 			}
 		};
+	}
+
+	@Override
+	public String getTag() {
+		return "input";
 	}
 }

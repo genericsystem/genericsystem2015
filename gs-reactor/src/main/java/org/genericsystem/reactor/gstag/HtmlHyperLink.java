@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSTagImpl;
+import org.genericsystem.reactor.az.GSTagImpl;
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.SwitchDefaults;
@@ -19,16 +19,21 @@ import io.vertx.core.json.JsonObject;
 public class HtmlHyperLink extends GSTagImpl implements SelectionDefaults, SwitchDefaults, ActionDefaults {
 
 	public HtmlHyperLink() {
-		super("a");
+
 	}
 
 	public HtmlHyperLink(Tag parent) {
-		super(parent, "a");
+		super(parent);
 	}
 
 	public HtmlHyperLink(Tag parent, String text) {
-		super(parent, "a");
+		super(parent);
 		setText(text);
+	}
+
+	@Override
+	public String getTag() {
+		return "a";
 	}
 
 	public HtmlHyperLink(Tag parent, String text, Consumer<Context> action) {
