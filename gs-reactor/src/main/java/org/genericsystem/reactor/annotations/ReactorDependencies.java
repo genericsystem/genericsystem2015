@@ -8,7 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.genericsystem.reactor.az.GSTagImpl;
-import org.genericsystem.reactor.az3.GSComposite.GSContentComponent;
 
 /**
  * @author Nicolas Feybesse
@@ -32,7 +31,7 @@ public @interface ReactorDependencies {
 	@Inherited
 	@Repeatable(ChildReactorDependenciesMult.class)
 	public @interface ChildReactorDependencies {
-		Class<? extends GSTagImpl> decorate() default GSContentComponent.class;
+		Class<? extends GSTagImpl> decorate();
 
 		Class<? extends GSTagImpl> value();
 	}

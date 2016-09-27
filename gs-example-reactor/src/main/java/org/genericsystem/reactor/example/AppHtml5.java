@@ -105,7 +105,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Brown")
 	@ChildForEach(ObservableListExtractor.HOLDERS.class)
-	@ChildReactorDependencies(GSValueComponents2.class)
+	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents2.class)
 	@MarginRight("1px")
 	@MarginBottom("1px")
 	public static class GSHolders extends GSComposite {
@@ -145,7 +145,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@DirectSelect(Car.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRow.class)
-	@ChildReactorDependencies(GSInstanceAttributesRow.class)
+	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRow.class)
 	@ChildFlexDirection("row")
 	@Style(propertyName = "margin", propertyValue = "4px")
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
@@ -154,7 +154,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@DirectSelect(Car.class)
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRowWithComponents.class)
-	@ChildReactorDependencies(GSInstanceAttributesRowWithComponents.class)
+	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRowWithComponents.class)
 	public static class GSTypeTableInstancesComposite extends GSTypeLabeledInstancesComposite {
 
 	}
@@ -162,13 +162,13 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@Styles.Color("#000000")
 	@BackgroundColor("purple")
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSValueComponents1.class)
-	@ChildReactorDependencies(GSValueComponents1.class)
+	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents1.class)
 	public static class GSTypeAttributesRowWithComponents extends GSTypeAttributesRow {
 
 	}
 
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSValueComponents2.class)
-	@ChildReactorDependencies(GSHolders.class)
+	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSHolders.class)
 	public static class GSInstanceAttributesRowWithComponents extends GSInstanceAttributesRow {
 
 	}

@@ -18,7 +18,7 @@ import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 @Overflow("hidden")
 @ReactorDependencies({ GSComposite.GSContentComponent.class })
 @ChildFlexDirection("column")
-@ChildReactorDependencies(GSContentComponent.GSContentComponentLabel.class)
+@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSContentComponent.GSContentComponentLabel.class)
 @ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSHeaderComponentLabel.class)
 @ChildReactorDependencies(decorate = GSFooterComponent.class, value = GSFooterComponentLabel.class)
 public abstract class GSComposite extends GSCompositeDiv {
