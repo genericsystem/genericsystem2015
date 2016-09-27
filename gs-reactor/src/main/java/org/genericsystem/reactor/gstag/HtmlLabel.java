@@ -10,11 +10,16 @@ import org.genericsystem.reactor.az.GSTagImpl;
 public class HtmlLabel extends GSTagImpl {
 
 	public HtmlLabel() {
-		super("label");
+
 	}
 
 	public HtmlLabel(Tag parent) {
-		super(parent, "label");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "label";
 	}
 
 	// @Style(propertyName = "width", propertyValue = "100%")

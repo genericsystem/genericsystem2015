@@ -10,10 +10,15 @@ import org.genericsystem.reactor.az.GSTagImpl;
 public class HtmlDiv extends GSTagImpl {
 
 	public HtmlDiv() {
-		super("div");
+
 	}
 
 	public HtmlDiv(Tag parent) {
-		super(parent, "div");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "div";
 	}
 }

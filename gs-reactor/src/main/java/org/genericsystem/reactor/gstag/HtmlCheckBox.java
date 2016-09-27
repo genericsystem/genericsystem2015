@@ -15,11 +15,16 @@ import io.vertx.core.json.JsonObject;
 public class HtmlCheckBox extends GSTagImpl {
 
 	public HtmlCheckBox() {
-		super("input");
+		super();
 	}
 
 	public HtmlCheckBox(Tag parent) {
-		super(parent, "input");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "input";
 	}
 
 	@Override

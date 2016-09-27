@@ -9,7 +9,16 @@ import org.genericsystem.reactor.az.GSTagImpl;
  */
 public class HtmlUl extends GSTagImpl {
 
+	public HtmlUl() {
+
+	}
+
 	public HtmlUl(Tag parent) {
-		super(parent, "ul");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "ul";
 	}
 }

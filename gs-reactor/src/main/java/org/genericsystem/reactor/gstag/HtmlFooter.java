@@ -9,7 +9,15 @@ import org.genericsystem.reactor.az.GSTagImpl;
  */
 public class HtmlFooter extends GSTagImpl {
 
+	public HtmlFooter() {
+	}
+
 	public HtmlFooter(Tag parent) {
-		super(parent, "footer");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "footer";
 	}
 }

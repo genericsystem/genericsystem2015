@@ -1,11 +1,14 @@
 package org.genericsystem.reactor.az3;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.function.Consumer;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -36,6 +39,15 @@ import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az.GSTagImpl;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javassist.util.proxy.MethodFilter;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
 
 public class GSCompositeDiv extends GSDiv implements Tag {
 
@@ -216,5 +228,70 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		Style[] styles = tagClass.getAnnotationsByType(Style.class);
 		for (Style style_ : styles)
 			result.addStyle(style_.propertyName(), style_.propertyValue());
+	}
+
+	private final static ProxyFactory PROXY_FACTORY = new ProxyFactory();
+	private final static MethodFilter METHOD_FILTER = method -> method.getName().equals("toString");
+
+	private Tag newInstance(Tag parent, Class<? extends Tag> clazz) {
+		assert clazz.isInterface();
+		PROXY_FACTORY.setSuperclass(Object.class);
+		PROXY_FACTORY.setInterfaces(new Class[] { clazz });
+		Tag result;
+		try {
+			result = (Tag) PROXY_FACTORY.createClass(METHOD_FILTER).newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		((ProxyObject) result).setHandler(new TagHandler(parent, result));
+		return result;
+	}
+
+	private static class TagHandler implements MethodHandler {
+
+		private MetaBinding<?> metaBinding;
+		private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();
+		private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
+		private Tag parent;
+		private final ObservableList<Tag> children = FXCollections.observableArrayList();
+
+		protected TagHandler(Tag parent, Tag tag) {
+			this.parent = parent;
+			if (parent != null)
+				parent.getObservableChildren().add(tag);
+		}
+
+		@Override
+		public Object invoke(Object self, Method m, Method proceed, Object[] args) throws Throwable {
+			return ((Tag) self).defaultToString();
+		}
+
+		public List<Consumer<Context>> getPreFixedBindings() {
+			return preFixedBindings;
+		}
+
+		public List<Consumer<Context>> getPostFixedBindings() {
+			return postFixedBindings;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <BETWEEN> MetaBinding<BETWEEN> getMetaBinding() {
+			return (MetaBinding<BETWEEN>) metaBinding;
+		}
+
+		public <BETWEEN> void setMetaBinding(MetaBinding<BETWEEN> metaBinding) {
+			if (this.metaBinding != null)
+				throw new IllegalStateException("MetaBinding already defined");
+			this.metaBinding = metaBinding;
+		}
+
+		public ObservableList<Tag> getObservableChildren() {
+			return children;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <COMPONENT extends Tag> COMPONENT getParent() {
+			return (COMPONENT) parent;
+		}
 	}
 }

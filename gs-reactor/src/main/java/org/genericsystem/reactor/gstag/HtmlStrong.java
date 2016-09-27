@@ -9,7 +9,15 @@ import org.genericsystem.reactor.az.GSTagImpl;
  */
 public class HtmlStrong extends GSTagImpl {
 
+	public HtmlStrong() {
+	}
+
 	public HtmlStrong(Tag parent) {
-		super(parent, "strong");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "strong";
 	}
 }

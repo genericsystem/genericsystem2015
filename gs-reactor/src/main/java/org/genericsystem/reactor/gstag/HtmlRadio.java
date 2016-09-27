@@ -13,8 +13,12 @@ import io.vertx.core.json.JsonObject;
  */
 public class HtmlRadio extends GSTagImpl {
 
+	public HtmlRadio() {
+
+	}
+
 	public HtmlRadio(Tag parent) {
-		super(parent, "input");
+		super(parent);
 	}
 
 	@Override
@@ -27,5 +31,10 @@ public class HtmlRadio extends GSTagImpl {
 				return jsonObj.put("type", "radio");
 			}
 		};
+	}
+
+	@Override
+	public String getTag() {
+		return "input";
 	}
 }

@@ -10,11 +10,16 @@ import org.genericsystem.reactor.az.GSTagImpl;
 public class HtmlH1 extends GSTagImpl {
 
 	public HtmlH1(Tag parent) {
-		super(parent, "h1");
+		super(parent);
 	}
 
 	public HtmlH1(Tag parent, String text) {
-		super(parent, "h1");
+		super(parent);
 		setText(text);
+	}
+
+	@Override
+	public String getTag() {
+		return "h1";
 	}
 }

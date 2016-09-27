@@ -11,11 +11,16 @@ import io.vertx.core.json.JsonObject;
 public class HtmlInputText extends GSTagImpl implements ActionDefaults {
 
 	public HtmlInputText() {
-		super("input");
+
 	}
 
 	public HtmlInputText(Tag parent) {
-		super(parent, "input");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "input";
 	}
 
 	@Override

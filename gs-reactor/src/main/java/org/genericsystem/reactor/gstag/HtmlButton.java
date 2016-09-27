@@ -16,11 +16,16 @@ import io.vertx.core.json.JsonObject;
 public class HtmlButton extends GSTagImpl implements ActionDefaults, GSBuilderDefaults {
 
 	public HtmlButton() {
-		super("button");
+
+	}
+
+	@Override
+	public String getTag() {
+		return "button";
 	}
 
 	public HtmlButton(Tag parent) {
-		super(parent, "button");
+		super(parent);
 	}
 
 	@Override

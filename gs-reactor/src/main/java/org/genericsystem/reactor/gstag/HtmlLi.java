@@ -9,7 +9,15 @@ import org.genericsystem.reactor.az.GSTagImpl;
  */
 public class HtmlLi extends GSTagImpl {
 
+	public HtmlLi() {
+	}
+
 	public HtmlLi(Tag parent) {
-		super(parent, "li");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "li";
 	}
 }

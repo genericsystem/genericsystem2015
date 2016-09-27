@@ -5,6 +5,11 @@ import org.genericsystem.reactor.az.GSTagImpl;
 
 public class HtmlHeader extends GSTagImpl {
 	public HtmlHeader(Tag parent) {
-		super(parent, "header");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "header";
 	}
 }

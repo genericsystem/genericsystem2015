@@ -19,16 +19,21 @@ import io.vertx.core.json.JsonObject;
 public class HtmlHyperLink extends GSTagImpl implements SelectionDefaults, SwitchDefaults, ActionDefaults {
 
 	public HtmlHyperLink() {
-		super("a");
+
 	}
 
 	public HtmlHyperLink(Tag parent) {
-		super(parent, "a");
+		super(parent);
 	}
 
 	public HtmlHyperLink(Tag parent, String text) {
-		super(parent, "a");
+		super(parent);
 		setText(text);
+	}
+
+	@Override
+	public String getTag() {
+		return "a";
 	}
 
 	public HtmlHyperLink(Tag parent, String text, Consumer<Context> action) {

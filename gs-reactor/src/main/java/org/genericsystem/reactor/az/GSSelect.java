@@ -20,13 +20,17 @@ public class GSSelect extends GSTagImpl implements SelectionDefaults, Components
 	public HtmlOption optionElement;
 
 	public GSSelect() {
-		super("select");
 		initSelect();
 	}
 
 	private GSSelect(Tag parent) {
-		super(parent, "select");
+		super(parent);
 		initSelect();
+	}
+
+	@Override
+	public String getTag() {
+		return "select";
 	}
 
 	protected void initSelect() {

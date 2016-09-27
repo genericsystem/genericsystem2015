@@ -9,7 +9,16 @@ import org.genericsystem.reactor.az.GSTagImpl;
  */
 public class HtmlP extends GSTagImpl {
 
+	public HtmlP() {
+
+	}
+
 	public HtmlP(Tag parent) {
-		super(parent, "p");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "p";
 	}
 }
