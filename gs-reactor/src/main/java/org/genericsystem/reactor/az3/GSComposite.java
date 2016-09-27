@@ -6,7 +6,7 @@ import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDep
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
-import org.genericsystem.reactor.annotations.Styles.ParentFlexDirection;
+import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az3.GSComposite.GSContentComponent;
 import org.genericsystem.reactor.az3.GSComposite.GSFooterComponent;
 import org.genericsystem.reactor.az3.GSComposite.GSFooterComponent.GSFooterComponentLabel;
@@ -17,8 +17,10 @@ import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 @Flex("1 1 0%")
 @Overflow("hidden")
 @ReactorDependencies({ GSComposite.GSContentComponent.class })
-@ChildFlexDirection("column")
-@ChildReactorDependencies(GSContentComponent.GSContentComponentLabel.class)
+@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.COLUMN)
+@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.COLUMN)
+@ChildFlexDirection(decorate = GSFooterComponent.class, value = FlexDirection.COLUMN)
+@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSContentComponent.GSContentComponentLabel.class)
 @ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSHeaderComponentLabel.class)
 @ChildReactorDependencies(decorate = GSFooterComponent.class, value = GSFooterComponentLabel.class)
 public abstract class GSComposite extends GSCompositeDiv {
@@ -26,7 +28,6 @@ public abstract class GSComposite extends GSCompositeDiv {
 	@Flex("1 1 0%")
 	@Overflow("hidden")
 	@ParentForEach
-	@ParentFlexDirection
 	public static class GSContentComponent extends GSCompositeDiv {
 		public static class GSContentComponentLabel extends GSLabelDisplayer {
 
@@ -35,7 +36,6 @@ public abstract class GSComposite extends GSCompositeDiv {
 
 	@Flex("1 1 0%")
 	@Overflow("hidden")
-	@ParentFlexDirection
 	public static class GSHeaderComponent extends GSCompositeDiv {
 		public static class GSHeaderComponentLabel extends GSLabelDisplayer {
 
@@ -44,7 +44,6 @@ public abstract class GSComposite extends GSCompositeDiv {
 
 	@Flex("1 1 0%")
 	@Overflow("hidden")
-	@ParentFlexDirection
 	public static class GSFooterComponent extends GSCompositeDiv {
 		public static class GSFooterComponentLabel extends GSLabelDisplayer {
 
