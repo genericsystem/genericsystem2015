@@ -395,7 +395,7 @@ public class GSEditor extends GSCompositeDiv {
 
 								@Override
 								public void postfix() {
-									bindAction(context -> addHolder(context, (ConvertedValueDefaults) find(HolderAdderInput.class)));
+									bindAction(context -> addHolder(context, find(HolderAdderInput.class)));
 								}
 							}
 						}
@@ -425,7 +425,7 @@ public class GSEditor extends GSCompositeDiv {
 
 								@Override
 								public void postfix() {
-									bindAction(context -> addHolder(context, (ConvertedValueDefaults) find(BooleanHolderAdderInput.class)));
+									bindAction(context -> addHolder(context, find(BooleanHolderAdderInput.class)));
 								}
 							}
 						}

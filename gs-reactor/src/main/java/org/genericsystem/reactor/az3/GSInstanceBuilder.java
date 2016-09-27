@@ -174,7 +174,7 @@ public class GSInstanceBuilder extends GSCompositeDiv implements GSBuilderDefaul
 								() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
 								getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
 				bindAction(model -> {
-					ConvertedValueDefaults input = (ConvertedValueDefaults) find(InstanceNameBuilderInput.class);
+					ConvertedValueDefaults input = find(InstanceNameBuilderInput.class);
 					Generic newInstance = model.getGeneric().setInstance(input.getConvertedValueProperty(model).getValue());
 					for (Entry<Generic, Property<Serializable>> entry : getHoldersMapProperty(model).getValue().entrySet())
 						if (entry.getValue().getValue() != null) {
