@@ -33,7 +33,7 @@ public @interface ReactorDependencies {
 	public @interface ChildReactorDependencies {
 		Class<? extends GSTagImpl> decorate();
 
-		Class<? extends GSTagImpl> value();
+		Class<? extends GSTagImpl>[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

@@ -117,7 +117,8 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			ChildReactorDependencies[] childDependenciesMult = getParent().getClass().getAnnotationsByType(ChildReactorDependencies.class);
 			for (ChildReactorDependencies cd : childDependenciesMult) {
 				if (cd.decorate().isAssignableFrom(getClass()))
-					find(cd.value());
+					for (Class<? extends GSTagImpl> childClass : cd.value())
+						find(childClass);
 			}
 		}
 		for (Tag tag : nodes.values())
