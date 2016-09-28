@@ -200,7 +200,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 					else
 						log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
 
-			// Not working properly.
 			ChildKeepFlexDirection childKeepFlexDirection = result.getParent().getClass().getAnnotation(ChildKeepFlexDirection.class);
 			if (childKeepFlexDirection != null)
 				for (Class<? extends GSTagImpl> clazz : childKeepFlexDirection.value())
@@ -214,11 +213,9 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			if (childReverseFlexDirection != null)
 				for (Class<? extends GSTagImpl> clazz : childReverseFlexDirection.value())
 					if (clazz.isAssignableFrom(result.getClass()))
-						if (GSDiv.class.isAssignableFrom(result.getClass())) {
-
-							System.out.println("Inversion de direction");
+						if (GSDiv.class.isAssignableFrom(result.getClass()))
 							((GSDiv) result).reverseDirection();
-						} else
+						else
 							log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
 
 			ChildFlex[] childFlexs = parentClass.getAnnotationsByType(ChildFlex.class);

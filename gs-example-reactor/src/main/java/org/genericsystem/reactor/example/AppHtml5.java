@@ -24,9 +24,11 @@ import org.genericsystem.reactor.annotations.Styles.ChildBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.ChildMarginBottom;
 import org.genericsystem.reactor.annotations.Styles.ChildMarginRight;
+import org.genericsystem.reactor.annotations.Styles.ChildReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.az.FlexDirection;
@@ -94,7 +96,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@ChildMarginBottom(decorate = GSHeaderComponent.class, value = "1px")
 	@Styles.Color("White")
 	@DirectSelect(Car.class)
-	@FlexDirectionStyle(FlexDirection.ROW)
+	@KeepFlexDirection
 	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
 	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
@@ -104,7 +106,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Orange")
-	@FlexDirectionStyle(FlexDirection.ROW)
+	@KeepFlexDirection
 	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
 	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
@@ -163,6 +165,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRow.class)
 	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRow.class)
 	@Style(propertyName = "margin", propertyValue = "4px")
+	@ChildReverseFlexDirection({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
 
 	}
