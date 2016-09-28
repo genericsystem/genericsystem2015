@@ -167,15 +167,31 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
+	@Repeatable(ChildKeepFlexDirections.class)
 	public @interface ChildKeepFlexDirection {
-		Class<? extends GSTagImpl>[] value();
+		Class<? extends GSTagImpl> decorate();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
+	public @interface ChildKeepFlexDirections {
+		ChildKeepFlexDirection[] value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	@Repeatable(ChildReverseFlexDirections.class)
 	public @interface ChildReverseFlexDirection {
-		Class<? extends GSTagImpl>[] value();
+		Class<? extends GSTagImpl> decorate();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ChildReverseFlexDirections {
+		ChildReverseFlexDirection[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -232,8 +248,8 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	@Repeatable(ChildGenericBackgroundColors.class)
-	public @interface ChildGenericBackgroundColor {
+	@Repeatable(ChildGenericValueBackgroundColors.class)
+	public @interface ChildGenericValueBackgroundColor {
 		Class<? extends GSTagImpl> decorate();
 
 	}
@@ -241,8 +257,8 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	public @interface ChildGenericBackgroundColors {
-		ChildGenericBackgroundColor[] value();
+	public @interface ChildGenericValueBackgroundColors {
+		ChildGenericValueBackgroundColor[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

@@ -22,6 +22,7 @@ import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ChildGenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildMarginBottom;
 import org.genericsystem.reactor.annotations.Styles.ChildMarginRight;
 import org.genericsystem.reactor.annotations.Styles.ChildReverseFlexDirection;
@@ -143,7 +144,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	}
 
-	@ChildBackgroundColor(decorate = GSContentComponent.class, value = "Yellow")
+	@ChildGenericValueBackgroundColor(decorate = GSContentComponent.class)
 	@ChildBackgroundColor(decorate = GSHeaderComponent.class, value = "Yellow")
 	@ChildForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	public static class GSValueComponents2 extends GSValueComponents {
@@ -165,7 +166,8 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRow.class)
 	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRow.class)
 	@Style(propertyName = "margin", propertyValue = "4px")
-	@ChildReverseFlexDirection({ GSHeaderComponent.class, GSContentComponent.class })
+	@ChildReverseFlexDirection(decorate = GSHeaderComponent.class)
+	@ChildReverseFlexDirection(decorate = GSContentComponent.class)
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
 
 	}
