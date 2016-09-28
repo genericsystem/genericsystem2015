@@ -26,7 +26,7 @@ public @interface ForEach {
 	@Inherited
 	@Repeatable(ChildForEachs.class)
 	public @interface ChildForEach {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		Class<? extends Supplier<ObservableListExtractor>> value();
 	}

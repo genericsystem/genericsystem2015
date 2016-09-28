@@ -2,8 +2,11 @@ package org.genericsystem.reactor.az3;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Tag;
@@ -251,15 +254,29 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		});
 	}
 
+	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Consumer<Annotation> consumer, Tag current) {
+		if (current != null) {
+			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
+			for (Annotation annotation : annotations)
+				try {
+					Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
+					// TODO: Use isAssignableFrom instead of equals.
+					if (Arrays.asList(decorate).equals(classesToResult)) {
+						consumer.accept(annotation);
+						return;
+					}
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					throw new IllegalStateException(e);
+				}
+			classesToResult.add(0, current.getClass());
+			processDecorateAnnotation(annotationClass, classesToResult, consumer, current.getParent());
+		}
+	}
+
 	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
-		Annotation[] annotations = result.getParent().getClass().getAnnotationsByType(annotationClass);
-		for (Annotation annotation : annotations)
-			try {
-				if (((Class<?>) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation)).isAssignableFrom(result.getClass()))
-					consumer.accept(annotation);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalStateException(e);
-			}
+		List<Class<?>> classesToResult = new ArrayList<>();
+		classesToResult.add(result.getClass());
+		processDecorateAnnotation(annotationClass, classesToResult, consumer, result.getParent());
 	}
 
 	private static <T extends Tag> void processDecorateStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
