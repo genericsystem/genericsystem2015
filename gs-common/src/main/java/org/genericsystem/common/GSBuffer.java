@@ -693,4 +693,119 @@ public class GSBuffer implements Buffer {
 	public String toString(Charset arg0) {
 		return internal.toString();
 	}
+
+	@Override
+	public int getIntLE(int pos) {
+		return internal.getIntLE(pos);
+	}
+
+	@Override
+	public long getUnsignedIntLE(int pos) {
+		return internal.getUnsignedIntLE(pos);
+	}
+
+	@Override
+	public long getLongLE(int pos) {
+		return internal.getLongLE(pos);
+	}
+
+	@Override
+	public short getShortLE(int pos) {
+		return internal.getShortLE(pos);
+	}
+
+	@Override
+	public int getUnsignedShortLE(int pos) {
+		return internal.getUnsignedShortLE(pos);
+	}
+
+	@Override
+	public int getMedium(int pos) {
+		return internal.getMedium(pos);
+	}
+
+	@Override
+	public int getMediumLE(int pos) {
+		return internal.getMediumLE(pos);
+	}
+
+	@Override
+	public int getUnsignedMedium(int pos) {
+		return internal.getUnsignedMedium(pos);
+	}
+
+	@Override
+	public int getUnsignedMediumLE(int pos) {
+		return internal.getUnsignedMediumLE(pos);
+	}
+
+	@Override
+	public Buffer appendIntLE(int i) {
+		return internal.appendIntLE(i);
+	}
+
+	@Override
+	public Buffer appendUnsignedIntLE(long i) {
+		return internal.appendUnsignedIntLE(i);
+	}
+
+	@Override
+	public Buffer appendMedium(int i) {
+		return internal.appendMedium(i);
+	}
+
+	@Override
+	public Buffer appendMediumLE(int i) {
+		return internal.appendMediumLE(i);
+	}
+
+	@Override
+	public Buffer appendLongLE(long l) {
+		return internal.appendLongLE(l);
+	}
+
+	@Override
+	public Buffer appendShortLE(short s) {
+		return internal.appendShortLE(s);
+	}
+
+	@Override
+	public Buffer appendUnsignedShortLE(int s) {
+		return internal.appendUnsignedShortLE(s);
+	}
+
+	@Override
+	public Buffer setIntLE(int pos, int i) {
+		return internal.setInt(pos, i);
+	}
+
+	@Override
+	public Buffer setUnsignedIntLE(int pos, long i) {
+		return internal.setUnsignedIntLE(pos, i);
+	}
+
+	@Override
+	public Buffer setMedium(int pos, int i) {
+		return internal.setMedium(pos, i);
+	}
+
+	@Override
+	public Buffer setMediumLE(int pos, int i) {
+		return internal.setMediumLE(pos, i);
+	}
+
+	@Override
+	public Buffer setLongLE(int pos, long l) {
+		return internal.setLongLE(pos, l);
+	}
+
+	@Override
+	public Buffer setShortLE(int pos, short s) {
+		return internal.setShortLE(pos, s);
+	}
+
+	@Override
+	public Buffer setUnsignedShortLE(int pos, int s) {
+		return internal.setUnsignedShortLE(pos, s);
+	}
 }

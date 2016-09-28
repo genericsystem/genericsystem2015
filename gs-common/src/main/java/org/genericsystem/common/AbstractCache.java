@@ -36,7 +36,8 @@ import javafx.collections.ObservableList;
  *
  */
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
-
+	//
+	// differentialProperty);
 	public Generic setMeta(int dim) {
 		return setInstance(null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim)));
 	}
