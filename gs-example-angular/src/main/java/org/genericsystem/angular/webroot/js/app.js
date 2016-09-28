@@ -1,4 +1,3 @@
-
 angular.module('CrudApp', ['ngRoute']).config(['$routeProvider', function ($routeProvider) {
 	$routeProvider.
 	when('/', {templateUrl: '/tpl/home.html', controller: IndexCtrl}).
@@ -23,10 +22,21 @@ function IndexCtrl($scope, $http, $location){
 function ListCtrl($scope, $http, $route) {
 	$scope.type = path;
 	$scope.names = columns;
-
-	$http.get('/api/'+path).success(function (data) {			
+	$http.get('/api/'+path).success(function (data) {	
 		$scope.instances = data;		
 	});	
+
+	$scope.commit = function(){
+		$http.put('/api/'+path+'/commit/');
+	};
+	$scope.shift = function () {
+			$http.post('/api/'+path+'/shift/');
+			$route.reload();	
+	}; 
+	$scope.clear = function (instance) {
+			$http.delete('/api/'+path+'/clear/');			
+			$route.reload();						
+	};	
 }
 
 function AddCtrl($scope, $http, $location) {
@@ -63,10 +73,7 @@ function EditCtrl($scope, $http, $location, $routeParams) {
 	};
 
 	$scope.delete = function (instance) {
-		var deleteInst = confirm('Are you absolutely sure you want to delete?');
-		if (deleteInst) {
-			$http.delete('/api/'+path+'/' + instance.id);           
-			$scope.activePath = $location.path('/list');
-		}
-	};
+			$http.delete('/api/'+path+'/' + instance.id).success(function (data){  
+			$scope.activePath = $location.path('/list')});
+		};
 }

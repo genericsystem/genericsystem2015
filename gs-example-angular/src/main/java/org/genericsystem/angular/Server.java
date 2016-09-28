@@ -69,6 +69,25 @@ public class Server extends AbstractVerticle {
 		runner.accept(vertx);
 	}
 
+	@Override
+	public void start() throws Exception {
+		Router router = Router.router(vertx);
+		router.route().handler(BodyHandler.create());
+		router.route().handler(CookieHandler.create());
+		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+		router.route().handler(CacheHandler.create(engine));
+		JsonArray jsonArray = getGSJsonCRUD();
+		router.get("/api/types").handler(ctx -> {
+			ctx.response().end(jsonArray.encode());
+		});
+		initREST(router);
+
+		// Create a router endpoint for the static content.
+		router.route().handler(StaticHandler.create());
+		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+
+	}
+
 	public String getTableName(Generic type) {
 		if (!type.isSystem())
 			return null;
@@ -155,44 +174,20 @@ public class Server extends AbstractVerticle {
 		}
 	}
 
-	@Override
-	public void start() throws Exception {
-		Router router = Router.router(vertx);
-		router.route().handler(BodyHandler.create());
-		router.route().handler(CookieHandler.create());
-		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
-		router.route().handler(CacheHandler.create(engine));
-		JsonArray jsonArray = getGSJsonCRUD();
-		router.get("/api/types").handler(ctx -> {
-			ctx.response().end(jsonArray.encode());
-		});
-		initREST(router);
-
-		// Create a router endpoint for the static content.
-		router.route().handler(StaticHandler.create());
-		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
-		System.out.println("HttpServerCreated");
-
-	}
-
 	private void initREST(Router router) {
-		System.out.println("initREST");
 		JsonArray jsonArray = getGSJsonCRUD();
 		router.get("/api/types").handler(ctx -> {
 			ctx.response().end(jsonArray.encode());
 		});
 		for (int j = 0; j < jsonArray.size(); j++) {
 			String typeName = jsonArray.getJsonObject(j).getString("tableName");
-
 			router.get("/api/" + typeName).handler(ctx -> {
-				System.out.println("GET");
 				Generic type = engine.getInstance(typeName);
 				final JsonArray json = new JsonArray();
 				type.getInstances().stream().forEach(i -> json.add(getJson(i, getAttributes(type))));
 				ctx.response().end(json.encode());
 			});
 			router.get("/api/" + typeName + "/:id").handler(ctx -> {
-				System.out.println("GET");
 				Generic type = engine.getInstance(typeName);
 				Generic instance = getInstanceById(type, Long.valueOf(ctx.request().getParam("id")));
 				JsonObject json = getJson(instance, getAttributes(type));
@@ -222,7 +217,6 @@ public class Server extends AbstractVerticle {
 				Generic type = engine.getInstance(typeName);
 				Generic instance = getInstanceById(type, Long.valueOf(ctx.request().getParam("id")));
 				instance.remove();
-				ctx.response().setStatusCode(204);
 				ctx.response().end();
 			});
 			router.put("/api/" + typeName + "/commit").handler(ctx -> {
