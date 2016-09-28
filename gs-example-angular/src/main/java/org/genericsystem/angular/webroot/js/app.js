@@ -1,4 +1,5 @@
-angular.module('CrudApp', []).config(['$routeProvider', function ($routeProvider) {
+
+angular.module('CrudApp', ['ngRoute']).config(['$routeProvider', function ($routeProvider) {
 	$routeProvider.
 	when('/', {templateUrl: '/tpl/home.html', controller: IndexCtrl}).
 	when('/list', {templateUrl: '/tpl/lists.html', controller: ListCtrl}).
@@ -26,18 +27,6 @@ function ListCtrl($scope, $http, $route) {
 	$http.get('/api/'+path).success(function (data) {			
 		$scope.instances = data;		
 	});	
-
-	<button class="btn btn-success" ng-click="commit(instance)">
-	Save <span class="glyphicon glyphicon-floppy-disk" />
-	</button>
- 
-	<button class="btn btn-warning" ng-click="shift(instance)">
-	Shift <span class="glyphicon glyphicon-fast-forward" />
-	</button>
- 
-	<button class="btn btn-danger" ng-click="clear(instance)">
-	Cancel <span class="glyphicon glyphicon-trash" />
-	</button>
 }
 
 function AddCtrl($scope, $http, $location) {

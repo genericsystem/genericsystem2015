@@ -16,7 +16,6 @@ import org.genericsystem.kernel.Cache;
 import org.genericsystem.kernel.Engine;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -47,14 +46,16 @@ public class Server extends AbstractVerticle {
 		car1.setHolder(power, 100);
 		car2.setHolder(power, 200);
 		engine.getCurrentCache().flush();
+
 		String dir = "gs-example-angular/src/main/java/" + Server.class.getPackage().getName().replace(".", "/");
 		try {
+			// We need to use the canonical file. Without the file name is .
 			File current = new File(".").getCanonicalFile();
 			if (dir.startsWith(current.getName()) && !dir.equals(current.getName())) {
 				dir = dir.substring(current.getName().length() + 1);
 			}
 		} catch (IOException e) {
-			// Ignore it
+			// Ignore it.
 		}
 		System.setProperty("vertx.cwd", dir);
 		Consumer<Vertx> runner = vertx -> {
@@ -64,22 +65,7 @@ public class Server extends AbstractVerticle {
 				t.printStackTrace();
 			}
 		};
-
 		Vertx vertx = Vertx.vertx(new VertxOptions().setClustered(false));
-		runner.accept(vertx);
-	}
-
-	public static void run(String dir, String verticleID, VertxOptions options, DeploymentOptions deploymentOptions) {
-		System.setProperty("vertx.cwd", dir);
-		Consumer<Vertx> runner = vertx -> {
-			try {
-				vertx.deployVerticle(verticleID);
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		};
-
-		Vertx vertx = Vertx.vertx(options);
 		runner.accept(vertx);
 	}
 
@@ -109,7 +95,6 @@ public class Server extends AbstractVerticle {
 		return attributesArray;
 	}
 
-	// Method to override to get desired columns
 	public Snapshot<Generic> getAttributes(Generic type) {
 		return type.getAttributes().filter(att -> att.getComponents().size() == 1 && type.inheritsFrom(att.getBaseComponent()));
 	}
@@ -182,6 +167,7 @@ public class Server extends AbstractVerticle {
 			ctx.response().end(jsonArray.encode());
 		});
 		initREST(router);
+
 		// Create a router endpoint for the static content.
 		router.route().handler(StaticHandler.create());
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
@@ -197,6 +183,7 @@ public class Server extends AbstractVerticle {
 		});
 		for (int j = 0; j < jsonArray.size(); j++) {
 			String typeName = jsonArray.getJsonObject(j).getString("tableName");
+
 			router.get("/api/" + typeName).handler(ctx -> {
 				System.out.println("GET");
 				Generic type = engine.getInstance(typeName);
@@ -205,14 +192,13 @@ public class Server extends AbstractVerticle {
 				ctx.response().end(json.encode());
 			});
 			router.get("/api/" + typeName + "/:id").handler(ctx -> {
-				System.out.println("GETID");
+				System.out.println("GET");
 				Generic type = engine.getInstance(typeName);
 				Generic instance = getInstanceById(type, Long.valueOf(ctx.request().getParam("id")));
 				JsonObject json = getJson(instance, getAttributes(type));
 				ctx.response().end(json.encode());
 			});
 			router.post("/api/" + typeName).handler(ctx -> {
-				System.out.println("POST");
 				Generic type = engine.getInstance(typeName);
 				JsonObject newInst = ctx.getBodyAsJson();
 				Generic instance = type.setInstance(newInst.getString("value"));
@@ -222,7 +208,6 @@ public class Server extends AbstractVerticle {
 				ctx.response().end(newInst.encode());
 			});
 			router.put("/api/" + typeName + "/:id").handler(ctx -> {
-				System.out.println("PUT");
 				Generic type = engine.getInstance(typeName);
 				Generic instance = getInstanceById(type, Long.valueOf(ctx.request().getParam("id")));
 				JsonObject update = ctx.getBodyAsJson();
@@ -234,27 +219,23 @@ public class Server extends AbstractVerticle {
 				ctx.response().end(json.encode());
 			});
 			router.delete("/api/" + typeName + "/:id").handler(ctx -> {
-				System.out.println("DELETE");
 				Generic type = engine.getInstance(typeName);
 				Generic instance = getInstanceById(type, Long.valueOf(ctx.request().getParam("id")));
 				instance.remove();
 				ctx.response().setStatusCode(204);
 				ctx.response().end();
 			});
-			router.put("/api/" + typeName).handler(ctx -> {
-				System.out.println("Flush");
+			router.put("/api/" + typeName + "/commit").handler(ctx -> {
 				engine.getCurrentCache().flush();
 				ctx.response().end();
 			});
 
 			router.delete("/api/" + typeName + "/shift").handler(ctx -> {
-				System.out.println("shift");
 				engine.getCurrentCache().shiftTs();
 				ctx.response().end();
 			});
 
 			router.delete("/api/" + typeName + "/clear").handler(ctx -> {
-				System.out.println("clear");
 				engine.getCurrentCache().clear();
 				ctx.response().end();
 			});
