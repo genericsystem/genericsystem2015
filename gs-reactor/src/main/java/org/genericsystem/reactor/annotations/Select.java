@@ -26,7 +26,7 @@ public @interface Select {
 	@Inherited
 	@Repeatable(ChildSelects.class)
 	public @interface ChildSelect {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		Class<? extends Supplier<ObservableValueSelector>> value();
 	}

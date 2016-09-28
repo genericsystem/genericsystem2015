@@ -69,7 +69,7 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	public @interface GenericBackgroundColor {
+	public @interface GenericValueBackgroundColor {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -133,7 +133,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildStyles.class)
 	public @interface ChildStyle {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String name();
 
@@ -152,7 +152,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildFlexDirections.class)
 	public @interface ChildFlexDirection {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		FlexDirection value();
 	}
@@ -167,15 +167,31 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
+	@Repeatable(ChildKeepFlexDirections.class)
 	public @interface ChildKeepFlexDirection {
-		Class<? extends GSTagImpl>[] value();
+		Class<? extends GSTagImpl>[] decorate();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
+	public @interface ChildKeepFlexDirections {
+		ChildKeepFlexDirection[] value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	@Repeatable(ChildReverseFlexDirections.class)
 	public @interface ChildReverseFlexDirection {
-		Class<? extends GSTagImpl>[] value();
+		Class<? extends GSTagImpl>[] decorate();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Inherited
+	public @interface ChildReverseFlexDirections {
+		ChildReverseFlexDirection[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -183,7 +199,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildFlexs.class)
 	public @interface ChildFlex {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -200,7 +216,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildFlexWraps.class)
 	public @interface ChildFlexWrap {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -217,7 +233,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildBackgroundColors.class)
 	public @interface ChildBackgroundColor {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -232,17 +248,17 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	@Repeatable(ChildGenericBackgroundColors.class)
-	public @interface ChildGenericBackgroundColor {
-		Class<? extends GSTagImpl> decorate();
+	@Repeatable(ChildGenericValueBackgroundColors.class)
+	public @interface ChildGenericValueBackgroundColor {
+		Class<? extends GSTagImpl>[] decorate();
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	public @interface ChildGenericBackgroundColors {
-		ChildGenericBackgroundColor[] value();
+	public @interface ChildGenericValueBackgroundColors {
+		ChildGenericValueBackgroundColor[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -250,7 +266,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildAlignItemss.class)
 	public @interface ChildAlignItems {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -267,7 +283,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildJustifyContents.class)
 	public @interface ChildJustifyContent {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -284,7 +300,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildOverflows.class)
 	public @interface ChildOverflow {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -301,7 +317,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildColors.class)
 	public @interface ChildColor {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -318,7 +334,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildMarginRights.class)
 	public @interface ChildMarginRight {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -335,7 +351,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildMarginBottoms.class)
 	public @interface ChildMarginBottom {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -352,7 +368,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildHeights.class)
 	public @interface ChildHeight {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}
@@ -369,7 +385,7 @@ public @interface Styles {
 	@Inherited
 	@Repeatable(ChildWidths.class)
 	public @interface ChildWidth {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
 		String value();
 	}

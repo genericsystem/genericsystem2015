@@ -22,11 +22,14 @@ import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.ChildGenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.ChildMarginBottom;
 import org.genericsystem.reactor.annotations.Styles.ChildMarginRight;
+import org.genericsystem.reactor.annotations.Styles.ChildReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.az.FlexDirection;
@@ -65,7 +68,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Green")
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSInstancesComposite extends GSComposite {
 
 	}
@@ -73,14 +76,14 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@BackgroundColor("Blue")
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSRowInstancesComposite extends GSComposite {
 
 	}
 
 	@BackgroundColor("Red")
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributes extends GSComposite {
 
@@ -94,8 +97,8 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@ChildMarginBottom(decorate = GSHeaderComponent.class, value = "1px")
 	@Styles.Color("White")
 	@DirectSelect(Car.class)
-	@FlexDirectionStyle(FlexDirection.ROW)
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@KeepFlexDirection
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
 	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
@@ -104,8 +107,8 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Orange")
-	@FlexDirectionStyle(FlexDirection.ROW)
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@KeepFlexDirection
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
 	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
@@ -118,7 +121,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Brown")
-	@ChildForEach(ObservableListExtractor.HOLDERS.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.HOLDERS.class)
 	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents2.class)
 	public static class GSHolders extends GSComposite {
 
@@ -127,7 +130,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	// @DirectSelect(Power.class)
 	@ChildBackgroundColor(decorate = GSContentComponent.class, value = "Purple")
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@ChildForEach(ObservableListExtractor.COMPONENTS.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	@ChildSelect(decorate = GSHeaderComponent.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
 	@ChildMarginRight(decorate = GSContentComponent.class, value = "1px")
@@ -136,14 +139,14 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	}
 
-	@ChildForEach(ObservableListExtractor.OTHER_COMPONENTS_1.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	public static class GSValueComponents1 extends GSValueComponents {
 
 	}
 
-	@ChildBackgroundColor(decorate = GSContentComponent.class, value = "Yellow")
+	@ChildGenericValueBackgroundColor(decorate = GSContentComponent.class)
 	@ChildBackgroundColor(decorate = GSHeaderComponent.class, value = "Yellow")
-	@ChildForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	public static class GSValueComponents2 extends GSValueComponents {
 
 	}
@@ -163,6 +166,8 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRow.class)
 	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRow.class)
 	@Style(propertyName = "margin", propertyValue = "4px")
+	@ChildReverseFlexDirection(decorate = GSHeaderComponent.class)
+	@ChildReverseFlexDirection(decorate = GSContentComponent.class)
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
 
 	}

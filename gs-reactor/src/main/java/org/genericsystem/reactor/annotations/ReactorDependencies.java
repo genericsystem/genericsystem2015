@@ -31,9 +31,9 @@ public @interface ReactorDependencies {
 	@Inherited
 	@Repeatable(ChildReactorDependenciesMult.class)
 	public @interface ChildReactorDependencies {
-		Class<? extends GSTagImpl> decorate();
+		Class<? extends GSTagImpl>[] decorate();
 
-		Class<? extends GSTagImpl> value();
+		Class<? extends GSTagImpl>[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

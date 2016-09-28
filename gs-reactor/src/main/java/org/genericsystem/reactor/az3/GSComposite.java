@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.az3;
 
-import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
@@ -27,7 +26,6 @@ public abstract class GSComposite extends GSCompositeDiv {
 
 	@Flex("1 1 0%")
 	@Overflow("hidden")
-	@ParentForEach
 	public static class GSContentComponent extends GSCompositeDiv {
 		public static class GSContentComponentLabel extends GSLabelDisplayer {
 

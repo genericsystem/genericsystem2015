@@ -1,0 +1,21 @@
+<h2>Home, choose a type</h2>
+<div>
+	<table class="table table-condensed">
+		<thead>
+			<tr>
+				<th>Type</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="choice in choices">
+				<td>{{choice.tableName}}</td>
+
+				<td><button class="btn btn-primary" id="type-choice"
+						ng-click="select(choice)">
+						Select<span class="glyphicon glyphicon-hand-up" />
+					</button></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
