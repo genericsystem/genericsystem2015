@@ -40,7 +40,7 @@ import org.genericsystem.reactor.annotations.Styles.Color;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
-import org.genericsystem.reactor.annotations.Styles.GenericBackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Height;
 import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
@@ -295,7 +295,7 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		if (backgroundColor != null)
 			result.addStyle("background-color", backgroundColor.value());
 
-		if (tagClass.getAnnotation(GenericBackgroundColor.class) != null)
+		if (tagClass.getAnnotation(GenericValueBackgroundColor.class) != null)
 			result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
 					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00"));
 		FlexWrap flexWrap = tagClass.getAnnotation(FlexWrap.class);

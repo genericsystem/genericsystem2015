@@ -69,7 +69,7 @@ public @interface Styles {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	@Inherited
-	public @interface GenericBackgroundColor {
+	public @interface GenericValueBackgroundColor {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

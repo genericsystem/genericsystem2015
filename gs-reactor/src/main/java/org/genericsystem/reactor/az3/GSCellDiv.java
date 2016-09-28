@@ -6,7 +6,7 @@ import org.genericsystem.reactor.annotations.Styles.Color;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
-import org.genericsystem.reactor.annotations.Styles.GenericBackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Height;
 import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
@@ -80,7 +80,7 @@ public class GSCellDiv extends GSDiv {
 	}
 
 	@Color("#000000")
-	@GenericBackgroundColor
+	@GenericValueBackgroundColor
 	public static class GSSubcellDiv extends GSComponentEditorDiv {
 	}
 
