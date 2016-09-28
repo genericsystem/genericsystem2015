@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSTagImpl;
+import org.genericsystem.reactor.az.GSTagImpl;
 
 /**
  * @author Nicolas Feybesse
@@ -9,7 +9,16 @@ import org.genericsystem.reactor.gs.GSTagImpl;
  */
 public class HtmlSpan extends GSTagImpl {
 
+	public HtmlSpan() {
+
+	}
+
 	public HtmlSpan(Tag parent) {
-		super(parent, "span");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "span";
 	}
 }

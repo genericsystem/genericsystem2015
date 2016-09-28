@@ -1,7 +1,7 @@
 package org.genericsystem.reactor.gstag;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gs.GSTagImpl;
+import org.genericsystem.reactor.az.GSTagImpl;
 
 /**
  * @author Nicolas Feybesse
@@ -9,7 +9,16 @@ import org.genericsystem.reactor.gs.GSTagImpl;
  */
 public class HtmlUl extends GSTagImpl {
 
+	public HtmlUl() {
+
+	}
+
 	public HtmlUl(Tag parent) {
-		super(parent, "ul");
+		super(parent);
+	}
+
+	@Override
+	public String getTag() {
+		return "ul";
 	}
 }

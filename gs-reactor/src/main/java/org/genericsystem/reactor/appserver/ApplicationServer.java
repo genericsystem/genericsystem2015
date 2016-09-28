@@ -21,7 +21,7 @@ import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
-import org.genericsystem.reactor.gs.GSApp;
+import org.genericsystem.reactor.az.GSApp;
 
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -156,7 +156,7 @@ public class ApplicationServer extends AbstractBackEnd {
 					String indexHtml = "<!DOCTYPE html>";
 					indexHtml += "<html>";
 					indexHtml += "<head>";
-					indexHtml += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+					indexHtml += "<meta charset=\"UTF-8\" name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
 					indexHtml += "<LINK rel=stylesheet type=\"text/css\" href=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".css\"/>";
 					indexHtml += "<script>";
 					indexHtml += "var serviceLocation = \"ws://\" + document.location.host + \"" + request.path() + "\";";
