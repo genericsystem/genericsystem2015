@@ -68,7 +68,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Green")
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSInstancesComposite extends GSComposite {
 
 	}
@@ -76,14 +76,14 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@BackgroundColor("Blue")
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSRowInstancesComposite extends GSComposite {
 
 	}
 
 	@BackgroundColor("Red")
 	@DirectSelect(Car.class)
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributes extends GSComposite {
 
@@ -98,7 +98,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@Styles.Color("White")
 	@DirectSelect(Car.class)
 	@KeepFlexDirection
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
 	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
@@ -108,7 +108,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Orange")
 	@KeepFlexDirection
-	@ChildForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
 	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
@@ -121,7 +121,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Brown")
-	@ChildForEach(ObservableListExtractor.HOLDERS.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.HOLDERS.class)
 	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents2.class)
 	public static class GSHolders extends GSComposite {
 
@@ -130,7 +130,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	// @DirectSelect(Power.class)
 	@ChildBackgroundColor(decorate = GSContentComponent.class, value = "Purple")
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@ChildForEach(ObservableListExtractor.COMPONENTS.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	@ChildSelect(decorate = GSHeaderComponent.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
 	@ChildMarginRight(decorate = GSContentComponent.class, value = "1px")
@@ -139,14 +139,14 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	}
 
-	@ChildForEach(ObservableListExtractor.OTHER_COMPONENTS_1.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	public static class GSValueComponents1 extends GSValueComponents {
 
 	}
 
 	@ChildGenericValueBackgroundColor(decorate = GSContentComponent.class)
 	@ChildBackgroundColor(decorate = GSHeaderComponent.class, value = "Yellow")
-	@ChildForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
+	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	public static class GSValueComponents2 extends GSValueComponents {
 
 	}

@@ -10,7 +10,6 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
-import org.genericsystem.reactor.annotations.ForEach.ParentForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
@@ -131,36 +130,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 	}
 
 	private static <T extends Tag> void processAnnotations(Class<T> tagClass, Tag result) {
-		ParentForEach parentForEach = tagClass.getAnnotation(ParentForEach.class);
-		if (parentForEach == null) {
-			ForEach forEach = tagClass.getAnnotation(ForEach.class);
-			if (forEach != null) {
-				try {
-					result.forEach(forEach.value().newInstance().get());
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-		} else {
-			ChildForEach childForEach = result.getParent().getClass().getAnnotation(ChildForEach.class);
-			if (childForEach != null) {
-				try {
-					result.forEach(childForEach.value()[parentForEach.pos()].newInstance().get());
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			} else
-				log.warn("Warning : unable to find childForEach on : " + result.getParent().getClass().getSimpleName() + " for : " + tagClass.getSimpleName());
-		}
-
-		processAnnotation(Select.class, tagClass, annotation -> {
-			try {
-				result.select(((Select) annotation).value().newInstance().get());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
-		});
-
 		if (result.getParent() != null) {
 			Class<? extends Tag> parentClass = result.getParent().getClass();
 
@@ -171,7 +140,13 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 					throw new IllegalStateException(e);
 				}
 			});
-
+			processDecorateAnnotation(ChildForEach.class, parentClass, result, annotation -> {
+				try {
+					result.forEach(((ChildForEach) annotation).value().newInstance().get());
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
 			processDecorateAnnotation(ChildStyle.class, parentClass, result, annotation -> result.addStyle(((ChildStyle) annotation).name(), ((ChildStyle) annotation).value()));
 
 			processDecorateAnnotation(ChildFlexDirection.class, parentClass, result, annotation -> {
@@ -209,6 +184,22 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			processDecorateStyleAnnotation(ChildWidth.class, parentClass, result, "width");
 		}
 
+		processAnnotation(ForEach.class, tagClass, annotation -> {
+			try {
+				result.forEach(((ForEach) annotation).value().newInstance().get());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		});
+
+		processAnnotation(Select.class, tagClass, annotation -> {
+			try {
+				result.select(((Select) annotation).value().newInstance().get());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		});
+
 		processAnnotation(FlexDirectionStyle.class, tagClass, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
 				((GSDiv) result).setDirection(((FlexDirectionStyle) annotation).value());
@@ -231,6 +222,8 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		processAnnotation(GenericValueBackgroundColor.class, tagClass, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
 				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00")));
 
+		processAnnotation(Style.class, tagClass, annotation -> result.addStyle(((Style) annotation).propertyName(), ((Style) annotation).propertyValue()));
+
 		processStyleAnnotation(BackgroundColor.class, tagClass, result, "background-color");
 		processStyleAnnotation(FlexWrap.class, tagClass, result, "flex-wrap");
 		processStyleAnnotation(Flex.class, tagClass, result, "flex");
@@ -242,8 +235,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		processStyleAnnotation(MarginBottom.class, tagClass, result, "margin-bottom");
 		processStyleAnnotation(Height.class, tagClass, result, "height");
 		processStyleAnnotation(Width.class, tagClass, result, "width");
-
-		processAnnotation(Style.class, tagClass, annotation -> result.addStyle(((Style) annotation).propertyName(), ((Style) annotation).propertyValue()));
 	}
 
 	private static <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Class<T> tagClass, Consumer<Annotation> consumer) {
