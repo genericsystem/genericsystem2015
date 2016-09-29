@@ -11,7 +11,6 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
@@ -24,6 +23,7 @@ import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
+import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -115,7 +115,7 @@ public class GSEditor extends GSCompositeDiv {
 	@Parent(GSEditor.class)
 	@KeepFlexDirection
 	@Flex("1")
-	@Style(propertyName = "height", propertyValue = "100%")
+	@Style(name = "height", value = "100%")
 	public static class EditorContent extends GSDiv {
 		// Line/column with the names of the attributes and components of relations.
 		@ReverseFlexDirection
@@ -196,7 +196,7 @@ public class GSEditor extends GSCompositeDiv {
 					@Flex("1 0 auto")
 					@JustifyContent("center")
 					@AlignItems("center")
-					@Style(propertyName = "text-align", propertyValue = "center")
+					@Style(name = "text-align", value = "center")
 					public static class CheckboxLabel extends org.genericsystem.reactor.gstag.HtmlLabel {
 
 						@Override
@@ -209,9 +209,9 @@ public class GSEditor extends GSCompositeDiv {
 							});
 						}
 
-						@Style(propertyName = "float", propertyValue = "left")
-						@Style(propertyName = "vertical-align", propertyValue = "middle")
-						@Style(propertyName = "margin", propertyValue = "4px")
+						@Style(name = "float", value = "left")
+						@Style(name = "vertical-align", value = "middle")
+						@Style(name = "margin", value = "4px")
 						public static class Checkbox extends GSCheckBoxWithValue {
 
 							@Override

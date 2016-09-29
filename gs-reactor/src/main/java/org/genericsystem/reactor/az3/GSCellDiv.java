@@ -104,7 +104,7 @@ public class GSCellDiv extends GSDiv {
 
 	@JustifyContent("center")
 	@Height("100%")
-	@Style(propertyName = "text-decoration", propertyValue = "none")
+	@Style(name = "text-decoration", value = "none")
 	public static class GSActionLink extends HtmlHyperLink {
 	}
 }
