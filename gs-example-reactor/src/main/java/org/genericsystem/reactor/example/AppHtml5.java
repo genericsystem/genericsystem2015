@@ -13,23 +13,20 @@ import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.Select.ChildSelect;
+import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ChildBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.ChildGenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ChildMarginBottom;
-import org.genericsystem.reactor.annotations.Styles.ChildMarginRight;
-import org.genericsystem.reactor.annotations.Styles.ChildReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.MarginBottom;
+import org.genericsystem.reactor.annotations.Styles.MarginRight;
+import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.az.FlexDirection;
@@ -37,12 +34,16 @@ import org.genericsystem.reactor.az.GSApp;
 import org.genericsystem.reactor.az3.GSComposite;
 import org.genericsystem.reactor.az3.GSComposite.GSContentComponent;
 import org.genericsystem.reactor.az3.GSComposite.GSHeaderComponent;
+import org.genericsystem.reactor.az3.GSComposite.GSTable;
+import org.genericsystem.reactor.az3.GSComposite.GSTable.GSContentRow;
+import org.genericsystem.reactor.az3.GSComposite.GSTable.GSHeaderRow;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.example.AppHtml5.AudiTT;
 import org.genericsystem.reactor.example.AppHtml5.AudiTT.AudiTTGreen;
 import org.genericsystem.reactor.example.AppHtml5.AudiTT.AudiTTPower;
 import org.genericsystem.reactor.example.AppHtml5.AudiTT.Green;
 import org.genericsystem.reactor.example.AppHtml5.GSInstancesComposite;
+import org.genericsystem.reactor.example.AppHtml5.GSInstancesTable;
 import org.genericsystem.reactor.example.AppHtml5.GSRowInstancesComposite;
 import org.genericsystem.reactor.example.AppHtml5.GSTypeAttributes;
 import org.genericsystem.reactor.example.AppHtml5.GSTypeAttributesRow;
@@ -57,7 +58,8 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class, AudiTT.class, Green.class, AudiTTGreen.class, AudiTTPower.class, Unit.class })
 @RunScript(ExampleReactorScript.class)
-@ReactorDependencies({ GSInstancesComposite.class, GSRowInstancesComposite.class, GSTypeAttributes.class, GSTypeAttributesRow.class, GSValueComponents.class, GSTypeLabeledInstancesComposite.class, GSTypeTableInstancesComposite.class, TestCell.class })
+@ReactorDependencies({ GSInstancesComposite.class, GSRowInstancesComposite.class, GSTypeAttributes.class, GSTypeAttributesRow.class, GSValueComponents.class, GSTypeLabeledInstancesComposite.class, GSTypeTableInstancesComposite.class, TestCell.class,
+		GSInstancesTable.class })
 @FlexWrap("wrap")
 @Flex("1 1 0%")
 public class AppHtml5 extends GSApp implements SelectionDefaults {
@@ -68,7 +70,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Green")
 	@DirectSelect(Car.class)
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSInstancesComposite extends GSComposite {
 
 	}
@@ -76,31 +78,31 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@BackgroundColor("Blue")
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@DirectSelect(Car.class)
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSRowInstancesComposite extends GSComposite {
 
 	}
 
 	@BackgroundColor("Red")
 	@DirectSelect(Car.class)
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributes extends GSComposite {
 
 	}
 
-	@ChildBackgroundColor(decorate = GSContentComponent.class, value = "Purple")
-	@ChildBackgroundColor(decorate = GSHeaderComponent.class, value = "Purple")
-	@ChildMarginRight(decorate = GSContentComponent.class, value = "1px")
-	@ChildMarginBottom(decorate = GSContentComponent.class, value = "1px")
-	@ChildMarginRight(decorate = GSHeaderComponent.class, value = "1px")
-	@ChildMarginBottom(decorate = GSHeaderComponent.class, value = "1px")
+	@BackgroundColor(decorate = GSContentComponent.class, value = "Purple")
+	@BackgroundColor(decorate = GSHeaderComponent.class, value = "Purple")
+	@MarginRight(decorate = GSContentComponent.class, value = "1px")
+	@MarginBottom(decorate = GSContentComponent.class, value = "1px")
+	@MarginRight(decorate = GSHeaderComponent.class, value = "1px")
+	@MarginBottom(decorate = GSHeaderComponent.class, value = "1px")
 	@Styles.Color("White")
 	@DirectSelect(Car.class)
 	@KeepFlexDirection
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
-	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
-	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@FlexDirectionStyle(decorate = GSContentComponent.class, value = FlexDirection.ROW)
+	@FlexDirectionStyle(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
 	public static class GSTypeAttributesRow extends GSComposite {
 
@@ -108,45 +110,45 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@BackgroundColor("Orange")
 	@KeepFlexDirection
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-	@ChildFlexDirection(decorate = GSContentComponent.class, value = FlexDirection.ROW)
-	@ChildFlexDirection(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@FlexDirectionStyle(decorate = GSContentComponent.class, value = FlexDirection.ROW)
+	@FlexDirectionStyle(decorate = GSHeaderComponent.class, value = FlexDirection.ROW)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
-	@ChildMarginRight(decorate = GSHeaderComponent.class, value = "1px")
-	@ChildMarginBottom(decorate = GSHeaderComponent.class, value = "1px")
-	@ChildMarginRight(decorate = GSContentComponent.class, value = "1px")
-	@ChildMarginBottom(decorate = GSContentComponent.class, value = "1px")
+	@MarginRight(decorate = GSHeaderComponent.class, value = "1px")
+	@MarginBottom(decorate = GSHeaderComponent.class, value = "1px")
+	@MarginRight(decorate = GSContentComponent.class, value = "1px")
+	@MarginBottom(decorate = GSContentComponent.class, value = "1px")
 	public static class GSInstanceAttributesRow extends GSComposite {
 
 	}
 
 	@BackgroundColor("Brown")
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.HOLDERS.class)
-	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents2.class)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.HOLDERS.class)
+	@ReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents2.class)
 	public static class GSHolders extends GSComposite {
 
 	}
 
 	// @DirectSelect(Power.class)
-	@ChildBackgroundColor(decorate = GSContentComponent.class, value = "Purple")
+	@BackgroundColor(decorate = GSContentComponent.class, value = "Purple")
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.COMPONENTS.class)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.COMPONENTS.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
-	@ChildSelect(decorate = GSHeaderComponent.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
-	@ChildMarginRight(decorate = GSContentComponent.class, value = "1px")
-	@ChildMarginBottom(decorate = GSContentComponent.class, value = "1px")
+	@Select(decorate = GSHeaderComponent.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
+	@MarginRight(decorate = GSContentComponent.class, value = "1px")
+	@MarginBottom(decorate = GSContentComponent.class, value = "1px")
 	public static class GSValueComponents extends GSComposite {
 
 	}
 
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	public static class GSValueComponents1 extends GSValueComponents {
 
 	}
 
-	@ChildGenericValueBackgroundColor(decorate = GSContentComponent.class)
-	@ChildBackgroundColor(decorate = GSHeaderComponent.class, value = "Yellow")
-	@ChildForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+	@GenericValueBackgroundColor(decorate = GSContentComponent.class)
+	@BackgroundColor(decorate = GSHeaderComponent.class, value = "Yellow")
+	@ForEach(decorate = GSContentComponent.class, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	public static class GSValueComponents2 extends GSValueComponents {
 
 	}
@@ -163,31 +165,47 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	@DirectSelect(Car.class)
 	@ReactorDependencies({ GSHeaderComponent.class, GSContentComponent.class })
-	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRow.class)
-	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRow.class)
-	@Style(propertyName = "margin", propertyValue = "4px")
-	@ChildReverseFlexDirection(decorate = GSHeaderComponent.class)
-	@ChildReverseFlexDirection(decorate = GSContentComponent.class)
+	@ReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRow.class)
+	@ReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRow.class)
+	@Style(name = "margin", value = "4px")
+	@ReverseFlexDirection(decorate = GSHeaderComponent.class)
+	@ReverseFlexDirection(decorate = GSContentComponent.class)
 	public static class GSTypeLabeledInstancesComposite extends GSInstancesComposite {
 
 	}
 
 	@DirectSelect(Car.class)
-	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRowWithComponents.class)
-	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRowWithComponents.class)
+	@ReactorDependencies(decorate = GSHeaderComponent.class, value = GSTypeAttributesRowWithComponents.class)
+	@ReactorDependencies(decorate = GSContentComponent.class, value = GSInstanceAttributesRowWithComponents.class)
 	public static class GSTypeTableInstancesComposite extends GSTypeLabeledInstancesComposite {
 
 	}
 
-	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSValueComponents1.class)
-	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents1.class)
+	@ReactorDependencies(decorate = GSHeaderComponent.class, value = GSValueComponents1.class)
+	@ReactorDependencies(decorate = GSContentComponent.class, value = GSValueComponents1.class)
 	public static class GSTypeAttributesRowWithComponents extends GSTypeAttributesRow {
 
 	}
 
-	@ChildReactorDependencies(decorate = GSHeaderComponent.class, value = GSValueComponents2.class)
-	@ChildReactorDependencies(decorate = GSContentComponent.class, value = GSHolders.class)
+	@ReactorDependencies(decorate = GSHeaderComponent.class, value = GSValueComponents2.class)
+	@ReactorDependencies(decorate = GSContentComponent.class, value = GSHolders.class)
 	public static class GSInstanceAttributesRowWithComponents extends GSInstanceAttributesRow {
+
+	}
+
+	@DirectSelect(Car.class)
+	@Style(name = "margin", value = "4px")
+	@ForEach(decorate = { GSHeaderRow.class, GSContentComponent.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+	@ForEach(decorate = GSContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
+	@ForEach(decorate = { GSContentRow.class, GSContentComponent.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@ReactorDependencies({ GSHeaderRow.class, GSContentRow.class })
+	@ReactorDependencies(decorate = GSHeaderRow.class, value = { GSHeaderComponent.class, GSContentComponent.class })
+	@ReactorDependencies(decorate = GSContentRow.class, value = { GSHeaderComponent.class, GSContentComponent.class })
+	@ReactorDependencies(decorate = { GSHeaderRow.class, GSHeaderComponent.class }, value = GSValueComponents1.class)
+	@ReactorDependencies(decorate = { GSHeaderRow.class, GSContentComponent.class }, value = GSValueComponents1.class)
+	@ReactorDependencies(decorate = { GSContentRow.class, GSHeaderComponent.class }, value = GSValueComponents2.class)
+	@ReactorDependencies(decorate = { GSContentRow.class, GSContentComponent.class }, value = GSHolders.class)
+	public static class GSInstancesTable extends GSTable {
 
 	}
 

@@ -8,33 +8,15 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ForEach.ChildForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.ReactorDependencies.ChildReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.Select.ChildSelect;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ChildAlignItems;
-import org.genericsystem.reactor.annotations.Styles.ChildBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ChildColor;
-import org.genericsystem.reactor.annotations.Styles.ChildFlex;
-import org.genericsystem.reactor.annotations.Styles.ChildFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.ChildFlexWrap;
-import org.genericsystem.reactor.annotations.Styles.ChildGenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ChildHeight;
-import org.genericsystem.reactor.annotations.Styles.ChildJustifyContent;
-import org.genericsystem.reactor.annotations.Styles.ChildKeepFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.ChildMarginBottom;
-import org.genericsystem.reactor.annotations.Styles.ChildMarginRight;
-import org.genericsystem.reactor.annotations.Styles.ChildOverflow;
-import org.genericsystem.reactor.annotations.Styles.ChildReverseFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.ChildStyle;
-import org.genericsystem.reactor.annotations.Styles.ChildWidth;
 import org.genericsystem.reactor.annotations.Styles.Color;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
@@ -91,8 +73,8 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 
 	public GSCompositeDiv(Tag parent) {
 		super(parent);
-		initComposite();
 		processAnnotations(this);
+		initComposite();
 		init();
 	}
 
@@ -104,12 +86,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
 				find(clazz);
 		});
-		if (getParent() != null) {
-			processDecorateAnnotation(ChildReactorDependencies.class, this, annotation -> {
-				for (Class<? extends GSTagImpl> childClass : ((ChildReactorDependencies) annotation).value())
-					find(childClass);
-			});
-		}
 		for (Tag tag : nodes.values())
 			tag.postfix();
 	}
@@ -124,75 +100,17 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 				throw new IllegalStateException(e);
 			}
 			((GSTagImpl) result).setParent(this);
+			processAnnotations(result);
 			if (GSCompositeDiv.class.isAssignableFrom(tagClass))
 				((GSCompositeDiv) result).initComposite();
-			processAnnotations(result);
 			result.init();
+			nodes.put(tagClass, result);
 		}
 		return result;
 	}
 
 	private static <T extends Tag> void processAnnotations(Tag result) {
-		if (result.getParent() != null) {
-			processDecorateAnnotation(ChildSelect.class, result, annotation -> {
-				try {
-					result.select(((ChildSelect) annotation).value().newInstance().get());
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
-			processDecorateAnnotation(ChildForEach.class, result, annotation -> {
-				try {
-					result.forEach(((ChildForEach) annotation).value().newInstance().get());
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
-			processDecorateAnnotation(ChildStyle.class, result, annotation -> result.addStyle(((ChildStyle) annotation).name(), ((ChildStyle) annotation).value()));
-
-			processDecorateAnnotation(ChildFlexDirection.class, result, annotation -> {
-				if (GSDiv.class.isAssignableFrom(result.getClass()))
-					((GSDiv) result).setDirection(((ChildFlexDirection) annotation).value());
-				else
-					log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
-			});
-			processDecorateAnnotation(ChildKeepFlexDirection.class, result, annotation -> {
-				if (GSDiv.class.isAssignableFrom(result.getClass()))
-					((GSDiv) result).keepDirection();
-				else
-					log.warn("Warning: KeepFlexDirection is applicable only to GSDiv extensions.");
-			});
-			processDecorateAnnotation(ChildReverseFlexDirection.class, result, annotation -> {
-				if (GSDiv.class.isAssignableFrom(result.getClass()))
-					((GSDiv) result).reverseDirection();
-				else
-					log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
-			});
-
-			processDecorateAnnotation(ChildGenericValueBackgroundColor.class, result, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
-					"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00")));
-
-			processDecorateStyleAnnotation(ChildFlex.class, result, "flex");
-			processDecorateStyleAnnotation(ChildFlexWrap.class, result, "flex-wrap");
-			processDecorateStyleAnnotation(ChildBackgroundColor.class, result, "background-color");
-			processDecorateStyleAnnotation(ChildAlignItems.class, result, "align-items");
-			processDecorateStyleAnnotation(ChildJustifyContent.class, result, "justify-content");
-			processDecorateStyleAnnotation(ChildOverflow.class, result, "overflow");
-			processDecorateStyleAnnotation(ChildColor.class, result, "color");
-			processDecorateStyleAnnotation(ChildMarginRight.class, result, "margin-right");
-			processDecorateStyleAnnotation(ChildMarginBottom.class, result, "margin-bottom");
-			processDecorateStyleAnnotation(ChildHeight.class, result, "height");
-			processDecorateStyleAnnotation(ChildWidth.class, result, "width");
-		}
-
-		processAnnotation(ForEach.class, result, annotation -> {
-			try {
-				result.forEach(((ForEach) annotation).value().newInstance().get());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
-		});
-
+		processAnnotation(DirectSelect.class, result, annotation -> result.select(((DirectSelect) annotation).value()));
 		processAnnotation(Select.class, result, annotation -> {
 			try {
 				result.select(((Select) annotation).value().newInstance().get());
@@ -200,12 +118,20 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 				throw new IllegalStateException(e);
 			}
 		});
+		processAnnotation(ForEach.class, result, annotation -> {
+			try {
+				result.forEach(((ForEach) annotation).value().newInstance().get());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		});
+		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 
 		processAnnotation(FlexDirectionStyle.class, result, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
 				((GSDiv) result).setDirection(((FlexDirectionStyle) annotation).value());
 			else
-				log.warn("Warning: FlexDirectionStyle is applicable only to GSDiv extensions.");
+				log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
 		});
 		processAnnotation(KeepFlexDirection.class, result, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
@@ -219,15 +145,10 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			else
 				log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
 		});
-		processAnnotation(DirectSelect.class, result, annotation -> result.select(((DirectSelect) annotation).value()));
-		processAnnotation(GenericValueBackgroundColor.class, result, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
-				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00")));
 
-		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).propertyName(), ((Style) annotation).propertyValue()));
-
-		processStyleAnnotation(BackgroundColor.class, result, "background-color");
-		processStyleAnnotation(FlexWrap.class, result, "flex-wrap");
 		processStyleAnnotation(Flex.class, result, "flex");
+		processStyleAnnotation(FlexWrap.class, result, "flex-wrap");
+		processStyleAnnotation(BackgroundColor.class, result, "background-color");
 		processStyleAnnotation(AlignItems.class, result, "align-items");
 		processStyleAnnotation(JustifyContent.class, result, "justify-content");
 		processStyleAnnotation(Overflow.class, result, "overflow");
@@ -236,51 +157,69 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		processStyleAnnotation(MarginBottom.class, result, "margin-bottom");
 		processStyleAnnotation(Height.class, result, "height");
 		processStyleAnnotation(Width.class, result, "width");
+		processAnnotation(GenericValueBackgroundColor.class, result, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
+				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00")));
+	}
+
+	private static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
+		if (list1.size() != list2.size())
+			return false;
+		for (int i = 0; i < list1.size(); i++)
+			if (!list1.get(i).isAssignableFrom(list2.get(i)))
+				return false;
+		return true;
 	}
 
 	private static <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
-		Annotation[] annotations = result.getClass().getAnnotationsByType(annotationClass);
-		for (Annotation annotation : annotations)
-			consumer.accept(annotation);
-	}
-
-	private static <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
-		processAnnotation(annotationClass, result, annotation -> {
-			try {
-				result.addStyle(propertyName, (String) annotation.annotationType().getDeclaredMethod("value").invoke(annotation));
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		});
-	}
-
-	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Consumer<Annotation> consumer, Tag current) {
-		if (current != null) {
+		List<Class<?>> classesToResult = new ArrayList<>();
+		Tag current = result;
+		Annotation applyingAnnotation = null;
+		while (current != null) {
+			boolean annotationFound = false;
 			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
 			for (Annotation annotation : annotations)
 				try {
 					Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
-					// TODO: Use isAssignableFrom instead of equals.
-					if (Arrays.asList(decorate).equals(classesToResult)) {
-						consumer.accept(annotation);
-						return;
+					if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
+						if (annotationFound)
+							throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
+									+ Arrays.asList(decorate).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
+						applyingAnnotation = annotation;
+						annotationFound = true;
 					}
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					throw new IllegalStateException(e);
 				}
+
+			if (!DirectSelect.class.equals(annotationClass)) {
+				Class<?> superClass = current.getClass().getSuperclass();
+				while (!annotationFound && superClass != null) {
+					annotations = superClass.getAnnotationsByType(annotationClass);
+					for (Annotation annotation : annotations)
+						try {
+							Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
+							if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
+								if (annotationFound)
+									throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
+											+ Arrays.asList(decorate).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
+								applyingAnnotation = annotation;
+								annotationFound = true;
+							}
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							throw new IllegalStateException(e);
+						}
+					superClass = superClass.getSuperclass();
+				}
+			}
 			classesToResult.add(0, current.getClass());
-			processDecorateAnnotation(annotationClass, classesToResult, consumer, current.getParent());
+			current = current.getParent();
 		}
+		if (applyingAnnotation != null)
+			consumer.accept(applyingAnnotation);
 	}
 
-	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
-		List<Class<?>> classesToResult = new ArrayList<>();
-		classesToResult.add(result.getClass());
-		processDecorateAnnotation(annotationClass, classesToResult, consumer, result.getParent());
-	}
-
-	private static <T extends Tag> void processDecorateStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
-		processDecorateAnnotation(annotationClass, result, annotation -> {
+	private static <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
+		processAnnotation(annotationClass, result, annotation -> {
 			try {
 				result.addStyle(propertyName, (String) annotation.annotationType().getDeclaredMethod("value").invoke(annotation));
 			} catch (Exception e) {

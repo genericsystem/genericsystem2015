@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.annotations;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,128 +11,14 @@ import org.genericsystem.reactor.az.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-@Inherited
 public @interface Styles {
 	Style[] value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
 	@Repeatable(Styles.class)
 	public @interface Style {
-		String propertyName();
-
-		String propertyValue();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface FlexDirectionStyle {
-		FlexDirection value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface KeepFlexDirection {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ReverseFlexDirection {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface Flex {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface FlexWrap {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface BackgroundColor {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface GenericValueBackgroundColor {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface AlignItems {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface JustifyContent {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface Overflow {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface Color {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface MarginRight {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface MarginBottom {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface Height {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface Width {
-		String value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildStyles.class)
-	public @interface ChildStyle {
-		Class<? extends GSTagImpl>[] decorate();
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String name();
 
@@ -142,258 +27,221 @@ public @interface Styles {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildStyles {
-		ChildStyle[] value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildFlexDirections.class)
-	public @interface ChildFlexDirection {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(FlexDirections.class)
+	public @interface FlexDirectionStyle {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		FlexDirection value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildFlexDirections {
-		ChildFlexDirection[] value();
+	public @interface FlexDirections {
+		FlexDirectionStyle[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildKeepFlexDirections.class)
-	public @interface ChildKeepFlexDirection {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(KeepFlexDirections.class)
+	public @interface KeepFlexDirection {
+		Class<? extends GSTagImpl>[] decorate() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildKeepFlexDirections {
-		ChildKeepFlexDirection[] value();
+	public @interface KeepFlexDirections {
+		KeepFlexDirection[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildReverseFlexDirections.class)
-	public @interface ChildReverseFlexDirection {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(ReverseFlexDirections.class)
+	public @interface ReverseFlexDirection {
+		Class<? extends GSTagImpl>[] decorate() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildReverseFlexDirections {
-		ChildReverseFlexDirection[] value();
+	public @interface ReverseFlexDirections {
+		ReverseFlexDirection[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildFlexs.class)
-	public @interface ChildFlex {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(Flexs.class)
+	public @interface Flex {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildFlexs {
-		ChildFlex[] value();
+	public @interface Flexs {
+		Flex[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildFlexWraps.class)
-	public @interface ChildFlexWrap {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(FlexWraps.class)
+	public @interface FlexWrap {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildFlexWraps {
-		ChildFlexWrap[] value();
+	public @interface FlexWraps {
+		FlexWrap[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildBackgroundColors.class)
-	public @interface ChildBackgroundColor {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(BackgroundColors.class)
+	public @interface BackgroundColor {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildBackgroundColors {
-		ChildBackgroundColor[] value();
+	public @interface BackgroundColors {
+		BackgroundColor[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildGenericValueBackgroundColors.class)
-	public @interface ChildGenericValueBackgroundColor {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(GenericValueBackgroundColors.class)
+	public @interface GenericValueBackgroundColor {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildGenericValueBackgroundColors {
-		ChildGenericValueBackgroundColor[] value();
+	public @interface GenericValueBackgroundColors {
+		GenericValueBackgroundColor[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildAlignItemss.class)
-	public @interface ChildAlignItems {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(AlignItemss.class)
+	public @interface AlignItems {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildAlignItemss {
-		ChildAlignItems[] value();
+	public @interface AlignItemss {
+		AlignItems[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildJustifyContents.class)
-	public @interface ChildJustifyContent {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(JustifyContents.class)
+	public @interface JustifyContent {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildJustifyContents {
-		ChildJustifyContent[] value();
+	public @interface JustifyContents {
+		JustifyContent[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildOverflows.class)
-	public @interface ChildOverflow {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(Overflows.class)
+	public @interface Overflow {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildOverflows {
-		ChildOverflow[] value();
+	public @interface Overflows {
+		Overflow[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildColors.class)
-	public @interface ChildColor {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(Colors.class)
+	public @interface Color {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildColors {
-		ChildColor[] value();
+	public @interface Colors {
+		Color[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildMarginRights.class)
-	public @interface ChildMarginRight {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(MarginRights.class)
+	public @interface MarginRight {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildMarginRights {
-		ChildMarginRight[] value();
+	public @interface MarginRights {
+		MarginRight[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildMarginBottoms.class)
-	public @interface ChildMarginBottom {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(MarginBottoms.class)
+	public @interface MarginBottom {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildMarginBottoms {
-		ChildMarginBottom[] value();
+	public @interface MarginBottoms {
+		MarginBottom[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildHeights.class)
-	public @interface ChildHeight {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(Heights.class)
+	public @interface Height {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildHeights {
-		ChildHeight[] value();
+	public @interface Heights {
+		Height[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildWidths.class)
-	public @interface ChildWidth {
-		Class<? extends GSTagImpl>[] decorate();
+	@Repeatable(Widths.class)
+	public @interface Width {
+		Class<? extends GSTagImpl>[] decorate() default {};
 
 		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildWidths {
-		ChildWidth[] value();
+	public @interface Widths {
+		Width[] value();
 	}
 }

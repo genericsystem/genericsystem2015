@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.annotations;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
+import org.genericsystem.reactor.annotations.ForEach.ForEachs;
 import org.genericsystem.reactor.az.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
@@ -17,24 +17,15 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-@Inherited
+@Repeatable(ForEachs.class)
 public @interface ForEach {
+	Class<? extends GSTagImpl>[] decorate() default {};
+
 	Class<? extends Supplier<ObservableListExtractor>> value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Inherited
-	@Repeatable(ChildForEachs.class)
-	public @interface ChildForEach {
-		Class<? extends GSTagImpl>[] decorate();
-
-		Class<? extends Supplier<ObservableListExtractor>> value();
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Inherited
-	public @interface ChildForEachs {
-		ChildForEach[] value();
+	public @interface ForEachs {
+		ForEach[] value();
 	}
 }
