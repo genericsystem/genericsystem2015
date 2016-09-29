@@ -91,8 +91,8 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 
 	public GSCompositeDiv(Tag parent) {
 		super(parent);
-		initComposite();
 		processAnnotations(this);
+		initComposite();
 		init();
 	}
 
@@ -124,10 +124,11 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 				throw new IllegalStateException(e);
 			}
 			((GSTagImpl) result).setParent(this);
+			processAnnotations(result);
 			if (GSCompositeDiv.class.isAssignableFrom(tagClass))
 				((GSCompositeDiv) result).initComposite();
-			processAnnotations(result);
 			result.init();
+			nodes.put(tagClass, result);
 		}
 		return result;
 	}
@@ -254,24 +255,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		});
 	}
 
-	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Consumer<Annotation> consumer, Tag current) {
-		if (current != null) {
-			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			for (Annotation annotation : annotations)
-				try {
-					Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
-					if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
-						consumer.accept(annotation);
-						return;
-					}
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-					throw new IllegalStateException(e);
-				}
-			classesToResult.add(0, current.getClass());
-			processDecorateAnnotation(annotationClass, classesToResult, consumer, current.getParent());
-		}
-	}
-
 	private static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
 		if (list1.size() != list2.size())
 			return false;
@@ -284,7 +267,23 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		classesToResult.add(result.getClass());
-		processDecorateAnnotation(annotationClass, classesToResult, consumer, result.getParent());
+		Tag current = result.getParent();
+		Annotation applyingAnnotation = null;
+		while (current != null) {
+			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
+			for (Annotation annotation : annotations)
+				try {
+					Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
+					if (isAssignableFrom(Arrays.asList(decorate), classesToResult))
+						applyingAnnotation = annotation;
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					throw new IllegalStateException(e);
+				}
+			classesToResult.add(0, current.getClass());
+			current = current.getParent();
+		}
+		if (applyingAnnotation != null)
+			consumer.accept(applyingAnnotation);
 	}
 
 	private static <T extends Tag> void processDecorateStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
