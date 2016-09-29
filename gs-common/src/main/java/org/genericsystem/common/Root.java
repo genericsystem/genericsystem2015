@@ -10,13 +10,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javassist.util.proxy.MethodFilter;
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
-import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
+import org.genericsystem.api.core.annotations.DirectClass;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.MetaRelation;
@@ -24,6 +20,11 @@ import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.DefaultRoot;
+
+import javassist.util.proxy.MethodFilter;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
 
 /**
  * @author Nicolas Feybesse
@@ -125,8 +126,9 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 				clazz = metaAnnotation.value();
 			else if (!metaAnnotation.value().isAssignableFrom(clazz))
 				getCurrentCache().discardWithException(new InstantiationException(clazz + " must extends " + metaAnnotation.value()));
-		if (clazz == null || !getTClass().isAssignableFrom(clazz))
+		if (clazz == null || (!getTClass().isAssignableFrom(clazz) && clazz.getAnnotation(DirectClass.class) == null)) {
 			clazz = getTClass();
+		}
 		return clazz;
 	}
 
