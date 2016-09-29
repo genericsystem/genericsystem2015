@@ -260,8 +260,7 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			for (Annotation annotation : annotations)
 				try {
 					Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
-					// TODO: Use isAssignableFrom instead of equals.
-					if (Arrays.asList(decorate).equals(classesToResult)) {
+					if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
 						consumer.accept(annotation);
 						return;
 					}
@@ -271,6 +270,15 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			classesToResult.add(0, current.getClass());
 			processDecorateAnnotation(annotationClass, classesToResult, consumer, current.getParent());
 		}
+	}
+
+	private static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
+		if (list1.size() != list2.size())
+			return false;
+		for (int i = 0; i < list1.size(); i++)
+			if (!list1.get(i).isAssignableFrom(list2.get(i)))
+				return false;
+		return true;
 	}
 
 	private static <T extends Tag> void processDecorateAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
