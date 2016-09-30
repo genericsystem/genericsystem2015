@@ -8,13 +8,14 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.Height;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Width;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue;
+import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az.GSInputTextWithConversion;
 import org.genericsystem.reactor.az3.GSCellDiv.ButtonDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.CenteredFlexDiv;
@@ -40,7 +41,7 @@ import javafx.beans.value.ObservableValue;
 @ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
 @Flex("1")
 @ReverseFlexDirection
-public class GSInstanceBuilder extends GSCompositeDiv implements GSBuilderDefaults {
+public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 	public GSInstanceBuilder() {
 		super();

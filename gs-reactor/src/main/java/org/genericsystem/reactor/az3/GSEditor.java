@@ -11,6 +11,7 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
@@ -23,7 +24,6 @@ import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -79,7 +79,7 @@ import javafx.collections.ObservableList;
 		ComponentAdderSelect.class })
 @Flex("1")
 @FlexDirectionStyle(FlexDirection.ROW)
-public class GSEditor extends GSCompositeDiv {
+public class GSEditor extends GSDiv {
 
 	public GSEditor() {
 		super();

@@ -6,6 +6,7 @@ import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.az.FlexDirection;
+import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az3.GSComposite.Content;
 import org.genericsystem.reactor.az3.GSComposite.Footer;
 import org.genericsystem.reactor.az3.GSComposite.Footer.FooterLabel;
@@ -23,11 +24,11 @@ import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 @ReactorDependencies(path = Content.class, value = Content.ContentLabel.class)
 @ReactorDependencies(path = Header.class, value = HeaderLabel.class)
 @ReactorDependencies(path = Footer.class, value = FooterLabel.class)
-public abstract class GSComposite extends GSCompositeDiv {
+public abstract class GSComposite extends GSDiv {
 
 	@Flex("1 1 0%")
 	@Overflow("hidden")
-	public static class Content extends GSCompositeDiv {
+	public static class Content extends GSDiv {
 		public static class ContentLabel extends GSLabelDisplayer {
 
 		}
@@ -35,7 +36,7 @@ public abstract class GSComposite extends GSCompositeDiv {
 
 	@Flex("1 1 0%")
 	@Overflow("hidden")
-	public static class Header extends GSCompositeDiv {
+	public static class Header extends GSDiv {
 		public static class HeaderLabel extends GSLabelDisplayer {
 
 		}
@@ -43,7 +44,7 @@ public abstract class GSComposite extends GSCompositeDiv {
 
 	@Flex("1 1 0%")
 	@Overflow("hidden")
-	public static class Footer extends GSCompositeDiv {
+	public static class Footer extends GSDiv {
 		public static class FooterLabel extends GSLabelDisplayer {
 
 		}
@@ -52,7 +53,7 @@ public abstract class GSComposite extends GSCompositeDiv {
 	@Flex("1 1 0%")
 	@Overflow("hidden")
 	@ReactorDependencies(ContentRow.class)
-	public static abstract class GSTable extends GSCompositeDiv {
+	public static abstract class GSTable extends GSDiv {
 
 		@ReverseFlexDirection
 		public static class HeaderRow extends GSComposite {

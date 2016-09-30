@@ -50,7 +50,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, GSInstanceBuilder.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
 @Flex("1")
-public class GSTable extends GSCompositeDiv implements SelectionDefaults, Tag {
+public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 
 	public GSTable() {
 		super();
