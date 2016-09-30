@@ -4,8 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -43,31 +41,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 
 	public static final Logger log = LoggerFactory.getLogger(Tag.class);
 
-	private final HashMap<Class<? extends Tag>, Tag> nodes = new LinkedHashMap<Class<? extends Tag>, Tag>() {
-		private static final long serialVersionUID = -6835018021862236920L;
-
-		@Override
-		public Tag get(Object key) {
-			Class<? extends Tag> searchClass = (Class<? extends Tag>) key;
-			Tag tag = super.get(searchClass);
-			if (tag == null)
-				for (Class<? extends Tag> clazz : keySet()) {
-					if (searchClass.isAssignableFrom(clazz)) {
-						if (tag == null) {
-							tag = super.get(clazz);
-							if (!searchClass.equals(GSCompositeDiv.this.getClass()))
-								System.out.println("Search : " + searchClass.getSimpleName() + " find polymorphic class : " + GSCompositeDiv.this.getClass().getSimpleName());
-							else
-								break;
-						} else
-							System.out.println("Warning : Found several results for class : " + searchClass.getSimpleName() + " on : " + GSCompositeDiv.this.getClass().getSimpleName() + " exact paths for them : " + searchClass + " " + getClass());
-					}
-				}
-			return tag;
-		};
-
-	};
-
 	public GSCompositeDiv() {
 	}
 
@@ -79,20 +52,29 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 	}
 
 	private void initComposite() {
-		nodes.put(getClass(), this);
 		processAnnotation(ReactorDependencies.class, this, annotation -> {
-			// System.out.println("Declaring classes : " + Arrays.toString(getClass().getDeclaredClasses()));
-			// System.out.println("ReactorDependencies : " + Arrays.toString(deps.value()));
 			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
 				find(clazz);
 		});
-		for (Tag tag : nodes.values())
+		for (Tag tag : getObservableChildren())
 			tag.postfix();
 	}
 
 	@Override
 	public <T extends Tag> T find(Class<T> tagClass) {
-		T result = (T) nodes.get(tagClass);
+		T result = null;
+		for (Tag child : getObservableChildren()) {
+			if (tagClass.isAssignableFrom(child.getClass())) {
+				if (result == null) {
+					result = (T) child;
+					if (!tagClass.equals(GSCompositeDiv.this.getClass()))
+						System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + GSCompositeDiv.this.getClass().getSimpleName());
+					else
+						break;
+				} else
+					System.out.println("Warning : Found several results for class : " + tagClass.getSimpleName() + " on : " + GSCompositeDiv.this.getClass().getSimpleName() + " exact paths for them : " + tagClass + " " + getClass());
+			}
+		}
 		if (result == null) {
 			try {
 				result = tagClass.newInstance();
@@ -104,7 +86,6 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 			if (GSCompositeDiv.class.isAssignableFrom(tagClass))
 				((GSCompositeDiv) result).initComposite();
 			result.init();
-			nodes.put(tagClass, result);
 		}
 		return result;
 	}
