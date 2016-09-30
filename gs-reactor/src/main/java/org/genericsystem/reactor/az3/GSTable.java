@@ -16,7 +16,6 @@ import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.az.GSDiv;
-import org.genericsystem.reactor.az3.GSCellDiv.GSTitleDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.az3.GSTable.Row.Cell.SubCell.BooleanValueSubCell.BooleanDisplayer;
 import org.genericsystem.reactor.az3.GSTable.Row.Cell.SubCell.ComponentSubCell.ComponentLabel;
@@ -29,6 +28,7 @@ import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.AttributeNam
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
 import org.genericsystem.reactor.az3.Table.ButtonDiv;
+import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;

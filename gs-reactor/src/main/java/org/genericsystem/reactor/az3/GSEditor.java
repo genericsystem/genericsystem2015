@@ -36,7 +36,6 @@ import org.genericsystem.reactor.az3.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.az3.GSCellDiv.GSComponentEditorDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSSubcellEditorDiv;
-import org.genericsystem.reactor.az3.GSCellDiv.GSTitleDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.SubcellEditorContainerDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.WrappedColumnDiv;
@@ -57,6 +56,7 @@ import org.genericsystem.reactor.az3.GSEditor.EditorContent.LinkTitles.InstanceT
 import org.genericsystem.reactor.az3.GSEditor.EditorContent.LinkTitles.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.az3.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.az3.GSEditor.EditorTitle.EditorTitleContent;
+import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;

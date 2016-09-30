@@ -14,7 +14,7 @@ import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.az.GSApp;
-import org.genericsystem.reactor.az3.Table.InstancesTable;
+import org.genericsystem.reactor.az3.TitledDiv.TitledInstancesTable;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.example.AppHtml5.CarInstancesTable;
 import org.genericsystem.reactor.example.AppHtml5.ColorInstancesTable;
@@ -32,12 +32,12 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@DirectSelect(Car.class)
-	public static class CarInstancesTable extends InstancesTable {
+	public static class CarInstancesTable extends TitledInstancesTable {
 
 	}
 
 	@DirectSelect(Color.class)
-	public static class ColorInstancesTable extends InstancesTable {
+	public static class ColorInstancesTable extends TitledInstancesTable {
 
 	}
 }

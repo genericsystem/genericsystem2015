@@ -17,7 +17,6 @@ import org.genericsystem.reactor.annotations.Styles.MarginBottom;
 import org.genericsystem.reactor.annotations.Styles.MarginRight;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxDisplayer;
@@ -50,7 +49,6 @@ public class Table extends GSDiv {
 
 	}
 
-	@Style(name = "margin", value = "4px")
 	@Styles.Color(path = HeaderRow.class, value = "white")
 	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
 	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")

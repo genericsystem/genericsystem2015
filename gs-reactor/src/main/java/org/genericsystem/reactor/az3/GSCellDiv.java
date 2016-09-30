@@ -21,15 +21,6 @@ import org.genericsystem.reactor.gstag.HtmlHyperLink;
 @Overflow("hidden")
 public class GSCellDiv extends GSDiv {
 
-	@BackgroundColor("#EA4500")
-	@MarginRight("1px")
-	@MarginBottom("1px")
-	@Color("White")
-	@JustifyContent("center")
-	@AlignItems("center")
-	public static class GSTitleDiv extends GSDiv {
-	}
-
 	@Flex("1")
 	@JustifyContent("center")
 	@AlignItems("center")
