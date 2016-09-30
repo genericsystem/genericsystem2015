@@ -4,6 +4,7 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
+import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az3.GSComposite.GSContentComponent;
 import org.genericsystem.reactor.az3.GSComposite.GSFooterComponent;
@@ -48,23 +49,22 @@ public abstract class GSComposite extends GSCompositeDiv {
 		}
 	}
 
+	@Flex("1 1 0%")
+	@Overflow("hidden")
 	@ReactorDependencies(GSContentRow.class)
 	public static abstract class GSTable extends GSCompositeDiv {
 
-		@Flex("1 1 0%")
-		@Overflow("hidden")
+		@ReverseFlexDirection
 		public static class GSHeaderRow extends GSComposite {
 
 		}
 
-		@Flex("1 1 0%")
-		@Overflow("hidden")
+		@ReverseFlexDirection
 		public static class GSContentRow extends GSComposite {
 
 		}
 
-		@Flex("1 1 0%")
-		@Overflow("hidden")
+		@ReverseFlexDirection
 		public static class GSFooterRow extends GSComposite {
 
 		}
