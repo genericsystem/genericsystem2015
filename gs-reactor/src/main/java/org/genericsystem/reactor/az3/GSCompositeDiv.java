@@ -175,47 +175,41 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		Tag current = result;
 		Annotation applyingAnnotation = null;
 		while (current != null) {
-			boolean annotationFound = false;
 			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			for (Annotation annotation : annotations)
-				try {
-					Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
-					if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
-						if (annotationFound)
-							throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
-									+ Arrays.asList(decorate).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-						applyingAnnotation = annotation;
-						annotationFound = true;
-					}
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-					throw new IllegalStateException(e);
-				}
+			Annotation annotationFound = selectAnnotation(annotations, annotationClass, classesToResult);
 
 			if (!DirectSelect.class.equals(annotationClass)) {
 				Class<?> superClass = current.getClass().getSuperclass();
-				while (!annotationFound && superClass != null) {
+				while (annotationFound == null && superClass != null) {
 					annotations = superClass.getAnnotationsByType(annotationClass);
-					for (Annotation annotation : annotations)
-						try {
-							Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
-							if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
-								if (annotationFound)
-									throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
-											+ Arrays.asList(decorate).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-								applyingAnnotation = annotation;
-								annotationFound = true;
-							}
-						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-							throw new IllegalStateException(e);
-						}
+					annotationFound = selectAnnotation(annotations, annotationClass, classesToResult);
 					superClass = superClass.getSuperclass();
 				}
 			}
+			if (annotationFound != null)
+				applyingAnnotation = annotationFound;
 			classesToResult.add(0, current.getClass());
 			current = current.getParent();
 		}
 		if (applyingAnnotation != null)
 			consumer.accept(applyingAnnotation);
+	}
+
+	private static Annotation selectAnnotation(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
+		Annotation annotationFound = null;
+		for (Annotation annotation : annotations)
+			try {
+				Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
+				if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
+					if (annotationFound != null)
+						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
+								+ Arrays.asList(decorate).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
+					annotationFound = annotation;
+				}
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				throw new IllegalStateException(e);
+			}
+		return annotationFound;
 	}
 
 	private static <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
