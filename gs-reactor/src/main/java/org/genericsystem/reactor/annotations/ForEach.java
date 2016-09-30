@@ -19,7 +19,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 @Target({ ElementType.TYPE })
 @Repeatable(ForEachs.class)
 public @interface ForEach {
-	Class<? extends GSTagImpl>[] decorate() default {};
+	Class<? extends GSTagImpl>[] path() default {};
 
 	Class<? extends Supplier<ObservableListExtractor>> value();
 

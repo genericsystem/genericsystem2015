@@ -20,7 +20,7 @@ import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSApp;
-import org.genericsystem.reactor.az3.GSCompositeDiv;
+import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.example.AppHtml4.GSAttributesComposite;
 import org.genericsystem.reactor.example.AppHtml4.GSAttributesComposite.GSAttributesContentComponent;
@@ -60,11 +60,11 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 	@Flex("1 1 0%")
 	@Overflow("hidden")
 	@ReactorDependencies({ GSContentComponent.class })
-	public static abstract class GSComposite extends GSCompositeDiv {
+	public static abstract class GSComposite extends GSDiv {
 		@Flex("1 1 0%")
 		@Overflow("hidden")
 		@ReactorDependencies({ GSContentComponentLabel.class })
-		public static class GSContentComponent extends GSCompositeDiv {
+		public static class GSContentComponent extends GSDiv {
 			@Overflow("hidden")
 			public static class GSContentComponentLabel extends GSLabelDisplayer {
 
@@ -109,7 +109,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		@Flex("1 1 0%")
 		@Overflow("hidden")
 		@ReactorDependencies({ GSHeaderComponentLabel2.class })
-		public static class GSHeaderComponent_ extends GSCompositeDiv {
+		public static class GSHeaderComponent_ extends GSDiv {
 			public static class GSHeaderComponentLabel2 extends GSLabelDisplayer {
 
 			}
@@ -141,7 +141,7 @@ public class AppHtml4 extends GSApp implements SelectionDefaults {
 		@Overflow("hidden")
 		@FlexDirectionStyle(FlexDirection.ROW)
 		@ReactorDependencies({ GSHeaderComponentLabel.class })
-		public static class GSHeaderComponent extends org.genericsystem.reactor.az3.GSCompositeDiv {
+		public static class GSHeaderComponent extends GSDiv {
 			public static class GSHeaderComponentLabel extends GSLabelDisplayer {
 
 			}

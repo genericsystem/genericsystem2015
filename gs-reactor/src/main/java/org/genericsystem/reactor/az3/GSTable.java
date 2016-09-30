@@ -16,8 +16,6 @@ import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.az.GSDiv;
-import org.genericsystem.reactor.az3.GSCellDiv.ButtonDiv;
-import org.genericsystem.reactor.az3.GSCellDiv.GSTitleDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.az3.GSTable.Row.Cell.SubCell.BooleanValueSubCell.BooleanDisplayer;
 import org.genericsystem.reactor.az3.GSTable.Row.Cell.SubCell.ComponentSubCell.ComponentLabel;
@@ -29,6 +27,8 @@ import org.genericsystem.reactor.az3.GSTable.TitleRow.EmptyCell;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
+import org.genericsystem.reactor.az3.Table.ButtonDiv;
+import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
@@ -50,7 +50,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, GSInstanceBuilder.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
 		ValueDisplayer.class, RemoveButton.class })
 @Flex("1")
-public class GSTable extends GSCompositeDiv implements SelectionDefaults, Tag {
+public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 
 	public GSTable() {
 		super();

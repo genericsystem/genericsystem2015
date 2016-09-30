@@ -19,7 +19,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @Target({ ElementType.TYPE })
 @Repeatable(Selects.class)
 public @interface Select {
-	Class<? extends GSTagImpl>[] decorate() default {};
+	Class<? extends GSTagImpl>[] path() default {};
 
 	Class<? extends Supplier<ObservableValueSelector>> value();
 

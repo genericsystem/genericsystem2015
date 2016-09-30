@@ -17,7 +17,7 @@ import org.genericsystem.reactor.az.GSTagImpl;
 @Target({ ElementType.TYPE })
 @Repeatable(ReactorDependenciesMult.class)
 public @interface ReactorDependencies {
-	Class<? extends GSTagImpl>[] decorate() default {};
+	Class<? extends GSTagImpl>[] path() default {};
 
 	Class<? extends GSTagImpl>[] value();
 

@@ -11,6 +11,7 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
@@ -23,7 +24,6 @@ import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -36,7 +36,6 @@ import org.genericsystem.reactor.az3.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.az3.GSCellDiv.GSComponentEditorDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSSubcellEditorDiv;
-import org.genericsystem.reactor.az3.GSCellDiv.GSTitleDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.SubcellEditorContainerDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.WrappedColumnDiv;
@@ -57,6 +56,7 @@ import org.genericsystem.reactor.az3.GSEditor.EditorContent.LinkTitles.InstanceT
 import org.genericsystem.reactor.az3.GSEditor.EditorContent.LinkTitles.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.az3.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.az3.GSEditor.EditorTitle.EditorTitleContent;
+import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -79,7 +79,7 @@ import javafx.collections.ObservableList;
 		ComponentAdderSelect.class })
 @Flex("1")
 @FlexDirectionStyle(FlexDirection.ROW)
-public class GSEditor extends GSCompositeDiv {
+public class GSEditor extends GSDiv {
 
 	public GSEditor() {
 		super();

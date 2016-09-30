@@ -18,7 +18,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(Styles.class)
 	public @interface Style {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String name();
 
@@ -29,7 +29,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(FlexDirections.class)
 	public @interface FlexDirectionStyle {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		FlexDirection value();
 	}
@@ -44,7 +44,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(KeepFlexDirections.class)
 	public @interface KeepFlexDirection {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -57,7 +57,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(ReverseFlexDirections.class)
 	public @interface ReverseFlexDirection {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -70,7 +70,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(Flexs.class)
 	public @interface Flex {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -85,7 +85,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(FlexWraps.class)
 	public @interface FlexWrap {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -100,7 +100,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(BackgroundColors.class)
 	public @interface BackgroundColor {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -115,8 +115,9 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(GenericValueBackgroundColors.class)
 	public @interface GenericValueBackgroundColor {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
+		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -129,7 +130,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(AlignItemss.class)
 	public @interface AlignItems {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -144,7 +145,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(JustifyContents.class)
 	public @interface JustifyContent {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -159,7 +160,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(Overflows.class)
 	public @interface Overflow {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -174,7 +175,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(Colors.class)
 	public @interface Color {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -189,7 +190,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(MarginRights.class)
 	public @interface MarginRight {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -204,7 +205,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(MarginBottoms.class)
 	public @interface MarginBottom {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -219,7 +220,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(Heights.class)
 	public @interface Height {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}
@@ -234,7 +235,7 @@ public @interface Styles {
 	@Target({ ElementType.TYPE })
 	@Repeatable(Widths.class)
 	public @interface Width {
-		Class<? extends GSTagImpl>[] decorate() default {};
+		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
 	}

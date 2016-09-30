@@ -17,7 +17,7 @@ import org.genericsystem.reactor.az.GSTagImpl;
 @Target({ ElementType.TYPE })
 @Repeatable(DirectSelects.class)
 public @interface DirectSelect {
-	Class<? extends GSTagImpl>[] decorate() default {};
+	Class<? extends GSTagImpl>[] path() default {};
 
 	Class<?> value();
 
