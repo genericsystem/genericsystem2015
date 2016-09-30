@@ -199,11 +199,11 @@ public class GSCompositeDiv extends GSDiv implements Tag {
 		Annotation annotationFound = null;
 		for (Annotation annotation : annotations)
 			try {
-				Class<?>[] decorate = (Class<?>[]) annotation.annotationType().getDeclaredMethod("decorate").invoke(annotation);
-				if (isAssignableFrom(Arrays.asList(decorate), classesToResult)) {
+				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
+				if (isAssignableFrom(Arrays.asList(path), classesToResult)) {
 					if (annotationFound != null)
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
-								+ Arrays.asList(decorate).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
+								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
 					annotationFound = annotation;
 				}
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
