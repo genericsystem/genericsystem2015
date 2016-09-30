@@ -62,7 +62,7 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	}
 
 	@BackgroundColor("Brown")
-	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class })
+	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@ReactorDependencies(value = GSValueComponents.class)
 	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { HeaderLabel.class, GSCheckBoxDisplayer.class })
 	@ForEach(path = GSValueComponents.class, value = ObservableListExtractor.HOLDERS.class)

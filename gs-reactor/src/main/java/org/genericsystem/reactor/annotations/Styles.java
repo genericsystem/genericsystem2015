@@ -117,6 +117,7 @@ public @interface Styles {
 	public @interface GenericValueBackgroundColor {
 		Class<? extends GSTagImpl>[] path() default {};
 
+		String value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

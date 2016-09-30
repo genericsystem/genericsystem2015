@@ -80,7 +80,7 @@ public class GSCellDiv extends GSDiv {
 	}
 
 	@Color("#000000")
-	@GenericValueBackgroundColor
+	@GenericValueBackgroundColor("#e5ed00")
 	public static class GSSubcellDiv extends GSComponentEditorDiv {
 	}
 

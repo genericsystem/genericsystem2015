@@ -476,7 +476,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processStyleAnnotation(Height.class, result, "height");
 		processStyleAnnotation(Width.class, result, "width");
 		processAnnotation(GenericValueBackgroundColor.class, result, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
-				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : "#e5ed00")));
+				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
 	}
 
 	default boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
