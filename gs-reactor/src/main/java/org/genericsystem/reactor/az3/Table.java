@@ -52,10 +52,12 @@ public class Table extends GSDiv {
 
 	@Style(name = "margin", value = "4px")
 	@Styles.Color(path = HeaderRow.class, value = "white")
-	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "Purple")
-	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "Purple")
-	@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "Purple")
-	@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "Purple")
+	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
+	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
+	@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
+	@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
+	@Styles.Color(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "white")
+	@GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
 	@AlignItems(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "flex-start")
 	@ReactorDependencies({ HeaderRow.class, ContentRow.class })
 	@ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class, ButtonDiv.class })
@@ -70,7 +72,6 @@ public class Table extends GSDiv {
 
 	}
 
-	@BackgroundColor("Brown")
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@ReactorDependencies(value = GSValueComponents.class)
 	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { HeaderLabel.class, GSCheckBoxDisplayer.class })
@@ -82,9 +83,8 @@ public class Table extends GSDiv {
 
 	}
 
-	// @DirectSelect(Power.class)
-	@BackgroundColor(path = Content.class, value = "Yellow")
-	@BackgroundColor(path = Header.class, value = "Yellow")
+	@BackgroundColor(path = Content.class, value = "#e5ed00")
+	@BackgroundColor(path = Header.class, value = "#e5ed00")
 	@JustifyContent(path = Header.class, value = "center")
 	@AlignItems(path = Header.class, value = "center")
 	@JustifyContent(path = Content.class, value = "center")
