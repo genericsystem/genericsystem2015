@@ -1,10 +1,5 @@
 package org.genericsystem.reactor.example;
 
-import org.genericsystem.api.core.annotations.Components;
-import org.genericsystem.api.core.annotations.Meta;
-import org.genericsystem.api.core.annotations.SystemGeneric;
-import org.genericsystem.api.core.annotations.value.IntValue;
-import org.genericsystem.api.core.annotations.value.StringValue;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.CarColor2;
@@ -40,17 +35,12 @@ import org.genericsystem.reactor.az3.GSComposite.GSTable.HeaderRow;
 import org.genericsystem.reactor.az3.GSComposite.Header;
 import org.genericsystem.reactor.az3.GSComposite.Header.HeaderLabel;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
-import org.genericsystem.reactor.example.AppHtml5.AudiTT;
-import org.genericsystem.reactor.example.AppHtml5.AudiTT.AudiTTGreen;
-import org.genericsystem.reactor.example.AppHtml5.AudiTT.AudiTTPower;
-import org.genericsystem.reactor.example.AppHtml5.AudiTT.Green;
 import org.genericsystem.reactor.example.AppHtml5.GSInstancesTable;
-import org.genericsystem.reactor.example.AppHtml5.Unit;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-@DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class, AudiTT.class, Green.class, AudiTTGreen.class, AudiTTPower.class, Unit.class })
+@DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
 @ReactorDependencies({ GSInstancesTable.class })
 @FlexWrap("wrap")
@@ -110,35 +100,5 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 	@ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	public static class GSInstancesTable extends GSTable {
 
-	}
-
-	@SystemGeneric
-	@Meta(Car.class)
-	@StringValue("Audi TT")
-	public static class AudiTT {
-
-		@SystemGeneric
-		@Meta(Color.class)
-		@StringValue("green")
-		public static class Green {
-
-		}
-
-		@Meta(Power.class)
-		@IntValue(432)
-		@SystemGeneric
-		@Components(AudiTT.class)
-		public static class AudiTTPower {
-		}
-
-		@Meta(CarColor.class)
-		@SystemGeneric
-		@Components({ AudiTT.class, Green.class })
-		public static class AudiTTGreen {
-
-		}
-	}
-
-	public static class Unit {
 	}
 }
