@@ -9,7 +9,6 @@ import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Height;
 import org.genericsystem.reactor.annotations.Styles.JustifyContent;
-import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.MarginBottom;
 import org.genericsystem.reactor.annotations.Styles.MarginRight;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
@@ -39,31 +38,6 @@ public class GSCellDiv extends GSDiv {
 	@Color("#ffffff")
 	@BackgroundColor("#ea0084")
 	public static class GSTitleLineCellDiv extends GSDiv {
-	}
-
-	@KeepFlexDirection
-	@BackgroundColor("#ea0084")
-	@MarginRight("1px")
-	@MarginBottom("1px")
-	public static class ButtonDiv extends GSDiv {
-
-		@Override
-		public void init() {
-			if (FlexDirection.ROW.equals(getDirection())) {
-				addStyle("flex", "0");
-				addStyle("min-width", "100px");
-			} else {
-				addStyle("flex", "1");
-			}
-			getDirectionProperty().addListener((o, v, nv) -> {
-				if (FlexDirection.ROW.equals(nv)) {
-					addStyle("flex", "0");
-					addStyle("min-width", "100px");
-				} else {
-					addStyle("flex", "1");
-				}
-			});
-		}
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)

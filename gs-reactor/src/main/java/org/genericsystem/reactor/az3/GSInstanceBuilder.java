@@ -17,7 +17,6 @@ import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue;
 import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az.GSInputTextWithConversion;
-import org.genericsystem.reactor.az3.GSCellDiv.ButtonDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSComponentEditorDiv;
 import org.genericsystem.reactor.az3.GSCellDiv.GSSubcellEditorDiv;
@@ -28,6 +27,7 @@ import org.genericsystem.reactor.az3.GSInstanceBuilder.BuilderCell.BooleanHolder
 import org.genericsystem.reactor.az3.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.az3.GSInstanceBuilder.BuilderCell.LinkBuilder.ComponentBuilder.ComponentBuilderSelect;
 import org.genericsystem.reactor.az3.GSInstanceBuilder.InstanceNameBuilder.InstanceNameBuilderInput;
+import org.genericsystem.reactor.az3.Table.ButtonDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
