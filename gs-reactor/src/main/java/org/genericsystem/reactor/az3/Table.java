@@ -26,6 +26,7 @@ import org.genericsystem.reactor.az3.GSComposite.Header;
 import org.genericsystem.reactor.az3.GSComposite.Header.HeaderLabel;
 import org.genericsystem.reactor.az3.Table.ContentRow;
 import org.genericsystem.reactor.gstag.HtmlButton;
+import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
@@ -54,14 +55,15 @@ public class Table extends GSDiv {
 	@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
 	@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
 	@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
-	@Styles.Color(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "white")
+	@Styles.Color(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, value = "white")
 	@GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
 	@AlignItems(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "flex-start")
 	@ReactorDependencies({ HeaderRow.class, ContentRow.class })
 	@ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class, ButtonDiv.class })
-	@ReactorDependencies(path = ContentRow.class, value = { GSValueComponents.class, GSHolders.class, ButtonDiv.class })
-	@ReactorDependencies(path = { ContentRow.class, ButtonDiv.class }, value = RemoveButton.class)
 	@ReactorDependencies(path = { HeaderRow.class, Content.class }, value = GSValueComponents.class)
+	@ReactorDependencies(path = ContentRow.class, value = { GSValueComponents.class, GSHolders.class, ButtonDiv.class })
+	@ReactorDependencies(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = InstanceNameLink.class)
+	@ReactorDependencies(path = { ContentRow.class, ButtonDiv.class }, value = RemoveButton.class)
 	@ForEach(path = { HeaderRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 	@ForEach(path = { ContentRow.class, GSHolders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
@@ -97,6 +99,15 @@ public class Table extends GSDiv {
 	@MarginBottom(path = Content.class, value = "1px")
 	public static class GSValueComponents extends GSComposite {
 
+	}
+
+	public static class InstanceNameLink extends HtmlHyperLink {
+
+		@Override
+		public void init() {
+			bindText();
+			bindAction(model -> getSelectionProperty(model).setValue(model));
+		}
 	}
 
 	@KeepFlexDirection

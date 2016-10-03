@@ -31,6 +31,10 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml5.class, "/example-reactor");
 	}
 
+	public AppHtml5() {
+		createSelectionProperty();
+	}
+
 	@DirectSelect(Car.class)
 	public static class CarInstancesTable extends TitledInstancesTable {
 
