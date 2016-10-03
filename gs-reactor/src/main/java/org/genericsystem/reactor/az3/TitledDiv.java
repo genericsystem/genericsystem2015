@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.az3;
 
 import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Color;
@@ -32,7 +33,6 @@ public class TitledDiv extends GSDiv {
 		public static class TitleContent extends HtmlH2 {
 			@Override
 			public void init() {
-				setStringExtractor(StringExtractor.MANAGEMENT);
 				bindText();
 			}
 		}
@@ -40,6 +40,7 @@ public class TitledDiv extends GSDiv {
 
 	@Style(name = "margin", value = "4px")
 	@ReactorDependencies({ GSTitleDiv.class, InstancesTable.class })
+	@SetStringExtractor(path = GSTitleDiv.class, value = StringExtractor.MANAGEMENT.class)
 	public static class TitledInstancesTable extends TitledDiv {
 
 	}
