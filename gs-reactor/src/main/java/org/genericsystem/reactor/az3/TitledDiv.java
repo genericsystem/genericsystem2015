@@ -12,12 +12,12 @@ import org.genericsystem.reactor.annotations.Styles.MarginRight;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSDiv;
-import org.genericsystem.reactor.az3.Table.InstancesTable;
 import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv.TitleContent;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.StringExtractor;
 
+@Style(name = "margin", value = "4px")
 @FlexDirectionStyle(FlexDirection.COLUMN)
 @ReactorDependencies(GSTitleDiv.class)
 public class TitledDiv extends GSDiv {
@@ -38,7 +38,6 @@ public class TitledDiv extends GSDiv {
 		}
 	}
 
-	@Style(name = "margin", value = "4px")
 	@ReactorDependencies({ GSTitleDiv.class, InstancesTable.class })
 	@SetStringExtractor(path = GSTitleDiv.class, value = StringExtractor.MANAGEMENT.class)
 	public static class TitledInstancesTable extends TitledDiv {
