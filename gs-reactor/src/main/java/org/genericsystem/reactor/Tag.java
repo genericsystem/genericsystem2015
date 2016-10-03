@@ -42,6 +42,7 @@ import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
@@ -450,7 +451,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 		processAnnotation(ForEach.class, result, annotation -> {
 			try {
-				result.forEach(((ForEach) annotation).value().newInstance().get());
+				if (!NO_FOR_EACH.class.equals(((ForEach) annotation).value()))
+					result.forEach(((ForEach) annotation).value().newInstance().get());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}

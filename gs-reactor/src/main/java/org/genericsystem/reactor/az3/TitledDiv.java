@@ -16,6 +16,7 @@ import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv.TitleContent;
 import org.genericsystem.reactor.gstag.HtmlH2;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @Style(name = "margin", value = "4px")
 @FlexDirectionStyle(FlexDirection.COLUMN)
@@ -44,4 +45,9 @@ public class TitledDiv extends GSDiv {
 
 	}
 
+	@ReactorDependencies({ GSTitleDiv.class, InstanceEditor.class })
+	@SetStringExtractor(path = GSTitleDiv.class, value = StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
+	public static class TitledInstanceEditor extends TitledDiv implements SelectionDefaults {
+
+	}
 }

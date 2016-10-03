@@ -109,4 +109,10 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
+	public static class NO_FOR_EACH implements Supplier<ObservableListExtractor> {
+		@Override
+		public ObservableListExtractor get() {
+			throw new IllegalStateException();
+		}
+	}
 }
