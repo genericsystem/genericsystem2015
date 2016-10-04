@@ -30,25 +30,31 @@ public class DirectClassTest extends AbstractTest {
 	}
 
 	public void test005() {
+		Engine engine = new Engine(Vehicle5.class);
+		assert !(engine.find(Vehicle5.class) instanceof Vehicle5);
+	}
+
+	public void test006() {
+		Engine engine = new Engine(Vehicle6.class);
+		assert engine.find(Vehicle6.class) instanceof Vehicle6;
+		assert engine.find(Vehicle6.class) instanceof Generic;
+	}
+
+	public void test007() {
 		Engine engine = new Engine(Car.class, CarStandard.class, MyAudi.class, MyBmw.class);
 		assert engine.find(MyBmw.class) instanceof CarStandard;
 		assert engine.find(MyAudi.class) instanceof MyAudi;
 	}
 
-	public void test006() {
+	public void test008() {
 		Engine engine = new Engine(CarStandard.class);
 		System.out.println(engine.find(CarStandard.class).getClass().getName());
 		CarStandard cs = engine.find(CarStandard.class);
 	}
 
-	public void test007() {
+	public void test009() {
 		catchAndCheckCause(() -> new Engine(MyBmw2.class), IllegalStateException.class);
 		catchAndCheckCause(() -> new Engine(MyBmw3.class), IllegalStateException.class);
-	}
-
-	public void test008() {
-		Engine engine = new Engine(Vehicle5.class);
-		assert !(engine.find(Vehicle5.class) instanceof Vehicle5);
 	}
 
 	@SystemGeneric
@@ -74,6 +80,12 @@ public class DirectClassTest extends AbstractTest {
 
 	@SystemGeneric
 	public static class Vehicle5 {
+
+	}
+
+	@DirectClass
+	@SystemGeneric
+	public static class Vehicle6 implements Generic {
 
 	}
 

@@ -23,6 +23,7 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Color;

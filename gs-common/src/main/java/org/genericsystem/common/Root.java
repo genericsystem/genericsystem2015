@@ -120,29 +120,20 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 
 	protected Class<?> adaptClass(Class<?> clazz, Generic meta) {
 		InstanceClass metaAnnotation = meta == null ? null : getAnnotedClass(meta).getAnnotation(InstanceClass.class);
-		if (clazz == null) {
-			if (metaAnnotation == null)
-				return getTClass();
-			else
-				return metaAnnotation.value();
-		}
+		if (clazz == null)
+			return metaAnnotation == null ? getTClass() : metaAnnotation.value();
+
 		DirectClass directClass = clazz.getAnnotation(DirectClass.class);
 		if (directClass != null)
-			if (metaAnnotation == null) {
+			if (metaAnnotation == null)
 				return clazz;
-			} else {
-				if (metaAnnotation.value().isAssignableFrom(clazz))
-					return clazz;
-				else
-					getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
-			}
-
-		if (metaAnnotation == null) {
-			if (getTClass().isAssignableFrom(clazz))
+			else if (metaAnnotation.value().isAssignableFrom(clazz))
 				return clazz;
 			else
-				return getTClass();
-		}
+				getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+		if (metaAnnotation == null)
+			return getTClass().isAssignableFrom(clazz) ? clazz : getTClass();
+
 		if (metaAnnotation.value().isAssignableFrom(clazz))
 			return clazz;
 		else
