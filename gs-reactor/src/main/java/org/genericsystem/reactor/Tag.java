@@ -410,8 +410,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			if (tagClass.isAssignableFrom(child.getClass())) {
 				if (result == null) {
 					result = (T) child;
-					if (!tagClass.equals(getClass()))
-						System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + getClass().getSimpleName());
+					if (!tagClass.equals(child.getClass()))
+						System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + child.getClass().getSimpleName());
 					else
 						break;
 				} else
