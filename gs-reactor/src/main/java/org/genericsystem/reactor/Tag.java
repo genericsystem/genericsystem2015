@@ -24,6 +24,7 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
+import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Color;
@@ -433,10 +434,15 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> void processAnnotations(Tag result) {
+		processAnnotation(StyleClass.class, result, annotation -> {
+			for (String str : ((StyleClass) annotation).value()) {
+				result.addStyleClass(str);
+			}
+		});
 		processAnnotation(DirectSelect.class, result, annotation -> result.select(((DirectSelect) annotation).value()));
 		processAnnotation(Select.class, result, annotation -> {
 			try {
-				result.select(((Select) annotation).value().newInstance().get());
+				result.select(((Select) annotation).value().newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}

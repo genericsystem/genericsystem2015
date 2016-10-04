@@ -22,7 +22,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 public @interface Select {
 	Class<? extends GSTagImpl>[] path() default {};
 
-	Class<? extends Supplier<ObservableValueSelector>> value();
+	Class<? extends ObservableValueSelector> value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
