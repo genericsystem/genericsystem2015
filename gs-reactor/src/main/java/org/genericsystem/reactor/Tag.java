@@ -17,6 +17,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
@@ -47,6 +48,7 @@ import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
@@ -456,6 +458,13 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
+		});
+
+		processAnnotation(BindSelection.class, result, annotation -> {
+			if (SelectionDefaults.class.isAssignableFrom(result.getClass()))
+				((SelectionDefaults) result).bindSelection(result.find(((BindSelection) annotation).value()));
+			else
+				log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
 		});
 
 		processAnnotation(SetStringExtractor.class, result, annotation -> {
