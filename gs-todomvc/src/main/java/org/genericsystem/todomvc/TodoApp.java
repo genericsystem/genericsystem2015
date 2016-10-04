@@ -253,6 +253,7 @@ public class TodoApp extends GSApp {
 										bindAction(Context::flush);
 									}
 								};
+								addStyleClass("save-cancel");
 								new HtmlButton(this) {
 									{
 										addStyleClass("cancel");
