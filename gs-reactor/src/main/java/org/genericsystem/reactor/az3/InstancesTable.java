@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.az3;
 
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
@@ -34,7 +35,9 @@ import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlHyperLink;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
+@BindSelection(ContentRow.class)
 @Styles.Color(path = HeaderRow.class, value = "white")
 @BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
 @BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
@@ -53,7 +56,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @ForEach(path = { ContentRow.class, GSHolders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-public class InstancesTable extends Table {
+public class InstancesTable extends Table implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@ReactorDependencies(value = GSValueComponents.class)
