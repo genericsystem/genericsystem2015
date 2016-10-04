@@ -27,7 +27,7 @@ import org.genericsystem.reactor.az3.GSTable.TitleRow.EmptyCell;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
-import org.genericsystem.reactor.az3.Table.ButtonDiv;
+import org.genericsystem.reactor.az3.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;
@@ -126,7 +126,7 @@ public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 		}
 
 		// EmptyCell corresponding to the “Remove” or “Add” button of other lines.
-		public static class EmptyCell extends ButtonDiv {
+		public static class EmptyCell extends InstancesTable.ButtonDiv {
 		}
 	}
 
@@ -186,7 +186,7 @@ public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 		}
 
 		// Button to delete the instance.
-		public static class RemoveButtonDiv extends ButtonDiv {
+		public static class RemoveButtonDiv extends InstancesTable.ButtonDiv {
 			@Flex("1")
 			@Height("100%")
 			@Width("100%")

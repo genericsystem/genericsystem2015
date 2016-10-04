@@ -21,6 +21,8 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.Select.SelectModel;
+import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
@@ -41,6 +43,7 @@ import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
@@ -442,13 +445,33 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				throw new IllegalStateException(e);
 			}
 		});
+		processAnnotation(SelectModel.class, result, annotation -> {
+			result.select__(context -> {
+				try {
+					return ((SelectModel) annotation).value().newInstance().get().apply(context, result);
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		});
+
 		processAnnotation(ForEach.class, result, annotation -> {
 			try {
-				result.forEach(((ForEach) annotation).value().newInstance().get());
+				if (!NO_FOR_EACH.class.equals(((ForEach) annotation).value()))
+					result.forEach(((ForEach) annotation).value().newInstance().get());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
 		});
+
+		processAnnotation(SetStringExtractor.class, result, annotation -> {
+			try {
+				result.setStringExtractor(((SetStringExtractor) annotation).value().newInstance().get());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		});
+
 		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 
 		processAnnotation(FlexDirectionStyle.class, result, annotation -> {

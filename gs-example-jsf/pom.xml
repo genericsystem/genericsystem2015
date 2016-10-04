@@ -16,6 +16,7 @@
 		<jstl.version>1.2</jstl.version>
 		<weld.core.version>2.2.6.Final</weld.core.version>
 		<wildfly-maven-plugin.version>1.0.1.Final</wildfly-maven-plugin.version>
+		<failOnMissingWebXml>false</failOnMissingWebXml>
 	</properties>
 
 	<repositories>
@@ -100,6 +101,7 @@
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
+
 		<!-- plugins> <plugin> <groupId>org.wildfly.plugins</groupId> <artifactId>wildfly-maven-plugin</artifactId> 
 			<version>${wildfly-maven-plugin.version}</version> <executions> <execution> 
 			<phase>install</phase> <goals> <goal>deploy</goal> </goals> </execution> 

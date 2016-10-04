@@ -27,7 +27,7 @@ import org.genericsystem.reactor.az3.GSInstanceBuilder.BuilderCell.BooleanHolder
 import org.genericsystem.reactor.az3.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.az3.GSInstanceBuilder.BuilderCell.LinkBuilder.ComponentBuilder.ComponentBuilderSelect;
 import org.genericsystem.reactor.az3.GSInstanceBuilder.InstanceNameBuilder.InstanceNameBuilderInput;
-import org.genericsystem.reactor.az3.Table.ButtonDiv;
+import org.genericsystem.reactor.az3.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
@@ -160,7 +160,7 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 	// “Add” button.
 	@Parent(GSInstanceBuilder.class)
-	public static class AddButtonDiv extends ButtonDiv {
+	public static class AddButtonDiv extends InstancesTable.ButtonDiv {
 		@Parent(AddButtonDiv.class)
 		@Flex("1")
 		@Height("100%")

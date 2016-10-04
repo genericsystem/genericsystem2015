@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import org.genericsystem.reactor.annotations.Select.Selects;
 import org.genericsystem.reactor.az.GSTagImpl;
+import org.genericsystem.reactor.model.ObservableModelSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
 /**
@@ -29,4 +30,18 @@ public @interface Select {
 		Select[] value();
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	@Repeatable(SelectModels.class)
+	public @interface SelectModel {
+		Class<? extends GSTagImpl>[] path() default {};
+
+		Class<? extends Supplier<ObservableModelSelector>> value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	public @interface SelectModels {
+		SelectModel[] value();
+	}
 }

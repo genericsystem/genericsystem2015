@@ -40,14 +40,18 @@ import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyDiv2.MyHtmlUl.MyHtml
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHeader;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHeader.MyHtmlH1;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHeader.MyHtmlInputText;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlButton;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlSpan;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi2;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi3;
-import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi4;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlButton;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlSpan;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlSpan.MyHtmlStrong;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi2;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi2.MyHtmlHyperLink;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi3;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi3.MyHtmlHyperLink2;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi4;
+import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyHtmlFooter1.MyHtmlDiv3.MyHtmlUl2.MyHtmlLi4.MyHtmlHyperLink3;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter2;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter2.MyHtmlDiv4;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyHtmlFooter2.MyHtmlDiv4.MyHtmlButton3;
@@ -139,11 +143,11 @@ public class TodoApp2 extends GSApp {
 		createNewInitializedProperty(COMPLETED_TODOS, model -> getTodos(model).filtered(COMPLETE));
 	}
 
-	@ReactorDependencies({ MyDiv.class, MyHtmlFooter1.class, MyHtmlFooter2.class })
+	@ReactorDependencies({ MyDiv.class, MyHtmlFooter2.class })
 	public static class MyHtmlDiv extends HtmlDiv {
 
 		@StyleClass("todoapp")
-		@ReactorDependencies({ MyHeader.class, MyDiv2.class })
+		@ReactorDependencies({ MyHeader.class, MyDiv2.class, MyHtmlFooter1.class })
 		public static class MyDiv extends GSDiv {
 
 			@StyleClass("header")
@@ -238,97 +242,116 @@ public class TodoApp2 extends GSApp {
 					}
 				}
 			}
-		}
 
-		@StyleClass("footer")
-		@ReactorDependencies(MyHtmlDiv3.class)
-		public static class MyHtmlFooter1 extends HtmlFooter {
+			@StyleClass("footer")
+			@ReactorDependencies(MyHtmlDiv3.class)
+			public static class MyHtmlFooter1 extends HtmlFooter {
 
-			@Override
-			public void init() {
-				bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(model).size() == 0 ? true : false, getTodos(model)));
-			}
-
-			private ObservableList<Generic> getTodos(Context model) {
-				return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
-			}
-
-			@ReactorDependencies({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
-			public static class MyHtmlDiv3 extends HtmlDiv {
-
-				@StyleClass("todo-count")
-				public static class MyHtmlSpan extends HtmlSpan {
-
-					public static class MyHtmlStrong extends HtmlStrong {
-
-						@Override
-						public void init() {
-							bindText(model -> Bindings.createStringBinding(() -> {
-								int size = getActiveTodos(model).size();
-								return size + " item" + (size > 1 ? "s" : "") + " left";
-							}, getActiveTodos(model)));
-						}
-
-						private ObservableList<Generic> getActiveTodos(Context model) {
-							return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
-						}
-					}
+				@Override
+				public void init() {
+					bindOptionalStyleClass("hide", "hasNoTodo", model -> Bindings.createBooleanBinding(() -> getTodos(model).size() == 0 ? true : false, getTodos(model)));
 				}
 
-				@StyleClass("filters")
-				@ReactorDependencies({ MyHtmlLi2.class, MyHtmlLi3.class, MyHtmlLi4.class })
-				public static class MyHtmlUl2 extends HtmlUl {
-
-					public static class MyHtmlLi2 extends HtmlLi {
-
-						@Override
-						public void init() {
-							new HtmlHyperLink(this, "All", model -> getModeProperty(model).setValue(ALL)).bindOptionalStyleClass("selected", "allMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ALL));
-						}
-
-						private Property<Predicate<Generic>> getModeProperty(Context model) {
-							return getProperty(FILTER_MODE, model);
-						}
-					}
-
-					public static class MyHtmlLi3 extends HtmlLi {
-
-						@Override
-						public void init() {
-							new HtmlHyperLink(this, "Actives", model -> getModeProperty(model).setValue(ACTIVE)).bindOptionalStyleClass("selected", "activeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ACTIVE));
-						}
-
-						private Property<Predicate<Generic>> getModeProperty(Context model) {
-							return getProperty(FILTER_MODE, model);
-						}
-					}
-
-					public static class MyHtmlLi4 extends HtmlLi {
-
-						@Override
-						public void init() {
-							new HtmlHyperLink(this, "Completes", model -> getModeProperty(model).setValue(COMPLETE)).bindOptionalStyleClass("selected", "completeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), COMPLETE));
-						}
-
-						private Property<Predicate<Generic>> getModeProperty(Context model) {
-							return getProperty(FILTER_MODE, model);
-						}
-					}
-
+				private ObservableList<Generic> getTodos(Context model) {
+					return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
 				}
 
-				@StyleClass("clear-completed")
-				public static class MyHtmlButton extends HtmlButton {
+				@ReactorDependencies({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
+				public static class MyHtmlDiv3 extends HtmlDiv {
 
-					@Override
-					public void init() {
-						bindAction(model -> new ArrayList<>(getCompletedTodos(model)).forEach(Generic::remove));
-						bindText(model -> Bindings.createStringBinding(() -> "Clear completed (" + getCompletedTodos(model).size() + ")", getCompletedTodos(model)));
-						bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
+					@StyleClass("todo-count")
+					@ReactorDependencies(MyHtmlStrong.class)
+					public static class MyHtmlSpan extends HtmlSpan {
+
+						public static class MyHtmlStrong extends HtmlStrong {
+
+							@Override
+							public void init() {
+								bindText(model -> Bindings.createStringBinding(() -> {
+									int size = getActiveTodos(model).size();
+									return size + " item" + (size > 1 ? "s" : "") + " left";
+								}, getActiveTodos(model)));
+							}
+
+							private ObservableList<Generic> getActiveTodos(Context model) {
+								return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
+							}
+						}
 					}
 
-					private ObservableList<Generic> getCompletedTodos(Context model) {
-						return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
+					@StyleClass("filters")
+					@ReactorDependencies({ MyHtmlLi2.class, MyHtmlLi3.class, MyHtmlLi4.class })
+					public static class MyHtmlUl2 extends HtmlUl {
+
+						@ReactorDependencies(MyHtmlHyperLink.class)
+						public static class MyHtmlLi2 extends HtmlLi {
+
+							public static class MyHtmlHyperLink extends HtmlHyperLink {
+
+								@Override
+								public void init() {
+									setText("All");
+									bindAction(model -> getModeProperty(model).setValue(ALL));
+									bindOptionalStyleClass("selected", "allMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ALL));
+								}
+
+								private Property<Predicate<Generic>> getModeProperty(Context model) {
+									return getProperty(FILTER_MODE, model);
+								}
+							}
+						}
+
+						@ReactorDependencies(MyHtmlHyperLink2.class)
+						public static class MyHtmlLi3 extends HtmlLi {
+
+							public static class MyHtmlHyperLink2 extends HtmlHyperLink {
+
+								@Override
+								public void init() {
+									setText("Actives");
+									bindAction(model -> getModeProperty(model).setValue(ACTIVE));
+									bindOptionalStyleClass("selected", "activeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), ACTIVE));
+								}
+
+								private Property<Predicate<Generic>> getModeProperty(Context model) {
+									return getProperty(FILTER_MODE, model);
+								}
+							}
+						}
+
+						@ReactorDependencies(MyHtmlHyperLink3.class)
+						public static class MyHtmlLi4 extends HtmlLi {
+
+							public static class MyHtmlHyperLink3 extends HtmlHyperLink {
+
+								@Override
+								public void init() {
+									setText("Completes");
+									bindAction(model -> getModeProperty(model).setValue(COMPLETE));
+									bindOptionalStyleClass("selected", "completeMode", model -> Bindings.equal((ObservableObjectValue<?>) getModeProperty(model), COMPLETE));
+								}
+
+								private Property<Predicate<Generic>> getModeProperty(Context model) {
+									return getProperty(FILTER_MODE, model);
+								}
+							}
+						}
+
+					}
+
+					@StyleClass("clear-completed")
+					public static class MyHtmlButton extends HtmlButton {
+
+						@Override
+						public void init() {
+							bindAction(model -> new ArrayList<>(getCompletedTodos(model)).forEach(Generic::remove));
+							bindText(model -> Bindings.createStringBinding(() -> "Clear completed (" + getCompletedTodos(model).size() + ")", getCompletedTodos(model)));
+							bindOptionalStyleClass("hide", "hasNoCompleted", model -> Bindings.createBooleanBinding(() -> getCompletedTodos(model).size() == 0 ? true : false, getCompletedTodos(model)));
+						}
+
+						private ObservableList<Generic> getCompletedTodos(Context model) {
+							return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
+						}
 					}
 				}
 			}
@@ -341,6 +364,7 @@ public class TodoApp2 extends GSApp {
 			@ReactorDependencies({ MyHtmlButton3.class, MyHtmlButton4.class })
 			public static class MyHtmlDiv4 extends HtmlFooter {
 
+				@StyleClass("save")
 				public static class MyHtmlButton3 extends HtmlButton {
 
 					@Override
@@ -350,6 +374,7 @@ public class TodoApp2 extends GSApp {
 					}
 				}
 
+				@StyleClass("cancel")
 				public static class MyHtmlButton4 extends HtmlButton {
 
 					@Override
