@@ -440,7 +440,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processAnnotation(DirectSelect.class, result, annotation -> result.select(((DirectSelect) annotation).value()));
 		processAnnotation(Select.class, result, annotation -> {
 			try {
-				result.select(((Select) annotation).value().newInstance().get());
+				result.select(((Select) annotation).value().newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
