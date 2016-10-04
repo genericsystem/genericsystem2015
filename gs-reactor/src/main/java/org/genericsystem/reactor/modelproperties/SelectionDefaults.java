@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.modelproperties;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
@@ -92,7 +93,7 @@ public interface SelectionDefaults extends Tag {
 			subContexts.addListener((ListChangeListener<Context>) change -> {
 				if (selection != null)
 					while (change.next())
-						if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().contains(selection.getValue()))
+						if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().stream().map(c -> c.getGeneric()).collect(Collectors.toList()).contains(selection.getValue().getGeneric()))
 							selection.setValue(null);
 			});
 			Property<Generic> updatedGeneric = getProperty(UPDATED_GENERIC, model);
