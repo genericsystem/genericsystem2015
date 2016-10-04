@@ -9,6 +9,10 @@ import org.genericsystem.reactor.az.GSTagImpl;
  */
 public class HtmlH1 extends GSTagImpl {
 
+	public HtmlH1() {
+
+	}
+
 	public HtmlH1(Tag parent) {
 		super(parent);
 	}
