@@ -76,8 +76,8 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test009() {
-		catchAndCheckCause(() -> new Engine(MyBmw.class), InstantiationException.class);
-		catchAndCheckCause(() -> new Engine(MyMercedes.class), InstantiationException.class);
+		catchAndCheckCause(() -> new Engine(MyBmw.class), IllegalStateException.class);
+		catchAndCheckCause(() -> new Engine(MyMercedes.class), IllegalStateException.class);
 	}
 
 	public void test010() {
@@ -341,11 +341,13 @@ public class AnnotationTest extends AbstractTest {
 
 	}
 
-	public static interface VehicleInstance extends Generic {}
+	public static interface VehicleInstance extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static interface MyAudi extends VehicleInstance {}
+	public static interface MyAudi extends VehicleInstance {
+	}
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
@@ -355,7 +357,8 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(VehicleType.class)
-	public static interface MyMercedes {}
+	public static interface MyMercedes {
+	}
 
 	@SystemGeneric
 	@InstanceClass(VehicleInstance.class)
@@ -370,46 +373,57 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	@SystemGeneric
-	public static interface Games extends Generic {}
+	public static interface Games extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(Games.class)
-	public static interface MyGames extends Generic {}
+	public static interface MyGames extends Generic {
+	}
 
 	@SystemGeneric
-	public static interface Children extends Generic {}
+	public static interface Children extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(Children.class)
-	public static interface MyChildren extends Generic {}
+	public static interface MyChildren extends Generic {
+	}
 
 	@SystemGeneric
 	@Supers({ Games.class, Children.class })
-	public static interface ChildrenGames extends Generic {}
+	public static interface ChildrenGames extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(ChildrenGames.class)
-	public static interface MyChildrenGames extends Generic {}
+	public static interface MyChildrenGames extends Generic {
+	}
 
 	@SystemGeneric
 	@Supers({ Human.class, Vehicle.class })
-	public static interface Transformer extends Generic {}
+	public static interface Transformer extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(Transformer.class)
-	public static interface MyTransformer extends Generic {}
+	public static interface MyTransformer extends Generic {
+	}
 
 	@SystemGeneric
 	@Supers({ Transformer.class, ChildrenGames.class })
-	public static interface TransformerChildrenGames extends Generic {}
+	public static interface TransformerChildrenGames extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(TransformerChildrenGames.class)
-	public static interface MyTransformerChildrenGames extends Generic {}
+	public static interface MyTransformerChildrenGames extends Generic {
+	}
 
 	@SystemGeneric
 	@Meta(Vehicle.class)
-	public static interface MyVehicle extends Generic {}
+	public static interface MyVehicle extends Generic {
+	}
 
 	@SystemGeneric
 	@Components(Vehicle.class)
@@ -454,7 +468,8 @@ public class AnnotationTest extends AbstractTest {
 
 	@SystemGeneric
 	@Meta(Car.class)
-	public static interface myCar extends Generic {}
+	public static interface myCar extends Generic {
+	}
 
 	@SystemGeneric
 	@Components(Car.class)
@@ -470,35 +485,43 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	@SystemGeneric
-	public static interface Human extends Generic {}
+	public static interface Human extends Generic {
+	}
 
 	@SystemGeneric
-	public static interface Man extends Human {}
+	public static interface Man extends Human {
+	}
 
 	@SystemGeneric
 	@Meta(Human.class)
-	public static interface Myck extends Generic {}
+	public static interface Myck extends Generic {
+	}
 
 	@SystemGeneric
-	public static interface Time extends Generic {}
+	public static interface Time extends Generic {
+	}
 
 	@SystemGeneric
 	@Components({ Human.class, Vehicle.class })
-	public static interface HumanPossessVehicle extends Generic {}
+	public static interface HumanPossessVehicle extends Generic {
+	}
 
 	@SystemGeneric
 	@Components({ Human.class, Car.class })
 	@Supers(HumanPossessVehicle.class)
-	public static interface HumanPossessCar extends HumanPossessVehicle {}
+	public static interface HumanPossessCar extends HumanPossessVehicle {
+	}
 
 	@SystemGeneric
 	@Components({ Man.class, Car.class })
 	@Supers(HumanPossessVehicle.class)
-	public static interface ManPossessCar extends HumanPossessVehicle {}
+	public static interface ManPossessCar extends HumanPossessVehicle {
+	}
 
 	@SystemGeneric
 	@Components({ Human.class, Vehicle.class, Time.class })
-	public static interface HumanPossessVehicleTime extends Generic {}
+	public static interface HumanPossessVehicleTime extends Generic {
+	}
 
 	@SystemGeneric
 	public static interface GraphicComposite extends Generic {

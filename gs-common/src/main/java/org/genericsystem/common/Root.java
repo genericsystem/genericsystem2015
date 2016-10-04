@@ -114,22 +114,40 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 	}
 
 	protected Generic build(Vertex vertex) {
-		return build(vertex.getTs(), vertex.getClazz(), vertex.getMeta() == vertex.getTs() ? null : getGenericById(vertex.getMeta()), vertex.getSupers()
-				.stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents().stream().map(this::getGenericById)
-				.collect(Collectors.toList()), vertex.getBirthTs());
+		return build(vertex.getTs(), vertex.getClazz(), vertex.getMeta() == vertex.getTs() ? null : getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(),
+				vertex.getComponents().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getBirthTs());
 	}
 
 	protected Class<?> adaptClass(Class<?> clazz, Generic meta) {
 		InstanceClass metaAnnotation = meta == null ? null : getAnnotedClass(meta).getAnnotation(InstanceClass.class);
-		if (metaAnnotation != null)
-			if (clazz == null || clazz.isAssignableFrom(metaAnnotation.value()))
-				clazz = metaAnnotation.value();
-			else if (!metaAnnotation.value().isAssignableFrom(clazz))
-				getCurrentCache().discardWithException(new InstantiationException(clazz + " must extends " + metaAnnotation.value()));
-		if (clazz == null || (!getTClass().isAssignableFrom(clazz) && clazz.getAnnotation(DirectClass.class) == null)) {
-			clazz = getTClass();
+		if (clazz == null) {
+			if (metaAnnotation == null)
+				return getTClass();
+			else
+				return metaAnnotation.value();
 		}
-		return clazz;
+		DirectClass directClass = clazz.getAnnotation(DirectClass.class);
+		if (directClass != null)
+			if (metaAnnotation == null) {
+				return clazz;
+			} else {
+				if (metaAnnotation.value().isAssignableFrom(clazz))
+					return clazz;
+				else
+					getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+			}
+
+		if (metaAnnotation == null) {
+			if (getTClass().isAssignableFrom(clazz))
+				return clazz;
+			else
+				return getTClass();
+		}
+		if (metaAnnotation.value().isAssignableFrom(clazz))
+			return clazz;
+		else
+			getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+		return null;// Not reached
 	}
 
 	public abstract long pickNewTs();
