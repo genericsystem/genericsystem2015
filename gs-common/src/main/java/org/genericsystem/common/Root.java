@@ -124,13 +124,11 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 			return metaAnnotation == null ? getTClass() : metaAnnotation.value();
 
 		DirectClass directClass = clazz.getAnnotation(DirectClass.class);
-		if (directClass != null)
-			if (metaAnnotation == null)
-				return clazz;
-			else if (metaAnnotation.value().isAssignableFrom(clazz))
+		if (directClass != null){
+			if (metaAnnotation == null||metaAnnotation.value().isAssignableFrom(clazz))
 				return clazz;
 			else
-				getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+				getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));}
 		if (metaAnnotation == null)
 			return getTClass().isAssignableFrom(clazz) ? clazz : getTClass();
 
@@ -164,8 +162,7 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 
 	private Generic newInstance(Class<?> clazz) {
 		PROXY_FACTORY.setSuperclass(clazz.isInterface() ? Object.class : clazz);
-		PROXY_FACTORY.setInterfaces(clazz.isInterface() ? getTClass().isAssignableFrom(clazz) ? new Class[] { clazz } : new Class[] { clazz, getTClass() }
-				: getTClass().isAssignableFrom(clazz) ? new Class[] {} : new Class[] { getTClass() });
+		PROXY_FACTORY.setInterfaces(clazz.isInterface() ? (getTClass().isAssignableFrom(clazz) ? new Class[] { clazz } : new Class[] { clazz, getTClass() }) : getTClass().isAssignableFrom(clazz) ? new Class[] {} : new Class[] { getTClass() });
 		try {
 			return (Generic) PROXY_FACTORY.createClass(METHOD_FILTER).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -214,8 +211,8 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 		abstract protected Root getRoot();
 
 		public Vertex getVertex() {
-			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(Generic::getTs)
-					.collect(Collectors.toList()), getValue(), getComponents().stream().map(Generic::getTs).collect(Collectors.toList()), getBirthTs());
+			return new Vertex(getClazz(), getTs(), getMeta() != null ? getMeta().getTs() : getTs(), getSupers().stream().map(Generic::getTs).collect(Collectors.toList()), getValue(),
+					getComponents().stream().map(Generic::getTs).collect(Collectors.toList()), getBirthTs());
 		}
 
 		public Class<?> getClazz() {
@@ -253,8 +250,7 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 	public AbstractCache getCurrentCache() {
 		AbstractCache context = cacheLocal.get();
 		if (context == null)
-			throw new IllegalStateException(
-					"Unable to find the current cache, thread context is not defined. Did you miss to call start() method on your cache ? or perhaps have you accidentaly closed your engine ?");
+			throw new IllegalStateException("Unable to find the current cache, thread context is not defined. Did you miss to call start() method on your cache ? or perhaps have you accidentaly closed your engine ?");
 		return context;
 	}
 

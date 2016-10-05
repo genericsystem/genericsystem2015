@@ -6,7 +6,6 @@ import org.genericsystem.reactor.az.GSTagImpl;
 public class HtmlHeader extends GSTagImpl {
 
 	public HtmlHeader() {
-
 	}
 
 	public HtmlHeader(Tag parent) {

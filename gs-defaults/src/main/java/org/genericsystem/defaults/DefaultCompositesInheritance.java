@@ -7,12 +7,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
@@ -23,6 +17,12 @@ import org.genericsystem.defaults.tools.InheritanceComputer;
 import org.genericsystem.defaults.tools.ObservableInheritanceComputer2;
 
 import com.sun.javafx.collections.ObservableListWrapper;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
