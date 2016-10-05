@@ -14,22 +14,20 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
-import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.ba_htmltag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
 import org.genericsystem.reactor.ca_gscomponents.GSCheckBoxWithValue;
+import org.genericsystem.reactor.ca_gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.ca_gscomponents.GSDiv;
 import org.genericsystem.reactor.ca_gscomponents.GSInputTextWithConversion;
-import org.genericsystem.reactor.ca_gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.ca_gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.ca_gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.ca_gscomponents.GSSelect.InstanceCompositeSelect;
@@ -61,13 +59,13 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-@Flex(path = HeaderRow.class, value = "0.3")
-@Flex(path = { ContentRow.class, Content.class }, value = "1")
-@Styles.Color(path = HeaderRow.class, value = "white")
-@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
-@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
-@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
-@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
+@Style(path = HeaderRow.class, name = "flex", value = "0.3")
+@Style(path = ContentRow.class, name = "flex", value = "1")
+@Style(path = HeaderRow.class, name = "color", value = "white")
+@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
 @ReactorDependencies({ HeaderRow.class, ContentRow.class })
 @ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class })
 @ReactorDependencies(path = { HeaderRow.class, Content.class }, value = GSValueComponents.class)
@@ -135,8 +133,8 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
-	@Flex(path = { Header.class, GSInputTextEditorWithConversion.class }, value = "1")
-	@Width(path = { Header.class, GSInputTextEditorWithConversion.class }, value = "100%")
+	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "flex", value = "1")
+	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "width", value = "100%")
 	@ReactorDependencies({ Header.class, Content.class, RemovalLink.class })
 	@ReactorDependencies(path = Header.class, value = GSInputTextEditorWithConversion.class)
 	@ReactorDependencies(path = Content.class, value = { DirectRelationComponentEditor.class, GSLabelDisplayer.class })
@@ -155,14 +153,14 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	@Select(path = { GSValueComponents.class, Header.class, GSInputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSCheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@FlexWrap("wrap")
-	@Overflow("auto")
+	@Style(name = "flex-wrap", value = "wrap")
+	@Style(name = "overflow", value = "auto")
 	public static class GSHoldersEditor extends GSHolders {
 
 	}
 
-	@Flex("1")
-	@Width("100%")
+	@Style(name = "flex", value = "1")
+	@Style(name = "width", value = "100%")
 	public static class DirectRelationComponentEditor extends InstanceCompositeSelect {
 		@Override
 		public void init() {
@@ -183,9 +181,9 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
-	@Flex("1 0 auto")
-	@Flex(path = { Header.class, GSInputTextWithConversion.class }, value = "1")
-	@Width(path = { Header.class, GSInputTextWithConversion.class }, value = "100%")
+	@Style(name = "flex", value = "1 0 auto")
+	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
+	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
 	@ReactorDependencies({ Header.class, Content.class, AdditionLink.class })
 	@ReactorDependencies(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@ReactorDependencies(path = Content.class, value = ComponentAdderSelect.class)
@@ -243,8 +241,8 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
-	@Flex("1")
-	@Width("100%")
+	@Style(name = "flex", value = "1")
+	@Style(name = "width", value = "100%")
 	public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry {
 
 		@Override
