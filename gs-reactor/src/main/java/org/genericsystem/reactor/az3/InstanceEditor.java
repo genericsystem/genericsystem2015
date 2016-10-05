@@ -12,15 +12,19 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.Styles;
+import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
+import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
+import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxEditor;
+import org.genericsystem.reactor.az.GSDiv;
 import org.genericsystem.reactor.az.GSInputTextWithConversion;
 import org.genericsystem.reactor.az.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.az.GSSelect.CompositeSelectWithEmptyEntry;
@@ -29,6 +33,7 @@ import org.genericsystem.reactor.az3.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.az3.GSComposite.Content;
 import org.genericsystem.reactor.az3.GSComposite.Header;
 import org.genericsystem.reactor.az3.InstanceEditor.GSHoldersEditor;
+import org.genericsystem.reactor.az3.InstanceEditor.GSMultiCheckbox;
 import org.genericsystem.reactor.az3.InstanceEditor.GSValueComponentsEditor;
 import org.genericsystem.reactor.az3.InstancesTable.GSHolders;
 import org.genericsystem.reactor.az3.InstancesTable.GSValueComponents;
@@ -37,20 +42,27 @@ import org.genericsystem.reactor.az3.Table.HeaderRow;
 import org.genericsystem.reactor.gstag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_COMPONENT;
 import org.genericsystem.reactor.model.ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
 import org.genericsystem.reactor.model.ObservableModelSelector.REMOVABLE_HOLDER_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector.DIRECT_RELATION_SELECTOR;
+import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
+import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.REVERSED_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 @Flex(path = HeaderRow.class, value = "0.3")
+@Flex(path = { ContentRow.class, Content.class }, value = "1")
 @Styles.Color(path = HeaderRow.class, value = "white")
 @BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
 @BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
@@ -59,13 +71,69 @@ import javafx.beans.value.ChangeListener;
 @ReactorDependencies({ HeaderRow.class, ContentRow.class })
 @ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class })
 @ReactorDependencies(path = { HeaderRow.class, Content.class }, value = GSValueComponents.class)
-@ReactorDependencies(path = ContentRow.class, value = { GSValueComponentsEditor.class, GSHoldersEditor.class })
+@ReactorDependencies(path = ContentRow.class, value = { GSValueComponentsEditor.class, Content.class })
+@ReactorDependencies(path = { ContentRow.class, Content.class }, value = { GSHoldersEditor.class, GSMultiCheckbox.class })
 @ReactorDependencies(path = { ContentRow.class, GSValueComponentsEditor.class }, value = { Header.class, Content.class })
 @ForEach(path = { HeaderRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-@ForEach(path = { ContentRow.class, GSHolders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+@ForEach(path = { ContentRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+@Select(path = { ContentRow.class, Content.class, GSHoldersEditor.class }, value = NON_MULTICHECKBOX_SELECTOR.class)
+@Select(path = { ContentRow.class, Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR.class)
 public class InstanceEditor extends Table implements SelectionDefaults {
+	@ReactorDependencies(CheckboxLabel.class)
+	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_COMPONENT.class)
+	@FlexWrap("wrap")
+	@Overflow("auto")
+	public static class GSMultiCheckbox extends GSDiv {
+
+	}
+
+	@Flex("1 0 auto")
+	@JustifyContent("center")
+	@AlignItems("center")
+	@Style(name = "text-align", value = "center")
+	@ReactorDependencies(Checkbox.class)
+	public static class CheckboxLabel extends org.genericsystem.reactor.gstag.HtmlLabel {
+
+		@Override
+		public void init() {
+			bindText();
+			addPrefixBinding(model -> {
+				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
+					addStyle(model, "background-color", getGenericStringProperty(model).getValue());
+			});
+		}
+	}
+
+	@Style(name = "float", value = "left")
+	@Style(name = "vertical-align", value = "middle")
+	@Style(name = "margin", value = "4px")
+	public static class Checkbox extends GSCheckBoxWithValue {
+
+		@Override
+		public void init() {
+			initValueProperty(context -> context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric()) != null ? true : false);
+			storeProperty("exists", context -> {
+				ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()).getValue() != null ? true : false,
+						context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()));
+				exists.addListener((o, v, nva) -> {
+					if (!context.isDestroyed())
+						getConvertedValueProperty(context).setValue(nva);
+				});
+				return exists;
+			});
+			addConvertedValueChangeListener((context, nva) -> {
+				if (Boolean.TRUE.equals(nva))
+					context.getGenerics()[2].setHolder(context.getGenerics()[1], null, context.getGeneric());
+				if (Boolean.FALSE.equals(nva)) {
+					Generic link = context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric());
+					if (link != null)
+						link.remove();
+				}
+			});
+		}
+	}
 
 	@Flex(path = { Header.class, GSInputTextEditorWithConversion.class }, value = "1")
 	@Width(path = { Header.class, GSInputTextEditorWithConversion.class }, value = "100%")
@@ -78,6 +146,7 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	public static class GSValueComponentsEditor extends GSValueComponents implements ComponentsDefaults {
 	}
 
+	@Flex(path = GSValueComponentsEditor.class, value = "1 0 auto")
 	@ReactorDependencies(value = { GSValueComponentsEditor.class, GSHolderAdder.class })
 	@ReactorDependencies(path = { GSValueComponentsEditor.class, Header.class }, value = { GSInputTextEditorWithConversion.class, GSCheckBoxEditor.class })
 	@ReactorDependencies(path = { GSHolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
@@ -114,6 +183,7 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
+	@Flex("1 0 auto")
 	@Flex(path = { Header.class, GSInputTextWithConversion.class }, value = "1")
 	@Width(path = { Header.class, GSInputTextWithConversion.class }, value = "100%")
 	@ReactorDependencies({ Header.class, Content.class, AdditionLink.class })
@@ -179,7 +249,6 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 
 		@Override
 		public void init() {
-			// select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
 			addPostfixBinding(model -> {
 				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 				if (selectedComponents != null)
@@ -197,7 +266,6 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 
 		private void addHolder(Context context, ConvertedValueDefaults tag) {
-			System.out.println("addHolder, classe du tag : " + tag.getClass().getSimpleName());
 			Property<Serializable> observable = tag.getConvertedValueProperty(context);
 			assert observable != null;
 			if (observable.getValue() != null) {
