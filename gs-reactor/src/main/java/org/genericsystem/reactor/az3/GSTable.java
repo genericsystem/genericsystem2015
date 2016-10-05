@@ -27,7 +27,6 @@ import org.genericsystem.reactor.az3.GSTable.TitleRow.EmptyCell;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.az3.GSTable.TitleRow.TypeName.TypeNameDisplayer;
-import org.genericsystem.reactor.az3.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.az3.TitledDiv.GSTitleDiv;
 import org.genericsystem.reactor.gstag.HtmlButton;
 import org.genericsystem.reactor.gstag.HtmlH2;

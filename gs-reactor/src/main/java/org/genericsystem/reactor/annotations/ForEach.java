@@ -5,7 +5,6 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
 
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
 import org.genericsystem.reactor.az.GSTagImpl;
@@ -21,7 +20,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 public @interface ForEach {
 	Class<? extends GSTagImpl>[] path() default {};
 
-	Class<? extends Supplier<ObservableListExtractor>> value();
+	Class<? extends ObservableListExtractor> value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })

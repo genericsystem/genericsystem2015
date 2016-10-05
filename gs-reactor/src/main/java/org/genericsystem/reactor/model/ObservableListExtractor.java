@@ -2,7 +2,6 @@ package org.genericsystem.reactor.model;
 
 import java.util.Arrays;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
@@ -60,58 +59,58 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 
 	public static final ObservableListExtractor OTHER_COMPONENTS_2 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2]));
 
-	public static class ATTRIBUTES_OF_TYPE implements Supplier<ObservableListExtractor> {
+	public static class ATTRIBUTES_OF_TYPE implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return ATTRIBUTES_OF_TYPE;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return ATTRIBUTES_OF_TYPE.apply(generics);
 		}
 	}
 
-	public static class OTHER_COMPONENTS_1 implements Supplier<ObservableListExtractor> {
+	public static class OTHER_COMPONENTS_1 implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return OTHER_COMPONENTS_1;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return OTHER_COMPONENTS_1.apply(generics);
 		}
 	}
 
-	public static class COMPONENTS implements Supplier<ObservableListExtractor> {
+	public static class COMPONENTS implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return COMPONENTS;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return COMPONENTS.apply(generics);
 		}
 	}
 
-	public static class SUBINSTANCES implements Supplier<ObservableListExtractor> {
+	public static class SUBINSTANCES implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return SUBINSTANCES;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return SUBINSTANCES.apply(generics);
 		}
 	}
 
-	public static class ATTRIBUTES_OF_INSTANCES implements Supplier<ObservableListExtractor> {
+	public static class ATTRIBUTES_OF_INSTANCES implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return ATTRIBUTES_OF_INSTANCES;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return ATTRIBUTES_OF_INSTANCES.apply(generics);
 		}
 	}
 
-	public static class HOLDERS implements Supplier<ObservableListExtractor> {
+	public static class HOLDERS implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return HOLDERS;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return HOLDERS.apply(generics);
 		}
 	}
 
-	public static class OTHER_COMPONENTS_2 implements Supplier<ObservableListExtractor> {
+	public static class OTHER_COMPONENTS_2 implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
-			return OTHER_COMPONENTS_2;
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return OTHER_COMPONENTS_2.apply(generics);
 		}
 	}
 
-	public static class NO_FOR_EACH implements Supplier<ObservableListExtractor> {
+	public static class NO_FOR_EACH implements ObservableListExtractor {
 		@Override
-		public ObservableListExtractor get() {
+		public ObservableList<Generic> apply(Generic[] generics) {
 			throw new IllegalStateException();
 		}
 	}
