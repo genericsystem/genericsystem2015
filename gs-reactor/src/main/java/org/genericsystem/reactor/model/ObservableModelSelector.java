@@ -31,14 +31,12 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		}
 	}
 
-	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements Supplier<ObservableModelSelector> {
+	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements ObservableModelSelector {
 		@Override
-		public ObservableModelSelector get() {
-			return (context, tag) -> {
-				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
-				return Bindings.createObjectBinding(() -> holders.isEmpty() || (context.getGeneric().getComponents().size() < 2 && !context.getGeneric().isPropertyConstraintEnabled())
-						|| (context.getGeneric().getComponents().size() >= 2 && !context.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? context : null, ObservableListExtractor.HOLDERS.apply(context.getGenerics()));
-			};
+		public ObservableValue<Context> apply(Context context, Tag tag) {
+			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
+			return Bindings.createObjectBinding(() -> holders.isEmpty() || (context.getGeneric().getComponents().size() < 2 && !context.getGeneric().isPropertyConstraintEnabled())
+					|| (context.getGeneric().getComponents().size() >= 2 && !context.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? context : null, ObservableListExtractor.HOLDERS.apply(context.getGenerics()));
 		}
 	}
 }
