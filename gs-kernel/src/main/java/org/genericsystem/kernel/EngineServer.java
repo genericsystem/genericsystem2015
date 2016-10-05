@@ -41,8 +41,7 @@ public class EngineServer extends AbstractBackEnd {
 			for (String path : options.getEnginePaths()) {
 				AbstractServer root = buildRoot(options.getPersistentDirectoryPath(path), options.getClasses(path));
 				roots.put(path, root);
-				System.out.println("Starts engine with path : " + path + " and persistence repository path : "
-						+ options.getPersistentDirectoryPath(path));
+				System.out.println("Starts engine with path : " + path + " and persistence repository path : " + options.getPersistentDirectoryPath(path));
 			}
 	}
 
@@ -57,8 +56,7 @@ public class EngineServer extends AbstractBackEnd {
 		case Protocol.PICK_NEW_TS:
 			return replyBuffer.appendLongThrowException(() -> root.pickNewTs());
 		case Protocol.GET_DEPENDENCIES:
-			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(),
-					gsBuffer.getLong()));
+			return replyBuffer.appendGSVertexArrayThrowException(() -> root.getDependencies(gsBuffer.getLong(), gsBuffer.getLong()));
 		case Protocol.GET_VERTEX:
 			return replyBuffer.appendGSVertexThrowException(() -> root.getVertex(gsBuffer.getLong()));
 		case Protocol.APPLY:

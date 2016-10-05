@@ -482,7 +482,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		});
 
 		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
-
+		processAnnotation(StyleClass.class, result, annotation -> {
+			for (String sc : ((StyleClass) annotation).value())
+				result.addStyleClass(sc);
+		});
 		processAnnotation(FlexDirectionStyle.class, result, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
 				((GSDiv) result).setDirection(((FlexDirectionStyle) annotation).value());
@@ -529,43 +532,43 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		Tag current = result;
-		Annotation applyingAnnotation = null;
+		List<Annotation> applyingAnnotations = new ArrayList<>();
 		while (current != null) {
 			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			Annotation annotationFound = selectAnnotation(annotations, annotationClass, classesToResult);
+			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
 
 			if (!DirectSelect.class.equals(annotationClass)) {
 				Class<?> superClass = current.getClass().getSuperclass();
-				while (annotationFound == null && superClass != null) {
+				while (annotationsFound.isEmpty() && superClass != null) {
 					annotations = superClass.getAnnotationsByType(annotationClass);
-					annotationFound = selectAnnotation(annotations, annotationClass, classesToResult);
+					annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
 					superClass = superClass.getSuperclass();
 				}
 			}
-			if (annotationFound != null)
-				applyingAnnotation = annotationFound;
+			if (!annotationsFound.isEmpty())
+				applyingAnnotations = annotationsFound;
 			classesToResult.add(0, current.getClass());
 			current = current.getParent();
 		}
-		if (applyingAnnotation != null)
+		for (Annotation applyingAnnotation : applyingAnnotations)
 			consumer.accept(applyingAnnotation);
 	}
 
-	default Annotation selectAnnotation(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
-		Annotation annotationFound = null;
+	default List<Annotation> selectAnnotations(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
+		List<Annotation> annotationsFound = new ArrayList<>();
 		for (Annotation annotation : annotations)
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
 				if (isAssignableFrom(Arrays.asList(path), classesToResult)) {
-					if (annotationFound != null)
+					if (!annotationsFound.isEmpty() && !Style.class.equals(annotationClass))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-					annotationFound = annotation;
+					annotationsFound.add(annotation);
 				}
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new IllegalStateException(e);
 			}
-		return annotationFound;
+		return annotationsFound;
 	}
 
 	default <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {
