@@ -6,8 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.reactor.az.FlexDirection;
-import org.genericsystem.reactor.az.GSTagImpl;
+import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
+import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })

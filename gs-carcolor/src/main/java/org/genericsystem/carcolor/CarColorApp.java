@@ -7,20 +7,20 @@ import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.az.FlexDirection;
-import org.genericsystem.reactor.az.GSApp;
-import org.genericsystem.reactor.az.GSEditor;
-import org.genericsystem.reactor.az.GSHeader;
-import org.genericsystem.reactor.az.GSLogo;
-import org.genericsystem.reactor.az.GSModal;
-import org.genericsystem.reactor.az.GSMonitor;
-import org.genericsystem.reactor.az.GSResponsive;
-import org.genericsystem.reactor.az.GSTable;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
+import org.genericsystem.reactor.ca_gscomponents.GSApp;
+import org.genericsystem.reactor.ca_gscomponents.GSEditor;
+import org.genericsystem.reactor.ca_gscomponents.GSHeader;
+import org.genericsystem.reactor.ca_gscomponents.GSLogo;
+import org.genericsystem.reactor.ca_gscomponents.GSModal;
+import org.genericsystem.reactor.ca_gscomponents.GSMonitor;
+import org.genericsystem.reactor.ca_gscomponents.GSResponsive;
+import org.genericsystem.reactor.ca_gscomponents.GSTable;
 
 /**
  * @author Nicolas Feybesse
