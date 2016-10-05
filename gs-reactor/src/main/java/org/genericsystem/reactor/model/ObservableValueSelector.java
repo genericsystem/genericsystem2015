@@ -27,10 +27,24 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
+	public static class CHECK_BOX_DISPLAYER_0 implements ObservableValueSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			return gs[0].getComponents().size() == 1 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
+		}
+	}
+
 	public static class LABEL_DISPLAYER implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[1].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
+		}
+	}
+
+	public static class LABEL_DISPLAYER_0 implements ObservableValueSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			return gs[0].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 

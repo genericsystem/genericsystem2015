@@ -30,4 +30,15 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 					.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
 		}
 	}
+
+	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements Supplier<ObservableModelSelector> {
+		@Override
+		public ObservableModelSelector get() {
+			return (context, tag) -> {
+				ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
+				return Bindings.createObjectBinding(() -> holders.isEmpty() || (context.getGeneric().getComponents().size() < 2 && !context.getGeneric().isPropertyConstraintEnabled())
+						|| (context.getGeneric().getComponents().size() >= 2 && !context.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? context : null, ObservableListExtractor.HOLDERS.apply(context.getGenerics()));
+			};
+		}
+	}
 }

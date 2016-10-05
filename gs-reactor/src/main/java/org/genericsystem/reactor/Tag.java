@@ -17,13 +17,14 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
-import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.Color;
@@ -48,6 +49,7 @@ import org.genericsystem.reactor.model.StringExtractor;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
@@ -409,8 +411,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			if (tagClass.isAssignableFrom(child.getClass())) {
 				if (result == null) {
 					result = (T) child;
-					if (!tagClass.equals(getClass()))
-						System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + getClass().getSimpleName());
+					if (!tagClass.equals(child.getClass()))
+						System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + child.getClass().getSimpleName());
 					else
 						break;
 				} else
@@ -462,6 +464,13 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
+		});
+
+		processAnnotation(BindSelection.class, result, annotation -> {
+			if (SelectionDefaults.class.isAssignableFrom(result.getClass()))
+				((SelectionDefaults) result).bindSelection(result.find(((BindSelection) annotation).value()));
+			else
+				log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
 		});
 
 		processAnnotation(SetStringExtractor.class, result, annotation -> {

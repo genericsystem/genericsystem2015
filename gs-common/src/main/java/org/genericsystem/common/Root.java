@@ -10,13 +10,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javassist.util.proxy.MethodFilter;
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
-import javassist.util.proxy.ProxyObject;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.ISignature;
+import org.genericsystem.api.core.annotations.DirectClass;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.defaults.DefaultConfig.MetaRelation;
@@ -24,6 +20,11 @@ import org.genericsystem.defaults.DefaultConfig.Sequence;
 import org.genericsystem.defaults.DefaultConfig.SystemMap;
 import org.genericsystem.defaults.DefaultGeneric;
 import org.genericsystem.defaults.DefaultRoot;
+
+import javassist.util.proxy.MethodFilter;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
 
 /**
  * @author Nicolas Feybesse
@@ -113,21 +114,31 @@ public abstract class Root implements DefaultRoot<Generic>, ProxyObject, Generic
 	}
 
 	protected Generic build(Vertex vertex) {
-		return build(vertex.getTs(), vertex.getClazz(), vertex.getMeta() == vertex.getTs() ? null : getGenericById(vertex.getMeta()), vertex.getSupers()
-				.stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(), vertex.getComponents().stream().map(this::getGenericById)
-				.collect(Collectors.toList()), vertex.getBirthTs());
+		return build(vertex.getTs(), vertex.getClazz(), vertex.getMeta() == vertex.getTs() ? null : getGenericById(vertex.getMeta()), vertex.getSupers().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getValue(),
+				vertex.getComponents().stream().map(this::getGenericById).collect(Collectors.toList()), vertex.getBirthTs());
 	}
 
 	protected Class<?> adaptClass(Class<?> clazz, Generic meta) {
 		InstanceClass metaAnnotation = meta == null ? null : getAnnotedClass(meta).getAnnotation(InstanceClass.class);
-		if (metaAnnotation != null)
-			if (clazz == null || clazz.isAssignableFrom(metaAnnotation.value()))
-				clazz = metaAnnotation.value();
-			else if (!metaAnnotation.value().isAssignableFrom(clazz))
-				getCurrentCache().discardWithException(new InstantiationException(clazz + " must extends " + metaAnnotation.value()));
-		if (clazz == null || !getTClass().isAssignableFrom(clazz))
-			clazz = getTClass();
-		return clazz;
+		if (clazz == null)
+			return metaAnnotation == null ? getTClass() : metaAnnotation.value();
+
+		DirectClass directClass = clazz.getAnnotation(DirectClass.class);
+		if (directClass != null)
+			if (metaAnnotation == null)
+				return clazz;
+			else if (metaAnnotation.value().isAssignableFrom(clazz))
+				return clazz;
+			else
+				getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+		if (metaAnnotation == null)
+			return getTClass().isAssignableFrom(clazz) ? clazz : getTClass();
+
+		if (metaAnnotation.value().isAssignableFrom(clazz))
+			return clazz;
+		else
+			getCurrentCache().discardWithException(new IllegalStateException(clazz + " must extend " + metaAnnotation.value()));
+		return null;// Not reached
 	}
 
 	public abstract long pickNewTs();
