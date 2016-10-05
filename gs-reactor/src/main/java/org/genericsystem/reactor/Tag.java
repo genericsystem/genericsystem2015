@@ -426,9 +426,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				throw new IllegalStateException(e);
 			}
 			((GSTagImpl) result).setParent(this);
-			processAnnotations(result);
 			result.initComposite();
 			result.init();
+			processAnnotations(result);
 		}
 		return result;
 	}
