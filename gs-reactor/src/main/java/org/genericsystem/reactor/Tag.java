@@ -473,7 +473,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		});
 
 		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
-
+		processAnnotation(StyleClass.class, result, annotation -> {
+			for (String sc : ((StyleClass) annotation).value())
+				result.addStyleClass(sc);
+		});
 		processAnnotation(FlexDirectionStyle.class, result, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
 				((GSDiv) result).setDirection(((FlexDirectionStyle) annotation).value());

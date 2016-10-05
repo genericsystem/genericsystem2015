@@ -5,15 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
@@ -35,6 +28,16 @@ import org.genericsystem.reactor.gstag.HtmlSpan;
 import org.genericsystem.reactor.gstag.HtmlStrong;
 import org.genericsystem.reactor.gstag.HtmlUl;
 import org.genericsystem.todomvc.Todos.Completed;
+
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -145,7 +148,7 @@ public class TodoApp extends GSApp {
 										new HtmlLi(this) {
 											{
 												storeProperty(COMPLETED, model -> {
-													Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
+													Generic completed = model.getGeneric().getHolder(model.find(Completed.class));
 													return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
 												});
 												forEach2(model -> getFilteredTodos(model));
@@ -155,6 +158,14 @@ public class TodoApp extends GSApp {
 														addStyleClass("view");
 														new HtmlCheckBox(this) {
 															{
+																addPrefixBinding(todo -> {
+																	Property<Boolean> completedProperty = getProperty(COMPLETED, todo);
+																	ObservableValue<Generic> completed = (ObservableValue<Generic>) getExtractors(todo.getParent()).get(todo.getGeneric())[0];
+																	Property<Generic> completedGenericProperty = new SimpleObjectProperty(completed.getValue());
+																	BidirectionalBinding.bind(completedGenericProperty, completedProperty, g -> g == null ? false : (Boolean) g.getValue(),
+																			b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null);
+																	completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
+																});
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
 																	if (Boolean.TRUE.equals(getObservableValue(COMPLETED, todo).getValue())) {
@@ -162,7 +173,6 @@ public class TodoApp extends GSApp {
 																	}
 																});
 																bindOptionalBiDirectionalAttribute(COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-																addPropertyChangeListener(COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.find(Completed.class), nva));
 															}
 														};
 														new HtmlLabel(this) {

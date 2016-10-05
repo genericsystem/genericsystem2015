@@ -3,7 +3,7 @@ package org.genericsystem.todomvc;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
-import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
+import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 
 @UniqueValueConstraint
@@ -11,7 +11,8 @@ import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 public class Todos {
 	@SystemGeneric
 	@InstanceValueClassConstraint(Boolean.class)
-	@PropertyConstraint
+	// @PropertyConstraint
+	@SingularConstraint
 	@Components(Todos.class)
 	public static class Completed {
 
