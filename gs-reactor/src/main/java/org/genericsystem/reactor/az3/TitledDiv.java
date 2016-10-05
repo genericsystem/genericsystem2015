@@ -2,13 +2,7 @@ package org.genericsystem.reactor.az3;
 
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
-import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Color;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.JustifyContent;
-import org.genericsystem.reactor.annotations.Styles.MarginBottom;
-import org.genericsystem.reactor.annotations.Styles.MarginRight;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSDiv;
@@ -23,12 +17,12 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 @ReactorDependencies(GSTitleDiv.class)
 public class TitledDiv extends GSDiv {
 
-	@BackgroundColor("#EA4500")
-	@MarginRight("1px")
-	@MarginBottom("1px")
-	@Color("White")
-	@JustifyContent("center")
-	@AlignItems("center")
+	@Style(name = "background-color", value = "#EA4500")
+	@Style(name = "margin-right", value = "1px")
+	@Style(name = "margin-bottomr", value = "1px")
+	@Style(name = "color", value = "White")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
 	@ReactorDependencies(TitleContent.class)
 	public static class GSTitleDiv extends GSDiv {
 		public static class TitleContent extends HtmlH2 {

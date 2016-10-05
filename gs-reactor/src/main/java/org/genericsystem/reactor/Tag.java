@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -481,11 +482,11 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			}
 		});
 
-		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 		processAnnotation(StyleClass.class, result, annotation -> {
 			for (String sc : ((StyleClass) annotation).value())
 				result.addStyleClass(sc);
 		});
+
 		processAnnotation(FlexDirectionStyle.class, result, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
 				((GSDiv) result).setDirection(((FlexDirectionStyle) annotation).value());
@@ -516,6 +517,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processStyleAnnotation(MarginBottom.class, result, "margin-bottom");
 		processStyleAnnotation(Height.class, result, "height");
 		processStyleAnnotation(Width.class, result, "width");
+		processStyleAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 		processAnnotation(GenericValueBackgroundColor.class, result, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
 				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
 	}
@@ -545,8 +547,33 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 					superClass = superClass.getSuperclass();
 				}
 			}
-			if (!annotationsFound.isEmpty())
+			if (Style.class.equals(annotationClass))
+				applyingAnnotations.addAll(annotationsFound);
+			else if (!annotationsFound.isEmpty())
 				applyingAnnotations = annotationsFound;
+			classesToResult.add(0, current.getClass());
+			current = current.getParent();
+		}
+		for (Annotation applyingAnnotation : applyingAnnotations)
+			consumer.accept(applyingAnnotation);
+	}
+
+	default <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
+		List<Class<?>> classesToResult = new ArrayList<>();
+		Tag current = result;
+		List<Annotation> applyingAnnotations = new ArrayList<>();
+		while (current != null) {
+			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
+			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
+
+			Class<?> superClass = current.getClass().getSuperclass();
+			while (superClass != null) {
+				annotations = superClass.getAnnotationsByType(annotationClass);
+				annotationsFound.addAll(selectAnnotations(annotations, annotationClass, classesToResult));
+				superClass = superClass.getSuperclass();
+			}
+			Collections.reverse(annotationsFound);
+			applyingAnnotations.addAll(annotationsFound);
 			classesToResult.add(0, current.getClass());
 			current = current.getParent();
 		}

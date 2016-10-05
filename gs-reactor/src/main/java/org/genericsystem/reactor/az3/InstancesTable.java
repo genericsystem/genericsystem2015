@@ -5,18 +5,11 @@ import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.Styles;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Height;
-import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.MarginBottom;
-import org.genericsystem.reactor.annotations.Styles.MarginRight;
-import org.genericsystem.reactor.annotations.Styles.Width;
+import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.az.FlexDirection;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.az.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -38,12 +31,12 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @BindSelection(ContentRow.class)
-@Styles.Color(path = HeaderRow.class, value = "white")
-@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
-@BackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
-@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
-@BackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
-@Styles.Color(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, value = "white")
+@Style(path = HeaderRow.class, name = "color", value = "white")
+@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
+@Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
 @AlignItems(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "flex-start")
 @ReactorDependencies({ HeaderRow.class, ContentRow.class })
@@ -69,20 +62,20 @@ public class InstancesTable extends Table implements SelectionDefaults {
 
 	}
 
-	@BackgroundColor(path = Content.class, value = "#e5ed00")
-	@BackgroundColor(path = Header.class, value = "#e5ed00")
-	@JustifyContent(path = Header.class, value = "center")
-	@AlignItems(path = Header.class, value = "center")
-	@JustifyContent(path = Content.class, value = "center")
-	@AlignItems(path = Content.class, value = "center")
 	@FlexDirectionStyle(FlexDirection.ROW)
+	@Style(path = Content.class, name = "background-color", value = "#e5ed00")
+	@Style(path = Header.class, name = "background-color", value = "#e5ed00")
+	@Style(path = Header.class, name = "justify-content", value = "center")
+	@Style(path = Header.class, name = "align-items", value = "center")
+	@Style(path = Content.class, name = "justify-content", value = "center")
+	@Style(path = Content.class, name = "align-items", value = "center")
 	@ForEach(path = Content.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
 	@ReactorDependencies({ Header.class, Content.class })
-	@MarginRight(path = Header.class, value = "1px")
-	@MarginBottom(path = Header.class, value = "1px")
-	@MarginRight(path = Content.class, value = "1px")
-	@MarginBottom(path = Content.class, value = "1px")
+	@Style(path = Header.class, name = "margin-right", value = "1px")
+	@Style(path = Header.class, name = "margin-bottom", value = "1px")
+	@Style(path = Content.class, name = "margin-right", value = "1px")
+	@Style(path = Content.class, name = "margin-bottom", value = "1px")
 	public static class GSValueComponents extends GSComposite {
 
 	}
@@ -97,9 +90,9 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	}
 
 	@KeepFlexDirection
-	@BackgroundColor("#ea0084")
-	@MarginRight("1px")
-	@MarginBottom("1px")
+	@Style(name = "background-color", value = "#ea0084")
+	@Style(name = "margin-right", value = "1px")
+	@Style(name = "margin-bottom", value = "1px")
 	public static class ButtonDiv extends GSDiv {
 		@Override
 		public void init() {
@@ -120,9 +113,9 @@ public class InstancesTable extends Table implements SelectionDefaults {
 		}
 	}
 
-	@Flex("1")
-	@Height("100%")
-	@Width("100%")
+	@Style(name = "flex", value = "1")
+	@Style(name = "height", value = "100%")
+	@Style(name = "width", value = "100%")
 	public static class RemoveButton extends HtmlButton {
 
 		@Override
