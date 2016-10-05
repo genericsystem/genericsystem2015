@@ -3,7 +3,6 @@ package org.genericsystem.reactor.model;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.genericsystem.common.Generic;
 
@@ -22,38 +21,38 @@ public interface StringExtractor extends Function<Generic, String> {
 	};
 	public static final StringExtractor INFO = Generic::info;
 
-	public static class EXTRACTOR implements Supplier<StringExtractor> {
+	public static class EXTRACTOR implements StringExtractor {
 		@Override
-		public StringExtractor get() {
-			return EXTRACTOR;
+		public String apply(Generic generic) {
+			return EXTRACTOR.apply(generic);
 		}
 	}
 
-	public static class SIMPLE_CLASS_EXTRACTOR implements Supplier<StringExtractor> {
+	public static class SIMPLE_CLASS_EXTRACTOR implements StringExtractor {
 		@Override
-		public StringExtractor get() {
-			return SIMPLE_CLASS_EXTRACTOR;
+		public String apply(Generic generic) {
+			return SIMPLE_CLASS_EXTRACTOR.apply(generic);
 		}
 	}
 
-	public static class MANAGEMENT implements Supplier<StringExtractor> {
+	public static class MANAGEMENT implements StringExtractor {
 		@Override
-		public StringExtractor get() {
-			return MANAGEMENT;
+		public String apply(Generic generic) {
+			return MANAGEMENT.apply(generic);
 		}
 	}
 
-	public static class TYPE_INSTANCE_EXTRACTOR implements Supplier<StringExtractor> {
+	public static class TYPE_INSTANCE_EXTRACTOR implements StringExtractor {
 		@Override
-		public StringExtractor get() {
-			return TYPE_INSTANCE_EXTRACTOR;
+		public String apply(Generic generic) {
+			return TYPE_INSTANCE_EXTRACTOR.apply(generic);
 		}
 	}
 
-	public static class INFO implements Supplier<StringExtractor> {
+	public static class INFO implements StringExtractor {
 		@Override
-		public StringExtractor get() {
-			return INFO;
+		public String apply(Generic generic) {
+			return INFO.apply(generic);
 		}
 	}
 }

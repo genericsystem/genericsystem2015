@@ -448,7 +448,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processAnnotation(SelectModel.class, result, annotation -> {
 			result.select__(context -> {
 				try {
-					return ((SelectModel) annotation).value().newInstance().get().apply(context, result);
+					return ((SelectModel) annotation).value().newInstance().apply(context, result);
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}
@@ -458,7 +458,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processAnnotation(ForEach.class, result, annotation -> {
 			try {
 				if (!NO_FOR_EACH.class.equals(((ForEach) annotation).value()))
-					result.forEach(((ForEach) annotation).value().newInstance().get());
+					result.forEach(((ForEach) annotation).value().newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}
@@ -466,7 +466,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 		processAnnotation(SetStringExtractor.class, result, annotation -> {
 			try {
-				result.setStringExtractor(((SetStringExtractor) annotation).value().newInstance().get());
+				result.setStringExtractor(((SetStringExtractor) annotation).value().newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
 			}

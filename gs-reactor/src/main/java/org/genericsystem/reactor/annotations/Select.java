@@ -5,7 +5,6 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
 
 import org.genericsystem.reactor.annotations.Select.Selects;
 import org.genericsystem.reactor.az.GSTagImpl;
@@ -36,7 +35,7 @@ public @interface Select {
 	public @interface SelectModel {
 		Class<? extends GSTagImpl>[] path() default {};
 
-		Class<? extends Supplier<ObservableModelSelector>> value();
+		Class<? extends ObservableModelSelector> value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

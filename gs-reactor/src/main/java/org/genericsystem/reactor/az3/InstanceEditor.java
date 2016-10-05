@@ -160,7 +160,7 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 
 		@Override
 		public void init() {
-			//			select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
+			// select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
 			addPostfixBinding(model -> {
 				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 				if (selectedComponents != null)
