@@ -38,7 +38,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
-@ReactorDependencies({ HeaderRow.class, ContentRow.class })
+@ReactorDependencies({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
 @ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class, ButtonDiv.class })
 @ReactorDependencies(path = { HeaderRow.class, Content.class }, value = GSValueComponents.class)
 @ReactorDependencies(path = ContentRow.class, value = { GSValueComponents.class, GSHolders.class, ButtonDiv.class })
