@@ -52,6 +52,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SEL
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.REVERSED_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
@@ -76,6 +77,7 @@ import javafx.beans.value.ObservableValue;
 @ForEach(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @ForEach(path = { ContentRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+@Select(path = { HeaderRow.class, GSValueComponents.class }, value = TYPE_SELECTOR.class)
 @Select(path = { ContentRow.class, Content.class, GSHoldersEditor.class }, value = NON_MULTICHECKBOX_SELECTOR.class)
 @Select(path = { ContentRow.class, Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR.class)
 public class InstanceEditor extends Table implements SelectionDefaults {

@@ -75,4 +75,11 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 			return gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null;
 		}
 	}
+
+	public static class TYPE_SELECTOR implements ObservableValueSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			return gs[1];
+		}
+	}
 }
