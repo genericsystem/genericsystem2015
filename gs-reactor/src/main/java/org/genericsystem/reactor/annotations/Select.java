@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.genericsystem.reactor.annotations.Select.Selects;
-import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 

@@ -21,7 +21,7 @@ import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
-import org.genericsystem.reactor.ca_gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.GSApp;
 
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
