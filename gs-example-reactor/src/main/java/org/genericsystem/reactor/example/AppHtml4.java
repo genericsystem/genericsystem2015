@@ -8,7 +8,6 @@ import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.RunScript;
@@ -19,10 +18,6 @@ import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.ba_htmltag.HtmlLabel.GSLabelDisplayer;
-import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
-import org.genericsystem.reactor.ca_gscomponents.GSApp;
-import org.genericsystem.reactor.ca_gscomponents.GSDiv;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.example.AppHtml4.GSAttributesComposite;
 import org.genericsystem.reactor.example.AppHtml4.GSAttributesComposite.GSAttributesContentComponent;
@@ -43,8 +38,13 @@ import org.genericsystem.reactor.example.AppHtml4.GSTypeLabeledInstancesComposit
 import org.genericsystem.reactor.example.AppHtml4.GSTypeRowLabeledTypeAttributesComposite;
 import org.genericsystem.reactor.example.AppHtml4.GSTypeRowLabeledTypeAttributesComposite.GSHeaderComponent;
 import org.genericsystem.reactor.example.AppHtml4.GSTypeRowLabeledTypeAttributesComposite.GSHeaderComponent.GSHeaderComponentLabel;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)

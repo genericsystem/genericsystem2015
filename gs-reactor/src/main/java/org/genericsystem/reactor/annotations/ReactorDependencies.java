@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.genericsystem.reactor.annotations.ReactorDependencies.ReactorDependenciesMult;
-import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 /**
  * @author Nicolas Feybesse
