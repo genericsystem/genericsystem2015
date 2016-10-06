@@ -534,7 +534,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		Tag current = result;
-		List<Annotation> applyingAnnotations = new ArrayList<>();
+		Annotation applyingAnnotation = null;
 		while (current != null) {
 			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
 			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
@@ -547,14 +547,12 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 					superClass = superClass.getSuperclass();
 				}
 			}
-			if (Style.class.equals(annotationClass))
-				applyingAnnotations.addAll(annotationsFound);
-			else if (!annotationsFound.isEmpty())
-				applyingAnnotations = annotationsFound;
+			if (!annotationsFound.isEmpty())
+				applyingAnnotation = annotationsFound.get(0);
 			classesToResult.add(0, current.getClass());
 			current = current.getParent();
 		}
-		for (Annotation applyingAnnotation : applyingAnnotations)
+		if (applyingAnnotation != null)
 			consumer.accept(applyingAnnotation);
 	}
 
@@ -563,13 +561,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		Tag current = result;
 		List<Annotation> applyingAnnotations = new ArrayList<>();
 		while (current != null) {
-			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
-
-			Class<?> superClass = current.getClass().getSuperclass();
+			Class<?> superClass = current.getClass();
+			List<Annotation> annotationsFound = new ArrayList<>();
 			while (superClass != null) {
-				annotations = superClass.getAnnotationsByType(annotationClass);
-				annotationsFound.addAll(selectAnnotations(annotations, annotationClass, classesToResult));
+				annotationsFound.addAll(selectAnnotations(superClass.getAnnotationsByType(annotationClass), annotationClass, classesToResult));
 				superClass = superClass.getSuperclass();
 			}
 			Collections.reverse(annotationsFound);
