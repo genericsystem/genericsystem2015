@@ -1,12 +1,12 @@
 package org.genericsystem.carcolor;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.az.FlexDirection;
-import org.genericsystem.reactor.az.GSDiv;
-import org.genericsystem.reactor.az.GSModalButton;
-import org.genericsystem.reactor.gstag.HtmlHyperLink;
-import org.genericsystem.reactor.gstag.HtmlLi;
-import org.genericsystem.reactor.gstag.HtmlUl;
+import org.genericsystem.reactor.ba_htmltag.HtmlHyperLink;
+import org.genericsystem.reactor.ba_htmltag.HtmlLi;
+import org.genericsystem.reactor.ba_htmltag.HtmlUl;
+import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
+import org.genericsystem.reactor.ca_gscomponents.GSDiv;
+import org.genericsystem.reactor.ca_gscomponents.GSModalButton;
 
 public class GSUserGuide extends GSDiv {
 

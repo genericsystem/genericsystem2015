@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
-import org.genericsystem.reactor.az.GSTagImpl;
+import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 /**

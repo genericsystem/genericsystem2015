@@ -10,21 +10,21 @@ import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.kernel.Engine;
+import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.az.FlexDirection;
-import org.genericsystem.reactor.az.GSApp;
-import org.genericsystem.reactor.az.GSEditor;
-import org.genericsystem.reactor.az.GSMonitorExtended;
-import org.genericsystem.reactor.az.GSStepEditor;
-import org.genericsystem.reactor.az.GSTable;
-import org.genericsystem.reactor.az.GSComposite.ColorCompositeRadio;
-import org.genericsystem.reactor.az.GSComposite.ColorTitleCompositeFlexElement;
+import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
+import org.genericsystem.reactor.ca_gscomponents.GSApp;
+import org.genericsystem.reactor.ca_gscomponents.GSEditor;
+import org.genericsystem.reactor.ca_gscomponents.GSMonitorExtended;
+import org.genericsystem.reactor.ca_gscomponents.GSStepEditor;
+import org.genericsystem.reactor.ca_gscomponents.GSTable;
+import org.genericsystem.reactor.ca_gscomponents.GSComposite.ColorCompositeRadio;
+import org.genericsystem.reactor.ca_gscomponents.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)

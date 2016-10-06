@@ -6,16 +6,16 @@ import org.genericsystem.carcolor.model.CarColor2;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
+import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.az.GSApp;
-import org.genericsystem.reactor.az3.GSEditor;
-import org.genericsystem.reactor.az3.GSTable;
-import org.genericsystem.reactor.az3.GSEditor.HorizontalGSEditor;
-import org.genericsystem.reactor.az3.GSTable.HorizontalTable;
+import org.genericsystem.reactor.ca_gscomponents.GSApp;
+import org.genericsystem.reactor.ca_gscomponents2.GSEditor;
+import org.genericsystem.reactor.ca_gscomponents2.GSTable;
+import org.genericsystem.reactor.ca_gscomponents2.GSEditor.HorizontalGSEditor;
+import org.genericsystem.reactor.ca_gscomponents2.GSTable.HorizontalTable;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)

@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,13 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.aa_modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.aa_modelproperties.DisplayDefaults;
+import org.genericsystem.reactor.aa_modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.aa_modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.aa_modelproperties.StylesDefaults;
+import org.genericsystem.reactor.aa_modelproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -41,18 +49,11 @@ import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
-import org.genericsystem.reactor.az.GSDiv;
-import org.genericsystem.reactor.az.GSTagImpl;
+import org.genericsystem.reactor.ca_gscomponents.GSDiv;
+import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.StringExtractor;
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.DisplayDefaults;
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -426,9 +427,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				throw new IllegalStateException(e);
 			}
 			((GSTagImpl) result).setParent(this);
-			processAnnotations(result);
 			result.initComposite();
 			result.init();
+			processAnnotations(result);
 		}
 		return result;
 	}
@@ -481,11 +482,11 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			}
 		});
 
-		processAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 		processAnnotation(StyleClass.class, result, annotation -> {
 			for (String sc : ((StyleClass) annotation).value())
 				result.addStyleClass(sc);
 		});
+
 		processAnnotation(FlexDirectionStyle.class, result, annotation -> {
 			if (GSDiv.class.isAssignableFrom(result.getClass()))
 				((GSDiv) result).setDirection(((FlexDirectionStyle) annotation).value());
@@ -516,6 +517,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processStyleAnnotation(MarginBottom.class, result, "margin-bottom");
 		processStyleAnnotation(Height.class, result, "height");
 		processStyleAnnotation(Width.class, result, "width");
+		processStyleAnnotation(Style.class, result, annotation -> result.addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 		processAnnotation(GenericValueBackgroundColor.class, result, annotation -> result.addPrefixBinding(modelContext -> result.addStyle(modelContext, "background-color",
 				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) result).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
 	}
@@ -532,43 +534,68 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		Tag current = result;
-		Annotation applyingAnnotation = null;
+		List<Annotation> applyingAnnotations = new ArrayList<>();
 		while (current != null) {
 			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			Annotation annotationFound = selectAnnotation(annotations, annotationClass, classesToResult);
+			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
 
 			if (!DirectSelect.class.equals(annotationClass)) {
 				Class<?> superClass = current.getClass().getSuperclass();
-				while (annotationFound == null && superClass != null) {
+				while (annotationsFound.isEmpty() && superClass != null) {
 					annotations = superClass.getAnnotationsByType(annotationClass);
-					annotationFound = selectAnnotation(annotations, annotationClass, classesToResult);
+					annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
 					superClass = superClass.getSuperclass();
 				}
 			}
-			if (annotationFound != null)
-				applyingAnnotation = annotationFound;
+			if (Style.class.equals(annotationClass))
+				applyingAnnotations.addAll(annotationsFound);
+			else if (!annotationsFound.isEmpty())
+				applyingAnnotations = annotationsFound;
 			classesToResult.add(0, current.getClass());
 			current = current.getParent();
 		}
-		if (applyingAnnotation != null)
+		for (Annotation applyingAnnotation : applyingAnnotations)
 			consumer.accept(applyingAnnotation);
 	}
 
-	default Annotation selectAnnotation(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
-		Annotation annotationFound = null;
+	default <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
+		List<Class<?>> classesToResult = new ArrayList<>();
+		Tag current = result;
+		List<Annotation> applyingAnnotations = new ArrayList<>();
+		while (current != null) {
+			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
+			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
+
+			Class<?> superClass = current.getClass().getSuperclass();
+			while (superClass != null) {
+				annotations = superClass.getAnnotationsByType(annotationClass);
+				annotationsFound.addAll(selectAnnotations(annotations, annotationClass, classesToResult));
+				superClass = superClass.getSuperclass();
+			}
+			Collections.reverse(annotationsFound);
+			applyingAnnotations.addAll(annotationsFound);
+			classesToResult.add(0, current.getClass());
+			current = current.getParent();
+		}
+		for (Annotation applyingAnnotation : applyingAnnotations)
+			consumer.accept(applyingAnnotation);
+	}
+
+	default List<Annotation> selectAnnotations(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
+		List<Annotation> annotationsFound = new ArrayList<>();
 		for (Annotation annotation : annotations)
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
 				if (isAssignableFrom(Arrays.asList(path), classesToResult)) {
-					if (annotationFound != null)
+					if (!annotationsFound.isEmpty() && !Style.class.equals(annotationClass))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-					annotationFound = annotation;
+					annotationsFound.add(annotation);
 				}
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new IllegalStateException(e);
 			}
-		return annotationFound;
+		return annotationsFound;
 	}
 
 	default <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Tag result, String propertyName) {

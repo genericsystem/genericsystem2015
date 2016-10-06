@@ -15,7 +15,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.az.GSApp;
+import org.genericsystem.reactor.ca_gscomponents.GSApp;
 import org.genericsystem.reactor.model.RootModel;
 
 /**
