@@ -1,5 +1,7 @@
 package org.genericsystem.reactor.model;
 
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
 import java.util.function.BiFunction;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -7,7 +9,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;

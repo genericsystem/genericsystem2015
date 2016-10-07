@@ -6,7 +6,6 @@ import org.genericsystem.carcolor.model.CarColor2;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
-import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
@@ -16,17 +15,18 @@ import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.ca_gscomponents.FlexDirection;
-import org.genericsystem.reactor.ca_gscomponents.GSApp;
-import org.genericsystem.reactor.ca_gscomponents2.InstanceEditor;
-import org.genericsystem.reactor.ca_gscomponents2.DivWithTitle.TitledInstanceEditor;
-import org.genericsystem.reactor.ca_gscomponents2.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.example.AppHtml5.CarInstancesTable;
 import org.genericsystem.reactor.example.AppHtml5.ColorInstancesTable;
 import org.genericsystem.reactor.example.AppHtml5.ColumnSelectedInstanceEditor;
 import org.genericsystem.reactor.example.AppHtml5.SelectedInstanceEditor;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents2.InstanceEditor;
+import org.genericsystem.reactor.gscomponents2.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents2.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.model.ObservableModelSelector;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)

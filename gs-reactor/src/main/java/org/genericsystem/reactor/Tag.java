@@ -18,13 +18,6 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.aa_modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.aa_modelproperties.DisplayDefaults;
-import org.genericsystem.reactor.aa_modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.aa_modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.aa_modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.aa_modelproperties.StylesDefaults;
-import org.genericsystem.reactor.aa_modelproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -49,13 +42,21 @@ import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
-import org.genericsystem.reactor.ca_gscomponents.GSDiv;
-import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.DisplayDefaults;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
@@ -534,7 +535,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Tag result, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		Tag current = result;
-		List<Annotation> applyingAnnotations = new ArrayList<>();
+		Annotation applyingAnnotation = null;
 		while (current != null) {
 			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
 			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
@@ -547,14 +548,12 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 					superClass = superClass.getSuperclass();
 				}
 			}
-			if (Style.class.equals(annotationClass))
-				applyingAnnotations.addAll(annotationsFound);
-			else if (!annotationsFound.isEmpty())
-				applyingAnnotations = annotationsFound;
+			if (!annotationsFound.isEmpty())
+				applyingAnnotation = annotationsFound.get(0);
 			classesToResult.add(0, current.getClass());
 			current = current.getParent();
 		}
-		for (Annotation applyingAnnotation : applyingAnnotations)
+		if (applyingAnnotation != null)
 			consumer.accept(applyingAnnotation);
 	}
 
@@ -563,13 +562,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		Tag current = result;
 		List<Annotation> applyingAnnotations = new ArrayList<>();
 		while (current != null) {
-			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
-
-			Class<?> superClass = current.getClass().getSuperclass();
+			Class<?> superClass = current.getClass();
+			List<Annotation> annotationsFound = new ArrayList<>();
 			while (superClass != null) {
-				annotations = superClass.getAnnotationsByType(annotationClass);
-				annotationsFound.addAll(selectAnnotations(annotations, annotationClass, classesToResult));
+				annotationsFound.addAll(selectAnnotations(superClass.getAnnotationsByType(annotationClass), annotationClass, classesToResult));
 				superClass = superClass.getSuperclass();
 			}
 			Collections.reverse(annotationsFound);

@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.reactor.ca_gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })

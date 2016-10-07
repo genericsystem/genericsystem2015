@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+org.eclipse.jdt.ui.ignorelowercasenames=true
+org.eclipse.jdt.ui.importorder=org.genericsystem.reactor.modelproperties;org.genericsystem.reactor.htmltag;org.genericsystem.reactor.gscomponent;org.genericsystem.reactor.gscomponent2;java;javax;org;com;
+org.eclipse.jdt.ui.ondemandthreshold=99
+org.eclipse.jdt.ui.staticondemandthreshold=99
