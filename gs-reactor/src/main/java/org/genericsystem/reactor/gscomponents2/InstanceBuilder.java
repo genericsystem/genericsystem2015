@@ -19,6 +19,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.Height;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
@@ -108,11 +109,11 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 	@Flex("1")
 	@Height("100%")
 	@Width("100%")
+	@SetText("Add")
 	public static class AddButton extends HtmlButton {
 
 		@Override
 		public void init() {
-			setText("Add");
 			bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED,
 					model -> Bindings.createStringBinding(
 							() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",

@@ -25,6 +25,7 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
@@ -506,6 +507,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			else
 				log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
 		});
+		processAnnotation(SetText.class, result, annotation -> result.setText(((SetText) annotation).value()));
 
 		processStyleAnnotation(Flex.class, result, "flex");
 		processStyleAnnotation(FlexWrap.class, result, "flex-wrap");

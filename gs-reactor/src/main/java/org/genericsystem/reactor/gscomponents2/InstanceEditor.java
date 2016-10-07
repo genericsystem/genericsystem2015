@@ -17,6 +17,7 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Styles.AlignItems;
 import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
@@ -176,11 +177,11 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
+	@SetText("×")
 	public static class RemovalLink extends GSActionLink {
 
 		@Override
 		public void init() {
-			setText("×");
 			bindAction(Context::remove);
 		}
 	}
@@ -260,11 +261,11 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
+	@SetText("+")
 	public static class AdditionLink extends GSActionLink {
 
 		@Override
 		public void init() {
-			setText("+");
 			bindAction(context -> addHolder(context.getParent(), (ConvertedValueDefaults) this.getParent().find(Header.class).getObservableChildren().stream().filter(t -> t instanceof ConvertedValueDefaults).findFirst().get()));
 		}
 

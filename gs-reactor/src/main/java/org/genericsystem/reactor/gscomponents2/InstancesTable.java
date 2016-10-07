@@ -10,6 +10,7 @@ import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
@@ -117,11 +118,11 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Style(name = "flex", value = "1")
 	@Style(name = "height", value = "100%")
 	@Style(name = "width", value = "100%")
+	@SetText("Remove")
 	public static class RemoveButton extends HtmlButton {
 
 		@Override
 		public void init() {
-			setText("Remove");
 			bindAction(Context::remove);
 		}
 	}
