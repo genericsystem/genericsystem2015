@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
@@ -62,7 +63,9 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
@@ -209,16 +212,27 @@ public class TodoApp2 extends GSApp {
 
 							@StyleClass("toggle")
 							public static class MyHtmlCheckBox extends HtmlCheckBox {
+								Map<Generic, Observable[]> getExtractors(Context model) {
+									return this.<Map<Generic, Observable[]>> getProperty("extractorMap", model).getValue();
+								}
 
 								@Override
 								public void init() {
+									addPrefixBinding(todo -> {
+										Property<Boolean> completedProperty = getProperty(COMPLETED, todo);
+										ObservableValue<Generic> completed = (ObservableValue<Generic>) getExtractors(todo.getParent()).get(todo.getGeneric())[0];
+										Property<Generic> completedGenericProperty = new SimpleObjectProperty(completed.getValue());
+										completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
+										BidirectionalBinding.bind(completedProperty, completedGenericProperty, b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null,
+												g -> g == null ? false : (Boolean) g.getValue());
+									});
+									addStyleClass("toggle");
 									addPrefixBinding(todo -> {
 										if (Boolean.TRUE.equals(getObservableValue(COMPLETED, todo).getValue())) {
 											getDomNodeAttributes(todo).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 										}
 									});
 									bindOptionalBiDirectionalAttribute(COMPLETED, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-									addPropertyChangeListener(COMPLETED, (model, nva) -> model.getGeneric().setHolder(model.find(Completed.class), nva));
 								}
 							}
 
