@@ -36,6 +36,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
@@ -102,7 +103,12 @@ public class TodoApp extends GSApp {
 				return result;
 			};
 		});
-		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(model.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
+		createNewInitializedProperty(TODOS, model -> {
+			ObservableList<Generic> result = new ObservableListWrapperExtended<>(model.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo));
+			result.addListener((ListChangeListener<? super Generic>) c -> {
+			});
+			return result;
+		});
 		createNewInitializedProperty(FILTER_MODE, model -> ALL);
 		createNewInitializedProperty(FILTERED_TODOS, model -> {
 			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));
@@ -162,9 +168,9 @@ public class TodoApp extends GSApp {
 																	Property<Boolean> completedProperty = getProperty(COMPLETED, todo);
 																	ObservableValue<Generic> completed = (ObservableValue<Generic>) getExtractors(todo.getParent()).get(todo.getGeneric())[0];
 																	Property<Generic> completedGenericProperty = new SimpleObjectProperty(completed.getValue());
-																	BidirectionalBinding.bind(completedGenericProperty, completedProperty, g -> g == null ? false : (Boolean) g.getValue(),
-																			b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null);
 																	completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
+																	BidirectionalBinding.bind(completedProperty, completedGenericProperty, b -> todo.getGeneric().isAlive() ? todo.getGeneric().setHolder(todo.find(Completed.class), b) : null,
+																			g -> g == null ? false : (Boolean) g.getValue());
 																});
 																addStyleClass("toggle");
 																addPrefixBinding(todo -> {
