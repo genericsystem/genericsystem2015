@@ -27,7 +27,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class CHECK_BOX_DISPLAYER_0 implements ObservableValueSelector {
+	public static class CHECK_BOX_DISPLAYER_ATTRIBUTE implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[0].getComponents().size() == 1 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
@@ -41,7 +41,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class LABEL_DISPLAYER_0 implements ObservableValueSelector {
+	public static class LABEL_DISPLAYER_ATTRIBUTE implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[0].getComponents().size() == 1 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
@@ -76,14 +76,14 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
-	public static class MULTICHECKBOX_SELECTOR_1 implements ObservableValueSelector {
+	public static class MULTICHECKBOX_SELECTOR_RELATION implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[1])) ? gs[0] : null;
 		}
 	}
 
-	public static class NON_MULTICHECKBOX_SELECTOR_1 implements ObservableValueSelector {
+	public static class NON_MULTICHECKBOX_SELECTOR_RELATION implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
 			return gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[1])) ? gs[0] : null;

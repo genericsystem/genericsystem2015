@@ -38,10 +38,10 @@ import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSHolderAdder;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSMultiCheckbox;
 import org.genericsystem.reactor.gscomponents2.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_COMPONENT_1;
+import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
 import org.genericsystem.reactor.model.ObservableValueSelector;
-import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR_1;
-import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_1;
+import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
+import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -54,8 +54,8 @@ import javafx.beans.value.ObservableValue;
 @ReactorDependencies(path = Content.class, value = { GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
 @ReactorDependencies(path = ButtonDiv.class, value = AddButton.class)
 @ForEach(path = { Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
-@Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_1.class)
-@Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_1.class)
+@Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
+@Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
 public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 
 	@Override
@@ -67,7 +67,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 	}
 
 	@ReactorDependencies(path = CheckboxLabel.class, value = CheckboxBuilder.class)
-	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_COMPONENT_1.class)
+	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_RELATION_COMPONENT.class)
 	public static class GSMultiCheckboxBuilder extends GSMultiCheckbox implements GSBuilderDefaults {
 		@Override
 		public void init() {
@@ -91,8 +91,8 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 	@ReactorDependencies({ Header.class, Content.class })
 	@ReactorDependencies(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
 	@ReactorDependencies(path = Content.class, value = ComponentAdderSelect.class)
-	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_0.class)
-	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_0.class)
+	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
+	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	public static class GSHolderBuilder extends GSHolderAdder implements GSBuilderDefaults, ComponentsDefaults {
 
 		@Override

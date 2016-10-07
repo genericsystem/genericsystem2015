@@ -45,7 +45,7 @@ import org.genericsystem.reactor.gscomponents2.Table.ContentRow;
 import org.genericsystem.reactor.gscomponents2.Table.HeaderRow;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
-import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_COMPONENT;
+import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
 import org.genericsystem.reactor.model.ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
 import org.genericsystem.reactor.model.ObservableModelSelector.REMOVABLE_HOLDER_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector;
@@ -84,7 +84,7 @@ import javafx.beans.value.ObservableValue;
 @Select(path = { ContentRow.class, Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR.class)
 public class InstanceEditor extends Table implements SelectionDefaults {
 	@ReactorDependencies(CheckboxLabel.class)
-	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_COMPONENT.class)
+	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_LINK_COMPONENT.class)
 	@FlexWrap("wrap")
 	@Overflow("auto")
 	public static class GSMultiCheckbox extends GSDiv {
@@ -192,8 +192,8 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	@ReactorDependencies(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@ReactorDependencies(path = Content.class, value = ComponentAdderSelect.class)
 	@Select(path = AdditionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
-	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_0.class)
-	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_0.class)
+	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
+	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	public static class GSHolderAdder extends GSValueComponents implements ComponentsDefaults {
 		@Override
 		public void init() {
