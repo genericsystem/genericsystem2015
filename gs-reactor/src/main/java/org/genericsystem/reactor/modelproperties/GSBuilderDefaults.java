@@ -17,6 +17,7 @@ public interface GSBuilderDefaults extends ContextProperty {
 	public static final String COMPONENTS_MAP = "componentsMap";
 	public static final String HOLDERS_MAP = "holdersMap";
 	public static final String INVALID_LIST = "invalidList";
+	public static final String MULTIPLE_RELATION = "multipleRelation";
 
 	default void createHoldersMapProperty() {
 		createNewInitializedProperty(HOLDERS_MAP, model -> new HashMap<Generic, Property<Serializable>>());
@@ -30,6 +31,10 @@ public interface GSBuilderDefaults extends ContextProperty {
 		createNewInitializedProperty(INVALID_LIST, model -> new ArrayList<ObservableValue<Boolean>>());
 	};
 
+	default void createMultipleRelationProperty() {
+		createNewInitializedProperty(MULTIPLE_RELATION, context -> new HashMap<Generic, Map<Generic, Property<Serializable>>>());
+	}
+
 	default Property<List<ObservableValue<Boolean>>> getInvalidListProperty(Context model) {
 		return getProperty(INVALID_LIST, model);
 	}
@@ -40,5 +45,9 @@ public interface GSBuilderDefaults extends ContextProperty {
 
 	default Property<Map<Generic, List<Property<Context>>>> getComponentsMapProperty(Context model) {
 		return getProperty(COMPONENTS_MAP, model);
+	}
+
+	default Property<Map<Generic, Map<Generic, Property<Serializable>>>> getMultipleRelationProperty(Context context) {
+		return getProperty(MULTIPLE_RELATION, context);
 	}
 }

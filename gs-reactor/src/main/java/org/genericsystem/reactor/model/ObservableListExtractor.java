@@ -94,6 +94,13 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
+	public static class SUBINSTANCES_OF_COMPONENT_1 implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !g.equals(generics[1])).stream().toArray(Generic[]::new));
+		}
+	}
+
 	public static class ATTRIBUTES_OF_INSTANCES implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {

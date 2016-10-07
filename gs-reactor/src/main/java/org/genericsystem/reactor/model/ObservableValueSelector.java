@@ -76,6 +76,20 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		}
 	}
 
+	public static class MULTICHECKBOX_SELECTOR_1 implements ObservableValueSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			return gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[1])) ? gs[0] : null;
+		}
+	}
+
+	public static class NON_MULTICHECKBOX_SELECTOR_1 implements ObservableValueSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			return gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[1])) ? gs[0] : null;
+		}
+	}
+
 	public static class TYPE_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {

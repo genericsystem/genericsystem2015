@@ -7,7 +7,9 @@ import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -23,15 +25,23 @@ import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder.AddButton;
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder.GSHolderBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder.GSMultiCheckboxBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceEditor.Checkbox;
+import org.genericsystem.reactor.gscomponents2.InstanceEditor.CheckboxLabel;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.ComponentAdderSelect;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSHolderAdder;
+import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSMultiCheckbox;
 import org.genericsystem.reactor.gscomponents2.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_COMPONENT_1;
 import org.genericsystem.reactor.model.ObservableValueSelector;
+import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR_1;
+import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_1;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -40,9 +50,12 @@ import javafx.beans.value.ObservableValue;
 @ReverseFlexDirection
 @Style(path = GSInputTextWithConversion.class, name = "flex", value = "1")
 @Style(path = GSInputTextWithConversion.class, name = "width", value = "100%")
-@ReactorDependencies({ GSInputTextWithConversion.class, GSHolderBuilder.class, ButtonDiv.class })
+@ReactorDependencies({ GSInputTextWithConversion.class, Content.class, ButtonDiv.class })
+@ReactorDependencies(path = Content.class, value = { GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
 @ReactorDependencies(path = ButtonDiv.class, value = AddButton.class)
-@ForEach(path = { GSHolderBuilder.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+@ForEach(path = { Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+@Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_1.class)
+@Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_1.class)
 public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 
 	@Override
@@ -50,6 +63,28 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 		createHoldersMapProperty();
 		createComponentsMapProperty();
 		createInvalidListProperty();
+		createMultipleRelationProperty();
+	}
+
+	@ReactorDependencies(path = CheckboxLabel.class, value = CheckboxBuilder.class)
+	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_COMPONENT_1.class)
+	public static class GSMultiCheckboxBuilder extends GSMultiCheckbox implements GSBuilderDefaults {
+		@Override
+		public void init() {
+			addPrefixBinding(context -> getMultipleRelationProperty(context).getValue().put(context.getGeneric(), new HashMap<>()));
+		}
+	}
+
+	public static class CheckboxBuilder extends Checkbox implements GSBuilderDefaults {
+		@Override
+		public void init() {
+			addConvertedValueChangeListener((context, nva) -> {
+				if (Boolean.TRUE.equals(nva))
+					getMultipleRelationProperty(context).getValue().get(context.getGenerics()[1]).put(context.getGeneric(), getConvertedValueProperty(context));
+				if (Boolean.FALSE.equals(nva))
+					getMultipleRelationProperty(context).getValue().get(context.getGenerics()[1]).remove(context.getGeneric());
+			});
+		}
 	}
 
 	@Style(name = "flex", value = "1")
@@ -96,6 +131,12 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 						newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
 					entry.getValue().stream().forEach(sel -> sel.setValue(null));
 				}
+				Map<Generic, Map<Generic, Property<Serializable>>> relationMap = getMultipleRelationProperty(model).getValue();
+				for (Entry<Generic, Map<Generic, Property<Serializable>>> entry : relationMap.entrySet())
+					for (Generic target : entry.getValue().keySet())
+						newInstance.setHolder(entry.getKey(), null, target);
+				for (Property<Serializable> convertedProperty : relationMap.values().stream().flatMap(hm -> hm.values().stream()).collect(Collectors.toList()))
+					convertedProperty.setValue(null);
 				input.getConvertedValueProperty(model).setValue(null);
 			});
 		}
