@@ -1,21 +1,14 @@
 package org.genericsystem.reactor.gscomponents2;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
 
-import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
-import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
@@ -38,6 +31,7 @@ import org.genericsystem.reactor.gscomponents2.InstanceEditor.ComponentAdderSele
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSHolderAdder;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSMultiCheckbox;
 import org.genericsystem.reactor.gscomponents2.InstancesTable.ButtonDiv;
+import org.genericsystem.reactor.model.ContextAction.CREATE_INSTANCE;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
 import org.genericsystem.reactor.model.ObservableValueSelector;
@@ -45,7 +39,6 @@ import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SEL
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @ReverseFlexDirection
@@ -110,6 +103,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 	@Height("100%")
 	@Width("100%")
 	@SetText("Add")
+	@BindAction(CREATE_INSTANCE.class)
 	public static class AddButton extends HtmlButton {
 
 		@Override
@@ -118,28 +112,6 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 					model -> Bindings.createStringBinding(
 							() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
 							getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
-			bindAction(model -> {
-				ConvertedValueDefaults input = getParent().getParent().find(GSInputTextWithConversion.class);
-				Generic newInstance = model.getGeneric().setInstance(input.getConvertedValueProperty(model).getValue());
-				for (Entry<Generic, Property<Serializable>> entry : getHoldersMapProperty(model).getValue().entrySet())
-					if (entry.getValue().getValue() != null) {
-						newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
-						entry.getValue().setValue(null);
-					}
-				for (Entry<Generic, List<Property<Context>>> entry : getComponentsMapProperty(model).getValue().entrySet()) {
-					List<Generic> selectedGenerics = entry.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-					if (!selectedGenerics.isEmpty() && selectedGenerics.size() + 1 == entry.getKey().getComponents().size())
-						newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
-					entry.getValue().stream().forEach(sel -> sel.setValue(null));
-				}
-				Map<Generic, Map<Generic, Property<Serializable>>> relationMap = getMultipleRelationProperty(model).getValue();
-				for (Entry<Generic, Map<Generic, Property<Serializable>>> entry : relationMap.entrySet())
-					for (Generic target : entry.getValue().keySet())
-						newInstance.setHolder(entry.getKey(), null, target);
-				for (Property<Serializable> convertedProperty : relationMap.values().stream().flatMap(hm -> hm.values().stream()).collect(Collectors.toList()))
-					convertedProperty.setValue(null);
-				input.getConvertedValueProperty(model).setValue(null);
-			});
 		}
 	}
 }

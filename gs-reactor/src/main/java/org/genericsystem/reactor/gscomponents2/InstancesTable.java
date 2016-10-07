@@ -5,7 +5,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 
-import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
@@ -29,6 +29,8 @@ import org.genericsystem.reactor.gscomponents2.InstancesTable.InstanceNameLink;
 import org.genericsystem.reactor.gscomponents2.InstancesTable.RemoveButton;
 import org.genericsystem.reactor.gscomponents2.Table.ContentRow;
 import org.genericsystem.reactor.gscomponents2.Table.HeaderRow;
+import org.genericsystem.reactor.model.ContextAction.REMOVE;
+import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
@@ -82,12 +84,12 @@ public class InstancesTable extends Table implements SelectionDefaults {
 
 	}
 
+	@BindAction(SET_SELECTION.class)
 	public static class InstanceNameLink extends HtmlHyperLink {
 
 		@Override
 		public void init() {
 			bindText();
-			bindAction(model -> getSelectionProperty(model).setValue(model));
 		}
 	}
 
@@ -119,12 +121,8 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Style(name = "height", value = "100%")
 	@Style(name = "width", value = "100%")
 	@SetText("Remove")
+	@BindAction(REMOVE.class)
 	public static class RemoveButton extends HtmlButton {
-
-		@Override
-		public void init() {
-			bindAction(Context::remove);
-		}
 	}
 
 }

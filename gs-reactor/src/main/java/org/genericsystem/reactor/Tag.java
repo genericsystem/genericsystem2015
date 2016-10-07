@@ -1,5 +1,14 @@
 package org.genericsystem.reactor;
 
+import org.genericsystem.reactor.modelproperties.ActionDefaults;
+import org.genericsystem.reactor.modelproperties.AttributesDefaults;
+import org.genericsystem.reactor.modelproperties.DisplayDefaults;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +27,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -50,14 +60,6 @@ import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.DisplayDefaults;
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 
 import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
@@ -508,6 +510,18 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
 		});
 		processAnnotation(SetText.class, result, annotation -> result.setText(((SetText) annotation).value()));
+		processAnnotation(BindAction.class, result, annotation -> {
+			if (ActionDefaults.class.isAssignableFrom(result.getClass()))
+				((ActionDefaults) result).bindAction(context -> {
+					try {
+						((BindAction) annotation).value().newInstance().accept(context, result);
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+				});
+			else
+				log.warn("BindAction is applicable only to tags implementing ActionDefaults");
+		});
 
 		processStyleAnnotation(Flex.class, result, "flex");
 		processStyleAnnotation(FlexWrap.class, result, "flex-wrap");

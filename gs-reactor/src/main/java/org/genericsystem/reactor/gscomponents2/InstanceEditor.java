@@ -1,18 +1,17 @@
 package org.genericsystem.reactor.gscomponents2;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
@@ -44,6 +43,8 @@ import org.genericsystem.reactor.gscomponents2.InstancesTable.GSHolders;
 import org.genericsystem.reactor.gscomponents2.InstancesTable.GSValueComponents;
 import org.genericsystem.reactor.gscomponents2.Table.ContentRow;
 import org.genericsystem.reactor.gscomponents2.Table.HeaderRow;
+import org.genericsystem.reactor.model.ContextAction.ADD_HOLDER;
+import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
@@ -140,12 +141,14 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 
 	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "width", value = "100%")
-	@ReactorDependencies({ Header.class, Content.class, RemovalLink.class })
+	@ReactorDependencies({ Header.class, Content.class, GSActionLink.class })
 	@ReactorDependencies(path = Header.class, value = GSInputTextEditorWithConversion.class)
 	@ReactorDependencies(path = Content.class, value = { DirectRelationComponentEditor.class, GSLabelDisplayer.class })
 	@Select(path = { Content.class, DirectRelationComponentEditor.class }, value = DIRECT_RELATION_SELECTOR.class)
 	@Select(path = { Content.class, GSLabelDisplayer.class }, value = REVERSED_RELATION_SELECTOR.class)
-	@SelectModel(path = RemovalLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
+	@SelectModel(path = GSActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
+	@SetText(path = GSActionLink.class, value = "×")
+	@BindAction(path = GSActionLink.class, value = REMOVE.class)
 	public static class GSValueComponentsEditor extends GSValueComponents implements ComponentsDefaults {
 	}
 
@@ -177,24 +180,17 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
-	@SetText("×")
-	public static class RemovalLink extends GSActionLink {
-
-		@Override
-		public void init() {
-			bindAction(Context::remove);
-		}
-	}
-
 	@Style(name = "flex", value = "1 0 auto")
 	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
-	@ReactorDependencies({ Header.class, Content.class, AdditionLink.class })
+	@ReactorDependencies({ Header.class, Content.class, GSActionLink.class })
 	@ReactorDependencies(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@ReactorDependencies(path = Content.class, value = ComponentAdderSelect.class)
-	@Select(path = AdditionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
+	@Select(path = GSActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
 	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+	@SetText(path = GSActionLink.class, value = "+")
+	@BindAction(path = GSActionLink.class, value = ADD_HOLDER.class)
 	public static class GSHolderAdder extends GSValueComponents implements ComponentsDefaults {
 		@Override
 		public void init() {
@@ -237,15 +233,6 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 		}
 	}
 
-	public static void addHolder(Context context, ConvertedValueDefaults tag) {
-		Property<Serializable> observable = tag.getConvertedValueProperty(context);
-		if (observable.getValue() != null) {
-			Serializable newValue = observable.getValue();
-			observable.setValue(null);
-			context.getGenerics()[1].addHolder(context.getGeneric(), newValue);
-		}
-	}
-
 	@Style(name = "flex", value = "1")
 	@Style(name = "width", value = "100%")
 	@Select(DIRECT_RELATION_SELECTOR.class)
@@ -258,25 +245,6 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 				if (selectedComponents != null)
 					selectedComponents.getValue().add(getSelectionProperty(model));
 			});
-		}
-	}
-
-	@SetText("+")
-	public static class AdditionLink extends GSActionLink {
-
-		@Override
-		public void init() {
-			bindAction(context -> addHolder(context.getParent(), (ConvertedValueDefaults) this.getParent().find(Header.class).getObservableChildren().stream().filter(t -> t instanceof ConvertedValueDefaults).findFirst().get()));
-		}
-
-		private void addHolder(Context context, ConvertedValueDefaults tag) {
-			Property<Serializable> observable = tag.getConvertedValueProperty(context);
-			assert observable != null;
-			if (observable.getValue() != null) {
-				Serializable newValue = observable.getValue();
-				observable.setValue(null);
-				context.getGenerics()[1].addHolder(context.getGeneric(), newValue);
-			}
 		}
 	}
 }
