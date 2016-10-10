@@ -79,9 +79,8 @@ public class AnnotationTest extends AbstractTest {
 	}
 
 	public void test004_instanceof() {
-
-		catchAndCheckCause(() -> new Engine(MyBmw.class), InstantiationException.class);
-		catchAndCheckCause(() -> new Engine(MyMercedes.class), InstantiationException.class);
+		catchAndCheckCause(() -> new Engine(MyBmw.class), IllegalStateException.class);
+		catchAndCheckCause(() -> new Engine(MyMercedes.class), IllegalStateException.class);
 	}
 
 	public static class VehicleInstance implements Generic {
