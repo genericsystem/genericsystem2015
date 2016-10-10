@@ -14,7 +14,7 @@ import org.genericsystem.reactor.gscomponents.GSSubcellDisplayer.LinkTitleDispla
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-import org.genericsystem.reactor.modelproperties.SwitchDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
 
@@ -96,7 +96,7 @@ public class GSInstanceBuilder extends GSComposite implements GSBuilderDefaults 
 		};
 	}
 
-	public static class GSStepInstanceBuilder extends GSInstanceBuilder implements SwitchDefaults {
+	public static class GSStepInstanceBuilder extends GSInstanceBuilder implements StepperDefaults {
 
 		protected Tag switchedTag;
 		protected Tag instanceNameTag;

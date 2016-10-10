@@ -37,6 +37,7 @@ import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents2.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSHoldersEditor;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSMultiCheckbox;
 import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSValueComponentsEditor;
@@ -75,17 +76,22 @@ import javafx.beans.value.ObservableValue;
 @ReactorDependencies({ HeaderRow.class, ContentRow.class })
 @ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class })
 @ReactorDependencies(path = { HeaderRow.class, Content.class }, value = GSValueComponents.class)
-@ReactorDependencies(path = ContentRow.class, value = { GSValueComponentsEditor.class, Content.class })
-@ReactorDependencies(path = { ContentRow.class, Content.class }, value = { GSHoldersEditor.class, GSMultiCheckbox.class })
+@ReactorDependencies(path = ContentRow.class, value = { GSValueComponentsEditor.class, AttributeContent.class })
 @ReactorDependencies(path = { ContentRow.class, GSValueComponentsEditor.class }, value = { Header.class, Content.class })
+@ReactorDependencies(path = { ContentRow.class, Content.class }, value = { GSHoldersEditor.class, GSMultiCheckbox.class })
 @ForEach(path = { HeaderRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-@ForEach(path = { ContentRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { HeaderRow.class, GSValueComponents.class }, value = TYPE_SELECTOR.class)
-@Select(path = { ContentRow.class, Content.class, GSHoldersEditor.class }, value = NON_MULTICHECKBOX_SELECTOR.class)
-@Select(path = { ContentRow.class, Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR.class)
 public class InstanceEditor extends Table implements SelectionDefaults {
+
+	@ReactorDependencies({ GSHoldersEditor.class, GSMultiCheckbox.class })
+	@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+	@Select(path = GSHoldersEditor.class, value = NON_MULTICHECKBOX_SELECTOR.class)
+	@Select(path = GSMultiCheckbox.class, value = MULTICHECKBOX_SELECTOR.class)
+	public static class AttributeContent extends Content {
+	}
+
 	@ReactorDependencies(CheckboxLabel.class)
 	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_LINK_COMPONENT.class)
 	@FlexWrap("wrap")

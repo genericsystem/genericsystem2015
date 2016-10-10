@@ -3,6 +3,7 @@ package org.genericsystem.reactor.model;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import java.io.Serializable;
 import java.util.List;
@@ -81,6 +82,26 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				input.getConvertedValueProperty(context).setValue(null);
 			} else
 				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults.");
+		}
+	}
+
+	public static class PREVIOUS implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (StepperDefaults.class.isAssignableFrom(tag.getClass()))
+				((StepperDefaults) tag).prev(context);
+			else
+				log.warn("The PREVIOUS action is applicable only to a tag implementing StepperDefaults.");
+		}
+	}
+
+	public static class NEXT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (StepperDefaults.class.isAssignableFrom(tag.getClass()))
+				((StepperDefaults) tag).next(context);
+			else
+				log.warn("The NEXT action is applicable only to a tag implementing SwitchDefaults.");
 		}
 	}
 }

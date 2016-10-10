@@ -7,6 +7,7 @@ import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 
 import java.io.Serializable;
@@ -53,6 +54,7 @@ import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.annotations.Styles.Width;
+import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -471,6 +473,13 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			}
 		});
 
+		processAnnotation(Stepper.class, annotation -> {
+			if (StepperDefaults.class.isAssignableFrom(getClass()))
+				((StepperDefaults) this).stepper(find(((Stepper) annotation).switchClass()), find(((Stepper) annotation).headerClass()));
+			else
+				log.warn("Switch is applicable only to tags implementing SwitchDefaults.");
+		});
+
 		processAnnotation(BindSelection.class, annotation -> {
 			if (SelectionDefaults.class.isAssignableFrom(getClass()))
 				((SelectionDefaults) this).bindSelection(find(((BindSelection) annotation).value()));
@@ -520,7 +529,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 					}
 				});
 			else
-				log.warn("BindAction is applicable only to tags implementing ActionDefaults");
+				log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
 		});
 
 		processStyleAnnotation(Flex.class, "flex");

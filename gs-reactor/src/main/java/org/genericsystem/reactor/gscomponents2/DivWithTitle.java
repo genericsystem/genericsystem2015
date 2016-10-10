@@ -1,5 +1,9 @@
 package org.genericsystem.reactor.gscomponents2;
 
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import org.genericsystem.reactor.htmltag.HtmlH2;
+
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
@@ -9,10 +13,6 @@ import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv.TitleContent;
 import org.genericsystem.reactor.model.StringExtractor;
-
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
-import org.genericsystem.reactor.htmltag.HtmlH2;
 
 @Style(name = "margin", value = "4px")
 @FlexDirectionStyle(FlexDirection.COLUMN)
@@ -44,6 +44,11 @@ public class DivWithTitle extends GSDiv {
 	@ReactorDependencies({ GSTitleDiv.class, InstanceEditor.class })
 	@SetStringExtractor(path = GSTitleDiv.class, value = StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
 	public static class TitledInstanceEditor extends DivWithTitle implements SelectionDefaults {
+
+	}
+
+	@ReactorDependencies({ GSTitleDiv.class, InstanceStepEditor.class })
+	public static class TitledInstanceStepEditor extends TitledInstanceEditor {
 
 	}
 }
