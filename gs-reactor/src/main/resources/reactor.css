@@ -28,7 +28,6 @@ section .adding {
 	font-style : italic;
 	font-weight : bold;
 	font-size : 108%;
-	background-color : white;
 	-webkit-backface-visibility: hidden;
 	-webkit-filter: opacity(89%);
   	-moz-filter: opacity(89%);

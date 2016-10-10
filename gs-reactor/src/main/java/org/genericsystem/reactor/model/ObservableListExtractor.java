@@ -66,6 +66,13 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
+	public static class COMPONENTS implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return COMPONENTS.apply(generics);
+		}
+	}
+
 	public static class OTHER_COMPONENTS_1 implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
@@ -73,10 +80,10 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
-	public static class COMPONENTS implements ObservableListExtractor {
+	public static class OTHER_COMPONENTS_2 implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return COMPONENTS.apply(generics);
+			return OTHER_COMPONENTS_2.apply(generics);
 		}
 	}
 
@@ -87,10 +94,17 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
-	public static class SUBINSTANCES_OF_COMPONENT implements ObservableListExtractor {
+	public static class SUBINSTANCES_OF_LINK_COMPONENT implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !g.equals(generics[2])).stream().toArray(Generic[]::new));
+		}
+	}
+
+	public static class SUBINSTANCES_OF_RELATION_COMPONENT implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !g.equals(generics[1])).stream().toArray(Generic[]::new));
 		}
 	}
 
@@ -105,13 +119,6 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return HOLDERS.apply(generics);
-		}
-	}
-
-	public static class OTHER_COMPONENTS_2 implements ObservableListExtractor {
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			return OTHER_COMPONENTS_2.apply(generics);
 		}
 	}
 
