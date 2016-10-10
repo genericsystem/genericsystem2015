@@ -15,7 +15,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +27,13 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 	public static class ADD_HOLDER implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			ConvertedValueDefaults inputTag = (ConvertedValueDefaults) tag.getParent().find(Header.class).getObservableChildren().stream().filter(t -> t instanceof ConvertedValueDefaults).findFirst().get();
-			Property<Serializable> observable = inputTag.getConvertedValueProperty(context.getParent());
-			assert observable != null;
-			if (observable.getValue() != null) {
-				Serializable newValue = observable.getValue();
-				observable.setValue(null);
-				context.getGenerics()[2].addHolder(context.getGenerics()[1], newValue);
-			}
+			Property<Serializable> convertedValue = ((ConvertedValueDefaults) tag.getParent()).getConvertedValueProperty(context.getParent());
+			if (convertedValue.getValue() != null) {
+				Serializable newValue = convertedValue.getValue();
+				convertedValue.setValue(null);
+				context.getGenerics()[1].addHolder(context.getGeneric(), newValue);
+			} else if (Boolean.class.equals(context.getGeneric().getInstanceValueClassConstraint()))
+				context.getGenerics()[1].addHolder(context.getGeneric(), false);
 		}
 	}
 

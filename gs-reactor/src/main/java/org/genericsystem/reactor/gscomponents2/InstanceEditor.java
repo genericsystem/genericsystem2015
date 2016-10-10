@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.gscomponents2;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
+import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
@@ -191,10 +192,15 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@SetText(path = GSActionLink.class, value = "+")
 	@BindAction(path = GSActionLink.class, value = ADD_HOLDER.class)
-	public static class GSHolderAdder extends GSValueComponents implements ComponentsDefaults {
+	public static class GSHolderAdder extends GSValueComponents implements ComponentsDefaults, ConvertedValueDefaults {
 		@Override
 		public void init() {
 			createComponentsListProperty();
+			createConvertedValueProperty();
+			addConvertedValueChangeListener((context, nva) -> {
+				if (nva != null)
+					context.getGenerics()[1].addHolder(context.getGeneric(), nva);
+			});
 			addPostfixBinding(model -> {
 				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 				ChangeListener<Context> listener = (o, v, nva) -> {
@@ -216,20 +222,14 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	public static class HolderAdderInput extends GSInputTextWithConversion {
 		@Override
 		public void init() {
-			addConvertedValueChangeListener((context, nva) -> {
-				if (nva != null)
-					context.getGenerics()[1].addHolder(context.getGeneric(), nva);
-			});
+			addConvertedValueChangeListener((context, nva) -> ((ConvertedValueDefaults) getParent().getParent()).getConvertedValueProperty(context.getParent().getParent()).setValue(nva));
 		}
 	}
 
 	public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
 		@Override
 		public void init() {
-			addConvertedValueChangeListener((context, nva) -> {
-				if (nva != null)
-					context.getGenerics()[1].addHolder(context.getGeneric(), nva);
-			});
+			addConvertedValueChangeListener((context, nva) -> ((ConvertedValueDefaults) getParent().getParent()).getConvertedValueProperty(context.getParent().getParent()).setValue(nva));
 		}
 	}
 
