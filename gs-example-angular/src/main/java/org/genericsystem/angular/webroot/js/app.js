@@ -5,12 +5,11 @@ angular.module('CrudApp', ['ngRoute']).config(['$routeProvider', function ($rout
 	when('/add-inst', {templateUrl: '/tpl/add-new.html', controller: AddCtrl}).
 	when('/edit/:id', {templateUrl: '/tpl/edit.html', controller: EditCtrl}).
 	otherwise({redirectTo: '/'});
-
 }]);
 
 function IndexCtrl($scope, $http, $location){
-	$http.get('/api/types').success(function(data){	
-		$scope.choices = data;		
+	$http.get('/api/types').then(function(response) {
+		$scope.choices = response.data;		
 		$scope.select = function(choice){
 			path = choice.tableName;
 			columns = choice.columns;			
@@ -22,8 +21,8 @@ function IndexCtrl($scope, $http, $location){
 function ListCtrl($scope, $http, $route) {
 	$scope.type = path;
 	$scope.names = columns;
-	$http.get('/api/'+path).success(function (data) {	
-		$scope.instances = data;		
+	$http.get('/api/'+path).then(function(response) {
+		$scope.instances = response.data;		
 	});	
 
 	$scope.commit = function(){
@@ -45,7 +44,7 @@ function AddCtrl($scope, $http, $location) {
 	$scope.type = path;
 	$scope.names = columns;
 	$scope.add_new = function (instance, AddNewForm) {
-		$http.post('/api/'+path+'/', instance).success(function () {
+		$http.post('/api/'+path+'/', instance).then(function(response) {
 			$scope.reset();
 			$scope.activePath = $location.path('/list');
 		});
@@ -61,19 +60,19 @@ function EditCtrl($scope, $http, $location, $routeParams) {
 	$scope.activePath = null;
 	$scope.type = path;	
 	$scope.names = columns; 
-	$http.get('/api/'+path+'/' + id).success(function (data) {
-		$scope.instance = data;
+	$http.get('/api/'+path+'/' + id).then(function(response) {
+		$scope.instance = response.data;
 	});
 
 	$scope.update = function (instance) {
-		$http.put('/api/'+path+'/' + id, instance).success(function (data) {
-			$scope.instance = data;
-			$scope.activePath = $location.path('/list');
-		});
+		$http.put('/api/'+path+'/' + id, instance).then(function(response) {
+			$scope.instance = response.data;
+			$scope.activePath = $location.path('/list')
+			})
 	};
-
 	$scope.delete = function (instance) {
-			$http.delete('/api/'+path+'/' + instance.id).success(function (data){  
-			$scope.activePath = $location.path('/list')});
+			$http.delete('/api/'+path+'/' + instance.id).then(function(response) {
+			$scope.activePath = $location.path('/list')
+			})
 		};
 }
