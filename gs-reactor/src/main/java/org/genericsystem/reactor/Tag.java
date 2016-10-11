@@ -28,6 +28,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -538,7 +539,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		processStyleAnnotation(MarginBottom.class, "margin-bottom");
 		processStyleAnnotation(Height.class, "height");
 		processStyleAnnotation(Width.class, "width");
-		processStyleAnnotation();
+
+		processRepeatableAnnotation(Attribute.class, annotation -> addAttribute(((Attribute) annotation).name(), ((Attribute) annotation).value()));
+		processRepeatableAnnotation(Style.class, annotation -> addStyle(((Style) annotation).name(), ((Style) annotation).value()));
+
 		processAnnotation(GenericValueBackgroundColor.class, annotation -> addPrefixBinding(modelContext -> addStyle(modelContext, "background-color",
 				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) this).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
 	}
@@ -577,7 +581,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			consumer.accept(applyingAnnotation);
 	}
 
-	default <T extends Tag> void processStyleAnnotation() {
+	default <T extends Tag> void processRepeatableAnnotation(Class<? extends Annotation> annotationClass, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		Tag current = this;
 		List<Annotation> applyingAnnotations = new ArrayList<>();
@@ -585,7 +589,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			Class<?> superClass = current.getClass();
 			List<Annotation> annotationsFound = new ArrayList<>();
 			while (superClass != null) {
-				annotationsFound.addAll(selectAnnotations(superClass.getAnnotationsByType(Style.class), Style.class, classesToResult));
+				annotationsFound.addAll(selectAnnotations(superClass.getAnnotationsByType(annotationClass), annotationClass, classesToResult));
 				superClass = superClass.getSuperclass();
 			}
 			Collections.reverse(annotationsFound);
@@ -594,7 +598,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			current = current.getParent();
 		}
 		for (Annotation applyingAnnotation : applyingAnnotations)
-			addStyle(((Style) applyingAnnotation).name(), ((Style) applyingAnnotation).value());
+			consumer.accept(applyingAnnotation);
 	}
 
 	default List<Annotation> selectAnnotations(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
@@ -603,7 +607,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
 				if (isAssignableFrom(Arrays.asList(path), classesToResult)) {
-					if (!annotationsFound.isEmpty() && !Style.class.equals(annotationClass))
+					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
 					annotationsFound.add(annotation);
