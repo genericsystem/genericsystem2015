@@ -45,6 +45,48 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		}
 	}
 
+	public static class FLUSH implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.flush();
+		}
+	}
+
+	public static class CANCEL implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.cancel();
+		}
+	}
+
+	public static class MOUNT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.mount();
+		}
+	}
+
+	public static class UNMOUNT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.unmount();
+		}
+	}
+
+	public static class SHIFTTS implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.shiftTs();
+		}
+	}
+
+	public static class GC implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.gc();
+		}
+	}
+
 	public static class SET_SELECTION implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
@@ -52,6 +94,16 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(context);
 			else
 				log.warn("The SET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
+		}
+	}
+
+	public static class RESET_SELECTION implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
+			else
+				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
 		}
 	}
 

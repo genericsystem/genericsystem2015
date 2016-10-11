@@ -33,12 +33,13 @@ import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInst
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents3.Monitor.MonitorExtended;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
 @ReactorDependencies({ CarInstancesTable.class, CarHorizontalInstancesTable.class, ColorInstancesTable.class, SelectedInstanceEditor.class, HorizontalSelectedInstanceEditor.class, SelectedInstanceStepEditor.class,
-		HorizontalSelectedInstanceStepEditor.class })
+		HorizontalSelectedInstanceStepEditor.class, MonitorExtended.class })
 @FlexWrap("wrap")
 @Flex("1 1 0%")
 public class AppHtml5 extends GSApp implements SelectionDefaults {
