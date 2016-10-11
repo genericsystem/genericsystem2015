@@ -1,75 +1,65 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Color;
-import org.genericsystem.reactor.annotations.Styles.Flex;
+import org.genericsystem.reactor.htmltag.HtmlHyperLink;
+
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Height;
-import org.genericsystem.reactor.annotations.Styles.JustifyContent;
-import org.genericsystem.reactor.annotations.Styles.MarginBottom;
-import org.genericsystem.reactor.annotations.Styles.MarginRight;
-import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-
-@Flex("1")
-@Overflow("hidden")
+@Style(name = "flex", value = "1")
+@Style(name = "overflow", value = "hidden")
 public class GSCellDiv extends GSDiv {
 
-	@Flex("1")
-	@JustifyContent("center")
-	@AlignItems("center")
-	@MarginRight("1px")
-	@MarginBottom("1px")
-	@Color("#ffffff")
-	@BackgroundColor("#ea0084")
+	@Style(name = "flex", value = "1")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
+	@Style(name = "margin-right", value = "1px")
+	@Style(name = "margin-bottom", value = "1px")
+	@Style(name = "color", value = "#ffffff")
+	@Style(name = "background-color", value = "#ea0084")
 	public static class GSTitleLineCellDiv extends GSDiv {
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Flex("1")
-	@MarginRight("1px")
-	@MarginBottom("1px")
-	@Color("#ffffff")
+	@Style(name = "flex", value = "1")
+	@Style(name = "margin-right", value = "1px")
+	@Style(name = "margin-bottom", value = "1px")
+	@Style(name = "color", value = "#ffffff")
 	public static class GSSubcellEditorDiv extends GSDiv {
 	}
 
-	@JustifyContent("center")
-	@AlignItems("center")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
 	public static class GSComponentEditorDiv extends GSSubcellEditorDiv {
 	}
 
-	@Color("#000000")
+	@Style(name = "color", value = "#000000")
 	@GenericValueBackgroundColor("#e5ed00")
 	public static class GSSubcellDiv extends GSComponentEditorDiv {
 	}
 
-	@Flex("1")
+	@Style(name = "flex", value = "1")
 	@FlexDirectionStyle(FlexDirection.COLUMN)
-	@FlexWrap("wrap")
-	@Overflow("auto")
+	@Style(name = "flex-wrap", value = "wrap")
+	@Style(name = "overflow", value = "auto")
 	public static class WrappedColumnDiv extends GSDiv {
 	}
 
-	@Flex("1 0 auto")
+	@Style(name = "flex", value = "1 0 auto")
 	@FlexDirectionStyle(FlexDirection.ROW)
 	public static class SubcellEditorContainerDiv extends GSDiv {
 	}
 
-	@Flex("1")
-	@JustifyContent("center")
-	@AlignItems("center")
+	@Style(name = "flex", value = "1")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
 	public static class CenteredFlexDiv extends GSDiv {
 	}
 
-	@JustifyContent("center")
-	@Height("100%")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "height", value = "100%")
 	@Style(name = "text-decoration", value = "none")
 	public static class GSActionLink extends HtmlHyperLink {
 	}

@@ -13,11 +13,8 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Styles.Flex;
-import org.genericsystem.reactor.annotations.Styles.Height;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
@@ -99,9 +96,9 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 		}
 	}
 
-	@Flex("1")
-	@Height("100%")
-	@Width("100%")
+	@Style(name = "flex", value = "1")
+	@Style(name = "height", value = "100%")
+	@Style(name = "width", value = "100%")
 	@SetText("Add")
 	@BindAction(CREATE_INSTANCE.class)
 	public static class AddButton extends HtmlButton {

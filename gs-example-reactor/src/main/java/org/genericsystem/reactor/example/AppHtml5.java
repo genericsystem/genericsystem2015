@@ -22,8 +22,6 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
-import org.genericsystem.reactor.annotations.Styles.Flex;
-import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;
@@ -40,8 +38,8 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @RunScript(ExampleReactorScript.class)
 @ReactorDependencies({ CarInstancesTable.class, CarHorizontalInstancesTable.class, ColorInstancesTable.class, SelectedInstanceEditor.class, HorizontalSelectedInstanceEditor.class, SelectedInstanceStepEditor.class,
 		HorizontalSelectedInstanceStepEditor.class, MonitorExtended.class })
-@FlexWrap("wrap")
-@Flex("1 1 0%")
+@Style(name = "flex-wrap", value = "wrap")
+@Style(name = "flex", value = "1 1 0%")
 public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {

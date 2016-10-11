@@ -18,13 +18,8 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.JustifyContent;
-import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
@@ -100,15 +95,15 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 
 	@ReactorDependencies(CheckboxLabel.class)
 	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_LINK_COMPONENT.class)
-	@FlexWrap("wrap")
-	@Overflow("auto")
+	@Style(name = "flex-wrap", value = "wrap")
+	@Style(name = "overflow", value = "auto")
 	public static class GSMultiCheckbox extends GSDiv {
 
 	}
 
-	@Flex("1 0 auto")
-	@JustifyContent("center")
-	@AlignItems("center")
+	@Style(name = "flex", value = "1 0 auto")
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
 	@Style(name = "text-align", value = "center")
 	@ReactorDependencies(Checkbox.class)
 	public static class CheckboxLabel extends org.genericsystem.reactor.htmltag.HtmlLabel {
@@ -165,7 +160,7 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	public static class GSValueComponentsEditor extends GSValueComponents implements ComponentsDefaults {
 	}
 
-	@Flex(path = GSValueComponentsEditor.class, value = "1 0 auto")
+	@Style(path = GSValueComponentsEditor.class, name = "flex", value = "1 0 auto")
 	@ReactorDependencies(value = { GSValueComponentsEditor.class, GSHolderAdder.class })
 	@ReactorDependencies(path = { GSValueComponentsEditor.class, Header.class }, value = { GSInputTextEditorWithConversion.class, GSCheckBoxEditor.class })
 	@ReactorDependencies(path = { GSHolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
