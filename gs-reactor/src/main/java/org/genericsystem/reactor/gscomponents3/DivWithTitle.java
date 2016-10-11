@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents2;
+package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -10,8 +10,8 @@ import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv.TitleContent;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv.TitleContent;
 import org.genericsystem.reactor.model.StringExtractor;
 
 @Style(name = "margin", value = "4px")

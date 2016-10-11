@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents2;
+package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Styles.Flex;
@@ -6,11 +6,11 @@ import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Footer;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Footer.FooterLabel;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header.HeaderLabel;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Footer;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Footer.FooterLabel;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header.HeaderLabel;
 
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 

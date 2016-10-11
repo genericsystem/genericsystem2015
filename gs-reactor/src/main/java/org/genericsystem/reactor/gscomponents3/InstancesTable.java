@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents2;
+package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -19,16 +19,16 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header.HeaderLabel;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.ButtonDiv;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.GSHolders;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.GSValueComponents;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.InstanceNameLink;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.RemoveButton;
-import org.genericsystem.reactor.gscomponents2.Table.ContentRow;
-import org.genericsystem.reactor.gscomponents2.Table.HeaderRow;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header.HeaderLabel;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.InstanceNameLink;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.RemoveButton;
+import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
+import org.genericsystem.reactor.gscomponents3.Table.HeaderRow;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;

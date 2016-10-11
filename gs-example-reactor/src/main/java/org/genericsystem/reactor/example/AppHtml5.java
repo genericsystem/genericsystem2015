@@ -27,11 +27,11 @@ import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.TitledInstanceEditor;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.TitledInstanceStepEditor;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents2.InstanceEditor;
-import org.genericsystem.reactor.gscomponents2.InstanceStepEditor;
+import org.genericsystem.reactor.gscomponents3.InstanceEditor;
+import org.genericsystem.reactor.gscomponents3.InstanceStepEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })

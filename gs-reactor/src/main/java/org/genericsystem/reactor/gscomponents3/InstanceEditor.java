@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents2;
+package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
@@ -35,16 +35,16 @@ import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputT
 import org.genericsystem.reactor.gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents2.InstanceEditor.AttributeContent;
-import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSHoldersEditor;
-import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSMultiCheckbox;
-import org.genericsystem.reactor.gscomponents2.InstanceEditor.GSValueComponentsEditor;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.GSHolders;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.GSValueComponents;
-import org.genericsystem.reactor.gscomponents2.Table.ContentRow;
-import org.genericsystem.reactor.gscomponents2.Table.HeaderRow;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents3.InstanceEditor.AttributeContent;
+import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSHoldersEditor;
+import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSMultiCheckbox;
+import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSValueComponentsEditor;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
+import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
+import org.genericsystem.reactor.gscomponents3.Table.HeaderRow;
 import org.genericsystem.reactor.model.ContextAction.ADD_HOLDER;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ObservableListExtractor;

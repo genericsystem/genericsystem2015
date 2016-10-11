@@ -32,6 +32,7 @@ import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.Boo
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.LinkBuilder.ComponentBuilder.ComponentBuilderSelect;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.InstanceNameBuilder.InstanceNameBuilderInput;
+import org.genericsystem.reactor.gscomponents3.InstancesTable;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 
 import javafx.beans.binding.Bindings;
