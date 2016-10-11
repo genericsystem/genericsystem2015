@@ -66,6 +66,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+@FlexDirectionStyle(FlexDirection.ROW)
 @Style(path = HeaderRow.class, name = "flex", value = "0.3")
 @Style(path = ContentRow.class, name = "flex", value = "1")
 @Style(path = HeaderRow.class, name = "color", value = "white")
@@ -84,6 +85,11 @@ import javafx.beans.value.ObservableValue;
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { HeaderRow.class, GSValueComponents.class }, value = TYPE_SELECTOR.class)
 public class InstanceEditor extends Table implements SelectionDefaults {
+
+	@FlexDirectionStyle(FlexDirection.COLUMN)
+	public static class HorizontalInstanceEditor extends InstanceEditor {
+
+	}
 
 	@ReactorDependencies({ GSHoldersEditor.class, GSMultiCheckbox.class })
 	@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)

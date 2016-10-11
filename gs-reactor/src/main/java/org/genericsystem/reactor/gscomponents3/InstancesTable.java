@@ -55,6 +55,10 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 public class InstancesTable extends Table implements SelectionDefaults {
 
+	@FlexDirectionStyle(FlexDirection.ROW)
+	public static class HorizontalInstancesTable extends InstancesTable {
+	}
+
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@ReactorDependencies(value = GSValueComponents.class)
 	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { HeaderLabel.class, GSCheckBoxDisplayer.class })
@@ -63,7 +67,6 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Select(path = { GSValueComponents.class, Header.class, HeaderLabel.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSCheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	public static class GSHolders extends GSComposite {
-
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -81,7 +84,6 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Style(path = Content.class, name = "margin-right", value = "1px")
 	@Style(path = Content.class, name = "margin-bottom", value = "1px")
 	public static class GSValueComponents extends GSComposite {
-
 	}
 
 	@BindAction(SET_SELECTION.class)
@@ -124,5 +126,4 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@BindAction(REMOVE.class)
 	public static class RemoveButton extends HtmlButton {
 	}
-
 }

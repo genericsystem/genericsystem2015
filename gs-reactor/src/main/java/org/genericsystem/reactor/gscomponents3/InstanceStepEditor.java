@@ -5,16 +5,6 @@ import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 
-import org.genericsystem.reactor.annotations.BindAction;
-import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Stepper;
-import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.AttributeContent;
@@ -25,6 +15,19 @@ import org.genericsystem.reactor.gscomponents3.InstanceStepEditor.StepNavigator;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
 import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
 import org.genericsystem.reactor.gscomponents3.Table.HeaderRow;
+
+import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.SetText;
+import org.genericsystem.reactor.annotations.Stepper;
+import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
+import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.model.ContextAction.NEXT;
 import org.genericsystem.reactor.model.ContextAction.PREVIOUS;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -51,6 +54,11 @@ import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
 @Select(path = { HeaderRow.class, GSValueComponents.class }, value = TYPE_SELECTOR.class)
 @Stepper(switchClass = ContentRow.class, headerClass = HeaderRow.class)
 public class InstanceStepEditor extends Table implements SelectionDefaults, StepperDefaults {
+
+	@FlexDirectionStyle(FlexDirection.ROW)
+	public static class HorizontalInstanceStepEditor extends InstanceStepEditor {
+
+	}
 
 	@ReactorDependencies({ PrevLink.class, NextLink.class })
 	@Style(name = "justify-content", value = "space-between")
