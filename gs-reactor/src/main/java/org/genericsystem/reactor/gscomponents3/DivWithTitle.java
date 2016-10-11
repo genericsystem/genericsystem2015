@@ -18,6 +18,7 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.model.StringExtractor;
 
+@Style(name = "flex", value = "1")
 @Style(name = "margin", value = "4px")
 @FlexDirectionStyle(FlexDirection.COLUMN)
 @ReactorDependencies(GSTitleDiv.class)
