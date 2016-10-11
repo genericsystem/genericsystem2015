@@ -1,10 +1,10 @@
 package org.genericsystem.reactor.gscomponents;
 
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
 import java.util.function.UnaryOperator;
 
 import org.genericsystem.reactor.Tag;
-
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 public class GSResponsive extends GSDiv implements SelectionDefaults {
 
@@ -22,7 +22,8 @@ public class GSResponsive extends GSDiv implements SelectionDefaults {
 					tag.addStyle("padding", "10px");
 					tag.addStyle("border-radius", "10px");
 					tag.addStyle("background-color", "white");
-					tag.addStyle("min-width", "10cm");
+					tag.addStyle("min-width", "60%");
+					tag.addStyle("max-width", "100%");
 				}
 			}
 		};
