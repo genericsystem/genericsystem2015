@@ -5,9 +5,9 @@ import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 
 import java.io.Serializable;
@@ -37,24 +37,13 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
+import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
-import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.BackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Color;
-import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.FlexWrap;
 import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Height;
-import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.MarginBottom;
-import org.genericsystem.reactor.annotations.Styles.MarginRight;
-import org.genericsystem.reactor.annotations.Styles.Overflow;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.annotations.Styles.Width;
-import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -532,17 +521,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
 		});
 
-		processStyleAnnotation(Flex.class, "flex");
-		processStyleAnnotation(FlexWrap.class, "flex-wrap");
-		processStyleAnnotation(BackgroundColor.class, "background-color");
-		processStyleAnnotation(AlignItems.class, "align-items");
-		processStyleAnnotation(JustifyContent.class, "justify-content");
-		processStyleAnnotation(Overflow.class, "overflow");
-		processStyleAnnotation(Color.class, "color");
-		processStyleAnnotation(MarginRight.class, "margin-right");
-		processStyleAnnotation(MarginBottom.class, "margin-bottom");
-		processStyleAnnotation(Height.class, "height");
-		processStyleAnnotation(Width.class, "width");
 		processStyleAnnotation(Style.class, annotation -> addStyle(((Style) annotation).name(), ((Style) annotation).value()));
 		processAnnotation(GenericValueBackgroundColor.class, annotation -> addPrefixBinding(modelContext -> addStyle(modelContext, "background-color",
 				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) this).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
@@ -617,15 +595,5 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				throw new IllegalStateException(e);
 			}
 		return annotationsFound;
-	}
-
-	default <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, String propertyName) {
-		processAnnotation(annotationClass, annotation -> {
-			try {
-				addStyle(propertyName, (String) annotation.annotationType().getDeclaredMethod("value").invoke(annotation));
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		});
 	}
 }
