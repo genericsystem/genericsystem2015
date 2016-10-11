@@ -91,7 +91,7 @@ public interface SelectionDefaults extends Tag {
 			ObservableList<Context> subContexts = model.getSubContexts(subElement);
 			Property<Context> selection = getSelectionProperty(model);
 			subContexts.addListener((ListChangeListener<Context>) change -> {
-				if (selection != null)
+				if (selection != null && selection.getValue() != null)
 					while (change.next())
 						if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().stream().map(c -> c.getGeneric()).collect(Collectors.toList()).contains(selection.getValue().getGeneric()))
 							selection.setValue(null);
