@@ -19,7 +19,6 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
@@ -110,7 +109,6 @@ public class GSEditor extends GSDiv {
 	}
 
 	// Content.
-	@Parent(GSEditor.class)
 	@KeepFlexDirection
 	@Style(name = "flex", value = "1")
 	@Style(name = "height", value = "100%")
@@ -280,7 +278,6 @@ public class GSEditor extends GSDiv {
 							}
 
 							public static class CheckboxContainerDiv extends CenteredFlexDiv {
-								@Parent(CheckboxContainerDiv.class)
 								public static class BooleanHolderEditorInput extends GSCheckBoxEditor {
 								}
 							}
@@ -392,7 +389,7 @@ public class GSEditor extends GSDiv {
 							public static class HolderAdditionLink extends AdditionLink {
 
 								@Override
-								public void postfix() {
+								public void init() {
 									bindAction(context -> addHolder(context, find(HolderAdderInput.class)));
 								}
 							}
@@ -422,7 +419,7 @@ public class GSEditor extends GSDiv {
 							public static class BooleanHolderAdditionLink extends AdditionLink {
 
 								@Override
-								public void postfix() {
+								public void init() {
 									bindAction(context -> addHolder(context, find(BooleanHolderAdderInput.class)));
 								}
 							}
@@ -462,7 +459,6 @@ public class GSEditor extends GSDiv {
 								}
 
 								// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.
-								@Parent(ComponentAdder.class)
 								@Style(name = "flex", value = "1")
 								@Style(name = "height", value = "100%")
 								@Style(name = "width", value = "100%")

@@ -68,7 +68,7 @@ public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 	}
 
 	@Override
-	public void postfix() {
+	public void init() {
 		bindSelection(find(Row.class));
 	}
 

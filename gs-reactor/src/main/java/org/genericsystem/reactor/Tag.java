@@ -378,9 +378,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default void init() {
 	}
 
-	default void postfix() {
-	}
-
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
 	public static interface RootTag {
@@ -398,8 +395,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
 				find(clazz);
 		});
-		for (Tag tag : getObservableChildren())
-			tag.postfix();
 	}
 
 	default <T extends Tag> T find(Class<T> tagClass) {
