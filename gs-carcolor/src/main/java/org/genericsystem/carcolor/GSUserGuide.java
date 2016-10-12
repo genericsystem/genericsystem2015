@@ -12,8 +12,6 @@ public class GSUserGuide extends GSDiv {
 
 	public GSUserGuide(Tag parent) {
 		super(parent, FlexDirection.COLUMN);
-		addStyle("flex-direction", "column");
-		addStyle("flex-wrap", "nowrap");
 		addStyle("justify-content", "center");
 
 		GSDiv gSection = new GSDiv(this, FlexDirection.COLUMN) {

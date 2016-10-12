@@ -16,16 +16,16 @@ import org.genericsystem.reactor.model.ObservableModelSelector.SELECTION_SELECTO
 
 import javafx.beans.binding.Bindings;
 
-@StyleClass("modal")
 @ReactorDependencies(GSDiv.class)
 @ReactorDependencies(path = GSDiv.class, value = HtmlHyperLink.class)
-@Style(path = GSDiv.class, name = "max-width", value = "40%")
+@StyleClass("modal")
 @StyleClass(path = GSDiv.class, value = "modal-content")
+@StyleClass(path = { GSDiv.class, HtmlHyperLink.class }, value = "close")
+@Style(path = GSDiv.class, name = "max-width", value = "40%")
 @Style(path = GSDiv.class, name = "padding", value = "10px")
 @Style(path = GSDiv.class, name = "border-radius", value = "10px")
 @Style(path = GSDiv.class, name = "background-color", value = "white")
 @SelectModel(path = { GSDiv.class, GSDiv.class }, value = SELECTION_SELECTOR.class)
-@StyleClass(path = { GSDiv.class, HtmlHyperLink.class }, value = "close")
 @SetText(path = { GSDiv.class, HtmlHyperLink.class }, value = "×")
 @BindAction(path = { GSDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
 public class Modal extends GSDiv implements SelectionDefaults {

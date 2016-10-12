@@ -4,6 +4,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
+import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
@@ -21,7 +22,6 @@ import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEdit
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents3.GSComposite.Header.HeaderLabel;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
@@ -35,21 +35,17 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
 @BindSelection(ContentRow.class)
-@Style(path = HeaderRow.class, name = "color", value = "white")
-@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Content.class }, value = "#ea0084")
-@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, Header.class }, value = "#ea0084")
-@GenericValueBackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Content.class }, value = "#ea0084")
-@GenericValueBackgroundColor(path = { HeaderRow.class, Content.class, GSValueComponents.class, Header.class }, value = "#ea0084")
-@Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
+@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")
 @GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
+@Style(path = HeaderRow.class, name = "color", value = "white")
+@Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
 @ReactorDependencies({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
-@ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, Content.class, ButtonDiv.class })
-@ReactorDependencies(path = { HeaderRow.class, Content.class }, value = GSValueComponents.class)
+@ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class, ButtonDiv.class })
 @ReactorDependencies(path = ContentRow.class, value = { GSValueComponents.class, GSHolders.class, ButtonDiv.class })
 @ReactorDependencies(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = InstanceNameLink.class)
 @ReactorDependencies(path = { ContentRow.class, ButtonDiv.class }, value = RemoveButton.class)
-@ForEach(path = { HeaderRow.class, Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+@ForEach(path = { HeaderRow.class, GSValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @ForEach(path = { ContentRow.class, GSHolders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
@@ -61,28 +57,23 @@ public class InstancesTable extends Table implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@ReactorDependencies(value = GSValueComponents.class)
-	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { HeaderLabel.class, GSCheckBoxDisplayer.class })
+	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { GSLabelDisplayer.class, GSCheckBoxDisplayer.class })
 	@ForEach(path = GSValueComponents.class, value = ObservableListExtractor.HOLDERS.class)
 	@ForEach(path = { GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-	@Select(path = { GSValueComponents.class, Header.class, HeaderLabel.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
+	@Select(path = { GSValueComponents.class, Header.class, GSLabelDisplayer.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSCheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	public static class GSHolders extends GSComposite {
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Style(path = Content.class, name = "background-color", value = "#e5ed00")
-	@Style(path = Header.class, name = "background-color", value = "#e5ed00")
-	@Style(path = Header.class, name = "justify-content", value = "center")
-	@Style(path = Header.class, name = "align-items", value = "center")
-	@Style(path = Content.class, name = "justify-content", value = "center")
-	@Style(path = Content.class, name = "align-items", value = "center")
+	@Style(path = GSDiv.class, name = "background-color", value = "#e5ed00")
+	@Style(path = GSDiv.class, name = "justify-content", value = "center")
+	@Style(path = GSDiv.class, name = "align-items", value = "center")
+	@Style(path = GSDiv.class, name = "margin-right", value = "1px")
+	@Style(path = GSDiv.class, name = "margin-bottom", value = "1px")
 	@ForEach(path = Content.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
 	@ReactorDependencies({ Header.class, Content.class })
-	@Style(path = Header.class, name = "margin-right", value = "1px")
-	@Style(path = Header.class, name = "margin-bottom", value = "1px")
-	@Style(path = Content.class, name = "margin-right", value = "1px")
-	@Style(path = Content.class, name = "margin-bottom", value = "1px")
 	public static class GSValueComponents extends GSComposite {
 	}
 

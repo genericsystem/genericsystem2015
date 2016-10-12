@@ -14,7 +14,6 @@ import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
@@ -38,13 +37,12 @@ import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 
-@ReverseFlexDirection
 @Style(path = GSInputTextWithConversion.class, name = "flex", value = "1")
 @Style(path = GSInputTextWithConversion.class, name = "width", value = "100%")
 @ReactorDependencies({ GSInputTextWithConversion.class, Content.class, ButtonDiv.class })
 @ReactorDependencies(path = Content.class, value = { GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
 @ReactorDependencies(path = ButtonDiv.class, value = AddButton.class)
-@ForEach(path = { Content.class }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+@ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
 @Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
 public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {

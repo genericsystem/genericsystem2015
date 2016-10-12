@@ -8,21 +8,16 @@ import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
 
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
+@ReverseFlexDirection(path = GSComposite.class)
 @ReactorDependencies(ContentRow.class)
 public class Table extends GSDiv {
 
-	@ReverseFlexDirection
 	public static class HeaderRow extends GSComposite {
-
 	}
 
-	@ReverseFlexDirection
 	public static class ContentRow extends GSComposite {
-
 	}
 
-	@ReverseFlexDirection
 	public static class FooterRow extends GSComposite {
-
 	}
 }
