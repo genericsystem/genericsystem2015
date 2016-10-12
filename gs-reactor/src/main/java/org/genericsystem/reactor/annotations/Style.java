@@ -6,23 +6,26 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.genericsystem.reactor.annotations.Style.Styles;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface Styles {
-	Style[] value();
+@Repeatable(Styles.class)
+public @interface Style {
+	Class<? extends GSTagImpl>[] path() default {};
+
+	String name();
+
+	String value();
+
+	int[] pos() default {};
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Repeatable(Styles.class)
-	public @interface Style {
-		Class<? extends GSTagImpl>[] path() default {};
-
-		String name();
-
-		String value();
+	public @interface Styles {
+		Style[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -32,6 +35,8 @@ public @interface Styles {
 		Class<? extends GSTagImpl>[] path() default {};
 
 		FlexDirection value();
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -45,6 +50,8 @@ public @interface Styles {
 	@Repeatable(KeepFlexDirections.class)
 	public @interface KeepFlexDirection {
 		Class<? extends GSTagImpl>[] path() default {};
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -58,6 +65,8 @@ public @interface Styles {
 	@Repeatable(ReverseFlexDirections.class)
 	public @interface ReverseFlexDirection {
 		Class<? extends GSTagImpl>[] path() default {};
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -73,6 +82,8 @@ public @interface Styles {
 		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

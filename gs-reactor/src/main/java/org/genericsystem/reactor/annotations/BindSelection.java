@@ -13,4 +13,6 @@ public @interface BindSelection {
 	Class<? extends GSTagImpl>[] path() default {};
 
 	Class<? extends GSTagImpl> value();
+
+	int[] pos() default {};
 }

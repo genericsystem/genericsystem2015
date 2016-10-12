@@ -16,9 +16,9 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSDiv;
@@ -68,7 +68,7 @@ public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 	}
 
 	@Override
-	public void postfix() {
+	public void init() {
 		bindSelection(find(Row.class));
 	}
 

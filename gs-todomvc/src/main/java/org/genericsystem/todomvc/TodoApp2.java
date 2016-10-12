@@ -1,21 +1,5 @@
 package org.genericsystem.todomvc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
-import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlCheckBox;
 import org.genericsystem.reactor.htmltag.HtmlDiv;
@@ -29,6 +13,24 @@ import org.genericsystem.reactor.htmltag.HtmlLi;
 import org.genericsystem.reactor.htmltag.HtmlSpan;
 import org.genericsystem.reactor.htmltag.HtmlStrong;
 import org.genericsystem.reactor.htmltag.HtmlUl;
+
+import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.GSDiv;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.DependsOnModel;
+import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv.MyDiv.MyDiv2;

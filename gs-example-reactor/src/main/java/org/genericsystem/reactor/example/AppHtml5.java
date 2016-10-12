@@ -22,7 +22,7 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceEditor;
