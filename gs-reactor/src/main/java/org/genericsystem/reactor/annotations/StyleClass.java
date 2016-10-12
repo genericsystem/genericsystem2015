@@ -17,6 +17,8 @@ public @interface StyleClass {
 
 	String[] value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface StyleClasses {

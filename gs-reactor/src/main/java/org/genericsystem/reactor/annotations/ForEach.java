@@ -22,6 +22,8 @@ public @interface ForEach {
 
 	Class<? extends ObservableListExtractor> value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface ForEachs {

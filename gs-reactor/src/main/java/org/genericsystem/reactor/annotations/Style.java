@@ -20,6 +20,8 @@ public @interface Style {
 
 	String value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface Styles {
@@ -33,6 +35,8 @@ public @interface Style {
 		Class<? extends GSTagImpl>[] path() default {};
 
 		FlexDirection value();
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -46,6 +50,8 @@ public @interface Style {
 	@Repeatable(KeepFlexDirections.class)
 	public @interface KeepFlexDirection {
 		Class<? extends GSTagImpl>[] path() default {};
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -59,6 +65,8 @@ public @interface Style {
 	@Repeatable(ReverseFlexDirections.class)
 	public @interface ReverseFlexDirection {
 		Class<? extends GSTagImpl>[] path() default {};
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -74,6 +82,8 @@ public @interface Style {
 		Class<? extends GSTagImpl>[] path() default {};
 
 		String value();
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

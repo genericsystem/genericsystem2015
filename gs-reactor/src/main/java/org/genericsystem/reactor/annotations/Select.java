@@ -23,6 +23,8 @@ public @interface Select {
 
 	Class<? extends ObservableValueSelector> value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface Selects {
@@ -36,6 +38,8 @@ public @interface Select {
 		Class<? extends GSTagImpl>[] path() default {};
 
 		Class<? extends ObservableModelSelector> value();
+
+		int[] pos() default {};
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

@@ -18,6 +18,8 @@ public @interface SetStringExtractor {
 
 	Class<? extends StringExtractor> value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface SetStringExtractors {

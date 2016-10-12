@@ -23,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
@@ -576,12 +577,41 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			consumer.accept(applyingAnnotation);
 	}
 
+	default boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation) {
+		if (posAnnotation.length == 0)
+			return true;
+		Tag tag = this;
+		int depth = pathAnnotation.length;
+		for (int i = 1; i <= depth; i++) {
+			if (position(tag, pathAnnotation[depth - i]) != posAnnotation[depth - i])
+				return false;
+			tag = tag.getParent();
+		}
+		return true;
+	}
+
+	// Assumes that tag is of a class extending tagClass.
+	default int position(Tag tag, Class<?> tagClass) {
+		int result = 0;
+		for (Tag sibling : getParent().getObservableChildren()) {
+			if (sibling.equals(tag))
+				break;
+			if (tagClass.isAssignableFrom(sibling.getClass()))
+				result++;
+		}
+		return result;
+	}
+
 	default List<Annotation> selectAnnotations(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
 		List<Annotation> annotationsFound = new ArrayList<>();
 		for (Annotation annotation : annotations)
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
-				if (isAssignableFrom(Arrays.asList(path), classesToResult)) {
+				int[] pos = (int[]) annotation.annotationType().getDeclaredMethod("pos").invoke(annotation);
+				if (pos.length != 0 && pos.length != path.length)
+					throw new IllegalStateException("The annotation contains a path and an array of class positions of different lengths. path: " + Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: "
+							+ IntStream.of(pos).boxed().collect(Collectors.toList()));
+				if (isAssignableFrom(Arrays.asList(path), classesToResult) && posMatches(pos, path)) {
 					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
