@@ -32,8 +32,7 @@ import org.genericsystem.reactor.model.ContextAction.PREVIOUS;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
 
-@Style(path = { GSComposite.class, GSValueComponents.class }, pos = { 0, 0 }, name = "flex", value = "0.3")
-@Style(path = { GSComposite.class, GSValueComponents.class }, pos = { 1, 0 }, name = "flex", value = "0.3")
+@Style(path = { GSComposite.class, GSValueComponents.class }, pos = { -1, 0 }, name = "flex", value = "0.3")
 @Style(path = { GSComposite.class, GSValueComponents.class }, name = "color", value = "white")
 @Style(path = { GSComposite.class, StepNavigator.class }, name = "flex", value = "")
 @GenericValueBackgroundColor(path = { GSComposite.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")

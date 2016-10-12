@@ -583,7 +583,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		Tag tag = this;
 		int depth = pathAnnotation.length;
 		for (int i = 1; i <= depth; i++) {
-			if (position(tag, pathAnnotation[depth - i]) != posAnnotation[depth - i])
+			if (posAnnotation[depth - i] != -1 && position(tag, pathAnnotation[depth - i]) != posAnnotation[depth - i])
 				return false;
 			tag = tag.getParent();
 		}
