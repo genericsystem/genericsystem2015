@@ -11,6 +11,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.model.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.model.ObservableModelSelector.SELECTION_SELECTOR;
 
@@ -34,8 +35,8 @@ public class Modal extends GSDiv implements SelectionDefaults {
 		bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
 	}
 
-	@ReactorDependencies(path = GSDiv.class, value = { HtmlHyperLink.class, InstanceEditor.class })
-	@Style(path = { GSDiv.class, InstanceEditor.class }, name = "min-height", value = "300px")
+	@ReactorDependencies(path = GSDiv.class, value = { HtmlHyperLink.class, TitledInstanceEditor.class })
+	@Style(path = { GSDiv.class, TitledInstanceEditor.class }, name = "min-height", value = "300px")
 	public static class ModalEditor extends Modal {
 
 	}
