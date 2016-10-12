@@ -3,6 +3,7 @@ package org.genericsystem.reactor.model;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,7 +16,6 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +28,13 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 	public static class ADD_HOLDER implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			ConvertedValueDefaults inputTag = (ConvertedValueDefaults) tag.getParent().find(Header.class).getObservableChildren().stream().filter(t -> t instanceof ConvertedValueDefaults).findFirst().get();
-			Property<Serializable> observable = inputTag.getConvertedValueProperty(context.getParent());
-			assert observable != null;
-			if (observable.getValue() != null) {
-				Serializable newValue = observable.getValue();
-				observable.setValue(null);
-				context.getGenerics()[2].addHolder(context.getGenerics()[1], newValue);
-			}
+			Property<Serializable> convertedValue = ((ConvertedValueDefaults) tag.getParent()).getConvertedValueProperty(context.getParent());
+			if (convertedValue.getValue() != null) {
+				Serializable newValue = convertedValue.getValue();
+				convertedValue.setValue(null);
+				context.getGenerics()[1].addHolder(context.getGeneric(), newValue);
+			} else if (Boolean.class.equals(context.getGeneric().getInstanceValueClassConstraint()))
+				context.getGenerics()[1].addHolder(context.getGeneric(), false);
 		}
 	}
 
@@ -46,6 +45,48 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		}
 	}
 
+	public static class FLUSH implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.flush();
+		}
+	}
+
+	public static class CANCEL implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.cancel();
+		}
+	}
+
+	public static class MOUNT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.mount();
+		}
+	}
+
+	public static class UNMOUNT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.unmount();
+		}
+	}
+
+	public static class SHIFTTS implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.shiftTs();
+		}
+	}
+
+	public static class GC implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			System.gc();
+		}
+	}
+
 	public static class SET_SELECTION implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
@@ -53,6 +94,16 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(context);
 			else
 				log.warn("The SET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
+		}
+	}
+
+	public static class RESET_SELECTION implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
+			else
+				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
 		}
 	}
 
@@ -83,6 +134,26 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				input.getConvertedValueProperty(context).setValue(null);
 			} else
 				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults.");
+		}
+	}
+
+	public static class PREVIOUS implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (StepperDefaults.class.isAssignableFrom(tag.getClass()))
+				((StepperDefaults) tag).prev(context);
+			else
+				log.warn("The PREVIOUS action is applicable only to a tag implementing StepperDefaults.");
+		}
+	}
+
+	public static class NEXT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (StepperDefaults.class.isAssignableFrom(tag.getClass()))
+				((StepperDefaults) tag).next(context);
+			else
+				log.warn("The NEXT action is applicable only to a tag implementing SwitchDefaults.");
 		}
 	}
 }

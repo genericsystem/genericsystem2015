@@ -1,21 +1,21 @@
-package org.genericsystem.reactor.gscomponents2;
-
-import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.Styles.Flex;
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.Overflow;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Footer;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Footer.FooterLabel;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header.HeaderLabel;
+package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
-@Flex("1 1 0%")
-@Overflow("hidden")
+import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Footer;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Footer.FooterLabel;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header.HeaderLabel;
+
+import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSDiv;
+
+@Style(name = "flex", value = "1 1 0%")
+@Style(name = "overflow", value = "hidden")
 @ReactorDependencies({ GSComposite.Content.class })
 @FlexDirectionStyle(path = Content.class, value = FlexDirection.COLUMN)
 @FlexDirectionStyle(path = Header.class, value = FlexDirection.COLUMN)
@@ -25,24 +25,24 @@ import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 @ReactorDependencies(path = Footer.class, value = FooterLabel.class)
 public abstract class GSComposite extends GSDiv {
 
-	@Flex("1 1 0%")
-	@Overflow("hidden")
+	@Style(name = "flex", value = "1 1 0%")
+	@Style(name = "overflow", value = "hidden")
 	public static class Content extends GSDiv {
 		public static class ContentLabel extends GSLabelDisplayer {
 
 		}
 	}
 
-	@Flex("1 1 0%")
-	@Overflow("hidden")
+	@Style(name = "flex", value = "1 1 0%")
+	@Style(name = "overflow", value = "hidden")
 	public static class Header extends GSDiv {
 		public static class HeaderLabel extends GSLabelDisplayer {
 
 		}
 	}
 
-	@Flex("1 1 0%")
-	@Overflow("hidden")
+	@Style(name = "flex", value = "1 1 0%")
+	@Style(name = "overflow", value = "hidden")
 	public static class Footer extends GSDiv {
 		public static class FooterLabel extends GSLabelDisplayer {
 

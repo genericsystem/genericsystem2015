@@ -1,5 +1,9 @@
 package org.genericsystem.reactor.example;
 
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
+
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -14,17 +18,14 @@ import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.GSComposite.ColorCompositeRadio;
+import org.genericsystem.reactor.gscomponents.GSComposite.ColorTitleCompositeFlexElement;
 import org.genericsystem.reactor.gscomponents.GSEditor;
 import org.genericsystem.reactor.gscomponents.GSMonitorExtended;
 import org.genericsystem.reactor.gscomponents.GSStepEditor;
 import org.genericsystem.reactor.gscomponents.GSTable;
-import org.genericsystem.reactor.gscomponents.GSComposite.ColorCompositeRadio;
-import org.genericsystem.reactor.gscomponents.GSComposite.ColorTitleCompositeFlexElement;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
@@ -54,13 +55,13 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		new GSStepEditor(this, FlexDirection.ROW) {
 			{
 				select__(model -> getSelectionProperty(model));
-				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
+				stepper(switchedTag, instanceNameTag);
 			}
 		};
 		new GSStepEditor(this, FlexDirection.COLUMN) {
 			{
 				select__(model -> getSelectionProperty(model));
-				switcher_(switchedTag, ObservableListExtractor.ATTRIBUTES_OF_INSTANCES, instanceNameTag);
+				stepper(switchedTag, instanceNameTag);
 			}
 		};
 

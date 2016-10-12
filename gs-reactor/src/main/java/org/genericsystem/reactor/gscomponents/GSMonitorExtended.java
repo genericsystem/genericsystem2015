@@ -20,7 +20,6 @@ public class GSMonitorExtended extends GSMonitor {
 
 	@Override
 	protected void middlePart() {
-		createNewProperty("Ts");
 		new HtmlButton(this) {
 			{
 				setText("Mount");

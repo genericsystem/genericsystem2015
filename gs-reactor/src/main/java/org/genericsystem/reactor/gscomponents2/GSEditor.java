@@ -22,16 +22,10 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.Styles.AlignItems;
-import org.genericsystem.reactor.annotations.Styles.Flex;
 import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.FlexWrap;
-import org.genericsystem.reactor.annotations.Styles.Height;
-import org.genericsystem.reactor.annotations.Styles.JustifyContent;
 import org.genericsystem.reactor.annotations.Styles.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.annotations.Styles.Width;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -40,7 +34,6 @@ import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSComponentEditorDiv;
@@ -65,6 +58,7 @@ import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorTitle.EditorTitleContent;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;
@@ -81,7 +75,7 @@ import javafx.collections.ObservableList;
 @ReactorDependencies({ EditorTitleContent.class, InstanceType.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class,
 		DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class,
 		ComponentAdderSelect.class })
-@Flex("1")
+@Style(name = "flex", value = "1")
 @FlexDirectionStyle(FlexDirection.ROW)
 public class GSEditor extends GSDiv {
 
@@ -118,12 +112,12 @@ public class GSEditor extends GSDiv {
 	// Content.
 	@Parent(GSEditor.class)
 	@KeepFlexDirection
-	@Flex("1")
+	@Style(name = "flex", value = "1")
 	@Style(name = "height", value = "100%")
 	public static class EditorContent extends GSDiv {
 		// Line/column with the names of the attributes and components of relations.
 		@ReverseFlexDirection
-		@Flex("0.3")
+		@Style(name = "flex", value = "0.3")
 		public static class LinkTitles extends GSDiv {
 
 			public static class InstanceType extends GSTitleLineCellDiv {
@@ -139,7 +133,7 @@ public class GSEditor extends GSDiv {
 			}
 
 			@ForEach(ATTRIBUTES_OF_INSTANCES.class)
-			@Flex("1")
+			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
 			public static class TypeAttribute extends GSDiv {
 
@@ -152,7 +146,7 @@ public class GSEditor extends GSDiv {
 				}
 
 				@Select(RELATION_SELECTOR.class)
-				@Flex("1")
+				@Style(name = "flex", value = "1")
 				@FlexDirectionStyle(FlexDirection.ROW)
 				public static class RelationName extends GSDiv {
 
@@ -167,16 +161,16 @@ public class GSEditor extends GSDiv {
 		}
 
 		// Edition itself.
-		@Flex("1")
+		@Style(name = "flex", value = "1")
 		@ReverseFlexDirection
 		public static class InstanceEdition extends GSDiv {
 
 			// Edition of the name of the instance.
 			public static class InstanceNameEditorDiv extends GSSubcellEditorDiv {
 
-				@Flex("1")
-				@Height("100%")
-				@Width("100%")
+				@Style(name = "flex", value = "1")
+				@Style(name = "height", value = "100%")
+				@Style(name = "width", value = "100%")
 				public static class InstanceNameEditor extends GSInputTextEditorWithConversion {
 				}
 			}
@@ -197,9 +191,9 @@ public class GSEditor extends GSDiv {
 						select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
 					}
 
-					@Flex("1 0 auto")
-					@JustifyContent("center")
-					@AlignItems("center")
+					@Style(name = "flex", value = "1 0 auto")
+					@Style(name = "justify-content", value = "center")
+					@Style(name = "align-items", value = "center")
 					@Style(name = "text-align", value = "center")
 					public static class CheckboxLabel extends HtmlLabel {
 
@@ -245,8 +239,8 @@ public class GSEditor extends GSDiv {
 				}
 
 				// Edition of other attributes.
-				@Flex("1")
-				@FlexWrap("wrap")
+				@Style(name = "flex", value = "1")
+				@Style(name = "flex-wrap", value = "wrap")
 				public static class AttributeEditionColumn extends GenericColumn {
 
 					@Override
@@ -269,9 +263,9 @@ public class GSEditor extends GSDiv {
 								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							@Flex("1")
-							@Height("100%")
-							@Width("100%")
+							@Style(name = "flex", value = "1")
+							@Style(name = "height", value = "100%")
+							@Style(name = "width", value = "100%")
 							public static class HolderEditorInput extends GSInputTextEditorWithConversion {
 							}
 
@@ -294,7 +288,7 @@ public class GSEditor extends GSDiv {
 						}
 
 						// Edition of links.
-						@Flex("1")
+						@Style(name = "flex", value = "1")
 						@FlexDirectionStyle(FlexDirection.ROW)
 						public static class LinkEditor extends GSDiv implements ComponentsDefaults {
 
@@ -312,9 +306,9 @@ public class GSEditor extends GSDiv {
 								}
 
 								// TODO: Finish decomposition of InstanceCompositeSelect.
-								@Flex("1")
-								@Height("100%")
-								@Width("100%")
+								@Style(name = "flex", value = "1")
+								@Style(name = "height", value = "100%")
+								@Style(name = "width", value = "100%")
 								public static class DirectRelationComponentEditor extends InstanceCompositeSelect {
 
 									@Override
@@ -381,9 +375,9 @@ public class GSEditor extends GSDiv {
 								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 							}
 
-							@Flex("1")
-							@Height("100%")
-							@Width("100%")
+							@Style(name = "flex", value = "1")
+							@Style(name = "height", value = "100%")
+							@Style(name = "width", value = "100%")
 							public static class HolderAdderInput extends GSInputTextWithConversion {
 
 								@Override
@@ -435,7 +429,7 @@ public class GSEditor extends GSDiv {
 						}
 
 						// Addition of links.
-						@Flex("1")
+						@Style(name = "flex", value = "1")
 						@FlexDirectionStyle(FlexDirection.ROW)
 						public static class LinkAdder extends GSDiv implements ComponentsDefaults {
 
@@ -469,9 +463,9 @@ public class GSEditor extends GSDiv {
 
 								// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.
 								@Parent(ComponentAdder.class)
-								@Flex("1")
-								@Height("100%")
-								@Width("100%")
+								@Style(name = "flex", value = "1")
+								@Style(name = "height", value = "100%")
+								@Style(name = "width", value = "100%")
 								public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry {
 
 									@Override

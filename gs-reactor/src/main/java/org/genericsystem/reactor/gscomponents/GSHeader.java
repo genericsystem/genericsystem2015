@@ -7,7 +7,7 @@ public class GSHeader extends GSDiv {
 
 	public GSHeader(Tag parent, String string, TagConstructor tag1, String string1, TagConstructor tag2, String string2) {
 		super(parent, FlexDirection.ROW);
-		addStyle("justify-content", "space-around");
+		addStyle("flex-wrap", "wrap");
 		addStyle("padding", "10px");
 		if (tag1 != null) {
 			Tag leftTag = tag1.build(this);

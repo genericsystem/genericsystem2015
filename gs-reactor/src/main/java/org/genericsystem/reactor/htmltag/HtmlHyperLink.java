@@ -9,7 +9,7 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 import org.genericsystem.reactor.modelproperties.ActionDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.SwitchDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import io.vertx.core.json.JsonObject;
 
@@ -17,7 +17,7 @@ import io.vertx.core.json.JsonObject;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlHyperLink extends GSTagImpl implements SelectionDefaults, SwitchDefaults, ActionDefaults {
+public class HtmlHyperLink extends GSTagImpl implements SelectionDefaults, StepperDefaults, ActionDefaults {
 
 	public HtmlHyperLink() {
 
