@@ -7,8 +7,8 @@ import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.carcolor.UserGuide2.ModalContent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.StyleClasses.StyleClass;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.StyleClass;
 
 @StyleClass("modal")
 @ReactorDependencies(ModalContent.class)

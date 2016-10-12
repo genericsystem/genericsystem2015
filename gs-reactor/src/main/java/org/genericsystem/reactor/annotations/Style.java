@@ -6,23 +6,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.genericsystem.reactor.annotations.Style.Styles;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface Styles {
-	Style[] value();
+@Repeatable(Styles.class)
+public @interface Style {
+	Class<? extends GSTagImpl>[] path() default {};
+
+	String name();
+
+	String value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Repeatable(Styles.class)
-	public @interface Style {
-		Class<? extends GSTagImpl>[] path() default {};
-
-		String name();
-
-		String value();
+	public @interface Styles {
+		Style[] value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

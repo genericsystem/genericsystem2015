@@ -6,20 +6,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.genericsystem.reactor.annotations.StyleClass.StyleClasses;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface StyleClasses {
+@Repeatable(StyleClasses.class)
+public @interface StyleClass {
+	Class<? extends GSTagImpl>[] path() default {};
 
-	StyleClass[] value();
+	String[] value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	@Repeatable(StyleClasses.class)
-	public @interface StyleClass {
-		Class<? extends GSTagImpl>[] path() default {};
-
-		String[] value();
+	public @interface StyleClasses {
+		StyleClass[] value();
 	}
 }

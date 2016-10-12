@@ -2,17 +2,16 @@ package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
+import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Footer;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Footer.FooterLabel;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Header.HeaderLabel;
-
-import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
 
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
