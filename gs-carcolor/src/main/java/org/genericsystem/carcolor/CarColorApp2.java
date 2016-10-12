@@ -69,10 +69,12 @@ public class CarColorApp2 extends GSApp implements SelectionDefaults {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "flex", value = "0 1 auto")
+	@Style(name = "align-items", value = "center")
 	@ReactorDependencies(HtmlImg.class)
 	@Attribute(path = HtmlImg.class, name = "src", value = "logoTransp.png")
 	@Attribute(path = HtmlImg.class, name = "alt", value = "logo")
-	@Style(path = HtmlImg.class, name = "height", value = "100%")
+	@Style(path = HtmlImg.class, name = "height", value = "auto")
+	@Style(path = HtmlImg.class, name = "width", value = "150px")
 	public static class Logo extends GSDiv {
 	}
 

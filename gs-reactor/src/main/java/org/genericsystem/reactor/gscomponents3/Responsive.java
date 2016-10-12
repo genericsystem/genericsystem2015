@@ -16,7 +16,8 @@ public class Responsive extends GSDiv {
 			tag.addStyle("padding", "10px");
 			tag.addStyle("border-radius", "10px");
 			tag.addStyle("background-color", "white");
-			tag.addStyle("min-width", "10cm");
+			tag.addStyle("min-width", "8cm");
+			tag.addStyle("max-width", "100%");
 		}
 	}
 }
