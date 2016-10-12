@@ -1,12 +1,10 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import java.util.function.UnaryOperator;
 
 import org.genericsystem.reactor.Tag;
 
-public class GSResponsive extends GSDiv implements SelectionDefaults {
+public class GSResponsive extends GSDiv {
 
 	@SafeVarargs
 	public GSResponsive(Tag parent, FlexDirection direction, UnaryOperator<Tag>... contentTagConsumers) {

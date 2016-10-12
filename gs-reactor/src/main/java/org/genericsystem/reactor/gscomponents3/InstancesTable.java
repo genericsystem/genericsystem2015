@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents2;
+package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -19,16 +19,16 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents2.GSComposite.Header.HeaderLabel;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.ButtonDiv;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.GSHolders;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.GSValueComponents;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.InstanceNameLink;
-import org.genericsystem.reactor.gscomponents2.InstancesTable.RemoveButton;
-import org.genericsystem.reactor.gscomponents2.Table.ContentRow;
-import org.genericsystem.reactor.gscomponents2.Table.HeaderRow;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header.HeaderLabel;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.InstanceNameLink;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.RemoveButton;
+import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
+import org.genericsystem.reactor.gscomponents3.Table.HeaderRow;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -55,6 +55,10 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 public class InstancesTable extends Table implements SelectionDefaults {
 
+	@FlexDirectionStyle(FlexDirection.ROW)
+	public static class HorizontalInstancesTable extends InstancesTable {
+	}
+
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@ReactorDependencies(value = GSValueComponents.class)
 	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { HeaderLabel.class, GSCheckBoxDisplayer.class })
@@ -63,7 +67,6 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Select(path = { GSValueComponents.class, Header.class, HeaderLabel.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSCheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	public static class GSHolders extends GSComposite {
-
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
@@ -81,7 +84,6 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Style(path = Content.class, name = "margin-right", value = "1px")
 	@Style(path = Content.class, name = "margin-bottom", value = "1px")
 	public static class GSValueComponents extends GSComposite {
-
 	}
 
 	@BindAction(SET_SELECTION.class)
@@ -124,5 +126,4 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@BindAction(REMOVE.class)
 	public static class RemoveButton extends HtmlButton {
 	}
-
 }

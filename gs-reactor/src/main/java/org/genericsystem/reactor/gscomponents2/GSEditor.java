@@ -34,7 +34,6 @@ import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSComponentEditorDiv;
@@ -59,6 +58,7 @@ import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.AttributeName.AttributeNameDisplayer;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorTitle.EditorTitleContent;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;

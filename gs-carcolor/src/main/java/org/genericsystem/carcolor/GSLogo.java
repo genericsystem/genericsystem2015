@@ -1,11 +1,11 @@
-package org.genericsystem.reactor.gscomponents;
-
-import org.genericsystem.reactor.htmltag.HtmlImg;
+package org.genericsystem.carcolor;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.htmltag.HtmlImg;
 
 public class GSLogo extends GSDiv {
-
 	public GSLogo(Tag parent) {
 		super(parent, FlexDirection.ROW);
 		addStyle("flex", "0 1 auto");
@@ -18,5 +18,4 @@ public class GSLogo extends GSDiv {
 			}
 		};
 	}
-
 }

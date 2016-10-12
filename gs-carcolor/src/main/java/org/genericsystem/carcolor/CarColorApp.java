@@ -15,7 +15,6 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSApp;
 import org.genericsystem.reactor.gscomponents.GSEditor;
 import org.genericsystem.reactor.gscomponents.GSHeader;
-import org.genericsystem.reactor.gscomponents.GSLogo;
 import org.genericsystem.reactor.gscomponents.GSModal;
 import org.genericsystem.reactor.gscomponents.GSMonitor;
 import org.genericsystem.reactor.gscomponents.GSResponsive;

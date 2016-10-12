@@ -28,6 +28,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -430,11 +431,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		processAnnotation(StyleClass.class, annotation -> {
-			for (String str : ((StyleClass) annotation).value()) {
-				addStyleClass(str);
-			}
-		});
 		processAnnotation(DirectSelect.class, annotation -> select(((DirectSelect) annotation).value()));
 		processAnnotation(Select.class, annotation -> {
 			try {
@@ -521,7 +517,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
 		});
 
-		processStyleAnnotation(Style.class, annotation -> addStyle(((Style) annotation).name(), ((Style) annotation).value()));
+		processRepeatableAnnotation(Attribute.class, annotation -> addAttribute(((Attribute) annotation).name(), ((Attribute) annotation).value()));
+		processRepeatableAnnotation(Style.class, annotation -> addStyle(((Style) annotation).name(), ((Style) annotation).value()));
+
 		processAnnotation(GenericValueBackgroundColor.class, annotation -> addPrefixBinding(modelContext -> addStyle(modelContext, "background-color",
 				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) this).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
 	}
@@ -560,7 +558,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			consumer.accept(applyingAnnotation);
 	}
 
-	default <T extends Tag> void processStyleAnnotation(Class<? extends Annotation> annotationClass, Consumer<Annotation> consumer) {
+	default <T extends Tag> void processRepeatableAnnotation(Class<? extends Annotation> annotationClass, Consumer<Annotation> consumer) {
 		List<Class<?>> classesToResult = new ArrayList<>();
 		Tag current = this;
 		List<Annotation> applyingAnnotations = new ArrayList<>();
@@ -586,7 +584,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
 				if (isAssignableFrom(Arrays.asList(path), classesToResult)) {
-					if (!annotationsFound.isEmpty() && !Style.class.equals(annotationClass))
+					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
 					annotationsFound.add(annotation);

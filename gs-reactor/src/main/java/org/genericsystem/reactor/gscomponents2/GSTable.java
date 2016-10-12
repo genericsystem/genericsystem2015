@@ -8,6 +8,9 @@ import org.genericsystem.reactor.htmltag.HtmlH2;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
+import org.genericsystem.reactor.gscomponents3.InstancesTable;
+
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -19,7 +22,6 @@ import org.genericsystem.reactor.annotations.Styles.Style;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.BooleanValueSubCell.BooleanDisplayer;
 import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.ComponentSubCell.ComponentLabel;
