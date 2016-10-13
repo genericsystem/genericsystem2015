@@ -8,6 +8,7 @@ import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
@@ -78,12 +79,8 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	}
 
 	@BindAction(SET_SELECTION.class)
+	@BindText
 	public static class InstanceNameLink extends HtmlHyperLink {
-
-		@Override
-		public void init() {
-			bindText();
-		}
 	}
 
 	@KeepFlexDirection

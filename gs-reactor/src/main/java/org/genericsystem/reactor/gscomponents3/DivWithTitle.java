@@ -4,6 +4,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlH2;
 
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Style;
@@ -11,7 +12,6 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv.TitleContent;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.HorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents3.InstanceStepEditor.HorizontalInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.HorizontalInstancesTable;
@@ -29,14 +29,9 @@ public class DivWithTitle extends GSDiv {
 	@Style(name = "color", value = "White")
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
-	@ReactorDependencies(TitleContent.class)
+	@ReactorDependencies(HtmlH2.class)
+	@BindText(path = HtmlH2.class)
 	public static class GSTitleDiv extends GSDiv {
-		public static class TitleContent extends HtmlH2 {
-			@Override
-			public void init() {
-				bindText();
-			}
-		}
 	}
 
 	@ReactorDependencies({ GSTitleDiv.class, InstancesTable.class })

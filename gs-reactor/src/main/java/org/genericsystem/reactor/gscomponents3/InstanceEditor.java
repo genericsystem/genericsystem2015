@@ -13,6 +13,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.Select;
@@ -54,7 +55,6 @@ import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX
 import org.genericsystem.reactor.model.ObservableValueSelector.REVERSED_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
-import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -78,7 +78,6 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	public static class HorizontalInstanceEditor extends InstanceEditor {
-
 	}
 
 	@ReactorDependencies({ GSHoldersEditor.class, GSMultiCheckbox.class })
@@ -93,24 +92,16 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")
 	public static class GSMultiCheckbox extends GSDiv {
-
 	}
 
 	@Style(name = "flex", value = "1 0 auto")
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "text-align", value = "center")
+	@GenericValueBackgroundColor("#e5ed00")
 	@ReactorDependencies(Checkbox.class)
+	@BindText
 	public static class CheckboxLabel extends org.genericsystem.reactor.htmltag.HtmlLabel {
-
-		@Override
-		public void init() {
-			bindText();
-			addPrefixBinding(model -> {
-				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
-					addStyle(model, "background-color", getGenericStringProperty(model).getValue());
-			});
-		}
 	}
 
 	@Style(name = "float", value = "left")
@@ -167,7 +158,6 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")
 	public static class GSHoldersEditor extends GSHolders {
-
 	}
 
 	@Style(name = "flex", value = "1")
