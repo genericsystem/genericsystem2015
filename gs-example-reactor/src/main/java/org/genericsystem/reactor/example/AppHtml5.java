@@ -3,13 +3,6 @@ package org.genericsystem.reactor.example;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
-import org.genericsystem.reactor.example.AppHtml5.CarHorizontalInstancesTable;
-import org.genericsystem.reactor.example.AppHtml5.CarInstancesTable;
-import org.genericsystem.reactor.example.AppHtml5.ColorInstancesTable;
-import org.genericsystem.reactor.example.AppHtml5.HorizontalSelectedInstanceEditor;
-import org.genericsystem.reactor.example.AppHtml5.HorizontalSelectedInstanceStepEditor;
-import org.genericsystem.reactor.example.AppHtml5.SelectedInstanceEditor;
-import org.genericsystem.reactor.example.AppHtml5.SelectedInstanceStepEditor;
 
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -36,8 +29,12 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-@ReactorDependencies({ CarInstancesTable.class, CarHorizontalInstancesTable.class, ColorInstancesTable.class, SelectedInstanceEditor.class, HorizontalSelectedInstanceEditor.class, SelectedInstanceStepEditor.class,
-		HorizontalSelectedInstanceStepEditor.class, MonitorExtended.class })
+@ReactorDependencies({ TitledInstancesTable.class, TitledHorizontalInstancesTable.class, TitledInstancesTable.class, TitledInstanceEditor.class, TitledHorizontalInstanceEditor.class, TitledInstanceStepEditor.class, TitledHorizontalInstanceStepEditor.class,
+		MonitorExtended.class })
+@DirectSelect(path = TitledInstancesTable.class, pos = 0, value = Car.class)
+@DirectSelect(path = TitledHorizontalInstancesTable.class, pos = 0, value = Car.class)
+@DirectSelect(path = TitledInstancesTable.class, pos = 2, value = Color.class)
+@SelectModel(path = TitledInstanceEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
 @Style(name = "flex-wrap", value = "wrap")
 @Style(name = "flex", value = "1 1 0%")
 public class AppHtml5 extends GSApp implements SelectionDefaults {
@@ -48,38 +45,5 @@ public class AppHtml5 extends GSApp implements SelectionDefaults {
 
 	public AppHtml5() {
 		createSelectionProperty();
-	}
-
-	@DirectSelect(Car.class)
-	public static class CarInstancesTable extends TitledInstancesTable {
-
-	}
-
-	@DirectSelect(Car.class)
-	public static class CarHorizontalInstancesTable extends TitledHorizontalInstancesTable {
-
-	}
-
-	@DirectSelect(Color.class)
-	public static class ColorInstancesTable extends TitledInstancesTable {
-
-	}
-
-	@SelectModel(ObservableModelSelector.SELECTION_SELECTOR.class)
-	public static class SelectedInstanceEditor extends TitledInstanceEditor {
-	}
-
-	@SelectModel(ObservableModelSelector.SELECTION_SELECTOR.class)
-	public static class HorizontalSelectedInstanceEditor extends TitledHorizontalInstanceEditor {
-
-	}
-
-	@SelectModel(ObservableModelSelector.SELECTION_SELECTOR.class)
-	public static class SelectedInstanceStepEditor extends TitledInstanceStepEditor {
-	}
-
-	@SelectModel(ObservableModelSelector.SELECTION_SELECTOR.class)
-	public static class HorizontalSelectedInstanceStepEditor extends TitledHorizontalInstanceStepEditor {
-
 	}
 }
