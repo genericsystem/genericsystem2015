@@ -4,18 +4,17 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlH2;
 
+import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.SetStringExtractor;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv.TitleContent;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.HorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents3.InstanceStepEditor.HorizontalInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.HorizontalInstancesTable;
-
-import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.SetStringExtractor;
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.Style;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.model.StringExtractor;
 
 @Style(name = "flex", value = "1")

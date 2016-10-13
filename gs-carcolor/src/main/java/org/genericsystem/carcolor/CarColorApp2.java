@@ -28,8 +28,8 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 
 @RunScript(CarColorScript.class)
@@ -69,10 +69,12 @@ public class CarColorApp2 extends GSApp implements SelectionDefaults {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "flex", value = "0 1 auto")
+	@Style(name = "align-items", value = "center")
 	@ReactorDependencies(HtmlImg.class)
 	@Attribute(path = HtmlImg.class, name = "src", value = "logoTransp.png")
 	@Attribute(path = HtmlImg.class, name = "alt", value = "logo")
-	@Style(path = HtmlImg.class, name = "height", value = "100%")
+	@Style(path = HtmlImg.class, name = "height", value = "auto")
+	@Style(path = HtmlImg.class, name = "width", value = "150px")
 	public static class Logo extends GSDiv {
 	}
 

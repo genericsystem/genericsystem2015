@@ -21,6 +21,8 @@ public @interface DirectSelect {
 
 	Class<?> value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface DirectSelects {

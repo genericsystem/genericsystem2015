@@ -18,6 +18,8 @@ public @interface BindAction {
 
 	Class<? extends ContextAction> value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface BindActions {

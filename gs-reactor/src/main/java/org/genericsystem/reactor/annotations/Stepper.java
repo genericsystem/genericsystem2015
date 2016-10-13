@@ -19,6 +19,8 @@ public @interface Stepper {
 
 	Class<? extends GSTagImpl> headerClass();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface Steppers {

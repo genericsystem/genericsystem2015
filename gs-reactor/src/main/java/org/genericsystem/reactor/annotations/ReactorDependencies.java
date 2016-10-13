@@ -21,6 +21,8 @@ public @interface ReactorDependencies {
 
 	Class<? extends GSTagImpl>[] value();
 
+	int[] pos() default {};
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface ReactorDependenciesMult {

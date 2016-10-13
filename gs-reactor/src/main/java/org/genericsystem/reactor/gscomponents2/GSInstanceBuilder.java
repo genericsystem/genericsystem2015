@@ -13,10 +13,9 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.Parent;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
-import org.genericsystem.reactor.annotations.Styles.ReverseFlexDirection;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
@@ -37,7 +36,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-@Parent(GSTable.class)
 @ReactorDependencies({ InstanceNameBuilderInput.class, HolderBuilderInput.class, BooleanHolderBuilderInput.class, ComponentBuilderSelect.class, AddButton.class })
 @Style(name = "flex", value = "1")
 @ReverseFlexDirection
@@ -59,9 +57,7 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 	}
 
 	// For the creation of the instance’s value.
-	@Parent(GSInstanceBuilder.class)
 	public static class InstanceNameBuilder extends GSSubcellEditorDiv {
-		@Parent(InstanceNameBuilder.class)
 		@Style(name = "flex", value = "1")
 		@Style(name = "height", value = "100%")
 		@Style(name = "width", value = "100%")
@@ -70,7 +66,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 	}
 
 	// Creation of holders/links.
-	@Parent(GSInstanceBuilder.class)
 	public static class BuilderCell extends GSSubcellEditorDiv {
 
 		@Override
@@ -79,7 +74,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 		}
 
 		// Creation of non-boolean holders.
-		@Parent(BuilderCell.class)
 		public static class HolderBuilder extends GSSubcellEditorDiv {
 
 			@Override
@@ -87,7 +81,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 				select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 			}
 
-			@Parent(HolderBuilder.class)
 			@Style(name = "flex", value = "1")
 			@Style(name = "height", value = "100%")
 			@Style(name = "width", value = "100%")
@@ -106,7 +99,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 		}
 
 		// Creation of boolean holders.
-		@Parent(BuilderCell.class)
 		public static class BooleanHolderBuilder extends GSSubcellEditorDiv {
 
 			@Override
@@ -114,9 +106,7 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 				select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
 			}
 
-			@Parent(BooleanHolderBuilder.class)
 			public static class CheckboxContainerBuildDiv extends CenteredFlexDiv {
-				@Parent(CheckboxContainerBuildDiv.class)
 				public static class BooleanHolderBuilderInput extends GSCheckBoxWithValue implements GSBuilderDefaults {
 
 					@Override
@@ -131,7 +121,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 		}
 
 		// Creation of links.
-		@Parent(BuilderCell.class)
 		public static class LinkBuilder extends LinkEditor implements GSBuilderDefaults {
 
 			@Override
@@ -143,7 +132,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 				});
 			}
 
-			@Parent(LinkBuilder.class)
 			public static class ComponentBuilder extends GSComponentEditorDiv {
 
 				@Override
@@ -151,7 +139,6 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 					forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1])));
 				}
 
-				@Parent(ComponentBuilder.class)
 				public static class ComponentBuilderSelect extends ComponentAdderSelect {
 				}
 			}
@@ -159,9 +146,7 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 	}
 
 	// “Add” button.
-	@Parent(GSInstanceBuilder.class)
 	public static class AddButtonDiv extends InstancesTable.ButtonDiv {
-		@Parent(AddButtonDiv.class)
 		@Style(name = "flex", value = "1")
 		@Style(name = "height", value = "100%")
 		@Style(name = "width", value = "100%")
@@ -193,5 +178,4 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 			}
 		}
 	}
-
 }

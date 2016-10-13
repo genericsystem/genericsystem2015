@@ -3,10 +3,6 @@ package org.genericsystem.reactor.gscomponents3;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlLabel;
 
-import org.genericsystem.reactor.gscomponents3.Monitor.CancelButton;
-import org.genericsystem.reactor.gscomponents3.Monitor.FlushButton;
-import org.genericsystem.reactor.gscomponents3.Monitor.LastUpdateLabel;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -17,10 +13,11 @@ import org.genericsystem.common.Statics;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.ReactorDependencies;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents3.Monitor.LastUpdateLabel;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
 import org.genericsystem.reactor.model.ContextAction.FLUSH;
 import org.genericsystem.reactor.model.ContextAction.GC;
@@ -30,28 +27,29 @@ import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
 
 import javafx.beans.binding.Bindings;
 
-@ReactorDependencies({ FlushButton.class, CancelButton.class, LastUpdateLabel.class })
+@ReactorDependencies({ HtmlButton.class, HtmlButton.class, LastUpdateLabel.class })
+@SetText(path = HtmlButton.class, pos = 0, value = "Save")
+@BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
+@SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
+@BindAction(path = HtmlButton.class, pos = 1, value = CANCEL.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
 public class Monitor extends GSDiv {
 
-	@ReactorDependencies({ FlushButton.class, CancelButton.class, MountButton.class, CacheLevel.class, UnmountButton.class, ShiftTSButton.class, LastUpdateLabel.class })
+	@ReactorDependencies({ HtmlButton.class, HtmlButton.class, HtmlButton.class, CacheLevel.class, HtmlButton.class, HtmlButton.class, LastUpdateLabel.class/*, HtmlButton.class */ })
+	@SetText(path = HtmlButton.class, pos = 2, value = "Mount")
+	@BindAction(path = HtmlButton.class, pos = 2, value = MOUNT.class)
+	@SetText(path = HtmlButton.class, pos = 3, value = "Unmount")
+	@BindAction(path = HtmlButton.class, pos = 3, value = UNMOUNT.class)
+	@SetText(path = HtmlButton.class, pos = 4, value = "ShiftTs")
+	@BindAction(path = HtmlButton.class, pos = 4, value = SHIFTTS.class)
+	@SetText(path = HtmlButton.class, pos = 5, value = "Collect")
+	@BindAction(path = HtmlButton.class, pos = 5, value = GC.class)
 	public static class MonitorExtended extends Monitor {
 	}
 
-	@SetText("Save")
-	@BindAction(FLUSH.class)
-	public static class FlushButton extends HtmlButton {
-	}
-
-	@SetText("Cancel")
-	@BindAction(CANCEL.class)
-	public static class CancelButton extends HtmlButton {
-	}
-
 	public static class LastUpdateLabel extends HtmlLabel {
-
 		@Override
 		public void init() {
 			bindText(context -> Bindings.createStringBinding(() -> {
@@ -64,31 +62,10 @@ public class Monitor extends GSDiv {
 		}
 	}
 
-	@SetText("Collect")
-	@BindAction(GC.class)
-	public static class CollectButton extends HtmlButton {
-	}
-
-	@SetText("Mount")
-	@BindAction(MOUNT.class)
-	public static class MountButton extends HtmlButton {
-	}
-
 	public static class CacheLevel extends HtmlLabel {
-
 		@Override
 		public void init() {
 			bindText(context -> Bindings.convert(context.getCacheLevelObservableValue()));
 		}
-	}
-
-	@SetText("Unmount")
-	@BindAction(UNMOUNT.class)
-	public static class UnmountButton extends HtmlButton {
-	}
-
-	@SetText("ShiftTS")
-	@BindAction(SHIFTTS.class)
-	public static class ShiftTSButton extends HtmlButton {
 	}
 }

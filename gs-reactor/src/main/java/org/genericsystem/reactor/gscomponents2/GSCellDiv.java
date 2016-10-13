@@ -2,9 +2,9 @@ package org.genericsystem.reactor.gscomponents2;
 
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 
-import org.genericsystem.reactor.annotations.Styles.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Styles.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Styles.Style;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 
