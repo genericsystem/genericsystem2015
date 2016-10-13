@@ -20,13 +20,14 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;
 import org.genericsystem.reactor.gscomponents2.GSEditor;
 import org.genericsystem.reactor.gscomponents2.GSEditor.HorizontalGSEditor;
+import org.genericsystem.reactor.gscomponents2.GSMonitor.GSMonitorExtended;
 import org.genericsystem.reactor.gscomponents2.GSTable;
 import org.genericsystem.reactor.gscomponents2.GSTable.HorizontalTable;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-@Children({ GSTable.class, HorizontalTable.class, GSEditor.class, HorizontalGSEditor.class, GSTable.class })
+@Children({ GSTable.class, HorizontalTable.class, GSEditor.class, HorizontalGSEditor.class, GSTable.class, GSMonitorExtended.class })
 @DirectSelect(path = GSTable.class, pos = 0, value = Car.class)
 @DirectSelect(path = HorizontalTable.class, value = Car.class)
 @SelectModel(path = GSEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
