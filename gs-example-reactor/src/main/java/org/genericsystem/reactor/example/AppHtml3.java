@@ -18,20 +18,25 @@ import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents2.GSEditor;
-import org.genericsystem.reactor.gscomponents2.GSEditor.HorizontalGSEditor;
-import org.genericsystem.reactor.gscomponents2.GSTable;
-import org.genericsystem.reactor.gscomponents2.GSTable.HorizontalTable;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstancesTable;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents3.Monitor.MonitorExtended;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-@ReactorDependencies({ GSTable.class, HorizontalTable.class, GSEditor.class, HorizontalGSEditor.class, GSTable.class })
-@DirectSelect(path = GSTable.class, pos = 0, value = Car.class)
-@DirectSelect(path = HorizontalTable.class, value = Car.class)
-@SelectModel(path = GSEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
-@DirectSelect(path = GSTable.class, pos = 2, value = Color.class)
-@Style(name = "justify-content", value = "center")
+@ReactorDependencies({ TitledInstancesTable.class, TitledHorizontalInstancesTable.class, TitledInstancesTable.class, TitledInstanceEditor.class, TitledHorizontalInstanceEditor.class, TitledInstanceStepEditor.class, TitledHorizontalInstanceStepEditor.class,
+		MonitorExtended.class })
+@DirectSelect(path = TitledInstancesTable.class, pos = 0, value = Car.class)
+@DirectSelect(path = TitledHorizontalInstancesTable.class, pos = 0, value = Car.class)
+@DirectSelect(path = TitledInstancesTable.class, pos = 2, value = Color.class)
+@SelectModel(path = TitledInstanceEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
+@Style(name = "flex-wrap", value = "wrap")
+@Style(name = "flex", value = "1 1 0%")
 public class AppHtml3 extends GSApp implements SelectionDefaults {
 
 	public static void main(String[] mainArgs) {
