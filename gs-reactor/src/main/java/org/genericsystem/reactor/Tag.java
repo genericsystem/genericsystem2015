@@ -391,13 +391,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return getTag() + " " + getClass().getName();
 	}
 
-	default void initComposite() {
-		processAnnotation(ReactorDependencies.class, annotation -> {
-			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
-				createTag(clazz);
-		});
-	}
-
 	default <T extends Tag> T find(Class<T> tagClass) {
 		T result = null;
 		for (Tag child : getObservableChildren()) {
@@ -423,13 +416,16 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			throw new IllegalStateException(e);
 		}
 		((GSTagImpl) result).setParent(this);
-		result.initComposite();
-		result.init();
 		result.processAnnotations();
+		result.init();
 		return result;
 	}
 
 	default <T extends Tag> void processAnnotations() {
+		processAnnotation(ReactorDependencies.class, annotation -> {
+			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
+				createTag(clazz);
+		});
 		processAnnotation(DirectSelect.class, annotation -> select(((DirectSelect) annotation).value()));
 		processAnnotation(Select.class, annotation -> {
 			try {
