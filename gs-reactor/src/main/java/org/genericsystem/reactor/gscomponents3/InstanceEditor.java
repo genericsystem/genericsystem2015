@@ -155,7 +155,7 @@ public class InstanceEditor extends Table implements SelectionDefaults {
 	public static class GSValueComponentsEditor extends GSValueComponents implements ComponentsDefaults {
 	}
 
-	@Style(path = GSValueComponentsEditor.class, name = "flex", value = "1 0 auto")
+	@Style(path = GSValueComponents.class, name = "flex", value = "1 0 auto")
 	@ReactorDependencies(value = { GSValueComponentsEditor.class, GSHolderAdder.class })
 	@ReactorDependencies(path = { GSValueComponentsEditor.class, Header.class }, value = { GSInputTextEditorWithConversion.class, GSCheckBoxEditor.class })
 	@ReactorDependencies(path = { GSHolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
