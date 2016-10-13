@@ -27,8 +27,9 @@ public class GSUserGuide extends GSDiv {
 						addStyle("-webkit-border-radius", "30px");
 						addStyle("border-radius", "30px");
 						addStyle("-moz-border-radius", "30px");
-						addStyle("max-width", "40%");
-
+						addStyle("overflow", "auto");
+						// addStyle("max-width", "40%");
+						addStyleClass("widthResponsive");
 						addStyleClass("modal-content");
 						new HtmlHyperLink(this) {
 							{
