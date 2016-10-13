@@ -19,7 +19,10 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 	public static class SELECTION_SELECTOR implements ObservableModelSelector {
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
-			return ((SelectionDefaults) tag).getSelectionProperty(context);
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				return ((SelectionDefaults) tag).getSelectionProperty(context);
+			else
+				throw new IllegalStateException("SELECTION_SELECTOR is applicable only to tags implementing SelectionDefaults.");
 		}
 	}
 
@@ -37,7 +40,7 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
 			return Bindings.createObjectBinding(() -> holders.isEmpty() || (context.getGeneric().getComponents().size() < 2 && !context.getGeneric().isPropertyConstraintEnabled())
-					|| (context.getGeneric().getComponents().size() >= 2 && !context.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? context : null, ObservableListExtractor.HOLDERS.apply(context.getGenerics()));
+					|| (context.getGeneric().getComponents().size() >= 2 && !context.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? context : null, holders);
 		}
 	}
 }
