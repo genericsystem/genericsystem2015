@@ -5,7 +5,7 @@ import org.genericsystem.reactor.htmltag.HtmlLabel;
 
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
@@ -19,7 +19,7 @@ import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
 import org.genericsystem.reactor.model.TextBinding;
 
-@ReactorDependencies({ HtmlButton.class, HtmlButton.class, HtmlLabel.class })
+@Children({ HtmlButton.class, HtmlButton.class, HtmlLabel.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
 @SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
@@ -30,7 +30,7 @@ import org.genericsystem.reactor.model.TextBinding;
 @Style(name = "padding", value = "10px")
 public class Monitor extends GSDiv {
 
-	@ReactorDependencies({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class/*, HtmlButton.class */ })
+	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class/*, HtmlButton.class */ })
 	@SetText(path = HtmlButton.class, pos = 2, value = "Mount")
 	@BindAction(path = HtmlButton.class, pos = 2, value = MOUNT.class)
 	@SetText(path = HtmlButton.class, pos = 3, value = "Unmount")

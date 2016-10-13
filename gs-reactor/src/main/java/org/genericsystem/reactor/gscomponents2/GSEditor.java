@@ -19,7 +19,7 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
@@ -95,7 +95,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-@ReactorDependencies({ EditorTitle.class, EditorContent.class })
+@Children({ EditorTitle.class, EditorContent.class })
 @Style(name = "flex", value = "1")
 @FlexDirectionStyle(path = EditorContent.class, value = FlexDirection.ROW)
 public class GSEditor extends GSDiv implements SelectionDefaults {
@@ -105,7 +105,7 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 	}
 
 	// Main title.
-	@ReactorDependencies(EditorTitleContent.class)
+	@Children(EditorTitleContent.class)
 	public static class EditorTitle extends GSTitleDiv {
 
 		@BindText
@@ -117,38 +117,38 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 	// Content.
 	@Style(name = "flex", value = "1")
 	@Style(name = "height", value = "100%")
-	@ReactorDependencies({ LinkTitles.class, InstanceEdition.class })
+	@Children({ LinkTitles.class, InstanceEdition.class })
 	public static class EditorContent extends GSDiv {
 		// Line/column with the names of the attributes and components of relations.
 		@ReverseFlexDirection
 		@Style(name = "flex", value = "0.3")
-		@ReactorDependencies({ InstanceType.class, TypeAttribute.class })
+		@Children({ InstanceType.class, TypeAttribute.class })
 		public static class LinkTitles extends GSDiv {
 
 			@Select(ObservableValueSelector.TYPE_SELECTOR.class)
-			@ReactorDependencies(GSLabelDisplayer.class)
+			@Children(GSLabelDisplayer.class)
 			public static class InstanceType extends GSTitleLineCellDiv {
 			}
 
 			@ForEach(ATTRIBUTES_OF_INSTANCES.class)
 			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
-			@ReactorDependencies({ AttributeName.class, RelationName.class })
+			@Children({ AttributeName.class, RelationName.class })
 			public static class TypeAttribute extends GSDiv {
 
 				@Select(STRICT_ATTRIBUTE_SELECTOR.class)
-				@ReactorDependencies(GSLabelDisplayer.class)
+				@Children(GSLabelDisplayer.class)
 				public static class AttributeName extends GSTitleLineCellDiv {
 				}
 
 				@Select(RELATION_SELECTOR.class)
 				@Style(name = "flex", value = "1")
 				@FlexDirectionStyle(FlexDirection.ROW)
-				@ReactorDependencies(ComponentName.class)
+				@Children(ComponentName.class)
 				public static class RelationName extends GSDiv {
 
 					@ForEach(OTHER_COMPONENTS_2.class)
-					@ReactorDependencies(GSLabelDisplayer.class)
+					@Children(GSLabelDisplayer.class)
 					public static class ComponentName extends GSTitleLineCellDiv {
 					}
 				}
@@ -158,11 +158,11 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 		// Edition itself.
 		@Style(name = "flex", value = "1")
 		@ReverseFlexDirection
-		@ReactorDependencies({ InstanceNameEditorDiv.class, InstanceAttributeEditor.class })
+		@Children({ InstanceNameEditorDiv.class, InstanceAttributeEditor.class })
 		public static class InstanceEdition extends GSDiv {
 
 			// Edition of the name of the instance.
-			@ReactorDependencies(InstanceNameEditor.class)
+			@Children(InstanceNameEditor.class)
 			public static class InstanceNameEditorDiv extends GSSubcellEditorDiv {
 
 				@Style(name = "flex", value = "1")
@@ -174,12 +174,12 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 
 			// Edition of the holders/links.
 			@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-			@ReactorDependencies({ MultiCheckbox.class, AttributeEditionColumn.class })
+			@Children({ MultiCheckbox.class, AttributeEditionColumn.class })
 			public static class InstanceAttributeEditor extends WrappedColumnDiv {
 
 				// Multiple checkboxes : for binary relations without the singular constraint.
 				@Select(ObservableValueSelector.MULTICHECKBOX_SELECTOR.class)
-				@ReactorDependencies(CheckboxLabel.class)
+				@Children(CheckboxLabel.class)
 				public static class MultiCheckbox extends WrappedColumnDiv {
 
 					@Style(name = "flex", value = "1 0 auto")
@@ -187,7 +187,7 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 					@Style(name = "align-items", value = "center")
 					@Style(name = "text-align", value = "center")
 					@BindText
-					@ReactorDependencies(Checkbox.class)
+					@Children(Checkbox.class)
 					public static class CheckboxLabel extends HtmlLabel {
 
 						@Override
@@ -234,16 +234,16 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 				@Style(name = "flex", value = "1")
 				@Style(name = "flex-wrap", value = "wrap")
 				@Select(ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR.class)
-				@ReactorDependencies({ SubcellEditor.class, SubcellAdder.class })
+				@Children({ SubcellEditor.class, SubcellAdder.class })
 				public static class AttributeEditionColumn extends GenericColumn {
 
 					@ForEach(ObservableListExtractor.HOLDERS.class)
-					@ReactorDependencies({ HolderEditor.class, BooleanHolderEditor.class, LinkEditor.class, RemovalLink.class })
+					@Children({ HolderEditor.class, BooleanHolderEditor.class, LinkEditor.class, RemovalLink.class })
 					public static class SubcellEditor extends SubcellEditorContainerDiv {
 
 						// Edition of non-boolean holders.
 						@Select(ObservableValueSelector.LABEL_DISPLAYER.class)
-						@ReactorDependencies(HolderEditorInput.class)
+						@Children(HolderEditorInput.class)
 						public static class HolderEditor extends GSSubcellEditorDiv {
 
 							@Style(name = "flex", value = "1")
@@ -256,10 +256,10 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 
 						// Edition of boolean holders.
 						@Select(ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
-						@ReactorDependencies(CheckboxContainerDiv.class)
+						@Children(CheckboxContainerDiv.class)
 						public static class BooleanHolderEditor extends GSSubcellEditorDiv {
 
-							@ReactorDependencies(GSCheckBoxEditor.class)
+							@Children(GSCheckBoxEditor.class)
 							public static class CheckboxContainerDiv extends CenteredFlexDiv {
 							}
 						}
@@ -268,7 +268,7 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 						@Style(name = "flex", value = "1")
 						@FlexDirectionStyle(FlexDirection.ROW)
 						@Select(ObservableValueSelector.RELATION_SELECTOR.class)
-						@ReactorDependencies(ComponentEditor.class)
+						@Children(ComponentEditor.class)
 						public static class LinkEditor extends GSDiv implements ComponentsDefaults {
 
 							@Override
@@ -277,7 +277,7 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 							}
 
 							@ForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
-							@ReactorDependencies({ DirectRelationComponentEditor.class, ReversedRelationDisplayer.class })
+							@Children({ DirectRelationComponentEditor.class, ReversedRelationDisplayer.class })
 							public static class ComponentEditor extends GSComponentEditorDiv {
 
 								// TODO: Finish decomposition of InstanceCompositeSelect.
@@ -323,12 +323,12 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 
 					// To add a new holder/link if it’s possible.
 					@SelectModel(ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR.class)
-					@ReactorDependencies({ HolderAdder.class, BooleanHolderAdder.class, LinkAdder.class })
+					@Children({ HolderAdder.class, BooleanHolderAdder.class, LinkAdder.class })
 					public static class SubcellAdder extends SubcellEditorContainerDiv {
 
 						// Addition of non-boolean holders.
 						@Select(ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
-						@ReactorDependencies({ HolderAdderInput.class, HolderAdditionLink.class })
+						@Children({ HolderAdderInput.class, HolderAdditionLink.class })
 						public static class HolderAdder extends GSSubcellEditorDiv {
 
 							@Style(name = "flex", value = "1")
@@ -356,10 +356,10 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 
 						// Addition of boolean holders.
 						@Select(ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
-						@ReactorDependencies({ CheckboxContainerAddDiv.class, BooleanHolderAdditionLink.class })
+						@Children({ CheckboxContainerAddDiv.class, BooleanHolderAdditionLink.class })
 						public static class BooleanHolderAdder extends GSSubcellEditorDiv {
 
-							@ReactorDependencies(BooleanHolderAdderInput.class)
+							@Children(BooleanHolderAdderInput.class)
 							public static class CheckboxContainerAddDiv extends CenteredFlexDiv {
 								public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
 
@@ -386,7 +386,7 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 						@Style(name = "flex", value = "1")
 						@FlexDirectionStyle(FlexDirection.ROW)
 						@Select(ObservableValueSelector.RELATION_SELECTOR.class)
-						@ReactorDependencies(ComponentAdder.class)
+						@Children(ComponentAdder.class)
 						public static class LinkAdder extends GSDiv implements ComponentsDefaults {
 
 							@Override
@@ -410,7 +410,7 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 							}
 
 							@ForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
-							@ReactorDependencies(ComponentAdderSelect.class)
+							@Children(ComponentAdderSelect.class)
 							public static class ComponentAdder extends GSComponentEditorDiv {
 
 								// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.

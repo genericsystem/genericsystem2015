@@ -5,7 +5,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 
 import org.genericsystem.reactor.annotations.BindAction;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -17,8 +17,8 @@ import org.genericsystem.reactor.model.ObservableModelSelector.SELECTION_SELECTO
 
 import javafx.beans.binding.Bindings;
 
-@ReactorDependencies(GSDiv.class)
-@ReactorDependencies(path = GSDiv.class, value = HtmlHyperLink.class)
+@Children(GSDiv.class)
+@Children(path = GSDiv.class, value = HtmlHyperLink.class)
 @StyleClass("modal")
 @StyleClass(path = GSDiv.class, value = "modal-content")
 @StyleClass(path = { GSDiv.class, HtmlHyperLink.class }, value = "close")
@@ -35,7 +35,7 @@ public class Modal extends GSDiv implements SelectionDefaults {
 		bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
 	}
 
-	@ReactorDependencies(path = GSDiv.class, value = { HtmlHyperLink.class, TitledInstanceEditor.class })
+	@Children(path = GSDiv.class, value = { HtmlHyperLink.class, TitledInstanceEditor.class })
 	@Style(path = { GSDiv.class, TitledInstanceEditor.class }, name = "min-height", value = "300px")
 	public static class ModalEditor extends Modal {
 

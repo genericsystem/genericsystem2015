@@ -10,7 +10,7 @@ import java.util.HashMap;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -39,9 +39,9 @@ import javafx.beans.value.ObservableValue;
 
 @Style(path = GSInputTextWithConversion.class, name = "flex", value = "1")
 @Style(path = GSInputTextWithConversion.class, name = "width", value = "100%")
-@ReactorDependencies({ GSInputTextWithConversion.class, Content.class, ButtonDiv.class })
-@ReactorDependencies(path = Content.class, value = { GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
-@ReactorDependencies(path = ButtonDiv.class, value = AddButton.class)
+@Children({ GSInputTextWithConversion.class, Content.class, ButtonDiv.class })
+@Children(path = Content.class, value = { GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
+@Children(path = ButtonDiv.class, value = AddButton.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
 @Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
@@ -55,7 +55,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 		createMultipleRelationProperty();
 	}
 
-	@ReactorDependencies(path = CheckboxLabel.class, value = CheckboxBuilder.class)
+	@Children(path = CheckboxLabel.class, value = CheckboxBuilder.class)
 	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_RELATION_COMPONENT.class)
 	public static class GSMultiCheckboxBuilder extends GSMultiCheckbox implements GSBuilderDefaults {
 		@Override
@@ -77,9 +77,9 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 	}
 
 	@Style(name = "flex", value = "1")
-	@ReactorDependencies({ Header.class, Content.class })
-	@ReactorDependencies(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
-	@ReactorDependencies(path = Content.class, value = ComponentAdderSelect.class)
+	@Children({ Header.class, Content.class })
+	@Children(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
+	@Children(path = Content.class, value = ComponentAdderSelect.class)
 	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	public static class GSHolderBuilder extends GSHolderAdder implements GSBuilderDefaults, ComponentsDefaults {

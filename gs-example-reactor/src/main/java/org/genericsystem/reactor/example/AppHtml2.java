@@ -12,7 +12,7 @@ import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
@@ -26,7 +26,7 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-@ReactorDependencies({ GSTable.class, HorizontalTable.class, GSEditor.class, HorizontalGSEditor.class, GSTable.class })
+@Children({ GSTable.class, HorizontalTable.class, GSEditor.class, HorizontalGSEditor.class, GSTable.class })
 @DirectSelect(path = GSTable.class, pos = 0, value = Car.class)
 @DirectSelect(path = HorizontalTable.class, value = Car.class)
 @SelectModel(path = GSEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)

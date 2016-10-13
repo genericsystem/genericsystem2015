@@ -10,7 +10,7 @@ import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -41,11 +41,11 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @Style(path = HeaderRow.class, name = "color", value = "white")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
-@ReactorDependencies({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
-@ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class, ButtonDiv.class })
-@ReactorDependencies(path = ContentRow.class, value = { GSValueComponents.class, GSHolders.class, ButtonDiv.class })
-@ReactorDependencies(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = InstanceNameLink.class)
-@ReactorDependencies(path = { ContentRow.class, ButtonDiv.class }, value = RemoveButton.class)
+@Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
+@Children(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class, ButtonDiv.class })
+@Children(path = ContentRow.class, value = { GSValueComponents.class, GSHolders.class, ButtonDiv.class })
+@Children(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = InstanceNameLink.class)
+@Children(path = { ContentRow.class, ButtonDiv.class }, value = RemoveButton.class)
 @ForEach(path = { HeaderRow.class, GSValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @ForEach(path = { ContentRow.class, GSHolders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
@@ -57,8 +57,8 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	}
 
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
-	@ReactorDependencies(value = GSValueComponents.class)
-	@ReactorDependencies(path = { GSValueComponents.class, Header.class }, value = { GSLabelDisplayer.class, GSCheckBoxDisplayer.class })
+	@Children(value = GSValueComponents.class)
+	@Children(path = { GSValueComponents.class, Header.class }, value = { GSLabelDisplayer.class, GSCheckBoxDisplayer.class })
 	@ForEach(path = GSValueComponents.class, value = ObservableListExtractor.HOLDERS.class)
 	@ForEach(path = { GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSLabelDisplayer.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
@@ -74,7 +74,7 @@ public class InstancesTable extends Table implements SelectionDefaults {
 	@Style(path = GSDiv.class, name = "margin-bottom", value = "1px")
 	@ForEach(path = Content.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
-	@ReactorDependencies({ Header.class, Content.class })
+	@Children({ Header.class, Content.class })
 	public static class GSValueComponents extends GSComposite {
 	}
 

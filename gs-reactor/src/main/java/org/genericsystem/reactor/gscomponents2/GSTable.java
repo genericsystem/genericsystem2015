@@ -10,7 +10,7 @@ import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
@@ -56,7 +56,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
 
-@ReactorDependencies({ TableTitle.class, TableContent.class })
+@Children({ TableTitle.class, TableContent.class })
 @Style(name = "flex", value = "1")
 public class GSTable extends GSDiv {
 
@@ -64,7 +64,7 @@ public class GSTable extends GSDiv {
 	public static class HorizontalTable extends GSTable {
 	}
 
-	@ReactorDependencies(TableTitleContent.class)
+	@Children(TableTitleContent.class)
 	public static class TableTitle extends GSTitleDiv {
 
 		@SetStringExtractor(StringExtractor.MANAGEMENT.class)
@@ -73,7 +73,7 @@ public class GSTable extends GSDiv {
 		}
 	}
 
-	@ReactorDependencies({ TitleRow.class, GSInstanceBuilder.class, Row.class })
+	@Children({ TitleRow.class, GSInstanceBuilder.class, Row.class })
 	public static class TableContent extends GSDiv implements SelectionDefaults {
 		@Override
 		public void init() {
@@ -83,31 +83,31 @@ public class GSTable extends GSDiv {
 
 	@ReverseFlexDirection
 	@Style(name = "flex", value = "1")
-	@ReactorDependencies({ TypeName.class, TypeAttribute.class, EmptyCell.class })
+	@Children({ TypeName.class, TypeAttribute.class, EmptyCell.class })
 	public static class TitleRow extends GSDiv {
-		@ReactorDependencies(GSLabelDisplayer.class)
+		@Children(GSLabelDisplayer.class)
 		public static class TypeName extends GSTitleLineCellDiv {
 		}
 
 		@ForEach(ATTRIBUTES_OF_TYPE.class)
 		@Style(name = "flex", value = "1")
 		@FlexDirectionStyle(FlexDirection.ROW)
-		@ReactorDependencies({ AttributeName.class, RelationName.class })
+		@Children({ AttributeName.class, RelationName.class })
 		public static class TypeAttribute extends GSDiv {
 
 			@Select(STRICT_ATTRIBUTE_SELECTOR.class)
-			@ReactorDependencies(GSLabelDisplayer.class)
+			@Children(GSLabelDisplayer.class)
 			public static class AttributeName extends GSTitleLineCellDiv {
 			}
 
 			@Select(RELATION_SELECTOR.class)
 			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
-			@ReactorDependencies(ComponentName.class)
+			@Children(ComponentName.class)
 			public static class RelationName extends GSDiv {
 
 				@ForEach(OTHER_COMPONENTS_1.class)
-				@ReactorDependencies(GSLabelDisplayer.class)
+				@Children(GSLabelDisplayer.class)
 				public static class ComponentName extends GSTitleLineCellDiv {
 				}
 			}
@@ -122,10 +122,10 @@ public class GSTable extends GSDiv {
 	@ForEach(SUBINSTANCES.class)
 	@ReverseFlexDirection
 	@Style(name = "flex", value = "1")
-	@ReactorDependencies({ RowName.class, Cell.class, RemoveButtonDiv.class })
+	@Children({ RowName.class, Cell.class, RemoveButtonDiv.class })
 	public static class Row extends GSDiv {
 
-		@ReactorDependencies(RowNameDisplayer.class)
+		@Children(RowNameDisplayer.class)
 		public static class RowName extends GSCellDiv {
 
 			@Style(name = "flex", value = "1")
@@ -140,34 +140,34 @@ public class GSTable extends GSDiv {
 		}
 
 		@ForEach(ATTRIBUTES_OF_INSTANCES.class)
-		@ReactorDependencies(SubCell.class)
+		@Children(SubCell.class)
 		public static class Cell extends GSCellDiv {
 
 			@ForEach(HOLDERS.class)
 			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
-			@ReactorDependencies({ ComponentSubCell.class, BooleanValueSubCell.class, ValueSubCell.class })
+			@Children({ ComponentSubCell.class, BooleanValueSubCell.class, ValueSubCell.class })
 			public static class SubCell extends GSDiv {
 
 				@ForEach(OTHER_COMPONENTS_2.class)
-				@ReactorDependencies(GSLabelDisplayer.class)
+				@Children(GSLabelDisplayer.class)
 				public static class ComponentSubCell extends GSSubcellDiv {
 				}
 
 				@Select(CHECK_BOX_DISPLAYER.class)
-				@ReactorDependencies(GSCheckBoxDisplayer.class)
+				@Children(GSCheckBoxDisplayer.class)
 				public static class BooleanValueSubCell extends GSSubcellDiv {
 				}
 
 				@Select(LABEL_DISPLAYER.class)
-				@ReactorDependencies(GSLabelDisplayer.class)
+				@Children(GSLabelDisplayer.class)
 				public static class ValueSubCell extends GSSubcellDiv {
 				}
 			}
 		}
 
 		// Button to delete the instance.
-		@ReactorDependencies(RemoveButton.class)
+		@Children(RemoveButton.class)
 		public static class RemoveButtonDiv extends InstancesTable.ButtonDiv {
 			@Style(name = "flex", value = "1")
 			@Style(name = "height", value = "100%")

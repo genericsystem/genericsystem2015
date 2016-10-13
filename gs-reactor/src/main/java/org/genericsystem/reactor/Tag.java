@@ -35,7 +35,7 @@ import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
@@ -424,8 +424,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		processAnnotation(ReactorDependencies.class, annotation -> {
-			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
+		processAnnotation(Children.class, annotation -> {
+			for (Class<? extends GSTagImpl> clazz : ((Children) annotation).value())
 				createTag(clazz);
 		});
 		processAnnotation(DirectSelect.class, annotation -> select(((DirectSelect) annotation).value()));

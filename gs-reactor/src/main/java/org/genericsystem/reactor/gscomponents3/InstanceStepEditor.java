@@ -7,7 +7,7 @@ import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
@@ -36,11 +36,11 @@ import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
 @Style(path = { GSComposite.class, GSValueComponents.class }, name = "color", value = "white")
 @Style(path = { GSComposite.class, StepNavigator.class }, name = "flex", value = "")
 @GenericValueBackgroundColor(path = { GSComposite.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")
-@ReactorDependencies({ HeaderRow.class, ContentRow.class })
-@ReactorDependencies(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponentsEditor.class, StepNavigator.class })
-@ReactorDependencies(path = ContentRow.class, value = { GSValueComponents.class, AttributeContent.class, StepNavigator.class })
-@ReactorDependencies(path = { ContentRow.class, Content.class }, value = { GSHoldersEditor.class, GSMultiCheckbox.class })
-@ReactorDependencies(path = { HeaderRow.class, GSValueComponentsEditor.class }, value = { Header.class, Content.class })
+@Children({ HeaderRow.class, ContentRow.class })
+@Children(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponentsEditor.class, StepNavigator.class })
+@Children(path = ContentRow.class, value = { GSValueComponents.class, AttributeContent.class, StepNavigator.class })
+@Children(path = { ContentRow.class, Content.class }, value = { GSHoldersEditor.class, GSMultiCheckbox.class })
+@Children(path = { HeaderRow.class, GSValueComponentsEditor.class }, value = { Header.class, Content.class })
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, AttributeContent.class }, value = ObservableListExtractor.NO_FOR_EACH.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
@@ -53,7 +53,7 @@ public class InstanceStepEditor extends Table implements SelectionDefaults, Step
 
 	}
 
-	@ReactorDependencies({ PrevLink.class, NextLink.class })
+	@Children({ PrevLink.class, NextLink.class })
 	@Style(name = "justify-content", value = "space-between")
 	@ReverseFlexDirection
 	public static class StepNavigator extends GSDiv {
