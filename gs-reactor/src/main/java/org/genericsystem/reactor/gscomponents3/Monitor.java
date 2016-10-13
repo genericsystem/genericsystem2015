@@ -24,7 +24,7 @@ import org.genericsystem.reactor.model.TextBinding;
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
 @SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
 @BindAction(path = HtmlButton.class, pos = 1, value = CANCEL.class)
-@BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.CACHE_LEVEL.class)
+@BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.LAST_UPDATE.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
@@ -39,7 +39,7 @@ public class Monitor extends GSDiv {
 	@BindAction(path = HtmlButton.class, pos = 4, value = SHIFTTS.class)
 	@SetText(path = HtmlButton.class, pos = 5, value = "Collect")
 	@BindAction(path = HtmlButton.class, pos = 5, value = GC.class)
-	@BindText(path = HtmlLabel.class, pos = 1, value = TextBinding.LAST_UPDATE.class)
+	@BindText(path = HtmlLabel.class, pos = 1, value = TextBinding.CACHE_LEVEL.class)
 	public static class MonitorExtended extends Monitor {
 	}
 }
