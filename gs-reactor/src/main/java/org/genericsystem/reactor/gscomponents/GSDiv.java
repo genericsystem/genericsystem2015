@@ -54,15 +54,21 @@ public class GSDiv extends HtmlDiv {
 	}
 
 	public void reverseDirection() {
-		Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
-		setDirection(parentDirection.getValue().reverse());
-		parentDirection.addListener((o, v, nv) -> setDirection(nv.reverse()));
+		if (GSDiv.class.isAssignableFrom(getParent().getClass())) {
+			Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
+			setDirection(parentDirection.getValue().reverse());
+			parentDirection.addListener((o, v, nv) -> setDirection(nv.reverse()));
+		} else
+			throw new IllegalStateException("The class of the parent must extend GSDiv when reverseDirection is used.");
 	}
 
 	public void keepDirection() {
-		Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
-		setDirection(parentDirection.getValue());
-		parentDirection.addListener((o, v, nv) -> setDirection(nv));
+		if (GSDiv.class.isAssignableFrom(getParent().getClass())) {
+			Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
+			setDirection(parentDirection.getValue());
+			parentDirection.addListener((o, v, nv) -> setDirection(nv));
+		} else
+			throw new IllegalStateException("The class of the parent must extend GSDiv when keepDirection is used.");
 	}
 
 	public static class GenericColumn extends GSDiv {

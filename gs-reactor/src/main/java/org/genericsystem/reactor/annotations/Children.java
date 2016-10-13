@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.reactor.annotations.ReactorDependencies.ReactorDependenciesMult;
+import org.genericsystem.reactor.annotations.Children.ChildrenMult;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 /**
@@ -15,8 +15,8 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-@Repeatable(ReactorDependenciesMult.class)
-public @interface ReactorDependencies {
+@Repeatable(ChildrenMult.class)
+public @interface Children {
 	Class<? extends GSTagImpl>[] path() default {};
 
 	Class<? extends GSTagImpl>[] value();
@@ -25,7 +25,7 @@ public @interface ReactorDependencies {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	public @interface ReactorDependenciesMult {
-		ReactorDependencies[] value();
+	public @interface ChildrenMult {
+		Children[] value();
 	}
 }

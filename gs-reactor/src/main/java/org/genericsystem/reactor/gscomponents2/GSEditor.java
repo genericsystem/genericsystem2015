@@ -17,13 +17,14 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.Select.SelectModel;
+import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
@@ -40,27 +41,50 @@ import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSSubcellEditorDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.SubcellEditorContainerDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.WrappedColumnDiv;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.BooleanHolderAdditionLink;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.CheckboxContainerAddDiv;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.BooleanHolderAdder.CheckboxContainerAddDiv.BooleanHolderAdderInput;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.HolderAdder;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.HolderAdder.HolderAdderInput;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.HolderAdder.HolderAdditionLink;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
-import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.BooleanHolderEditor.CheckboxContainerDiv.BooleanHolderEditorInput;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.BooleanHolderEditor;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.BooleanHolderEditor.CheckboxContainerDiv;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.HolderEditor;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.HolderEditor.HolderEditorInput;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor.ComponentEditor;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor.ComponentEditor.DirectRelationComponentEditor;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor.ComponentEditor.ReversedRelationDisplayer;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.RemovalLink;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.MultiCheckbox;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.MultiCheckbox.CheckboxLabel;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.MultiCheckbox.CheckboxLabel.Checkbox;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceNameEditorDiv.InstanceNameEditor;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.InstanceType;
-import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.InstanceType.TypeNameDisplayer;
-import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.AttributeName.AttributeNameDisplayer;
-import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.AttributeName;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName;
+import org.genericsystem.reactor.gscomponents2.GSEditor.EditorTitle;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;
+import org.genericsystem.reactor.model.ObservableModelSelector;
+import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
@@ -71,88 +95,61 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-@ReactorDependencies({ EditorTitleContent.class, InstanceType.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, InstanceNameEditor.class, Checkbox.class, ReversedRelationDisplayer.class,
-		DirectRelationComponentEditor.class, BooleanHolderEditorInput.class, HolderEditorInput.class, RemovalLink.class, BooleanHolderAdderInput.class, BooleanHolderAdditionLink.class, HolderAdderInput.class, HolderAdditionLink.class,
-		ComponentAdderSelect.class })
+@Children({ EditorTitle.class, EditorContent.class })
 @Style(name = "flex", value = "1")
-@FlexDirectionStyle(FlexDirection.ROW)
-public class GSEditor extends GSDiv {
+@FlexDirectionStyle(path = EditorContent.class, value = FlexDirection.ROW)
+public class GSEditor extends GSDiv implements SelectionDefaults {
 
-	public GSEditor() {
-		super();
-	}
-
-	public GSEditor(Tag parent) {
-		super(parent);
-	}
-
-	// No automatic enclosing class parent for this GSEditor extension
-	@FlexDirectionStyle(FlexDirection.COLUMN)
-	public static class HorizontalGSEditor extends GSEditor implements SelectionDefaults {
-
-		public HorizontalGSEditor(Tag parent) {
-			super(parent);
-		}
+	@FlexDirectionStyle(path = EditorContent.class, value = FlexDirection.COLUMN)
+	public static class HorizontalGSEditor extends GSEditor {
 	}
 
 	// Main title.
+	@Children(EditorTitleContent.class)
 	public static class EditorTitle extends GSTitleDiv {
 
+		@BindText
+		@SetStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
 		public static class EditorTitleContent extends HtmlH2 {
-
-			@Override
-			public void init() {
-				setStringExtractor(StringExtractor.TYPE_INSTANCE_EXTRACTOR);
-				bindText();
-			}
 		}
 	}
 
 	// Content.
-	@KeepFlexDirection
 	@Style(name = "flex", value = "1")
 	@Style(name = "height", value = "100%")
+	@Children({ LinkTitles.class, InstanceEdition.class })
 	public static class EditorContent extends GSDiv {
 		// Line/column with the names of the attributes and components of relations.
 		@ReverseFlexDirection
 		@Style(name = "flex", value = "0.3")
+		@Children({ InstanceType.class, TypeAttribute.class })
 		public static class LinkTitles extends GSDiv {
 
+			@Select(ObservableValueSelector.TYPE_SELECTOR.class)
+			@Children(GSLabelDisplayer.class)
 			public static class InstanceType extends GSTitleLineCellDiv {
-
-				@Override
-				public void init() {
-					select(gs -> gs[1]);
-				}
-
-				public static class TypeNameDisplayer extends GSLabelDisplayer {
-
-				}
 			}
 
 			@ForEach(ATTRIBUTES_OF_INSTANCES.class)
 			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
+			@Children({ AttributeName.class, RelationName.class })
 			public static class TypeAttribute extends GSDiv {
 
 				@Select(STRICT_ATTRIBUTE_SELECTOR.class)
+				@Children(GSLabelDisplayer.class)
 				public static class AttributeName extends GSTitleLineCellDiv {
-
-					public static class AttributeNameDisplayer extends GSLabelDisplayer {
-
-					}
 				}
 
 				@Select(RELATION_SELECTOR.class)
 				@Style(name = "flex", value = "1")
 				@FlexDirectionStyle(FlexDirection.ROW)
+				@Children(ComponentName.class)
 				public static class RelationName extends GSDiv {
 
 					@ForEach(OTHER_COMPONENTS_2.class)
+					@Children(GSLabelDisplayer.class)
 					public static class ComponentName extends GSTitleLineCellDiv {
-
-						public static class ComponentNameDisplayer extends GSLabelDisplayer {
-						}
 					}
 				}
 			}
@@ -161,9 +158,11 @@ public class GSEditor extends GSDiv {
 		// Edition itself.
 		@Style(name = "flex", value = "1")
 		@ReverseFlexDirection
+		@Children({ InstanceNameEditorDiv.class, InstanceAttributeEditor.class })
 		public static class InstanceEdition extends GSDiv {
 
 			// Edition of the name of the instance.
+			@Children(InstanceNameEditor.class)
 			public static class InstanceNameEditorDiv extends GSSubcellEditorDiv {
 
 				@Style(name = "flex", value = "1")
@@ -174,30 +173,25 @@ public class GSEditor extends GSDiv {
 			}
 
 			// Edition of the holders/links.
+			@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+			@Children({ MultiCheckbox.class, AttributeEditionColumn.class })
 			public static class InstanceAttributeEditor extends WrappedColumnDiv {
 
-				@Override
-				public void init() {
-					forEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES);
-				}
-
 				// Multiple checkboxes : for binary relations without the singular constraint.
+				@Select(ObservableValueSelector.MULTICHECKBOX_SELECTOR.class)
+				@Children(CheckboxLabel.class)
 				public static class MultiCheckbox extends WrappedColumnDiv {
-
-					@Override
-					public void init() {
-						select(gs -> gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
-					}
 
 					@Style(name = "flex", value = "1 0 auto")
 					@Style(name = "justify-content", value = "center")
 					@Style(name = "align-items", value = "center")
 					@Style(name = "text-align", value = "center")
+					@BindText
+					@Children(Checkbox.class)
 					public static class CheckboxLabel extends HtmlLabel {
 
 						@Override
 						public void init() {
-							bindText();
 							forEach(gs -> ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])).stream().toArray(Generic[]::new)));
 							addPrefixBinding(model -> {
 								if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
@@ -239,27 +233,18 @@ public class GSEditor extends GSDiv {
 				// Edition of other attributes.
 				@Style(name = "flex", value = "1")
 				@Style(name = "flex-wrap", value = "wrap")
+				@Select(ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR.class)
+				@Children({ SubcellEditor.class, SubcellAdder.class })
 				public static class AttributeEditionColumn extends GenericColumn {
 
-					@Override
-					public void init() {
-						select(gs -> gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null);
-					}
-
+					@ForEach(ObservableListExtractor.HOLDERS.class)
+					@Children({ HolderEditor.class, BooleanHolderEditor.class, LinkEditor.class, RemovalLink.class })
 					public static class SubcellEditor extends SubcellEditorContainerDiv {
 
-						@Override
-						public void init() {
-							forEach(ObservableListExtractor.HOLDERS);
-						}
-
 						// Edition of non-boolean holders.
+						@Select(ObservableValueSelector.LABEL_DISPLAYER.class)
+						@Children(HolderEditorInput.class)
 						public static class HolderEditor extends GSSubcellEditorDiv {
-
-							@Override
-							public void init() {
-								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-							}
 
 							@Style(name = "flex", value = "1")
 							@Style(name = "height", value = "100%")
@@ -270,47 +255,40 @@ public class GSEditor extends GSDiv {
 						}
 
 						// Edition of boolean holders.
+						@Select(ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
+						@Children(CheckboxContainerDiv.class)
 						public static class BooleanHolderEditor extends GSSubcellEditorDiv {
 
-							@Override
-							public void init() {
-								select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-							}
-
+							@Children(GSCheckBoxEditor.class)
 							public static class CheckboxContainerDiv extends CenteredFlexDiv {
-								public static class BooleanHolderEditorInput extends GSCheckBoxEditor {
-								}
 							}
-
 						}
 
 						// Edition of links.
 						@Style(name = "flex", value = "1")
 						@FlexDirectionStyle(FlexDirection.ROW)
+						@Select(ObservableValueSelector.RELATION_SELECTOR.class)
+						@Children(ComponentEditor.class)
 						public static class LinkEditor extends GSDiv implements ComponentsDefaults {
 
 							@Override
 							public void init() {
-								select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
 								createComponentsListProperty();
 							}
 
+							@ForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
+							@Children({ DirectRelationComponentEditor.class, ReversedRelationDisplayer.class })
 							public static class ComponentEditor extends GSComponentEditorDiv {
-
-								@Override
-								public void init() {
-									forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
-								}
 
 								// TODO: Finish decomposition of InstanceCompositeSelect.
 								@Style(name = "flex", value = "1")
 								@Style(name = "height", value = "100%")
 								@Style(name = "width", value = "100%")
+								@Select(ObservableValueSelector.DIRECT_RELATION_SELECTOR.class)
 								public static class DirectRelationComponentEditor extends InstanceCompositeSelect {
 
 									@Override
 									public void init() {
-										select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
 										addPostfixBinding(model -> {
 											Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 											if (selectedComponents != null)
@@ -319,16 +297,10 @@ public class GSEditor extends GSDiv {
 									}
 								}
 
+								@Select(ObservableValueSelector.REVERSED_RELATION_SELECTOR.class)
 								public static class ReversedRelationDisplayer extends GSLabelDisplayer {
-
-									@Override
-									public void init() {
-										select(gs -> !gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) && !gs[0].getLinks(gs[2]).isEmpty() ? gs[0] : null);
-									}
 								}
-
 							}
-
 						}
 
 						// Hyperlink to remove a holder/link. Displayed only if there is no required constraint on the given attribute/relation,
@@ -350,27 +322,14 @@ public class GSEditor extends GSDiv {
 					}
 
 					// To add a new holder/link if it’s possible.
+					@SelectModel(ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR.class)
+					@Children({ HolderAdder.class, BooleanHolderAdder.class, LinkAdder.class })
 					public static class SubcellAdder extends SubcellEditorContainerDiv {
 
-						@Override
-						public void init() {
-							select__(model -> {
-								ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-								return Bindings
-										.createObjectBinding(
-												() -> holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
-														|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null,
-												ObservableListExtractor.HOLDERS.apply(model.getGenerics()));
-							});
-						}
-
 						// Addition of non-boolean holders.
+						@Select(ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
+						@Children({ HolderAdderInput.class, HolderAdditionLink.class })
 						public static class HolderAdder extends GSSubcellEditorDiv {
-
-							@Override
-							public void init() {
-								select(gs -> gs[0].getComponents().size() < 2 && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-							}
 
 							@Style(name = "flex", value = "1")
 							@Style(name = "height", value = "100%")
@@ -396,13 +355,11 @@ public class GSEditor extends GSDiv {
 						}
 
 						// Addition of boolean holders.
+						@Select(ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+						@Children({ CheckboxContainerAddDiv.class, BooleanHolderAdditionLink.class })
 						public static class BooleanHolderAdder extends GSSubcellEditorDiv {
 
-							@Override
-							public void init() {
-								select(gs -> gs[0].getComponents().size() < 2 && Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null);
-							}
-
+							@Children(BooleanHolderAdderInput.class)
 							public static class CheckboxContainerAddDiv extends CenteredFlexDiv {
 								public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
 
@@ -428,11 +385,12 @@ public class GSEditor extends GSDiv {
 						// Addition of links.
 						@Style(name = "flex", value = "1")
 						@FlexDirectionStyle(FlexDirection.ROW)
+						@Select(ObservableValueSelector.RELATION_SELECTOR.class)
+						@Children(ComponentAdder.class)
 						public static class LinkAdder extends GSDiv implements ComponentsDefaults {
 
 							@Override
 							public void init() {
-								select(gs -> gs[0].getComponents().size() >= 2 ? gs[0] : null);
 								createComponentsListProperty();
 								addPostfixBinding(model -> {
 									Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
@@ -451,22 +409,19 @@ public class GSEditor extends GSDiv {
 								});
 							}
 
+							@ForEach(ObservableListExtractor.OTHER_COMPONENTS_2.class)
+							@Children(ComponentAdderSelect.class)
 							public static class ComponentAdder extends GSComponentEditorDiv {
-
-								@Override
-								public void init() {
-									forEach((ObservableListExtractor) gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2])));
-								}
 
 								// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.
 								@Style(name = "flex", value = "1")
 								@Style(name = "height", value = "100%")
 								@Style(name = "width", value = "100%")
+								@Select(ObservableValueSelector.DIRECT_RELATION_SELECTOR.class)
 								public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry {
 
 									@Override
 									public void init() {
-										select(gs -> gs[1].isReferentialIntegrityEnabled(gs[1].getComponents().indexOf(gs[0])) ? gs[0] : null);
 										addPostfixBinding(model -> {
 											Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 											if (selectedComponents != null)

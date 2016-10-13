@@ -32,9 +32,10 @@ import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
@@ -51,6 +52,7 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.model.TextBinding.GENERIC_STRING;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -391,13 +393,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return getTag() + " " + getClass().getName();
 	}
 
-	default void initComposite() {
-		processAnnotation(ReactorDependencies.class, annotation -> {
-			for (Class<? extends GSTagImpl> clazz : ((ReactorDependencies) annotation).value())
-				createTag(clazz);
-		});
-	}
-
 	default <T extends Tag> T find(Class<T> tagClass) {
 		T result = null;
 		for (Tag child : getObservableChildren()) {
@@ -423,13 +418,16 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			throw new IllegalStateException(e);
 		}
 		((GSTagImpl) result).setParent(this);
-		result.initComposite();
-		result.init();
 		result.processAnnotations();
+		result.init();
 		return result;
 	}
 
 	default <T extends Tag> void processAnnotations() {
+		processAnnotation(Children.class, annotation -> {
+			for (Class<? extends GSTagImpl> clazz : ((Children) annotation).value())
+				createTag(clazz);
+		});
 		processAnnotation(DirectSelect.class, annotation -> select(((DirectSelect) annotation).value()));
 		processAnnotation(Select.class, annotation -> {
 			try {
@@ -503,6 +501,18 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
 		});
 		processAnnotation(SetText.class, annotation -> setText(((SetText) annotation).value()));
+		processAnnotation(BindText.class, annotation -> {
+			if (GENERIC_STRING.class.equals(((BindText) annotation).value()))
+				bindText();
+			else
+				bindText(context -> {
+					try {
+						return ((BindText) annotation).value().newInstance().apply(context, this);
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+				});
+		});
 		processAnnotation(BindAction.class, annotation -> {
 			if (ActionDefaults.class.isAssignableFrom(getClass()))
 				((ActionDefaults) this).bindAction(context -> {

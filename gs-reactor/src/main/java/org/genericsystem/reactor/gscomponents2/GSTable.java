@@ -1,6 +1,5 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
@@ -8,31 +7,43 @@ import org.genericsystem.reactor.htmltag.HtmlH2;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
-import org.genericsystem.reactor.gscomponents3.InstancesTable;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.SetStringExtractor;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSTitleLineCellDiv;
-import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.BooleanValueSubCell.BooleanDisplayer;
-import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.ComponentSubCell.ComponentLabel;
-import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.ValueSubCell.ValueDisplayer;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.BooleanValueSubCell;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.ComponentSubCell;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell.ValueSubCell;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.RemoveButtonDiv;
 import org.genericsystem.reactor.gscomponents2.GSTable.Row.RemoveButtonDiv.RemoveButton;
+import org.genericsystem.reactor.gscomponents2.GSTable.Row.RowName;
 import org.genericsystem.reactor.gscomponents2.GSTable.Row.RowName.RowNameDisplayer;
+import org.genericsystem.reactor.gscomponents2.GSTable.TableContent;
+import org.genericsystem.reactor.gscomponents2.GSTable.TableTitle;
 import org.genericsystem.reactor.gscomponents2.GSTable.TableTitle.TableTitleContent;
 import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.EmptyCell;
-import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.AttributeName.AttributeNameDisplayer;
-import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName.ComponentNameDisplayer;
-import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeName.TypeNameDisplayer;
+import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute;
+import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.AttributeName;
+import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.RelationName;
+import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName;
+import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeName;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
+import org.genericsystem.reactor.gscomponents3.InstancesTable;
+import org.genericsystem.reactor.model.ContextAction.REMOVE;
+import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_TYPE;
 import org.genericsystem.reactor.model.ObservableListExtractor.HOLDERS;
@@ -45,85 +56,65 @@ import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.StringExtractor;
 
-@ReactorDependencies({ TableTitleContent.class, TypeNameDisplayer.class, AttributeNameDisplayer.class, ComponentNameDisplayer.class, GSInstanceBuilder.class, RowNameDisplayer.class, ComponentLabel.class, EmptyCell.class, BooleanDisplayer.class,
-		ValueDisplayer.class, RemoveButton.class })
+@Children({ TableTitle.class, TableContent.class })
 @Style(name = "flex", value = "1")
-public class GSTable extends GSDiv implements SelectionDefaults, Tag {
+public class GSTable extends GSDiv {
 
-	public GSTable() {
-		super();
-	}
-
-	public GSTable(Tag parent) {
-		super(parent);
-	}
-
-	// No automatic enclosing class parent for this GSTable extention
-	@FlexDirectionStyle(FlexDirection.ROW)
+	@FlexDirectionStyle(path = TableContent.class, value = FlexDirection.ROW)
 	public static class HorizontalTable extends GSTable {
+	}
 
-		public HorizontalTable(Tag parent) {
-			super(parent);
+	@Children(TableTitleContent.class)
+	public static class TableTitle extends GSTitleDiv {
+
+		@SetStringExtractor(StringExtractor.MANAGEMENT.class)
+		@BindText
+		public static class TableTitleContent extends HtmlH2 {
 		}
 	}
 
-	@Override
-	public void init() {
-		bindSelection(find(Row.class));
-	}
-
-	public static class TableTitle extends GSTitleDiv {
-
-		public static class TableTitleContent extends HtmlH2 {
-			@Override
-			public void init() {
-				setStringExtractor(StringExtractor.MANAGEMENT);
-				bindText();
-			}
+	@Children({ TitleRow.class, GSInstanceBuilder.class, Row.class })
+	public static class TableContent extends GSDiv implements SelectionDefaults {
+		@Override
+		public void init() {
+			bindSelection(find(Row.class));
 		}
 	}
 
 	@ReverseFlexDirection
 	@Style(name = "flex", value = "1")
+	@Children({ TypeName.class, TypeAttribute.class, EmptyCell.class })
 	public static class TitleRow extends GSDiv {
+		@Children(GSLabelDisplayer.class)
 		public static class TypeName extends GSTitleLineCellDiv {
-			public static class TypeNameDisplayer extends GSLabelDisplayer {
-			}
 		}
 
 		@ForEach(ATTRIBUTES_OF_TYPE.class)
 		@Style(name = "flex", value = "1")
 		@FlexDirectionStyle(FlexDirection.ROW)
+		@Children({ AttributeName.class, RelationName.class })
 		public static class TypeAttribute extends GSDiv {
 
 			@Select(STRICT_ATTRIBUTE_SELECTOR.class)
+			@Children(GSLabelDisplayer.class)
 			public static class AttributeName extends GSTitleLineCellDiv {
-
-				public static class AttributeNameDisplayer extends GSLabelDisplayer {
-
-				}
 			}
 
 			@Select(RELATION_SELECTOR.class)
 			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
+			@Children(ComponentName.class)
 			public static class RelationName extends GSDiv {
 
 				@ForEach(OTHER_COMPONENTS_1.class)
+				@Children(GSLabelDisplayer.class)
 				public static class ComponentName extends GSTitleLineCellDiv {
-
-					public static class ComponentNameDisplayer extends GSLabelDisplayer {
-					}
-				}
-
-				@ForEach(OTHER_COMPONENTS_2.class)
-				public static class InstanceComponentName extends ComponentName {
-
 				}
 			}
 		}
 
 		// EmptyCell corresponding to the “Remove” or “Add” button of other lines.
+		@Style(name = "flex", value = "1")
 		public static class EmptyCell extends InstancesTable.ButtonDiv {
 		}
 	}
@@ -131,70 +122,59 @@ public class GSTable extends GSDiv implements SelectionDefaults, Tag {
 	@ForEach(SUBINSTANCES.class)
 	@ReverseFlexDirection
 	@Style(name = "flex", value = "1")
+	@Children({ RowName.class, Cell.class, RemoveButtonDiv.class })
 	public static class Row extends GSDiv {
 
+		@Children(RowNameDisplayer.class)
 		public static class RowName extends GSCellDiv {
 
 			@Style(name = "flex", value = "1")
 			@Style(name = "color", value = "white")
 			@Style(name = "margin-right", value = "1px")
 			@Style(name = "margin-bottom", value = "1px")
+			@GenericValueBackgroundColor("#3393ff")
+			@BindText
+			@BindAction(SET_SELECTION.class)
 			public static class RowNameDisplayer extends HtmlHyperLink {
-
-				@Override
-				public void init() {
-					bindText();
-					bindAction(model -> getSelectionProperty(model).setValue(model));
-					addPrefixBinding(modelContext -> addStyle(modelContext, "background-color",
-							"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) this).getGenericStringProperty(modelContext).getValue() : "#3393FF"));
-				}
 			}
 		}
 
 		@ForEach(ATTRIBUTES_OF_INSTANCES.class)
+		@Children(SubCell.class)
 		public static class Cell extends GSCellDiv {
 
 			@ForEach(HOLDERS.class)
 			@Style(name = "flex", value = "1")
 			@FlexDirectionStyle(FlexDirection.ROW)
+			@Children({ ComponentSubCell.class, BooleanValueSubCell.class, ValueSubCell.class })
 			public static class SubCell extends GSDiv {
 
 				@ForEach(OTHER_COMPONENTS_2.class)
+				@Children(GSLabelDisplayer.class)
 				public static class ComponentSubCell extends GSSubcellDiv {
-
-					public static class ComponentLabel extends GSLabelDisplayer {
-					}
 				}
 
 				@Select(CHECK_BOX_DISPLAYER.class)
+				@Children(GSCheckBoxDisplayer.class)
 				public static class BooleanValueSubCell extends GSSubcellDiv {
-
-					public static class BooleanDisplayer extends GSCheckBoxDisplayer {
-					}
 				}
 
 				@Select(LABEL_DISPLAYER.class)
+				@Children(GSLabelDisplayer.class)
 				public static class ValueSubCell extends GSSubcellDiv {
-
-					public static class ValueDisplayer extends GSLabelDisplayer {
-					}
 				}
-
 			}
 		}
 
 		// Button to delete the instance.
+		@Children(RemoveButton.class)
 		public static class RemoveButtonDiv extends InstancesTable.ButtonDiv {
 			@Style(name = "flex", value = "1")
 			@Style(name = "height", value = "100%")
 			@Style(name = "width", value = "100%")
+			@SetText("Remove")
+			@BindAction(REMOVE.class)
 			public static class RemoveButton extends HtmlButton {
-
-				@Override
-				public void init() {
-					setText("Remove");
-					bindAction(Context::remove);
-				}
 			}
 		}
 	}

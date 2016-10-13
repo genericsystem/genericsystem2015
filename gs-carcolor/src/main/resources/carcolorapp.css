@@ -134,3 +134,13 @@ border-radius: 30px;
 	height: 40px;
 	width: 100px;
 }
+@media only screen and (max-device-width:2000px){
+	.widthResponsive{
+		max-width:40%;
+	}
+}
+@media only screen and (max-device-width:480px){
+	.widthResponsive{
+		max-width:80%;
+	}
+}

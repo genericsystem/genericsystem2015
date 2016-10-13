@@ -28,7 +28,7 @@ import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.annotations.ReactorDependencies;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.todomvc.TodoApp2.MyHtmlDiv;
@@ -76,7 +76,7 @@ import javafx.collections.transformation.FilteredList;
  *
  */
 @DependsOnModel({ Todos.class, Completed.class })
-@ReactorDependencies({ MyHtmlDiv.class })
+@Children({ MyHtmlDiv.class })
 // @ReactorDependencies(path = { MyHtmlDiv.class }, value = { MyHeader.class })
 // @ReactorDependencies(path = { MyHeader.class }, value = { MyHtmlH1.class, MyHtmlInputText.class })
 public class TodoApp2 extends GSApp {
@@ -148,15 +148,15 @@ public class TodoApp2 extends GSApp {
 		createNewInitializedProperty(COMPLETED_TODOS, model -> getTodos(model).filtered(COMPLETE));
 	}
 
-	@ReactorDependencies({ MyDiv.class, MyHtmlFooter2.class })
+	@Children({ MyDiv.class, MyHtmlFooter2.class })
 	public static class MyHtmlDiv extends HtmlDiv {
 
 		@StyleClass("todoapp")
-		@ReactorDependencies({ MyHeader.class, MyDiv2.class, MyHtmlFooter1.class })
+		@Children({ MyHeader.class, MyDiv2.class, MyHtmlFooter1.class })
 		public static class MyDiv extends GSDiv {
 
 			@StyleClass("header")
-			@ReactorDependencies({ MyHtmlH1.class, MyHtmlInputText.class })
+			@Children({ MyHtmlH1.class, MyHtmlInputText.class })
 			public static class MyHeader extends HtmlHeader {
 
 				public static class MyHtmlH1 extends HtmlH1 {
@@ -184,14 +184,14 @@ public class TodoApp2 extends GSApp {
 			}
 
 			@StyleClass("main")
-			@ReactorDependencies(MyHtmlUl.class)
+			@Children(MyHtmlUl.class)
 			public static class MyDiv2 extends GSDiv {
 
 				@StyleClass("todo-list")
-				@ReactorDependencies(MyHtmlLi.class)
+				@Children(MyHtmlLi.class)
 				public static class MyHtmlUl extends HtmlUl {
 
-					@ReactorDependencies(MyHtmlDiv2.class)
+					@Children(MyHtmlDiv2.class)
 					public static class MyHtmlLi extends HtmlLi {
 
 						@Override
@@ -209,7 +209,7 @@ public class TodoApp2 extends GSApp {
 						}
 
 						@StyleClass("view")
-						@ReactorDependencies({ MyHtmlCheckBox.class, MyHtmlLabel.class, MyHtmlButton2.class })
+						@Children({ MyHtmlCheckBox.class, MyHtmlLabel.class, MyHtmlButton2.class })
 						public static class MyHtmlDiv2 extends HtmlDiv {
 
 							@StyleClass("toggle")
@@ -260,7 +260,7 @@ public class TodoApp2 extends GSApp {
 			}
 
 			@StyleClass("footer")
-			@ReactorDependencies(MyHtmlDiv3.class)
+			@Children(MyHtmlDiv3.class)
 			public static class MyHtmlFooter1 extends HtmlFooter {
 
 				@Override
@@ -272,11 +272,11 @@ public class TodoApp2 extends GSApp {
 					return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
 				}
 
-				@ReactorDependencies({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
+				@Children({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
 				public static class MyHtmlDiv3 extends HtmlDiv {
 
 					@StyleClass("todo-count")
-					@ReactorDependencies(MyHtmlStrong.class)
+					@Children(MyHtmlStrong.class)
 					public static class MyHtmlSpan extends HtmlSpan {
 
 						public static class MyHtmlStrong extends HtmlStrong {
@@ -296,10 +296,10 @@ public class TodoApp2 extends GSApp {
 					}
 
 					@StyleClass("filters")
-					@ReactorDependencies({ MyHtmlLi2.class, MyHtmlLi3.class, MyHtmlLi4.class })
+					@Children({ MyHtmlLi2.class, MyHtmlLi3.class, MyHtmlLi4.class })
 					public static class MyHtmlUl2 extends HtmlUl {
 
-						@ReactorDependencies(MyHtmlHyperLink.class)
+						@Children(MyHtmlHyperLink.class)
 						public static class MyHtmlLi2 extends HtmlLi {
 
 							public static class MyHtmlHyperLink extends HtmlHyperLink {
@@ -317,7 +317,7 @@ public class TodoApp2 extends GSApp {
 							}
 						}
 
-						@ReactorDependencies(MyHtmlHyperLink2.class)
+						@Children(MyHtmlHyperLink2.class)
 						public static class MyHtmlLi3 extends HtmlLi {
 
 							public static class MyHtmlHyperLink2 extends HtmlHyperLink {
@@ -335,7 +335,7 @@ public class TodoApp2 extends GSApp {
 							}
 						}
 
-						@ReactorDependencies(MyHtmlHyperLink3.class)
+						@Children(MyHtmlHyperLink3.class)
 						public static class MyHtmlLi4 extends HtmlLi {
 
 							public static class MyHtmlHyperLink3 extends HtmlHyperLink {
@@ -373,11 +373,11 @@ public class TodoApp2 extends GSApp {
 			}
 		}
 
-		@ReactorDependencies(MyHtmlDiv4.class)
+		@Children(MyHtmlDiv4.class)
 		public static class MyHtmlFooter2 extends HtmlFooter {
 
 			@StyleClass("save-cancel")
-			@ReactorDependencies({ MyHtmlButton3.class, MyHtmlButton4.class })
+			@Children({ MyHtmlButton3.class, MyHtmlButton4.class })
 			public static class MyHtmlDiv4 extends HtmlFooter {
 
 				@StyleClass("save")
