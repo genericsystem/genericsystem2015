@@ -16,16 +16,15 @@ import org.genericsystem.reactor.gscomponents3.Monitor;
 import org.genericsystem.reactor.gscomponents3.Responsive;
 
 import org.genericsystem.carcolor.CarColorApp.CarColorScript;
-import org.genericsystem.carcolor.CarColorApp2.PageContent;
 import org.genericsystem.carcolor.CarColorApp2.PageHeader;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.reactor.annotations.Attribute;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -35,7 +34,10 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
 @Style(name = "background-color", value = "#00afeb")
-@Children({ ModalEditor.class, PageHeader.class, PageContent.class, Monitor.class })
+@Children({ ModalEditor.class, PageHeader.class, Responsive.class, Monitor.class })
+@Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
+@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, pos = { 0, 0 }, value = Car.class)
+@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, pos = { 0, 1 }, value = Color.class)
 public class CarColorApp2 extends GSApp implements SelectionDefaults {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp2.class, "/cars");
@@ -51,20 +53,6 @@ public class CarColorApp2 extends GSApp implements SelectionDefaults {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Children({ Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
 	public static class PageHeader extends GSDiv {
-	}
-
-	@Children({ CarInstancesTable.class, ColorInstancesTable.class })
-	public static class PageContent extends Responsive {
-	}
-
-	@DirectSelect(Car.class)
-	public static class CarInstancesTable extends TitledInstancesTable {
-
-	}
-
-	@DirectSelect(Color.class)
-	public static class ColorInstancesTable extends TitledInstancesTable {
-
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
