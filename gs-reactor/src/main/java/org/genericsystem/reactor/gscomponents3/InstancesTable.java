@@ -17,6 +17,7 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
+import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -24,18 +25,21 @@ import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.ContentRow;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.InstanceNameLink;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.RemoveButton;
-import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
-import org.genericsystem.reactor.gscomponents3.Table.HeaderRow;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
-@BindSelection(ContentRow.class)
+@Style(name = "flex", value = "1 1 0%")
+@Style(name = "overflow", value = "hidden")
+@ReverseFlexDirection(path = GSComposite.class)
+@BindSelection(value = GSComposite.class, valuePos = 2)
 @GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")
 @GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
 @Style(path = HeaderRow.class, name = "color", value = "white")
@@ -50,7 +54,13 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @ForEach(path = { ContentRow.class, GSHolders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-public class InstancesTable extends Table implements SelectionDefaults {
+public class InstancesTable extends GSDiv implements SelectionDefaults {
+
+	public static class HeaderRow extends GSComposite {
+	}
+
+	public static class ContentRow extends GSComposite {
+	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)
 	public static class HorizontalInstancesTable extends InstancesTable {
