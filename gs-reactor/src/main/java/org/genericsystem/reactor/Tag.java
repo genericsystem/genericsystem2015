@@ -394,20 +394,21 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> T find(Class<T> tagClass) {
-		T result = null;
+		return find(tagClass, 0);
+	}
+
+	default <T extends Tag> T find(Class<T> tagClass, int pos) {
+		int posFound = 0;
 		for (Tag child : getObservableChildren()) {
 			if (tagClass.isAssignableFrom(child.getClass())) {
-				if (result == null) {
-					result = (T) child;
-					if (!tagClass.equals(child.getClass()))
-						System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + child.getClass().getSimpleName());
-					else
-						break;
-				} else
-					System.out.println("Warning : Found several results for class : " + tagClass.getSimpleName() + " on : " + getClass().getSimpleName() + " exact paths for them : " + tagClass + " " + getClass());
+				if (!tagClass.equals(child.getClass()))
+					System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + child.getClass().getSimpleName());
+				if (posFound == pos)
+					return (T) child;
+				posFound++;
 			}
 		}
-		return result;
+		throw new IllegalStateException("No tag corresponding to class " + tagClass.getSimpleName() + " found, position " + pos + ".");
 	}
 
 	default <T extends Tag> T createTag(Class<T> tagClass) {
@@ -456,15 +457,16 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		});
 
 		processAnnotation(Stepper.class, annotation -> {
-			if (StepperDefaults.class.isAssignableFrom(getClass()))
-				((StepperDefaults) this).stepper(find(((Stepper) annotation).switchClass()), find(((Stepper) annotation).headerClass()));
-			else
+			if (StepperDefaults.class.isAssignableFrom(getClass())) {
+				Stepper stepperAnn = (Stepper) annotation;
+				((StepperDefaults) this).stepper(find(stepperAnn.switchClass(), stepperAnn.switchClassPos()), find(stepperAnn.headerClass(), stepperAnn.headerClassPos()));
+			} else
 				log.warn("Switch is applicable only to tags implementing SwitchDefaults.");
 		});
 
 		processAnnotation(BindSelection.class, annotation -> {
 			if (SelectionDefaults.class.isAssignableFrom(getClass()))
-				((SelectionDefaults) this).bindSelection(find(((BindSelection) annotation).value()));
+				((SelectionDefaults) this).bindSelection(find(((BindSelection) annotation).value(), ((BindSelection) annotation).valuePos()));
 			else
 				log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
 		});
@@ -547,14 +549,11 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		Tag current = this;
 		Annotation applyingAnnotation = null;
 		while (current != null) {
-			Annotation[] annotations = current.getClass().getAnnotationsByType(annotationClass);
-			List<Annotation> annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
-
+			List<Annotation> annotationsFound = selectAnnotations(current.getClass(), annotationClass, classesToResult);
 			if (!DirectSelect.class.equals(annotationClass)) {
 				Class<?> superClass = current.getClass().getSuperclass();
 				while (annotationsFound.isEmpty() && superClass != null) {
-					annotations = superClass.getAnnotationsByType(annotationClass);
-					annotationsFound = selectAnnotations(annotations, annotationClass, classesToResult);
+					annotationsFound = selectAnnotations(superClass, annotationClass, classesToResult);
 					superClass = superClass.getSuperclass();
 				}
 			}
@@ -575,7 +574,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			Class<?> superClass = current.getClass();
 			List<Annotation> annotationsFound = new ArrayList<>();
 			while (superClass != null) {
-				annotationsFound.addAll(selectAnnotations(superClass.getAnnotationsByType(annotationClass), annotationClass, classesToResult));
+				annotationsFound.addAll(selectAnnotations(superClass, annotationClass, classesToResult));
 				superClass = superClass.getSuperclass();
 			}
 			Collections.reverse(annotationsFound);
@@ -612,15 +611,16 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return result;
 	}
 
-	default List<Annotation> selectAnnotations(Annotation[] annotations, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
+	default List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
 		List<Annotation> annotationsFound = new ArrayList<>();
+		Annotation[] annotations = annotatedClass.getAnnotationsByType(annotationClass);
 		for (Annotation annotation : annotations)
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
 				int[] pos = (int[]) annotation.annotationType().getDeclaredMethod("pos").invoke(annotation);
 				if (pos.length != 0 && pos.length != path.length)
-					throw new IllegalStateException("The annotation contains a path and an array of class positions of different lengths. path: " + Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: "
-							+ IntStream.of(pos).boxed().collect(Collectors.toList()));
+					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
+							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + IntStream.of(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
 				if (isAssignableFrom(Arrays.asList(path), classesToResult) && posMatches(pos, path)) {
 					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
