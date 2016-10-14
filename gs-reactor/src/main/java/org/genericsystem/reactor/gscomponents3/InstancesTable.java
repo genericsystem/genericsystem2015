@@ -40,9 +40,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = GSComposite.class)
 @BindSelection(value = GSComposite.class, valuePos = 2)
-@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")
 @GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
-@Style(path = HeaderRow.class, name = "color", value = "white")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
 @Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
@@ -56,6 +54,8 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @ForEach(path = { ContentRow.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 public class InstancesTable extends GSDiv implements SelectionDefaults {
 
+	@GenericValueBackgroundColor(path = { GSValueComponents.class, GSDiv.class }, value = "#ea0084")
+	@Style(name = "color", value = "white")
 	public static class HeaderRow extends GSComposite {
 	}
 

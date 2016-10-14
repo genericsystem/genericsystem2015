@@ -68,8 +68,6 @@ import javafx.beans.value.ObservableValue;
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(path = HeaderRow.class, name = "flex", value = "0.3")
 @Style(path = ContentRow.class, name = "flex", value = "1")
-@Style(path = HeaderRow.class, name = "color", value = "white")
-@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")
 @Children({ HeaderRow.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class })
 @Children(path = ContentRow.class, value = { GSValueComponentsEditor.class, AttributeContent.class })
