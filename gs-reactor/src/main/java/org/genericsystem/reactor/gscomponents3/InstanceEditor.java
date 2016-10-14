@@ -14,14 +14,15 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
-import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
@@ -37,10 +38,10 @@ import org.genericsystem.reactor.gscomponents3.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSHoldersEditor;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSMultiCheckbox;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSValueComponentsEditor;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.ContentRow;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
-import org.genericsystem.reactor.gscomponents3.Table.ContentRow;
-import org.genericsystem.reactor.gscomponents3.Table.HeaderRow;
+import org.genericsystem.reactor.gscomponents3.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.model.ContextAction.ADD_HOLDER;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -61,11 +62,12 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+@Style(name = "flex", value = "1 1 0%")
+@Style(name = "overflow", value = "hidden")
+@ReverseFlexDirection(path = GSComposite.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(path = HeaderRow.class, name = "flex", value = "0.3")
 @Style(path = ContentRow.class, name = "flex", value = "1")
-@Style(path = HeaderRow.class, name = "color", value = "white")
-@GenericValueBackgroundColor(path = { HeaderRow.class, GSValueComponents.class, GSDiv.class }, value = "#ea0084")
 @Children({ HeaderRow.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class })
 @Children(path = ContentRow.class, value = { GSValueComponentsEditor.class, AttributeContent.class })
@@ -74,7 +76,7 @@ import javafx.beans.value.ObservableValue;
 @ForEach(path = { HeaderRow.class, GSValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { GSComposite.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { HeaderRow.class, GSValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
-public class InstanceEditor extends Table implements SelectionDefaults {
+public class InstanceEditor extends GSDiv implements SelectionDefaults {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	public static class HorizontalInstanceEditor extends InstanceEditor {
