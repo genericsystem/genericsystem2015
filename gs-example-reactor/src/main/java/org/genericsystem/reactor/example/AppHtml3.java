@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.example;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 
 import org.genericsystem.carcolor.model.Car;
@@ -10,9 +8,9 @@ import org.genericsystem.carcolor.model.CarColor2;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
@@ -37,13 +35,9 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @SelectModel(path = TitledInstanceEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
 @Style(name = "flex-wrap", value = "wrap")
 @Style(name = "flex", value = "1 1 0%")
-public class AppHtml3 extends GSApp implements SelectionDefaults {
+public class AppHtml3 extends GSApp {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml3.class, "/example-reactor");
-	}
-
-	public AppHtml3() {
-		createSelectionProperty();
 	}
 }

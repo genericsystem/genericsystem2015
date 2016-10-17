@@ -1,7 +1,5 @@
 package org.genericsystem.carcolor;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlH1;
 import org.genericsystem.reactor.htmltag.HtmlImg;
@@ -38,14 +36,9 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, pos = { 0, 0 }, value = Car.class)
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, pos = { 0, 1 }, value = Color.class)
-public class CarColorApp2 extends GSApp implements SelectionDefaults {
+public class CarColorApp2 extends GSApp {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp2.class, "/cars");
-	}
-
-	@Override
-	public void init() {
-		createSelectionProperty();
 	}
 
 	@Style(name = "justify-content", value = "space-around")

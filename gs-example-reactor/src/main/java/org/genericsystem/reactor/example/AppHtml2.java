@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.example;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 
 import org.genericsystem.carcolor.model.Car;
@@ -10,9 +8,9 @@ import org.genericsystem.carcolor.model.CarColor2;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.carcolor.model.UsedCar;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
@@ -33,13 +31,9 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @SelectModel(path = GSEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
 @DirectSelect(path = GSTable.class, pos = 2, value = Color.class)
 @Style(name = "justify-content", value = "center")
-public class AppHtml2 extends GSApp implements SelectionDefaults {
+public class AppHtml2 extends GSApp {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml2.class, "/example-reactor");
-	}
-
-	public AppHtml2() {
-		createSelectionProperty();
 	}
 }
