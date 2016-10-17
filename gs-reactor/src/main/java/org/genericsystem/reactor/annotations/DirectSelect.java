@@ -19,7 +19,7 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
 public @interface DirectSelect {
 	Class<? extends GSTagImpl>[] path() default {};
 
-	Class<?> value();
+	Class<?>[] value();
 
 	int[] pos() default {};
 

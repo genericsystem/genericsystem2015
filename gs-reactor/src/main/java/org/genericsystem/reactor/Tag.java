@@ -33,9 +33,9 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Select.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
@@ -429,7 +429,19 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			for (Class<? extends GSTagImpl> clazz : ((Children) annotation).value())
 				createTag(clazz);
 		});
-		processAnnotation(DirectSelect.class, annotation -> select(((DirectSelect) annotation).value()));
+		processAnnotation(DirectSelect.class, annotation -> {
+			try {
+				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
+				Class<?>[] selects = ((DirectSelect) annotation).value();
+				Class<?> tagClass = path.length != 0 ? path[path.length - 1] : null;
+				if (selects.length == 1 || tagClass == null)
+					select(selects[0]);
+				else
+					select(selects[position(this, tagClass)]);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				throw new IllegalStateException(e);
+			}
+		});
 		processAnnotation(Select.class, annotation -> {
 			try {
 				select(((Select) annotation).value().newInstance());

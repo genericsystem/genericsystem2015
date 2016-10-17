@@ -35,8 +35,7 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
 @Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
-@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, pos = { 0, 0 }, value = Car.class)
-@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, pos = { 0, 1 }, value = Color.class)
+@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Car.class, Color.class })
 public class CarColorApp2 extends GSApp {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp2.class, "/cars");
