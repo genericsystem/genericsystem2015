@@ -76,13 +76,10 @@ public class GSAttributeOfInstanceEditor extends GSDiv {
 				new GSSubcellAdder(this) {
 					{
 						addStyle("flex", "1 0 auto");
-						select__(model -> {
-							ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(model.getGenerics());
-							return Bindings
-									.createObjectBinding(
-											() -> holders.isEmpty() || (model.getGeneric().getComponents().size() < 2 && !model.getGeneric().isPropertyConstraintEnabled())
-													|| (model.getGeneric().getComponents().size() >= 2 && !model.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? model : null,
-											ObservableListExtractor.HOLDERS.apply(model.getGenerics()));
+						select__(context -> {
+							ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
+							return Bindings.createObjectBinding(() -> holders.isEmpty() || (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled())
+									&& !context.getGeneric().isSingularConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2]))) ? context : null, holders);
 						});
 					}
 				};
