@@ -7,10 +7,12 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.api.core.annotations.Meta;
+import org.genericsystem.api.core.annotations.PasswordGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator;
 import org.genericsystem.api.core.annotations.constraints.NoReferentialIntegrityProperty;
@@ -138,6 +140,14 @@ public abstract class SystemCache {
 		if (singularTarget != null)
 			for (int axe : singularTarget.value())
 				result.enableSingularConstraint(axe);
+
+		if (clazz.getAnnotation(PasswordGeneric.class) != null) {
+			result.enablePasswordGeneric();
+			result.enableSingularConstraint(ApiStatics.BASE_POSITION);
+			Generic salt = result.addAttribute("Salt");
+			result.setInstanceValueClassConstraint(byte[].class);
+			salt.setInstanceValueClassConstraint(byte[].class);
+		}
 	}
 
 	private void triggersDependencies(Class<?> clazz) {

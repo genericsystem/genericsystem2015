@@ -41,7 +41,7 @@ import org.genericsystem.security.model.User;
 public class SecurityApp extends GSApp {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, SecurityApp.class, "/example");
+		ApplicationServer.startSimpleGenericApp(mainArgs, SecurityApp.class, "/security");
 	}
 
 	public static class ExampleScript implements Script {

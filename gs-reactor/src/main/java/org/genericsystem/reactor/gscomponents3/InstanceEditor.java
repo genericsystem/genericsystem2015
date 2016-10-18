@@ -2,8 +2,11 @@ package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
+import org.genericsystem.reactor.htmltag.HtmlHyperLink;
+import org.genericsystem.reactor.htmltag.HtmlLabel;
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
 import java.util.List;
@@ -11,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.DefaultConfig.MetaAttribute;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
@@ -29,6 +33,7 @@ import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEdit
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
+import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
 import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
@@ -53,6 +58,8 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector.DIRECT_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
+import org.genericsystem.reactor.model.ObservableValueSelector.NON_PASSWORD_INSTANCE_SELECTOR;
+import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_INSTANCE_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.REVERSED_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
@@ -135,11 +142,35 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 		}
 	}
 
+	@SetText("Change password")
+	public static class PasswordEditor extends HtmlHyperLink {
+	}
+
+	@Children({ HtmlLabel.class, PasswordInput.class/*, HtmlLabel.class, PasswordInput.class*/ })
+	@SetText(path = HtmlLabel.class, pos = 0, value = "Enter new password:")
+	@SetText(path = HtmlLabel.class, pos = 1, value = "Confirm password:")
+	public static class PasswordAdder extends GSDiv implements PasswordDefaults {
+		@Override
+		public void init() {
+			createSaltProperty();
+			find(PasswordInput.class, 0).addConvertedValueChangeListener((context, nva) -> {
+				if (nva != null) {
+					Generic passwordHash = context.getGenerics()[1].addHolder(context.getGeneric(), nva);
+					Generic saltAttribute = context.find(MetaAttribute.class).getInstance("Salt", context.getGeneric());
+					// TODO: Not working, salt property not found.
+					//					passwordHash.addHolder(saltAttribute, getSaltProperty(context).getValue());
+				}
+			});
+		}
+	}
+
 	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "width", value = "100%")
 	@Children({ Header.class, Content.class, GSActionLink.class })
-	@Children(path = Header.class, value = GSInputTextEditorWithConversion.class)
+	@Children(path = Header.class, value = { PasswordEditor.class, GSInputTextEditorWithConversion.class })
 	@Children(path = Content.class, value = { DirectRelationComponentEditor.class, GSLabelDisplayer.class })
+	@Select(path = { Header.class, PasswordEditor.class }, value = PASSWORD_INSTANCE_SELECTOR.class)
+	@Select(path = { Header.class, GSInputTextEditorWithConversion.class }, value = NON_PASSWORD_INSTANCE_SELECTOR.class)
 	@Select(path = { Content.class, DirectRelationComponentEditor.class }, value = DIRECT_RELATION_SELECTOR.class)
 	@Select(path = { Content.class, GSLabelDisplayer.class }, value = REVERSED_RELATION_SELECTOR.class)
 	@SelectModel(path = GSActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
@@ -150,8 +181,8 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 
 	@Style(path = GSValueComponents.class, name = "flex", value = "1 0 auto")
 	@Children(value = { GSValueComponentsEditor.class, GSHolderAdder.class })
-	@Children(path = { GSValueComponentsEditor.class, Header.class }, value = { GSInputTextEditorWithConversion.class, GSCheckBoxEditor.class })
-	@Children(path = { GSHolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
+	@Children(path = { GSValueComponentsEditor.class, Header.class }, value = { PasswordEditor.class, GSInputTextEditorWithConversion.class, GSCheckBoxEditor.class })
+	@Children(path = { GSHolderAdder.class, Header.class }, value = { PasswordAdder.class, HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@ForEach(path = GSHolderAdder.class, value = NO_FOR_EACH.class)
 	@SelectModel(path = GSHolderAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSInputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
@@ -179,9 +210,10 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
 	@Children({ Header.class, Content.class, GSActionLink.class })
-	@Children(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
+	@Children(path = Header.class, value = { PasswordAdder.class, HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@Children(path = Content.class, value = ComponentAdderSelect.class)
 	@Select(path = GSActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
+	@Select(path = { Header.class, PasswordAdder.class }, value = ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR.class)
 	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@SetText(path = GSActionLink.class, value = "+")
