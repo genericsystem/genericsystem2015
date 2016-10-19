@@ -20,6 +20,7 @@ import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
+import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -27,6 +28,7 @@ import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
+import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
 
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
@@ -50,11 +52,11 @@ public class CarColorApp2 extends GSApp {
 
 	@SetText("User Guide")
 	@Style(name = "flex", value = "0 1 auto")
+	@BindAction(MODAL_DISPLAY_FLEX.class)
 	public static class GuideButton extends HtmlButton {
 		@Override
 		public void init() {
 			inheritStyle("background-color");
-			bindAction(model -> getParent().find(UserGuide2.class).getDisplayProperty(model).setValue("flex"));
 		}
 	}
 }

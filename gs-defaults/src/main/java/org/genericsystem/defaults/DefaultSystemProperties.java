@@ -10,10 +10,10 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.NotFoundException;
 import org.genericsystem.defaults.DefaultConfig.CascadeRemoveProperty;
+import org.genericsystem.defaults.DefaultConfig.HiddenProperty;
 import org.genericsystem.defaults.DefaultConfig.InstanceValueGeneratorProperty;
 import org.genericsystem.defaults.DefaultConfig.NoReferentialIntegrityProperty;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
-import org.genericsystem.defaults.DefaultConfig.PasswordProperty;
 import org.genericsystem.defaults.constraints.InstanceValueClassConstraint;
 import org.genericsystem.defaults.constraints.PropertyConstraint;
 import org.genericsystem.defaults.constraints.RequiredConstraint;
@@ -199,20 +199,19 @@ public interface DefaultSystemProperties<T extends DefaultGeneric<T>> extends IG
 
 	@SuppressWarnings("unchecked")
 	@Override
-	default T enablePasswordGeneric() {
-		// TODO: Add salt attribute, enable singular constraint.
-		return enableSystemProperty(PasswordProperty.class, ApiStatics.NO_POSITION);
+	default T hide() {
+		return enableSystemProperty(HiddenProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	default T disablePasswordGeneric() {
-		return disableSystemProperty(PasswordProperty.class, ApiStatics.NO_POSITION);
+	default T unhide() {
+		return disableSystemProperty(HiddenProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@Override
-	default boolean isPasswordGenericEnabled() {
-		return isSystemPropertyEnabled(PasswordProperty.class, ApiStatics.NO_POSITION);
+	default boolean isHidden() {
+		return isSystemPropertyEnabled(HiddenProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@SuppressWarnings("unchecked")
