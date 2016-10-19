@@ -15,11 +15,15 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
 public @interface Stepper {
 	Class<? extends GSTagImpl>[] path() default {};
 
+	int[] pos() default {};
+
 	Class<? extends GSTagImpl> switchClass();
+
+	int switchClassPos() default 0;
 
 	Class<? extends GSTagImpl> headerClass();
 
-	int[] pos() default {};
+	int headerClassPos() default 0;
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })

@@ -4,7 +4,6 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import java.util.function.BiFunction;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
@@ -30,8 +29,8 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics());
-			return BindingsTools
-					.transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(ApiStatics.BASE_POSITION) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
+			return BindingsTools.transmitSuccessiveInvalidations(Bindings
+					.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
 		}
 	}
 
@@ -39,8 +38,10 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
-			return Bindings.createObjectBinding(() -> holders.isEmpty() || (context.getGeneric().getComponents().size() < 2 && !context.getGeneric().isPropertyConstraintEnabled())
-					|| (context.getGeneric().getComponents().size() >= 2 && !context.getGeneric().isSingularConstraintEnabled(ApiStatics.BASE_POSITION)) ? context : null, holders);
+			return Bindings.createObjectBinding(() -> holders.isEmpty()
+					|| (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled()) && !context.getGeneric().isSingularConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])))
+							? context : null,
+					holders);
 		}
 	}
 }

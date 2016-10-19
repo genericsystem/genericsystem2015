@@ -19,7 +19,6 @@ import org.genericsystem.reactor.gscomponents.GSModal;
 import org.genericsystem.reactor.gscomponents.GSMonitor;
 import org.genericsystem.reactor.gscomponents.GSResponsive;
 import org.genericsystem.reactor.gscomponents.GSTable;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 /**
  * @author Nicolas Feybesse
@@ -27,14 +26,13 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
  */
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
-public class CarColorApp extends GSApp implements SelectionDefaults {
+public class CarColorApp extends GSApp {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
 	}
 
 	public CarColorApp() {
-		createSelectionProperty();
 		addStyle("background-color", "#00afeb");
 
 		new GSHeader(this, "Reactor Live Demo", GSLogo::new, "", GSUserGuide::new, "");

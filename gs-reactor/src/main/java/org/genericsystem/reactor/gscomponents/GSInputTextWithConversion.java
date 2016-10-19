@@ -1,16 +1,24 @@
 package org.genericsystem.reactor.gscomponents;
 
+import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.modelproperties.PasswordDefaults;
+import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+
+import org.genericsystem.reactor.htmltag.HtmlInputText;
+
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
-import org.genericsystem.reactor.htmltag.HtmlInputText;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -104,6 +112,54 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 					clazz = String.class;
 			}
 			return ApiStatics.STRING_CONVERTERS.get(clazz);
+		}
+	}
+
+	public static class PasswordInput extends GSInputTextWithConversion<byte[]> implements PasswordDefaults {
+		public PasswordInput() {
+			addAttribute("type", "password");
+		}
+
+		@Override
+		public StringConverter<byte[]> getConverter(Context context) {
+			return new StringConverter<byte[]>() {
+
+				// TODO: Put encryption methods in a separate class.
+				private byte[] getEncryptedPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+					String algorithm = "PBKDF2WithHmacSHA1";
+					int derivedKeyLength = 160;
+					int iterations = 20000;
+					KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, derivedKeyLength);
+					SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
+					return f.generateSecret(spec).getEncoded();
+				}
+
+				private byte[] generateSalt() throws NoSuchAlgorithmException {
+					SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+					byte[] salt = new byte[8];
+					random.nextBytes(salt);
+					return salt;
+				}
+
+				@Override
+				public String toString(byte[] hash) {
+					return hash == null ? null : "********";
+				}
+
+				@Override
+				public byte[] fromString(String password) {
+					if (password.length() < 8)
+						throw new IllegalStateException("Password must be at least 8 characters.");
+					Property<byte[]> saltProperty = getSaltProperty(context);
+					try {
+						if (saltProperty.getValue() == null)
+							saltProperty.setValue(generateSalt());
+						return getEncryptedPassword(password, saltProperty.getValue());
+					} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+						throw new IllegalStateException("Encryption error", e);
+					}
+				}
+			};
 		}
 	}
 }

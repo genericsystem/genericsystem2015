@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.example;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -29,7 +27,7 @@ import org.genericsystem.reactor.gscomponents.GSTable;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-public class AppHtml extends GSApp implements SelectionDefaults {
+public class AppHtml extends GSApp {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml.class, "/example-reactor");
@@ -42,7 +40,6 @@ public class AppHtml extends GSApp implements SelectionDefaults {
 		new GenericH1Section(this, "Generic System Reactor Live Demo").addStyle("background-color", "#ffa500");
 
 		select(gs -> gs[0]);
-		createSelectionProperty();
 		new GSTable(this).select(Car.class);
 		new GSTable(this, FlexDirection.ROW).select(Car.class);
 		new GSEditor(this, FlexDirection.ROW) {
