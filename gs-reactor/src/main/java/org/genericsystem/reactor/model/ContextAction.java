@@ -87,6 +87,13 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		}
 	}
 
+	public static class DISPLAY_NONE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getDisplayProperty(context).setValue("none");
+		}
+	}
+
 	public static class SET_SELECTION implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
