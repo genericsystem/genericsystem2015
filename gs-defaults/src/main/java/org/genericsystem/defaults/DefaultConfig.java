@@ -76,6 +76,15 @@ public class DefaultConfig {
 	@Meta(MetaAttribute.class)
 	@Supers(SystemMap.class)
 	@Components(MetaAttribute.class)
+	@PropertyConstraint
+	public static class PasswordProperty implements SystemProperty {
+
+	}
+
+	@SystemGeneric
+	@Meta(MetaAttribute.class)
+	@Supers(SystemMap.class)
+	@Components(MetaAttribute.class)
 	@InstanceValueClassConstraint(Boolean.class)
 	@PropertyConstraint
 	@Deprecated

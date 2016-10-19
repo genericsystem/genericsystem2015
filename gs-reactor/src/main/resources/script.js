@@ -2,7 +2,7 @@
 var wsocket;
 
 function connect() {
-	console.log("connecte");
+	console.log("connect");
 	wsocket = new WebSocket(serviceLocation);
 	wsocket.binaryType = "arraybuffer";
 	wsocket.onmessage = onMessageReceived;
@@ -17,7 +17,7 @@ function onMessageReceived(evt) {
 	case 'A':
 		var parent = document.getElementById(message.parentId);
 		if (parent == null) {
-			console.log("Unreached parent element id on add : "+message.nodeId)
+			console.log("Unreached parent on add. parent id  : "+message.parentId+" for element : "+message.nodeId);
 			break;
 		}
 		elt = document.createElement(message.tagHtml);
@@ -167,7 +167,7 @@ function onMessageReceived(evt) {
 }	
 
 function onclose(evt) {
-	alert("Socket close with code : " + evt.code);
+	alert("Socket has closed with code : " + evt.code);
 }
 
 function selectIndex(name){
@@ -180,10 +180,12 @@ function selectIndex(name){
 }
 
 window.onclick = function(event) {
-	var modal =  document.getElementsByClassName("modal")[0];
-	if (event.target == modal) {
-		if(modal.style.display != "none") {
-			document.getElementsByClassName("close")[0].click();
+	var modal = document.getElementsByClassName("modal");
+	var i;
+	for (i=0; i < modal.length; i++){
+		var id = modal[i].id;
+		if(modal[i].style.display == "flex" && event.target.id == id) {
+			document.getElementsByClassName("close")[i].click();
 		}
 	}
 }

@@ -4,13 +4,14 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
+import org.genericsystem.reactor.htmltag.HtmlLabel;
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
-import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -68,7 +69,7 @@ public class InstancesTable extends GSDiv implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, Content.class }, value = "#e5ed00")
 	@Children(value = GSValueComponents.class)
-	@Children(path = { GSValueComponents.class, Header.class }, value = { GSLabelDisplayer.class, GSCheckBoxDisplayer.class })
+	@Children(path = { GSValueComponents.class, Header.class }, value = { GSLabelDisplayer.class, HtmlLabel.class, GSCheckBoxDisplayer.class })
 	@ForEach(path = GSValueComponents.class, value = ObservableListExtractor.HOLDERS.class)
 	@ForEach(path = { GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 	@Select(path = { GSValueComponents.class, Header.class, GSLabelDisplayer.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
@@ -84,7 +85,11 @@ public class InstancesTable extends GSDiv implements SelectionDefaults {
 	@Style(path = GSDiv.class, name = "margin-bottom", value = "1px")
 	@ForEach(path = Content.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR.class)
+	@Select(path = { Header.class, HtmlLabel.class }, pos = { -1, 0 }, value = ObservableValueSelector.NON_PASSWORD_INSTANCE_SELECTOR.class)
+	@Select(path = { Header.class, HtmlLabel.class }, pos = { -1, 1 }, value = ObservableValueSelector.PASSWORD_INSTANCE_SELECTOR.class)
 	@Children({ Header.class, Content.class })
+	@Children(path = Header.class, value = { GSLabelDisplayer.class, HtmlLabel.class })
+	@SetText(path = { Header.class, HtmlLabel.class }, pos = { -1, 1 }, value = "******")
 	public static class GSValueComponents extends GSComposite {
 	}
 

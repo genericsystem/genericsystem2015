@@ -13,6 +13,7 @@ import org.genericsystem.defaults.DefaultConfig.CascadeRemoveProperty;
 import org.genericsystem.defaults.DefaultConfig.InstanceValueGeneratorProperty;
 import org.genericsystem.defaults.DefaultConfig.NoReferentialIntegrityProperty;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
+import org.genericsystem.defaults.DefaultConfig.PasswordProperty;
 import org.genericsystem.defaults.constraints.InstanceValueClassConstraint;
 import org.genericsystem.defaults.constraints.PropertyConstraint;
 import org.genericsystem.defaults.constraints.RequiredConstraint;
@@ -194,6 +195,24 @@ public interface DefaultSystemProperties<T extends DefaultGeneric<T>> extends IG
 	@Override
 	default boolean isInheritanceEnabled() {
 		return !isSystemPropertyEnabled(NonHeritableProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default T enablePasswordGeneric() {
+		// TODO: Add salt attribute, enable singular constraint.
+		return enableSystemProperty(PasswordProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default T disablePasswordGeneric() {
+		return disableSystemProperty(PasswordProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@Override
+	default boolean isPasswordGenericEnabled() {
+		return isSystemPropertyEnabled(PasswordProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@SuppressWarnings("unchecked")
