@@ -16,6 +16,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents3.Modal.ModalWithDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +85,20 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		@Override
 		public void accept(Context context, Tag tag) {
 			System.gc();
+		}
+	}
+
+	public static class DISPLAY_NONE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getDisplayProperty(context).setValue("none");
+		}
+	}
+
+	public static class MODAL_DISPLAY_FLEX implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getParent().find(ModalWithDisplay.class).getDisplayProperty(context).setValue("flex");
 		}
 	}
 
