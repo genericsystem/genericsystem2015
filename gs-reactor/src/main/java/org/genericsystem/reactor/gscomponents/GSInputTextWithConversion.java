@@ -118,6 +118,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 	public static class PasswordInput extends GSInputTextWithConversion<byte[]> implements PasswordDefaults {
 		public PasswordInput() {
 			addAttribute("type", "password");
+			addAttribute("placeholder", "********");
 		}
 
 		@Override
@@ -143,7 +144,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 				@Override
 				public String toString(byte[] hash) {
-					return hash == null ? null : "********";
+					return null;
 				}
 
 				@Override
