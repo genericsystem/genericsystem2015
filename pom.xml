@@ -52,6 +52,8 @@
 		<module>gs-todomvc</module>
 		<module>gs-carcolor</module>
 		<module>gs-carcolor-model</module>
+		<module>gs-security-model</module>
+		<module>gs-security</module>
 	</modules>
 
 	<distributionManagement>
