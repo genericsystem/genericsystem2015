@@ -8,6 +8,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 import org.genericsystem.reactor.htmltag.HtmlLabel;
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
+import org.genericsystem.reactor.htmltag.HtmlSpan;
 
 import java.util.Arrays;
 import java.util.List;
@@ -173,16 +174,9 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 				if (nva != null)
 					context.getGeneric().updateValue(nva);
 			});
-			PasswordInput input1 = find(PasswordInput.class, 1);
-			PasswordInput input2 = find(PasswordInput.class, 2);
-			input2.addAttribute("disabled", "disabled");
-			input1.addConvertedValueChangeListener((context, nva) -> {
-				input2.addAttribute(context, "disabled", null);
-			});
-			input2.addConvertedValueChangeListener((context, nva) -> {
-				if (context.getGeneric().getValue().equals(find(PasswordInput.class).getConvertedValueProperty(context).getValue())) {
-					// TODO: Old password check not working.
-					if (Arrays.equals((byte[]) nva, (byte[]) input1.getConvertedValueProperty(context).getValue()))
+			find(PasswordInput.class, 2).addConvertedValueChangeListener((context, nva) -> {
+				if (Arrays.equals((byte[]) context.getGeneric().getValue(), (byte[]) find(PasswordInput.class).getConvertedValueProperty(context).getValue())) {
+					if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue()))
 						getConvertedValueProperty(context).setValue(nva);
 					else
 						// TODO
@@ -195,9 +189,12 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 		}
 	}
 
-	@Children({ HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class })
+	@Children({ HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class, HtmlSpan.class })
 	@SetText(path = HtmlLabel.class, pos = 0, value = "Enter new password:")
 	@SetText(path = HtmlLabel.class, pos = 1, value = "Confirm password:")
+	@SetText(path = HtmlSpan.class, value = "These passwords don’t match. Try again.")
+	@Style(path = HtmlSpan.class, name = "color", value = "darkred")
+	@Style(path = HtmlSpan.class, name = "display", value = "none")
 	public static class PasswordAdder extends GSDiv implements PasswordDefaults, ConvertedValueDefaults {
 		@Override
 		public void init() {
@@ -205,21 +202,22 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 			addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null) {
 					Generic passwordHash = context.getGenerics()[1].addHolder(context.getGeneric(), nva);
-					passwordHash.addHolder(context.find(Salt.class), getSaltProperty(context).getValue());
+					passwordHash.setHolder(context.find(Salt.class), getSaltProperty(context).getValue());
 				}
 			});
-			PasswordInput input1 = find(PasswordInput.class, 0);
-			PasswordInput input2 = find(PasswordInput.class, 1);
-			input2.addAttribute("disabled", "disabled");
-			input1.addConvertedValueChangeListener((context, nva) -> {
-				input2.addAttribute(context, "disabled", null);
-			});
-			input2.addConvertedValueChangeListener((context, nva) -> {
-				if (Arrays.equals((byte[]) nva, (byte[]) input1.getConvertedValueProperty(context).getValue()))
+			find(PasswordInput.class).addConvertedValueChangeListener((context, nva) -> {
+				if (nva != null && Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue())) {
 					getConvertedValueProperty(context).setValue(nva);
-				else
-					// TODO
-					System.out.println("2 different values.");
+					find(HtmlSpan.class).addStyle("display", "none");
+				} else
+					find(HtmlSpan.class).addStyle("display", "inline");
+			});
+			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
+				if (nva != null && Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
+					getConvertedValueProperty(context).setValue(nva);
+					find(HtmlSpan.class).addStyle("display", "none");
+				} else
+					find(HtmlSpan.class).addStyle("display", "inline");
 			});
 		}
 	}

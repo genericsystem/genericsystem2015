@@ -2,6 +2,7 @@ package org.genericsystem.reactor.model;
 
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
+import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
@@ -17,6 +18,8 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents3.Modal.ModalWithDisplay;
+import org.genericsystem.security.model.User.Password;
+import org.genericsystem.security.model.User.Salt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +134,9 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				Generic newInstance = context.getGeneric().setInstance(input.getConvertedValueProperty(context).getValue());
 				for (Entry<Generic, Property<Serializable>> entry : buildTag.getHoldersMapProperty(context).getValue().entrySet())
 					if (entry.getValue().getValue() != null) {
-						newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
+						Generic newHolder = newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
+						if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass()) && newHolder.isInstanceOf(context.find(Password.class)))
+							newHolder.setHolder(context.find(Salt.class), ((PasswordDefaults) tag.getParent().getParent()).getSaltProperty(context).getValue());
 						entry.getValue().setValue(null);
 					}
 				for (Entry<Generic, List<Property<Context>>> entry : buildTag.getComponentsMapProperty(context).getValue().entrySet()) {
