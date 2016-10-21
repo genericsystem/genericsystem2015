@@ -125,7 +125,6 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		public StringConverter<byte[]> getConverter(Context context) {
 			return new StringConverter<byte[]>() {
 
-				// TODO: Put encryption methods in a separate class.
 				private byte[] getEncryptedPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
 					String algorithm = "PBKDF2WithHmacSHA1";
 					int derivedKeyLength = 160;
