@@ -12,6 +12,7 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE;
 import org.genericsystem.reactor.model.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.model.ObservableModelSelector.SELECTION_SELECTOR;
 
@@ -20,24 +21,32 @@ import javafx.beans.binding.Bindings;
 @Children(GSDiv.class)
 @Children(path = GSDiv.class, value = HtmlHyperLink.class)
 @StyleClass("modal")
-@StyleClass(path = GSDiv.class, value = "modal-content")
+@StyleClass(path = GSDiv.class, value = { "widthResponsive", "modal-content" })
 @StyleClass(path = { GSDiv.class, HtmlHyperLink.class }, value = "close")
-@Style(path = GSDiv.class, name = "max-width", value = "40%")
+@Style(path = GSDiv.class, name = "overflow", value = "auto")
 @Style(path = GSDiv.class, name = "padding", value = "10px")
 @Style(path = GSDiv.class, name = "border-radius", value = "10px")
 @Style(path = GSDiv.class, name = "background-color", value = "white")
-@SelectModel(path = { GSDiv.class, GSDiv.class }, value = SELECTION_SELECTOR.class)
 @SetText(path = { GSDiv.class, HtmlHyperLink.class }, value = "×")
-@BindAction(path = { GSDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
-public class Modal extends GSDiv implements SelectionDefaults {
-	@Override
-	public void init() {
-		bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
-	}
+public class Modal extends GSDiv {
 
 	@Children(path = GSDiv.class, value = { HtmlHyperLink.class, TitledInstanceEditor.class })
 	@Style(path = { GSDiv.class, TitledInstanceEditor.class }, name = "min-height", value = "300px")
-	public static class ModalEditor extends Modal {
+	@SelectModel(path = { GSDiv.class, GSDiv.class }, value = SELECTION_SELECTOR.class)
+	@BindAction(path = { GSDiv.class, HtmlHyperLink.class }, value = RESET_SELECTION.class)
+	public static class ModalEditor extends Modal implements SelectionDefaults {
+		@Override
+		public void init() {
+			bindStyle(DISPLAY, DISPLAY, model -> Bindings.createStringBinding(() -> getSelectionProperty(model).getValue() != null ? "flex" : "none", getSelectionProperty(model)));
+		}
+	}
 
+	@BindAction(path = { GSDiv.class, HtmlHyperLink.class }, value = DISPLAY_NONE.class)
+	public static class ModalWithDisplay extends Modal {
+		@Override
+		public void init() {
+			createInitializedDisplayProperty("none");
+			bindStyle(DISPLAY, DISPLAY);
+		}
 	}
 }

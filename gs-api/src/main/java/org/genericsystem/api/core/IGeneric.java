@@ -1281,11 +1281,11 @@ public interface IGeneric<T extends IGeneric<T>> extends ISignature<T> {
 	 */
 	boolean isInheritanceEnabled();
 
-	T enablePasswordGeneric();
+	T hide();
 
-	T disablePasswordGeneric();
+	T unhide();
 
-	boolean isPasswordGenericEnabled();
+	boolean isHidden();
 
 	/**
 	 * Removes this vertex.

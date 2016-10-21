@@ -469,9 +469,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		if (posAnnotation.length == 0)
 			return true;
 		Tag tag = this;
-		int depth = pathAnnotation.length;
-		for (int i = 1; i <= depth; i++) {
-			if (posAnnotation[depth - i] != -1 && position(tag, pathAnnotation[depth - i]) != posAnnotation[depth - i])
+		for (int i = pathAnnotation.length - 1; i >= 0; i--) {
+			if (posAnnotation[i] != -1 && position(tag, pathAnnotation[i]) != posAnnotation[i])
 				return false;
 			tag = tag.getParent();
 		}
@@ -481,7 +480,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	// Assumes that tag is of a class extending tagClass.
 	default int position(Tag tag, Class<?> tagClass) {
 		int result = 0;
-		for (Tag sibling : getParent().getObservableChildren()) {
+		for (Tag sibling : tag.getParent().getObservableChildren()) {
 			if (sibling.equals(tag))
 				break;
 			if (tagClass.isAssignableFrom(sibling.getClass()))
