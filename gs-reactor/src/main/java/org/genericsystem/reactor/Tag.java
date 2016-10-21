@@ -1,11 +1,8 @@
 package org.genericsystem.reactor;
 
-import org.genericsystem.reactor.modelproperties.ActionDefaults;
 import org.genericsystem.reactor.modelproperties.AttributesDefaults;
 import org.genericsystem.reactor.modelproperties.DisplayDefaults;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
 import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
@@ -30,29 +27,10 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.annotations.BindAction;
-import org.genericsystem.reactor.annotations.BindSelection;
-import org.genericsystem.reactor.annotations.BindText;
-import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.Select.SelectModel;
-import org.genericsystem.reactor.annotations.SetStringExtractor;
-import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
-import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
-import org.genericsystem.reactor.model.StringExtractor;
-import org.genericsystem.reactor.model.TextBinding.GENERIC_STRING;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -381,6 +359,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default void init() {
 	}
 
+	default void beforeProcessAnnotations() {
+	}
+
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
 	public static interface RootTag {
@@ -419,132 +400,18 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			throw new IllegalStateException(e);
 		}
 		((GSTagImpl) result).setParent(this);
+		result.beforeProcessAnnotations();
 		result.processAnnotations();
 		result.init();
 		return result;
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		processAnnotation(Children.class, annotation -> {
-			for (Class<? extends GSTagImpl> clazz : ((Children) annotation).value())
-				createTag(clazz);
-		});
-		processAnnotation(DirectSelect.class, annotation -> {
-			try {
-				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
-				Class<?>[] selects = ((DirectSelect) annotation).value();
-				Class<?> tagClass = path.length != 0 ? path[path.length - 1] : null;
-				if (selects.length == 1 || tagClass == null)
-					select(selects[0]);
-				else
-					select(selects[position(this, tagClass)]);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalStateException(e);
-			}
-		});
-		processAnnotation(Select.class, annotation -> {
-			try {
-				select(((Select) annotation).value().newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
-		});
-		processAnnotation(SelectModel.class, annotation -> {
-			select__(context -> {
-				try {
-					return ((SelectModel) annotation).value().newInstance().apply(context, this);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
-		});
+		List<InfoAnnotation> infoAnnotations = DownloaderAnnotation.getInstance().getInfoAnnotations();
 
-		processAnnotation(ForEach.class, annotation -> {
-			try {
-				if (!NO_FOR_EACH.class.equals(((ForEach) annotation).value()))
-					forEach(((ForEach) annotation).value().newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
-		});
-
-		processAnnotation(Stepper.class, annotation -> {
-			if (StepperDefaults.class.isAssignableFrom(getClass())) {
-				Stepper stepperAnn = (Stepper) annotation;
-				((StepperDefaults) this).stepper(find(stepperAnn.switchClass(), stepperAnn.switchClassPos()), find(stepperAnn.headerClass(), stepperAnn.headerClassPos()));
-			} else
-				log.warn("Switch is applicable only to tags implementing SwitchDefaults.");
-		});
-
-		processAnnotation(BindSelection.class, annotation -> {
-			if (SelectionDefaults.class.isAssignableFrom(getClass()))
-				((SelectionDefaults) this).bindSelection(find(((BindSelection) annotation).value(), ((BindSelection) annotation).valuePos()));
-			else
-				log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
-		});
-
-		processAnnotation(SetStringExtractor.class, annotation -> {
-			try {
-				setStringExtractor(((SetStringExtractor) annotation).value().newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
-		});
-
-		processAnnotation(StyleClass.class, annotation -> {
-			for (String sc : ((StyleClass) annotation).value())
-				addStyleClass(sc);
-		});
-
-		processAnnotation(FlexDirectionStyle.class, annotation -> {
-			if (GSDiv.class.isAssignableFrom(getClass()))
-				((GSDiv) this).setDirection(((FlexDirectionStyle) annotation).value());
-			else
-				log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
-		});
-		processAnnotation(KeepFlexDirection.class, annotation -> {
-			if (GSDiv.class.isAssignableFrom(getClass()))
-				((GSDiv) this).keepDirection();
-			else
-				log.warn("Warning: KeepFlexDirection is applicable only to GSDiv extensions.");
-		});
-		processAnnotation(ReverseFlexDirection.class, annotation -> {
-			if (GSDiv.class.isAssignableFrom(getClass()))
-				((GSDiv) this).reverseDirection();
-			else
-				log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
-		});
-		processAnnotation(SetText.class, annotation -> setText(((SetText) annotation).value()));
-		processAnnotation(BindText.class, annotation -> {
-			if (GENERIC_STRING.class.equals(((BindText) annotation).value()))
-				bindText();
-			else
-				bindText(context -> {
-					try {
-						return ((BindText) annotation).value().newInstance().apply(context, this);
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				});
-		});
-		processAnnotation(BindAction.class, annotation -> {
-			if (ActionDefaults.class.isAssignableFrom(getClass()))
-				((ActionDefaults) this).bindAction(context -> {
-					try {
-						((BindAction) annotation).value().newInstance().accept(context, this);
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				});
-			else
-				log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
-		});
-
-		processRepeatableAnnotation(Attribute.class, annotation -> addAttribute(((Attribute) annotation).name(), ((Attribute) annotation).value()));
-		processRepeatableAnnotation(Style.class, annotation -> addStyle(((Style) annotation).name(), ((Style) annotation).value()));
-
-		processAnnotation(GenericValueBackgroundColor.class, annotation -> addPrefixBinding(modelContext -> addStyle(modelContext, "background-color",
-				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) this).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation).value())));
+		for (InfoAnnotation infoAnnotation : infoAnnotations) {
+			processAnnotation(infoAnnotation);
+		}
 	}
 
 	default boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
@@ -556,46 +423,46 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return true;
 	}
 
-	default <T extends Tag> void processAnnotation(Class<? extends Annotation> annotationClass, Consumer<Annotation> consumer) {
-		List<Class<?>> classesToResult = new ArrayList<>();
-		Tag current = this;
-		Annotation applyingAnnotation = null;
-		while (current != null) {
-			List<Annotation> annotationsFound = selectAnnotations(current.getClass(), annotationClass, classesToResult);
-			if (!DirectSelect.class.equals(annotationClass)) {
-				Class<?> superClass = current.getClass().getSuperclass();
-				while (annotationsFound.isEmpty() && superClass != null) {
-					annotationsFound = selectAnnotations(superClass, annotationClass, classesToResult);
+	default <T extends Tag> void processAnnotation(InfoAnnotation infoAnnotation) {
+		if (!infoAnnotation.isRepeatable()) {
+			List<Class<?>> classesToResult = new ArrayList<>();
+			Tag current = this;
+			Annotation applyingAnnotation = null;
+			while (current != null) {
+				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), infoAnnotation.getAnnotationClass(), classesToResult);
+				if (!DirectSelect.class.equals(infoAnnotation.getAnnotationClass())) {
+					Class<?> superClass = current.getClass().getSuperclass();
+					while (annotationsFound.isEmpty() && superClass != null) {
+						annotationsFound = selectAnnotations(superClass, infoAnnotation.getAnnotationClass(), classesToResult);
+						superClass = superClass.getSuperclass();
+					}
+				}
+				if (!annotationsFound.isEmpty())
+					applyingAnnotation = annotationsFound.get(0);
+				classesToResult.add(0, current.getClass());
+				current = current.getParent();
+			}
+			if (applyingAnnotation != null)
+				infoAnnotation.getConsumer().accept(applyingAnnotation, this);
+		} else {
+			List<Class<?>> classesToResult = new ArrayList<>();
+			Tag current = this;
+			List<Annotation> applyingAnnotations = new ArrayList<>();
+			while (current != null) {
+				Class<?> superClass = current.getClass();
+				List<Annotation> annotationsFound = new ArrayList<>();
+				while (superClass != null) {
+					annotationsFound.addAll(selectAnnotations(superClass, infoAnnotation.getAnnotationClass(), classesToResult));
 					superClass = superClass.getSuperclass();
 				}
+				Collections.reverse(annotationsFound);
+				applyingAnnotations.addAll(annotationsFound);
+				classesToResult.add(0, current.getClass());
+				current = current.getParent();
 			}
-			if (!annotationsFound.isEmpty())
-				applyingAnnotation = annotationsFound.get(0);
-			classesToResult.add(0, current.getClass());
-			current = current.getParent();
+			for (Annotation applyingAnnotation : applyingAnnotations)
+				infoAnnotation.getConsumer().accept(applyingAnnotation, this);
 		}
-		if (applyingAnnotation != null)
-			consumer.accept(applyingAnnotation);
-	}
-
-	default <T extends Tag> void processRepeatableAnnotation(Class<? extends Annotation> annotationClass, Consumer<Annotation> consumer) {
-		List<Class<?>> classesToResult = new ArrayList<>();
-		Tag current = this;
-		List<Annotation> applyingAnnotations = new ArrayList<>();
-		while (current != null) {
-			Class<?> superClass = current.getClass();
-			List<Annotation> annotationsFound = new ArrayList<>();
-			while (superClass != null) {
-				annotationsFound.addAll(selectAnnotations(superClass, annotationClass, classesToResult));
-				superClass = superClass.getSuperclass();
-			}
-			Collections.reverse(annotationsFound);
-			applyingAnnotations.addAll(annotationsFound);
-			classesToResult.add(0, current.getClass());
-			current = current.getParent();
-		}
-		for (Annotation applyingAnnotation : applyingAnnotations)
-			consumer.accept(applyingAnnotation);
 	}
 
 	default boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation) {
@@ -642,5 +509,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				throw new IllegalStateException(e);
 			}
 		return annotationsFound;
+	}
+
+	default void addAnnotation(Class<? extends Annotation> annotationClass, BiConsumer<Annotation, Tag> consumer, boolean isRepeatable) {
+		List<InfoAnnotation> infoAnnotations = DownloaderAnnotation.getInstance().getInfoAnnotations();
+		infoAnnotations.add(new InfoAnnotation(annotationClass, consumer, isRepeatable));
 	}
 }
