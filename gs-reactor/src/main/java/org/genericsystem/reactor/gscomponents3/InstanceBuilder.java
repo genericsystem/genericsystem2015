@@ -5,7 +5,9 @@ import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
+import org.genericsystem.reactor.htmltag.HtmlSpan;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -41,6 +43,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX
 import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Style(path = GSInputTextWithConversion.class, name = "flex", value = "1")
@@ -68,23 +71,23 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 		@Override
 		public void init() {
 			createConvertedValueProperty();
-			//			storeInvalidProperty(context -> {
-			//				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
-			//				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
-			//				return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
-			//						secondHashProperty);
-			//			});
+			storeInvalidProperty(context -> {
+				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
+				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
+				return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
+						secondHashProperty);
+			});
 			addPrefixBinding(context -> {
 				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
 				getHoldersMapProperty(context).getValue().put(context.getGeneric(), getConvertedValueProperty(context));
-				//				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
+				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
-				if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue()))
+				if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
+					find(HtmlSpan.class).addStyle(context, "display", "none");
 					getConvertedValueProperty(context).setValue(nva);
-				else
-					// TODO
-					System.out.println("2 different values.");
+				} else
+					find(HtmlSpan.class).addStyle(context, "display", "inline");
 			});
 		}
 	}

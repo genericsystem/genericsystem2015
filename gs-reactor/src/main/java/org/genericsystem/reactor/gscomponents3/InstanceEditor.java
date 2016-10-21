@@ -162,10 +162,14 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 		}
 	}
 
-	@Children({ HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class })
+	@Children({ HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class, HtmlSpan.class, HtmlSpan.class })
 	@SetText(path = HtmlLabel.class, pos = 0, value = "Enter old password:")
 	@SetText(path = HtmlLabel.class, pos = 1, value = "Enter new password:")
 	@SetText(path = HtmlLabel.class, pos = 2, value = "Confirm password:")
+	@SetText(path = HtmlSpan.class, pos = 0, value = "These passwords don’t match. Try again.")
+	@SetText(path = HtmlSpan.class, pos = 1, value = "Old password incorrect.")
+	@Style(path = HtmlSpan.class, name = "color", value = "darkred")
+	@Style(path = HtmlSpan.class, name = "display", value = "none")
 	public static class PasswordEditorContent extends PasswordAdder {
 		@Override
 		public void init() {
@@ -174,16 +178,21 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 				if (nva != null)
 					context.getGeneric().updateValue(nva);
 			});
+			find(PasswordInput.class).addConvertedValueChangeListener((context, nva) -> {
+				if (Arrays.equals((byte[]) context.getGeneric().getValue(), (byte[]) find(PasswordInput.class).getConvertedValueProperty(context).getValue()))
+					find(HtmlSpan.class, 1).addStyle(context, "display", "none");
+				else if (nva != null)
+					find(HtmlSpan.class, 1).addStyle(context, "display", "inline");
+			});
 			find(PasswordInput.class, 2).addConvertedValueChangeListener((context, nva) -> {
 				if (Arrays.equals((byte[]) context.getGeneric().getValue(), (byte[]) find(PasswordInput.class).getConvertedValueProperty(context).getValue())) {
-					if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue()))
+					if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue())) {
+						find(HtmlSpan.class).addStyle(context, "display", "none");
 						getConvertedValueProperty(context).setValue(nva);
-					else
-						// TODO
-						System.out.println("2 different values.");
+					} else
+						find(HtmlSpan.class).addStyle(context, "display", "inline");
 				} else
-					// TODO
-					System.out.println("Old password incorrect.");
+					find(HtmlSpan.class, 1).addStyle(context, "display", "inline");
 			});
 
 		}
@@ -208,16 +217,16 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 			find(PasswordInput.class).addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null && Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue())) {
 					getConvertedValueProperty(context).setValue(nva);
-					find(HtmlSpan.class).addStyle("display", "none");
+					find(HtmlSpan.class).addStyle(context, "display", "none");
 				} else
-					find(HtmlSpan.class).addStyle("display", "inline");
+					find(HtmlSpan.class).addStyle(context, "display", "inline");
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null && Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
 					getConvertedValueProperty(context).setValue(nva);
-					find(HtmlSpan.class).addStyle("display", "none");
+					find(HtmlSpan.class).addStyle(context, "display", "none");
 				} else
-					find(HtmlSpan.class).addStyle("display", "inline");
+					find(HtmlSpan.class).addStyle(context, "display", "inline");
 			});
 		}
 	}
