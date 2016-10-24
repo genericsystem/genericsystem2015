@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 
 public class AnnotationsManager {
 
-	private static final AnnotationsManager INSTANCE = new AnnotationsManager();
-
 	private final Set<AnnotationProcessor> processors = new LinkedHashSet<>();
 
 	public static final Logger log = LoggerFactory.getLogger(AnnotationsManager.class);
@@ -46,7 +44,7 @@ public class AnnotationsManager {
 			log.warn("Unable to find a processor on annotation : " + annotationClass.getSimpleName());
 	}
 
-	private AnnotationsManager() {
+	public AnnotationsManager() {
 		registerAnnotation(Children.class);
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
@@ -64,10 +62,6 @@ public class AnnotationsManager {
 		registerAnnotation(BindAction.class);
 		registerAnnotation(Style.class);
 		registerAnnotation(GenericValueBackgroundColor.class);
-	}
-
-	public static AnnotationsManager getInstance() {
-		return INSTANCE;
 	}
 
 	public Set<AnnotationProcessor> getProcessors() {

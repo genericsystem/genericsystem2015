@@ -366,10 +366,21 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
-	public static interface RootTag {
+	default RootTag getRootTag() {
+		return getParent().getRootTag();
+	}
+
+	public static interface RootTag extends Tag {
 		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {
 			return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
 		}
+
+		@Override
+		default RootTag getRootTag() {
+			return this;
+		}
+
+		public AnnotationsManager getAnnotationsManager();
 	}
 
 	default String defaultToString() {
@@ -402,14 +413,13 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			throw new IllegalStateException(e);
 		}
 		((GSTagImpl) result).setParent(this);
-		result.beforeProcessAnnotations();
 		result.processAnnotations();
 		result.init();
 		return result;
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		for (AnnotationProcessor processor : AnnotationsManager.getInstance().getProcessors())
+		for (AnnotationProcessor processor : getRootTag().getAnnotationsManager().getProcessors())
 			processAnnotation(processor, this);
 	}
 
