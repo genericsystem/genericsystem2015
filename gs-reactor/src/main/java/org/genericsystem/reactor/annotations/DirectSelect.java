@@ -46,7 +46,7 @@ public @interface DirectSelect {
 				if (selects.length == 1 || tagClass == null)
 					tag.select(selects[0]);
 				else
-					tag.select(selects[tag.position(tag, tagClass)]);
+					tag.select(selects[Tag.position(tag, tagClass)]);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new IllegalStateException(e);
 			}

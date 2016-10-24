@@ -410,10 +410,10 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	default <T extends Tag> void processAnnotations() {
 		for (AnnotationProcessor processor : AnnotationsManager.getInstance().getProcessors())
-			processAnnotation(processor);
+			processAnnotation(processor, this);
 	}
 
-	default boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
+	static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
 		if (list1.size() != list2.size())
 			return false;
 		for (int i = 0; i < list1.size(); i++)
@@ -422,17 +422,17 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return true;
 	}
 
-	default <T extends Tag> void processAnnotation(AnnotationProcessor processor) {
+	static <T extends Tag> void processAnnotation(AnnotationProcessor processor, Tag tag) {
 		if (!processor.isRepeatable()) {
 			List<Class<?>> classesToResult = new ArrayList<>();
-			Tag current = this;
+			Tag current = tag;
 			Annotation applyingAnnotation = null;
 			while (current != null) {
-				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult);
+				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult, tag);
 				if (!DirectSelect.class.equals(processor.getAnnotationClass())) {
 					Class<?> superClass = current.getClass().getSuperclass();
 					while (annotationsFound.isEmpty() && superClass != null) {
-						annotationsFound = selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult);
+						annotationsFound = selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag);
 						superClass = superClass.getSuperclass();
 					}
 				}
@@ -442,16 +442,16 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				current = current.getParent();
 			}
 			if (applyingAnnotation != null)
-				processor.getProcess().accept(applyingAnnotation, this);
+				processor.getProcess().accept(applyingAnnotation, tag);
 		} else {
 			List<Class<?>> classesToResult = new ArrayList<>();
-			Tag current = this;
+			Tag current = tag;
 			List<Annotation> applyingAnnotations = new ArrayList<>();
 			while (current != null) {
 				Class<?> superClass = current.getClass();
 				List<Annotation> annotationsFound = new ArrayList<>();
 				while (superClass != null) {
-					annotationsFound.addAll(selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult));
+					annotationsFound.addAll(selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag));
 					superClass = superClass.getSuperclass();
 				}
 				Collections.reverse(annotationsFound);
@@ -460,14 +460,14 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				current = current.getParent();
 			}
 			for (Annotation applyingAnnotation : applyingAnnotations)
-				processor.getProcess().accept(applyingAnnotation, this);
+				processor.getProcess().accept(applyingAnnotation, tag);
 		}
 	}
 
-	default boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation) {
+	static boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation, Tag testedTag) {
 		if (posAnnotation.length == 0)
 			return true;
-		Tag tag = this;
+		Tag tag = testedTag;
 		for (int i = pathAnnotation.length - 1; i >= 0; i--) {
 			if (posAnnotation[i] != -1 && position(tag, pathAnnotation[i]) != posAnnotation[i])
 				return false;
@@ -477,7 +477,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	// Assumes that tag is of a class extending tagClass.
-	default int position(Tag tag, Class<?> tagClass) {
+	static int position(Tag tag, Class<?> tagClass) {
 		int result = 0;
 		for (Tag sibling : tag.getParent().getObservableChildren()) {
 			if (sibling.equals(tag))
@@ -488,7 +488,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return result;
 	}
 
-	default List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult) {
+	static List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
 		List<Annotation> annotationsFound = new ArrayList<>();
 		Annotation[] annotations = annotatedClass.getAnnotationsByType(annotationClass);
 		for (Annotation annotation : annotations)
@@ -498,7 +498,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				if (pos.length != 0 && pos.length != path.length)
 					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + IntStream.of(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
-				if (isAssignableFrom(Arrays.asList(path), classesToResult) && posMatches(pos, path)) {
+				if (isAssignableFrom(Arrays.asList(path), classesToResult) && posMatches(pos, path, tag)) {
 					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
