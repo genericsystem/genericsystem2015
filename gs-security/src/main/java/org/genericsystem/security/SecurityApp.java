@@ -1,16 +1,5 @@
 package org.genericsystem.security;
 
-import org.genericsystem.reactor.htmltag.HtmlH1;
-
-import org.genericsystem.reactor.gscomponents.GSApp;
-
-import org.genericsystem.reactor.gscomponents3.AppHeader;
-import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents3.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents3.Monitor;
-import org.genericsystem.reactor.gscomponents3.Responsive;
-
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -20,6 +9,14 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
+import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents3.AppHeader;
+import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents3.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents3.Monitor;
+import org.genericsystem.reactor.gscomponents3.Responsive;
+import org.genericsystem.reactor.htmltag.HtmlH1;
 import org.genericsystem.security.SecurityApp.ExampleScript;
 import org.genericsystem.security.model.Role;
 import org.genericsystem.security.model.User;
@@ -32,8 +29,6 @@ import org.genericsystem.security.model.User;
 @RunScript(ExampleScript.class)
 @DependsOnModel({ User.class })
 @Style(name = "background-color", value = "Red")
-//@Style(path = Responsive.class, name = "width", value = "80%")
-//@Style(name = "align-items", value = "center")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "gs-security")
@@ -46,6 +41,7 @@ public class SecurityApp extends GSApp {
 
 	public static class ExampleScript implements Script {
 
+		@Override
 		public void run(Root engine) {
 			// Generic role = engine.find(Role.class);
 			engine.getCurrentCache().flush();

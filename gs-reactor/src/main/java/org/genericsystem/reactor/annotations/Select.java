@@ -1,14 +1,17 @@
 package org.genericsystem.reactor.annotations;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.BiConsumer;
 
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Select.SelectProcessor;
 import org.genericsystem.reactor.annotations.Select.Selects;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
-import org.genericsystem.reactor.model.ObservableModelSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
 /**
@@ -18,6 +21,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(Selects.class)
+@Process(SelectProcessor.class)
 public @interface Select {
 	Class<? extends GSTagImpl>[] path() default {};
 
@@ -31,20 +35,15 @@ public @interface Select {
 		Select[] value();
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	@Repeatable(SelectModels.class)
-	public @interface SelectModel {
-		Class<? extends GSTagImpl>[] path() default {};
+	public static class SelectProcessor implements BiConsumer<Annotation, Tag> {
 
-		Class<? extends ObservableModelSelector> value();
-
-		int[] pos() default {};
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE })
-	public @interface SelectModels {
-		SelectModel[] value();
+		@Override
+		public void accept(Annotation annotation, Tag tag) {
+			try {
+				tag.select(((Select) annotation).value().newInstance());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		}
 	}
 }

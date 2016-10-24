@@ -7,6 +7,8 @@ import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -22,19 +24,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -44,6 +33,19 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.AnnotationsManager.AnnotationProcessor;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.annotations.Attribute;
+import org.genericsystem.reactor.annotations.DirectSelect;
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -407,11 +409,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		List<InfoAnnotation> infoAnnotations = DownloaderAnnotation.getInstance().getInfoAnnotations();
-
-		for (InfoAnnotation infoAnnotation : infoAnnotations) {
+		for (AnnotationProcessor infoAnnotation : AnnotationsManager.getInstance().getProcessors())
 			processAnnotation(infoAnnotation);
-		}
 	}
 
 	default boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
@@ -423,7 +422,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return true;
 	}
 
-	default <T extends Tag> void processAnnotation(InfoAnnotation infoAnnotation) {
+	default <T extends Tag> void processAnnotation(AnnotationProcessor infoAnnotation) {
 		if (!infoAnnotation.isRepeatable()) {
 			List<Class<?>> classesToResult = new ArrayList<>();
 			Tag current = this;
@@ -509,10 +508,5 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				throw new IllegalStateException(e);
 			}
 		return annotationsFound;
-	}
-
-	default void addAnnotation(Class<? extends Annotation> annotationClass, BiConsumer<Annotation, Tag> consumer, boolean isRepeatable) {
-		List<InfoAnnotation> infoAnnotations = DownloaderAnnotation.getInstance().getInfoAnnotations();
-		infoAnnotations.add(new InfoAnnotation(annotationClass, consumer, isRepeatable));
 	}
 }
