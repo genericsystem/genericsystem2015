@@ -94,6 +94,13 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		}
 	}
 
+	public static class SUBINSTANCES_OF_META implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return SUBINSTANCES_OF_META.apply(generics);
+		}
+	}
+
 	public static class SUBINSTANCES_OF_LINK_COMPONENT implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {

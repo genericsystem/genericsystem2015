@@ -1,23 +1,18 @@
 package org.genericsystem.reactor.gscomponents;
 
-import java.util.Map;
-
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.StringExtractor;
-
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlOption;
+import org.genericsystem.reactor.htmltag.HtmlSelect;
 
-import io.vertx.core.json.JsonObject;
-import javafx.beans.value.ChangeListener;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.StringExtractor;
+
 import javafx.beans.value.ObservableValue;
 
-public class GSSelect extends GSTagImpl implements SelectionDefaults, ComponentsDefaults {
+public class GSSelect extends HtmlSelect implements SelectionDefaults, ComponentsDefaults {
 
 	public HtmlOption optionElement;
 
@@ -30,11 +25,6 @@ public class GSSelect extends GSTagImpl implements SelectionDefaults, Components
 		initSelect();
 	}
 
-	@Override
-	public String getTag() {
-		return "select";
-	}
-
 	protected void initSelect() {
 		options();
 		initProperties();
@@ -42,30 +32,15 @@ public class GSSelect extends GSTagImpl implements SelectionDefaults, Components
 		bindBiDirectionalSelection(optionElement);
 		addPrefixBinding(model -> {
 			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric()))) {
-				Map<String, String> map = getDomNodeStyles(model);
-				ChangeListener<String> listener = (o, old, newValue) -> map.put("background-color", newValue);
 				ObservableValue<String> observable = getSelectionString(model);
-				observable.addListener(listener);
-				map.put("background-color", observable.getValue());
+				observable.addListener((o, old, newValue) -> addStyle(model, "background-color", newValue));
+				addStyle(model, "background-color", observable.getValue());
 			}
 		});
 		optionElement.addPrefixBinding(model -> {
 			if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
 				optionElement.addStyle(model, "background-color", optionElement.getGenericStringProperty(model).getValue());
 		});
-	}
-
-	@Override
-	public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-		return new HtmlDomNode(parent, modelContext, this) {
-
-			@Override
-			public void handleMessage(JsonObject json) {
-				if (UPDATE.equals(json.getString(MSG_TYPE))) {
-					((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
-				}
-			}
-		};
 	}
 
 	protected void options() {

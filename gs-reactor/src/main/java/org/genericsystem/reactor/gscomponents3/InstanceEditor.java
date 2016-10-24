@@ -35,11 +35,11 @@ import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
-import org.genericsystem.reactor.gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents3.GSSelect.GSSelectWithEmptyEntry;
+import org.genericsystem.reactor.gscomponents3.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSHoldersEditor;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSMultiCheckbox;
@@ -277,6 +277,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	public static class DirectRelationComponentEditor extends InstanceCompositeSelect {
 		@Override
 		public void init() {
+			super.init();
 			addPostfixBinding(model -> {
 				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 				if (selectedComponents != null)
@@ -340,10 +341,11 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Style(name = "flex", value = "1")
 	@Style(name = "width", value = "100%")
 	@Select(DIRECT_RELATION_SELECTOR.class)
-	public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry {
+	public static class ComponentAdderSelect extends GSSelectWithEmptyEntry {
 
 		@Override
 		public void init() {
+			super.init();
 			addPostfixBinding(model -> {
 				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
 				if (selectedComponents != null)
