@@ -70,6 +70,7 @@ public class AnnotationsManager {
 		registerAnnotation(BindAction.class);
 		registerAnnotation(Style.class);
 		registerAnnotation(GenericValueBackgroundColor.class);
+		registerAnnotation(Attribute.class);
 	}
 
 	public void processAnnotations(Tag tag) {
