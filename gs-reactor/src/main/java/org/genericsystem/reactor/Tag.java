@@ -409,8 +409,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		for (AnnotationProcessor infoAnnotation : AnnotationsManager.getInstance().getProcessors())
-			processAnnotation(infoAnnotation);
+		for (AnnotationProcessor processor : AnnotationsManager.getInstance().getProcessors())
+			processAnnotation(processor);
 	}
 
 	default boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
@@ -422,17 +422,17 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return true;
 	}
 
-	default <T extends Tag> void processAnnotation(AnnotationProcessor infoAnnotation) {
-		if (!infoAnnotation.isRepeatable()) {
+	default <T extends Tag> void processAnnotation(AnnotationProcessor processor) {
+		if (!processor.isRepeatable()) {
 			List<Class<?>> classesToResult = new ArrayList<>();
 			Tag current = this;
 			Annotation applyingAnnotation = null;
 			while (current != null) {
-				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), infoAnnotation.getAnnotationClass(), classesToResult);
-				if (!DirectSelect.class.equals(infoAnnotation.getAnnotationClass())) {
+				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult);
+				if (!DirectSelect.class.equals(processor.getAnnotationClass())) {
 					Class<?> superClass = current.getClass().getSuperclass();
 					while (annotationsFound.isEmpty() && superClass != null) {
-						annotationsFound = selectAnnotations(superClass, infoAnnotation.getAnnotationClass(), classesToResult);
+						annotationsFound = selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult);
 						superClass = superClass.getSuperclass();
 					}
 				}
@@ -442,7 +442,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				current = current.getParent();
 			}
 			if (applyingAnnotation != null)
-				infoAnnotation.getConsumer().accept(applyingAnnotation, this);
+				processor.getProcess().accept(applyingAnnotation, this);
 		} else {
 			List<Class<?>> classesToResult = new ArrayList<>();
 			Tag current = this;
@@ -451,7 +451,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				Class<?> superClass = current.getClass();
 				List<Annotation> annotationsFound = new ArrayList<>();
 				while (superClass != null) {
-					annotationsFound.addAll(selectAnnotations(superClass, infoAnnotation.getAnnotationClass(), classesToResult));
+					annotationsFound.addAll(selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult));
 					superClass = superClass.getSuperclass();
 				}
 				Collections.reverse(annotationsFound);
@@ -460,7 +460,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 				current = current.getParent();
 			}
 			for (Annotation applyingAnnotation : applyingAnnotations)
-				infoAnnotation.getConsumer().accept(applyingAnnotation, this);
+				processor.getProcess().accept(applyingAnnotation, this);
 		}
 	}
 

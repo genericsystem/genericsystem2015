@@ -43,7 +43,7 @@ public class AnnotationsManager {
 				throw new IllegalStateException(e);
 			}
 		} else
-			log.warn("Unable to find a processor for annotation : " + annotationClass.getSimpleName());
+			log.warn("Unable to find a processor on annotation : " + annotationClass.getSimpleName());
 	}
 
 	private AnnotationsManager() {
@@ -77,12 +77,12 @@ public class AnnotationsManager {
 	public class AnnotationProcessor {
 
 		private final Class<? extends Annotation> annotationClass;
-		private final BiConsumer<Annotation, Tag> consumer;
+		private final BiConsumer<Annotation, Tag> process;
 		private final boolean repeatable;
 
 		public AnnotationProcessor(Class<? extends Annotation> annotationClass, BiConsumer<Annotation, Tag> process, boolean repeatable) {
 			this.annotationClass = annotationClass;
-			this.consumer = process;
+			this.process = process;
 			this.repeatable = repeatable;
 		}
 
@@ -90,8 +90,8 @@ public class AnnotationsManager {
 			return annotationClass;
 		}
 
-		public BiConsumer<Annotation, Tag> getConsumer() {
-			return consumer;
+		public BiConsumer<Annotation, Tag> getProcess() {
+			return process;
 		}
 
 		public boolean isRepeatable() {
