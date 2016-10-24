@@ -55,9 +55,9 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		return holders;
 	};
 
-	public static final ObservableListExtractor OTHER_COMPONENTS_1 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[1]));
+	public static final ObservableListExtractor OTHER_COMPONENTS_1 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !gs[1].inheritsFrom(g));
 
-	public static final ObservableListExtractor OTHER_COMPONENTS_2 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !g.equals(gs[2]));
+	public static final ObservableListExtractor OTHER_COMPONENTS_2 = gs -> ObservableListExtractor.COMPONENTS.apply(gs).filtered(g -> !gs[2].inheritsFrom(g));
 
 	public static class ATTRIBUTES_OF_TYPE implements ObservableListExtractor {
 		@Override
@@ -97,14 +97,14 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 	public static class SUBINSTANCES_OF_LINK_COMPONENT implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !g.equals(generics[2])).stream().toArray(Generic[]::new));
+			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !generics[2].inheritsFrom(g)).stream().toArray(Generic[]::new));
 		}
 	}
 
 	public static class SUBINSTANCES_OF_RELATION_COMPONENT implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !g.equals(generics[1])).stream().toArray(Generic[]::new));
+			return ObservableListExtractor.SUBINSTANCES.apply(ObservableListExtractor.COMPONENTS.apply(generics).filtered(g -> !generics[1].inheritsFrom(g)).stream().toArray(Generic[]::new));
 		}
 	}
 

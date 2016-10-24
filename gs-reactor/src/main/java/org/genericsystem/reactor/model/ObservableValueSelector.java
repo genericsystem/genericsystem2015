@@ -93,28 +93,32 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 	public static class MULTICHECKBOX_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return !gs[0].isHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2])) ? gs[0] : null;
+			Generic component = gs[0].getComponents().stream().filter(c -> gs[2].inheritsFrom(c)).findFirst().get();
+			return !gs[0].isHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)) ? gs[0] : null;
 		}
 	}
 
 	public static class NON_MULTICHECKBOX_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return !gs[0].isHidden() && (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[2]))) ? gs[0] : null;
+			Generic component = gs[0].getComponents().stream().filter(c -> gs[2].inheritsFrom(c)).findFirst().get();
+			return !gs[0].isHidden() && (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component))) ? gs[0] : null;
 		}
 	}
 
 	public static class MULTICHECKBOX_SELECTOR_RELATION implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return !gs[1].isHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[1])) ? gs[0] : null;
+			Generic component = gs[0].getComponents().stream().filter(c -> gs[1].inheritsFrom(c)).findFirst().get();
+			return !gs[1].isHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)) ? gs[0] : null;
 		}
 	}
 
 	public static class NON_MULTICHECKBOX_SELECTOR_RELATION implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return !gs[1].isHidden() && (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(gs[1]))) ? gs[0] : null;
+			Generic component = gs[0].getComponents().stream().filter(c -> gs[1].inheritsFrom(c)).findFirst().get();
+			return !gs[1].isHidden() && (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component))) ? gs[0] : null;
 		}
 	}
 
