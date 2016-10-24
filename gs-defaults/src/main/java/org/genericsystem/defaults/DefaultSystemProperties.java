@@ -59,6 +59,9 @@ public interface DefaultSystemProperties<T extends DefaultGeneric<T>> extends IG
 	}
 
 	@Override
+	DefaultRoot<T> getRoot();
+
+	@Override
 	@SuppressWarnings("unchecked")
 	default T enableSystemProperty(Class<? extends SystemProperty> propertyClass, int pos, T... targets) {
 		setSystemPropertyValue(propertyClass, pos, Boolean.TRUE, targets);

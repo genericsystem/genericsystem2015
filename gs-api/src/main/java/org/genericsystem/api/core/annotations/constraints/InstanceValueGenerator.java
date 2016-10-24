@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Iterator;
 import java.util.List;
+
 import org.genericsystem.api.core.IGeneric;
 
 /**
@@ -29,9 +30,13 @@ public @interface InstanceValueGenerator {
 	public static interface ValueGenerator<T extends IGeneric<T>> {
 		/**
 		 * @param meta
+		 *            the meta of generic to create.
 		 * @param supers
+		 *            the supers of the generic to create
 		 * @param value
+		 *            the value proposed of the generic to create
 		 * @param components
+		 *            the components of the generic to create
 		 * @return the generate value for new instances
 		 */
 		Serializable generateInstanceValue(T meta, List<T> supers, Serializable value, List<T> components);

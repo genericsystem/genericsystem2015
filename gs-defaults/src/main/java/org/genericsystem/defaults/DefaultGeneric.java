@@ -109,8 +109,8 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 
 	default boolean isDependencyOf(T meta, List<T> supers, Serializable value, List<T> components) {
 
-		return (inheritsFrom(meta, supers, value, components) || getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components)) || (!isMeta() && getMeta().isDependencyOf(meta, supers, value, components)) || (!components
-				.equals(getComponents()) && componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()))));
+		return (inheritsFrom(meta, supers, value, components) || getComponents().stream().anyMatch(component -> component.isDependencyOf(meta, supers, value, components)) || (!isMeta() && getMeta().isDependencyOf(meta, supers, value, components))
+				|| (!components.equals(getComponents()) && componentsDepends(getComponents(), components) && supers.stream().anyMatch(override -> override.inheritsFrom(getMeta()))));
 
 	}
 
@@ -299,11 +299,6 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 	@Override
 	default boolean isSystem() {
 		return ApiStatics.TS_SYSTEM == getBirthTs();
-	}
-
-	@Override
-	default DefaultRoot<T> getRoot() {
-		throw new IllegalStateException();
 	}
 
 	@Override

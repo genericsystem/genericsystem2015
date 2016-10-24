@@ -28,7 +28,6 @@ public interface DefaultRoot<T extends DefaultGeneric<T>> extends IRoot<T>, Defa
 		return find(MetaRelation.class);
 	}
 
-	@Override
 	default T getMap() {
 		return find(SystemMap.class);
 	}
