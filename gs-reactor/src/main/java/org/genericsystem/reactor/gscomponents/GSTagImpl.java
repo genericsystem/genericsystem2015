@@ -21,6 +21,7 @@ public abstract class GSTagImpl implements Tag {
 
 	protected GSTagImpl(Tag parent) {
 		setParent(parent);
+		beforeProcessAnnotations();
 		processAnnotations();
 		init();
 	}

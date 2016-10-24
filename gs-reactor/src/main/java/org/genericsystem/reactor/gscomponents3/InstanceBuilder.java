@@ -2,30 +2,37 @@ package org.genericsystem.reactor.gscomponents3;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
+import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
+import org.genericsystem.reactor.htmltag.HtmlSpan;
 
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.BindAction;
-import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents3.InstanceBuilder.AddButton;
 import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSHolderBuilder;
 import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSMultiCheckboxBuilder;
+import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSPasswordBuilder;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.Checkbox;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.CheckboxLabel;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.ComponentAdderSelect;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSHolderAdder;
 import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSMultiCheckbox;
+import org.genericsystem.reactor.gscomponents3.InstanceEditor.PasswordAdder;
 import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.model.ContextAction.CREATE_INSTANCE;
 import org.genericsystem.reactor.model.ObservableListExtractor;
@@ -33,19 +40,22 @@ import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_R
 import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
+import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Style(path = GSInputTextWithConversion.class, name = "flex", value = "1")
 @Style(path = GSInputTextWithConversion.class, name = "width", value = "100%")
 @Children({ GSInputTextWithConversion.class, Content.class, ButtonDiv.class })
-@Children(path = Content.class, value = { GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
+@Children(path = Content.class, value = { GSPasswordBuilder.class, GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
 @Children(path = ButtonDiv.class, value = AddButton.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
+@Select(path = { Content.class, GSPasswordBuilder.class }, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
 @Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
 @Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
-public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
+public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, PasswordDefaults {
 
 	@Override
 	public void init() {
@@ -53,6 +63,33 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults {
 		createComponentsMapProperty();
 		createInvalidListProperty();
 		createMultipleRelationProperty();
+		createSaltProperty();
+	}
+
+	@Style(name = "overflow", value = "auto")
+	public static class GSPasswordBuilder extends PasswordAdder implements GSBuilderDefaults {
+		@Override
+		public void init() {
+			createConvertedValueProperty();
+			storeInvalidProperty(context -> {
+				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
+				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
+				return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
+						secondHashProperty);
+			});
+			addPrefixBinding(context -> {
+				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
+				getHoldersMapProperty(context).getValue().put(context.getGeneric(), getConvertedValueProperty(context));
+				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
+			});
+			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
+				if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
+					find(HtmlSpan.class).addStyle(context, "display", "none");
+					getConvertedValueProperty(context).setValue(nva);
+				} else
+					find(HtmlSpan.class).addStyle(context, "display", "inline");
+			});
+		}
 	}
 
 	@Children(path = CheckboxLabel.class, value = CheckboxBuilder.class)

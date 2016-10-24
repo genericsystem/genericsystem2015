@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.example;
 
 import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
-
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.CarColor2;
@@ -12,7 +11,7 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.Select.SelectModel;
+import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;

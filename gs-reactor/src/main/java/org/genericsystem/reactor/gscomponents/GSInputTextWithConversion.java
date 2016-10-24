@@ -118,13 +118,13 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 	public static class PasswordInput extends GSInputTextWithConversion<byte[]> implements PasswordDefaults {
 		public PasswordInput() {
 			addAttribute("type", "password");
+			addAttribute("placeholder", "********");
 		}
 
 		@Override
 		public StringConverter<byte[]> getConverter(Context context) {
 			return new StringConverter<byte[]>() {
 
-				// TODO: Put encryption methods in a separate class.
 				private byte[] getEncryptedPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
 					String algorithm = "PBKDF2WithHmacSHA1";
 					int derivedKeyLength = 160;
@@ -143,7 +143,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 
 				@Override
 				public String toString(byte[] hash) {
-					return hash == null ? null : "********";
+					return null;
 				}
 
 				@Override

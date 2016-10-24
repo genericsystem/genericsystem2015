@@ -6,7 +6,7 @@ import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.Select.SelectModel;
+import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
