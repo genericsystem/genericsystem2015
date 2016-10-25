@@ -17,6 +17,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents3.Modal.ModalWithDisplay;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
@@ -130,7 +131,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			if (GSBuilderDefaults.class.isAssignableFrom(tag.getClass())) {
 				GSBuilderDefaults buildTag = (GSBuilderDefaults) tag;
-				ConvertedValueDefaults input = tag.getParent().getParent().find(GSInputTextWithConversion.class);
+				ConvertedValueDefaults input = tag.getParent().getParent().find(Header.class).find(GSInputTextWithConversion.class);
 				Generic newInstance = context.getGeneric().setInstance(input.getConvertedValueProperty(context).getValue());
 				for (Entry<Generic, Property<Serializable>> entry : buildTag.getHoldersMapProperty(context).getValue().entrySet())
 					if (entry.getValue().getValue() != null) {

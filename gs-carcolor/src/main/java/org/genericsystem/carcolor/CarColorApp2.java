@@ -53,10 +53,8 @@ public class CarColorApp2 extends GSApp {
 	@SetText("User Guide")
 	@Style(name = "flex", value = "0 1 auto")
 	@BindAction(MODAL_DISPLAY_FLEX.class)
+	@InheritStyle("background-color")
 	public static class GuideButton extends HtmlButton {
-		@Override
-		public void init() {
-			inheritStyle("background-color");
-		}
+
 	}
 }
