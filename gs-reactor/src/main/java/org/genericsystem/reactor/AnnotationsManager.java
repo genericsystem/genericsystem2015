@@ -72,7 +72,7 @@ public class AnnotationsManager {
 		registerAnnotation(GenericValueBackgroundColor.class);
 	}
 
-	void processAnnotations(Tag tag) {
+	public void processAnnotations(Tag tag) {
 		for (AnnotationProcessor processor : processors)
 			processAnnotation(processor, tag);
 	}

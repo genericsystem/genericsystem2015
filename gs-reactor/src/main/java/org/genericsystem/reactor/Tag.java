@@ -403,13 +403,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			throw new IllegalStateException(e);
 		}
 		((GSTagImpl) result).setParent(this);
-		result.processAnnotations();
+		getRootTag().getAnnotationsManager().processAnnotations(this);
 		result.init();
 		return result;
 	}
-
-	default <T extends Tag> void processAnnotations() {
-		getRootTag().getAnnotationsManager().processAnnotations(this);
-	}
-
 }

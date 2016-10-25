@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Tag;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public abstract class GSTagImpl implements Tag {
 
@@ -22,7 +22,7 @@ public abstract class GSTagImpl implements Tag {
 	protected GSTagImpl(Tag parent) {
 		setParent(parent);
 		beforeProcessAnnotations();
-		processAnnotations();
+		getRootTag().getAnnotationsManager().processAnnotations(this);
 		init();
 	}
 
