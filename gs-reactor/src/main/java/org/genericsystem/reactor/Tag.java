@@ -403,7 +403,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 			throw new IllegalStateException(e);
 		}
 		((GSTagImpl) result).setParent(this);
-		getRootTag().getAnnotationsManager().processAnnotations(this);
+		getRootTag().getAnnotationsManager().processAnnotations(result);
 		result.init();
 		return result;
 	}
