@@ -135,7 +135,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				for (Entry<Generic, Property<Serializable>> entry : buildTag.getHoldersMapProperty(context).getValue().entrySet())
 					if (entry.getValue().getValue() != null) {
 						Generic newHolder = newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
-						if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass()) && newHolder.isInstanceOf(context.find(Password.class)))
+						if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass()) && context.find(Password.class) != null && newHolder.isInstanceOf(context.find(Password.class)))
 							newHolder.setHolder(context.find(Salt.class), ((PasswordDefaults) tag.getParent().getParent()).getSaltProperty(context).getValue());
 						entry.getValue().setValue(null);
 					}
