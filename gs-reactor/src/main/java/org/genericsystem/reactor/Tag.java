@@ -10,19 +10,13 @@ import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import io.vertx.core.http.ServerWebSocket;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
@@ -37,11 +31,7 @@ import javafx.util.StringConverter;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.AnnotationsManager.AnnotationProcessor;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.slf4j.Logger;
@@ -419,104 +409,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	default <T extends Tag> void processAnnotations() {
-		for (AnnotationProcessor processor : getRootTag().getAnnotationsManager().getProcessors())
-			processAnnotation(processor, this);
+		getRootTag().getAnnotationsManager().processAnnotations(this);
 	}
 
-	static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
-		if (list1.size() != list2.size())
-			return false;
-		for (int i = 0; i < list1.size(); i++)
-			if (!list1.get(i).isAssignableFrom(list2.get(i)))
-				return false;
-		return true;
-	}
-
-	static <T extends Tag> void processAnnotation(AnnotationProcessor processor, Tag tag) {
-		if (!processor.isRepeatable()) {
-			List<Class<?>> classesToResult = new ArrayList<>();
-			Tag current = tag;
-			Annotation applyingAnnotation = null;
-			while (current != null) {
-				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult, tag);
-				if (!DirectSelect.class.equals(processor.getAnnotationClass())) {
-					Class<?> superClass = current.getClass().getSuperclass();
-					while (annotationsFound.isEmpty() && superClass != null) {
-						annotationsFound = selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag);
-						superClass = superClass.getSuperclass();
-					}
-				}
-				if (!annotationsFound.isEmpty())
-					applyingAnnotation = annotationsFound.get(0);
-				classesToResult.add(0, current.getClass());
-				current = current.getParent();
-			}
-			if (applyingAnnotation != null)
-				processor.getProcess().accept(applyingAnnotation, tag);
-		} else {
-			List<Class<?>> classesToResult = new ArrayList<>();
-			Tag current = tag;
-			List<Annotation> applyingAnnotations = new ArrayList<>();
-			while (current != null) {
-				Class<?> superClass = current.getClass();
-				List<Annotation> annotationsFound = new ArrayList<>();
-				while (superClass != null) {
-					annotationsFound.addAll(selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag));
-					superClass = superClass.getSuperclass();
-				}
-				Collections.reverse(annotationsFound);
-				applyingAnnotations.addAll(annotationsFound);
-				classesToResult.add(0, current.getClass());
-				current = current.getParent();
-			}
-			for (Annotation applyingAnnotation : applyingAnnotations)
-				processor.getProcess().accept(applyingAnnotation, tag);
-		}
-	}
-
-	static boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation, Tag testedTag) {
-		if (posAnnotation.length == 0)
-			return true;
-		Tag tag = testedTag;
-		for (int i = pathAnnotation.length - 1; i >= 0; i--) {
-			if (posAnnotation[i] != -1 && position(tag, pathAnnotation[i]) != posAnnotation[i])
-				return false;
-			tag = tag.getParent();
-		}
-		return true;
-	}
-
-	// Assumes that tag is of a class extending tagClass.
-	static int position(Tag tag, Class<?> tagClass) {
-		int result = 0;
-		for (Tag sibling : tag.getParent().getObservableChildren()) {
-			if (sibling.equals(tag))
-				break;
-			if (tagClass.isAssignableFrom(sibling.getClass()))
-				result++;
-		}
-		return result;
-	}
-
-	static List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
-		List<Annotation> annotationsFound = new ArrayList<>();
-		Annotation[] annotations = annotatedClass.getAnnotationsByType(annotationClass);
-		for (Annotation annotation : annotations)
-			try {
-				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
-				int[] pos = (int[]) annotation.annotationType().getDeclaredMethod("pos").invoke(annotation);
-				if (pos.length != 0 && pos.length != path.length)
-					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
-							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + IntStream.of(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
-				if (isAssignableFrom(Arrays.asList(path), classesToResult) && posMatches(pos, path, tag)) {
-					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
-						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
-								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-					annotationsFound.add(annotation);
-				}
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalStateException(e);
-			}
-		return annotationsFound;
-	}
 }

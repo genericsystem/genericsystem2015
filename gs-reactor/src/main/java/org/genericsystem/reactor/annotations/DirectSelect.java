@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiConsumer;
 
+import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DirectSelect.DirectSelects;
 import org.genericsystem.reactor.annotations.DirectSelect.Processor;
@@ -46,7 +47,7 @@ public @interface DirectSelect {
 				if (selects.length == 1 || tagClass == null)
 					tag.select(selects[0]);
 				else
-					tag.select(selects[Tag.position(tag, tagClass)]);
+					tag.select(selects[AnnotationsManager.position(tag, tagClass)]);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new IllegalStateException(e);
 			}
