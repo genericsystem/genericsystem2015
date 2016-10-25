@@ -1,13 +1,16 @@
 package org.genericsystem.reactor.htmltag;
 
+import org.genericsystem.reactor.modelproperties.ActionDefaults;
+
+import java.util.function.Consumer;
+
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
-import org.genericsystem.reactor.modelproperties.ActionDefaults;
-
 import io.vertx.core.json.JsonObject;
+import javafx.beans.property.Property;
 
 public class HtmlInputText extends GSTagImpl implements ActionDefaults {
 
@@ -36,8 +39,11 @@ public class HtmlInputText extends GSTagImpl implements ActionDefaults {
 
 			@Override
 			public void handleMessage(JsonObject json) {
-				if (ADD.equals(json.getString(MSG_TYPE)))
-					((ActionDefaults) getTag()).getAction(getModelContext()).accept(new Object());
+				if (ADD.equals(json.getString(MSG_TYPE))) {
+					Property<Consumer<Object>> action = ((ActionDefaults) getTag()).getActionProperty(getModelContext());
+					if (action != null)
+						action.getValue().accept(new Object());
+				}
 				if (UPDATE.equals(json.getString(MSG_TYPE)))
 					getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(TEXT_CONTENT));
 			}
