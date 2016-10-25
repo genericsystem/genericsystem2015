@@ -23,6 +23,7 @@ import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.Password
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents3.InstanceBuilder.AddButton;
 import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSHolderBuilder;
 import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSMultiCheckboxBuilder;
@@ -46,9 +47,10 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-@Style(path = GSInputTextWithConversion.class, name = "flex", value = "1")
-@Style(path = GSInputTextWithConversion.class, name = "width", value = "100%")
-@Children({ GSInputTextWithConversion.class, Content.class, ButtonDiv.class })
+@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
+@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
+@Children({ Header.class, Content.class, ButtonDiv.class })
+@Children(path = Header.class, value = GSInputTextWithConversion.class)
 @Children(path = Content.class, value = { GSPasswordBuilder.class, GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
 @Children(path = ButtonDiv.class, value = AddButton.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)

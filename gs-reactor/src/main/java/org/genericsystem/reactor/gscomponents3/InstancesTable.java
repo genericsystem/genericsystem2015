@@ -37,7 +37,6 @@ import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
-@Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = GSComposite.class)
 @BindSelection(value = GSComposite.class, valuePos = 2)
@@ -107,14 +106,14 @@ public class InstancesTable extends GSDiv implements SelectionDefaults {
 		public void init() {
 			if (FlexDirection.ROW.equals(getDirection())) {
 				addStyle("flex", "0");
-				addStyle("min-width", "100px");
+				addStyleClass("buttonDiv");
 			} else {
 				addStyle("flex", "1");
 			}
 			getDirectionProperty().addListener((o, v, nv) -> {
 				if (FlexDirection.ROW.equals(nv)) {
 					addStyle("flex", "0");
-					addStyle("min-width", "100px");
+					addStyleClass("buttonDiv");
 				} else {
 					addStyle("flex", "1");
 				}

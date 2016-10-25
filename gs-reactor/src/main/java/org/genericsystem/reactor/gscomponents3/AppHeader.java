@@ -19,7 +19,7 @@ import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
 @Children({ Logo.class, TitleDiv.class })
 public class AppHeader extends GSDiv {
 	@FlexDirectionStyle(FlexDirection.ROW)
-	@Style(name = "flex", value = "0 1 auto")
+	@Style(name = "flex", value = "1 1 0%")
 	@Style(name = "align-items", value = "center")
 	@Children(HtmlImg.class)
 	@Attribute(path = HtmlImg.class, name = "src", value = "logoTransp.png")

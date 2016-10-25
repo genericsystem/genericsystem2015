@@ -1,5 +1,8 @@
 package org.genericsystem.reactor.gscomponents;
 
+import org.genericsystem.reactor.htmltag.HtmlButton;
+import org.genericsystem.reactor.htmltag.HtmlLabel;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -9,9 +12,6 @@ import java.util.Date;
 import org.genericsystem.common.Statics;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
 
 import javafx.beans.binding.Bindings;
 
@@ -31,13 +31,7 @@ public class GSMonitor extends GSDiv {
 				bindAction(Context::flush);
 			}
 		};
-		new HtmlButton(this) {
-			{
-				setText("Cancel");
-				bindAction(Context::cancel);
-			}
-		};
-		middlePart();
+
 		new HtmlLabel(this) {
 			{
 				bindText(context -> Bindings.createStringBinding(() -> {
@@ -47,6 +41,13 @@ public class GSMonitor extends GSDiv {
 					LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault());
 					return "Last update : " + ldt.format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss"));
 				}, context.getTsObservableValue()));
+			}
+		};
+		middlePart();
+		new HtmlButton(this) {
+			{
+				setText("Cancel");
+				bindAction(Context::cancel);
 			}
 		};
 		// new HtmlButton(this) {
