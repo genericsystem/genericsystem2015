@@ -11,14 +11,19 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.gscomponents3.GSSelect.HtmlRepeatedOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
 @Children(HtmlOption.class)
-@BindText(path = HtmlOption.class)
+@BindText(path = HtmlRepeatedOption.class)
 @ForEach(path = HtmlOption.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @GenericValueBackgroundColor(path = HtmlOption.class, value = "")
 public class GSSelect extends HtmlSelect implements SelectionDefaults, ComponentsDefaults {
+
+	public static class HtmlRepeatedOption extends HtmlOption {
+	}
+
 	@Override
 	public void init() {
 		createSelectionProperty();
@@ -31,11 +36,12 @@ public class GSSelect extends HtmlSelect implements SelectionDefaults, Component
 		});
 	}
 
-	@Children({ HtmlOption.class, HtmlOption.class })
-	@SetText(path = HtmlOption.class, pos = 0, value = "")
+	@Children({ HtmlOption.class, HtmlRepeatedOption.class })
+	@SetText(path = HtmlOption.class, value = "")
 	@ForEach(path = HtmlOption.class, pos = 0, value = ObservableListExtractor.NO_FOR_EACH.class)
 	@ForEach(path = HtmlOption.class, pos = 1, value = ObservableListExtractor.SUBINSTANCES.class)
 	public static class GSSelectWithEmptyEntry extends GSSelect {
+
 		@Override
 		public void init() {
 			setSelectionShift(1);
