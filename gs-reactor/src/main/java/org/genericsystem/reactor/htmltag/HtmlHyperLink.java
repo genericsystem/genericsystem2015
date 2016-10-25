@@ -48,7 +48,7 @@ public class HtmlHyperLink extends GSTagImpl implements SelectionDefaults, Stepp
 
 			@Override
 			public void handleMessage(JsonObject json) {
-				((ActionDefaults) getTag()).getAction(getModelContext()).accept(new Object());
+				((ActionDefaults) getTag()).getActionProperty(getModelContext()).getValue().accept(new Object());
 			}
 		};
 	}

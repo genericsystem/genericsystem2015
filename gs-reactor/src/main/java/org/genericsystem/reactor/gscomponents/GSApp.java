@@ -1,8 +1,7 @@
 package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
-import io.vertx.core.http.ServerWebSocket;
+import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
 import java.lang.annotation.Annotation;
 
@@ -10,10 +9,14 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.annotations.CustomAnnotations;
 
-public class GSApp extends RootTagImpl implements SelectionDefaults {
+import io.vertx.core.http.ServerWebSocket;
+
+public class GSApp extends RootTagImpl implements SelectionDefaults, UserRoleDefaults {
 
 	public GSApp() {
 		createSelectionProperty();
+		createLoggedUserProperty();
+		createCurrentModeProperty();
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.model;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
 import java.util.function.BiFunction;
 
@@ -10,6 +11,7 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
@@ -42,6 +44,28 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 					|| (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled()) && !context.getGeneric().isSingularConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])))
 							? context : null,
 					holders);
+		}
+	}
+
+	public static class LOGGED_USER implements ObservableModelSelector {
+		@Override
+		public ObservableValue<Context> apply(Context context, Tag tag) {
+			if (UserRoleDefaults.class.isAssignableFrom(tag.getClass())) {
+				Property<Generic> loggedUserProperty = ((UserRoleDefaults) tag).getLoggedUserProperty(context);
+				return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null ? context : null, loggedUserProperty);
+			} else
+				throw new IllegalStateException("LOGGED_USER is applicable only to tags implementing UserRoleDefaults.");
+		}
+	}
+
+	public static class NO_LOGGED_USER implements ObservableModelSelector {
+		@Override
+		public ObservableValue<Context> apply(Context context, Tag tag) {
+			if (UserRoleDefaults.class.isAssignableFrom(tag.getClass())) {
+				Property<Generic> loggedUserProperty = ((UserRoleDefaults) tag).getLoggedUserProperty(context);
+				return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null ? null : context, loggedUserProperty);
+			} else
+				throw new IllegalStateException("NO_LOGGED_USER is applicable only to tags implementing UserRoleDefaults.");
 		}
 	}
 }
