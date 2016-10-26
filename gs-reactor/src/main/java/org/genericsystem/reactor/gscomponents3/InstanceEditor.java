@@ -105,6 +105,8 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@ForEach(path = CheckboxLabel.class, value = SUBINSTANCES_OF_LINK_COMPONENT.class)
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")
+	@Style(name = "margin-right", value = "1px")
+	@Style(name = "margin-bottom", value = "1px")
 	public static class GSMultiCheckbox extends GSDiv {
 	}
 
