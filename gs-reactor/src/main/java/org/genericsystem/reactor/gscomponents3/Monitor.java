@@ -16,6 +16,7 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.Mode;
 import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -24,14 +25,17 @@ import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoggedUserDiv;
 import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
+import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
 import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoginDiv.ValidateButton;
+import org.genericsystem.reactor.model.ContextAction;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
 import org.genericsystem.reactor.model.ContextAction.FLUSH;
 import org.genericsystem.reactor.model.ContextAction.GC;
 import org.genericsystem.reactor.model.ContextAction.MOUNT;
 import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
+import org.genericsystem.reactor.model.ModeSelector;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 import org.genericsystem.reactor.model.TextBinding;
 import org.genericsystem.security.model.User;
@@ -68,13 +72,24 @@ public class Monitor extends GSDiv {
 	public static class MonitorLogin extends Monitor implements UserRoleDefaults {
 
 		@SelectModel(ObservableModelSelector.LOGGED_USER.class)
-		@Children({ HtmlLabel.class, DisconnectButton.class })
+		@Children({ ModeSwitchButtons.class, HtmlLabel.class, DisconnectButton.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
 		public static class LoggedUserDiv extends GSDiv implements UserRoleDefaults {
 			@Override
 			public void init() {
 				find(HtmlLabel.class).bindText(context -> Bindings.createStringBinding(() -> getLoggedUserProperty(context).getValue() != null ? "Current user: " + (String) getLoggedUserProperty(context).getValue().getValue() : "No user logged.",
 						getLoggedUserProperty(context)));
+			}
+
+			@Children({ HtmlButton.class, HtmlButton.class })
+			@SetText(path = HtmlButton.class, pos = 0, value = "Admin mode")
+			@SetText(path = HtmlButton.class, pos = 1, value = "User mode")
+			@SelectModel(ObservableModelSelector.LOGGED_USER_ADMIN.class)
+			@Mode(path = HtmlButton.class, pos = 0, value = ModeSelector.NORMAL_MODE_ONLY.class)
+			@Mode(path = HtmlButton.class, pos = 1, value = ModeSelector.ADMIN_MODE_ONLY.class)
+			@BindAction(path = HtmlButton.class, pos = 0, value = ContextAction.SET_ADMIN_MODE.class)
+			@BindAction(path = HtmlButton.class, pos = 1, value = ContextAction.SET_NORMAL_MODE.class)
+			public static class ModeSwitchButtons extends GSDiv {
 			}
 
 			@SetText("Disconnect")

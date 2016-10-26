@@ -9,6 +9,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.security.model.Role.Admin;
+import org.genericsystem.security.model.UserRole;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -50,22 +52,25 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 	public static class LOGGED_USER implements ObservableModelSelector {
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
-			if (UserRoleDefaults.class.isAssignableFrom(tag.getClass())) {
-				Property<Generic> loggedUserProperty = ((UserRoleDefaults) tag).getLoggedUserProperty(context);
-				return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null ? context : null, loggedUserProperty);
-			} else
-				throw new IllegalStateException("LOGGED_USER is applicable only to tags implementing UserRoleDefaults.");
+			Property<Generic> loggedUserProperty = ((UserRoleDefaults) tag).getLoggedUserProperty(context);
+			return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null ? context : null, loggedUserProperty);
 		}
 	}
 
 	public static class NO_LOGGED_USER implements ObservableModelSelector {
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
-			if (UserRoleDefaults.class.isAssignableFrom(tag.getClass())) {
-				Property<Generic> loggedUserProperty = ((UserRoleDefaults) tag).getLoggedUserProperty(context);
-				return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null ? null : context, loggedUserProperty);
-			} else
-				throw new IllegalStateException("NO_LOGGED_USER is applicable only to tags implementing UserRoleDefaults.");
+			Property<Generic> loggedUserProperty = ((UserRoleDefaults) tag).getLoggedUserProperty(context);
+			return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null ? null : context, loggedUserProperty);
+		}
+	}
+
+	public static class LOGGED_USER_ADMIN implements ObservableModelSelector {
+		@Override
+		public ObservableValue<Context> apply(Context context, Tag tag) {
+			Property<Generic> loggedUserProperty = tag.getLoggedUserProperty(context);
+			ObservableValue<Generic> adminObservable = context.find(Admin.class).getObservableLink(context.find(UserRole.class), loggedUserProperty.getValue());
+			return Bindings.createObjectBinding(() -> loggedUserProperty.getValue() != null && adminObservable.getValue() != null ? context : null, loggedUserProperty, adminObservable);
 		}
 	}
 }

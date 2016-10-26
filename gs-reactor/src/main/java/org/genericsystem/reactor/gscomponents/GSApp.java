@@ -16,7 +16,7 @@ public class GSApp extends RootTagImpl implements SelectionDefaults, UserRoleDef
 	public GSApp() {
 		createSelectionProperty();
 		createLoggedUserProperty();
-		createCurrentModeProperty();
+		createAdminModeProperty();
 	}
 
 	@Override

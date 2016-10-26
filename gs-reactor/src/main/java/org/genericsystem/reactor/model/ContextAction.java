@@ -177,4 +177,18 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				log.warn("The NEXT action is applicable only to a tag implementing SwitchDefaults.");
 		}
 	}
+
+	public static class SET_ADMIN_MODE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getAdminModeProperty(context).setValue(true);
+		}
+	}
+
+	public static class SET_NORMAL_MODE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getAdminModeProperty(context).setValue(false);
+		}
+	}
 }

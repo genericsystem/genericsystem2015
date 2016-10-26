@@ -11,6 +11,7 @@ import org.genericsystem.reactor.Tag.RootTag;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.SetChangeListener;
 
@@ -55,40 +56,37 @@ public class HtmlDomNode {
 		this.modelContext = modelContext;
 	}
 
-	// <BETWEEN> ListChangeListener<Tag> getListChangeListener() {
-	// return change -> {
-	// while (change.next()) {
-	// if (change.wasRemoved()) {
-	// for (Tag childTag : change.getRemoved()) {
-	// MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-	// if (metaBinding != null) {
-	// modelContext.getSubContexts(childTag).removeAll();// destroy subcontexts
-	// modelContext.removeSubContexts(childTag);// remove tag ref
-	// }
-	// sizeBySubTag.remove(childTag);
-	// }
-	// }
-	// if (change.wasAdded()) {
-	// int index = change.getFrom();
-	// for (Tag childTag : change.getAddedSubList()) {
-	// MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-	// if (metaBinding != null) {
-	// modelContext.setSubContexts(childTag, new
-	// TransformationObservableList<BETWEEN,
-	// Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) ->
-	// {
-	// Context childModel = metaBinding.buildModel(modelContext, between);
-	// createChildDomNode(i, childModel, childTag);
-	// return childModel;
-	// }, Context::destroy));
-	// } else
-	// createChildDomNode(index++, modelContext, childTag);
-	// }
-	// }
-	// }
-	//
-	// };
-	// }
+	<BETWEEN> ListChangeListener<Tag> getListChangeListener() {
+		return change -> {
+			while (change.next()) {
+				if (change.wasRemoved()) {
+					for (Tag childTag : change.getRemoved()) {
+						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+						modelContext.getHtmlDomNode(childTag).sendRemove();
+						if (metaBinding != null) {
+							modelContext.getSubContexts(childTag).removeAll();// destroy subcontexts
+							modelContext.removeSubContexts(childTag);// remove tag ref
+						}
+						sizeBySubTag.remove(childTag);
+					}
+				}
+				if (change.wasAdded()) {
+					int index = change.getFrom();
+					for (Tag childTag : change.getAddedSubList()) {
+						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
+						if (metaBinding != null) {
+							modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
+								Context childModel = metaBinding.buildModel(modelContext, between);
+								createChildDomNode(i, childModel, childTag);
+								return childModel;
+							}, Context::destroy));
+						} else
+							createChildDomNode(index++, modelContext, childTag);
+					}
+				}
+			}
+		};
+	}
 
 	protected <BETWEEN> void init(int index) {
 		modelContext.register(this);
@@ -96,7 +94,7 @@ public class HtmlDomNode {
 			insertChild(index);
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext);
-		for (Tag childTag : tag.getObservableChildren()) {
+		for (Tag childTag : tag.getObservableChildren(modelContext)) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
 				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
@@ -108,7 +106,7 @@ public class HtmlDomNode {
 				}, Context::destroy));
 			} else
 				createChildDomNode(0, modelContext, childTag);
-
+			tag.getObservableChildren(modelContext).addListener(getListChangeListener());
 		}
 		for (Consumer<Context> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext);
@@ -282,7 +280,7 @@ public class HtmlDomNode {
 		private final String rootId;
 
 		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, ServerWebSocket webSocket) {
-			super(null, rootModelContext, (Tag) rootTag);
+			super(null, rootModelContext, rootTag);
 			this.rootId = rootId;
 			this.webSocket = webSocket;
 			sendAdd(0);
