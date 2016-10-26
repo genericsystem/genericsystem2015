@@ -29,13 +29,12 @@ section .adding {
 	font-weight : bold;
 	font-size : 108%;
 	-webkit-backface-visibility: hidden;
-	-webkit-filter: opacity(89%);
-  	-moz-filter: opacity(89%);
-  	-o-filter: opacity(89%);
-  	-ms-filter: opacity(89%);
-  	filter: opacity(89%);
+/* 	-webkit-filter: opacity(89%); */
+/*   	-moz-filter: opacity(89%); */
+/*   	-o-filter: opacity(89%); */
+/*   	-ms-filter: opacity(89%); */
+/*   	filter: opacity(89%); */
 }
-
 /* section .removing {
 	animation: disappeareffect 2s forwards;
 }
