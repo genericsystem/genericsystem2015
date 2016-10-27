@@ -61,12 +61,7 @@ public class HtmlDomNode {
 			while (change.next()) {
 				if (change.wasRemoved()) {
 					for (Tag childTag : change.getRemoved()) {
-						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-						modelContext.getHtmlDomNode(childTag).sendRemove();
-						if (metaBinding != null) {
-							modelContext.getSubContexts(childTag).removeAll();// destroy subcontexts
-							modelContext.removeSubContexts(childTag);// remove tag ref
-						}
+						recursiveRemove(modelContext, childTag);
 						sizeBySubTag.remove(childTag);
 					}
 				}
@@ -80,12 +75,35 @@ public class HtmlDomNode {
 								createChildDomNode(i, childModel, childTag);
 								return childModel;
 							}, Context::destroy));
-						} else
-							createChildDomNode(index++, modelContext, childTag);
+						} else {
+							if (modelContext.getHtmlDomNode(childTag) == null)
+								createChildDomNode(index++, modelContext, childTag);
+						}
 					}
 				}
 			}
 		};
+	}
+
+	private void recursiveRemove(Context context, Tag tag) {
+		System.out.println("recursiveRemove, tag: " + tag.getClass().getSimpleName());
+		if (tag.getMetaBinding() == null) {
+			for (Tag childTag : tag.getObservableChildren())
+				recursiveRemove(context, childTag);
+			if (context.getHtmlDomNode(tag) != null)
+				context.getHtmlDomNode(tag).sendRemove();
+			context.removeProperties(tag);
+			context.removeHtmlDomNode(tag);
+		} else {
+			for (Context subContext : context.getSubContexts(tag)) {
+				if (subContext.getHtmlDomNode(tag) != null)
+					subContext.getHtmlDomNode(tag).sendRemove();
+				subContext.removeProperties(tag);
+				subContext.removeHtmlDomNode(tag);
+			}
+			context.getSubContexts(tag).removeAll();// destroy subcontexts
+			context.removeSubContexts(tag);// remove tag ref
+		}
 	}
 
 	protected <BETWEEN> void init(int index) {

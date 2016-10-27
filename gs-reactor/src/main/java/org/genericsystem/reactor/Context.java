@@ -89,6 +89,14 @@ public class Context {
 		subContextsMap.remove(tag);
 	}
 
+	public void removeProperties(Tag tag) {
+		propertiesMap.remove(tag);
+	}
+
+	public void removeHtmlDomNode(Tag tag) {
+		htmlDomNodesMap.remove(tag);
+	}
+
 	void setSubContexts(Tag tag, ObservableList<Context> subContexts) {
 		assert subContextsMap.get(tag) == null;
 		subContextsMap.put(tag, subContexts);
