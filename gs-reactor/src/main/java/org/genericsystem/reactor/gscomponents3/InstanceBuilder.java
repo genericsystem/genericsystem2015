@@ -119,6 +119,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 	@Children({ Header.class, Content.class })
 	@Children(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
 	@Children(path = Content.class, value = ComponentAdderSelect.class)
+	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	public static class GSHolderBuilder extends GSHolderAdder implements GSBuilderDefaults, ComponentsDefaults {
