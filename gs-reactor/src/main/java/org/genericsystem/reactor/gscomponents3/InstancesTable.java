@@ -36,6 +36,7 @@ import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
+import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE;
 
 @Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = GSComposite.class)
@@ -58,6 +59,7 @@ public class InstancesTable extends GSDiv implements SelectionDefaults {
 	@GenericValueBackgroundColor(path = { GSValueComponents.class, GSDiv.class }, value = "#ea0084")
 	@Style(name = "color", value = "white")
 	@Children(path = { GSValueComponents.class, Header.class }, value = GSLabelDisplayer.class)
+	@Select(path = { GSValueComponents.class, Header.class }, value = STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	public static class HeaderRow extends GSComposite {
 	}
 

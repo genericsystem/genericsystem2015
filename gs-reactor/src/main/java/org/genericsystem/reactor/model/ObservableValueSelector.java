@@ -23,7 +23,14 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 	public static class STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return gs[0].getComponents().size() < 2 || Boolean.class.equals(gs[1].getInstanceValueClassConstraint()) ? gs[0] : null;
+			return gs[1].getComponents().size() < 2 || Boolean.class.equals(gs[1].getInstanceValueClassConstraint()) ? gs[0] : null;
+		}
+	}
+
+	public static class STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE implements ObservableValueSelector {
+		@Override
+		public Generic apply(Generic[] gs) {
+			return gs[0].getComponents().size() < 2 || Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 
