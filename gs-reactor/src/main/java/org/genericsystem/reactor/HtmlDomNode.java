@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 
 public class HtmlDomNode {
@@ -70,15 +71,14 @@ public class HtmlDomNode {
 					for (Tag childTag : change.getAddedSubList()) {
 						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 						if (metaBinding != null) {
-							modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
-								Context childModel = metaBinding.buildModel(modelContext, between);
-								createChildDomNode(i, childModel, childTag);
-								return childModel;
-							}, Context::destroy));
-						} else {
-							if (modelContext.getHtmlDomNode(childTag) == null)
-								createChildDomNode(index++, modelContext, childTag);
-						}
+							if (modelContext.getSubContexts(childTag) == null)
+								modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
+									Context childModel = metaBinding.buildModel(modelContext, between);
+									childTag.createNode(this, childModel).init(computeIndex(i, childTag));
+									return childModel;
+								}, Context::destroy));
+						} else if (modelContext.getHtmlDomNode(childTag) == null)
+							childTag.createNode(this, modelContext).init(index++);
 					}
 				}
 			}
@@ -86,7 +86,6 @@ public class HtmlDomNode {
 	}
 
 	private void recursiveRemove(Context context, Tag tag) {
-		System.out.println("recursiveRemove, tag: " + tag.getClass().getSimpleName());
 		if (tag.getMetaBinding() == null) {
 			for (Tag childTag : tag.getObservableChildren())
 				recursiveRemove(context, childTag);
@@ -94,12 +93,11 @@ public class HtmlDomNode {
 				context.getHtmlDomNode(tag).sendRemove();
 			context.removeProperties(tag);
 			context.removeHtmlDomNode(tag);
-		} else {
+		} else if (context.getSubContexts(tag) != null) {
 			for (Context subContext : context.getSubContexts(tag)) {
 				if (subContext.getHtmlDomNode(tag) != null)
 					subContext.getHtmlDomNode(tag).sendRemove();
 				subContext.removeProperties(tag);
-				subContext.removeHtmlDomNode(tag);
 			}
 			context.getSubContexts(tag).removeAll();// destroy subcontexts
 			context.removeSubContexts(tag);// remove tag ref
@@ -112,26 +110,23 @@ public class HtmlDomNode {
 			insertChild(index);
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(modelContext);
-		for (Tag childTag : tag.getObservableChildren(modelContext)) {
+		ObservableList<Tag> children = tag.getObservableChildren(modelContext);
+		for (Tag childTag : children) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
 				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
 					Context childContext = metaBinding.buildModel(modelContext, between);
-					createChildDomNode(i, childContext, childTag);
+					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
 					if (childContext.isOpaque())
 						childTag.addStyleClass(childContext, "opaque");
 					return childContext;
 				}, Context::destroy));
 			} else
-				createChildDomNode(0, modelContext, childTag);
-			tag.getObservableChildren(modelContext).addListener(getListChangeListener());
+				childTag.createNode(this, modelContext).init(computeIndex(0, childTag));
+			children.addListener(getListChangeListener());
 		}
 		for (Consumer<Context> binding : tag.getPostFixedBindings())
 			binding.accept(modelContext);
-	}
-
-	public void createChildDomNode(int index, Context childContext, Tag childTag) {
-		childTag.createNode(this, childContext).init(computeIndex(index, childTag));
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {
