@@ -25,10 +25,6 @@ public interface GSBuilderDefaults extends ContextProperty {
 		private Property<Serializable> value = new SimpleObjectProperty<>();
 		private List<Property<Context>> components = new ArrayList<>();
 
-		public GenericValueComponents() {
-			System.out.println("DEDANS");
-		}
-
 		public Property<Serializable> getGenericValue() {
 			return value;
 		}
