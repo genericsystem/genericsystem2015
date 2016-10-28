@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Mode.Modes;
 import org.genericsystem.reactor.annotations.Mode.ModeProcessor;
+import org.genericsystem.reactor.annotations.Mode.Modes;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ModeSelector;
 

@@ -10,6 +10,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 
 public interface GSBuilderDefaults extends ContextProperty {
@@ -18,6 +19,44 @@ public interface GSBuilderDefaults extends ContextProperty {
 	public static final String HOLDERS_MAP = "holdersMap";
 	public static final String INVALID_LIST = "invalidList";
 	public static final String MULTIPLE_RELATION = "multipleRelation";
+	public static final String VALUE_COMPONENTS_MAP = "valueComponentsMap";
+
+	public static class GenericValueComponents {
+		private Property<Serializable> value = new SimpleObjectProperty<>();
+		private List<Property<Context>> components = new ArrayList<>();
+
+		public Property<Serializable> getGenericValue() {
+			return value;
+		}
+
+		public void setGenericValue(Property<Serializable> value) {
+			this.value = value;
+		}
+
+		public List<Property<Context>> getComponents() {
+			return components;
+		}
+
+		public void setComponents(List<Property<Context>> components) {
+			this.components = components;
+		}
+
+	}
+
+	default void createValueComponentsMapProperty() {
+		createNewInitializedProperty(VALUE_COMPONENTS_MAP, model -> new HashMap<Generic, GenericValueComponents>() {
+			private static final long serialVersionUID = -435743147955810836L;
+
+			@Override
+			public GenericValueComponents get(Object key) {
+				GenericValueComponents result = super.get(key);
+				if (result == null)
+					put((Generic) key, result = new GenericValueComponents());
+				return result;
+			};
+
+		});
+	}
 
 	default void createHoldersMapProperty() {
 		createNewInitializedProperty(HOLDERS_MAP, model -> new HashMap<Generic, Property<Serializable>>());
@@ -37,6 +76,10 @@ public interface GSBuilderDefaults extends ContextProperty {
 
 	default Property<List<ObservableValue<Boolean>>> getInvalidListProperty(Context model) {
 		return getProperty(INVALID_LIST, model);
+	}
+
+	default Property<Map<Generic, GenericValueComponents>> getGenericValueComponents(Context context) {
+		return getProperty(VALUE_COMPONENTS_MAP, context);
 	}
 
 	default Property<Map<Generic, Property<Serializable>>> getHoldersMapProperty(Context model) {
