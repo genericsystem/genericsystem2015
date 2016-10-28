@@ -1,14 +1,15 @@
 package org.genericsystem.reactor.model;
 
+import java.util.function.BiFunction;
+
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gscomponents.GSTagImpl.TriFunction;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
-public interface ModeSelector extends TriFunction<Context, Tag, ObservableValue<Boolean>> {
+public interface ModeSelector extends BiFunction<Context, Tag, ObservableValue<Boolean>> {
 
 	public static class NORMAL_MODE_ONLY implements ModeSelector {
 		@Override
