@@ -95,9 +95,7 @@ public abstract class GSTagImpl implements Tag {
 			});
 		ObservableList<Tag> extObs = new ObservableListWrapperExtended<Tag>(children, child -> getExtractors(context).get(child));
 		filteredChildren = new FilteredList<Tag>(extObs, child -> Boolean.TRUE.equals(getExtractors(context).get(child)[0].getValue()));
-		// TODO: Garder transmitSuccessiveInvalidations ou non ?
-		// TODO: ajouter MinimalChangesObservableList
-		//		filteredChildren = new ListBinding<Tag>() {
+		//		filteredChildren = new MinimalChangesObservableList<Tag>(new ListBinding<Tag>() {
 		//			{
 		//				for (Tag child : children)
 		//					if (child.getModeSelector() != null)
@@ -108,7 +106,7 @@ public abstract class GSTagImpl implements Tag {
 		//			protected ObservableList<Tag> computeValue() {
 		//				return children.filtered(child -> child.getModeSelector() != null ? Boolean.TRUE.equals(child.getModeSelector().apply(context, child).getValue()) : true);
 		//			}
-		//		};
+		//		});
 		return filteredChildren;
 	}
 
