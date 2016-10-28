@@ -43,7 +43,6 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Children({ InstanceNameBuilder.class, BuilderCell.class, AddButtonDiv.class })
@@ -53,8 +52,7 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 	@Override
 	public void init() {
-		createHoldersMapProperty();
-		createComponentsMapProperty();
+		createValueComponentsMapProperty();
 		createInvalidListProperty();
 	}
 
@@ -85,11 +83,11 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 				@Override
 				public void init() {
-					addPrefixBinding(model -> {
-						if (getHoldersMapProperty(model) != null)
-							getHoldersMapProperty(model).getValue().put(model.getGeneric(), getConvertedValueProperty(model));
-						if (getInvalidListProperty(model) != null)
-							getInvalidListProperty(model).getValue().add(getInvalidObservable(model));
+					addPrefixBinding(context -> {
+						if (getGenericValueComponents(context) != null)
+							getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+						if (getInvalidListProperty(context) != null)
+							getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 					});
 				}
 			}
@@ -105,9 +103,9 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 					@Override
 					public void init() {
-						addPrefixBinding(model -> {
-							if (getHoldersMapProperty(model) != null)
-								getHoldersMapProperty(model).getValue().put(model.getGeneric(), getConvertedValueProperty(model));
+						addPrefixBinding(context -> {
+							if (getGenericValueComponents(context) != null)
+								getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
 						});
 					}
 				}
@@ -121,9 +119,9 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 			@Override
 			public void init() {
 				super.init();
-				addPostfixBinding(model -> {
-					if (getComponentsMapProperty(model) != null)
-						getComponentsMapProperty(model).getValue().put(model.getGeneric(), getComponentsProperty(model).getValue());
+				addPostfixBinding(context -> {
+					if (getGenericValueComponents(context) != null)
+						getGenericValueComponents(context).getValue().get(context.getGeneric()).setComponents(getComponentsProperty(context).getValue());
 				});
 			}
 
@@ -146,24 +144,20 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 			public void init() {
 				setText("Add");
 				bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED,
-						model -> Bindings.createStringBinding(
-								() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
-								getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
-				bindAction(model -> {
+						context -> Bindings.createStringBinding(
+								() -> Boolean.TRUE.equals(getInvalidListProperty(context).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
+								getInvalidListProperty(context).getValue().stream().toArray(ObservableValue[]::new)));
+				bindAction(context -> {
 					ConvertedValueDefaults input = getParent().getParent().find(InstanceNameBuilder.class).find(InstanceNameBuilderInput.class);
-					Generic newInstance = model.getGeneric().setInstance(input.getConvertedValueProperty(model).getValue());
-					for (Entry<Generic, Property<Serializable>> entry : getHoldersMapProperty(model).getValue().entrySet())
-						if (entry.getValue().getValue() != null) {
-							newInstance.setHolder(entry.getKey(), entry.getValue().getValue());
-							entry.getValue().setValue(null);
-						}
-					for (Entry<Generic, List<Property<Context>>> entry : getComponentsMapProperty(model).getValue().entrySet()) {
-						List<Generic> selectedGenerics = entry.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
+					Generic newInstance = context.getGeneric().setInstance(input.getConvertedValueProperty(context).getValue());
+					for (Entry<Generic, GenericValueComponents> entry : getGenericValueComponents(context).getValue().entrySet()) {
+						List<Generic> selectedGenerics = entry.getValue().getComponents().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
 						if (!selectedGenerics.isEmpty() && selectedGenerics.size() + 1 == entry.getKey().getComponents().size())
-							newInstance.setHolder(entry.getKey(), null, selectedGenerics.stream().toArray(Generic[]::new));
-						entry.getValue().stream().forEach(sel -> sel.setValue(null));
+							newInstance.setHolder(entry.getKey(), entry.getValue().getGenericValue().getValue(), selectedGenerics.stream().toArray(Generic[]::new));
+						entry.getValue().getGenericValue().setValue(null);
+						entry.getValue().getComponents().stream().forEach(sel -> sel.setValue(null));
 					}
-					input.getConvertedValueProperty(model).setValue(null);
+					input.getConvertedValueProperty(context).setValue(null);
 				});
 			}
 		}

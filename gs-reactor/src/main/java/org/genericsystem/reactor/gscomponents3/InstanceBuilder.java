@@ -61,8 +61,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 
 	@Override
 	public void init() {
-		createHoldersMapProperty();
-		createComponentsMapProperty();
+		createValueComponentsMapProperty();
 		createInvalidListProperty();
 		createMultipleRelationProperty();
 		createSaltProperty();
@@ -81,7 +80,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 			});
 			addPrefixBinding(context -> {
 				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
-				getHoldersMapProperty(context).getValue().put(context.getGeneric(), getConvertedValueProperty(context));
+				getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
 				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
@@ -127,9 +126,9 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 		@Override
 		public void init() {
 			createComponentsListProperty();
-			addPostfixBinding(model -> {
-				if (getComponentsMapProperty(model) != null)
-					getComponentsMapProperty(model).getValue().put(model.getGeneric(), getComponentsProperty(model).getValue());
+			addPostfixBinding(context -> {
+				if (getGenericValueComponents(context) != null)
+					getGenericValueComponents(context).getValue().get(context.getGeneric()).setComponents(getComponentsProperty(context).getValue());
 			});
 		}
 	}
