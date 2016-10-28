@@ -1,12 +1,14 @@
-package org.genericsystem.carcolor.model.extended;
+package org.genericsystem.extendedcarcolor.model;
 
 import org.genericsystem.api.core.annotations.Components;
+import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 
 @SystemGeneric
-@Components({ Car.class, Color.class })
+@Components({ Vehicle.class, Color.class })
 @SingularConstraint
-public class CarColor {
+@Dependencies({ Vehicle.class, Color.class })
+public class VehicleColor {
 
 }

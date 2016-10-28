@@ -51,7 +51,7 @@
 		<module>gs-example-javafx</module>
 		<module>gs-todomvc</module>
 		<module>gs-carcolor-model</module>
-		<module>gs-carcolor-model2</module>
+		<module>gs-extendedcarcolor-model</module>
 		<module>gs-security-model</module>
 		<module>gs-security</module>
 	</modules>
