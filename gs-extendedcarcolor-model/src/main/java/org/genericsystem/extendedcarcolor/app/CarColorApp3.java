@@ -66,6 +66,10 @@ public class CarColorApp3 extends GSApp {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp3.class, "cars2");
 	}
 
+	public CarColorApp3() {
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+	}
+
 	@Children({ TitledInstancesTable.class, TitledInstancesTable.class })
 	@DirectSelect(path = TitledInstancesTable.class, value = { Bike.class, Car.class })
 	@Style(name = "flex", value = "1")
