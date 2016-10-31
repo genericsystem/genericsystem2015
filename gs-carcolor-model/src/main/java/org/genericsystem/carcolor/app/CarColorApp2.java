@@ -43,6 +43,10 @@ public class CarColorApp2 extends GSApp {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp2.class, "/cars");
 	}
 
+	public CarColorApp2() {
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+	}
+
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1")
