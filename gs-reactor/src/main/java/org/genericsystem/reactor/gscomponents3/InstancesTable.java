@@ -12,6 +12,7 @@ import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.Mode;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -37,7 +38,9 @@ import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE;
+import org.genericsystem.reactor.model.TagSelector;
 
+@Mode(path = { GSDiv.class, ButtonDiv.class }, pos = { -1, 0 }, value = TagSelector.ADMIN_MODE_ONLY.class)
 @Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = GSComposite.class)
 @BindSelection(value = GSComposite.class, valuePos = 2)
