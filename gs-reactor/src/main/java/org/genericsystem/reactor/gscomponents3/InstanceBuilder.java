@@ -15,6 +15,7 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.Mode;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -42,11 +43,13 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
 import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.model.TagSelector;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
+@Mode(TagSelector.ADMIN_MODE_ONLY.class)
 @Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
 @Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
 @Children({ Header.class, Content.class, ButtonDiv.class })

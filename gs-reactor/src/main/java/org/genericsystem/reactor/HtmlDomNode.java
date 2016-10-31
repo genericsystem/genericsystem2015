@@ -76,7 +76,6 @@ public class HtmlDomNode {
 					}
 				}
 				if (change.wasAdded()) {
-					int index = change.getFrom();
 					for (Tag childTag : change.getAddedSubList()) {
 						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 						if (metaBinding != null) {
@@ -87,7 +86,7 @@ public class HtmlDomNode {
 									return childModel;
 								}, Context::destroy));
 						} else if (context.getHtmlDomNode(childTag) == null)
-							childTag.createNode(this, context).init(index++);
+							childTag.createNode(this, context).init(computeIndex(0, childTag));
 					}
 				}
 			}
