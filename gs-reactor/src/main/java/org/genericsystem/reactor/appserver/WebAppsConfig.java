@@ -16,7 +16,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.model.RootModel;
+import org.genericsystem.reactor.model.RootContext;
 
 /**
  * @author Nicolas Feybesse
@@ -144,7 +144,7 @@ public class WebAppsConfig extends JsonObject {
 	public static class SimpleWebAppConfig extends WebAppsConfig {
 		public SimpleWebAppConfig(String[] mainArgs, Class<? extends GSApp> htmlAppClass, String homePersistentDirectoryPath) {
 			super(mainArgs);
-			addApplication("/", htmlAppClass, RootModel.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
+			addApplication("/", htmlAppClass, RootContext.class, Engine.class, System.getenv("HOME") + "/genericsystem/" + homePersistentDirectoryPath);
 		}
 	}
 

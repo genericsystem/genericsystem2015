@@ -8,6 +8,8 @@ import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -17,17 +19,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
-import org.genericsystem.reactor.model.ModeSelector;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -37,6 +28,16 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.TagSelector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -235,9 +236,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	@Override
-	default <T> void createNewInitializedProperty(String propertyName, Context model, Function<Context, T> getInitialValue) {
-		model.createNewProperty(this, propertyName);
-		getProperty(propertyName, model).setValue(getInitialValue.apply(model));
+	default <T> void createNewInitializedProperty(String propertyName, Context context, Function<Context, T> getInitialValue) {
+		context.createNewProperty(this, propertyName);
+		getProperty(propertyName, context).setValue(getInitialValue.apply(context));
 	}
 
 	@Override
@@ -257,8 +258,8 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	}
 
 	@Override
-	default <T> void storeProperty(String propertyName, Context model, Function<Context, ObservableValue<T>> applyOnModel) {
-		model.storeProperty(this, propertyName, applyOnModel.apply(model));
+	default <T> void storeProperty(String propertyName, Context context, Function<Context, ObservableValue<T>> applyOnModel) {
+		context.storeProperty(this, propertyName, applyOnModel.apply(context));
 	}
 
 	default void addStyle(String propertyName, String value) {
@@ -349,8 +350,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 
 	public ObservableList<Tag> getObservableChildren();
 
-	public ObservableList<Tag> getObservableChildren(Context context);
-
 	default void init() {
 	}
 
@@ -363,9 +362,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return getParent().getRootTag();
 	}
 
-	public ModeSelector getModeSelector();
+	public TagSelector getTagSelector();
 
-	public void setModeSelector(ModeSelector modeSelector);
+	public void setTagSelector(TagSelector modeSelector);
 
 	public static interface RootTag extends Tag {
 		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {

@@ -12,7 +12,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Mode.ModeProcessor;
 import org.genericsystem.reactor.annotations.Mode.Modes;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
-import org.genericsystem.reactor.model.ModeSelector;
+import org.genericsystem.reactor.model.TagSelector;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
@@ -23,7 +23,7 @@ public @interface Mode {
 
 	int[] pos() default {};
 
-	Class<? extends ModeSelector> value();
+	Class<? extends TagSelector> value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
@@ -36,7 +36,7 @@ public @interface Mode {
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			try {
-				tag.setModeSelector(((Mode) annotation).value().newInstance());
+				tag.setTagSelector(((Mode) annotation).value().newInstance());
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}

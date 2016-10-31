@@ -1,20 +1,26 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
+
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.RootTag;
-
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.collections.transformation.FilteredList;
+
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Tag.RootTag;
+import org.genericsystem.reactor.model.TagSelector;
 
 public class HtmlDomNode {
 
@@ -48,21 +54,24 @@ public class HtmlDomNode {
 	private final String id;
 	private HtmlDomNode parent;
 	private Tag tag;
-	private Context modelContext;
+	private Context context;
 
-	public HtmlDomNode(HtmlDomNode parent, Context modelContext, Tag tag) {
+	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
 		this.tag = tag;
-		this.modelContext = modelContext;
+		this.context = context;
 	}
 
+	private ListChangeListener<Tag> listener;
+
 	<BETWEEN> ListChangeListener<Tag> getListChangeListener() {
-		return change -> {
+		return listener != null ? listener : (listener = change -> {
+			System.out.println("Listener : " + change + " on tag " + tag + " on node : " + this);
 			while (change.next()) {
 				if (change.wasRemoved()) {
 					for (Tag childTag : change.getRemoved()) {
-						recursiveRemove(modelContext, childTag);
+						recursiveRemove(context, childTag);
 						sizeBySubTag.remove(childTag);
 					}
 				}
@@ -71,23 +80,23 @@ public class HtmlDomNode {
 					for (Tag childTag : change.getAddedSubList()) {
 						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 						if (metaBinding != null) {
-							if (modelContext.getSubContexts(childTag) == null)
-								modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
-									Context childModel = metaBinding.buildModel(modelContext, between);
+							if (context.getSubContexts(childTag) == null)
+								context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
+									Context childModel = metaBinding.buildModel(context, between);
 									childTag.createNode(this, childModel).init(computeIndex(i, childTag));
 									return childModel;
 								}, Context::destroy));
-						} else if (modelContext.getHtmlDomNode(childTag) == null)
-							childTag.createNode(this, modelContext).init(index++);
+						} else if (context.getHtmlDomNode(childTag) == null)
+							childTag.createNode(this, context).init(index++);
 					}
 				}
 			}
-		};
+		});
 	}
 
 	private void recursiveRemove(Context context, Tag tag) {
 		if (tag.getMetaBinding() == null) {
-			for (Tag childTag : tag.getObservableChildren())
+			for (Tag childTag : context.getRootContext().getObservableChildren(tag))
 				recursiveRemove(context, childTag);
 			if (context.getHtmlDomNode(tag) != null)
 				context.getHtmlDomNode(tag).sendRemove();
@@ -105,32 +114,46 @@ public class HtmlDomNode {
 	}
 
 	protected <BETWEEN> void init(int index) {
-		modelContext.register(this);
+		context.register(this);
 		if (parent != null)
 			insertChild(index);
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
-			binding.accept(modelContext);
-		ObservableList<Tag> children = tag.getObservableChildren(modelContext);
+			binding.accept(context);
+
+		assert (!context.containsProperty(tag, "extractorsMap"));
+		tag.createNewInitializedProperty("extractorsMap", context, c -> new HashMap<Tag, ObservableValue<Boolean>[]>());
+		Map<Tag, ObservableValue<Boolean>[]> extractors = tag.<Map<Tag, ObservableValue<Boolean>[]>> getProperty("extractorsMap", context).getValue();
+		ObservableList<Tag> extObs = new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
+			ObservableValue<Boolean>[] result;
+			TagSelector selector = child.getTagSelector();
+			if (selector == null)
+				result = new ObservableValue[] { new SimpleBooleanProperty(true) };
+			else
+				result = new ObservableValue[] { selector.apply(context, child) };
+			Object prev = extractors.put(child, result);
+			return result;
+		});
+		ObservableList<Tag> children = new FilteredList<Tag>(extObs, child -> Boolean.TRUE.equals(extractors.get(child)[0].getValue()));
 		for (Tag childTag : children) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
-				modelContext.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(modelContext), (i, between) -> {
-					Context childContext = metaBinding.buildModel(modelContext, between);
+				context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
+					Context childContext = metaBinding.buildModel(context, between);
 					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
 					if (childContext.isOpaque())
 						childTag.addStyleClass(childContext, "opaque");
 					return childContext;
 				}, Context::destroy));
 			} else
-				childTag.createNode(this, modelContext).init(computeIndex(0, childTag));
-			children.addListener(getListChangeListener());
+				childTag.createNode(this, context).init(computeIndex(0, childTag));
 		}
+		children.addListener(getListChangeListener());
 		for (Consumer<Context> binding : tag.getPostFixedBindings())
-			binding.accept(modelContext);
+			binding.accept(context);
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {
-		for (Tag child : tag.getObservableChildren()) {
+		for (Tag child : context.getRootContext().getObservableChildren(tag)) {
 			if (child == childElement)
 				return indexInChildren;
 			indexInChildren += sizeBySubTag.get(child);
@@ -139,7 +162,7 @@ public class HtmlDomNode {
 	}
 
 	public Context getModelContext() {
-		return modelContext;
+		return context;
 	}
 
 	protected RootHtmlDomNode getRootHtmlDomNode() {
