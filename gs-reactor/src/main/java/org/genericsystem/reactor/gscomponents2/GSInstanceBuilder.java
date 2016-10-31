@@ -5,16 +5,14 @@ import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlButton;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
