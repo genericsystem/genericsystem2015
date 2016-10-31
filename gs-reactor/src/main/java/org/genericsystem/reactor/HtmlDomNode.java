@@ -67,7 +67,6 @@ public class HtmlDomNode {
 
 	<BETWEEN> ListChangeListener<Tag> getListChangeListener() {
 		return listener != null ? listener : (listener = change -> {
-			System.out.println("Listener : " + change + " on tag " + tag + " on node : " + this);
 			while (change.next()) {
 				if (change.wasRemoved()) {
 					for (Tag childTag : change.getRemoved()) {
@@ -112,6 +111,16 @@ public class HtmlDomNode {
 		}
 	}
 
+	private static class ExtendedList {
+		Map<Tag, ObservableValue<Boolean>[]> extractorsMap;
+		ObservableList<Tag> list;
+
+		public ExtendedList(Map<Tag, ObservableValue<Boolean>[]> extractorsMap, ObservableList<Tag> list) {
+			this.extractorsMap = extractorsMap;
+			this.list = list;
+		}
+	}
+
 	protected <BETWEEN> void init(int index) {
 		context.register(this);
 		if (parent != null)
@@ -119,9 +128,8 @@ public class HtmlDomNode {
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
 
-		assert (!context.containsProperty(tag, "extractorsMap"));
-		tag.createNewInitializedProperty("extractorsMap", context, c -> new HashMap<Tag, ObservableValue<Boolean>[]>());
-		Map<Tag, ObservableValue<Boolean>[]> extractors = tag.<Map<Tag, ObservableValue<Boolean>[]>> getProperty("extractorsMap", context).getValue();
+		assert (!context.containsProperty(tag, "filteredChildren"));
+		Map<Tag, ObservableValue<Boolean>[]> extractors = new HashMap<Tag, ObservableValue<Boolean>[]>();
 		ObservableList<Tag> extObs = new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
 			ObservableValue<Boolean>[] result;
 			TagSelector selector = child.getTagSelector();
@@ -129,10 +137,11 @@ public class HtmlDomNode {
 				result = new ObservableValue[] { new SimpleBooleanProperty(true) };
 			else
 				result = new ObservableValue[] { selector.apply(context, child) };
-			Object prev = extractors.put(child, result);
+			extractors.put(child, result);
 			return result;
 		});
 		ObservableList<Tag> children = new FilteredList<Tag>(extObs, child -> Boolean.TRUE.equals(extractors.get(child)[0].getValue()));
+		tag.createNewInitializedProperty("filteredChildren", context, c -> new ExtendedList(extractors, children));
 		for (Tag childTag : children) {
 			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
 			if (metaBinding != null) {
