@@ -1,22 +1,24 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.model.RootContext;
 
 /**
  * @author Nicolas Feybesse
@@ -201,5 +203,9 @@ public class Context {
 
 	public boolean isDestroyed() {
 		return destroyed;
+	}
+
+	public RootContext getRootContext() {
+		return getParent().getRootContext();
 	}
 }
