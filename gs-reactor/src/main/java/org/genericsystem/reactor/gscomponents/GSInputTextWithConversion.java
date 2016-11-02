@@ -12,7 +12,6 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
-import org.genericsystem.reactor.Tag;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -26,11 +25,6 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
 
 	public GSInputTextWithConversion() {
-		initInput();
-	}
-
-	public GSInputTextWithConversion(Tag parent) {
-		super(parent);
 		initInput();
 	}
 
@@ -74,13 +68,6 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 	}
 
 	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> implements SelectionDefaults {
-
-		public GSInputTextEditorWithConversion() {
-		}
-
-		public GSInputTextEditorWithConversion(Tag parent) {
-			super(parent);
-		}
 
 		@Override
 		protected void initInput() {

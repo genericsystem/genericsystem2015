@@ -21,20 +21,10 @@ public abstract class GSTagImpl implements Tag {
 	private final ObservableList<Tag> children = FXCollections.observableArrayList();
 	protected TagSwitcher switcher;
 
-	protected GSTagImpl(Tag parent) {
-		setParent(parent);
-		beforeProcessAnnotations();
-		getRootTag().getAnnotationsManager().processAnnotations(this);
-		init();
-	}
-
 	public void setParent(Tag parent) {
 		this.parent = parent;
 		if (parent != null)
 			parent.getObservableChildren().add(this);
-	}
-
-	protected GSTagImpl() {
 	}
 
 	@Override
