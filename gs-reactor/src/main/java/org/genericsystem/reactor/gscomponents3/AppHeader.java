@@ -15,8 +15,9 @@ import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
 
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
+@Style(path = { GSDiv.class }, pos = 2, name = "flex", value = "1")
 @FlexDirectionStyle(FlexDirection.ROW)
-@Children({ Logo.class, TitleDiv.class })
+@Children({ Logo.class, TitleDiv.class, GSDiv.class })
 public class AppHeader extends GSDiv {
 	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "flex", value = "1 1 0%")

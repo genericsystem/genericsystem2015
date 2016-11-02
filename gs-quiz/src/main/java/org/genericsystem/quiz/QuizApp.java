@@ -1,5 +1,16 @@
 package org.genericsystem.quiz;
 
+import org.genericsystem.reactor.htmltag.HtmlH1;
+
+import org.genericsystem.reactor.gscomponents.GSApp;
+
+import org.genericsystem.reactor.gscomponents3.AppHeader;
+import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents3.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents3.Monitor;
+import org.genericsystem.reactor.gscomponents3.Responsive;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.quiz.QuizApp.QuizScript;
@@ -17,16 +28,6 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.AppHeader;
-import org.genericsystem.reactor.gscomponents3.AppHeader.Logo;
-import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents3.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents3.Monitor;
-import org.genericsystem.reactor.gscomponents3.Responsive;
-import org.genericsystem.reactor.htmltag.HtmlH1;
 import org.genericsystem.security.model.User;
 
 /**
@@ -37,10 +38,8 @@ import org.genericsystem.security.model.User;
 @RunScript(QuizScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, UserAnswer.class, User.class })
 @Style(name = "background-color", value = "#00afeb")
-@Style(path = { AppHeader.class, GSDiv.class }, name = "flex", value = "1")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class })
-@Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, GSDiv.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Java Appraisal")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Quiz.class, Question.class, Answer.class, UserAnswer.class, User.class })
 public class QuizApp extends GSApp {
