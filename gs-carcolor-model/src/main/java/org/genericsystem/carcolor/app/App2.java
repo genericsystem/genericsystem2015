@@ -1,7 +1,7 @@
 package org.genericsystem.carcolor.app;
 
-import org.genericsystem.carcolor.app.CarColorApp.CarColorScript;
-import org.genericsystem.carcolor.app.CarColorApp2.UserGuideButtonDiv;
+import org.genericsystem.carcolor.app.App.CarColorScript;
+import org.genericsystem.carcolor.app.App2.UserGuideButtonDiv;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -38,9 +38,13 @@ import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
 @Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Car.class, Color.class })
-public class CarColorApp2 extends GSApp {
+public class App2 extends GSApp {
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp2.class, "/cars");
+		ApplicationServer.startSimpleGenericApp(mainArgs, App2.class, "/cars");
+	}
+
+	public App2() {
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 
 	@Style(name = "justify-content", value = "center")

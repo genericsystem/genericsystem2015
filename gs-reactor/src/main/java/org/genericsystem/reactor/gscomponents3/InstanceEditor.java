@@ -4,8 +4,11 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
+import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
+import org.genericsystem.reactor.htmltag.HtmlInputText;
 import org.genericsystem.reactor.htmltag.HtmlLabel;
 import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.htmltag.HtmlSpan;
@@ -17,6 +20,8 @@ import java.util.stream.Collectors;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.EncryptionUtils;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -164,7 +169,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 		}
 	}
 
-	@Children({ HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class, HtmlLabel.class, PasswordInput.class, HtmlSpan.class, HtmlSpan.class })
+	@Children({ HtmlLabel.class, HtmlInputText.class, HtmlLabel.class, HtmlInputText.class, HtmlLabel.class, HtmlInputText.class, HtmlSpan.class, HtmlSpan.class, ValidateButton.class })
 	@SetText(path = HtmlLabel.class, pos = 0, value = "Enter old password:")
 	@SetText(path = HtmlLabel.class, pos = 1, value = "Enter new password:")
 	@SetText(path = HtmlLabel.class, pos = 2, value = "Confirm password:")
@@ -172,31 +177,36 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@SetText(path = HtmlSpan.class, pos = 1, value = "Old password incorrect.")
 	@Style(path = HtmlSpan.class, name = "color", value = "darkred")
 	@Style(path = HtmlSpan.class, name = "display", value = "none")
-	public static class PasswordEditorContent extends PasswordAdder {
+	@Attribute(path = HtmlInputText.class, pos = 0, name = "type", value = "password")
+	@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
+	@Attribute(path = HtmlInputText.class, pos = 2, name = "type", value = "password")
+	public static class PasswordEditorContent extends GSDiv {
+	}
+
+	@SetText("OK")
+	public static class ValidateButton extends HtmlButton implements PasswordDefaults, UserRoleDefaults {
 		@Override
 		public void init() {
-			createConvertedValueProperty();
-			addConvertedValueChangeListener((context, nva) -> {
-				if (nva != null)
-					context.getGeneric().updateValue(nva);
+			bindAction(context -> {
+				HtmlInputText oldPassword = getParent().find(HtmlInputText.class);
+				HtmlInputText passwordInput = getParent().find(HtmlInputText.class, 1);
+				HtmlInputText confirmPassword = getParent().find(HtmlInputText.class, 2);
+				HtmlSpan invalidPassword = getParent().find(HtmlSpan.class, 1);
+				HtmlSpan invalidConfirmPassword = getParent().find(HtmlSpan.class);
+				if (Arrays.equals((byte[]) context.getGeneric().getValue(), EncryptionUtils.getEncryptedPassword(oldPassword.getDomNodeAttributes(context).get("value"), getSaltProperty(context).getValue()))) {
+					String psw1 = passwordInput.getDomNodeAttributes(context).get("value");
+					String psw2 = confirmPassword.getDomNodeAttributes(context).get("value");
+					if (psw1 != null && psw1.equals(psw2)) {
+						invalidConfirmPassword.addStyle(context, "display", "none");
+						invalidPassword.addStyle(context, "display", "none");
+						context.getGeneric().updateValue(EncryptionUtils.getEncryptedPassword(psw1, getSaltProperty(context).getValue()));
+					} else {
+						invalidConfirmPassword.addStyle(context, "display", "none");
+					}
+				} else {
+					invalidPassword.addStyle(context, "display", "inline");
+				}
 			});
-			find(PasswordInput.class).addConvertedValueChangeListener((context, nva) -> {
-				if (Arrays.equals((byte[]) context.getGeneric().getValue(), (byte[]) find(PasswordInput.class).getConvertedValueProperty(context).getValue()))
-					find(HtmlSpan.class, 1).addStyle(context, "display", "none");
-				else if (nva != null)
-					find(HtmlSpan.class, 1).addStyle(context, "display", "inline");
-			});
-			find(PasswordInput.class, 2).addConvertedValueChangeListener((context, nva) -> {
-				if (Arrays.equals((byte[]) context.getGeneric().getValue(), (byte[]) find(PasswordInput.class).getConvertedValueProperty(context).getValue())) {
-					if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue())) {
-						find(HtmlSpan.class).addStyle(context, "display", "none");
-						getConvertedValueProperty(context).setValue(nva);
-					} else
-						find(HtmlSpan.class).addStyle(context, "display", "inline");
-				} else
-					find(HtmlSpan.class, 1).addStyle(context, "display", "inline");
-			});
-
 		}
 	}
 

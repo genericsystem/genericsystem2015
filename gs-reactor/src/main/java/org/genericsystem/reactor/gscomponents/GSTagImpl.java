@@ -10,7 +10,7 @@ import javafx.collections.ObservableList;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.model.TagSelector;
+import org.genericsystem.reactor.model.TagSwitcher;
 
 public abstract class GSTagImpl implements Tag {
 
@@ -19,7 +19,7 @@ public abstract class GSTagImpl implements Tag {
 	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
 	private Tag parent;
 	private final ObservableList<Tag> children = FXCollections.observableArrayList();
-	protected TagSelector modeSelector;
+	protected TagSwitcher switcher;
 
 	protected GSTagImpl(Tag parent) {
 		setParent(parent);
@@ -77,12 +77,12 @@ public abstract class GSTagImpl implements Tag {
 	}
 
 	@Override
-	public void setTagSelector(TagSelector modeSelector) {
-		this.modeSelector = modeSelector;
+	public void setSwitcher(TagSwitcher switcher) {
+		this.switcher = switcher;
 	}
 
 	@Override
-	public TagSelector getTagSelector() {
-		return modeSelector;
+	public TagSwitcher getSwitcher() {
+		return switcher;
 	}
 }

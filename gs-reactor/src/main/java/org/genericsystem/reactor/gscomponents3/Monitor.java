@@ -18,7 +18,7 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.Mode;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -37,8 +37,8 @@ import org.genericsystem.reactor.model.ContextAction.GC;
 import org.genericsystem.reactor.model.ContextAction.MOUNT;
 import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
-import org.genericsystem.reactor.model.TagSelector;
 import org.genericsystem.reactor.model.ObservableModelSelector;
+import org.genericsystem.reactor.model.TagSwitcher;
 import org.genericsystem.reactor.model.TextBinding;
 import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
@@ -83,18 +83,15 @@ public class Monitor extends GSDiv {
 										getLoggedUserProperty(context)));
 			}
 
-			@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlButton.class })
+			@Children({ HtmlButton.class, HtmlButton.class })
 			@SetText(path = HtmlButton.class, pos = 0, value = "Admin mode")
 			@SetText(path = HtmlButton.class, pos = 1, value = "User mode")
-			@SetText(path = HtmlButton.class, pos = 2, value = "button2")
-			@SetText(path = HtmlButton.class, pos = 3, value = "button3")
-			@SetText(path = HtmlButton.class, pos = 4, value = "button4")
 			@SelectModel(ObservableModelSelector.LOGGED_USER_ADMIN.class)
-			@Mode(path = HtmlButton.class, pos = 0, value = TagSelector.NORMAL_MODE_ONLY.class)
-			@Mode(path = HtmlButton.class, pos = 1, value = TagSelector.ADMIN_MODE_ONLY.class)
+			@Switch(path = HtmlButton.class, pos = 0, value = TagSwitcher.NORMAL_MODE_ONLY.class)
+			@Switch(path = HtmlButton.class, pos = 1, value = TagSwitcher.ADMIN_MODE_ONLY.class)
 			@BindAction(path = HtmlButton.class, pos = 0, value = ContextAction.SET_ADMIN_MODE.class)
 			@BindAction(path = HtmlButton.class, pos = 1, value = ContextAction.SET_NORMAL_MODE.class)
-			@Mode(path = HtmlButton.class, pos = 3, value = TagSelector.ADMIN_MODE_ONLY.class)
+			@Switch(path = HtmlButton.class, pos = 3, value = TagSwitcher.ADMIN_MODE_ONLY.class)
 			public static class ModeSwitchButtons extends GSDiv {
 			}
 

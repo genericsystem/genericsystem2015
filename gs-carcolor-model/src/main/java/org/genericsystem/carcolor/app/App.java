@@ -1,6 +1,6 @@
 package org.genericsystem.carcolor.app;
 
-import org.genericsystem.carcolor.app.CarColorApp.CarColorScript;
+import org.genericsystem.carcolor.app.App.CarColorScript;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
@@ -26,13 +26,13 @@ import org.genericsystem.reactor.gscomponents.GSTable;
  */
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
-public class CarColorApp extends GSApp {
+public class App extends GSApp {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp.class, "/cars");
+		ApplicationServer.startSimpleGenericApp(mainArgs, App.class, "/cars");
 	}
 
-	public CarColorApp() {
+	public App() {
 		addStyle("background-color", "#00afeb");
 
 		new GSHeader(this, "Reactor Live Demo", GSLogo::new, "", GSUserGuide::new, "");

@@ -9,34 +9,34 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Mode.ModeProcessor;
-import org.genericsystem.reactor.annotations.Mode.Modes;
+import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
+import org.genericsystem.reactor.annotations.Switch.Modes;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
-import org.genericsystem.reactor.model.TagSelector;
+import org.genericsystem.reactor.model.TagSwitcher;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(Modes.class)
-@Process(ModeProcessor.class)
-public @interface Mode {
+@Process(SwichProcessor.class)
+public @interface Switch {
 	Class<? extends GSTagImpl>[] path() default {};
 
 	int[] pos() default {};
 
-	Class<? extends TagSelector> value();
+	Class<? extends TagSwitcher> value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
 	public @interface Modes {
-		Mode[] value();
+		Switch[] value();
 	}
 
-	public static class ModeProcessor implements BiConsumer<Annotation, Tag> {
+	public static class SwichProcessor implements BiConsumer<Annotation, Tag> {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			try {
-				tag.setTagSelector(((Mode) annotation).value().newInstance());
+				tag.setSwitcher(((Switch) annotation).value().newInstance());
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}

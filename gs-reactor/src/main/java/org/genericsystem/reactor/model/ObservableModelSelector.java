@@ -5,17 +5,17 @@ import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
 import java.util.function.BiFunction;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.security.model.Role.Admin;
 import org.genericsystem.security.model.UserRole;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 
 public interface ObservableModelSelector extends BiFunction<Context, Tag, ObservableValue<Context>> {
 
@@ -33,8 +33,8 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics());
-			return BindingsTools.transmitSuccessiveInvalidations(Bindings
-					.createObjectBinding(() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
+			return BindingsTools.transmitSuccessiveInvalidations(Bindings.createObjectBinding(
+					() -> (!context.getParent().getGeneric().isRequiredConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])) && holders.size() == 1) || holders.size() > 1 ? context : null, holders));
 		}
 	}
 
@@ -42,10 +42,10 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());
-			return Bindings.createObjectBinding(() -> holders.isEmpty()
-					|| (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled()) && !context.getGeneric().isSingularConstraintEnabled(context.getGeneric().getComponents().indexOf(context.getGenerics()[2])))
-							? context : null,
-					holders);
+			return Bindings.createObjectBinding(
+					() -> holders.isEmpty()
+							|| (!(context.getGeneric().getComponents().size() == 1 && context.getGeneric().isPropertyConstraintEnabled()) && !context.getGeneric().isSingularConstraintEnabled(
+									context.getGeneric().getComponents().indexOf(context.getGenerics()[2]))) ? context : null, holders);
 		}
 	}
 
