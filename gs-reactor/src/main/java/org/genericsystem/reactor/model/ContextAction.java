@@ -61,7 +61,10 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 	public static class CANCEL implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			context.cancel();
+			while (context.getCacheLevelObservableValue().getValue().intValue() > 0) {
+				context.cancel();
+				context.unmount();
+			}
 		}
 	}
 
@@ -76,6 +79,17 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		@Override
 		public void accept(Context context, Tag tag) {
 			context.unmount();
+		}
+	}
+
+	public static class UNMOUNT_CLOSE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.unmount();
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
+			else
+				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
 		}
 	}
 
@@ -110,6 +124,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 	public static class SET_SELECTION implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
+			context.mount();
 			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(context);
 			else
