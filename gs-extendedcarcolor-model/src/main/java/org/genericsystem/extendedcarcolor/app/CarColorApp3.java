@@ -1,7 +1,7 @@
 package org.genericsystem.extendedcarcolor.app;
 
 import org.genericsystem.carcolor.app.CCInheritStyle;
-import org.genericsystem.carcolor.app.UserGuide2;
+import org.genericsystem.carcolor.app.UserGuide;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.extendedcarcolor.app.CarColorApp3.CarColorScript2;
@@ -92,7 +92,7 @@ public class CarColorApp3 extends GSApp {
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1")
-	@Children({ UserGuide2.class, GuideButton.class })
+	@Children({ UserGuide.class, GuideButton.class })
 	public static class UserGuideButtonDiv extends GSDiv {
 	}
 
@@ -102,7 +102,7 @@ public class CarColorApp3 extends GSApp {
 	public static class GuideButton extends HtmlButton {
 		@Override
 		public void init() {
-			bindAction(model -> getParent().find(UserGuide2.class).getDisplayProperty(model).setValue("flex"));
+			bindAction(model -> getParent().find(UserGuide.class).getDisplayProperty(model).setValue("flex"));
 		}
 	}
 

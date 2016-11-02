@@ -1,6 +1,6 @@
 package org.genericsystem.carcolor.app;
 
-import org.genericsystem.carcolor.app.UserGuide2.TextContent;
+import org.genericsystem.carcolor.app.UserGuide.TextContent;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -12,7 +12,7 @@ import org.genericsystem.reactor.htmltag.HtmlUl;
 
 @Children(path = GSDiv.class, value = { HtmlHyperLink.class, TextContent.class })
 @Style(path = GSDiv.class, name = "border-radius", value = "30px")
-public class UserGuide2 extends ModalWithDisplay {
+public class UserGuide extends ModalWithDisplay {
 
 	@Children(value = { HtmlUl.class, HtmlUl.class, HtmlUl.class, GSDiv.class })
 	@Children(path = HtmlUl.class, pos = 0, value = { HtmlLi.class, HtmlLi.class, HtmlLi.class })
