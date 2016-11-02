@@ -18,8 +18,8 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.annotations.BindText;
-import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
@@ -32,8 +32,6 @@ import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEdit
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
-import org.genericsystem.reactor.gscomponents.GSSelect.CompositeSelectWithEmptyEntry;
-import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSComponentEditorDiv;
@@ -80,6 +78,8 @@ import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.LinkTitles
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorTitle;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
+import org.genericsystem.reactor.gscomponents3.GSSelect.GSSelectWithEmptyEntry;
+import org.genericsystem.reactor.gscomponents3.GSSelect.InstanceCompositeSelect;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;
@@ -280,7 +280,6 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 							@Children({ DirectRelationComponentEditor.class, ReversedRelationDisplayer.class })
 							public static class ComponentEditor extends GSComponentEditorDiv {
 
-								// TODO: Finish decomposition of InstanceCompositeSelect.
 								@Style(name = "flex", value = "1")
 								@Style(name = "height", value = "100%")
 								@Style(name = "width", value = "100%")
@@ -413,12 +412,11 @@ public class GSEditor extends GSDiv implements SelectionDefaults {
 							@Children(ComponentAdderSelect.class)
 							public static class ComponentAdder extends GSComponentEditorDiv {
 
-								// TODO: Finish decomposition of CompositeSelectWithEmptyEntry.
 								@Style(name = "flex", value = "1")
 								@Style(name = "height", value = "100%")
 								@Style(name = "width", value = "100%")
 								@Select(ObservableValueSelector.DIRECT_RELATION_SELECTOR.class)
-								public static class ComponentAdderSelect extends CompositeSelectWithEmptyEntry {
+								public static class ComponentAdderSelect extends GSSelectWithEmptyEntry {
 
 									@Override
 									public void init() {

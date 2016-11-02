@@ -7,7 +7,6 @@ import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlSpan;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -15,10 +14,10 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
@@ -46,7 +45,6 @@ import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUT
 import org.genericsystem.reactor.model.TagSwitcher;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)

@@ -305,6 +305,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Children(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@Children(path = Content.class, value = ComponentAdderSelect.class)
 	@Select(path = GSActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
+	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@SetText(path = GSActionLink.class, value = "+")

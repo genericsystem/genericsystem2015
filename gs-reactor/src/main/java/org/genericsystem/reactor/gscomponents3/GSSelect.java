@@ -14,9 +14,9 @@ import org.genericsystem.reactor.gscomponents3.GSSelect.HtmlRepeatedOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 
-@Children(HtmlOption.class)
+@Children(HtmlRepeatedOption.class)
 @BindText(path = HtmlRepeatedOption.class)
-@ForEach(path = HtmlOption.class, value = ObservableListExtractor.SUBINSTANCES.class)
+@ForEach(path = HtmlRepeatedOption.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @GenericValueBackgroundColor(path = HtmlOption.class, value = "")
 public class GSSelect extends HtmlSelect implements SelectionDefaults, ComponentsDefaults {
 

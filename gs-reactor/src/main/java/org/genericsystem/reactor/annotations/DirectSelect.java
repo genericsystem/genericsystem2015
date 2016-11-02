@@ -43,11 +43,10 @@ public @interface DirectSelect {
 			try {
 				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
 				Class<?>[] selects = ((DirectSelect) annotation).value();
-				Class<?> tagClass = path.length != 0 ? path[path.length - 1] : null;
-				if (selects.length == 1 || tagClass == null)
+				if (selects.length == 1)
 					tag.select(selects[0]);
 				else
-					tag.select(selects[AnnotationsManager.position(tag, tagClass)]);
+					tag.select(selects[AnnotationsManager.position(tag, path[path.length - 1])]);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new IllegalStateException(e);
 			}
