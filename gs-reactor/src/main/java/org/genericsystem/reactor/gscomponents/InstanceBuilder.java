@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
@@ -7,6 +7,7 @@ import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlSpan;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -18,23 +19,22 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddButton;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilder;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSMultiCheckboxBuilder;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSPasswordBuilder;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.Checkbox;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.CheckboxLabel;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.ComponentAdderSelect;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.GSHolderAdder;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.GSMultiCheckbox;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordAdder;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
-import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents3.InstanceBuilder.AddButton;
-import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSHolderBuilder;
-import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSMultiCheckboxBuilder;
-import org.genericsystem.reactor.gscomponents3.InstanceBuilder.GSPasswordBuilder;
-import org.genericsystem.reactor.gscomponents3.InstanceEditor.Checkbox;
-import org.genericsystem.reactor.gscomponents3.InstanceEditor.CheckboxLabel;
-import org.genericsystem.reactor.gscomponents3.InstanceEditor.ComponentAdderSelect;
-import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSHolderAdder;
-import org.genericsystem.reactor.gscomponents3.InstanceEditor.GSMultiCheckbox;
-import org.genericsystem.reactor.gscomponents3.InstanceEditor.PasswordAdder;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.model.ContextAction.CREATE_INSTANCE;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
@@ -45,6 +45,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUT
 import org.genericsystem.reactor.model.TagSwitcher;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)

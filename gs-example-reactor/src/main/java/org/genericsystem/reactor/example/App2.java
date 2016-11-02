@@ -16,13 +16,13 @@ import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceStepEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstancesTable;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceStepEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorExtended;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstancesTable;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorExtended;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })

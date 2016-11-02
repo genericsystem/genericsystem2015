@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -20,19 +20,17 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents3.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.ButtonDiv;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.ContentRow;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.GSHolders;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.GSValueComponents;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.HeaderRow;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.InstanceNameLink;
-import org.genericsystem.reactor.gscomponents3.InstancesTable.RemoveButton;
+import org.genericsystem.reactor.gscomponents.GSComposite.Content;
+import org.genericsystem.reactor.gscomponents.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ContentRow;
+import org.genericsystem.reactor.gscomponents.InstancesTable.GSHolders;
+import org.genericsystem.reactor.gscomponents.InstancesTable.GSValueComponents;
+import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
+import org.genericsystem.reactor.gscomponents.InstancesTable.InstanceNameLink;
+import org.genericsystem.reactor.gscomponents.InstancesTable.RemoveButton;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;

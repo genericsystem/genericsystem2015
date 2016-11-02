@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.htmltag.HtmlH1;
 import org.genericsystem.reactor.htmltag.HtmlImg;
@@ -8,10 +8,8 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.AppHeader.Logo;
-import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
+import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")

@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
@@ -13,9 +13,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE;
 import org.genericsystem.reactor.model.ContextAction.RESET_SELECTION;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT_CLOSE;

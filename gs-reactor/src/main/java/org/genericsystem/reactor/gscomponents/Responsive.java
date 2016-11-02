@@ -1,10 +1,8 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
 
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "flex-wrap", value = "wrap")

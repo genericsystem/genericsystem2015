@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents;
+package org.genericsystem.reactor;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -10,10 +10,7 @@ import org.genericsystem.api.core.annotations.Meta;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.MetaBinding;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gscomponents.TagNode.GenericTagType.GTagAttribute;
+import org.genericsystem.reactor.TagNode.GenericTagType.GTagAttribute;
 import org.genericsystem.reactor.model.TagSwitcher;
 
 public interface TagNode extends Tag {

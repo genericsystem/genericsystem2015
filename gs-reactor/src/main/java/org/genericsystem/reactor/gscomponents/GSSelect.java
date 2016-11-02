@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
@@ -10,7 +10,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
-import org.genericsystem.reactor.gscomponents3.GSSelect.HtmlRepeatedOption;
+import org.genericsystem.reactor.gscomponents.GSSelect.HtmlRepeatedOption;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
 

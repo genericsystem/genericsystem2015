@@ -5,7 +5,8 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.Modal.ModalWithDisplay;
+import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
+
 import org.genericsystem.reactor.htmltag.HtmlHyperLink;
 import org.genericsystem.reactor.htmltag.HtmlLi;
 import org.genericsystem.reactor.htmltag.HtmlUl;
