@@ -47,6 +47,10 @@ public class QuizApp extends GSApp {
 		ApplicationServer.startSimpleGenericApp(mainArgs, QuizApp.class, "/quiz");
 	}
 
+	public QuizApp() {
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+	}
+
 	public static class QuizScript implements Script {
 
 		@Override
