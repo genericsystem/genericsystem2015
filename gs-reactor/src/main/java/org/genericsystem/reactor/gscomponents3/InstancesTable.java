@@ -49,6 +49,7 @@ import org.genericsystem.reactor.model.TagSwitcher;
 @GenericValueBackgroundColor(path = { ContentRow.class, GSValueComponents.class, Header.class }, value = "#3393ff")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class, GSLabelDisplayer.class }, name = "color", value = "white")
+@Style(path = { ContentRow.class, GSValueComponents.class, Header.class }, name = "padding-left", value = "2px")
 @Style(path = { ContentRow.class, GSValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
 @Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class, ButtonDiv.class })
