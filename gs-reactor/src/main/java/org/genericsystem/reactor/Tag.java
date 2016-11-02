@@ -35,7 +35,7 @@ import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.TagSelector;
+import org.genericsystem.reactor.model.TagSwitcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -362,9 +362,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return getParent().getRootTag();
 	}
 
-	public TagSelector getTagSelector();
+	public TagSwitcher getSwitcher();
 
-	public void setTagSelector(TagSelector modeSelector);
+	public void setSwitcher(TagSwitcher switcher);
 
 	public static interface RootTag extends Tag {
 		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {

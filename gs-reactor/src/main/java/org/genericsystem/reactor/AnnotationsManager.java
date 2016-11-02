@@ -19,7 +19,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Mode;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Process;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectModel;
@@ -72,7 +72,7 @@ public class AnnotationsManager {
 		registerAnnotation(Style.class);
 		registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
-		registerAnnotation(Mode.class);
+		registerAnnotation(Switch.class);
 	}
 
 	public void processAnnotations(Tag tag) {

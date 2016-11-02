@@ -20,7 +20,6 @@ import javafx.collections.transformation.FilteredList;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag.RootTag;
-import org.genericsystem.reactor.model.TagSelector;
 
 public class HtmlDomNode {
 
@@ -29,6 +28,7 @@ public class HtmlDomNode {
 	protected static final String ADD = "A";
 	protected static final String UPDATE = "U";
 	static final String REMOVE = "R";
+	@Deprecated
 	static final String UPDATE_TEXT = "UT";
 	private static final String UPDATE_SELECTION = "US";
 	static final String ADD_STYLECLASS = "AC";
@@ -56,6 +56,31 @@ public class HtmlDomNode {
 	private Tag tag;
 	private Context context;
 
+	private final Consumer<Tag> tagAdder = tagAdder();
+	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
+		private static final long serialVersionUID = 6725720602283055930L;
+
+		@Override
+		public Integer get(Object key) {
+			Integer size = super.get(key);
+			if (size == null)
+				put((Tag) key, size = 0);
+			return size;
+		};
+	};
+	private ListChangeListener<Tag> listener = change -> {
+		while (change.next()) {
+			if (change.wasRemoved()) {
+				for (Tag childTag : change.getRemoved()) {
+					deepRemove(context, childTag);
+					sizeBySubTag.remove(childTag);
+				}
+			}
+			if (change.wasAdded())
+				change.getAddedSubList().forEach(tagAdder::accept);
+		}
+	};
+
 	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
@@ -63,39 +88,37 @@ public class HtmlDomNode {
 		this.context = context;
 	}
 
-	private ListChangeListener<Tag> listener;
-
-	<BETWEEN> ListChangeListener<Tag> getListChangeListener() {
-		return listener != null ? listener : (listener = change -> {
-			while (change.next()) {
-				if (change.wasRemoved()) {
-					for (Tag childTag : change.getRemoved()) {
-						recursiveRemove(context, childTag);
-						sizeBySubTag.remove(childTag);
-					}
-				}
-				if (change.wasAdded()) {
-					for (Tag childTag : change.getAddedSubList()) {
-						MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-						if (metaBinding != null) {
-							if (context.getSubContexts(childTag) == null)
-								context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
-									Context childModel = metaBinding.buildModel(context, between);
-									childTag.createNode(this, childModel).init(computeIndex(i, childTag));
-									return childModel;
-								}, Context::destroy));
-						} else if (context.getHtmlDomNode(childTag) == null)
-							childTag.createNode(this, context).init(computeIndex(0, childTag));
-					}
-				}
-			}
-		});
+	private <BETWEEN> Consumer<Tag> tagAdder() {
+		return childTag -> {
+			MetaBinding<BETWEEN> metaBinding = childTag.getMetaBinding();
+			if (metaBinding != null) {
+				if (context.getSubContexts(childTag) == null)
+					context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
+						Context childContext = metaBinding.buildModel(context, between);
+						childTag.createNode(this, childContext).init(computeIndex(i, childTag));
+						if (childContext.isOpaque())
+							childTag.addStyleClass(childContext, "opaque");
+						return childContext;
+					}, Context::destroy));
+			} else if (context.getHtmlDomNode(childTag) == null)
+				childTag.createNode(this, context).init(computeIndex(0, childTag));
+		};
 	}
 
-	private void recursiveRemove(Context context, Tag tag) {
+	private boolean destroyed = false;
+
+	void destroy() {
+		// System.out.println("Attempt to destroy : " + getNode().getId());
+		assert !destroyed : "Node : " + getId();
+		destroyed = true;
+		getRootHtmlDomNode().remove(getId());
+		parent.decrementSize(tag);
+	}
+
+	private void deepRemove(Context context, Tag tag) {
 		if (tag.getMetaBinding() == null) {
 			for (Tag childTag : context.getRootContext().getObservableChildren(tag))
-				recursiveRemove(context, childTag);
+				deepRemove(context, childTag);
 			if (context.getHtmlDomNode(tag) != null)
 				context.getHtmlDomNode(tag).sendRemove();
 			context.removeProperties(tag);
@@ -103,21 +126,11 @@ public class HtmlDomNode {
 		} else if (context.getSubContexts(tag) != null) {
 			for (Context subContext : context.getSubContexts(tag)) {
 				if (subContext.getHtmlDomNode(tag) != null)
-					subContext.getHtmlDomNode(tag).sendRemove();
+					subContext.getHtmlDomNode(tag).sendRemove();// necessary ?
 				subContext.removeProperties(tag);
 			}
-			context.getSubContexts(tag).removeAll();// destroy subcontexts
+			context.getSubContexts(tag).removeAll();// destroy subcontexts // necessary ?
 			context.removeSubContexts(tag);// remove tag ref
-		}
-	}
-
-	private static class ExtendedList {
-		Map<Tag, ObservableValue<Boolean>[]> extractorsMap;
-		ObservableList<Tag> list;
-
-		public ExtendedList(Map<Tag, ObservableValue<Boolean>[]> extractorsMap, ObservableList<Tag> list) {
-			this.extractorsMap = extractorsMap;
-			this.list = list;
 		}
 	}
 
@@ -127,37 +140,23 @@ public class HtmlDomNode {
 			insertChild(index);
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
-
 		assert (!context.containsProperty(tag, "filteredChildren"));
-		Map<Tag, ObservableValue<Boolean>[]> extractors = new HashMap<Tag, ObservableValue<Boolean>[]>();
-		ObservableList<Tag> extObs = new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
-			ObservableValue<Boolean>[] result;
-			TagSelector selector = child.getTagSelector();
-			if (selector == null)
-				result = new ObservableValue[] { new SimpleBooleanProperty(true) };
-			else
-				result = new ObservableValue[] { selector.apply(context, child) };
-			extractors.put(child, result);
-			return result;
-		});
-		ObservableList<Tag> children = new FilteredList<Tag>(extObs, child -> Boolean.TRUE.equals(extractors.get(child)[0].getValue()));
-		tag.createNewInitializedProperty("filteredChildren", context, c -> new ExtendedList(extractors, children));
-		for (Tag childTag : children) {
-			MetaBinding<BETWEEN> metaBinding = childTag.<BETWEEN> getMetaBinding();
-			if (metaBinding != null) {
-				context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
-					Context childContext = metaBinding.buildModel(context, between);
-					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
-					if (childContext.isOpaque())
-						childTag.addStyleClass(childContext, "opaque");
-					return childContext;
-				}, Context::destroy));
-			} else
-				childTag.createNode(this, context).init(computeIndex(0, childTag));
-		}
-		children.addListener(getListChangeListener());
+		FilteredChildren filteredChildren = new FilteredChildren();
+		tag.createNewInitializedProperty("filteredChildren", context, c -> filteredChildren);
+		for (Tag childTag : filteredChildren.filteredList)
+			tagAdder.accept(childTag);
+		filteredChildren.filteredList.addListener(listener);
 		for (Consumer<Context> binding : tag.getPostFixedBindings())
 			binding.accept(context);
+	}
+
+	private class FilteredChildren {
+		final Map<Tag, ObservableValue<Boolean>[]> selectorsByTag = new HashMap<Tag, ObservableValue<Boolean>[]>();// Prevents garbage collection
+		final ObservableList<Tag> filteredList = new FilteredList<Tag>(new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
+			ObservableValue<Boolean>[] result = new ObservableValue[] { child.getSwitcher() != null ? child.getSwitcher().apply(context, child) : new SimpleBooleanProperty(true) };
+			selectorsByTag.put(child, result);
+			return result;
+		}), child -> Boolean.TRUE.equals(selectorsByTag.get(child)[0].getValue()));
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {
@@ -177,32 +176,10 @@ public class HtmlDomNode {
 		return parent.getRootHtmlDomNode();
 	}
 
-	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
-		private static final long serialVersionUID = 6725720602283055930L;
-
-		@Override
-		public Integer get(Object key) {
-			Integer size = super.get(key);
-			if (size == null)
-				put((Tag) key, size = 0);
-			return size;
-		};
-	};
-
 	void insertChild(int index) {
 		parent.incrementSize(tag);
 		sendAdd(index);
 		getRootHtmlDomNode().add(getId(), this);
-	}
-
-	private boolean destroyed = false;
-
-	void destroy() {
-		// System.out.println("Attempt to destroy : " + getNode().getId());
-		assert !destroyed : "Node : " + getId();
-		destroyed = true;
-		getRootHtmlDomNode().remove(getId());
-		parent.decrementSize(tag);
 	}
 
 	private void incrementSize(Tag child) {
@@ -243,6 +220,7 @@ public class HtmlDomNode {
 			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementRemoved()));
 	};
 
+	@Deprecated
 	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 	private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
@@ -257,6 +235,7 @@ public class HtmlDomNode {
 		return indexListener;
 	}
 
+	@Deprecated
 	public ChangeListener<String> getTextListener() {
 		return textListener;
 	}

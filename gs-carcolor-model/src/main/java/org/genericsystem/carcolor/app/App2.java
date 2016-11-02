@@ -43,7 +43,7 @@ public class App2 extends GSApp {
 		ApplicationServer.startSimpleGenericApp(mainArgs, App2.class, "/cars");
 	}
 
-	public CarColorApp2() {
+	public App2() {
 		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 

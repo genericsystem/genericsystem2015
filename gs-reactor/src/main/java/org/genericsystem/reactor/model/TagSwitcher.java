@@ -9,9 +9,9 @@ import javafx.beans.value.ObservableValue;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 
-public interface TagSelector extends BiFunction<Context, Tag, ObservableValue<Boolean>> {
+public interface TagSwitcher extends BiFunction<Context, Tag, ObservableValue<Boolean>> {
 
-	public static class NORMAL_MODE_ONLY implements TagSelector {
+	public static class NORMAL_MODE_ONLY implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
 			Property<Boolean> adminProperty = tag.getAdminModeProperty(context);
@@ -19,7 +19,7 @@ public interface TagSelector extends BiFunction<Context, Tag, ObservableValue<Bo
 		}
 	}
 
-	public static class ADMIN_MODE_ONLY implements TagSelector {
+	public static class ADMIN_MODE_ONLY implements TagSwitcher {
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
 			return tag.getAdminModeProperty(context);
