@@ -55,16 +55,27 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		@Override
 		public void accept(Context context, Tag tag) {
 			context.flush();
+			context.unmount();
+		}
+	}
+
+	public static class FLUSH_CLOSE implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.flush();
+			context.unmount();
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
+			else
+				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
 		}
 	}
 
 	public static class CANCEL implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			while (context.getCacheLevelObservableValue().getValue().intValue() > 0) {
-				context.cancel();
-				context.unmount();
-			}
+			context.cancel();
+			context.unmount();
 		}
 	}
 

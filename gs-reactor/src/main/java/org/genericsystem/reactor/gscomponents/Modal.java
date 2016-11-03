@@ -15,7 +15,7 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE;
-import org.genericsystem.reactor.model.ContextAction.RESET_SELECTION;
+import org.genericsystem.reactor.model.ContextAction.FLUSH_CLOSE;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT_CLOSE;
 import org.genericsystem.reactor.model.ObservableModelSelector.SELECTION_SELECTOR;
 
@@ -43,7 +43,7 @@ public class Modal extends GSDiv {
 	@Attribute(path = { GSDiv.class, GSDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, name = "name", value = "close")
 	@FlexDirectionStyle(path = { GSDiv.class, GSDiv.class }, pos = { 0, 1 }, value = FlexDirection.ROW)
 	@SelectModel(path = { GSDiv.class, TitledInstanceEditor.class }, value = SELECTION_SELECTOR.class)
-	@BindAction(path = { GSDiv.class, GSDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = RESET_SELECTION.class)
+	@BindAction(path = { GSDiv.class, GSDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = FLUSH_CLOSE.class)
 	@BindAction(path = { GSDiv.class, GSDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = UNMOUNT_CLOSE.class)
 	public static class ModalEditor extends Modal implements SelectionDefaults {
 		@Override
