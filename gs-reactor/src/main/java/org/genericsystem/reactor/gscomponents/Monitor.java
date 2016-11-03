@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.gscomponents3;
+package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
@@ -23,13 +23,11 @@ import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoggedUserDiv;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoginDiv;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorLogin.LoginDiv.ValidateButton;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
 import org.genericsystem.reactor.model.ContextAction;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
 import org.genericsystem.reactor.model.ContextAction.FLUSH;

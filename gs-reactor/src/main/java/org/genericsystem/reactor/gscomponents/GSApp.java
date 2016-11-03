@@ -21,7 +21,6 @@ public class GSApp extends RootTagImpl implements SelectionDefaults, UserRoleDef
 
 	@Override
 	public void beforeProcessAnnotations() {
-		super.beforeProcessAnnotations();
 		Annotation annotations = getClass().getAnnotation(CustomAnnotations.class);
 		if (annotations != null)
 			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())

@@ -21,6 +21,8 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents.InstancesTable;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.GSTitleDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSTitleLineCellDiv;
 import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell;
 import org.genericsystem.reactor.gscomponents2.GSTable.Row.Cell.SubCell;
@@ -40,8 +42,6 @@ import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.At
 import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.RelationName;
 import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeAttribute.RelationName.ComponentName;
 import org.genericsystem.reactor.gscomponents2.GSTable.TitleRow.TypeName;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.GSTitleDiv;
-import org.genericsystem.reactor.gscomponents3.InstancesTable;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;

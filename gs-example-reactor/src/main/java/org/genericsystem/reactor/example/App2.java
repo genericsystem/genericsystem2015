@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.example;
 
-import org.genericsystem.reactor.example.AppHtml.ExampleReactorScript;
+import org.genericsystem.reactor.example.App.ExampleReactorScript;
+
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.CarColor2;
@@ -15,13 +16,13 @@ import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstanceStepEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledHorizontalInstancesTable;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstanceStepEditor;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents3.Monitor.MonitorExtended;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstancesTable;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorExtended;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
@@ -34,9 +35,13 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @SelectModel(path = TitledInstanceEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
 @Style(name = "flex-wrap", value = "wrap")
 @Style(name = "flex", value = "1 1 0%")
-public class AppHtml3 extends GSApp {
+public class App2 extends GSApp {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, AppHtml3.class, "/example-reactor");
+		ApplicationServer.startSimpleGenericApp(mainArgs, App2.class, "/example-reactor");
+	}
+
+	public App2() {
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 }

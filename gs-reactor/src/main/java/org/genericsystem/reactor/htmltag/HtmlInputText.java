@@ -6,21 +6,12 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 
 public class HtmlInputText extends GSTagImpl implements ActionDefaults {
-
-	public HtmlInputText() {
-
-	}
-
-	public HtmlInputText(Tag parent) {
-		super(parent);
-	}
 
 	@Override
 	public String getTag() {

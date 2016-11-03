@@ -19,6 +19,7 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.GSDiv;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.CenteredFlexDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSComponentEditorDiv;
 import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSSubcellEditorDiv;
@@ -36,7 +37,6 @@ import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.Lin
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.LinkBuilder.ComponentBuilder;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.InstanceNameBuilder;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.InstanceNameBuilder.InstanceNameBuilderInput;
-import org.genericsystem.reactor.gscomponents3.InstancesTable;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 

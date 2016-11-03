@@ -1,7 +1,7 @@
 package org.genericsystem.extendedcarcolor.app;
 
 import org.genericsystem.carcolor.app.CCInheritStyle;
-import org.genericsystem.carcolor.app.UserGuide2;
+import org.genericsystem.carcolor.app.UserGuide;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.extendedcarcolor.app.CarColorApp3.CarColorScript2;
@@ -35,18 +35,20 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
+
+import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.GSComposite;
 import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents3.AppHeader;
-import org.genericsystem.reactor.gscomponents3.AppHeader.Logo;
-import org.genericsystem.reactor.gscomponents3.AppHeader.TitleDiv;
-import org.genericsystem.reactor.gscomponents3.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents3.GSComposite;
-import org.genericsystem.reactor.gscomponents3.InstancesTable;
-import org.genericsystem.reactor.gscomponents3.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents3.Monitor;
-import org.genericsystem.reactor.gscomponents3.Responsive;
+import org.genericsystem.reactor.gscomponents.InstancesTable;
+import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
+import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlH1;
 
@@ -92,7 +94,7 @@ public class CarColorApp3 extends GSApp {
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1")
-	@Children({ UserGuide2.class, GuideButton.class })
+	@Children({ UserGuide.class, GuideButton.class })
 	public static class UserGuideButtonDiv extends GSDiv {
 	}
 
@@ -102,7 +104,7 @@ public class CarColorApp3 extends GSApp {
 	public static class GuideButton extends HtmlButton {
 		@Override
 		public void init() {
-			bindAction(model -> getParent().find(UserGuide2.class).getDisplayProperty(model).setValue("flex"));
+			bindAction(model -> getParent().find(UserGuide.class).getDisplayProperty(model).setValue("flex"));
 		}
 	}
 

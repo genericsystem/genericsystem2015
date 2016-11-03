@@ -1,7 +1,6 @@
 package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.AnnotationsManager;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.Tag.RootTag;
 
 public class RootTagImpl extends GSDiv implements RootTag {
@@ -9,12 +8,10 @@ public class RootTagImpl extends GSDiv implements RootTag {
 	private AnnotationsManager annotationsManager;
 
 	public RootTagImpl() {
-		super((Tag) null);
-	}
-
-	@Override
-	public void beforeProcessAnnotations() {
 		annotationsManager = new AnnotationsManager();
+		beforeProcessAnnotations();
+		getRootTag().getAnnotationsManager().processAnnotations(this);
+		init();
 	}
 
 	@Override

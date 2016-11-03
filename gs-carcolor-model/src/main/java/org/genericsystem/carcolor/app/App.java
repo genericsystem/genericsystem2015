@@ -1,57 +1,70 @@
 package org.genericsystem.carcolor.app;
 
+import org.genericsystem.reactor.htmltag.HtmlButton;
+import org.genericsystem.reactor.htmltag.HtmlH1;
+
+import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
+import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+
 import org.genericsystem.carcolor.app.App.CarColorScript;
+import org.genericsystem.carcolor.app.App.UserGuideButtonDiv;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
 import org.genericsystem.carcolor.model.Color;
 import org.genericsystem.carcolor.model.Power;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.CustomAnnotations;
 import org.genericsystem.reactor.annotations.DependsOnModel;
+import org.genericsystem.reactor.annotations.DirectSelect;
+import org.genericsystem.reactor.annotations.InheritStyle;
 import org.genericsystem.reactor.annotations.RunScript;
+import org.genericsystem.reactor.annotations.SetText;
+import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSEditor;
-import org.genericsystem.reactor.gscomponents.GSHeader;
-import org.genericsystem.reactor.gscomponents.GSModal;
-import org.genericsystem.reactor.gscomponents.GSMonitor;
-import org.genericsystem.reactor.gscomponents.GSResponsive;
-import org.genericsystem.reactor.gscomponents.GSTable;
+import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
 
-/**
- * @author Nicolas Feybesse
- *
- */
+@CustomAnnotations(InheritStyle.class)
 @RunScript(CarColorScript.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, CarColor.class })
+@Style(name = "background-color", value = "#00afeb")
+@Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
+@Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
+@Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
+@SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
+@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Car.class, Color.class })
 public class App extends GSApp {
-
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, App.class, "/cars");
 	}
 
 	public App() {
-		addStyle("background-color", "#00afeb");
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+	}
 
-		new GSHeader(this, "Reactor Live Demo", GSLogo::new, "", GSUserGuide::new, "");
-		new GSModal(this, contentSection -> new GSEditor(contentSection, FlexDirection.COLUMN) {
-			{
-				addStyle("min-height", "300px");
-			}
-		});
-		new GSResponsive(this, FlexDirection.COLUMN, firstSection -> new GSTable(firstSection) {
-			{
-				select(Car.class);
-			}
-		}, secondSection -> new GSTable(secondSection) {
-			{
-				select(Color.class);
-			}
-		});
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "align-items", value = "center")
+	@Style(name = "flex", value = "1")
+	@Children({ UserGuide.class, GuideButton.class })
+	public static class UserGuideButtonDiv extends GSDiv {
+	}
 
-		new GSMonitor(this);
+	@SetText("User Guide")
+	@Style(name = "flex", value = "0 1 auto")
+	@BindAction(MODAL_DISPLAY_FLEX.class)
+	@InheritStyle("background-color")
+	public static class GuideButton extends HtmlButton {
+
 	}
 
 	public static class CarColorScript implements Script {
@@ -87,7 +100,5 @@ public class App extends GSApp {
 			// power.enableRequiredConstraint(ApiStatics.BASE_POSITION);
 			engine.getCurrentCache().flush();
 		}
-
 	}
-
 }

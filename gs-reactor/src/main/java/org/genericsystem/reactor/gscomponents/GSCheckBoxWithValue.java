@@ -1,21 +1,14 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.Tag;
-
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 
 import org.genericsystem.reactor.htmltag.HtmlCheckBox;
 
+import org.genericsystem.reactor.ReactorStatics;
+
 public class GSCheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDefaults {
 
 	public GSCheckBoxWithValue() {
-		createConvertedValueProperty();
-		bindOptionalBiDirectionalAttribute(VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
-	}
-
-	public GSCheckBoxWithValue(Tag parent) {
-		super(parent);
 		createConvertedValueProperty();
 		bindOptionalBiDirectionalAttribute(VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 	}
@@ -26,22 +19,11 @@ public class GSCheckBoxWithValue extends HtmlCheckBox implements ConvertedValueD
 			initValueProperty(model -> (Boolean) model.getGeneric().getValue());
 			addConvertedValueChangeListener((model, nva) -> model.getGeneric().updateValue(nva));
 		}
-
-		public GSCheckBoxEditor(Tag parent) {
-			super(parent);
-			initValueProperty(model -> (Boolean) model.getGeneric().getValue());
-			addConvertedValueChangeListener((model, nva) -> model.getGeneric().updateValue(nva));
-		}
 	}
 
 	public static class GSCheckBoxDisplayer extends GSCheckBoxEditor {
 
 		public GSCheckBoxDisplayer() {
-			addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
-		}
-
-		public GSCheckBoxDisplayer(Tag parent) {
-			super(parent);
 			addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
 		}
 	}

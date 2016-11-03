@@ -6,7 +6,6 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.GSTagImpl;
 
 import io.vertx.core.json.JsonObject;
@@ -17,17 +16,9 @@ import io.vertx.core.json.JsonObject;
  */
 public class HtmlButton extends GSTagImpl implements ActionDefaults, GSBuilderDefaults, SelectionDefaults {
 
-	public HtmlButton() {
-
-	}
-
 	@Override
 	public String getTag() {
 		return "button";
-	}
-
-	public HtmlButton(Tag parent) {
-		super(parent);
 	}
 
 	@Override
