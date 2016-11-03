@@ -76,10 +76,8 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { ValueComponents.class, Content.class }, value = "#e5ed00")
 	@Children(value = ValueComponents.class)
-	@Children(path = { ValueComponents.class, Header.class }, value = { GSLabelDisplayer.class, HtmlLabel.class, CheckBoxDisplayer.class })
 	@ForEach(path = ValueComponents.class, value = ObservableListExtractor.HOLDERS.class)
 	@ForEach(path = { ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-	@Select(path = { ValueComponents.class, Header.class, GSLabelDisplayer.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Select(path = { ValueComponents.class, Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	public static class Holders extends Composite {
 	}
