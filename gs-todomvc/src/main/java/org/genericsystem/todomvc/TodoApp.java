@@ -76,8 +76,6 @@ import javafx.collections.transformation.FilteredList;
  */
 @DependsOnModel({ Todos.class, Completed.class })
 @Children({ MyHtmlDiv.class })
-// @ReactorDependencies(path = { MyHtmlDiv.class }, value = { MyHeader.class })
-// @ReactorDependencies(path = { MyHeader.class }, value = { MyHtmlH1.class, MyHtmlInputText.class })
 public class TodoApp extends RootTagImpl {
 
 	public static final String FILTER_MODE = "mode";
@@ -97,18 +95,6 @@ public class TodoApp extends RootTagImpl {
 
 	private ObservableList<Generic> getTodos(Context model) {
 		return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
-	}
-
-	private ObservableList<Generic> getFilteredTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(FILTERED_TODOS, model).getValue();
-	}
-
-	private ObservableList<Generic> getActiveTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
-	}
-
-	private ObservableList<Generic> getCompletedTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
 	}
 
 	private Map<Generic, Observable[]> getExtractors(Context model) {
