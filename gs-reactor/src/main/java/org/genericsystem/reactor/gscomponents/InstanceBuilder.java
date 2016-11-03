@@ -131,6 +131,15 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 		}
 	}
 
+	@Children({ GSHolderBuilder.class, HtmlSpan.class })
+	@SetText(path = HtmlSpan.class, value = "ERROR")
+	@Style(path = HtmlSpan.class, name = "color", value = "DarkRed")
+	@Style(path = HtmlSpan.class, name = "display", value = "none")
+	@Style(name = "flex", value = "1")
+	public static class GSHolderBuilderDiv extends GSDiv {
+
+	}
+
 	@Style(name = "flex", value = "1")
 	@Style(name = "height", value = "100%")
 	@Style(name = "width", value = "100%")
