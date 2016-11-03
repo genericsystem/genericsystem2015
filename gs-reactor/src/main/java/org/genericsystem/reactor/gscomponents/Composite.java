@@ -1,12 +1,11 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
-
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Footer;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
 
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")

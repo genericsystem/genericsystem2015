@@ -1,6 +1,6 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.htmltag.HtmlDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;

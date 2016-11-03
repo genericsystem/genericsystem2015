@@ -4,14 +4,13 @@ import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlInputText;
-
 import java.io.Serializable;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;

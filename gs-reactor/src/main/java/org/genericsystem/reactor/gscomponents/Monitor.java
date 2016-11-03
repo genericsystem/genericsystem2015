@@ -3,14 +3,7 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlInputText;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-
 import java.util.Arrays;
-
-import javafx.beans.binding.Bindings;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.EncryptionUtils;
@@ -18,15 +11,19 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
-import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
 import org.genericsystem.reactor.model.ContextAction;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
@@ -42,6 +39,8 @@ import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 
+import javafx.beans.binding.Bindings;
+
 @Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
@@ -53,7 +52,7 @@ import org.genericsystem.security.model.User.Salt;
 @Style(name = "padding", value = "10px")
 public class Monitor extends FlexDiv {
 
-	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class /* , HtmlButton.class */})
+	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class /* , HtmlButton.class */ })
 	@SetText(path = HtmlButton.class, pos = 2, value = "Mount")
 	@BindAction(path = HtmlButton.class, pos = 2, value = MOUNT.class)
 	@SetText(path = HtmlButton.class, pos = 3, value = "Unmount")

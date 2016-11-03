@@ -1,8 +1,5 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -11,6 +8,8 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents2.Monitor2.CancelButton;
 import org.genericsystem.reactor.gscomponents2.Monitor2.LastUpdateLabel;
 import org.genericsystem.reactor.gscomponents2.Monitor2.SaveButton;

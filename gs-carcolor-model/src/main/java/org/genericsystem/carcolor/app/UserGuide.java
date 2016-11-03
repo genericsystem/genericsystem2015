@@ -1,15 +1,15 @@
 package org.genericsystem.carcolor.app;
 
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
+import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
+
 import org.genericsystem.carcolor.app.UserGuide.TextContent;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.gscomponents.FlexDiv;
-import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
-
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-import org.genericsystem.reactor.htmltag.HtmlLi;
-import org.genericsystem.reactor.htmltag.HtmlUl;
 
 @Children(path = FlexDiv.class, value = { HtmlHyperLink.class, TextContent.class })
 @Style(path = FlexDiv.class, name = "border-radius", value = "30px")

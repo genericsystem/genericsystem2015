@@ -3,8 +3,6 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -17,6 +15,7 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;

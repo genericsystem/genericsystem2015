@@ -6,13 +6,6 @@ import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-import org.genericsystem.reactor.htmltag.HtmlInputText;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,21 +27,27 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
-import org.genericsystem.reactor.gscomponents.Composite.Content;
-import org.genericsystem.reactor.gscomponents.Composite.Header;
-import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
-import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.Combobox.ComboboxWithEmptyEntry;
 import org.genericsystem.reactor.gscomponents.Combobox.InstanceEditorCombobox;
+import org.genericsystem.reactor.gscomponents.Composite.Content;
+import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordHoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEditor;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ContentRow;
+import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
-import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.reactor.gscomponents2.CellDiv.ActionLink;
 import org.genericsystem.reactor.model.ContextAction.ADD_HOLDER;
@@ -118,7 +117,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 	@GenericValueBackgroundColor("#e5ed00")
 	@Children(Checkbox.class)
 	@BindText
-	public static class CheckboxLabel extends org.genericsystem.reactor.htmltag.HtmlLabel {
+	public static class CheckboxLabel extends HtmlLabel {
 	}
 
 	@Style(name = "float", value = "left")

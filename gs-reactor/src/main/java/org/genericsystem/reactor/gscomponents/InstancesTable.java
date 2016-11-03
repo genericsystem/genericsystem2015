@@ -2,11 +2,6 @@ package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
-
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
@@ -24,13 +19,17 @@ import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplaye
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ContentRow;
-import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
-import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
+import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.InstanceNameLink;
 import org.genericsystem.reactor.gscomponents.InstancesTable.RemoveButton;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.model.ObservableListExtractor;

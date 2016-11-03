@@ -2,9 +2,8 @@ package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlCheckBox;
-
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 
 public class CheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDefaults {
 

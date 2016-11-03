@@ -2,8 +2,7 @@ package org.genericsystem.reactor.gscomponents2;
 
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-
-import org.genericsystem.reactor.htmltag.HtmlButton;
+import org.genericsystem.reactor.modelproperties.GSBuilderDefaults.GenericValueComponents;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -18,6 +17,7 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents2.CellDiv.CenteredFlexDiv;

@@ -1,10 +1,9 @@
 package org.genericsystem.security;
 
-import org.genericsystem.reactor.htmltag.HtmlH1;
-
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin;
 import org.genericsystem.reactor.gscomponents.Responsive;

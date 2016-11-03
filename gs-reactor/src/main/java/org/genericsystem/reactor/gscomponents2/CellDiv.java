@@ -1,12 +1,11 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 
 @Style(name = "flex", value = "1")
 @Style(name = "overflow", value = "hidden")

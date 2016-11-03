@@ -1,13 +1,12 @@
 package org.genericsystem.carcolor.app;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlH1;
-
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.Responsive;

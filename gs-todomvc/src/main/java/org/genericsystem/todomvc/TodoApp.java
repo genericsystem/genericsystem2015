@@ -1,20 +1,19 @@
 package org.genericsystem.todomvc;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlCheckBox;
-import org.genericsystem.reactor.htmltag.HtmlDiv;
-import org.genericsystem.reactor.htmltag.HtmlFooter;
-import org.genericsystem.reactor.htmltag.HtmlH1;
-import org.genericsystem.reactor.htmltag.HtmlHeader;
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-import org.genericsystem.reactor.htmltag.HtmlInputText;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-import org.genericsystem.reactor.htmltag.HtmlLi;
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-import org.genericsystem.reactor.htmltag.HtmlStrong;
-import org.genericsystem.reactor.htmltag.HtmlUl;
-
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlFooter;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHeader;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlStrong;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import java.util.ArrayList;

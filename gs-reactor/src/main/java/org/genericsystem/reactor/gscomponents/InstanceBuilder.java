@@ -4,9 +4,6 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +18,8 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddButton;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.HolderBuilder;

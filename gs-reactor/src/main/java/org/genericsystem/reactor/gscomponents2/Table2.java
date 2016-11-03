@@ -2,15 +2,10 @@ package org.genericsystem.reactor.gscomponents2;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlH2;
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-import org.genericsystem.reactor.htmltag.HtmlLabel.GSLabelDisplayer;
-
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
-import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
@@ -18,11 +13,15 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
-import org.genericsystem.reactor.gscomponents.FlexDiv;
-import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
+import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents2.CellDiv.TitleLineCellDiv;
 import org.genericsystem.reactor.gscomponents2.Table2.Row.Cell;
 import org.genericsystem.reactor.gscomponents2.Table2.Row.Cell.SubCell;

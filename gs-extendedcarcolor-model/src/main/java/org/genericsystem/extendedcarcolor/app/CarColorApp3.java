@@ -1,8 +1,5 @@
 package org.genericsystem.extendedcarcolor.app;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlH1;
-
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
@@ -10,6 +7,8 @@ import org.genericsystem.reactor.gscomponents.Composite;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
 import org.genericsystem.reactor.gscomponents.Monitor;
