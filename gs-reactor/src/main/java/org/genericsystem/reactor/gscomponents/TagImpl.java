@@ -12,7 +12,7 @@ import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.TagSwitcher;
 
-public abstract class GSTagImpl implements Tag {
+public abstract class TagImpl implements Tag {
 
 	private MetaBinding<?> metaBinding;
 	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();

@@ -2,28 +2,27 @@ package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlCheckBox;
-
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 
-public class GSCheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDefaults {
+public class CheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDefaults {
 
-	public GSCheckBoxWithValue() {
+	public CheckBoxWithValue() {
 		createConvertedValueProperty();
 		bindOptionalBiDirectionalAttribute(VALUE, ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 	}
 
-	public static class GSCheckBoxEditor extends GSCheckBoxWithValue {
+	public static class CheckBoxEditor extends CheckBoxWithValue {
 
-		public GSCheckBoxEditor() {
+		public CheckBoxEditor() {
 			initValueProperty(model -> (Boolean) model.getGeneric().getValue());
 			addConvertedValueChangeListener((model, nva) -> model.getGeneric().updateValue(nva));
 		}
 	}
 
-	public static class GSCheckBoxDisplayer extends GSCheckBoxEditor {
+	public static class CheckBoxDisplayer extends CheckBoxEditor {
 
-		public GSCheckBoxDisplayer() {
+		public CheckBoxDisplayer() {
 			addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
 		}
 	}

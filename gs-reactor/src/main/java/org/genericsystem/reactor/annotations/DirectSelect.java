@@ -13,7 +13,7 @@ import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DirectSelect.DirectSelects;
 import org.genericsystem.reactor.annotations.DirectSelect.Processor;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**
  * @author Nicolas Feybesse
@@ -24,7 +24,7 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
 @Repeatable(DirectSelects.class)
 @Process(Processor.class)
 public @interface DirectSelect {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	Class<?>[] value();
 

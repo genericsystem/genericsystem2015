@@ -1,21 +1,20 @@
 package org.genericsystem.todomvc;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlCheckBox;
-import org.genericsystem.reactor.htmltag.HtmlDiv;
-import org.genericsystem.reactor.htmltag.HtmlFooter;
-import org.genericsystem.reactor.htmltag.HtmlH1;
-import org.genericsystem.reactor.htmltag.HtmlHeader;
-import org.genericsystem.reactor.htmltag.HtmlHyperLink;
-import org.genericsystem.reactor.htmltag.HtmlInputText;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-import org.genericsystem.reactor.htmltag.HtmlLi;
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-import org.genericsystem.reactor.htmltag.HtmlStrong;
-import org.genericsystem.reactor.htmltag.HtmlUl;
-
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlFooter;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHeader;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlStrong;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +26,8 @@ import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv;
@@ -77,9 +76,7 @@ import javafx.collections.transformation.FilteredList;
  */
 @DependsOnModel({ Todos.class, Completed.class })
 @Children({ MyHtmlDiv.class })
-// @ReactorDependencies(path = { MyHtmlDiv.class }, value = { MyHeader.class })
-// @ReactorDependencies(path = { MyHeader.class }, value = { MyHtmlH1.class, MyHtmlInputText.class })
-public class TodoApp extends GSApp {
+public class TodoApp extends RootTagImpl {
 
 	public static final String FILTER_MODE = "mode";
 	public static final String TODOS = "todos";
@@ -98,18 +95,6 @@ public class TodoApp extends GSApp {
 
 	private ObservableList<Generic> getTodos(Context model) {
 		return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
-	}
-
-	private ObservableList<Generic> getFilteredTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(FILTERED_TODOS, model).getValue();
-	}
-
-	private ObservableList<Generic> getActiveTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
-	}
-
-	private ObservableList<Generic> getCompletedTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
 	}
 
 	private Map<Generic, Observable[]> getExtractors(Context model) {
@@ -153,7 +138,7 @@ public class TodoApp extends GSApp {
 
 		@StyleClass("todoapp")
 		@Children({ MyHeader.class, MyDiv2.class, MyHtmlFooter1.class })
-		public static class MyDiv extends GSDiv {
+		public static class MyDiv extends FlexDiv {
 
 			@StyleClass("header")
 			@Children({ MyHtmlH1.class, MyHtmlInputText.class })
@@ -185,7 +170,7 @@ public class TodoApp extends GSApp {
 
 			@StyleClass("main")
 			@Children(MyHtmlUl.class)
-			public static class MyDiv2 extends GSDiv {
+			public static class MyDiv2 extends FlexDiv {
 
 				@StyleClass("todo-list")
 				@Children(MyHtmlLi.class)

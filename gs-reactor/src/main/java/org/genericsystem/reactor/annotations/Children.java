@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Children.ChildrenMult;
 import org.genericsystem.reactor.annotations.Children.ChildrenProcessor;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**
  * @author Nicolas Feybesse
@@ -22,9 +22,9 @@ import org.genericsystem.reactor.gscomponents.GSTagImpl;
 @Repeatable(ChildrenMult.class)
 @Process(ChildrenProcessor.class)
 public @interface Children {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
-	Class<? extends GSTagImpl>[] value();
+	Class<? extends TagImpl>[] value();
 
 	int[] pos() default {};
 
@@ -38,7 +38,7 @@ public @interface Children {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			for (Class<? extends GSTagImpl> clazz : ((Children) annotation).value())
+			for (Class<? extends TagImpl> clazz : ((Children) annotation).value())
 				tag.createTag(clazz);
 		}
 	}

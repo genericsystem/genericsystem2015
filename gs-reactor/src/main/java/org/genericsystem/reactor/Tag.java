@@ -8,8 +8,6 @@ import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +17,17 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.gscomponents.TagImpl;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.TagSwitcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -28,16 +37,6 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
-
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.TagSwitcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Nicolas Feybesse
@@ -353,9 +352,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	default void init() {
 	}
 
-	default void beforeProcessAnnotations() {
-	}
-
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
 	default RootTag getRootTag() {
@@ -408,7 +404,7 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		} catch (IllegalAccessException | InstantiationException e) {
 			throw new IllegalStateException(e);
 		}
-		((GSTagImpl) result).setParent(this);
+		((TagImpl) result).setParent(this);
 		getRootTag().getAnnotationsManager().processAnnotations(result);
 		result.init();
 		return result;

@@ -7,8 +7,6 @@ import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,7 +16,8 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gscomponents.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilderDiv;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.security.model.User.Password;

@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.SelectModel.SelectModelProcessor;
 import org.genericsystem.reactor.annotations.SelectModel.SelectModels;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -19,7 +19,7 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @Repeatable(SelectModels.class)
 @Process(SelectModelProcessor.class)
 public @interface SelectModel {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	Class<? extends ObservableModelSelector> value();
 

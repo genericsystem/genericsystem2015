@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach.ForEachProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 
@@ -24,7 +24,7 @@ import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 @Repeatable(ForEachs.class)
 @Process(ForEachProcessor.class)
 public @interface ForEach {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	Class<? extends ObservableListExtractor> value();
 

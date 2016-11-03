@@ -1,17 +1,16 @@
 package org.genericsystem.carcolor.app;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlH1;
-
 import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents.Monitor;
-import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import org.genericsystem.carcolor.app.App.CarColorScript;
 import org.genericsystem.carcolor.app.App.UserGuideButtonDiv;
@@ -43,7 +42,7 @@ import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
 @Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Car.class, Color.class })
-public class App extends GSApp {
+public class App extends RootTagImpl {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, App.class, "/cars");
 	}
@@ -56,7 +55,7 @@ public class App extends GSApp {
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1")
 	@Children({ UserGuide.class, GuideButton.class })
-	public static class UserGuideButtonDiv extends GSDiv {
+	public static class UserGuideButtonDiv extends FlexDiv {
 	}
 
 	@SetText("User Guide")

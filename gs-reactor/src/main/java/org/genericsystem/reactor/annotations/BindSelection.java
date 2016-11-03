@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindSelection.BindSelectionProcessor;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 @Target({ ElementType.TYPE })
 @Process(BindSelectionProcessor.class)
 public @interface BindSelection {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
-	Class<? extends GSTagImpl> value();
+	Class<? extends TagImpl> value();
 
 	int[] pos() default {};
 
