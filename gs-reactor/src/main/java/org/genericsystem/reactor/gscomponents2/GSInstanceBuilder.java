@@ -26,7 +26,7 @@ import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSSubcellEditorDiv;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
 import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.AddButtonDiv;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.AddButtonDiv.AddButton;
+import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.AddButtonDiv.AddButton2;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder;
 import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv;
@@ -131,12 +131,12 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 	}
 
 	// “Add” button.
-	@Children(AddButton.class)
+	@Children(AddButton2.class)
 	public static class AddButtonDiv extends InstancesTable.ButtonDiv {
 		@Style(name = "flex", value = "1")
 		@Style(name = "height", value = "100%")
 		@Style(name = "width", value = "100%")
-		public static class AddButton extends HtmlButton {
+		public static class AddButton2 extends HtmlButton {
 
 			@Override
 			public void init() {

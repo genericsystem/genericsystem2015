@@ -7,7 +7,6 @@ import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.htmltag.HtmlButton;
 import org.genericsystem.reactor.htmltag.HtmlSpan;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -23,7 +22,7 @@ import org.genericsystem.reactor.gscomponents.GSComposite.Content;
 import org.genericsystem.reactor.gscomponents.GSComposite.Header;
 import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddButton;
-import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilder;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilderDiv;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSMultiCheckboxBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSPasswordBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.Checkbox;
@@ -45,19 +44,16 @@ import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUT
 import org.genericsystem.reactor.model.TagSwitcher;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
-@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
-@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
 @Children({ Header.class, Content.class, ButtonDiv.class })
-@Children(path = Header.class, value = GSInputTextWithConversion.class)
-@Children(path = Content.class, value = { GSPasswordBuilder.class, GSHolderBuilder.class, GSMultiCheckboxBuilder.class })
+@Children(path = Header.class, value = GSHolderBuilderDiv.class)
+@Children(path = Content.class, value = { GSPasswordBuilder.class, GSHolderBuilderDiv.class, GSMultiCheckboxBuilder.class })
 @Children(path = ButtonDiv.class, value = AddButton.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @Select(path = { Content.class, GSPasswordBuilder.class }, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
-@Select(path = { Content.class, GSHolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
+@Select(path = { Content.class, GSHolderBuilderDiv.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
 @Select(path = { Content.class, GSMultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
 public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, PasswordDefaults {
 
@@ -117,7 +113,7 @@ public class InstanceBuilder extends GSComposite implements GSBuilderDefaults, P
 	}
 
 	@Style(name = "flex", value = "1")
-	@Children({ Header.class, Content.class })
+	@Children({ Content.class, Header.class, })
 	@Children(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
 	@Children(path = Content.class, value = ComponentAdderSelect.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)

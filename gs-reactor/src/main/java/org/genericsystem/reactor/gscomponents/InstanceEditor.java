@@ -349,7 +349,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 
 	@Style(name = "flex", value = "1")
 	@Style(name = "width", value = "100%")
-	@Select(DIRECT_RELATION_SELECTOR.class)
+	// @Select(DIRECT_RELATION_SELECTOR.class)
 	public static class ComponentAdderSelect extends GSSelectWithEmptyEntry {
 
 		@Override
