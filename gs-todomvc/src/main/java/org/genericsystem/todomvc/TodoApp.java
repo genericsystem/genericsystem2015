@@ -14,8 +14,8 @@ import org.genericsystem.reactor.htmltag.HtmlSpan;
 import org.genericsystem.reactor.htmltag.HtmlStrong;
 import org.genericsystem.reactor.htmltag.HtmlUl;
 
-import org.genericsystem.reactor.gscomponents.AppRoot;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +27,8 @@ import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv;
@@ -79,7 +79,7 @@ import javafx.collections.transformation.FilteredList;
 @Children({ MyHtmlDiv.class })
 // @ReactorDependencies(path = { MyHtmlDiv.class }, value = { MyHeader.class })
 // @ReactorDependencies(path = { MyHeader.class }, value = { MyHtmlH1.class, MyHtmlInputText.class })
-public class TodoApp extends AppRoot {
+public class TodoApp extends RootTagImpl {
 
 	public static final String FILTER_MODE = "mode";
 	public static final String TODOS = "todos";

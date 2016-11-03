@@ -19,7 +19,7 @@ import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-import org.genericsystem.reactor.gscomponents.AppRoot;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.reactor.gscomponents2.Editor2;
 import org.genericsystem.reactor.gscomponents2.Editor2.HorizontalGSEditor;
 import org.genericsystem.reactor.gscomponents2.Monitor2.MonitorExtended2;
@@ -35,7 +35,7 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @SelectModel(path = Editor2.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
 @DirectSelect(path = Table2.class, pos = 2, value = Color.class)
 @Style(name = "justify-content", value = "center")
-public class App extends AppRoot {
+public class App extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, App.class, "/example-reactor");

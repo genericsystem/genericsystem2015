@@ -1,5 +1,15 @@
 package org.genericsystem.security;
 
+import org.genericsystem.reactor.htmltag.HtmlH1;
+
+import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
+
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -9,16 +19,6 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
-
-import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.AppRoot;
-import org.genericsystem.reactor.gscomponents.Responsive;
-import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
-import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin;
-
-import org.genericsystem.reactor.htmltag.HtmlH1;
 import org.genericsystem.security.SecurityApp.ExampleScript;
 import org.genericsystem.security.model.Role;
 import org.genericsystem.security.model.User;
@@ -35,7 +35,7 @@ import org.genericsystem.security.model.User;
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "gs-security")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { User.class, Role.class })
-public class SecurityApp extends AppRoot {
+public class SecurityApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SecurityApp.class, "/security");

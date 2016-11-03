@@ -8,8 +8,6 @@ import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -18,16 +16,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javafx.beans.binding.ListBinding;
-import javafx.beans.property.Property;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.util.StringConverter;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
@@ -38,6 +26,17 @@ import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.TagSwitcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.vertx.core.http.ServerWebSocket;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.util.StringConverter;
 
 /**
  * @author Nicolas Feybesse
@@ -351,9 +350,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	public ObservableList<Tag> getObservableChildren();
 
 	default void init() {
-	}
-
-	default void beforeProcessAnnotations() {
 	}
 
 	public <COMPONENT extends Tag> COMPONENT getParent();

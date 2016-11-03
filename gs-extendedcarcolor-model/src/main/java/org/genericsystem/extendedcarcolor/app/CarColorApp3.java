@@ -1,5 +1,21 @@
 package org.genericsystem.extendedcarcolor.app;
 
+import org.genericsystem.reactor.htmltag.HtmlButton;
+import org.genericsystem.reactor.htmltag.HtmlH1;
+
+import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
+import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.Composite;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.InstancesTable;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
+
 import org.genericsystem.carcolor.app.CCInheritStyle;
 import org.genericsystem.carcolor.app.UserGuide;
 import org.genericsystem.common.Generic;
@@ -36,22 +52,6 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 
-import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.AppRoot;
-import org.genericsystem.reactor.gscomponents.Composite;
-import org.genericsystem.reactor.gscomponents.FlexDiv;
-import org.genericsystem.reactor.gscomponents.InstancesTable;
-import org.genericsystem.reactor.gscomponents.Monitor;
-import org.genericsystem.reactor.gscomponents.Responsive;
-import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
-import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
-import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlH1;
-
 @CustomAnnotations(CCInheritStyle.class)
 @RunScript(CarColorScript2.class)
 @DependsOnModel({ Car.class, Power.class, Color.class, Airbag.class, Bike.class, Energy.class, Mileage.class, MileageUnit.class, Price.class, SideCar.class, Transmission.class, UsedCar.class, VehicleColor.class, Vehicle.class, VehicleEngine.class,
@@ -63,7 +63,7 @@ import org.genericsystem.reactor.htmltag.HtmlH1;
 @Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Vehicle.class, VehicleEngine.class })
-public class CarColorApp3 extends AppRoot {
+public class CarColorApp3 extends RootTagImpl {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp3.class, "cars2");
 	}

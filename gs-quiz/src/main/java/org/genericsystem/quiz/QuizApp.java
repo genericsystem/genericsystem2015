@@ -3,12 +3,12 @@ package org.genericsystem.quiz;
 import org.genericsystem.reactor.htmltag.HtmlH1;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.AppRoot;
-import org.genericsystem.reactor.gscomponents.Monitor;
-import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -41,7 +41,7 @@ import org.genericsystem.security.model.User;
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Java Appraisal")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Quiz.class, Question.class, Answer.class, UserAnswer.class, User.class })
-public class QuizApp extends AppRoot {
+public class QuizApp extends RootTagImpl {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, QuizApp.class, "/quiz");
 	}

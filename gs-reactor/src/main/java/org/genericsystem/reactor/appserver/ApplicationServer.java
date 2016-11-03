@@ -21,7 +21,7 @@ import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
-import org.genericsystem.reactor.gscomponents.AppRoot;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -62,7 +62,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
-	public static void startSimpleGenericApp(String[] mainArgs, Class<? extends AppRoot> htmlAppClass, String homePersistentDirectoryPath) {
+	public static void startSimpleGenericApp(String[] mainArgs, Class<? extends RootTagImpl> htmlAppClass, String homePersistentDirectoryPath) {
 		new ApplicationServer(new SimpleWebAppConfig(mainArgs, htmlAppClass, homePersistentDirectoryPath)).start();
 	}
 
