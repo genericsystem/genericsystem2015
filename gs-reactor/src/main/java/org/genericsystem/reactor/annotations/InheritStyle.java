@@ -11,14 +11,14 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.InheritStyle.InheritStyleProcessor;
 import org.genericsystem.reactor.annotations.InheritStyle.InheritStyles;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(InheritStyles.class)
 @Process(value = InheritStyleProcessor.class, repeatable = true)
 public @interface InheritStyle {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	String[] value();
 

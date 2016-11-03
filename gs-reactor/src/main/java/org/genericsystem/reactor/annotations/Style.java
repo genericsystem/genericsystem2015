@@ -22,8 +22,8 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection.ReverseF
 import org.genericsystem.reactor.annotations.Style.StyleProcessor;
 import org.genericsystem.reactor.annotations.Style.Styles;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @Repeatable(Styles.class)
 @Process(value = StyleProcessor.class, repeatable = true)
 public @interface Style {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	String name();
 
@@ -60,7 +60,7 @@ public @interface Style {
 	@Repeatable(FlexDirections.class)
 	@Process(FlexDirectionStyleProcessor.class)
 	public @interface FlexDirectionStyle {
-		Class<? extends GSTagImpl>[] path() default {};
+		Class<? extends TagImpl>[] path() default {};
 
 		FlexDirection value();
 
@@ -77,8 +77,8 @@ public @interface Style {
 
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				if (GSDiv.class.isAssignableFrom(tag.getClass()))
-					((GSDiv) tag).setDirection(((FlexDirectionStyle) annotation).value());
+				if (FlexDiv.class.isAssignableFrom(tag.getClass()))
+					((FlexDiv) tag).setDirection(((FlexDirectionStyle) annotation).value());
 				else
 					log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
 			}
@@ -90,7 +90,7 @@ public @interface Style {
 	@Repeatable(KeepFlexDirections.class)
 	@Process(KeepFlexDirectionProcessor.class)
 	public @interface KeepFlexDirection {
-		Class<? extends GSTagImpl>[] path() default {};
+		Class<? extends TagImpl>[] path() default {};
 
 		int[] pos() default {};
 
@@ -105,8 +105,8 @@ public @interface Style {
 
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				if (GSDiv.class.isAssignableFrom(tag.getClass()))
-					((GSDiv) tag).keepDirection();
+				if (FlexDiv.class.isAssignableFrom(tag.getClass()))
+					((FlexDiv) tag).keepDirection();
 				else
 					log.warn("Warning: KeepFlexDirection is applicable only to GSDiv extensions.");
 			}
@@ -118,7 +118,7 @@ public @interface Style {
 	@Repeatable(ReverseFlexDirections.class)
 	@Process(ReverseFlexDirectionProcessor.class)
 	public @interface ReverseFlexDirection {
-		Class<? extends GSTagImpl>[] path() default {};
+		Class<? extends TagImpl>[] path() default {};
 
 		int[] pos() default {};
 
@@ -133,8 +133,8 @@ public @interface Style {
 
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				if (GSDiv.class.isAssignableFrom(tag.getClass()))
-					((GSDiv) tag).reverseDirection();
+				if (FlexDiv.class.isAssignableFrom(tag.getClass()))
+					((FlexDiv) tag).reverseDirection();
 				else
 					log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
 			}
@@ -146,7 +146,7 @@ public @interface Style {
 	@Repeatable(GenericValueBackgroundColors.class)
 	@Process(GenericValueBackgroundColorProcessor.class)
 	public @interface GenericValueBackgroundColor {
-		Class<? extends GSTagImpl>[] path() default {};
+		Class<? extends TagImpl>[] path() default {};
 
 		String value();
 

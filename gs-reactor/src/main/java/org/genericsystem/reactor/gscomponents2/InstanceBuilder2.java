@@ -16,27 +16,27 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
+import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
-import org.genericsystem.reactor.gscomponents2.GSCellDiv.CenteredFlexDiv;
-import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSComponentEditorDiv;
-import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSSubcellEditorDiv;
-import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
-import org.genericsystem.reactor.gscomponents2.GSEditor.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.AddButtonDiv;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.AddButtonDiv.AddButton;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.HolderBuilder.HolderBuilderInput;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.LinkBuilder;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.BuilderCell.LinkBuilder.ComponentBuilder;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.InstanceNameBuilder;
-import org.genericsystem.reactor.gscomponents2.GSInstanceBuilder.InstanceNameBuilder.InstanceNameBuilderInput;
+import org.genericsystem.reactor.gscomponents2.CellDiv.CenteredFlexDiv;
+import org.genericsystem.reactor.gscomponents2.CellDiv.ComponentEditorDiv;
+import org.genericsystem.reactor.gscomponents2.CellDiv.SubcellEditorDiv;
+import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellAdder.LinkAdder.ComponentAdder.ComponentAdderSelect;
+import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.InstanceEdition.InstanceAttributeEditor.AttributeEditionColumn.SubcellEditor.LinkEditor;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.AddButtonDiv;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.AddButtonDiv.AddButton;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.BooleanHolderBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.HolderBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.HolderBuilder.HolderBuilderInput;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.LinkBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.LinkBuilder.ComponentBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.InstanceNameBuilder;
+import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.InstanceNameBuilder.InstanceNameBuilderInput;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
@@ -46,7 +46,7 @@ import javafx.beans.value.ObservableValue;
 @Children({ InstanceNameBuilder.class, BuilderCell.class, AddButtonDiv.class })
 @Style(name = "flex", value = "1")
 @ReverseFlexDirection
-public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
+public class InstanceBuilder2 extends FlexDiv implements GSBuilderDefaults {
 
 	@Override
 	public void init() {
@@ -56,28 +56,28 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 	// For the creation of the instance’s value.
 	@Children(InstanceNameBuilderInput.class)
-	public static class InstanceNameBuilder extends GSSubcellEditorDiv {
+	public static class InstanceNameBuilder extends SubcellEditorDiv {
 		@Style(name = "flex", value = "1")
 		@Style(name = "height", value = "100%")
 		@Style(name = "width", value = "100%")
-		public static class InstanceNameBuilderInput extends GSInputTextWithConversion {
+		public static class InstanceNameBuilderInput extends InputTextWithConversion {
 		}
 	}
 
 	// Creation of holders/links.
 	@ForEach(ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 	@Children({ HolderBuilder.class, BooleanHolderBuilder.class, LinkBuilder.class })
-	public static class BuilderCell extends GSSubcellEditorDiv {
+	public static class BuilderCell extends SubcellEditorDiv {
 
 		// Creation of non-boolean holders.
 		@Select(ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 		@Children(HolderBuilderInput.class)
-		public static class HolderBuilder extends GSSubcellEditorDiv {
+		public static class HolderBuilder extends SubcellEditorDiv {
 
 			@Style(name = "flex", value = "1")
 			@Style(name = "height", value = "100%")
 			@Style(name = "width", value = "100%")
-			public static class HolderBuilderInput extends GSInputTextWithConversion implements GSBuilderDefaults {
+			public static class HolderBuilderInput extends InputTextWithConversion implements GSBuilderDefaults {
 
 				@Override
 				public void init() {
@@ -94,10 +94,10 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 		// Creation of boolean holders.
 		@Select(ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 		@Children(CheckboxContainerBuildDiv.class)
-		public static class BooleanHolderBuilder extends GSSubcellEditorDiv {
+		public static class BooleanHolderBuilder extends SubcellEditorDiv {
 			@Children(BooleanHolderBuilderInput.class)
 			public static class CheckboxContainerBuildDiv extends CenteredFlexDiv {
-				public static class BooleanHolderBuilderInput extends GSCheckBoxWithValue implements GSBuilderDefaults {
+				public static class BooleanHolderBuilderInput extends CheckBoxWithValue implements GSBuilderDefaults {
 
 					@Override
 					public void init() {
@@ -125,7 +125,7 @@ public class GSInstanceBuilder extends GSDiv implements GSBuilderDefaults {
 
 			@ForEach(ObservableListExtractor.OTHER_COMPONENTS_1.class)
 			@Children(ComponentAdderSelect.class)
-			public static class ComponentBuilder extends GSComponentEditorDiv {
+			public static class ComponentBuilder extends ComponentEditorDiv {
 			}
 		}
 	}

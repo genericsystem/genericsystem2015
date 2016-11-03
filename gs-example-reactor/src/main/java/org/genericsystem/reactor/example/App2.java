@@ -15,7 +15,7 @@ import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.AppRoot;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstancesTable;
@@ -35,7 +35,7 @@ import org.genericsystem.reactor.model.ObservableModelSelector;
 @SelectModel(path = TitledInstanceEditor.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
 @Style(name = "flex-wrap", value = "wrap")
 @Style(name = "flex", value = "1 1 0%")
-public class App2 extends GSApp {
+public class App2 extends AppRoot {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, App2.class, "/example-reactor");

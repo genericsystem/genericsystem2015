@@ -11,9 +11,9 @@ import org.genericsystem.reactor.annotations.CustomAnnotations;
 
 import io.vertx.core.http.ServerWebSocket;
 
-public class GSApp extends RootTagImpl implements SelectionDefaults, UserRoleDefaults {
+public class AppRoot extends RootTagImpl implements SelectionDefaults, UserRoleDefaults {
 
-	public GSApp() {
+	public AppRoot() {
 		createSelectionProperty();
 		createLoggedUserProperty();
 		createAdminModeProperty();

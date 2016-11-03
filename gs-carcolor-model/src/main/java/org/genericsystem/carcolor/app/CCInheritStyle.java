@@ -12,14 +12,14 @@ import org.genericsystem.carcolor.app.CCInheritStyle.CCInheritStyleProcessor;
 import org.genericsystem.carcolor.app.CCInheritStyle.CCInheritStyles;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Process;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(CCInheritStyles.class)
 @Process(value = CCInheritStyleProcessor.class, repeatable = true)
 public @interface CCInheritStyle {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	String[] value();
 

@@ -13,14 +13,14 @@ import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.SetText.SetTextProcessor;
 import org.genericsystem.reactor.annotations.SetText.SetTexts;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(SetTexts.class)
 @Process(SetTextProcessor.class)
 public @interface SetText {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	String[] value();
 

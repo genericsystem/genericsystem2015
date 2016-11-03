@@ -51,7 +51,7 @@ import org.genericsystem.security.model.User.Salt;
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
-public class Monitor extends GSDiv {
+public class Monitor extends FlexDiv {
 
 	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class /* , HtmlButton.class */})
 	@SetText(path = HtmlButton.class, pos = 2, value = "Mount")
@@ -72,7 +72,7 @@ public class Monitor extends GSDiv {
 		@SelectModel(ObservableModelSelector.LOGGED_USER.class)
 		@Children({ ModeSwitchButtons.class, HtmlLabel.class, DisconnectButton.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
-		public static class LoggedUserDiv extends GSDiv implements UserRoleDefaults {
+		public static class LoggedUserDiv extends FlexDiv implements UserRoleDefaults {
 			@Override
 			public void init() {
 				find(HtmlLabel.class)
@@ -90,7 +90,7 @@ public class Monitor extends GSDiv {
 			@BindAction(path = HtmlButton.class, pos = 0, value = ContextAction.SET_ADMIN_MODE.class)
 			@BindAction(path = HtmlButton.class, pos = 1, value = ContextAction.SET_NORMAL_MODE.class)
 			@Switch(path = HtmlButton.class, pos = 3, value = TagSwitcher.ADMIN_MODE_ONLY.class)
-			public static class ModeSwitchButtons extends GSDiv {
+			public static class ModeSwitchButtons extends FlexDiv {
 			}
 
 			@SetText("Disconnect")
@@ -111,7 +111,7 @@ public class Monitor extends GSDiv {
 		@SetText(path = HtmlSpan.class, pos = 1, value = "Invalid password.")
 		@Style(path = HtmlSpan.class, name = "display", value = "none")
 		@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
-		public static class LoginDiv extends GSDiv implements UserRoleDefaults {
+		public static class LoginDiv extends FlexDiv implements UserRoleDefaults {
 
 			@SetText("OK")
 			public static class ValidateButton extends HtmlButton implements PasswordDefaults, UserRoleDefaults {

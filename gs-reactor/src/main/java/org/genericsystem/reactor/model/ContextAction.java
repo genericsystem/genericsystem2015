@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion;
-import org.genericsystem.reactor.gscomponents.GSComposite.Header;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion;
+import org.genericsystem.reactor.gscomponents.Composite.Header;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
@@ -147,7 +147,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			if (GSBuilderDefaults.class.isAssignableFrom(tag.getClass())) {
 				GSBuilderDefaults buildTag = (GSBuilderDefaults) tag;
-				ConvertedValueDefaults input = tag.getParent().getParent().find(Header.class).find(GSInputTextWithConversion.class);
+				ConvertedValueDefaults input = tag.getParent().getParent().find(Header.class).find(InputTextWithConversion.class);
 				Generic newInstance = context.getGeneric().setInstance(input.getConvertedValueProperty(context).getValue());
 				for (Entry<Generic, GenericValueComponents> entry : buildTag.getGenericValueComponents(context).getValue().entrySet()) {
 					List<Generic> selectedGenerics = entry.getValue().getComponents().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());

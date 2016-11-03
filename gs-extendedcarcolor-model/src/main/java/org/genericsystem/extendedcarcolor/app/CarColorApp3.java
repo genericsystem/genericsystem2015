@@ -38,9 +38,9 @@ import org.genericsystem.reactor.appserver.Script;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSComposite;
-import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents.AppRoot;
+import org.genericsystem.reactor.gscomponents.Composite;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.Responsive;
@@ -57,13 +57,13 @@ import org.genericsystem.reactor.htmltag.HtmlH1;
 @DependsOnModel({ Car.class, Power.class, Color.class, Airbag.class, Bike.class, Energy.class, Mileage.class, MileageUnit.class, Price.class, SideCar.class, Transmission.class, UsedCar.class, VehicleColor.class, Vehicle.class, VehicleEngine.class,
 		VehicleEnergy.class, VehicleVehicleEngine.class })
 @Style(name = "background-color", value = "#00afeb")
-@Style(path = { Responsive.class, TitledInstancesTable.class, InstancesTable.class, GSComposite.class }, name = "flex", value = "0 1 auto")
+@Style(path = { Responsive.class, TitledInstancesTable.class, InstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, GroupDiv.class, GroupDiv2.class, TitledInstancesTable.class })
 @Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Vehicle.class, VehicleEngine.class })
-public class CarColorApp3 extends GSApp {
+public class CarColorApp3 extends AppRoot {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, CarColorApp3.class, "cars2");
 	}
@@ -76,8 +76,8 @@ public class CarColorApp3 extends GSApp {
 	@DirectSelect(path = TitledInstancesTable.class, value = { Bike.class, Car.class })
 	@Style(name = "flex", value = "1")
 	@Style(path = { TitledInstancesTable.class, InstancesTable.class }, name = "flex", value = "0 1 auto")
-	@Style(path = { TitledInstancesTable.class, InstancesTable.class, GSComposite.class }, name = "flex", value = "0 1 auto")
-	public static class GroupDiv extends GSDiv {
+	@Style(path = { TitledInstancesTable.class, InstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
+	public static class GroupDiv extends FlexDiv {
 
 	}
 
@@ -86,8 +86,8 @@ public class CarColorApp3 extends GSApp {
 	@DirectSelect(path = TitledInstancesTable.class, value = { Color.class, Energy.class })
 	@Style(name = "flex", value = "1")
 	@Style(path = { TitledInstancesTable.class, InstancesTable.class }, name = "flex", value = "0 1 auto")
-	@Style(path = { TitledInstancesTable.class, GSComposite.class }, name = "flex", value = "0 1 auto")
-	public static class GroupDiv2 extends GSDiv {
+	@Style(path = { TitledInstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
+	public static class GroupDiv2 extends FlexDiv {
 
 	}
 
@@ -95,7 +95,7 @@ public class CarColorApp3 extends GSApp {
 	@Style(name = "align-items", value = "center")
 	@Style(name = "flex", value = "1")
 	@Children({ UserGuide.class, GuideButton.class })
-	public static class UserGuideButtonDiv extends GSDiv {
+	public static class UserGuideButtonDiv extends FlexDiv {
 	}
 
 	@SetText("User Guide")

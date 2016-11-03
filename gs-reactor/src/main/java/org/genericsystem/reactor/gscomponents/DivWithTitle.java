@@ -9,7 +9,7 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.gscomponents.DivWithTitle.GSTitleDiv;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents.InstanceStepEditor.HorizontalInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents.InstancesTable.HorizontalInstancesTable;
@@ -18,8 +18,8 @@ import org.genericsystem.reactor.model.StringExtractor;
 @Style(name = "flex", value = "1")
 @Style(name = "margin", value = "4px")
 @FlexDirectionStyle(FlexDirection.COLUMN)
-@Children(GSTitleDiv.class)
-public class DivWithTitle extends GSDiv {
+@Children(TitleDiv.class)
+public class DivWithTitle extends FlexDiv {
 
 	@Style(name = "background-color", value = "#EA4500")
 	@Style(name = "margin-right", value = "1px")
@@ -29,32 +29,32 @@ public class DivWithTitle extends GSDiv {
 	@Style(name = "align-items", value = "center")
 	@Children(HtmlH2.class)
 	@BindText(path = HtmlH2.class)
-	public static class GSTitleDiv extends GSDiv {
+	public static class TitleDiv extends FlexDiv {
 	}
 
-	@Children({ GSTitleDiv.class, InstancesTable.class })
-	@SetStringExtractor(path = GSTitleDiv.class, value = StringExtractor.MANAGEMENT.class)
+	@Children({ TitleDiv.class, InstancesTable.class })
+	@SetStringExtractor(path = TitleDiv.class, value = StringExtractor.MANAGEMENT.class)
 	public static class TitledInstancesTable extends DivWithTitle {
 	}
 
-	@Children({ GSTitleDiv.class, HorizontalInstancesTable.class })
+	@Children({ TitleDiv.class, HorizontalInstancesTable.class })
 	public static class TitledHorizontalInstancesTable extends TitledInstancesTable {
 	}
 
-	@Children({ GSTitleDiv.class, InstanceEditor.class })
-	@SetStringExtractor(path = GSTitleDiv.class, value = StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
+	@Children({ TitleDiv.class, InstanceEditor.class })
+	@SetStringExtractor(path = TitleDiv.class, value = StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
 	public static class TitledInstanceEditor extends DivWithTitle implements SelectionDefaults {
 	}
 
-	@Children({ GSTitleDiv.class, HorizontalInstanceEditor.class })
+	@Children({ TitleDiv.class, HorizontalInstanceEditor.class })
 	public static class TitledHorizontalInstanceEditor extends TitledInstanceEditor {
 	}
 
-	@Children({ GSTitleDiv.class, InstanceStepEditor.class })
+	@Children({ TitleDiv.class, InstanceStepEditor.class })
 	public static class TitledInstanceStepEditor extends TitledInstanceEditor {
 	}
 
-	@Children({ GSTitleDiv.class, HorizontalInstanceStepEditor.class })
+	@Children({ TitleDiv.class, HorizontalInstanceStepEditor.class })
 	public static class TitledHorizontalInstanceStepEditor extends TitledInstanceStepEditor {
 	}
 }

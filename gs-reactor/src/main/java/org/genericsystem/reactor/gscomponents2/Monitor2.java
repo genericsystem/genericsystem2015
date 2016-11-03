@@ -10,10 +10,10 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.GSDiv;
-import org.genericsystem.reactor.gscomponents2.GSMonitor.CancelButton;
-import org.genericsystem.reactor.gscomponents2.GSMonitor.LastUpdateLabel;
-import org.genericsystem.reactor.gscomponents2.GSMonitor.SaveButton;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents2.Monitor2.CancelButton;
+import org.genericsystem.reactor.gscomponents2.Monitor2.LastUpdateLabel;
+import org.genericsystem.reactor.gscomponents2.Monitor2.SaveButton;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
 import org.genericsystem.reactor.model.ContextAction.FLUSH;
 import org.genericsystem.reactor.model.ContextAction.GC;
@@ -26,10 +26,10 @@ import org.genericsystem.reactor.model.TextBinding;
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
-public class GSMonitor extends GSDiv {
+public class Monitor2 extends FlexDiv {
 
 	@Children({ SaveButton.class, CancelButton.class, MountButton.class, CacheLevelLabel.class, UnmountButton.class, ShiftTsButton.class, LastUpdateLabel.class/*, CollectButton.class */ })
-	public static class GSMonitorExtended extends GSMonitor {
+	public static class MonitorExtended2 extends Monitor2 {
 	}
 
 	@SetText("Save")

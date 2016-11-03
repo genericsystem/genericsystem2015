@@ -6,7 +6,7 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "flex-wrap", value = "wrap")
-public class Responsive extends GSDiv {
+public class Responsive extends FlexDiv {
 	@Override
 	public void init() {
 		for (Tag tag : getObservableChildren()) {

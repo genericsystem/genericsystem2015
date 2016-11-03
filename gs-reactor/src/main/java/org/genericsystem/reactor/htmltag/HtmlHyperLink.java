@@ -6,7 +6,7 @@ import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import io.vertx.core.json.JsonObject;
 
@@ -14,7 +14,7 @@ import io.vertx.core.json.JsonObject;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlHyperLink extends GSTagImpl implements SelectionDefaults, StepperDefaults, ActionDefaults {
+public class HtmlHyperLink extends TagImpl implements SelectionDefaults, StepperDefaults, ActionDefaults {
 
 	@Override
 	public String getTag() {

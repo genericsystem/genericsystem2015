@@ -33,24 +33,24 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.gscomponents.GSCheckBoxWithValue.GSCheckBoxEditor;
-import org.genericsystem.reactor.gscomponents.GSComposite.Content;
-import org.genericsystem.reactor.gscomponents.GSComposite.Header;
-import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.GSInputTextEditorWithConversion;
-import org.genericsystem.reactor.gscomponents.GSInputTextWithConversion.PasswordInput;
-import org.genericsystem.reactor.gscomponents.GSSelect.GSSelectWithEmptyEntry;
-import org.genericsystem.reactor.gscomponents.GSSelect.InstanceCompositeSelect;
+import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
+import org.genericsystem.reactor.gscomponents.Composite.Content;
+import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
+import org.genericsystem.reactor.gscomponents.Combobox.ComboboxWithEmptyEntry;
+import org.genericsystem.reactor.gscomponents.Combobox.InstanceEditorCombobox;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeContent;
-import org.genericsystem.reactor.gscomponents.InstanceEditor.GSHoldersEditor;
-import org.genericsystem.reactor.gscomponents.InstanceEditor.GSMultiCheckbox;
-import org.genericsystem.reactor.gscomponents.InstanceEditor.GSPasswordHoldersEditor;
-import org.genericsystem.reactor.gscomponents.InstanceEditor.GSValueComponentsEditor;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordHoldersEditor;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEditor;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ContentRow;
-import org.genericsystem.reactor.gscomponents.InstancesTable.GSHolders;
-import org.genericsystem.reactor.gscomponents.InstancesTable.GSValueComponents;
+import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
-import org.genericsystem.reactor.gscomponents2.GSCellDiv.GSActionLink;
+import org.genericsystem.reactor.gscomponents2.CellDiv.ActionLink;
 import org.genericsystem.reactor.model.ContextAction.ADD_HOLDER;
 import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
@@ -76,29 +76,29 @@ import javafx.beans.value.ObservableValue;
 
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
-@ReverseFlexDirection(path = GSComposite.class)
+@ReverseFlexDirection(path = Composite.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(path = HeaderRow.class, name = "flex", value = "0.3")
 @Style(path = ContentRow.class, name = "flex", value = "1")
 @Children({ HeaderRow.class, ContentRow.class })
-@Children(path = HeaderRow.class, value = { GSValueComponents.class, GSValueComponents.class })
-@Children(path = ContentRow.class, value = { GSValueComponentsEditor.class, AttributeContent.class })
-@Children(path = { ContentRow.class, GSValueComponentsEditor.class }, value = { Header.class, Content.class })
-@Children(path = { ContentRow.class, Content.class }, value = { GSPasswordHoldersEditor.class, GSHoldersEditor.class, GSMultiCheckbox.class })
-@ForEach(path = { HeaderRow.class, GSValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-@ForEach(path = { GSComposite.class, GSValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-@Select(path = { HeaderRow.class, GSValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
-public class InstanceEditor extends GSDiv implements SelectionDefaults {
+@Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class })
+@Children(path = ContentRow.class, value = { ValueComponentsEditor.class, AttributeContent.class })
+@Children(path = { ContentRow.class, ValueComponentsEditor.class }, value = { Header.class, Content.class })
+@Children(path = { ContentRow.class, Content.class }, value = { PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
+@ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+@ForEach(path = { Composite.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+@Select(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
+public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	public static class HorizontalInstanceEditor extends InstanceEditor {
 	}
 
-	@Children({ GSPasswordHoldersEditor.class, GSHoldersEditor.class, GSMultiCheckbox.class })
+	@Children({ PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
 	@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-	@Select(path = GSPasswordHoldersEditor.class, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
-	@Select(path = GSHoldersEditor.class, value = NON_MULTICHECKBOX_SELECTOR.class)
-	@Select(path = GSMultiCheckbox.class, value = MULTICHECKBOX_SELECTOR.class)
+	@Select(path = PasswordHoldersEditor.class, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
+	@Select(path = HoldersEditor.class, value = NON_MULTICHECKBOX_SELECTOR.class)
+	@Select(path = MultiCheckbox.class, value = MULTICHECKBOX_SELECTOR.class)
 	public static class AttributeContent extends Content {
 	}
 
@@ -108,7 +108,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Style(name = "overflow", value = "auto")
 	@Style(name = "margin-right", value = "1px")
 	@Style(name = "margin-bottom", value = "1px")
-	public static class GSMultiCheckbox extends GSDiv {
+	public static class MultiCheckbox extends FlexDiv {
 	}
 
 	@Style(name = "flex", value = "1 0 auto")
@@ -124,7 +124,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Style(name = "float", value = "left")
 	@Style(name = "vertical-align", value = "middle")
 	@Style(name = "margin", value = "4px")
-	public static class Checkbox extends GSCheckBoxWithValue {
+	public static class Checkbox extends CheckBoxWithValue {
 
 		@Override
 		public void init() {
@@ -151,10 +151,10 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	}
 
 	@Children({ ModalWithDisplay.class, HtmlHyperLink.class })
-	@Children(path = { ModalWithDisplay.class, GSDiv.class }, value = { PasswordEditorContent.class, HtmlHyperLink.class })
+	@Children(path = { ModalWithDisplay.class, FlexDiv.class }, value = { PasswordEditorContent.class, HtmlHyperLink.class })
 	@SetText(path = HtmlHyperLink.class, value = "Change password")
 	@BindAction(path = HtmlHyperLink.class, value = MODAL_DISPLAY_FLEX.class)
-	public static class PasswordEditor extends GSDiv implements PasswordDefaults {
+	public static class PasswordEditor extends FlexDiv implements PasswordDefaults {
 		@Override
 		public void init() {
 			addPrefixBinding(context -> {
@@ -176,7 +176,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Attribute(path = HtmlInputText.class, pos = 0, name = "type", value = "password")
 	@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
 	@Attribute(path = HtmlInputText.class, pos = 2, name = "type", value = "password")
-	public static class PasswordEditorContent extends GSDiv {
+	public static class PasswordEditorContent extends FlexDiv {
 	}
 
 	@SetText("OK")
@@ -212,7 +212,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@SetText(path = HtmlSpan.class, value = "These passwords don’t match. Try again.")
 	@Style(path = HtmlSpan.class, name = "color", value = "darkred")
 	@Style(path = HtmlSpan.class, name = "display", value = "none")
-	public static class PasswordAdder extends GSDiv implements PasswordDefaults, ConvertedValueDefaults {
+	public static class PasswordAdder extends FlexDiv implements PasswordDefaults, ConvertedValueDefaults {
 		@Override
 		public void init() {
 			createConvertedValueProperty();
@@ -239,50 +239,50 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 		}
 	}
 
-	@Style(path = GSValueComponents.class, name = "flex", value = "1 0 auto")
+	@Style(path = ValueComponents.class, name = "flex", value = "1 0 auto")
 	@Children(value = { PasswordEditor.class, PasswordAdder.class })
 	@ForEach(path = PasswordEditor.class, value = ObservableListExtractor.HOLDERS.class)
 	@SelectModel(path = PasswordAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")
-	public static class GSPasswordHoldersEditor extends GSDiv implements PasswordDefaults {
+	public static class PasswordHoldersEditor extends FlexDiv implements PasswordDefaults {
 		@Override
 		public void init() {
 			createSaltProperty();
 		}
 	}
 
-	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "flex", value = "1")
-	@Style(path = { Header.class, GSInputTextEditorWithConversion.class }, name = "width", value = "100%")
-	@Children({ Header.class, Content.class, GSActionLink.class })
-	@Children(path = Header.class, value = { GSInputTextEditorWithConversion.class })
+	@Style(path = { Header.class, InputTextEditorWithConversion.class }, name = "flex", value = "1")
+	@Style(path = { Header.class, InputTextEditorWithConversion.class }, name = "width", value = "100%")
+	@Children({ Header.class, Content.class, ActionLink.class })
+	@Children(path = Header.class, value = { InputTextEditorWithConversion.class })
 	@Children(path = Content.class, value = { DirectRelationComponentEditor.class, GSLabelDisplayer.class })
 	@Select(path = { Content.class, DirectRelationComponentEditor.class }, value = DIRECT_RELATION_SELECTOR.class)
 	@Select(path = { Content.class, GSLabelDisplayer.class }, value = REVERSED_RELATION_SELECTOR.class)
-	@SelectModel(path = GSActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
-	@SetText(path = GSActionLink.class, value = "×")
-	@BindAction(path = GSActionLink.class, value = REMOVE.class)
-	public static class GSValueComponentsEditor extends GSValueComponents implements ComponentsDefaults {
+	@SelectModel(path = ActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
+	@SetText(path = ActionLink.class, value = "×")
+	@BindAction(path = ActionLink.class, value = REMOVE.class)
+	public static class ValueComponentsEditor extends ValueComponents implements ComponentsDefaults {
 	}
 
-	@Style(path = GSValueComponents.class, name = "flex", value = "1 0 auto")
-	@Children(value = { GSValueComponentsEditor.class, GSHolderAdder.class })
-	@Children(path = { GSValueComponentsEditor.class, Header.class }, value = { GSInputTextEditorWithConversion.class, GSCheckBoxEditor.class })
-	@Children(path = { GSHolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
-	@ForEach(path = GSHolderAdder.class, value = NO_FOR_EACH.class)
-	@SelectModel(path = GSHolderAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
-	@Select(path = { GSValueComponents.class, Header.class, GSInputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
-	@Select(path = { GSValueComponents.class, Header.class, GSCheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
+	@Style(path = ValueComponents.class, name = "flex", value = "1 0 auto")
+	@Children(value = { ValueComponentsEditor.class, HolderAdder.class })
+	@Children(path = { ValueComponentsEditor.class, Header.class }, value = { InputTextEditorWithConversion.class, CheckBoxEditor.class })
+	@Children(path = { HolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
+	@ForEach(path = HolderAdder.class, value = NO_FOR_EACH.class)
+	@SelectModel(path = HolderAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
+	@Select(path = { ValueComponents.class, Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
+	@Select(path = { ValueComponents.class, Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")
-	public static class GSHoldersEditor extends GSHolders {
+	public static class HoldersEditor extends Holders {
 	}
 
 	@Style(name = "flex", value = "1")
 	@Style(name = "width", value = "100%")
-	public static class DirectRelationComponentEditor extends InstanceCompositeSelect {
+	public static class DirectRelationComponentEditor extends InstanceEditorCombobox {
 		@Override
 		public void init() {
 			super.init();
@@ -295,18 +295,18 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	}
 
 	@Style(name = "flex", value = "1 0 auto")
-	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "flex", value = "1")
-	@Style(path = { Header.class, GSInputTextWithConversion.class }, name = "width", value = "100%")
-	@Children({ Header.class, Content.class, GSActionLink.class })
+	@Style(path = { Header.class, InputTextWithConversion.class }, name = "flex", value = "1")
+	@Style(path = { Header.class, InputTextWithConversion.class }, name = "width", value = "100%")
+	@Children({ Header.class, Content.class, ActionLink.class })
 	@Children(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@Children(path = Content.class, value = ComponentAdderSelect.class)
-	@Select(path = GSActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
+	@Select(path = ActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
-	@SetText(path = GSActionLink.class, value = "+")
-	@BindAction(path = GSActionLink.class, value = ADD_HOLDER.class)
-	public static class GSHolderAdder extends GSValueComponents implements ComponentsDefaults, ConvertedValueDefaults {
+	@SetText(path = ActionLink.class, value = "+")
+	@BindAction(path = ActionLink.class, value = ADD_HOLDER.class)
+	public static class HolderAdder extends ValueComponents implements ComponentsDefaults, ConvertedValueDefaults {
 		@Override
 		public void init() {
 			createComponentsListProperty();
@@ -333,14 +333,14 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 		}
 	}
 
-	public static class HolderAdderInput extends GSInputTextWithConversion {
+	public static class HolderAdderInput extends InputTextWithConversion {
 		@Override
 		public void init() {
 			addConvertedValueChangeListener((context, nva) -> ((ConvertedValueDefaults) getParent().getParent()).getConvertedValueProperty(context.getParent().getParent()).setValue(nva));
 		}
 	}
 
-	public static class BooleanHolderAdderInput extends GSCheckBoxWithValue {
+	public static class BooleanHolderAdderInput extends CheckBoxWithValue {
 		@Override
 		public void init() {
 			addConvertedValueChangeListener((context, nva) -> ((ConvertedValueDefaults) getParent().getParent()).getConvertedValueProperty(context.getParent().getParent()).setValue(nva));
@@ -350,7 +350,7 @@ public class InstanceEditor extends GSDiv implements SelectionDefaults {
 	@Style(name = "flex", value = "1")
 	@Style(name = "width", value = "100%")
 	@Select(DIRECT_RELATION_SELECTOR.class)
-	public static class ComponentAdderSelect extends GSSelectWithEmptyEntry {
+	public static class ComponentAdderSelect extends ComboboxWithEmptyEntry {
 
 		@Override
 		public void init() {

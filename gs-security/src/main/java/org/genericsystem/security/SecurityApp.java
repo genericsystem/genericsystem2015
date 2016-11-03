@@ -11,7 +11,7 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.GSApp;
+import org.genericsystem.reactor.gscomponents.AppRoot;
 import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
@@ -35,7 +35,7 @@ import org.genericsystem.security.model.User;
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
 @SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "gs-security")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { User.class, Role.class })
-public class SecurityApp extends GSApp {
+public class SecurityApp extends AppRoot {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SecurityApp.class, "/security");

@@ -13,7 +13,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction.BindActionProcessor;
 import org.genericsystem.reactor.annotations.BindAction.BindActions;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.ContextAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 @Repeatable(BindActions.class)
 @Process(BindActionProcessor.class)
 public @interface BindAction {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	Class<? extends ContextAction> value();
 

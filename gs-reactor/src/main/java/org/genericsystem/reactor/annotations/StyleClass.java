@@ -11,14 +11,14 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.StyleClass.StyleClassProcessor;
 import org.genericsystem.reactor.annotations.StyleClass.StyleClasses;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(StyleClasses.class)
 @Process(StyleClassProcessor.class)
 public @interface StyleClass {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	String[] value();
 

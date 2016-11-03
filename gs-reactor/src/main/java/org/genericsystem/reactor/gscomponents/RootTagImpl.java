@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Tag.RootTag;
 
-public class RootTagImpl extends GSDiv implements RootTag {
+public class RootTagImpl extends FlexDiv implements RootTag {
 
 	private AnnotationsManager annotationsManager;
 

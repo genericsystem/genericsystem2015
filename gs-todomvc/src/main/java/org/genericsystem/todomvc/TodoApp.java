@@ -14,8 +14,8 @@ import org.genericsystem.reactor.htmltag.HtmlSpan;
 import org.genericsystem.reactor.htmltag.HtmlStrong;
 import org.genericsystem.reactor.htmltag.HtmlUl;
 
-import org.genericsystem.reactor.gscomponents.GSApp;
-import org.genericsystem.reactor.gscomponents.GSDiv;
+import org.genericsystem.reactor.gscomponents.AppRoot;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,7 +79,7 @@ import javafx.collections.transformation.FilteredList;
 @Children({ MyHtmlDiv.class })
 // @ReactorDependencies(path = { MyHtmlDiv.class }, value = { MyHeader.class })
 // @ReactorDependencies(path = { MyHeader.class }, value = { MyHtmlH1.class, MyHtmlInputText.class })
-public class TodoApp extends GSApp {
+public class TodoApp extends AppRoot {
 
 	public static final String FILTER_MODE = "mode";
 	public static final String TODOS = "todos";
@@ -153,7 +153,7 @@ public class TodoApp extends GSApp {
 
 		@StyleClass("todoapp")
 		@Children({ MyHeader.class, MyDiv2.class, MyHtmlFooter1.class })
-		public static class MyDiv extends GSDiv {
+		public static class MyDiv extends FlexDiv {
 
 			@StyleClass("header")
 			@Children({ MyHtmlH1.class, MyHtmlInputText.class })
@@ -185,7 +185,7 @@ public class TodoApp extends GSApp {
 
 			@StyleClass("main")
 			@Children(MyHtmlUl.class)
-			public static class MyDiv2 extends GSDiv {
+			public static class MyDiv2 extends FlexDiv {
 
 				@StyleClass("todo-list")
 				@Children(MyHtmlLi.class)

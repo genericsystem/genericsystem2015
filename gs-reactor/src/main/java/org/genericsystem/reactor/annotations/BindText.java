@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindText.BindTextProcessor;
 import org.genericsystem.reactor.annotations.BindText.BindTexts;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.TextBinding;
 import org.genericsystem.reactor.model.TextBinding.GENERIC_STRING;
 
@@ -20,7 +20,7 @@ import org.genericsystem.reactor.model.TextBinding.GENERIC_STRING;
 @Repeatable(BindTexts.class)
 @Process(BindTextProcessor.class)
 public @interface BindText {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	Class<? extends TextBinding> value() default GENERIC_STRING.class;
 

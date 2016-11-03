@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Select.SelectProcessor;
 import org.genericsystem.reactor.annotations.Select.Selects;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.ObservableValueSelector;
 
 /**
@@ -23,7 +23,7 @@ import org.genericsystem.reactor.model.ObservableValueSelector;
 @Repeatable(Selects.class)
 @Process(SelectProcessor.class)
 public @interface Select {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	Class<? extends ObservableValueSelector> value();
 

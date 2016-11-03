@@ -1,12 +1,12 @@
 package org.genericsystem.reactor.htmltag;
 
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-public class HtmlP extends GSTagImpl {
+public class HtmlP extends TagImpl {
 
 	@Override
 	public String getTag() {

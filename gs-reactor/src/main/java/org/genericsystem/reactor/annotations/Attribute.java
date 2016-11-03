@@ -11,14 +11,14 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute.AttributeProcessor;
 import org.genericsystem.reactor.annotations.Attribute.Attributes;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(Attributes.class)
 @Process(value = AttributeProcessor.class, repeatable = true)
 public @interface Attribute {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	String name();
 

@@ -20,11 +20,11 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.util.StringConverter;
 
-public class GSInputTextWithConversion<T extends Serializable> extends HtmlInputText implements ConvertedValueDefaults {
+public class InputTextWithConversion<T extends Serializable> extends HtmlInputText implements ConvertedValueDefaults {
 
-	static final Logger log = LoggerFactory.getLogger(GSInputTextWithConversion.class);
+	static final Logger log = LoggerFactory.getLogger(InputTextWithConversion.class);
 
-	public GSInputTextWithConversion() {
+	public InputTextWithConversion() {
 		initInput();
 	}
 
@@ -67,7 +67,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		return ApiStatics.STRING_CONVERTERS.get(clazz);
 	}
 
-	public static class GSInputTextEditorWithConversion<T extends Serializable> extends GSInputTextWithConversion<T> implements SelectionDefaults {
+	public static class InputTextEditorWithConversion<T extends Serializable> extends InputTextWithConversion<T> implements SelectionDefaults {
 
 		@Override
 		protected void initInput() {
@@ -96,7 +96,7 @@ public class GSInputTextWithConversion<T extends Serializable> extends HtmlInput
 		}
 	}
 
-	public static class PasswordInput extends GSInputTextWithConversion<byte[]> implements PasswordDefaults {
+	public static class PasswordInput extends InputTextWithConversion<byte[]> implements PasswordDefaults {
 		public PasswordInput() {
 			addAttribute("type", "password");
 		}

@@ -2,7 +2,7 @@ package org.genericsystem.reactor.htmltag;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import io.vertx.core.json.JsonObject;
 
@@ -10,7 +10,7 @@ import io.vertx.core.json.JsonObject;
  * @author Nicolas Feybesse
  *
  */
-public class HtmlRadio extends GSTagImpl {
+public class HtmlRadio extends TagImpl {
 
 	@Override
 	public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {

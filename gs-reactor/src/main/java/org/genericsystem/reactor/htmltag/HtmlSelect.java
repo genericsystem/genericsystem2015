@@ -4,11 +4,11 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import io.vertx.core.json.JsonObject;
 
-public class HtmlSelect extends GSTagImpl {
+public class HtmlSelect extends TagImpl {
 
 	@Override
 	public String getTag() {
