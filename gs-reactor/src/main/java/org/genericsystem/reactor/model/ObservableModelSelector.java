@@ -5,17 +5,17 @@ import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
 import java.util.function.BiFunction;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.security.model.Role.Admin;
 import org.genericsystem.security.model.UserRole;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 public interface ObservableModelSelector extends BiFunction<Context, Tag, ObservableValue<Context>> {
 

@@ -15,6 +15,7 @@ public interface StringExtractor extends Function<Generic, String> {
 		Serializable value = generic.getValue();
 		return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
 	};
+
 	public static final StringExtractor MANAGEMENT = g -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management";
 	public static final StringExtractor TYPE_INSTANCE_EXTRACTOR = generic -> {
 		return "(" + SIMPLE_CLASS_EXTRACTOR.apply(generic.getMeta()) + ") " + SIMPLE_CLASS_EXTRACTOR.apply(generic);

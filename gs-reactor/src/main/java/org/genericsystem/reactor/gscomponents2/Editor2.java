@@ -74,11 +74,11 @@ import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.InstanceEdi
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles.InstanceType;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles.TypeAttribute;
-import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles.TypeAttribute.AttributeName;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles.TypeAttribute.RelationName;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles.TypeAttribute.RelationName.ComponentName;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorTitle;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorTitle.EditorTitleContent;
+import org.genericsystem.reactor.gscomponents2.Table2.TitleRow.TypeAttribute.AttributeName;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
 import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;

@@ -36,7 +36,7 @@ public class Modal extends FlexDiv {
 	@Children(path = FlexDiv.class, value = { TitledInstanceEditor.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = { HtmlButton.class, HtmlButton.class })
 	@SetText(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, value = { "Ok", "Cancel" })
-	@Style(path = { FlexDiv.class, TitledInstanceEditor.class }, name = "min-height", value = "300px")
+	// @Style(path = { FlexDiv.class, TitledInstanceEditor.class }, name = "min-height", value = "300px")
 	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, name = "flex", value = "1")
 	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, name = "flex", value = "1")
 	@Attribute(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, name = "name", value = "close")
