@@ -20,7 +20,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
-import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
@@ -67,8 +66,10 @@ public class Monitor extends FlexDiv {
 	public static class MonitorLogin extends Monitor implements UserRoleDefaults {
 
 		@Switch(TagSwitcher.LOGGED_USER.class)
-		@Children({ ModeSwitchButtons.class, HtmlLabel.class, DisconnectButton.class })
+		@Children({ ModeSwitchButtons.class, HtmlLabel.class, HtmlButton.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
+		@SetText(path = HtmlButton.class, value = "Disconnect")
+		@BindAction(path = HtmlButton.class, value = ContextAction.DISCONNECT.class)
 		public static class LoggedUserDiv extends FlexDiv implements UserRoleDefaults {
 			@Override
 			public void init() {
@@ -86,14 +87,6 @@ public class Monitor extends FlexDiv {
 			@BindAction(path = HtmlButton.class, pos = 1, value = ContextAction.SET_NORMAL_MODE.class)
 			@Switch(path = HtmlButton.class, pos = 3, value = TagSwitcher.ADMIN_MODE_ONLY.class)
 			public static class ModeSwitchButtons extends FlexDiv {
-			}
-
-			@SetText("Disconnect")
-			public static class DisconnectButton extends HtmlButton implements UserRoleDefaults {
-				@Override
-				public void init() {
-					bindAction(context -> getLoggedUserProperty(context).setValue(null));
-				}
 			}
 		}
 
