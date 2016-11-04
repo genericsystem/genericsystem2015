@@ -4,6 +4,7 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -45,6 +46,7 @@ import org.genericsystem.reactor.model.TagSwitcher;
 import org.genericsystem.reactor.model.TextBinding.ERROR_COMPONENTS;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
