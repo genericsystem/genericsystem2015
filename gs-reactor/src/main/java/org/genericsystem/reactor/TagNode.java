@@ -29,6 +29,30 @@ public interface TagNode extends Tag {
 		public static interface GTagAttribute extends Generic {
 
 		}
+
+		@SystemGeneric
+		@Components(GenericTagType.class)
+		public static interface GTagAnnotationType extends Generic {
+
+		}
+
+		@SystemGeneric
+		@Components(GTagAnnotationType.class)
+		public static interface AnnotationElement extends Generic {
+
+		}
+
+		@SystemGeneric
+		@Components(AnnotationElement.class)
+		public static interface ElementName extends Generic {
+
+		}
+
+		@SystemGeneric
+		@Components(AnnotationElement.class)
+		public static interface ElementValue extends Generic {
+
+		}
 	}
 
 	@SystemGeneric
