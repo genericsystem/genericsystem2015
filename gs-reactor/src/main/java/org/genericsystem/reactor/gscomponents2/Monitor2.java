@@ -26,9 +26,9 @@ import org.genericsystem.reactor.model.TextBinding;
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
 public class Monitor2 extends FlexDiv {
-
-	@Children({ SaveButton.class, CancelButton.class, MountButton.class, CacheLevelLabel.class, UnmountButton.class, ShiftTsButton.class, LastUpdateLabel.class/*, CollectButton.class */ })
+	@Children({ SaveButton.class, CancelButton.class, MountButton.class, CacheLevelLabel.class, UnmountButton.class, ShiftTsButton.class, LastUpdateLabel.class/* , CollectButton.class */ })
 	public static class MonitorExtended2 extends Monitor2 {
+
 	}
 
 	@SetText("Save")
