@@ -358,9 +358,9 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return getParent().getRootTag();
 	}
 
-	public TagSwitcher getSwitcher();
+	public List<TagSwitcher> getSwitchers();
 
-	public void setSwitcher(TagSwitcher switcher);
+	public void addSwitcher(TagSwitcher switcher);
 
 	public static interface RootTag extends Tag {
 		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {

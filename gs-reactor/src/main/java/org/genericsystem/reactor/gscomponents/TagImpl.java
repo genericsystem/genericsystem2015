@@ -19,7 +19,7 @@ public abstract class TagImpl implements Tag {
 	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
 	private Tag parent;
 	private final ObservableList<Tag> children = FXCollections.observableArrayList();
-	protected TagSwitcher switcher;
+	protected List<TagSwitcher> switchers = new ArrayList<>();
 
 	public void setParent(Tag parent) {
 		this.parent = parent;
@@ -67,12 +67,12 @@ public abstract class TagImpl implements Tag {
 	}
 
 	@Override
-	public void setSwitcher(TagSwitcher switcher) {
-		this.switcher = switcher;
+	public void addSwitcher(TagSwitcher switcher) {
+		switchers.add(switcher);
 	}
 
 	@Override
-	public TagSwitcher getSwitcher() {
-		return switcher;
+	public List<TagSwitcher> getSwitchers() {
+		return switchers;
 	}
 }

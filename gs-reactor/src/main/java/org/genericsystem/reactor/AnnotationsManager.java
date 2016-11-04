@@ -19,7 +19,6 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Process;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectModel;
@@ -32,6 +31,7 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,9 +81,9 @@ public class AnnotationsManager {
 	}
 
 	static <T extends Tag> void processAnnotation(AnnotationProcessor processor, Tag tag) {
+		List<Class<?>> classesToResult = new ArrayList<>();
+		Tag current = tag;
 		if (!processor.isRepeatable()) {
-			List<Class<?>> classesToResult = new ArrayList<>();
-			Tag current = tag;
 			Annotation applyingAnnotation = null;
 			while (current != null) {
 				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult, tag);
@@ -102,8 +102,6 @@ public class AnnotationsManager {
 			if (applyingAnnotation != null)
 				processor.getProcess().accept(applyingAnnotation, tag);
 		} else {
-			List<Class<?>> classesToResult = new ArrayList<>();
-			Tag current = tag;
 			List<Annotation> applyingAnnotations = new ArrayList<>();
 			while (current != null) {
 				Class<?> superClass = current.getClass();

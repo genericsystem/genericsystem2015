@@ -97,12 +97,12 @@ public interface TagNode extends Tag {
 	}
 
 	@Override
-	default void setSwitcher(TagSwitcher switcher) {
+	default void addSwitcher(TagSwitcher switcher) {
 		// this.switcher = switcher;
 	}
 
 	@Override
-	default TagSwitcher getSwitcher() {
+	default List<TagSwitcher> getSwitchers() {
 		return null;
 	}
 }
