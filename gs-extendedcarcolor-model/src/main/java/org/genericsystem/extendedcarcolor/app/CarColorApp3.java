@@ -15,7 +15,6 @@ import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
-import org.genericsystem.carcolor.app.CCInheritStyle;
 import org.genericsystem.carcolor.app.UserGuide;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
