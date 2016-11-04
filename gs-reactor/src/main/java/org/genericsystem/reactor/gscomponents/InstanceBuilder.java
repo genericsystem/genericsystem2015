@@ -23,7 +23,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddButton;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilderDiv;
-import org.genericsystem.reactor.gscomponents.InstanceBuilder.HolderBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.MultiCheckboxBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.PasswordBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.Checkbox;
@@ -55,7 +54,7 @@ import javafx.beans.value.ObservableValue;
 @Children(path = ButtonDiv.class, value = AddButton.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @Select(path = { Content.class, PasswordBuilder.class }, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
-@Select(path = { Content.class, HolderBuilder.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
+@Select(path = { Content.class, GSHolderBuilderDiv.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
 @Select(path = { Content.class, MultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
 public class InstanceBuilder extends Composite implements GSBuilderDefaults, PasswordDefaults {
 
