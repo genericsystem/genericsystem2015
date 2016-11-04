@@ -92,6 +92,8 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER.class)
 	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 0 }, value = ObservableValueSelector.NON_PASSWORD_INSTANCE_SELECTOR.class)
 	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 1 }, value = ObservableValueSelector.PASSWORD_INSTANCE_SELECTOR.class)
+	@Select(path = { Header.class, CheckBoxDisplayer.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
+	@Select(path = { Header.class, FlexDiv.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Children({ Content.class, Header.class })
 	@Children(path = Header.class, value = { CheckBoxDisplayer.class, FlexDiv.class })
 	@Children(path = { Header.class, FlexDiv.class }, value = { GSLabelDisplayer.class, HtmlLabel.class })

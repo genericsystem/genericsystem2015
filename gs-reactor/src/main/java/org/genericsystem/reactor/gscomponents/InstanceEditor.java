@@ -35,7 +35,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
@@ -59,11 +58,9 @@ import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_L
 import org.genericsystem.reactor.model.ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
 import org.genericsystem.reactor.model.ObservableModelSelector.REMOVABLE_HOLDER_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector;
-import org.genericsystem.reactor.model.ObservableValueSelector.DIRECT_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.REVERSED_RELATION_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
 import org.genericsystem.security.model.User.Salt;
@@ -255,11 +252,11 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 	@Style(path = { Header.class, InputTextEditorWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, InputTextEditorWithConversion.class }, name = "width", value = "100%")
 	@Children({ Header.class, Content.class, ActionLink.class })
-	@Children(path = Header.class, value = { InputTextEditorWithConversion.class })
-	@Children(path = Content.class, value = { DirectRelationComponentEditor.class, GSLabelDisplayer.class })
-	@Select(path = { Content.class, DirectRelationComponentEditor.class }, value = DIRECT_RELATION_SELECTOR.class)
-	@Select(path = { Content.class, GSLabelDisplayer.class }, value = REVERSED_RELATION_SELECTOR.class)
+	@Children(path = Header.class, value = { InputTextEditorWithConversion.class, CheckBoxEditor.class })
+	@Children(path = Content.class, value = DirectRelationComponentEditor.class)
 	@SelectModel(path = ActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
+	@Select(path = { Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
+	@Select(path = { Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	@SetText(path = ActionLink.class, value = "×")
 	@BindAction(path = ActionLink.class, value = REMOVE.class)
 	public static class ValueComponentsEditor extends ValueComponents implements ComponentsDefaults {
@@ -267,12 +264,9 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 
 	@Style(path = ValueComponents.class, name = "flex", value = "1 0 auto")
 	@Children(value = { ValueComponentsEditor.class, HolderAdder.class })
-	@Children(path = { ValueComponentsEditor.class, Header.class }, value = { InputTextEditorWithConversion.class, CheckBoxEditor.class })
 	@Children(path = { HolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@ForEach(path = HolderAdder.class, value = NO_FOR_EACH.class)
 	@SelectModel(path = HolderAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
-	@Select(path = { ValueComponents.class, Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
-	@Select(path = { ValueComponents.class, Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")

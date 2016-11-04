@@ -4,12 +4,12 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
@@ -42,9 +42,9 @@ import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SEL
 import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
 import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.model.TagSwitcher;
+import org.genericsystem.reactor.model.TextBinding.ERROR_COMPONENTS;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 
 @Switch(TagSwitcher.ADMIN_MODE_ONLY.class)
@@ -133,7 +133,7 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 	}
 
 	@Children({ HolderBuilder.class, HtmlSpan.class })
-	@SetText(path = HtmlSpan.class, value = "ERROR")
+	@BindText(path = HtmlSpan.class, value = ERROR_COMPONENTS.class)
 	@Style(path = HtmlSpan.class, name = "color", value = "DarkRed")
 	@Style(path = HtmlSpan.class, name = "display", value = "none")
 	@Style(name = "flex", value = "1")
