@@ -1,7 +1,7 @@
 package org.genericsystem.quiz;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
@@ -38,7 +38,7 @@ import org.genericsystem.security.model.User;
 @Style(name = "background-color", value = "#00afeb")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class })
-@SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Java Appraisal")
+@SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Java Appraisal")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Quiz.class, Question.class, Answer.class, UserAnswer.class, User.class })
 public class QuizApp extends RootTagImpl {
 	public static void main(String[] mainArgs) {

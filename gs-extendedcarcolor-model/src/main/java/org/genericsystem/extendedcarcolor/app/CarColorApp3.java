@@ -1,8 +1,8 @@
 package org.genericsystem.extendedcarcolor.app;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
-import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.Composite;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -58,8 +58,8 @@ import org.genericsystem.reactor.appserver.Script;
 @Style(path = { Responsive.class, TitledInstancesTable.class, InstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, GroupDiv.class, GroupDiv2.class, TitledInstancesTable.class })
-@Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
-@SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, UserGuideButtonDiv.class })
+@SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Vehicle.class, VehicleEngine.class })
 public class CarColorApp3 extends RootTagImpl {
 	public static void main(String[] mainArgs) {

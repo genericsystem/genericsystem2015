@@ -1,7 +1,7 @@
 package org.genericsystem.security;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
@@ -32,7 +32,7 @@ import org.genericsystem.security.model.User;
 @Style(name = "background-color", value = "Red")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, MonitorLogin.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
-@SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "gs-security")
+@SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "gs-security")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { User.class, Role.class })
 public class SecurityApp extends RootTagImpl {
 
