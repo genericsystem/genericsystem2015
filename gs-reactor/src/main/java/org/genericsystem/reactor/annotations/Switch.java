@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
 import org.genericsystem.reactor.annotations.Switch.Modes;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.TagSwitcher;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -19,7 +19,7 @@ import org.genericsystem.reactor.model.TagSwitcher;
 @Repeatable(Modes.class)
 @Process(SwichProcessor.class)
 public @interface Switch {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	int[] pos() default {};
 

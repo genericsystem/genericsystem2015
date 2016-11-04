@@ -3,14 +3,7 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import org.genericsystem.reactor.htmltag.HtmlButton;
-import org.genericsystem.reactor.htmltag.HtmlInputText;
-import org.genericsystem.reactor.htmltag.HtmlLabel;
-import org.genericsystem.reactor.htmltag.HtmlSpan;
-
 import java.util.Arrays;
-
-import javafx.beans.binding.Bindings;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.EncryptionUtils;
@@ -18,15 +11,19 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
-import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
 import org.genericsystem.reactor.model.ContextAction;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
@@ -42,6 +39,8 @@ import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 
+import javafx.beans.binding.Bindings;
+
 @Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
@@ -51,9 +50,9 @@ import org.genericsystem.security.model.User.Salt;
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
 @Style(name = "padding", value = "10px")
-public class Monitor extends GSDiv {
+public class Monitor extends FlexDiv {
 
-	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class /* , HtmlButton.class */})
+	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class /* , HtmlButton.class */ })
 	@SetText(path = HtmlButton.class, pos = 2, value = "Mount")
 	@BindAction(path = HtmlButton.class, pos = 2, value = MOUNT.class)
 	@SetText(path = HtmlButton.class, pos = 3, value = "Unmount")
@@ -72,7 +71,7 @@ public class Monitor extends GSDiv {
 		@SelectModel(ObservableModelSelector.LOGGED_USER.class)
 		@Children({ ModeSwitchButtons.class, HtmlLabel.class, DisconnectButton.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
-		public static class LoggedUserDiv extends GSDiv implements UserRoleDefaults {
+		public static class LoggedUserDiv extends FlexDiv implements UserRoleDefaults {
 			@Override
 			public void init() {
 				find(HtmlLabel.class)
@@ -90,7 +89,7 @@ public class Monitor extends GSDiv {
 			@BindAction(path = HtmlButton.class, pos = 0, value = ContextAction.SET_ADMIN_MODE.class)
 			@BindAction(path = HtmlButton.class, pos = 1, value = ContextAction.SET_NORMAL_MODE.class)
 			@Switch(path = HtmlButton.class, pos = 3, value = TagSwitcher.ADMIN_MODE_ONLY.class)
-			public static class ModeSwitchButtons extends GSDiv {
+			public static class ModeSwitchButtons extends FlexDiv {
 			}
 
 			@SetText("Disconnect")
@@ -111,7 +110,7 @@ public class Monitor extends GSDiv {
 		@SetText(path = HtmlSpan.class, pos = 1, value = "Invalid password.")
 		@Style(path = HtmlSpan.class, name = "display", value = "none")
 		@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
-		public static class LoginDiv extends GSDiv implements UserRoleDefaults {
+		public static class LoginDiv extends FlexDiv implements UserRoleDefaults {
 
 			@SetText("OK")
 			public static class ValidateButton extends HtmlButton implements PasswordDefaults, UserRoleDefaults {

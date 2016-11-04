@@ -51,14 +51,14 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 	public static class LABEL_DISPLAYER implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return gs[1].getComponents().size() == 1 && !gs[1].isHidden() && !Boolean.class.equals(gs[1].getInstanceValueClassConstraint()) ? gs[0] : null;
+			return gs[1].getComponents().size() < 2 && !gs[1].isHidden() && !Boolean.class.equals(gs[1].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 
 	public static class LABEL_DISPLAYER_ATTRIBUTE implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return gs[0].getComponents().size() == 1 && !gs[0].isHidden() && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
+			return gs[0].getComponents().size() < 2 && !gs[0].isHidden() && !Boolean.class.equals(gs[0].getInstanceValueClassConstraint()) ? gs[0] : null;
 		}
 	}
 

@@ -14,7 +14,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindSelection.BindSelectionProcessor;
 import org.genericsystem.reactor.annotations.Stepper.StepperProcessor;
 import org.genericsystem.reactor.annotations.Stepper.Steppers;
-import org.genericsystem.reactor.gscomponents.GSTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,15 +23,15 @@ import org.slf4j.LoggerFactory;
 @Repeatable(Steppers.class)
 @Process(StepperProcessor.class)
 public @interface Stepper {
-	Class<? extends GSTagImpl>[] path() default {};
+	Class<? extends TagImpl>[] path() default {};
 
 	int[] pos() default {};
 
-	Class<? extends GSTagImpl> switchClass();
+	Class<? extends TagImpl> switchClass();
 
 	int switchClassPos() default 0;
 
-	Class<? extends GSTagImpl> headerClass();
+	Class<? extends TagImpl> headerClass();
 
 	int headerClassPos() default 0;
 

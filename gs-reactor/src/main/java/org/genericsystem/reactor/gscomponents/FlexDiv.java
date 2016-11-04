@@ -1,18 +1,18 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.htmltag.HtmlDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class GSDiv extends HtmlDiv {
+public class FlexDiv extends HtmlDiv {
 	private final Property<FlexDirection> direction = new SimpleObjectProperty<>();
 
-	public GSDiv() {
+	public FlexDiv() {
 		this(FlexDirection.COLUMN);
 	}
 
-	public GSDiv(FlexDirection direction) {
+	public FlexDiv(FlexDirection direction) {
 		setDirection(direction);
 		addStyle("display", "flex");
 		addStyle("flex-wrap", "nowrap");
@@ -36,8 +36,8 @@ public class GSDiv extends HtmlDiv {
 	}
 
 	public void reverseDirection() {
-		if (GSDiv.class.isAssignableFrom(getParent().getClass())) {
-			Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
+		if (FlexDiv.class.isAssignableFrom(getParent().getClass())) {
+			Property<FlexDirection> parentDirection = ((FlexDiv) getParent()).getDirectionProperty();
 			setDirection(parentDirection.getValue().reverse());
 			parentDirection.addListener((o, v, nv) -> setDirection(nv.reverse()));
 		} else
@@ -45,22 +45,22 @@ public class GSDiv extends HtmlDiv {
 	}
 
 	public void keepDirection() {
-		if (GSDiv.class.isAssignableFrom(getParent().getClass())) {
-			Property<FlexDirection> parentDirection = ((GSDiv) getParent()).getDirectionProperty();
+		if (FlexDiv.class.isAssignableFrom(getParent().getClass())) {
+			Property<FlexDirection> parentDirection = ((FlexDiv) getParent()).getDirectionProperty();
 			setDirection(parentDirection.getValue());
 			parentDirection.addListener((o, v, nv) -> setDirection(nv));
 		} else
 			throw new IllegalStateException("The class of the parent must extend GSDiv when keepDirection is used.");
 	}
 
-	public static class GenericColumn extends GSDiv {
-		public GenericColumn() {
+	public static class FlexColumn extends FlexDiv {
+		public FlexColumn() {
 			super(FlexDirection.COLUMN);
 		}
 	}
 
-	public static class GenericRow extends GSDiv {
-		public GenericRow() {
+	public static class FlexRow extends FlexDiv {
+		public FlexRow() {
 			super(FlexDirection.ROW);
 		}
 	}
