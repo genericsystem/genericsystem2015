@@ -40,7 +40,7 @@ public class SecurityApp extends RootTagImpl {
 	}
 
 	public SecurityApp() {
-		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+		// addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 
 	public static class ExampleScript implements Script {

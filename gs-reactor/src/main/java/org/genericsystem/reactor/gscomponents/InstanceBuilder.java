@@ -74,16 +74,16 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 		@Override
 		public void init() {
 			createConvertedValueProperty();
-			// storeInvalidProperty(context -> {
-			// Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
-			// Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
-			// return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
-			// secondHashProperty);
-			// });
+			storeInvalidProperty(context -> {
+				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
+				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
+				return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
+						secondHashProperty);
+			});
 			addPrefixBinding(context -> {
 				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
 				getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
-				// getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
+				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
 				if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
