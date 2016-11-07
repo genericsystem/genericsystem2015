@@ -2,9 +2,9 @@ package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
-import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
@@ -12,23 +12,21 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ContentRow;
 import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
-import org.genericsystem.reactor.gscomponents.InstancesTable.InstanceNameLink;
-import org.genericsystem.reactor.gscomponents.InstancesTable.RemoveButton;
+import org.genericsystem.reactor.gscomponents.InstancesTable.LinksDiv;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.model.ContextAction.REMOVE;
 import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
@@ -38,21 +36,18 @@ import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_
 import org.genericsystem.reactor.model.TagSwitcher;
 
 @Switch(path = { FlexDiv.class, ButtonDiv.class }, pos = { -1, 0 }, value = TagSwitcher.ADMIN_MODE_ONLY.class)
-@Switch(path = { ContentRow.class, ValueComponents.class, Header.class, InstanceNameLink.class }, value = TagSwitcher.ADMIN_MODE_ONLY.class)
-@Switch(path = { ContentRow.class, ValueComponents.class, Header.class, GSLabelDisplayer.class }, value = TagSwitcher.NORMAL_MODE_ONLY.class)
 @Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = Composite.class)
 @BindSelection(value = Composite.class, valuePos = 2)
 @GenericValueBackgroundColor(path = { ContentRow.class, ValueComponents.class, Header.class }, value = "#3393ff")
-@Style(path = { ContentRow.class, ValueComponents.class, Header.class, InstanceNameLink.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class, GSLabelDisplayer.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "padding-left", value = "2px")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
+@Style(path = { HeaderRow.class, ButtonDiv.class }, name = "background-color", value = "#ea0084")
 @Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class, ButtonDiv.class })
-@Children(path = ContentRow.class, value = { ValueComponents.class, Holders.class, ButtonDiv.class })
-@Children(path = { ContentRow.class, ValueComponents.class, Header.class }, value = { InstanceNameLink.class, GSLabelDisplayer.class })
-@Children(path = { ContentRow.class, ButtonDiv.class }, value = RemoveButton.class)
+@Children(path = ContentRow.class, value = { ValueComponents.class, Holders.class, LinksDiv.class })
+@Children(path = { ContentRow.class, ValueComponents.class, Header.class }, value = GSLabelDisplayer.class)
 @ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @ForEach(path = { ContentRow.class, Holders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
@@ -101,13 +96,9 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	public static class ValueComponents extends Composite {
 	}
 
-	@BindAction(SET_SELECTION.class)
-	@BindText
-	public static class InstanceNameLink extends HtmlHyperLink {
-	}
-
-	@KeepFlexDirection
-	@Style(name = "background-color", value = "#ea0084")
+	@Style(name = "background-color", value = "white")
+	@Style(name = "justify-content", value = "center")
+	@FlexDirectionStyle(FlexDirection.ROW)
 	@Style(name = "margin-right", value = "1px")
 	@Style(name = "margin-bottom", value = "1px")
 	public static class ButtonDiv extends FlexDiv {
@@ -130,11 +121,15 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 		}
 	}
 
-	@Style(name = "flex", value = "1")
-	@Style(name = "height", value = "100%")
-	@Style(name = "width", value = "100%")
-	@SetText("Remove")
-	@BindAction(REMOVE.class)
-	public static class RemoveButton extends HtmlButton {
+	@Style(name = "background-color", value = "white")
+	@Style(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "max-width", value = "24px")
+	@Style(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, name = "max-width", value = "24px")
+	@Children({ HtmlHyperLink.class, HtmlHyperLink.class })
+	@Children(path = HtmlHyperLink.class, value = HtmlImg.class)
+	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "src", value = "delete.png")
+	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, name = "src", value = "edit.png")
+	@BindAction(path = HtmlHyperLink.class, pos = 1, value = REMOVE.class)
+	@BindAction(path = HtmlHyperLink.class, pos = 0, value = SET_SELECTION.class)
+	public static class LinksDiv extends ButtonDiv {
 	}
 }

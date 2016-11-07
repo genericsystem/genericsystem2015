@@ -13,11 +13,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-
 public interface ObservableModelSelector extends BiFunction<Context, Tag, ObservableValue<Context>> {
 
 	public static class SELECTION_SELECTOR implements ObservableModelSelector {

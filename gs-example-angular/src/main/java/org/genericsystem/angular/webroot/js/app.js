@@ -66,13 +66,16 @@ function EditCtrl($scope, $http, $location, $routeParams) {
 
 	$scope.update = function (instance) {
 		$http.put('/api/'+path+'/' + id, instance).then(function(response) {
+			console.log("UPDAAAAAAAATEEEE");
 			$scope.instance = response.data;
-			$scope.activePath = $location.path('/list')
+			$scope.activePath = $location.path('/list');
+			$scope.apply();
 			})
 	};
 	$scope.delete = function (instance) {
 			$http.delete('/api/'+path+'/' + instance.id).then(function(response) {
-			$scope.activePath = $location.path('/list')
+			$scope.activePath = $location.path('/list');
+			$scope.apply();
 			})
 		};
 }

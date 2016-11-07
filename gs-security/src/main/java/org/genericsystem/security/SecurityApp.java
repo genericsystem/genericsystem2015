@@ -1,14 +1,5 @@
 package org.genericsystem.security;
 
-import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
-import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin;
-import org.genericsystem.reactor.gscomponents.Responsive;
-import org.genericsystem.reactor.gscomponents.RootTagImpl;
-
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -18,6 +9,14 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
+import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
+import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin;
+import org.genericsystem.reactor.gscomponents.Responsive;
+import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.SecurityApp.ExampleScript;
 import org.genericsystem.security.model.Role;
 import org.genericsystem.security.model.User;
@@ -38,6 +37,10 @@ public class SecurityApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SecurityApp.class, "/security");
+	}
+
+	public SecurityApp() {
+		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 
 	public static class ExampleScript implements Script {
