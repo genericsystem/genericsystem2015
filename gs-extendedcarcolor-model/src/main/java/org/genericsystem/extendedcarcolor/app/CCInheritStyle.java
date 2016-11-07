@@ -1,4 +1,4 @@
-package org.genericsystem.carcolor.app;
+package org.genericsystem.extendedcarcolor.app;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -8,8 +8,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.carcolor.app.CCInheritStyle.CCInheritStyleProcessor;
-import org.genericsystem.carcolor.app.CCInheritStyle.CCInheritStyles;
+import org.genericsystem.extendedcarcolor.app.CCInheritStyle.CCInheritStyleProcessor;
+import org.genericsystem.extendedcarcolor.app.CCInheritStyle.CCInheritStyles;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Process;
 import org.genericsystem.reactor.gscomponents.TagImpl;

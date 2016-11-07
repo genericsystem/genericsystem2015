@@ -1,8 +1,8 @@
 package org.genericsystem.extendedcarcolor.app;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
+import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
-import org.genericsystem.reactor.gscomponents.AppHeader.TitleDiv;
 import org.genericsystem.reactor.gscomponents.Composite;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -15,7 +15,6 @@ import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
-import org.genericsystem.carcolor.app.CCInheritStyle;
 import org.genericsystem.carcolor.app.UserGuide;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
@@ -59,8 +58,8 @@ import org.genericsystem.reactor.appserver.Script;
 @Style(path = { Responsive.class, TitledInstancesTable.class, InstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, GroupDiv.class, GroupDiv2.class, TitledInstancesTable.class })
-@Children(path = AppHeader.class, value = { Logo.class, TitleDiv.class, UserGuideButtonDiv.class })
-@SetText(path = { AppHeader.class, TitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
+@Children(path = AppHeader.class, value = { Logo.class, AppTitleDiv.class, UserGuideButtonDiv.class })
+@SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Reactor Live Demo")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Vehicle.class, VehicleEngine.class })
 public class CarColorApp3 extends RootTagImpl {
 	public static void main(String[] mainArgs) {
@@ -125,16 +124,16 @@ public class CarColorApp3 extends RootTagImpl {
 			Generic audiS4 = car.setInstance("Audi S4");
 			audiS4.setHolder(power, 333);
 			System.out.println(engine.find(Vehicle.class).isAncestorOf(audiS4));
-			// audiS4.setLink(vehicleColor, "Audi S4 Green", green);
+			audiS4.setLink(vehicleColor, "Audi S4 Green", green);
 			Generic bmwM3 = car.setInstance("BMW M3");
 			bmwM3.setHolder(power, 450);
-			// bmwM3.setLink(vehicleColor, "BMW M3 Red", red);
+			bmwM3.setLink(vehicleColor, "BMW M3 Red", red);
 			Generic ferrariF40 = car.setInstance("Ferrari F40");
 			ferrariF40.setHolder(power, 478);
-			// ferrariF40.setLink(vehicleColor, "Ferrari F40 red", red);
+			ferrariF40.setLink(vehicleColor, "Ferrari F40 red", red);
 			Generic miniCooper = car.setInstance("Mini Cooper");
 			miniCooper.setHolder(power, 175);
-			// miniCooper.setLink(vehicleColor, "Mini Cooper", black);
+			miniCooper.setLink(vehicleColor, "Mini Cooper", black);
 			car.setInstance("Audi A4 3.0 TDI").setHolder(power, 233);
 			car.setInstance("Peugeot 106 GTI").setHolder(power, 120);
 			car.setInstance("Peugeot 206 S16").setHolder(power, 136);

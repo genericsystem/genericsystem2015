@@ -1,14 +1,17 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javafx.beans.property.SimpleBooleanProperty;
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.Tag.RootTag;
+
+import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -16,10 +19,6 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
-
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.RootTag;
 
 public class HtmlDomNode {
 
@@ -153,10 +152,10 @@ public class HtmlDomNode {
 	private class FilteredChildren {
 		final Map<Tag, ObservableValue<Boolean>[]> selectorsByTag = new HashMap<Tag, ObservableValue<Boolean>[]>();// Prevents garbage collection
 		final ObservableList<Tag> filteredList = new FilteredList<Tag>(new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
-			ObservableValue<Boolean>[] result = new ObservableValue[] { child.getSwitcher() != null ? child.getSwitcher().apply(context, child) : new SimpleBooleanProperty(true) };
+			ObservableValue<Boolean>[] result = child.getSwitchers().stream().map(s -> s.apply(context, child)).toArray(ObservableValue[]::new);
 			selectorsByTag.put(child, result);
 			return result;
-		}), child -> Boolean.TRUE.equals(selectorsByTag.get(child)[0].getValue()));
+		}), child -> Arrays.stream(selectorsByTag.get(child)).allMatch(s -> Boolean.TRUE.equals(s.getValue())));
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {

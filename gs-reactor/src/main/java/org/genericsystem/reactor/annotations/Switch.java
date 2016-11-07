@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
 import org.genericsystem.reactor.annotations.Switch.Modes;
+import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.TagSwitcher;
 
@@ -23,7 +23,7 @@ public @interface Switch {
 
 	int[] pos() default {};
 
-	Class<? extends TagSwitcher> value();
+	Class<? extends TagSwitcher>[] value();
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
@@ -36,7 +36,8 @@ public @interface Switch {
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			try {
-				tag.setSwitcher(((Switch) annotation).value().newInstance());
+				for (Class<? extends TagSwitcher> switcher : ((Switch) annotation).value())
+					tag.addSwitcher(switcher.newInstance());
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}

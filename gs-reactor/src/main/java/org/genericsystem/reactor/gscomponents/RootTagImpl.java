@@ -26,7 +26,7 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		if (annotations != null)
 			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
 				annotationsManager.registerAnnotation(annotation);
-		getRootTag().getAnnotationsManager().processAnnotations(this);
+		annotationsManager.processAnnotations(this);
 		init();
 	}
 

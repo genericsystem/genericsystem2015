@@ -38,8 +38,17 @@ public @interface Children {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			for (Class<? extends TagImpl> clazz : ((Children) annotation).value())
-				tag.createTag(clazz);
+			for (Class<? extends TagImpl> clazz : ((Children) annotation).value()) {
+				TagImpl result = null;
+				try {
+					result = clazz.newInstance();
+				} catch (IllegalAccessException | InstantiationException e) {
+					throw new IllegalStateException(e);
+				}
+				result.setParent(tag);
+				tag.getRootTag().getAnnotationsManager().processAnnotations(result);
+				result.init();
+			}
 		}
 	}
 }

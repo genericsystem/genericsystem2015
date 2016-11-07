@@ -11,7 +11,6 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.SelectModel;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
@@ -21,7 +20,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
-import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.DisconnectButton;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
@@ -32,7 +30,6 @@ import org.genericsystem.reactor.model.ContextAction.GC;
 import org.genericsystem.reactor.model.ContextAction.MOUNT;
 import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
-import org.genericsystem.reactor.model.ObservableModelSelector;
 import org.genericsystem.reactor.model.TagSwitcher;
 import org.genericsystem.reactor.model.TextBinding;
 import org.genericsystem.security.model.User;
@@ -68,22 +65,22 @@ public class Monitor extends FlexDiv {
 	@Children({ HtmlButton.class, HtmlButton.class, HtmlLabel.class, LoginDiv.class, LoggedUserDiv.class })
 	public static class MonitorLogin extends Monitor implements UserRoleDefaults {
 
-		@SelectModel(ObservableModelSelector.LOGGED_USER.class)
-		@Children({ ModeSwitchButtons.class, HtmlLabel.class, DisconnectButton.class })
+		@Switch(TagSwitcher.LOGGED_USER.class)
+		@Children({ ModeSwitchButtons.class, HtmlLabel.class, HtmlButton.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
+		@SetText(path = HtmlButton.class, value = "Disconnect")
+		@BindAction(path = HtmlButton.class, value = ContextAction.DISCONNECT.class)
 		public static class LoggedUserDiv extends FlexDiv implements UserRoleDefaults {
 			@Override
 			public void init() {
-				find(HtmlLabel.class)
-						.bindText(
-								context -> Bindings.createStringBinding(() -> getLoggedUserProperty(context).getValue() != null ? "Current user: " + (String) getLoggedUserProperty(context).getValue().getValue() : "No user logged.",
-										getLoggedUserProperty(context)));
+				find(HtmlLabel.class).bindText(context -> Bindings.createStringBinding(() -> getLoggedUserProperty(context).getValue() != null ? "Current user: " + (String) getLoggedUserProperty(context).getValue().getValue() : "No user logged.",
+						getLoggedUserProperty(context)));
 			}
 
 			@Children({ HtmlButton.class, HtmlButton.class })
 			@SetText(path = HtmlButton.class, pos = 0, value = "Admin mode")
 			@SetText(path = HtmlButton.class, pos = 1, value = "User mode")
-			@SelectModel(ObservableModelSelector.LOGGED_USER_ADMIN.class)
+			@Switch(TagSwitcher.LOGGED_USER_ADMIN.class)
 			@Switch(path = HtmlButton.class, pos = 0, value = TagSwitcher.NORMAL_MODE_ONLY.class)
 			@Switch(path = HtmlButton.class, pos = 1, value = TagSwitcher.ADMIN_MODE_ONLY.class)
 			@BindAction(path = HtmlButton.class, pos = 0, value = ContextAction.SET_ADMIN_MODE.class)
@@ -91,17 +88,9 @@ public class Monitor extends FlexDiv {
 			@Switch(path = HtmlButton.class, pos = 3, value = TagSwitcher.ADMIN_MODE_ONLY.class)
 			public static class ModeSwitchButtons extends FlexDiv {
 			}
-
-			@SetText("Disconnect")
-			public static class DisconnectButton extends HtmlButton implements UserRoleDefaults {
-				@Override
-				public void init() {
-					bindAction(context -> getLoggedUserProperty(context).setValue(null));
-				}
-			}
 		}
 
-		@SelectModel(ObservableModelSelector.NO_LOGGED_USER.class)
+		@Switch(TagSwitcher.NO_LOGGED_USER.class)
 		@Children({ HtmlLabel.class, HtmlInputText.class, HtmlLabel.class, HtmlInputText.class, ValidateButton.class, HtmlSpan.class, HtmlSpan.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
 		@SetText(path = HtmlLabel.class, pos = 0, value = "Login: ")

@@ -226,4 +226,12 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 			tag.getAdminModeProperty(context).setValue(false);
 		}
 	}
+
+	public static class DISCONNECT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getLoggedUserProperty(context).setValue(null);
+			tag.getAdminModeProperty(context).setValue(false);
+		}
+	}
 }
