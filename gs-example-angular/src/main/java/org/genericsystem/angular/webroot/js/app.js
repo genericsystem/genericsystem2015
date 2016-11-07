@@ -66,7 +66,6 @@ function EditCtrl($scope, $http, $location, $routeParams) {
 
 	$scope.update = function (instance) {
 		$http.put('/api/'+path+'/' + id, instance).then(function(response) {
-			console.log("UPDAAAAAAAATEEEE");
 			$scope.instance = response.data;
 			$scope.activePath = $location.path('/list');
 			$scope.apply();

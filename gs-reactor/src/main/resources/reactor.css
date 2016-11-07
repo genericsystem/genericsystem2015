@@ -85,7 +85,9 @@ section .adding {
 		top: 10px;
 		z-index: 1;
 }
-
+.img{
+	max-width : 24px; 
+}
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -144,11 +146,13 @@ border-radius: 30px;
 	.widthResponsive{
 		max-width:60%;
 
+	}.img{
+	max-width : 24px;
 	}
 }
 @media only screen and (max-width:480px) and (orientation : portrait), 
 only screen and (max-device-width:480px) and (orientation : portrait){
-	body {
+	.body {
 	font: 8px 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 1.4em;
 	background: #eaeaea;
@@ -162,19 +166,21 @@ only screen and (max-device-width:480px) and (orientation : portrait){
 	justify-content: center;
 	
 }.buttonDiv{
-	min-width : 30px;
+	min-width : 40px;
 	}
 	.screenResponsive{
 	min-width : 7cm;
 	}
 	.widthResponsive{
 		max-width:80%;
+	}.img{
+	max-width : 16px;
 	}
 }
 
 @media only screen and (max-width:960px) and (orientation : landscape),
 only screen and (max-device-width: 960px) and (orientation : landscape){
-	body {
+	.body {
 	font: 10px 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 1.4em;
 	background: #eaeaea;
@@ -195,5 +201,7 @@ only screen and (max-device-width: 960px) and (orientation : landscape){
 	}
 	.widthResponsive{
 		max-width:80%;
-	}
+	}.img{
+	max-width : 16px;
+}
 }

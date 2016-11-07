@@ -70,12 +70,13 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-@Style(name = "flex", value = "1 1 0%")
-@Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = Composite.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(path = HeaderRow.class, name = "flex", value = "0.3")
 @Style(path = ContentRow.class, name = "flex", value = "1")
+@Style(path = { HeaderRow.class, ValueComponents.class }, name = "flex", value = "1 1 auto")
+@Style(path = { ContentRow.class, ValueComponentsEditor.class }, name = "flex", value = "1 1 0%")
+@Style(path = { ContentRow.class, AttributeContent.class }, name = "flex", value = "1 1 0%")
 @Children({ HeaderRow.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class })
 @Children(path = ContentRow.class, value = { ValueComponentsEditor.class, AttributeContent.class })

@@ -72,7 +72,6 @@ public class CarColorApp3 extends RootTagImpl {
 	@Children({ TitledInstancesTable.class, TitledInstancesTable.class })
 	@DirectSelect(path = TitledInstancesTable.class, value = { Bike.class, Car.class })
 	@Style(path = TitledInstancesTable.class, name = "flex", value = "0 1 auto")
-
 	@Style(name = "flex", value = "1")
 	@Style(path = { TitledInstancesTable.class, InstancesTable.class }, name = "flex", value = "0 1 auto")
 	@Style(path = { TitledInstancesTable.class, InstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
@@ -85,7 +84,7 @@ public class CarColorApp3 extends RootTagImpl {
 	@DirectSelect(path = TitledInstancesTable.class, value = { Color.class, Energy.class })
 	@Style(name = "flex", value = "1")
 	@Style(path = { TitledInstancesTable.class, InstancesTable.class }, name = "flex", value = "0 1 auto")
-	@Style(path = { TitledInstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
+	@Style(path = { TitledInstancesTable.class, InstancesTable.class, Composite.class }, name = "flex", value = "0 1 auto")
 	public static class GroupDiv2 extends FlexDiv {
 
 	}

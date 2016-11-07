@@ -13,6 +13,7 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
@@ -40,6 +41,7 @@ import org.genericsystem.reactor.model.TagSwitcher;
 @ReverseFlexDirection(path = Composite.class)
 @BindSelection(value = Composite.class, valuePos = 2)
 @GenericValueBackgroundColor(path = { ContentRow.class, ValueComponents.class, Header.class }, value = "#3393ff")
+@Style(path = Composite.class, name = "flex", value = "0 1 auto")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class, GSLabelDisplayer.class }, name = "color", value = "white")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "padding-left", value = "2px")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
@@ -122,8 +124,8 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	}
 
 	@Style(name = "background-color", value = "white")
-	@Style(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "max-width", value = "24px")
-	@Style(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, name = "max-width", value = "24px")
+	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, value = "img")
+	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, value = "img")
 	@Children({ HtmlHyperLink.class, HtmlHyperLink.class })
 	@Children(path = HtmlHyperLink.class, value = HtmlImg.class)
 	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "src", value = "delete.png")
