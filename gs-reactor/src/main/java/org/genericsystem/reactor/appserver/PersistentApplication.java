@@ -8,7 +8,7 @@ import org.genericsystem.common.AbstractCache;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.Tag.RootTag;
+import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

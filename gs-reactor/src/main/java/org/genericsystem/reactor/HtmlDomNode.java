@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.Tag.RootTag;
 
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
