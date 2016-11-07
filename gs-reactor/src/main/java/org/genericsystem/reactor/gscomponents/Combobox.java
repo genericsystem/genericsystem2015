@@ -3,6 +3,7 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
@@ -12,6 +13,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSelect;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.model.StringExtractor;
+
+import javafx.beans.property.Property;
 
 @Children(HtmlRepeatedOption.class)
 @BindText(path = HtmlRepeatedOption.class)
@@ -62,7 +65,12 @@ public class Combobox extends HtmlSelect implements SelectionDefaults, Component
 				if ("Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(model.getGeneric().getMeta())))
 					addStyle(model, "background-color", getSelectionString(model).getValue());
 			});
-			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()))));
+			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> {
+				Generic updatedGeneric = model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()));
+				Property<Generic> genericProperty = getUpdatedGenericProperty(model);
+				if (genericProperty != null)
+					genericProperty.setValue(updatedGeneric);
+			}));
 		}
 	}
 }
