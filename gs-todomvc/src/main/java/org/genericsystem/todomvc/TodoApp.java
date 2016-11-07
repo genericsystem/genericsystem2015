@@ -1,5 +1,19 @@
 package org.genericsystem.todomvc;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BidirectionalBinding;
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.DependsOnModel;
+import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
@@ -15,21 +29,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlStrong;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
-
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ReactorStatics;
-import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.DependsOnModel;
-import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv.MyDiv;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv.MyDiv.MyDiv2;
