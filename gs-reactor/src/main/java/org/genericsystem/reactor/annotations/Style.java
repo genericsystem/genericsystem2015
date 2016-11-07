@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle.FlexDirectionStyleProcessor;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle.FlexDirections;
@@ -21,6 +22,11 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection.ReverseF
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection.ReverseFlexDirections;
 import org.genericsystem.reactor.annotations.Style.StyleProcessor;
 import org.genericsystem.reactor.annotations.Style.Styles;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.GTagStyleType;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleValue;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.TagImpl;
@@ -52,6 +58,11 @@ public @interface Style {
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			tag.addStyle(((Style) annotation).name(), ((Style) annotation).value());
+			if (ExtendedRootTag.class.isAssignableFrom(tag.getRootTag().getClass())) {
+				GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
+				Generic style = delegate.setHolder(delegate.getRoot().find(GTagStyleType.class), ((Style) annotation).name());
+				style.setHolder(delegate.getRoot().find(StyleValue.class), ((Style) annotation).value());
+			}
 		}
 	}
 
