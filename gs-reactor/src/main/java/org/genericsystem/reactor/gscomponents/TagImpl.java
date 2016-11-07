@@ -4,25 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.TagSwitcher;
 
-public abstract class TagImpl implements Tag {
+public abstract class TagImpl extends AbstractTag implements Tag {
 
 	private MetaBinding<?> metaBinding;
 	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();
 	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
-	private Tag parent;
-	private final ObservableList<Tag> children = FXCollections.observableArrayList();
 	protected List<TagSwitcher> switchers = new ArrayList<>();
 
+	@Override
 	public void setParent(Tag parent) {
-		this.parent = parent;
+		super.setParent(parent);
 		if (parent != null)
 			parent.getObservableChildren().add(this);
 	}
@@ -53,17 +49,6 @@ public abstract class TagImpl implements Tag {
 		if (this.metaBinding != null)
 			throw new IllegalStateException("MetaBinding already defined");
 		this.metaBinding = metaBinding;
-	}
-
-	@Override
-	public ObservableList<Tag> getObservableChildren() {
-		return children;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <COMPONENT extends Tag> COMPONENT getParent() {
-		return (COMPONENT) parent;
 	}
 
 	@Override

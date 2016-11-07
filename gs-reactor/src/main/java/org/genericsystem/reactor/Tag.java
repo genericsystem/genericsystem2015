@@ -8,8 +8,6 @@ import org.genericsystem.reactor.modelproperties.StylesDefaults;
 import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +16,14 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.model.ObservableListExtractor;
+import org.genericsystem.reactor.model.TagSwitcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.beans.binding.ListBinding;
 import javafx.beans.property.Property;
@@ -29,21 +35,12 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.StringConverter;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.TagSwitcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author Nicolas Feybesse
  *
  * @param <N>
  */
-public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults, UserRoleDefaults {
+public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults, UserRoleDefaults {
 
 	public static final Logger log = LoggerFactory.getLogger(Tag.class);
 
@@ -347,11 +344,13 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 		return new HtmlDomNode(parent, modelContext, this);
 	};
 
+	@Override
 	public ObservableList<Tag> getObservableChildren();
 
 	default void init() {
 	}
 
+	@Override
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
 	default RootTag getRootTag() {
@@ -361,19 +360,6 @@ public interface Tag extends TextPropertyDefaults, StylesDefaults, AttributesDef
 	public List<TagSwitcher> getSwitchers();
 
 	public void addSwitcher(TagSwitcher switcher);
-
-	public static interface RootTag extends Tag {
-		default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {
-			return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
-		}
-
-		@Override
-		default RootTag getRootTag() {
-			return this;
-		}
-
-		public AnnotationsManager getAnnotationsManager();
-	}
 
 	default String defaultToString() {
 		return getTag() + " " + getClass().getName();
