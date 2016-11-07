@@ -9,20 +9,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
-import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddButton;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddLink;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilderDiv;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.MultiCheckboxBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.PasswordBuilder;
@@ -53,7 +54,7 @@ import javafx.beans.value.ObservableValue;
 @Children({ Header.class, Content.class, ButtonDiv.class })
 @Children(path = Header.class, value = GSHolderBuilderDiv.class)
 @Children(path = Content.class, value = { PasswordBuilder.class, GSHolderBuilderDiv.class, MultiCheckboxBuilder.class })
-@Children(path = ButtonDiv.class, value = AddButton.class)
+@Children(path = ButtonDiv.class, value = AddLink.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @Select(path = { Content.class, PasswordBuilder.class }, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
 @Select(path = { Content.class, GSHolderBuilderDiv.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
@@ -73,16 +74,16 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 		@Override
 		public void init() {
 			createConvertedValueProperty();
-			storeInvalidProperty(context -> {
-				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
-				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
-				return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
-						secondHashProperty);
-			});
+			// storeInvalidProperty(context -> {
+			// Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
+			// Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
+			// return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
+			// secondHashProperty);
+			// });
 			addPrefixBinding(context -> {
 				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
 				getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
-				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
+				// getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
 				if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
@@ -143,12 +144,11 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 
 	}
 
-	@Style(name = "flex", value = "1")
-	@Style(name = "height", value = "100%")
-	@Style(name = "width", value = "100%")
-	@SetText("Add")
+	@Style(path = HtmlImg.class, name = "max-width", value = "24px")
+	@Children(HtmlImg.class)
+	@Attribute(path = HtmlImg.class, name = "src", value = "add2.png")
 	@BindAction(CREATE_INSTANCE.class)
-	public static class AddButton extends HtmlButton {
+	public static class AddLink extends HtmlHyperLink implements GSBuilderDefaults {
 
 		@Override
 		public void init() {
