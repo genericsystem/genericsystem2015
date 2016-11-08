@@ -13,13 +13,17 @@ import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilderDiv;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
+import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 import org.slf4j.Logger;
@@ -125,6 +129,16 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		}
 	}
 
+	public static class DISPLAY_NONE_CANCEL implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getParent().getParent().find(HtmlInputText.class).getDomNodeAttributes(context).put("value", "");
+			tag.getParent().getParent().find(HtmlInputText.class, 1).getDomNodeAttributes(context).put("value", "");
+			tag.getParent().getParent().find(HtmlInputText.class, 2).getDomNodeAttributes(context).put("value", "");
+			tag.getDisplayProperty(context).setValue("none");
+		}
+	}
+
 	public static class MODAL_DISPLAY_FLEX implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
@@ -150,6 +164,45 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
 			else
 				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
+		}
+	}
+
+	public static class CREATE_USER implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			context.mount();
+			HtmlInputText name = tag.getParent().getParent().find(HtmlInputText.class);
+			HtmlInputText passwordInput = tag.getParent().getParent().find(HtmlInputText.class, 1);
+			HtmlInputText confirmPassword = tag.getParent().getParent().find(HtmlInputText.class, 2);
+			HtmlSpan invalidUsername = tag.getParent().getParent().find(HtmlSpan.class);
+			HtmlSpan invalidConfirmPassword = tag.getParent().getParent().find(HtmlSpan.class, 1);
+
+			String psw1 = passwordInput.getDomNodeAttributes(context).get("value");
+			String psw2 = confirmPassword.getDomNodeAttributes(context).get("value");
+			Generic user;
+			try {
+				user = context.find(User.class).addInstance(name.getDomNodeAttributes(context).get("value"));
+			} catch (RollbackException e) {
+				invalidUsername.addStyle(context, "display", "inline");
+				return;
+			}
+			if (psw1 != null && psw1.equals(psw2)) {
+				invalidConfirmPassword.addStyle(context, "display", "none");
+				invalidUsername.addStyle(context, "display", "none");
+				byte[] salt = EncryptionUtils.generateSalt();
+				byte[] hash = EncryptionUtils.getEncryptedPassword(psw1, salt);
+				Generic hashGeneric = user.setHolder(context.find(Password.class), hash);
+				hashGeneric.setHolder(context.find(Salt.class), salt);
+				tag.getDisplayProperty(context).setValue("none");
+				name.getDomNodeAttributes(context).put("value", "");
+				passwordInput.getDomNodeAttributes(context).put("value", "");
+				confirmPassword.getDomNodeAttributes(context).put("value", "");
+				context.flush();
+				context.unmount();
+			} else {
+				invalidConfirmPassword.addStyle(context, "display", "inline");
+				context.unmount();
+			}
 		}
 	}
 

@@ -5,8 +5,8 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 

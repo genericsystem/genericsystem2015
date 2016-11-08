@@ -46,6 +46,7 @@ import org.genericsystem.reactor.model.TagSwitcher;
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "padding-left", value = "2px")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
 @Style(path = { HeaderRow.class, ButtonDiv.class }, name = "background-color", value = "#ea0084")
+@Style(name = "background-color", value = "lightgrey")
 @Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class, ButtonDiv.class })
 @Children(path = ContentRow.class, value = { ValueComponents.class, Holders.class, LinksDiv.class })

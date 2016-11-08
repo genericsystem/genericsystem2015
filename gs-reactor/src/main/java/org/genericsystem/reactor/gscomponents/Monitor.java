@@ -16,17 +16,23 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
+import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
+import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
 import org.genericsystem.reactor.model.ContextAction;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
+import org.genericsystem.reactor.model.ContextAction.CREATE_USER;
+import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE_CANCEL;
 import org.genericsystem.reactor.model.ContextAction.FLUSH;
 import org.genericsystem.reactor.model.ContextAction.GC;
+import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
 import org.genericsystem.reactor.model.ContextAction.MOUNT;
 import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
@@ -91,14 +97,17 @@ public class Monitor extends FlexDiv {
 		}
 
 		@Switch(TagSwitcher.NO_LOGGED_USER.class)
-		@Children({ HtmlLabel.class, HtmlInputText.class, HtmlLabel.class, HtmlInputText.class, ValidateButton.class, HtmlSpan.class, HtmlSpan.class })
+		@Children({ HtmlLabel.class, HtmlInputText.class, HtmlLabel.class, HtmlInputText.class, ValidateButton.class, HtmlSpan.class, HtmlSpan.class, ModalWithDisplay.class, HtmlHyperLink.class })
+		@Children(path = { ModalWithDisplay.class, FlexDiv.class }, value = { UserCreation.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
 		@SetText(path = HtmlLabel.class, pos = 0, value = "Login: ")
 		@SetText(path = HtmlLabel.class, pos = 1, value = "Password: ")
 		@SetText(path = HtmlSpan.class, pos = 0, value = "Invalid username.")
 		@SetText(path = HtmlSpan.class, pos = 1, value = "Invalid password.")
 		@Style(path = HtmlSpan.class, name = "display", value = "none")
+		@SetText(path = HtmlHyperLink.class, value = "Sign in")
 		@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
+		@BindAction(path = HtmlHyperLink.class, value = MODAL_DISPLAY_FLEX.class)
 		public static class LoginDiv extends FlexDiv implements UserRoleDefaults {
 
 			@SetText("OK")
@@ -131,5 +140,25 @@ public class Monitor extends FlexDiv {
 				}
 			}
 		}
+
+		@Children({ HtmlLabel.class, HtmlInputText.class, HtmlSpan.class, HtmlLabel.class, HtmlInputText.class, HtmlLabel.class, HtmlInputText.class, HtmlSpan.class, ButtonDiv.class })
+		@Children(path = ButtonDiv.class, value = { HtmlButton.class, HtmlButton.class })
+		@Style(path = ButtonDiv.class, name = "flex", value = "1")
+		@SetText(path = HtmlLabel.class, pos = 0, value = "Username :")
+		@SetText(path = HtmlLabel.class, pos = 1, value = "Password :")
+		@SetText(path = HtmlLabel.class, pos = 2, value = "Confirm password:")
+		@SetText(path = { ButtonDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = "OK")
+		@SetText(path = { ButtonDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = "Cancel")
+		@SetText(path = HtmlSpan.class, pos = 0, value = "Username already exists.")
+		@SetText(path = HtmlSpan.class, pos = 1, value = "These passwords don’t match. Try again.")
+		@Style(path = HtmlSpan.class, name = "display", value = "none")
+		@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
+		@Attribute(path = HtmlInputText.class, pos = 2, name = "type", value = "password")
+		@BindAction(path = { ButtonDiv.class, HtmlButton.class }, pos = { 0, 0 }, value = CREATE_USER.class)
+		@BindAction(path = { ButtonDiv.class, HtmlButton.class }, pos = { 0, 1 }, value = DISPLAY_NONE_CANCEL.class)
+		public static class UserCreation extends FlexDiv {
+
+		}
+
 	}
 }
