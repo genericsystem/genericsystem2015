@@ -24,7 +24,7 @@ import org.genericsystem.reactor.annotations.Style.StyleProcessor;
 import org.genericsystem.reactor.annotations.Style.Styles;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.GTagStyleType;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleName;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleValue;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -55,14 +55,21 @@ public @interface Style {
 
 	public static class StyleProcessor implements BiConsumer<Annotation, Tag> {
 
+		static long styleTime;
+		static int stylesNumber = 0;
+
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			tag.addStyle(((Style) annotation).name(), ((Style) annotation).value());
 			if (ExtendedRootTag.class.isAssignableFrom(tag.getRootTag().getClass())) {
 				GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
-				Generic style = delegate.setHolder(delegate.getRoot().find(GTagStyleType.class), ((Style) annotation).name());
+				//				long startTime = System.currentTimeMillis();
+				Generic style = delegate.setHolder(delegate.getRoot().find(StyleName.class), ((Style) annotation).name());
 				style.setHolder(delegate.getRoot().find(StyleValue.class), ((Style) annotation).value());
+				//				long endTime = System.currentTimeMillis();
+				//				styleTime += endTime - startTime;
+				//				System.out.println("Style, temps passé : " + (endTime - startTime) + ", temps total : " + styleTime + ", nombre de styles : " + (++stylesNumber) + ", temps par style : " + (styleTime / stylesNumber));
 			}
+			tag.addStyle(((Style) annotation).name(), ((Style) annotation).value());
 		}
 	}
 
