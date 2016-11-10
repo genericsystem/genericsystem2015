@@ -2,8 +2,6 @@ package org.genericsystem.api.core;
 
 import java.io.Serializable;
 
-import org.genericsystem.api.core.IGeneric.SystemProperty;
-
 /**
  * Represents the <code>Class</code> for an axed property.
  * 
@@ -13,7 +11,7 @@ import org.genericsystem.api.core.IGeneric.SystemProperty;
 public class AxedPropertyClass implements Serializable {
 	private static final long serialVersionUID = -2631066712866842794L;
 
-	private final Class<? extends SystemProperty> clazz;
+	private final Class<?> clazz;
 	private final int axe;
 
 	/**
@@ -24,7 +22,7 @@ public class AxedPropertyClass implements Serializable {
 	 * @param axe
 	 *            the position of the <code>SystemProperty</code>.
 	 */
-	public AxedPropertyClass(Class<? extends SystemProperty> clazz, int axe) {
+	public AxedPropertyClass(Class<?> clazz, int axe) {
 		this.clazz = clazz;
 		this.axe = axe;
 	}
@@ -34,7 +32,7 @@ public class AxedPropertyClass implements Serializable {
 	 * 
 	 * @return the <code>Class</code> of the <code>SystemProperty</code>.
 	 */
-	public Class<? extends SystemProperty> getClazz() {
+	public Class<?> getClazz() {
 		return clazz;
 	}
 

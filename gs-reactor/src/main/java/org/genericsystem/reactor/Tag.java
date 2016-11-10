@@ -350,7 +350,6 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	default void init() {
 	}
 
-	@Override
 	public <COMPONENT extends Tag> COMPONENT getParent();
 
 	default RootTag getRootTag() {

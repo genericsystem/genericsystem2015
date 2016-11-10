@@ -22,7 +22,6 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 	private AnnotationsManager annotationsManager;
 
 	public RootTagImpl() {
-		tagNode = buildTagNode(null);
 		createSelectionProperty();
 		createLoggedUserProperty();
 		createAdminModeProperty();
@@ -31,6 +30,11 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		if (annotations != null)
 			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
 				annotationsManager.registerAnnotation(annotation);
+		initRoot();
+	}
+
+	protected void initRoot() {
+		tagNode = buildTagNode(this);
 		annotationsManager.processAnnotations(this);
 		init();
 	}
@@ -46,23 +50,16 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 	}
 
 	@Override
-	public TagNode buildTagNode(Tag parent) {
+	public TagNode buildTagNode(Tag child) {
 		return new TagNode() {
 
 			private final ObservableList<Tag> children = FXCollections.observableArrayList();
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public <COMPONENT extends Tag> COMPONENT getParent() {
-				return (COMPONENT) parent;
-			}
 
 			@Override
 			public ObservableList<Tag> getObservableChildren() {
 				return children;
 			}
 		};
-
 	};
 
 	@Override

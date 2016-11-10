@@ -10,7 +10,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
 @Style(path = FlexDiv.class, name = "flex", value = "1 1 0%")
-@Style(path = FlexDiv.class, name = "overflow", value = "hidden")
+@Style(path = FlexDiv.class, name = "overflow", value = "auto")
 @Children({ Composite.Content.class })
 @Children(path = Content.class, value = GSLabelDisplayer.class)
 @Children(path = Header.class, value = GSLabelDisplayer.class)

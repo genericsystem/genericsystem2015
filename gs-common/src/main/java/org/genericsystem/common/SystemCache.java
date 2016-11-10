@@ -14,6 +14,7 @@ import org.genericsystem.api.core.annotations.Hidden;
 import org.genericsystem.api.core.annotations.Meta;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator;
+import org.genericsystem.api.core.annotations.constraints.NoInheritance;
 import org.genericsystem.api.core.annotations.constraints.NoReferentialIntegrityProperty;
 import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.constraints.RequiredConstraint;
@@ -118,6 +119,9 @@ public abstract class SystemCache {
 
 		if (clazz.getAnnotation(InstanceValueClassConstraint.class) != null)
 			result.setInstanceValueClassConstraint(clazz.getAnnotation(InstanceValueClassConstraint.class).value());
+
+		if (clazz.getAnnotation(NoInheritance.class) != null)
+			result.disableInheritance();
 
 		if (clazz.getAnnotation(InstanceValueGenerator.class) != null)
 			result.setInstanceValueGenerator(clazz.getAnnotation(InstanceValueGenerator.class).value());

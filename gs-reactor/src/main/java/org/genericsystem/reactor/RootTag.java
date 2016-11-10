@@ -17,5 +17,5 @@ public interface RootTag extends Tag {
 
 	AnnotationsManager getAnnotationsManager();
 
-	TagNode buildTagNode(Tag parent);
+	TagNode buildTagNode(Tag child);
 }

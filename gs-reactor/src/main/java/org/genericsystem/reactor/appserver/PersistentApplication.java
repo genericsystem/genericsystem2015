@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class PersistentApplication {
 	private final Class<? extends RootTag> htmlAppClass;
-	private final RootTag tagTree;
+	private RootTag tagTree;
 	private final Root engine;
 	private final Class<Context> modelClass;
 	private final String rootId;
@@ -42,7 +42,13 @@ public class PersistentApplication {
 		try {
 			tagTree = getApplicationClass().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
-			throw new IllegalStateException(e);
+			try {
+				engine.newCache().start();
+				tagTree = getApplicationClass().getConstructor(Root.class).newInstance(engine);
+				engine.getCurrentCache().flush();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException | NoSuchMethodException ex) {
+				throw new IllegalStateException(ex);
+			}
 		}
 	}
 
