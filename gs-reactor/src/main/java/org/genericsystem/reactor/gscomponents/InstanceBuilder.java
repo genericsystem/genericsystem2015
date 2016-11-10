@@ -29,7 +29,7 @@ import org.genericsystem.reactor.gscomponents.InstanceBuilder.MultiCheckboxBuild
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.PasswordBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.Checkbox;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.CheckboxLabel;
-import org.genericsystem.reactor.gscomponents.InstanceEditor.ComponentAdderSelect;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.DatalistEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HolderAdder;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordAdder;
@@ -119,7 +119,7 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 	@Style(name = "flex", value = "1")
 	@Children({ Content.class, Header.class, })
 	@Children(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
-	@Children(path = Content.class, value = ComponentAdderSelect.class)
+	@Children(path = Content.class, value = DatalistEditor.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)

@@ -59,14 +59,19 @@ function onMessageReceived(evt) {
 						nodeId : this.id,
 						textContent : this.value
 					}));
-				}
-				elt.onblur = function (e) {
-					wsocket.send(JSON.stringify({
-						msgType : "A",
-						nodeId : this.id
-					}));
-				}
+				}	
 			};
+			elt.onblur = function (e) {
+				wsocket.send(JSON.stringify({
+					msgType : "U",
+					nodeId : this.id,
+					textContent : this.value
+				}));
+				wsocket.send(JSON.stringify({
+					msgType : "A",
+					nodeId : this.id
+				}));
+			}
 			break;
 
 			case "checkbox": 
@@ -153,6 +158,18 @@ function onMessageReceived(evt) {
 			elt.value = message.attributeValue;
 		if (message.attributeName == "checked")
 			elt.checked = message.attributeValue;
+		if(message.attributeName == "list"){
+			document.getElementById(message.attributeValue).onclick = function (e) {
+				wsocket.send(JSON.stringify({
+					msgType : "U",
+					nodeId : this.id,
+					textContent : this.value
+				}));
+				wsocket.send(JSON.stringify({
+					msgType : "A",
+					nodeId : this.id
+				}));
+		}}
 		break;
 	case 'RA':
 		elt.removeAttribute(message.attributeName);
