@@ -14,6 +14,8 @@ import org.genericsystem.reactor.gscomponents.InstanceStepEditor.HorizontalInsta
 import org.genericsystem.reactor.gscomponents.InstancesTable.HorizontalInstancesTable;
 import org.genericsystem.reactor.model.StringExtractor;
 
+//Apple
+//@StyleClass("divWithTitle")
 @Style(name = "flex", value = "1")
 @Style(name = "margin", value = "4px")
 @FlexDirectionStyle(FlexDirection.COLUMN)
