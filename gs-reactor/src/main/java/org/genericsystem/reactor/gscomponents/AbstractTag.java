@@ -8,22 +8,28 @@ import javafx.collections.ObservableList;
 public abstract class AbstractTag implements Tag {
 
 	protected TagNode tagNode;
+	private Tag parent;
 
 	public TagNode getTagNode() {
 		return tagNode;
 	}
 
+	public void setTagNode(TagNode tagNode) {
+		this.tagNode = tagNode;
+	}
+
 	public void setParent(Tag parent) {
-		tagNode = parent.getRootTag().buildTagNode(parent);
+		this.parent = parent;
 	}
 
 	@Override
 	public ObservableList<Tag> getObservableChildren() {
+		// System.out.println("getObservableChildren on " + this);
 		return getTagNode().getObservableChildren();
 	}
 
 	@Override
 	public <COMPONENT extends Tag> COMPONENT getParent() {
-		return getTagNode().getParent();
+		return (COMPONENT) parent;
 	}
 }

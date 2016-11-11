@@ -23,7 +23,7 @@ public interface GSBuilderDefaults extends ContextProperty {
 
 	public static class GenericValueComponents {
 		private Property<Serializable> value = new SimpleObjectProperty<>();
-		private List<Property<Context>> components = new ArrayList<>();
+		private Map<Generic, Property<Serializable>> components = new HashMap<>();
 
 		public Property<Serializable> getGenericValue() {
 			return value;
@@ -33,11 +33,11 @@ public interface GSBuilderDefaults extends ContextProperty {
 			this.value = value;
 		}
 
-		public List<Property<Context>> getComponents() {
+		public Map<Generic, Property<Serializable>> getComponents() {
 			return components;
 		}
 
-		public void setComponents(List<Property<Context>> components) {
+		public void setComponents(Map<Generic, Property<Serializable>> components) {
 			this.components = components;
 		}
 
@@ -63,7 +63,7 @@ public interface GSBuilderDefaults extends ContextProperty {
 	}
 
 	default void createComponentsMapProperty() {
-		createNewInitializedProperty(COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<Context>>>());
+		createNewInitializedProperty(COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<Serializable>>>());
 	};
 
 	default void createInvalidListProperty() {
@@ -86,7 +86,7 @@ public interface GSBuilderDefaults extends ContextProperty {
 		return getProperty(HOLDERS_MAP, model);
 	}
 
-	default Property<Map<Generic, List<Property<Context>>>> getComponentsMapProperty(Context model) {
+	default Property<Map<Generic, List<Property<Serializable>>>> getComponentsMapProperty(Context model) {
 		return getProperty(COMPONENTS_MAP, model);
 	}
 

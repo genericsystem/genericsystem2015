@@ -60,6 +60,27 @@ public class HtmlTag {
 		}
 	}
 
+	public static class HtmlDatalist extends TagImpl {
+
+		@Override
+		public String getTag() {
+			return "datalist";
+		}
+
+		@Override
+		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
+			return new HtmlDomNode(parent, modelContext, this) {
+
+				@Override
+				public void handleMessage(JsonObject json) {
+					if (UPDATE.equals(json.getString(MSG_TYPE))) {
+						((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+					}
+				}
+			};
+		}
+	}
+
 	public static class HtmlDiv extends TagImpl {
 
 		@Override
@@ -146,6 +167,7 @@ public class HtmlTag {
 
 				@Override
 				public void handleMessage(JsonObject json) {
+					super.handleMessage(json);
 					if (ADD.equals(json.getString(MSG_TYPE))) {
 						Property<Consumer<Object>> action = ((ActionDefaults) getTag()).getActionProperty(getModelContext());
 						if (action != null)

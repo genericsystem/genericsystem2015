@@ -292,7 +292,6 @@ public class HtmlDomNode {
 	}
 
 	public void handleMessage(JsonObject json) {
-
 	}
 
 	public static class RootHtmlDomNode extends HtmlDomNode {

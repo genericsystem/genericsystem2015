@@ -1,8 +1,10 @@
 package org.genericsystem.reactor.modelproperties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 
 import javafx.beans.property.Property;
@@ -12,10 +14,10 @@ public interface ComponentsDefaults extends ContextProperty {
 	public static final String COMPONENTS = "components";
 
 	default void createComponentsListProperty() {
-		createNewInitializedProperty(COMPONENTS, model -> new ArrayList<Property<Context>>());
+		createNewInitializedProperty(COMPONENTS, model -> new HashMap<Generic, Property<Serializable>>());
 	}
 
-	default Property<List<Property<Context>>> getComponentsProperty(Context model) {
+	default Property<Map<Generic, Property<Serializable>>> getComponentsProperty(Context model) {
 		return getProperty(COMPONENTS, model);
 	}
 }

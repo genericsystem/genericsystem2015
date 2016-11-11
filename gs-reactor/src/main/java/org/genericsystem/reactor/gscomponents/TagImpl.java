@@ -17,13 +17,6 @@ public abstract class TagImpl extends AbstractTag implements Tag {
 	protected List<TagSwitcher> switchers = new ArrayList<>();
 
 	@Override
-	public void setParent(Tag parent) {
-		super.setParent(parent);
-		if (parent != null)
-			parent.getObservableChildren().add(this);
-	}
-
-	@Override
 	public String toString() {
 		return getTag() + " " + getClass().getName();
 	}

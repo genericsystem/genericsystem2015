@@ -213,22 +213,23 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				GSBuilderDefaults buildTag = (GSBuilderDefaults) tag;
 				Generic type = context.getGeneric();
 				Map<Generic, GenericValueComponents> gvc = buildTag.getGenericValueComponents(context).getValue();
-				Generic[] components = gvc.get(type).getComponents().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).toArray(Generic[]::new);
+				Generic[] components = gvc.get(type).getComponents().entrySet().stream().filter(obs -> obs.getValue() != null && obs.getValue().getValue() != null).map(entry -> entry.getKey().setInstance(entry.getValue().getValue()))
+						.filter(gen -> gen != null).toArray(Generic[]::new);
 				if ((gvc.get(type).getGenericValue().getValue() != null || components.length != 0) && components.length == type.getComponents().size()) {
 					Generic newInstance = type.setInstance(gvc.get(type).getGenericValue().getValue(), components);
-
 					for (Entry<Generic, GenericValueComponents> entry : gvc.entrySet().stream().filter(e -> !e.getKey().equals(type)).collect(Collectors.toSet())) {
-						Generic[] selectedGenerics = entry.getValue().getComponents().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).toArray(Generic[]::new);
+						Generic[] selectedGenerics = entry.getValue().getComponents().entrySet().stream().filter(entry_ -> entry_.getValue() != null && entry_.getValue().getValue() != null)
+								.map(entry_ -> entry_.getKey().setInstance(entry_.getValue().getValue())).filter(gen -> gen != null).toArray(Generic[]::new);
 						if ((entry.getValue().getGenericValue().getValue() != null || selectedGenerics.length != 0) && selectedGenerics.length + 1 == entry.getKey().getComponents().size()) {
 							Generic newHolder = newInstance.setHolder(entry.getKey(), entry.getValue().getGenericValue().getValue(), selectedGenerics);
 							if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass()) && context.find(Password.class) != null && newHolder.isInstanceOf(context.find(Password.class)))
 								newHolder.setHolder(context.find(Salt.class), ((PasswordDefaults) tag.getParent().getParent()).getSaltProperty(context).getValue());
 						}
-						entry.getValue().getComponents().stream().forEach(sel -> sel.setValue(null));
+						entry.getValue().getComponents().values().stream().forEach(sel -> sel.setValue(null));
 						entry.getValue().getGenericValue().setValue(null);
 					}
 
-					gvc.get(type).getComponents().stream().forEach(sel -> sel.setValue(null));
+					gvc.get(type).getComponents().values().stream().forEach(sel -> sel.setValue(null));
 					gvc.get(type).getGenericValue().setValue(null);
 
 					Map<Generic, Map<Generic, Property<Serializable>>> relationMap = buildTag.getMultipleRelationProperty(context).getValue();
@@ -244,6 +245,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 			} else
 				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults.");
 		}
+
 	}
 
 	public static class PREVIOUS implements ContextAction {

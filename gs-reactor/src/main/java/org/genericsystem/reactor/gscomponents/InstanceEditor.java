@@ -6,13 +6,12 @@ import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
+import java.io.Serializable;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -27,8 +26,6 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
-import org.genericsystem.reactor.gscomponents.Combobox.ComboboxWithEmptyEntry;
-import org.genericsystem.reactor.gscomponents.Combobox.InstanceEditorCombobox;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -38,6 +35,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
+import org.genericsystem.reactor.gscomponents.InputWithDatalist.InputTextEditorWithDatalist;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
@@ -276,14 +274,14 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 
 	@Style(name = "flex", value = "1")
 	@Style(name = "width", value = "100%")
-	public static class DirectRelationComponentEditor extends InstanceEditorCombobox {
+	public static class DirectRelationComponentEditor extends InputTextEditorWithDatalist implements ComponentsDefaults {
 		@Override
 		public void init() {
 			super.init();
 			addPostfixBinding(model -> {
-				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
+				Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
 				if (selectedComponents != null)
-					selectedComponents.getValue().add(getSelectionProperty(model));
+					selectedComponents.getValue().put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
 			});
 		}
 	}
@@ -293,7 +291,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 	@Style(path = { Header.class, InputTextWithConversion.class }, name = "width", value = "100%")
 	@Children({ Header.class, Content.class, ActionLink.class })
 	@Children(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
-	@Children(path = Content.class, value = ComponentAdderSelect.class)
+	@Children(path = Content.class, value = DatalistEditor.class)
 	@Select(path = ActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
@@ -310,19 +308,20 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 					context.getGenerics()[1].addHolder(context.getGeneric(), nva);
 			});
 			addPostfixBinding(model -> {
-				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
-				ChangeListener<Context> listener = (o, v, nva) -> {
-					List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-					if (selectedGenerics.size() + 1 == model.getGeneric().getComponents().size()) {
-						selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
+				Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
+				ChangeListener<Serializable> listener = (o, v, nva) -> {
+					Generic[] selectedGenerics = selectedComponents.getValue().entrySet().stream().filter(obs -> obs.getValue() != null).map(entry -> entry.getKey().getInstance(entry.getValue().getValue())).filter(gen -> gen != null)
+							.toArray(Generic[]::new);
+					if (selectedGenerics.length + 1 == model.getGeneric().getComponents().size()) {
+						selectedComponents.getValue().values().stream().forEach(sel -> sel.setValue(null));
 						try {
-							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
+							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics);
 						} catch (RollbackException e) {
 							e.printStackTrace();
 						}
 					}
 				};
-				selectedComponents.getValue().forEach(component -> component.addListener(listener));
+				selectedComponents.getValue().values().forEach(component -> component.addListener(listener));
 			});
 		}
 	}
@@ -342,17 +341,14 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 	}
 
 	@Style(name = "flex", value = "1")
-	@Style(name = "width", value = "100%")
-	// @Select(DIRECT_RELATION_SELECTOR.class)
-	public static class ComponentAdderSelect extends ComboboxWithEmptyEntry {
-
+	public static class DatalistEditor extends InputWithDatalist implements ComponentsDefaults {
 		@Override
 		public void init() {
 			super.init();
 			addPostfixBinding(model -> {
-				Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
+				Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
 				if (selectedComponents != null)
-					selectedComponents.getValue().add(getSelectionProperty(model));
+					selectedComponents.getValue().put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
 			});
 		}
 	}

@@ -105,7 +105,7 @@ public class Monitor extends FlexDiv {
 		@SetText(path = HtmlSpan.class, pos = 0, value = "Invalid username.")
 		@SetText(path = HtmlSpan.class, pos = 1, value = "Invalid password.")
 		@Style(path = HtmlSpan.class, name = "display", value = "none")
-		@SetText(path = HtmlHyperLink.class, value = "Sign in")
+		@SetText(path = HtmlHyperLink.class, value = "Sign up")
 		@Attribute(path = HtmlInputText.class, pos = 1, name = "type", value = "password")
 		@BindAction(path = HtmlHyperLink.class, value = MODAL_DISPLAY_FLEX.class)
 		public static class LoginDiv extends FlexDiv implements UserRoleDefaults {
