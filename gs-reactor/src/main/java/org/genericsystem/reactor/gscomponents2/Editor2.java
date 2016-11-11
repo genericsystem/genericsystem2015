@@ -6,6 +6,7 @@ import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.ApiStatics;
@@ -287,11 +288,12 @@ public class Editor2 extends FlexDiv implements SelectionDefaults {
 
 									@Override
 									public void init() {
-										addPostfixBinding(model -> {
-											Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
-											if (selectedComponents != null)
-												selectedComponents.getValue().add(getSelectionProperty(model));
-										});
+										// TODO: Use datalist to make it work.
+//										addPostfixBinding(model -> {
+//											Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
+//											if (selectedComponents != null)
+//												selectedComponents.getValue().add(getSelectionProperty(model));
+//										});
 									}
 								}
 
@@ -391,19 +393,19 @@ public class Editor2 extends FlexDiv implements SelectionDefaults {
 							public void init() {
 								createComponentsListProperty();
 								addPostfixBinding(model -> {
-									Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
-									ChangeListener<Context> listener = (o, v, nva) -> {
-										List<Generic> selectedGenerics = selectedComponents.getValue().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-										if (selectedGenerics.size() + 1 == model.getGeneric().getComponents().size()) {
-											selectedComponents.getValue().stream().forEach(sel -> sel.setValue(null));
+									Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
+									ChangeListener<Serializable> listener = (o, v, nva) -> {
+										Generic[] selectedGenerics = selectedComponents.getValue().entrySet().stream().filter(obs -> obs.getValue() != null).map(entry -> entry.getKey().getInstance(entry.getValue().getValue())).filter(gen -> gen != null).toArray(Generic[]::new);
+										if (selectedGenerics.length + 1 == model.getGeneric().getComponents().size()) {
+											selectedComponents.getValue().values().stream().forEach(sel -> sel.setValue(null));
 											try {
-												model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics.stream().toArray(Generic[]::new));
+												model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics);
 											} catch (RollbackException e) {
 												e.printStackTrace();
 											}
 										}
 									};
-									selectedComponents.getValue().forEach(component -> component.addListener(listener));
+									selectedComponents.getValue().values().forEach(component -> component.addListener(listener));
 								});
 							}
 
@@ -419,11 +421,11 @@ public class Editor2 extends FlexDiv implements SelectionDefaults {
 
 									@Override
 									public void init() {
-										addPostfixBinding(model -> {
-											Property<List<Property<Context>>> selectedComponents = getComponentsProperty(model);
-											if (selectedComponents != null)
-												selectedComponents.getValue().add(getSelectionProperty(model));
-										});
+//										addPostfixBinding(model -> {
+//											Property<Map<Generic, ObservableValue<Serializable>>> selectedComponents = getComponentsProperty(model);
+//											if (selectedComponents != null)
+//												selectedComponents.getValue().put(model.getGeneric(), getSelectionString(model));
+//										});
 									}
 								}
 							}
