@@ -148,11 +148,11 @@ public class InstanceBuilder2 extends FlexDiv implements GSBuilderDefaults {
 					ConvertedValueDefaults input = getParent().getParent().find(InstanceNameBuilder.class).find(InstanceNameBuilderInput.class);
 					Generic newInstance = context.getGeneric().setInstance(input.getConvertedValueProperty(context).getValue());
 					for (Entry<Generic, GenericValueComponents> entry : getGenericValueComponents(context).getValue().entrySet()) {
-						List<Generic> selectedGenerics = entry.getValue().getComponents().stream().filter(obs -> obs.getValue() != null).map(obs -> obs.getValue().getGeneric()).filter(gen -> gen != null).collect(Collectors.toList());
-						if (!selectedGenerics.isEmpty() && selectedGenerics.size() + 1 == entry.getKey().getComponents().size())
-							newInstance.setHolder(entry.getKey(), entry.getValue().getGenericValue().getValue(), selectedGenerics.stream().toArray(Generic[]::new));
+						Generic[] selectedGenerics = entry.getValue().getComponents().entrySet().stream().filter(entry_ -> entry_.getValue() != null && entry_.getValue().getValue() != null).map(entry_ -> entry_.getKey().setInstance(entry_.getValue().getValue())).filter(gen -> gen != null).toArray(Generic[]::new);
+						if ((entry.getValue().getGenericValue().getValue() != null || selectedGenerics.length != 0) && selectedGenerics.length + 1 == entry.getKey().getComponents().size())
+							newInstance.setHolder(entry.getKey(), entry.getValue().getGenericValue().getValue(), selectedGenerics);
 						entry.getValue().getGenericValue().setValue(null);
-						entry.getValue().getComponents().stream().forEach(sel -> sel.setValue(null));
+						entry.getValue().getComponents().values().stream().forEach(sel -> sel.setValue(null));
 					}
 					input.getConvertedValueProperty(context).setValue(null);
 				});
