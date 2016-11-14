@@ -1,8 +1,10 @@
 package org.genericsystem.reactor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -108,9 +110,9 @@ public class HtmlDomNode {
 	void destroy() {
 		// System.out.println("Attempt to destroy : " + getNode().getId());
 		assert !destroyed : "Node : " + getId();
-		destroyed = true;
-		getRootHtmlDomNode().remove(getId());
-		parent.decrementSize(tag);
+	destroyed = true;
+	getRootHtmlDomNode().remove(getId());
+	parent.decrementSize(tag);
 	}
 
 	private void deepRemove(Context context, Tag tag) {
@@ -292,6 +294,20 @@ public class HtmlDomNode {
 	}
 
 	public void handleMessage(JsonObject json) {
+	}
+	
+	
+	public List<HtmlDomNode> getChildren(){
+		List<HtmlDomNode> result = new ArrayList<>();
+		List<Tag> subTags = tag.getObservableChildren();
+		for(Tag subTag : subTags){
+			if(subTag.getMetaBinding()==null)
+				result.add(context.getHtmlDomNode(subTag));
+			else 
+				for(Context subContext : context.getSubContexts(subTag))
+					result.add(subContext.getHtmlDomNode(subTag));			
+		}	
+		return result;
 	}
 
 	public static class RootHtmlDomNode extends HtmlDomNode {

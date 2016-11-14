@@ -14,6 +14,7 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -36,6 +37,14 @@ public class Context {
 	public Context(Context parent, Generic[] generics) {
 		this.parent = parent;
 		this.generics = generics;
+	}
+	
+	void firstCall(){
+	
+		Context rootContext = getRootContext();
+		Tag rootTag = htmlDomNodesMap.keySet().iterator().next();	
+		HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
+		rootNode.getChildren();		
 	}
 
 	public Context getParent() {

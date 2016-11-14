@@ -25,9 +25,9 @@ public abstract class AbstractMinimalChangesObservableList<E> extends Observable
 	private BindingHelperObserver observer;
 
 	protected void invalidate() {
-		beginChange();
+		// beginChange();
 		doMinimalChanges();
-		endChange();
+		// endChange();
 	}
 
 	protected final void bind(Observable... dependencies) {

@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.gscomponents;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.InstanceClass;
@@ -19,6 +17,8 @@ import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleName
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleValue;
 
 import com.google.common.base.Objects;
+
+import javafx.collections.ObservableList;
 
 public class ExtendedRootTag extends RootTagImpl {
 
@@ -83,6 +83,7 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	static long styleTime;
 	static long stylesNumber;
+	static int flush;
 
 	@Override
 	public void processStyle(Tag tag, String name, String value) {
@@ -96,12 +97,19 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		Generic styleValueAttribute = delegate.getRoot().find(StyleValue.class);
 		Generic styleValue = style.getComposites().filter(g -> styleValueAttribute.equals(g.getMeta())).first();
+
+		// assert styleValue.getHolder(styleValueAttribute);
 		if (styleValue != null) {
 			if (!Objects.equal(value, styleValue.getValue()))
 				styleValue = style.setHolder(styleValueAttribute, value);
+			else
+				assert styleValue == style.getHolder(styleValueAttribute);
 		} else
 			styleValue = style.addHolder(styleValueAttribute, value);
-
+		// if (flush++ > 1) {
+		styleValue.getCurrentCache().flush();
+		flush = 0;
+		// }
 		// style.setHolder(delegate.getRoot().find(StyleValue.class), value);
 		long endTime = System.currentTimeMillis();
 		styleTime += (endTime - startTime);
