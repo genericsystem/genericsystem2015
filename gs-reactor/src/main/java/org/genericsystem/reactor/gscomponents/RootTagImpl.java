@@ -3,7 +3,12 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
+import io.vertx.core.http.ServerWebSocket;
+
 import java.lang.annotation.Annotation;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Context;
@@ -12,10 +17,6 @@ import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.CustomAnnotations;
-
-import io.vertx.core.http.ServerWebSocket;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, UserRoleDefaults {
 
@@ -34,8 +35,8 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 	}
 
 	protected void initRoot() {
-		tagNode = buildTagNode(this);
-		annotationsManager.processAnnotations(this);
+		setTagNode(buildTagNode(this));
+		processAnnotations(this);
 		init();
 	}
 
@@ -49,18 +50,22 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
 	}
 
+	public static class SimpleTableNode implements TagNode {
+		private final ObservableList<Tag> children = FXCollections.observableArrayList();
+
+		@Override
+		public ObservableList<Tag> getObservableChildren() {
+			return children;
+		}
+	}
+
 	@Override
 	public TagNode buildTagNode(Tag child) {
-		return new TagNode() {
-
-			private final ObservableList<Tag> children = FXCollections.observableArrayList();
-
-			@Override
-			public ObservableList<Tag> getObservableChildren() {
-				return children;
-			}
-		};
-	};
+		Tag parent = child.getParent();
+		if (parent != null)
+			parent.getObservableChildren().add(child);
+		return new SimpleTableNode();
+	}
 
 	@Override
 	public final <COMPONENT extends Tag> COMPONENT getParent() {

@@ -7,12 +7,12 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.sun.javafx.collections.ObservableListWrapper;
-
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
+
+import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
  * @author Nicolas Feybesse
@@ -72,37 +72,16 @@ public class TransformationObservableList<SOURCE, TARGET> extends ObservableList
 
 	}
 
-	// private final ListChangeListener<SOURCE> listener = change -> {
-	// while (change.next()) {
-	// beginChange();
-	// if (change.wasPermutated()) {
-	// assert false;// Not tested after
-	// for (int i = change.getFrom(); i < change.getTo(); i++)
-	// getRemoveConsumer().accept(change.getFrom());
-	// int index = change.getFrom();
-	// for (SOURCE source : change.getList().subList(change.getFrom(), change.getTo()))
-	// getAddBiConsumer().accept(index++, source);
-	// } else {
-	// if (change.wasRemoved()) {
-	// for (int i = 0; i < change.getRemovedSize(); i++)
-	// getRemoveConsumer().accept(change.getFrom());
-	// }
-	// if (change.wasAdded()) {
-	// int index = change.getFrom();
-	// for (SOURCE source : change.getAddedSubList())
-	// getAddBiConsumer().accept(index++, source);
-	// }
-	// }
-	// endChange();
-	// }
-	// };
-
 	public TransformationObservableList(ObservableList<SOURCE> external, Function<SOURCE, TARGET> srcToTarget) {
 		super(new ArrayList<>());
 		this.external = external; // prevent of listener garbage collection
 		this.addBiConsumer = (index, src) -> add(index, srcToTarget.apply(src));
 		this.removeConsumer = index -> remove(index.intValue());
 		bind();
+		init();
+	}
+
+	public void init() {
 		int i = 0;
 		beginChange();
 		for (SOURCE element : external)
@@ -116,11 +95,7 @@ public class TransformationObservableList<SOURCE, TARGET> extends ObservableList
 		this.addBiConsumer = (index, src) -> add(index, srcToTarget.apply(src));
 		this.removeConsumer = index -> remove(index.intValue());
 		bind();
-		int i = 0;
-		beginChange();
-		for (SOURCE element : external)
-			getAddBiConsumer().accept(i++, element);
-		endChange();
+		init();
 	}
 
 	public TransformationObservableList(ObservableList<SOURCE> external, BiFunction<Integer, SOURCE, TARGET> add, Consumer<TARGET> consumer) {
@@ -129,11 +104,15 @@ public class TransformationObservableList<SOURCE, TARGET> extends ObservableList
 		this.addBiConsumer = (index, src) -> add(index, add.apply(index, src));
 		this.removeConsumer = index -> consumer.accept(remove(index.intValue()));
 		bind();
-		int i = 0;
-		beginChange();
-		for (SOURCE element : external)
-			getAddBiConsumer().accept(i++, element);
-		endChange();
+		init();
+	}
+
+	public TransformationObservableList(ObservableList<SOURCE> external, BiFunction<Integer, SOURCE, TARGET> add) {
+		super(new ArrayList<>());
+		this.external = external; // prevents of listener garbage collection
+		this.addBiConsumer = (index, src) -> add(index, add.apply(index, src));
+		this.removeConsumer = index -> remove(index.intValue());
+		bind();
 	}
 
 	@Override

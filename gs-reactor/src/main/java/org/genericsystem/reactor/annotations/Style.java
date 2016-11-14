@@ -10,7 +10,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle.FlexDirectionStyleProcessor;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle.FlexDirections;
@@ -22,11 +21,6 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection.ReverseF
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection.ReverseFlexDirections;
 import org.genericsystem.reactor.annotations.Style.StyleProcessor;
 import org.genericsystem.reactor.annotations.Style.Styles;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleName;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleValue;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.TagImpl;
@@ -60,16 +54,17 @@ public @interface Style {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			if (ExtendedRootTag.class.isAssignableFrom(tag.getRootTag().getClass())) {
-				GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
-				//				long startTime = System.currentTimeMillis();
-				Generic style = delegate.setHolder(delegate.getRoot().find(StyleName.class), ((Style) annotation).name());
-				style.setHolder(delegate.getRoot().find(StyleValue.class), ((Style) annotation).value());
-				//				long endTime = System.currentTimeMillis();
-				//				styleTime += endTime - startTime;
-				//				System.out.println("Style, temps passé : " + (endTime - startTime) + ", temps total : " + styleTime + ", nombre de styles : " + (++stylesNumber) + ", temps par style : " + (styleTime / stylesNumber));
-			}
-			tag.addStyle(((Style) annotation).name(), ((Style) annotation).value());
+			tag.getRootTag().processStyle(tag, ((Style) annotation).name(), ((Style) annotation).value());
+			// if (ExtendedRootTag.class.isAssignableFrom(tag.getRootTag().getClass())) {
+			// GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
+			// // long startTime = System.currentTimeMillis();
+			// Generic style = delegate.setHolder(delegate.getRoot().find(StyleName.class), ((Style) annotation).name());
+			// style.setHolder(delegate.getRoot().find(StyleValue.class), ((Style) annotation).value());
+			// // long endTime = System.currentTimeMillis();
+			// // styleTime += endTime - startTime;
+			// // System.out.println("Style, temps passé : " + (endTime - startTime) + ", temps total : " + styleTime + ", nombre de styles : " + (++stylesNumber) + ", temps par style : " + (styleTime / stylesNumber));
+			// }
+			// tag.addStyle(((Style) annotation).name(), ((Style) annotation).value());
 		}
 	}
 

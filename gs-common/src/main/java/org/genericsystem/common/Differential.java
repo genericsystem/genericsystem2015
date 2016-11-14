@@ -2,15 +2,15 @@ package org.genericsystem.common;
 
 import java.util.stream.Stream;
 
+import javafx.beans.Observable;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.exceptions.ConcurrencyControlException;
 import org.genericsystem.api.core.exceptions.OptimisticLockConstraintViolationException;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.defaults.tools.ObservableBase;
-
-import javafx.beans.Observable;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 
 /**
  * @author Nicolas Feybesse
@@ -56,12 +56,14 @@ public class Differential implements IDifferential<Generic> {
 	protected Generic plug(Generic generic) {
 		// assert generic.getOtherTs()[0] == Long.MAX_VALUE;
 		adds.add(generic);
+		System.out.println("Add : " + generic.info() + System.identityHashCode(generic));
 		return generic;
 	}
 
 	protected void unplug(Generic generic) {
 		if (!adds.remove(generic))
 			removes.add(generic);
+		System.out.println("Remove : " + generic.info() + System.identityHashCode(generic));
 	}
 
 	@Override

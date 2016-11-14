@@ -1,9 +1,9 @@
 package org.genericsystem.reactor.gscomponents;
 
+import javafx.collections.ObservableList;
+
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
-
-import javafx.collections.ObservableList;
 
 public abstract class AbstractTag implements Tag {
 
