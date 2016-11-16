@@ -110,9 +110,9 @@ public class HtmlDomNode {
 	void destroy() {
 		// System.out.println("Attempt to destroy : " + getNode().getId());
 		assert !destroyed : "Node : " + getId();
-	destroyed = true;
-	getRootHtmlDomNode().remove(getId());
-	parent.decrementSize(tag);
+		destroyed = true;
+		getRootHtmlDomNode().remove(getId());
+		parent.decrementSize(tag);
 	}
 
 	private void deepRemove(Context context, Tag tag) {
@@ -295,18 +295,17 @@ public class HtmlDomNode {
 
 	public void handleMessage(JsonObject json) {
 	}
-	
-	
-	public List<HtmlDomNode> getChildren(){
+
+	public List<HtmlDomNode> getChildren() {
 		List<HtmlDomNode> result = new ArrayList<>();
 		List<Tag> subTags = tag.getObservableChildren();
-		for(Tag subTag : subTags){
-			if(subTag.getMetaBinding()==null)
+		for (Tag subTag : subTags) {
+			if (subTag.getMetaBinding() == null)
 				result.add(context.getHtmlDomNode(subTag));
-			else 
-				for(Context subContext : context.getSubContexts(subTag))
-					result.add(subContext.getHtmlDomNode(subTag));			
-		}	
+			else
+				for (Context subContext : context.getSubContexts(subTag))
+					result.add(subContext.getHtmlDomNode(subTag));
+		}
 		return result;
 	}
 

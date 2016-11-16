@@ -3,20 +3,16 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
-import io.vertx.core.http.ServerWebSocket;
-
 import java.lang.annotation.Annotation;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import org.genericsystem.reactor.AnnotationsManager;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.CustomAnnotations;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, UserRoleDefaults {
 
@@ -43,11 +39,6 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 	@Override
 	public AnnotationsManager getAnnotationsManager() {
 		return annotationsManager;
-	}
-
-	@Override
-	public RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {
-		return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
 	}
 
 	public static class SimpleTableNode implements TagNode {
