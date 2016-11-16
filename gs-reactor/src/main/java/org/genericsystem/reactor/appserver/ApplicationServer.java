@@ -23,7 +23,10 @@ import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -77,6 +80,33 @@ public class ApplicationServer extends AbstractBackEnd {
 	// protected PersistentApplication buildApp(Class<? extends TagTree> applicationClass, String persistentDirectoryPath, List<Class<?>> userClasses, Class<? extends Model> modelClass, Root engine, String rootId) {
 	// return new PersistentApplication(applicationClass, modelClass, engine, rootId);
 	// }
+	private static class DomNodeVerticle extends AbstractVerticle {
+		private Cache cache;
+		private ServerWebSocket socket;
+		private PersistentApplication application;
+		private RootHtmlDomNode rootHtmlDomNode;
+
+		DomNodeVerticle(Cache cache, ServerWebSocket socket, PersistentApplication application) {
+			this.cache = cache;
+			this.socket = socket;
+			this.application = application;
+		}
+
+		@Override
+		public void start(Future<Void> startFuture) {
+			GSVertx.vertx().getVertx().executeBlocking(future -> {
+				RootHtmlDomNode result = cache.safeSupply(() -> application.init(socket));
+				future.complete(result);
+			}, res -> {
+				if (res.succeeded())
+					rootHtmlDomNode = (RootHtmlDomNode) res.result();
+			});
+		}
+
+		RootHtmlDomNode getRootHtmlDomNode() {
+			return rootHtmlDomNode;
+		}
+	}
 
 	private class WebSocketsServer extends AbstractWebSocketsServer {
 
@@ -101,7 +131,8 @@ public class ApplicationServer extends AbstractBackEnd {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			Cache cache = (Cache) application.getEngine().newCache();
-			RootHtmlDomNode rootHtmlDomNode = cache.safeSupply(() -> application.init(socket));
+			DomNodeVerticle domNodeVerticle = new DomNodeVerticle(cache, socket, application);
+			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
 			Map<ServerWebSocket, Context> map = new ConcurrentHashMap<ServerWebSocket, Context>();
 			map.put(socket, GSVertx.vertx().getVertx().getOrCreateContext());
 			caches.put(cache, map);
@@ -111,11 +142,15 @@ public class ApplicationServer extends AbstractBackEnd {
 				GSBuffer gsBuffer = new GSBuffer(buffer);
 				String message = gsBuffer.getString(0, gsBuffer.length());
 				JsonObject json = new JsonObject(message);
-				HtmlDomNode node = rootHtmlDomNode.getNodeById(json.getString(HtmlDomNode.ID));
-				if (node != null) {
-					cache.safeConsum((x) -> node.handleMessage(json));
+				RootHtmlDomNode rootHtmlDomNode = domNodeVerticle.getRootHtmlDomNode();
+				if (rootHtmlDomNode != null) {
+					HtmlDomNode node = rootHtmlDomNode.getNodeById(json.getString(HtmlDomNode.ID));
+					if (node != null) {
+						cache.safeConsum((x) -> node.handleMessage(json));
+					} else
+						log.info("Can't find node id : " + json.getString(HtmlDomNode.ID));
 				} else
-					log.info("Can't find node id : " + json.getString(HtmlDomNode.ID));
+					log.info("The DOM node tree has not been fully built yet.");
 			};
 		}
 

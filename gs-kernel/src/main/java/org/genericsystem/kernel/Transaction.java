@@ -55,18 +55,18 @@ public class Transaction extends CheckedContext implements IDifferential<Generic
 		set.addAll(generic.getSupers());
 		set.addAll(generic.getComponents());
 		set.stream().forEach(ancestor -> ((IDependencies<Generic>) getDependencies(ancestor)).add(generic));
-		getChecker().checkAfterBuild(true, false, generic);
+		// getChecker().checkAfterBuild(true, false, generic);
 		return generic;
 	}
 
 	private void kill(Generic generic) {
-		getChecker().checkAfterBuild(false, false, generic);
+		// getChecker().checkAfterBuild(false, false, generic);
 		((RootServerHandler) generic.getProxyHandler()).getLifeManager().kill(getTs());
 		getRoot().getGarbageCollector().add(generic);
 	}
 
 	protected void unplug(Generic generic) {
-		getChecker().checkAfterBuild(false, false, generic);
+		// getChecker().checkAfterBuild(false, false, generic);
 		Set<Generic> set = new HashSet<>();
 		if (!generic.isMeta())
 			set.add(generic.getMeta());

@@ -265,13 +265,17 @@ public interface DefaultGeneric<T extends DefaultGeneric<T>> extends DefaultAnce
 			return false;
 		for (int i = 0; i < componentsList.size(); i++)
 			if (!getMeta().isReferentialIntegrityEnabled(i) && getMeta().isSingularConstraintEnabled(i))
-				return equiv(componentsList.get(i), components.get(i));
+				return equiv2(componentsList.get(i), (T) components.get(i));
 		for (int i = 0; i < componentsList.size(); i++)
 			if (!equiv(componentsList.get(i), components.get(i)))
 				return false;
 		if (!getMeta().isPropertyConstraintEnabled())
 			return Objects.equals(getValue(), value);
 		return true;
+	}
+
+	default boolean equiv2(T g1, T g2) {
+		return g1.inheritsFrom(g2) || g2.inheritsFrom(g1);
 	}
 
 	@Override

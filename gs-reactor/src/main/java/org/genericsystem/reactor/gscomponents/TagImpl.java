@@ -6,10 +6,9 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.model.TagSwitcher;
 
-public abstract class TagImpl extends AbstractTag implements Tag {
+public abstract class TagImpl extends AbstractTag {
 
 	private MetaBinding<?> metaBinding;
 	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();

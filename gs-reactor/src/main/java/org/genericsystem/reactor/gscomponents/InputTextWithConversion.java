@@ -50,7 +50,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 			try {
 				getProperty(propertyName, model).setValue(getConverter(model).fromString(getDomNodeAttributes(model).get(attributeName)));
 			} catch (Exception ignore) {
-				log.warn("Conversion exception : " + ignore.getMessage());
+				log.warn("Conversion exception: " + ignore.getMessage());
 			}
 		});
 		addPrefixBinding(model -> {
@@ -74,7 +74,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 			initValueProperty(model -> model.getGeneric().getValue());
 			addConvertedValueChangeListener((model, nva) -> {
 				if (nva != null) {
-					Generic updatedGeneric = model.getGeneric().updateValue(nva);
+					Generic updatedGeneric = updateGeneric(model, nva);
 					Property<Generic> genericProperty = getUpdatedGenericProperty(model);
 					if (genericProperty != null)
 						genericProperty.setValue(updatedGeneric);
@@ -82,9 +82,13 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 			});
 		}
 
+		protected Generic updateGeneric(Context context, Serializable newValue) {
+			return context.getGeneric().updateValue(newValue);
+		}
+
 		@Override
 		public StringConverter<T> getConverter(Context model) {
-			Class<?> clazz = model.getGenerics()[1].getInstanceValueClassConstraint();
+			Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
 			if (clazz == null) {
 				if (model.getGeneric().getValue() != null)
 					clazz = model.getGeneric().getValue().getClass();
@@ -92,6 +96,13 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 					clazz = String.class;
 			}
 			return ApiStatics.STRING_CONVERTERS.get(clazz);
+		}
+	}
+
+	public static class InputTextEditorWithConversionForDatalist<T extends Serializable> extends InputTextEditorWithConversion<T> implements SelectionDefaults {
+		@Override
+		protected Generic updateGeneric(Context context, Serializable newValue) {
+			return context.getGenerics()[1].updateComponent(context.getGeneric().getMeta().setInstance(newValue), context.getGenerics()[1].getComponents().indexOf(context.getGeneric()));
 		}
 	}
 
