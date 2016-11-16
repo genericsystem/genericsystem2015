@@ -84,7 +84,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 
 		@Override
 		public StringConverter<T> getConverter(Context model) {
-			Class<?> clazz = model.getGenerics()[1].getInstanceValueClassConstraint();
+			Class<?> clazz = model.getGeneric().getMeta().getInstanceValueClassConstraint();
 			if (clazz == null) {
 				if (model.getGeneric().getValue() != null)
 					clazz = model.getGeneric().getValue().getClass();
