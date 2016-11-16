@@ -72,9 +72,10 @@ import javafx.beans.value.ObservableValue;
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(path = HeaderRow.class, name = "flex", value = "0.3")
 @Style(path = ContentRow.class, name = "flex", value = "1")
-@Style(path = { HeaderRow.class, ValueComponents.class }, name = "flex", value = "1 1 auto")
+@Style(path = { HeaderRow.class, ValueComponents.class }, name = "flex", value = "1 1 0%")
 @Style(path = { ContentRow.class, ValueComponentsEditor.class }, name = "flex", value = "1 1 0%")
 @Style(path = { ContentRow.class, AttributeContent.class }, name = "flex", value = "1 1 0%")
+@Style(path = { ContentRow.class, AttributeContent.class }, name = "flex-wrap", value = "wrap")
 @Children({ HeaderRow.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class })
 @Children(path = ContentRow.class, value = { ValueComponentsEditor.class, AttributeContent.class })
@@ -103,6 +104,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 	@Style(name = "overflow", value = "auto")
 	@Style(name = "margin-right", value = "1px")
 	@Style(name = "margin-bottom", value = "1px")
+	@Style(name = "flex", value = "1 1 0%")
 	public static class MultiCheckbox extends FlexDiv {
 	}
 
