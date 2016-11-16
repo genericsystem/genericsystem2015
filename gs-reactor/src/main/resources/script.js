@@ -62,11 +62,6 @@ function onMessageReceived(evt) {
 				};
 				elt.onblur = function(e) {
 					wsocket.send(JSON.stringify({
-						msgType : "U",
-						nodeId : this.id,
-						textContent : this.value
-					}));
-					wsocket.send(JSON.stringify({
 						msgType : "A",
 						nodeId : this.id
 					}));
@@ -157,20 +152,26 @@ function onMessageReceived(evt) {
 			elt.value = message.attributeValue;
 		if (message.attributeName == "checked")
 			elt.checked = message.attributeValue;
-		if (message.attributeName == "list") {
-			document.getElementById(message.attributeValue).onclick = function(
-					e) {
-				wsocket.send(JSON.stringify({
-					msgType : "U",
-					nodeId : this.id,
-					textContent : this.value
-				}));
-				wsocket.send(JSON.stringify({
-					msgType : "A",
-					nodeId : this.id
-				}));
+		if (message.attributeName == "list")
+			elt.oninput = function(e) {
+				console.log("oninput");
+				var val = elt.value;
+				var opts = document.getElementById(elt.getAttribute("list")).childNodes;
+				for (var i = 0; i < opts.length; i++) {
+					if (opts[i].innerText === val) {
+						wsocket.send(JSON.stringify({
+							msgType : "U",
+							nodeId : this.id,
+							textContent : this.value
+						}));
+						wsocket.send(JSON.stringify({
+							msgType : "A",
+							nodeId : this.id
+						}));
+						break;
+					}
+				}
 			}
-		}
 		break;
 	case 'RA':
 		elt.removeAttribute(message.attributeName);
