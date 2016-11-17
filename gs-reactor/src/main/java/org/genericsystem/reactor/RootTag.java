@@ -1,9 +1,12 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.http.ServerWebSocket;
+import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.gscomponents.TagImpl;
+import org.genericsystem.reactor.model.StringExtractor;
+
+import io.vertx.core.http.ServerWebSocket;
 
 public interface RootTag extends Tag {
 
@@ -48,4 +51,8 @@ public interface RootTag extends Tag {
 		tag.addStyle(name, value);
 	}
 
+	default void processGenericValueBackgroundColor(Tag tag, String value) {
+		tag.addPrefixBinding(context -> tag.addStyle(context, "background-color",
+				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
+	}
 }

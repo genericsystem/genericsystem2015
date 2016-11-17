@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.annotations;
 
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -24,7 +22,6 @@ import org.genericsystem.reactor.annotations.Style.Styles;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.StringExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,11 +172,7 @@ public @interface Style {
 
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				tag.addPrefixBinding(modelContext -> tag.addStyle(
-						modelContext,
-						"background-color",
-						"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(modelContext.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(modelContext).getValue() : ((GenericValueBackgroundColor) annotation)
-								.value()));
+				tag.getRootTag().processGenericValueBackgroundColor(tag, ((GenericValueBackgroundColor) annotation).value());
 			}
 		}
 	}

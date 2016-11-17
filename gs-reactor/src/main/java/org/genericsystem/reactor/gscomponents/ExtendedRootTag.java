@@ -2,19 +2,25 @@ package org.genericsystem.reactor.gscomponents;
 
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.annotations.Components;
+import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.api.core.annotations.InstanceClass;
 import org.genericsystem.api.core.annotations.Meta;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.NoInheritance;
+import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
+import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.AnnotationParameter;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.AnnotationParameterValue;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleName;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleValue;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.TagAnnotation;
 
 import com.google.common.base.Objects;
 
@@ -27,6 +33,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	public ExtendedRootTag(Root engine) {
 		this.engine = engine;
 		super.initRoot();
+		processDelegateComposites(this);
 	}
 
 	@Override
@@ -61,6 +68,7 @@ public class ExtendedRootTag extends RootTagImpl {
 				result.setTagNode(tagNode);
 				tagNode.init();
 				processAnnotations(result);
+				processDelegateComposites(result);
 				result.init();
 				return result;
 			});
@@ -81,6 +89,16 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 	}
 
+	void processDelegateComposites(Tag tag) {
+		GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
+		for (Generic style : delegate.getObservableHolders(delegate.getRoot().find(StyleName.class)))
+			ExtendedRootTag.super.processStyle(tag, (String) style.getValue(), (String) style.getHolder(delegate.getRoot().find(StyleValue.class)).getValue());
+
+		Generic gvbColor = delegate.getComposite(GenericValueBackgroundColor.class);
+		if (gvbColor != null && gvbColor.isInstanceOf(delegate.getRoot().find(TagAnnotation.class)))
+			ExtendedRootTag.super.processGenericValueBackgroundColor(tag, (String) gvbColor.getComposite("value").getHolder(delegate.getRoot().find(AnnotationParameterValue.class)).getValue());
+	}
+
 	static long styleTime;
 	static long stylesNumber;
 	static int flush;
@@ -88,7 +106,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	@Override
 	public void processStyle(Tag tag, String name, String value) {
 		GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
-		long startTime = System.currentTimeMillis();
+		// long startTime = System.currentTimeMillis();
 
 		Generic styleNameAttribute = delegate.getRoot().find(StyleName.class);
 		Generic style = delegate.getComposites().filter(g -> styleNameAttribute.equals(g.getMeta())).filter(g -> Objects.equal(name, g.getValue())).first();
@@ -98,7 +116,6 @@ public class ExtendedRootTag extends RootTagImpl {
 		Generic styleValueAttribute = delegate.getRoot().find(StyleValue.class);
 		Generic styleValue = style.getComposites().filter(g -> styleValueAttribute.equals(g.getMeta())).first();
 
-		// assert styleValue.getHolder(styleValueAttribute);
 		if (styleValue != null) {
 			if (!Objects.equal(value, styleValue.getValue()))
 				styleValue = style.setHolder(styleValueAttribute, value);
@@ -109,16 +126,23 @@ public class ExtendedRootTag extends RootTagImpl {
 		// if (flush++ > 1) {
 		styleValue.getCurrentCache().flush();
 		flush = 0;
-		// }
-		// style.setHolder(delegate.getRoot().find(StyleValue.class), value);
-		long endTime = System.currentTimeMillis();
-		styleTime += (endTime - startTime);
-		System.out.println("Style, temps passé : " + (endTime - startTime) + ", temps total : " + styleTime + ", nombre de styles : " + (++stylesNumber) + ", temps par style : " + (styleTime / stylesNumber));
-		super.processStyle(tag, name, value);
+
+		// long endTime = System.currentTimeMillis();
+		// styleTime += (endTime - startTime);
+		// System.out.println("Style added, time spent: " + (endTime - startTime) + ", total time: " + styleTime + ", number of styles: " + (++stylesNumber) + ", time per style: " + (styleTime / stylesNumber));
+	}
+
+	@Override
+	public void processGenericValueBackgroundColor(Tag tag, String value) {
+		GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
+		Generic annotation = delegate.setHolder(delegate.getRoot().find(TagAnnotation.class), GenericValueBackgroundColor.class);
+		Generic name = annotation.setHolder(delegate.getRoot().find(AnnotationParameter.class), "value");
+		name.setHolder(delegate.getRoot().find(AnnotationParameterValue.class), value);
 	}
 
 	@SystemGeneric
 	@InstanceClass(GTag.class)
+	@Dependencies({ TagAnnotation.class, StyleName.class, StyleValue.class })
 	// @InstanceValueClassConstraint(AxedPropertyClass.class)
 	public static interface GTagType extends Generic {
 
@@ -136,6 +160,29 @@ public class ExtendedRootTag extends RootTagImpl {
 		@SingularConstraint
 		@NoInheritance
 		public static interface StyleValue extends Generic {
+
+		}
+
+		@SystemGeneric
+		@Components(GTagType.class)
+		@InstanceValueClassConstraint(Class.class)
+		@Dependencies({ AnnotationParameter.class, AnnotationParameterValue.class })
+		@NoInheritance
+		public static interface TagAnnotation extends Generic {
+
+		}
+
+		@SystemGeneric
+		@Components(TagAnnotation.class)
+		@InstanceValueClassConstraint(String.class)
+		public static interface AnnotationParameter extends Generic {
+
+		}
+
+		@SystemGeneric
+		@Components(AnnotationParameter.class)
+		@PropertyConstraint
+		public static interface AnnotationParameterValue extends Generic {
 
 		}
 	}
