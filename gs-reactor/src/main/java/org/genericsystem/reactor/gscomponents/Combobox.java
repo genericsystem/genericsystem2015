@@ -68,7 +68,7 @@ public class Combobox extends HtmlSelect implements SelectionDefaults, Component
 			addPostfixBinding(model -> getSelectionProperty(model).addListener((ov, ova, nva) -> {
 				Generic updatedGeneric = model.getGenerics()[1].updateComponent(nva.getGeneric(), model.getGenerics()[1].getComponents().indexOf(model.getGeneric()));
 				Property<Generic> genericProperty = getUpdatedGenericProperty(model);
-				if (genericProperty != null)
+				if (genericProperty != null && genericProperty.getValue() != null && genericProperty.getValue().getMeta().equals(updatedGeneric.getMeta()))
 					genericProperty.setValue(updatedGeneric);
 			}));
 		}

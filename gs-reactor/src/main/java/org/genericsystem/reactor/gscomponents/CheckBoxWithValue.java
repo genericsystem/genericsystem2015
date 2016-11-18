@@ -23,7 +23,7 @@ public class CheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDef
 			addConvertedValueChangeListener((model, nva) -> {
 				Generic updatedGeneric = model.getGeneric().updateValue(nva);
 				Property<Generic> genericProperty = getUpdatedGenericProperty(model);
-				if (genericProperty != null)
+				if (genericProperty != null && genericProperty.getValue() != null && genericProperty.getValue().getMeta().equals(updatedGeneric.getMeta()))
 					genericProperty.setValue(updatedGeneric);
 			});
 		}

@@ -76,7 +76,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 				if (nva != null) {
 					Generic updatedGeneric = updateGeneric(model, nva);
 					Property<Generic> genericProperty = getUpdatedGenericProperty(model);
-					if (genericProperty != null)
+					if (genericProperty != null && genericProperty.getValue() != null && genericProperty.getValue().getMeta().equals(updatedGeneric.getMeta()))
 						genericProperty.setValue(updatedGeneric);
 				}
 			});
