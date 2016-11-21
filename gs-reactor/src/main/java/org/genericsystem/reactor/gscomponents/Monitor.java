@@ -30,6 +30,7 @@ import org.genericsystem.reactor.model.ContextAction;
 import org.genericsystem.reactor.model.ContextAction.CANCEL;
 import org.genericsystem.reactor.model.ContextAction.CREATE_USER;
 import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE_CANCEL;
+import org.genericsystem.reactor.model.ContextAction.FLASH;
 import org.genericsystem.reactor.model.ContextAction.FLUSH;
 import org.genericsystem.reactor.model.ContextAction.GC;
 import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
@@ -44,11 +45,13 @@ import org.genericsystem.security.model.User.Salt;
 
 import javafx.beans.binding.Bindings;
 
-@Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
+@Children({ HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
-@SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
-@BindAction(path = HtmlButton.class, pos = 1, value = CANCEL.class)
+@SetText(path = HtmlButton.class, pos = 1, value = "Flash")
+@BindAction(path = HtmlButton.class, pos = 1, value = FLASH.class)
+@SetText(path = HtmlButton.class, pos = 2, value = "Cancel")
+@BindAction(path = HtmlButton.class, pos = 2, value = CANCEL.class)
 @BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.LAST_UPDATE.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")

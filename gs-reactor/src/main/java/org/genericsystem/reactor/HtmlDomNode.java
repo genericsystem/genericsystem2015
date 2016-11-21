@@ -1,5 +1,8 @@
 package org.genericsystem.reactor;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +14,6 @@ import java.util.function.Consumer;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 
-import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -56,6 +58,10 @@ public class HtmlDomNode {
 	private Tag tag;
 	private Context context;
 
+	public static interface Sender {
+		public void send(String message);
+	}
+
 	private final Consumer<Tag> tagAdder = tagAdder();
 	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
@@ -81,11 +87,129 @@ public class HtmlDomNode {
 		}
 	};
 
+	public List<HtmlDomNode> getChildren() {
+		List<HtmlDomNode> result = new ArrayList<>();
+		List<Tag> subTags = tag.getObservableChildren();
+		for (Tag subTag : subTags) {
+			if (subTag.getMetaBinding() == null)
+				result.add(context.getHtmlDomNode(subTag));
+			else
+				for (Context subContext : context.getSubContexts(subTag))
+					result.add(subContext.getHtmlDomNode(subTag));
+		}
+		return result;
+	}
+
+	public String header() {
+		String header = "";
+		String appName = this.tag.getClass().getSimpleName().toLowerCase();
+		header = "<!DOCTYPE html>\n";
+		header += "<html>\n";
+		header += "<head>\n";
+		header += "<meta charset=\"UTF-8\" name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+		header += "<LINK rel=stylesheet type=\"text/css\" href=\"" + appName + ".css\"/>\n";
+		header += "<LINK rel=stylesheet type=\"text/css\" href=\"reactor.css\"/>\n";
+		header += "<script>\n";
+		header += "var serviceLocation = \"ws://\" + document.location.host + \"" + "\";\n";
+		header += "</script>\n";
+		header += "<script type=\"text/javascript\" src=\"" + appName + ".js\"></script>\n";
+		header += "</head>\n";
+		header += "<body onload=\"connect();\" id=\"root\">\n";
+		return header;
+	}
+
+	public String footer() {
+		String footer = "</body>\n";
+		footer += "</html>\n";
+		return footer;
+	}
+
+	public static String cutLimit(String text) {
+		return text.substring(1, text.length() - 1);
+	}
+
+	public static String concatainClass(String clas1, String clas2) {
+		if (clas1.equals(""))
+			return clas2;
+		else if (clas2.equals(""))
+			return clas1;
+		else if (!clas2.equals(""))
+			return clas1 + " " + clas2;
+		return "";
+	}
+
+	public static String correcteStyle(String style) {
+		style = style.replace(',', ';');
+		style = style.replace("=", ":");
+		if (!style.equals(""))
+			style = style + ";";
+		return style;
+	}
+
+	public static String correctAttributes(String tagText, String tagAttributes) {
+		tagAttributes = cutLimit(tagAttributes);
+		if (tagText.equals("a"))
+			tagAttributes = " href=\"#\"";
+		else
+			tagAttributes = " " + tagAttributes;
+		int indexNull = tagAttributes.indexOf("checked=null,");
+		if (indexNull != -1)
+			tagAttributes = tagAttributes.substring(indexNull + 13, tagAttributes.length());
+		tagAttributes = tagAttributes.replace(',', ' ');
+		return tagAttributes;
+	}
+
+	public String extractInformationDomNode(String body) {
+		String tagText = this.tag.toString().split(" ")[0];
+		String clas = "";
+		if ((tagText.trim().equals("section")) || (tagText.trim().equals("div")) || (tagText.trim().equals("header")) || (tagText.trim().equals("footer"))) {
+			clas = "adding";
+		}
+		String clas2 = cutLimit(tag.getDomNodeStyleClasses(context).toString());
+		clas = concatainClass(clas, clas2);
+
+		String style = correcteStyle(tag.getDomNodeStyles(context).toString().substring(1, tag.getDomNodeStyles(context).toString().length() - 1));
+
+		body = "\n<" + tagText + " id=\"" + this.id + "\"";
+		if (!clas.equals(""))
+			body += " class=\"" + clas + "\"";
+		if (!style.equals(""))
+			body += " style=\"" + style + "\"";
+
+		String tagAttributes = correctAttributes(tagText, tag.getDomNodeAttributes(context).toString());
+		body += tagAttributes + ">";
+
+		for (HtmlDomNode node : getChildren())
+			body += node.extractInformationDomNode(body);
+		String tagValue = tag.getDomNodeTextProperty(context).toString();
+		tagValue = tagValue.substring(tagValue.indexOf("value:") + 7, tagValue.length() - 1);
+		if (!tagValue.equals("null"))
+			body += tagValue;
+
+		body += "</" + tagText + ">";
+		return body;
+
+	}
+
+	public void toHtmlFile(String sourceCode, String extention, String path) {
+		BufferedWriter writer = null;
+		try {
+			writer = new BufferedWriter(new FileWriter(path + "index." + extention));
+			writer.write(sourceCode);
+			writer.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
 		this.tag = tag;
 		this.context = context;
+
 	}
 
 	private <BETWEEN> Consumer<Tag> tagAdder() {
@@ -195,8 +319,8 @@ public class HtmlDomNode {
 			sizeBySubTag.put(child, size);
 	}
 
-	public ServerWebSocket getWebSocket() {
-		return parent.getWebSocket();
+	public Sender getSender() {
+		return parent.getSender();
 	}
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
@@ -268,6 +392,7 @@ public class HtmlDomNode {
 	}
 
 	public void sendRemove() {
+
 		sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
 		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID,
 		// id).encodePrettily());
@@ -278,7 +403,9 @@ public class HtmlDomNode {
 		// if (jsonObj.getString(MSG_TYPE).equals(ADD) ||
 		// jsonObj.getString(MSG_TYPE).equals(REMOVE))
 		// System.out.println(jsonObj.encodePrettily());
-		getWebSocket().writeFinalTextFrame(jsonObj.encode());
+		// gettWebSocket().writeFinalTextFrame(jsonObj.encode());
+		getSender().send(jsonObj.encode());
+
 	}
 
 	public String getId() {
@@ -296,36 +423,24 @@ public class HtmlDomNode {
 	public void handleMessage(JsonObject json) {
 	}
 
-	public List<HtmlDomNode> getChildren() {
-		List<HtmlDomNode> result = new ArrayList<>();
-		List<Tag> subTags = tag.getObservableChildren();
-		for (Tag subTag : subTags) {
-			if (subTag.getMetaBinding() == null)
-				result.add(context.getHtmlDomNode(subTag));
-			else
-				for (Context subContext : context.getSubContexts(subTag))
-					result.add(subContext.getHtmlDomNode(subTag));
-		}
-		return result;
-	}
-
 	public static class RootHtmlDomNode extends HtmlDomNode {
 		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
-		private final ServerWebSocket webSocket;
+		// private final ServerWebSocket webSocket;
+		private final Sender send;
 		private final String rootId;
 
-		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, ServerWebSocket webSocket) {
+		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, Sender send) {
 			super(null, rootModelContext, rootTag);
 			this.rootId = rootId;
-			this.webSocket = webSocket;
+			this.send = send;
 			sendAdd(0);
 			init(0);
 		}
 
 		@Override
-		public ServerWebSocket getWebSocket() {
-			return webSocket;
-		}
+		public Sender getSender() {
+			return this.send;
+		};
 
 		@Override
 		protected RootHtmlDomNode getRootHtmlDomNode() {

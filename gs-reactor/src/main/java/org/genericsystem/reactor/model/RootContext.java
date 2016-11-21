@@ -3,12 +3,12 @@ package org.genericsystem.reactor.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
+
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -25,6 +25,10 @@ public class RootContext extends Context {
 			return result;
 		};
 	};
+
+	Map<Tag, ObservableList<Tag>> getObservableSubTags() {
+		return this.observableSubTags;
+	}
 
 	// Method to override with a transformation of generic.getObservableInheritings() from GS an observablelist of Tags
 	public ObservableList<Tag> build(Tag tag) {

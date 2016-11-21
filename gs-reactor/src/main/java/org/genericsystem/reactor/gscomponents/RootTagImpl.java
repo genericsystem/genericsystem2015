@@ -48,6 +48,7 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		public ObservableList<Tag> getObservableChildren() {
 			return children;
 		}
+
 	}
 
 	@Override

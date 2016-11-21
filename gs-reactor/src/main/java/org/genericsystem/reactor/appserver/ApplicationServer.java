@@ -95,7 +95,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public void start(Future<Void> startFuture) {
 			GSVertx.vertx().getVertx().executeBlocking(future -> {
-				RootHtmlDomNode result = cache.safeSupply(() -> application.init(socket));
+				RootHtmlDomNode result = cache.safeSupply(() -> application.init(s -> socket.writeFinalTextFrame(s)));
 				future.complete(result);
 			}, res -> {
 				if (res.succeeded())
@@ -124,17 +124,17 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 
 		@Override
-		public Handler<Buffer> getHandler(String path, ServerWebSocket socket) {
+		public Handler<Buffer> getHandler(String path, ServerWebSocket webSocket) {
 
 			PersistentApplication application = apps.get(path);
 			if (application == null) {
 				throw new IllegalStateException("Unable to load an application with path : " + path);
 			}
 			Cache cache = (Cache) application.getEngine().newCache();
-			DomNodeVerticle domNodeVerticle = new DomNodeVerticle(cache, socket, application);
+			DomNodeVerticle domNodeVerticle = new DomNodeVerticle(cache, webSocket, application);
 			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
 			Map<ServerWebSocket, Context> map = new ConcurrentHashMap<ServerWebSocket, Context>();
-			map.put(socket, GSVertx.vertx().getVertx().getOrCreateContext());
+			map.put(webSocket, GSVertx.vertx().getVertx().getOrCreateContext());
 			caches.put(cache, map);
 			// log.info("Open new socket : " + socket);
 			return buffer -> {
@@ -199,8 +199,10 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<script type=\"text/javascript\" src=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body onload=\"connect();\" id=\"" + application.getRootId() + "\">";
+					application.setIndexHtml(indexHtml);
 					indexHtml += "</body>";
 					indexHtml += "</html>";
+					System.out.println(indexHtml);
 					request.response().end(indexHtml);
 				} else {
 					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);
@@ -238,6 +240,7 @@ public class ApplicationServer extends AbstractBackEnd {
 						request.response().end(buffer);
 					} else {
 						String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
+						System.out.println("azaizia");
 						request.response().end(result);
 					}
 				}
@@ -284,6 +287,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			log.info(logo);
 			log.info("Generic System Server is ready!");
 		}
+
 	}
 
 	@Override

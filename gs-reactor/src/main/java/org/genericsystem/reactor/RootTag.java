@@ -3,15 +3,14 @@ package org.genericsystem.reactor;
 import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
 
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.reactor.model.StringExtractor;
 
-import io.vertx.core.http.ServerWebSocket;
-
 public interface RootTag extends Tag {
 
-	default RootHtmlDomNode init(Context rootModelContext, String rootId, ServerWebSocket webSocket) {
-		return new RootHtmlDomNode(rootModelContext, this, rootId, webSocket);
+	default RootHtmlDomNode init(Context rootModelContext, String rootId, Sender send) {
+		return new RootHtmlDomNode(rootModelContext, this, rootId, send);
 	}
 
 	@Override
@@ -52,7 +51,7 @@ public interface RootTag extends Tag {
 	}
 
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
-		tag.addPrefixBinding(context -> tag.addStyle(context, "background-color",
-				"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
+		tag.addPrefixBinding(
+				context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
 	}
 }

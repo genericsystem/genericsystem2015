@@ -17,6 +17,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
@@ -60,6 +61,19 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			context.flush();
 			context.unmount();
+		}
+	}
+
+	public static class FLASH implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+
+			Context rootContext = context.getRootContext();
+			Tag rootTag = rootContext.getHtmlNodesMap().keySet().iterator().next();
+			HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
+			String body = rootNode.extractInformationDomNode(new String());
+			rootNode.toHtmlFile(rootNode.header() + body + rootNode.footer(), "html", "/home/middleware/git/genericsystem2015/gs-reactor/src/main/resources/");
+
 		}
 	}
 
