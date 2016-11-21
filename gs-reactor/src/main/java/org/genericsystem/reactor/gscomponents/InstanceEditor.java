@@ -4,6 +4,7 @@ import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
 import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.modelproperties.PasswordDefaults;
 import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+import org.genericsystem.reactor.modelproperties.StepperDefaults;
 import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
 
 import java.io.Serializable;
@@ -37,12 +38,11 @@ import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextE
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InputWithDatalist.InputTextEditorWithDatalist;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeContent;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeEdition;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.InstanceName;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
-import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordHoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEditor;
-import org.genericsystem.reactor.gscomponents.InstancesTable.ContentRow;
-import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
@@ -68,26 +68,30 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+@Style(name = "flex", value = "1 1 0%")
+@Style(name = "overflow", value = "hidden")
 @ReverseFlexDirection(path = Composite.class)
-@FlexDirectionStyle(FlexDirection.ROW)
-@Style(path = HeaderRow.class, name = "flex", value = "0.3")
-@Style(path = ContentRow.class, name = "flex", value = "1")
-@Style(path = { HeaderRow.class, ValueComponents.class }, name = "flex", value = "1 1 0%")
-@Style(path = { ContentRow.class, ValueComponentsEditor.class }, name = "flex", value = "1 1 0%")
-@Style(path = { ContentRow.class, AttributeContent.class }, name = "flex", value = "1 1 0%")
-@Style(path = { ContentRow.class, AttributeContent.class }, name = "flex-wrap", value = "wrap")
-@Children({ HeaderRow.class, ContentRow.class })
-@Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class })
-@Children(path = ContentRow.class, value = { ValueComponentsEditor.class, AttributeContent.class })
-@Children(path = { ContentRow.class, ValueComponentsEditor.class }, value = { Header.class, Content.class })
-@Children(path = { ContentRow.class, Content.class }, value = { PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
-@ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
-@ForEach(path = { Composite.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-@Select(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
-public class InstanceEditor extends FlexDiv implements SelectionDefaults {
+@Style(path = { Composite.class, ValueComponents.class }, pos = { -1, 0 }, name = "flex", value = "0.3")
+@Style(path = { Composite.class, ValueComponents.class }, name = "color", value = "white")
 
-	@FlexDirectionStyle(FlexDirection.COLUMN)
-	public static class HorizontalInstanceEditor extends InstanceEditor {
+@GenericValueBackgroundColor(path = { Composite.class, ValueComponents.class, FlexDiv.class }, value = "#ea0084")
+@Children({ InstanceName.class, AttributeEdition.class })
+@Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class,/* StepNavigator.class */ })
+@Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class, /* StepNavigator.class */ })
+@Children(path = { AttributeEdition.class, Content.class }, value = { HoldersEditor.class, MultiCheckbox.class })
+@Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Header.class, Content.class })
+@ForEach(path = AttributeEdition.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
+@ForEach(path = { AttributeEdition.class, AttributeContent.class }, value = ObservableListExtractor.NO_FOR_EACH.class)
+@ForEach(path = { AttributeEdition.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
+@Select(path = { InstanceName.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
+@Select(path = { AttributeEdition.class, ValueComponents.class, Header.class }, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+// @Stepper(switchClass = Composite.class, switchClassPos = 1, headerClass = Composite.class, headerClassPos = 0)
+public class InstanceEditor extends FlexDiv implements SelectionDefaults, StepperDefaults {
+
+	public static class InstanceName extends Composite {
+	}
+
+	public static class AttributeEdition extends Composite {
 	}
 
 	@Children({ PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
@@ -353,5 +357,10 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults {
 					selectedComponents.getValue().put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
 			});
 		}
+	}
+
+	@FlexDirectionStyle(FlexDirection.ROW)
+	public static class HorizontalInstanceEditor extends InstanceEditor {
+
 	}
 }
