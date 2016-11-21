@@ -13,6 +13,7 @@ import org.genericsystem.reactor.annotations.CustomAnnotations;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, UserRoleDefaults {
 
@@ -47,6 +48,11 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		@Override
 		public ObservableList<Tag> getObservableChildren() {
 			return children;
+		}
+
+		@Override
+		public ObservableMap<String, String> getObservableStyles() {
+			return FXCollections.observableHashMap();
 		}
 	}
 

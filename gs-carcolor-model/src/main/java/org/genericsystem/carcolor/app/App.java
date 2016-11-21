@@ -1,8 +1,8 @@
 package org.genericsystem.carcolor.app;
 
 import org.genericsystem.reactor.gscomponents.AppHeader;
-import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
+import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
