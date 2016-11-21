@@ -10,6 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
@@ -124,71 +125,30 @@ public class HtmlDomNode {
 		return footer;
 	}
 
-	public static String cutLimit(String text) {
-		return text.substring(1, text.length() - 1);
-	}
+	public String toHTMLString(String body) {
+		String tagText = this.tag.getTag();
+		String classes = tag.getDomNodeStyleClasses(context).stream().collect(Collectors.joining(" "));
 
-	public static String concatainClass(String clas1, String clas2) {
-		if (clas1.equals(""))
-			return clas2;
-		else if (clas2.equals(""))
-			return clas1;
-		else if (!clas2.equals(""))
-			return clas1 + " " + clas2;
-		return "";
-	}
+		classes = ("section".equals(tagText) || "div".equals(tagText) || "header".equals(tagText) || "footer".equals(tagText)) ? classes += " adding" : classes;
 
-	public static String correcteStyle(String style) {
-		style = style.replace(',', ';');
-		style = style.replace("=", ":");
-		if (!style.equals(""))
-			style = style + ";";
-		return style;
-	}
-
-	public static String correctAttributes(String tagText, String tagAttributes) {
-		tagAttributes = cutLimit(tagAttributes);
-		if (tagText.equals("a"))
-			tagAttributes = " href=\"#\"";
-		else
-			tagAttributes = " " + tagAttributes;
-		int indexNull = tagAttributes.indexOf("checked=null,");
-		if (indexNull != -1)
-			tagAttributes = tagAttributes.substring(indexNull + 13, tagAttributes.length());
-		tagAttributes = tagAttributes.replace(',', ' ');
-		return tagAttributes;
-	}
-
-	public String extractInformationDomNode(String body) {
-		String tagText = this.tag.toString().split(" ")[0];
-		String clas = "";
-		if ((tagText.trim().equals("section")) || (tagText.trim().equals("div")) || (tagText.trim().equals("header")) || (tagText.trim().equals("footer"))) {
-			clas = "adding";
-		}
-		String clas2 = cutLimit(tag.getDomNodeStyleClasses(context).toString());
-		clas = concatainClass(clas, clas2);
-
-		String style = correcteStyle(tag.getDomNodeStyles(context).toString().substring(1, tag.getDomNodeStyles(context).toString().length() - 1));
-
+		String styles = tag.getDomNodeStyles(context).entrySet().stream().map(m -> m.getKey() + ": " + m.getValue()).collect(Collectors.joining("; "));
 		body = "\n<" + tagText + " id=\"" + this.id + "\"";
-		if (!clas.equals(""))
-			body += " class=\"" + clas + "\"";
-		if (!style.equals(""))
-			body += " style=\"" + style + "\"";
+		if (!classes.equals(""))
+			body += " class=\"" + classes + "\"";
+		if (!styles.equals(""))
+			body += " style=\"" + styles + "\"";
 
-		String tagAttributes = correctAttributes(tagText, tag.getDomNodeAttributes(context).toString());
+		String tagAttributes = tag.getDomNodeAttributes(context).entrySet().stream().filter(m -> m.getValue() != null && !m.getValue().isEmpty()).map(m -> m.getKey() + "=\"" + m.getValue() + "\"").collect(Collectors.joining(""));
 		body += tagAttributes + ">";
 
 		for (HtmlDomNode node : getChildren())
-			body += node.extractInformationDomNode(body);
-		String tagValue = tag.getDomNodeTextProperty(context).toString();
-		tagValue = tagValue.substring(tagValue.indexOf("value:") + 7, tagValue.length() - 1);
-		if (!tagValue.equals("null"))
+			body += node.toHTMLString(body);
+		String tagValue = tag.getDomNodeTextProperty(context).getValue();
+		if (tagValue != null)
 			body += tagValue;
 
 		body += "</" + tagText + ">";
 		return body;
-
 	}
 
 	public void toHtmlFile(String sourceCode, String extention, String path) {
@@ -197,11 +157,9 @@ public class HtmlDomNode {
 			writer = new BufferedWriter(new FileWriter(path + "index." + extention));
 			writer.write(sourceCode);
 			writer.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
