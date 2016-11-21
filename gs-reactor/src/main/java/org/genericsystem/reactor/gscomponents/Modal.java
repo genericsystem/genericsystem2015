@@ -10,9 +10,7 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
-import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE;
@@ -35,7 +33,7 @@ import javafx.beans.binding.Bindings;
 @SetText(path = { FlexDiv.class, HtmlHyperLink.class }, value = "×")
 public class Modal extends FlexDiv {
 
-	@Children(path = FlexDiv.class, value = { TitledInstanceStepEditor.class, FlexDiv.class })
+	@Children(path = FlexDiv.class, value = { TitledInstanceEditor.class, FlexDiv.class })
 	@Children(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = { HtmlButton.class, HtmlButton.class })
 	@SetText(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, value = { "Ok", "Cancel" })
 	// @Style(path = { FlexDiv.class, TitledInstanceEditor.class }, name = "min-height", value = "300px")
