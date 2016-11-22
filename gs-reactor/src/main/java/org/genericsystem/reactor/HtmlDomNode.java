@@ -167,7 +167,6 @@ public class HtmlDomNode {
 		this.parent = parent;
 		this.tag = tag;
 		this.context = context;
-
 	}
 
 	private <BETWEEN> Consumer<Tag> tagAdder() {
@@ -341,17 +340,11 @@ public class HtmlDomNode {
 		jsonObj.put(ID, id);
 		jsonObj.put(TAG_HTML, getTag().getTag());
 		jsonObj.put(NEXT_ID, index);
-		fillJson(jsonObj);
 		// System.out.println(jsonObj.encodePrettily());
 		sendMessage(jsonObj);
 	}
 
-	public JsonObject fillJson(JsonObject jsonObj) {
-		return null;
-	}
-
 	public void sendRemove() {
-
 		sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
 		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID,
 		// id).encodePrettily());
@@ -362,9 +355,7 @@ public class HtmlDomNode {
 		// if (jsonObj.getString(MSG_TYPE).equals(ADD) ||
 		// jsonObj.getString(MSG_TYPE).equals(REMOVE))
 		// System.out.println(jsonObj.encodePrettily());
-		// gettWebSocket().writeFinalTextFrame(jsonObj.encode());
 		getSender().send(jsonObj.encode());
-
 	}
 
 	public String getId() {
@@ -384,7 +375,6 @@ public class HtmlDomNode {
 
 	public static class RootHtmlDomNode extends HtmlDomNode {
 		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
-		// private final ServerWebSocket webSocket;
 		private final Sender send;
 		private final String rootId;
 
@@ -398,8 +388,8 @@ public class HtmlDomNode {
 
 		@Override
 		public Sender getSender() {
-			return this.send;
-		};
+			return send;
+		}
 
 		@Override
 		protected RootHtmlDomNode getRootHtmlDomNode() {

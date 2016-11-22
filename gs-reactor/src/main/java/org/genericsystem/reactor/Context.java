@@ -18,7 +18,6 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 
 /**
  * @author Nicolas Feybesse
@@ -37,23 +36,21 @@ public class Context {
 		this.parent = parent;
 		this.generics = generics;
 	}
-	
-	void firstCall(){
-	
+
+	void firstCall() {
+
 		Context rootContext = getRootContext();
-		Tag rootTag = htmlDomNodesMap.keySet().iterator().next();	
+		Tag rootTag = htmlDomNodesMap.keySet().iterator().next();
 		HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
-		rootNode.getChildren();		
+		rootNode.getChildren();
 	}
 
-	// --------Houssam
-
-	public Map<Tag, HtmlDomNode> getHtmlNodesMap() {
-		return this.htmlDomNodesMap;
+	public Map<Tag, HtmlDomNode> getHtmlDomNodesMap() {
+		return htmlDomNodesMap;
 	}
 
 	public Context getParent() {
-		return this.parent;
+		return parent;
 	}
 
 	public ObservableList<Context> getSubContexts(Tag tag) {

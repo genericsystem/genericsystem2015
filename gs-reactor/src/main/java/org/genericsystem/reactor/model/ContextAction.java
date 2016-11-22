@@ -69,7 +69,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 
 			Context rootContext = context.getRootContext();
-			Tag rootTag = rootContext.getHtmlNodesMap().keySet().iterator().next();
+			Tag rootTag = rootContext.getHtmlDomNodesMap().keySet().iterator().next();
 			HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
 			String body = rootNode.toHTMLString(new String());
 			rootNode.toHtmlFile(rootNode.header() + body + rootNode.footer(), "html", "/home/middleware/git/genericsystem2015/gs-reactor/src/main/resources/");
