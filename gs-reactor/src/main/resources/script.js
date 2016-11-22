@@ -96,11 +96,14 @@ function onMessageReceived(evt) {
 		break;
 	case 'AA':
 		elt.setAttribute(message.attributeName, message.attributeValue);
-		if (message.attributeName == "value")
+		switch (message.attributeName) {
+		case "value":
 			elt.value = message.attributeValue;
-		if (message.attributeName == "checked")
+			break;
+		case "checked":
 			elt.checked = message.attributeValue;
-		if (message.attributeName == "list")
+			break;
+		case "list":
 			elt.oninput = function(e) {
 				console.log("oninput");
 				var val = elt.value;
@@ -120,7 +123,8 @@ function onMessageReceived(evt) {
 					}
 				}
 			}
-		if (message.attributeName == "type") {
+			break;
+		case "type":
 			switch (message.attributeValue) {
 			case "text":
 				elt.onkeyup = function(e) {
@@ -169,6 +173,7 @@ function onMessageReceived(evt) {
 				};
 				break;
 			}
+			break;
 		}
 		break;
 	case 'RA':
