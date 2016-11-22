@@ -45,11 +45,9 @@ import org.genericsystem.security.model.User.Salt;
 
 import javafx.beans.binding.Bindings;
 
-@Children({ HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class })
+@Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
-@SetText(path = HtmlButton.class, pos = 1, value = "Flash")
-@BindAction(path = HtmlButton.class, pos = 1, value = FLASH.class)
 @SetText(path = HtmlButton.class, pos = 2, value = "Cancel")
 @BindAction(path = HtmlButton.class, pos = 2, value = CANCEL.class)
 @BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.LAST_UPDATE.class)
@@ -58,7 +56,7 @@ import javafx.beans.binding.Bindings;
 @Style(name = "padding", value = "10px")
 public class Monitor extends FlexDiv {
 
-	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class /* , HtmlButton.class */ })
+	@Children({ HtmlButton.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class, HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 	@SetText(path = HtmlButton.class, pos = 2, value = "Mount")
 	@BindAction(path = HtmlButton.class, pos = 2, value = MOUNT.class)
 	@SetText(path = HtmlButton.class, pos = 3, value = "Unmount")
@@ -68,6 +66,8 @@ public class Monitor extends FlexDiv {
 	@SetText(path = HtmlButton.class, pos = 5, value = "Collect")
 	@BindAction(path = HtmlButton.class, pos = 5, value = GC.class)
 	@BindText(path = HtmlLabel.class, pos = 1, value = TextBinding.CACHE_LEVEL.class)
+	@SetText(path = HtmlButton.class, pos = 1, value = "Flash")
+	@BindAction(path = HtmlButton.class, pos = 1, value = FLASH.class)
 	public static class MonitorExtended extends Monitor {
 	}
 

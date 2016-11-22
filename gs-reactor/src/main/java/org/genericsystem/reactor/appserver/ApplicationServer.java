@@ -240,7 +240,6 @@ public class ApplicationServer extends AbstractBackEnd {
 						request.response().end(buffer);
 					} else {
 						String result = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
-						System.out.println("azaizia");
 						request.response().end(result);
 					}
 				}
