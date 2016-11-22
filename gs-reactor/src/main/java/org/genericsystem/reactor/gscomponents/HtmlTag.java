@@ -45,11 +45,8 @@ public class HtmlTag {
 		@Override
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
-
-				@Override
-				public JsonObject fillJson(JsonObject jsonObj) {
-					super.fillJson(jsonObj);
-					return jsonObj.put("type", "checkbox");
+				{
+					HtmlCheckBox.this.addAttribute("type", "checkbox");
 				}
 
 				@Override
@@ -159,10 +156,8 @@ public class HtmlTag {
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
 
-				@Override
-				public JsonObject fillJson(JsonObject jsonObj) {
-					super.fillJson(jsonObj);
-					return jsonObj.put("type", "text");
+				{
+					HtmlInputText.this.addAttribute("type", "HtmlInputText");
 				}
 
 				@Override
@@ -219,16 +214,15 @@ public class HtmlTag {
 		}
 	}
 
-	public static class HtmlRadio extends TagImpl {
+	public static class HtmlRadio extends TagImpl implements ActionDefaults {
 
 		@Override
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
 
-				@Override
-				public JsonObject fillJson(JsonObject jsonObj) {
-					super.fillJson(jsonObj);
-					return jsonObj.put("type", "radio");
+				{
+					HtmlRadio.this.addAttribute("type", "HtmlRadio");
+
 				}
 			};
 		}

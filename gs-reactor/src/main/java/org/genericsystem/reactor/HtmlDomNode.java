@@ -1,5 +1,8 @@
 package org.genericsystem.reactor;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,11 +10,11 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 
-import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -56,6 +59,10 @@ public class HtmlDomNode {
 	private Tag tag;
 	private Context context;
 
+	public static interface Sender {
+		public void send(String message);
+	}
+
 	private final Consumer<Tag> tagAdder = tagAdder();
 	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
@@ -81,11 +88,86 @@ public class HtmlDomNode {
 		}
 	};
 
+	public List<HtmlDomNode> getChildren() {
+		List<HtmlDomNode> result = new ArrayList<>();
+		List<Tag> subTags = tag.getObservableChildren();
+		for (Tag subTag : subTags) {
+			if (subTag.getMetaBinding() == null)
+				result.add(context.getHtmlDomNode(subTag));
+			else
+				for (Context subContext : context.getSubContexts(subTag))
+					result.add(subContext.getHtmlDomNode(subTag));
+		}
+		return result;
+	}
+
+	public String header() {
+		String header = "";
+		String appName = this.tag.getClass().getSimpleName().toLowerCase();
+		header = "<!DOCTYPE html>\n";
+		header += "<html>\n";
+		header += "<head>\n";
+		header += "<meta charset=\"UTF-8\" name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+		header += "<LINK rel=stylesheet type=\"text/css\" href=\"" + appName + ".css\"/>\n";
+		header += "<LINK rel=stylesheet type=\"text/css\" href=\"reactor.css\"/>\n";
+		header += "<script>\n";
+		header += "var serviceLocation = \"ws://\" + document.location.host + \"" + "\";\n";
+		header += "</script>\n";
+		header += "<script type=\"text/javascript\" src=\"" + appName + ".js\"></script>\n";
+		header += "</head>\n";
+		header += "<body onload=\"connect();\" id=\"root\">\n";
+		return header;
+	}
+
+	public String footer() {
+		String footer = "</body>\n";
+		footer += "</html>\n";
+		return footer;
+	}
+
+	public String toHTMLString(String body) {
+		String tagText = this.tag.getTag();
+		String classes = tag.getDomNodeStyleClasses(context).stream().collect(Collectors.joining(" "));
+
+		classes = ("section".equals(tagText) || "div".equals(tagText) || "header".equals(tagText) || "footer".equals(tagText)) ? classes += " adding" : classes;
+
+		String styles = tag.getDomNodeStyles(context).entrySet().stream().map(m -> m.getKey() + ": " + m.getValue()).collect(Collectors.joining("; "));
+		body = "\n<" + tagText + " id=\"" + this.id + "\"";
+		if (!classes.equals(""))
+			body += " class=\"" + classes + "\"";
+		if (!styles.equals(""))
+			body += " style=\"" + styles + "\"";
+
+		String tagAttributes = tag.getDomNodeAttributes(context).entrySet().stream().filter(m -> m.getValue() != null && !m.getValue().isEmpty()).map(m -> m.getKey() + "=\"" + m.getValue() + "\"").collect(Collectors.joining(""));
+		body += tagAttributes + ">";
+
+		for (HtmlDomNode node : getChildren())
+			body += node.toHTMLString(body);
+		String tagValue = tag.getDomNodeTextProperty(context).getValue();
+		if (tagValue != null)
+			body += tagValue;
+
+		body += "</" + tagText + ">";
+		return body;
+	}
+
+	public void toHtmlFile(String sourceCode, String extention, String path) {
+		BufferedWriter writer = null;
+		try {
+			writer = new BufferedWriter(new FileWriter(path + "index." + extention));
+			writer.write(sourceCode);
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
 		this.tag = tag;
 		this.context = context;
+
 	}
 
 	private <BETWEEN> Consumer<Tag> tagAdder() {
@@ -195,8 +277,8 @@ public class HtmlDomNode {
 			sizeBySubTag.put(child, size);
 	}
 
-	public ServerWebSocket getWebSocket() {
-		return parent.getWebSocket();
+	public Sender getSender() {
+		return parent.getSender();
 	}
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
@@ -268,6 +350,7 @@ public class HtmlDomNode {
 	}
 
 	public void sendRemove() {
+
 		sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
 		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID,
 		// id).encodePrettily());
@@ -278,7 +361,9 @@ public class HtmlDomNode {
 		// if (jsonObj.getString(MSG_TYPE).equals(ADD) ||
 		// jsonObj.getString(MSG_TYPE).equals(REMOVE))
 		// System.out.println(jsonObj.encodePrettily());
-		getWebSocket().writeFinalTextFrame(jsonObj.encode());
+		// gettWebSocket().writeFinalTextFrame(jsonObj.encode());
+		getSender().send(jsonObj.encode());
+
 	}
 
 	public String getId() {
@@ -296,36 +381,24 @@ public class HtmlDomNode {
 	public void handleMessage(JsonObject json) {
 	}
 
-	public List<HtmlDomNode> getChildren() {
-		List<HtmlDomNode> result = new ArrayList<>();
-		List<Tag> subTags = tag.getObservableChildren();
-		for (Tag subTag : subTags) {
-			if (subTag.getMetaBinding() == null)
-				result.add(context.getHtmlDomNode(subTag));
-			else
-				for (Context subContext : context.getSubContexts(subTag))
-					result.add(subContext.getHtmlDomNode(subTag));
-		}
-		return result;
-	}
-
 	public static class RootHtmlDomNode extends HtmlDomNode {
 		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
-		private final ServerWebSocket webSocket;
+		// private final ServerWebSocket webSocket;
+		private final Sender send;
 		private final String rootId;
 
-		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, ServerWebSocket webSocket) {
+		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, Sender send) {
 			super(null, rootModelContext, rootTag);
 			this.rootId = rootId;
-			this.webSocket = webSocket;
+			this.send = send;
 			sendAdd(0);
 			init(0);
 		}
 
 		@Override
-		public ServerWebSocket getWebSocket() {
-			return webSocket;
-		}
+		public Sender getSender() {
+			return this.send;
+		};
 
 		@Override
 		protected RootHtmlDomNode getRootHtmlDomNode() {

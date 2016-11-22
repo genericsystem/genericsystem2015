@@ -1,13 +1,17 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.genericsystem.api.core.exceptions.RollbackException;
+import org.genericsystem.common.Generic;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.model.RootContext;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
@@ -15,11 +19,6 @@ import javafx.beans.value.ObservableLongValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-
-import org.genericsystem.api.core.exceptions.RollbackException;
-import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.model.RootContext;
 
 /**
  * @author Nicolas Feybesse
@@ -45,6 +44,12 @@ public class Context {
 		Tag rootTag = htmlDomNodesMap.keySet().iterator().next();	
 		HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
 		rootNode.getChildren();		
+	}
+
+	// --------Houssam
+
+	public Map<Tag, HtmlDomNode> getHtmlNodesMap() {
+		return this.htmlDomNodesMap;
 	}
 
 	public Context getParent() {

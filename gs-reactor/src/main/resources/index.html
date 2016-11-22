@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+<LINK rel=stylesheet type="text/css" href="app.css"/>
+<LINK rel=stylesheet type="text/css" href="reactor.css"/>
+<script>
+var serviceLocation = "ws://" + document.location.host + "";
+</script>
+<script type="text/javascript" src="app.js"></script>
+</head>
+<body onload="connect();" id="root">
+
+<div id="1499968723" class=" adding" style="background-color: #00afeb; flex-direction: column; display: flex; flex-wrap: nowrap">
+<div id="0528334873" class="modal adding" style="flex-direction: column; display: none; flex-wrap: nowrap">
+<div id="1492018152" class="modal-content widthResponsive adding" style="background-color: white; border-radius: 10px; padding: 10px; max-height: 50%; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; min-height: 350px; flex-wrap: nowrap">
+<div id="1004399695" class=" adding" style="flex-direction: row; display: flex; flex-wrap: nowrap">
+<button id="1202501493" style="flex: 1 1 auto">Ok</button>
+<button id="0583947012" style="flex: 1 1 auto"name="close">Cancel</button></div></div></div>
+<div id="0697124561" class=" adding" style="padding: 10px; flex-direction: row; display: flex; justify-content: space-around; flex-wrap: nowrap">
+<div id="1344729375" class=" adding" style="flex-direction: row; flex: 1 1 0%; display: flex; align-items: center; flex-wrap: nowrap">
+<img id="0825449513" style="width: 150px; height: auto"src="logoTransp.png"alt="logo"></img></div>
+<div id="1446603066" class=" adding" style="flex-direction: row; text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue; color: White; flex: 3; display: flex; justify-content: center; align-items: center; flex-wrap: nowrap">
+<h1 id="1423011601">Reactor Live Demo</h1></div>
+<div id="2133369782" class=" adding" style="flex-direction: column; flex: 1; display: flex; justify-content: center; align-items: center; flex-wrap: nowrap">
+<div id="0173237933" class="modal adding" style="flex-direction: column; display: none; flex-wrap: nowrap">
+<div id="2038352252" class="modal-content widthResponsive adding" style="background-color: white; border-radius: 30px; padding: 10px; flex-direction: column; overflow: auto; display: flex; flex-wrap: nowrap">
+<a id="1178846184" class="close"name="close">×</a>
+<div id="1241106293" class=" adding" style="padding: 35px; flex-direction: column; display: flex; flex-wrap: nowrap">
+<ul id="0564099820">
+<li id="0387070885">Insert Car model</li>
+<li id="0393382419">Select color in the ComboBox</li>
+<li id="0546503324">Use "add Button" to update data</li>How to use CarColor Demo</ul>
+<ul id="1859850629">
+<li id="1780734255">Add new color of any CSS color style (ex : Black, rgb(0,0,0), #000000, ...)</li>
+<li id="0348668179">Select car in the ComboBox</li>
+<li id="1625303620">Use "add Button" to update data</li>Color Management</ul>
+<ul id="0688615479">
+<li id="1824347656">Click "Add Button" to add an entry in the cache</li>
+<li id="2127266771">Click the "Remove Button" to delete the entry in your cache</li>
+<li id="0274401073">Click "Save Button" to persist the cache</li>
+<li id="1325300819">Click "Cancel Button" to release the cache</li>General Tips</ul>
+<div id="1215655570" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap; text-align: center">To plenty enjoy the power of GS-REACTOR, go to Learning / Get Started</div></div></div></div>
+<button id="1786952020" style="background-color: #00afeb; flex: 0 1 auto">User Guide</button></div></div>
+<div id="0581454266" class=" adding" style="flex-direction: row; display: flex; flex-wrap: wrap">
+<div id="1675193165" class="screenResponsive adding" style="border-radius: 10px; background-color: white; padding: 10px; margin: 10px; flex-direction: column; max-width: 100%; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1957444165" class=" adding" style="background-color: #EA4500; flex-direction: column; color: White; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<h2 id="0066193925">Car(s) Management</h2></div>
+<div id="0367211829" class=" adding" style="background-color: lightgrey; flex-direction: column; overflow: hidden; display: flex; flex-wrap: nowrap">
+<div id="1065363566" class=" adding" style="flex-direction: row; overflow: hidden; color: white; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0497058239" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1588823122" class=" adding" style="background-color: #ea0084; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1336823489">Car</label></div></div>
+<div id="0112247556" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0410801221" class=" adding" style="background-color: #ea0084; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1262428701">Power</label></div></div>
+<div id="0628593228" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1607673051" class=" adding" style="background-color: #ea0084; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1439110100">Color</label></div></div>
+<div id="1278938834" class="buttonDiv adding" style="background-color: #ea0084; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px"></div></div>
+<div id="0176688754" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0166322539" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1132383187" class=" adding" style="flex-direction: column; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1493524787" class=" adding" style="flex-direction: row; overflow: hidden; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="0147503820" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<input id="1322880236" style="flex: 1; width: 100%; height: 100%"type="HtmlInputText"></input></div></div>
+<span id="0612139355" style="color: DarkRed; display: none">You must enter a value.</span></div></div>
+<div id="1273740939" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0029458624" class=" adding" style="flex-direction: column; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1932348921" class=" adding" style="flex-direction: row; overflow: hidden; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1454895749" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<input id="0699986550" style="flex: 1; width: 100%; height: 100%"type="HtmlInputText"></input></div></div>
+<span id="1081216542" style="color: DarkRed; display: none">Car needed to create a Power.</span></div></div>
+<div id="0556865607" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="2046115399" class=" adding" style="flex-direction: column; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1690764960" class=" adding" style="flex-direction: row; overflow: hidden; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1054214138" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="1205584119" class=" adding" style="flex-direction: column; flex: 1; display: flex; width: 100%; flex-wrap: nowrap">
+<input id="1685454567" style="flex: 1; width: 100%"type="HtmlInputText"list="2108708582"></input>
+<datalist id="2108708582">
+<option id="0029864792" style="background-color: Red">Red</option>
+<option id="1514233352" style="background-color: Black">Black</option>
+<option id="0271050131" style="background-color: Green">Green</option>
+<option id="1367087404" style="background-color: Blue">Blue</option>
+<option id="1830628648" style="background-color: Orange">Orange</option>
+<option id="1039966109" style="background-color: White">White</option>
+<option id="0316210892" style="background-color: Yellow">Yellow</option></datalist></div></div></div>
+<span id="0593240258" style="color: DarkRed; display: none">Car, Color needed to create a CarColor.</span></div></div>
+<div id="0657206764" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0722395519">
+<img id="0479881088" style="max-width: 24px"src="add2.png"></img></a></div></div>
+<div id="1572765274" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1459872903" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0528921592" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0882585689" style="color: white">Audi S4</label></div></div>
+<div id="0063868946" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1587670926" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1951554611" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="0414349352" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="0594313490">333</label></div></div></div></div>
+<div id="0672452207" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1850973936" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0220089767" class=" adding" style="background-color: Green; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1154802073">Green</label></div></div></div>
+<div id="0914510829" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0165925411">
+<img id="0376457910" class="img"src="edit.png"></img></a>
+<a id="1031084238">
+<img id="1352592319" class="img"src="delete.png"></img></a></div></div>
+<div id="1143946976" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1359609283" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="2122986628" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1508834297" style="color: white">BMW M3</label></div></div>
+<div id="1686836762" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="2054293677" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1442000243" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="2079073543" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="1198249894">450</label></div></div></div></div>
+<div id="0758552710" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1633853670" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="2075948496" class=" adding" style="background-color: Red; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1660111846">Red</label></div></div></div>
+<div id="2065173910" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0252307331">
+<img id="0394465607" class="img"src="edit.png"></img></a>
+<a id="1868022826">
+<img id="1410859243" class="img"src="delete.png"></img></a></div></div>
+<div id="0351125524" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0468447975" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1246495524" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1590119902" style="color: white">Ferrari F40</label></div></div>
+<div id="0617667442" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1617455557" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1243022287" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="0777653998" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="0217271068">478</label></div></div></div></div>
+<div id="0796278022" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1561152092" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0601756269" class=" adding" style="background-color: Red; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0895682209">Red</label></div></div></div>
+<div id="0727941894" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0470512540">
+<img id="1326794506" class="img"src="edit.png"></img></a>
+<a id="1659770439">
+<img id="1436730031" class="img"src="delete.png"></img></a></div></div>
+<div id="0309517332" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="2008740935" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1702136025" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0637573474" style="color: white">Mini Cooper</label></div></div>
+<div id="0580285386" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0036610835" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1130217935" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="1639226191" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="1882041488">175</label></div></div></div></div>
+<div id="0132951997" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0714233142" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1874447816" class=" adding" style="background-color: Black; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1928181123">Black</label></div></div></div>
+<div id="0278822180" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0681419236">
+<img id="0158072498" class="img"src="edit.png"></img></a>
+<a id="0380965809">
+<img id="1965107998" class="img"src="delete.png"></img></a></div></div>
+<div id="0813053663" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1723781133" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1487437808" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0615368224" style="color: white">Audi A4 3.0 TDI</label></div></div>
+<div id="0627891364" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0893537980" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0781119515" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="1691922220" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="0663930607">233</label></div></div></div></div>
+<div id="0000154383" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="1498770748" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="2027231477">
+<img id="1237392574" class="img"src="edit.png"></img></a>
+<a id="1535765674">
+<img id="0700925546" class="img"src="delete.png"></img></a></div></div>
+<div id="2038821143" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0954214005" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0748183935" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1073710736" style="color: white">Peugeot 106 GTI</label></div></div>
+<div id="1764021553" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1347323374" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1060279553" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="2092588913" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="0863535242">120</label></div></div></div></div>
+<div id="0398267134" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="1015809941" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0308516514">
+<img id="1709713588" class="img"src="edit.png"></img></a>
+<a id="0448654357">
+<img id="1179775096" class="img"src="delete.png"></img></a></div></div>
+<div id="1208592534" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1820365995" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0430444650" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1353969943" style="color: white">Peugeot 206 S16</label></div></div>
+<div id="1434173071" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1035361607" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1690575323" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="0732974877" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="0599200546">136</label></div></div></div></div>
+<div id="0753151606" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="1777014984" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="1074424399">
+<img id="1539268463" class="img"src="edit.png"></img></a>
+<a id="1445289456">
+<img id="1740186276" class="img"src="delete.png"></img></a></div></div>
+<div id="1953657870" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1435965896" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0690033751" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0128167893" style="color: white">null</label></div></div>
+<div id="1620470059" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="0228746664" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="0746605543" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0919045285">
+<img id="1707830375" class="img"src="edit.png"></img></a>
+<a id="2069551699">
+<img id="1428908460" class="img"src="delete.png"></img></a></div></div>
+<div id="1606626560" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1641405131" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1282411744" class=" adding" style="background-color: #3393ff; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1108900555" style="color: white">ss</label></div></div>
+<div id="0083223717" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1270445426" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0132282345" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<div id="0103648252" class=" adding" style="flex-direction: column; display: flex; flex-wrap: nowrap">
+<label id="0769034064">20</label></div></div></div></div>
+<div id="0767845757" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0957157907" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1402277029" class=" adding" style="background-color: Red; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1247870336">Red</label></div></div></div>
+<div id="1140950588" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0365795621">
+<img id="1850101533" class="img"src="edit.png"></img></a>
+<a id="0587674536">
+<img id="1803514258" class="img"src="delete.png"></img></a></div></div></div></div>
+<div id="1149483643" class="screenResponsive adding" style="border-radius: 10px; background-color: white; padding: 10px; margin: 10px; flex-direction: column; max-width: 100%; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1574124491" class=" adding" style="background-color: #EA4500; flex-direction: column; color: White; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<h2 id="0871624338">Color(s) Management</h2></div>
+<div id="0165492971" class=" adding" style="background-color: lightgrey; flex-direction: column; overflow: hidden; display: flex; flex-wrap: nowrap">
+<div id="1431847682" class=" adding" style="flex-direction: row; overflow: hidden; color: white; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1589743252" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="2131205785" class=" adding" style="background-color: #ea0084; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1477249466">Color</label></div></div>
+<div id="0033823483" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1549735797" class=" adding" style="background-color: #ea0084; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0436556409">Car</label></div></div>
+<div id="0170322337" class="buttonDiv adding" style="background-color: #ea0084; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px"></div></div>
+<div id="0786866991" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0909927161" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0920500221" class=" adding" style="flex-direction: column; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="0136065620" class=" adding" style="flex-direction: row; overflow: hidden; flex: 1; display: flex; flex-wrap: nowrap">
+<div id="1915342287" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<input id="0874813628" style="flex: 1; width: 100%; height: 100%"type="HtmlInputText"></input></div></div>
+<span id="0140475458" style="color: DarkRed; display: none">You must enter a value.</span></div></div>
+<div id="1694951098" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0220529268" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; margin-bottom: 1px; flex-wrap: wrap; margin-right: 1px">
+<label id="1562484104" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="2139717045" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>Audi S4</label>
+<label id="1863541305" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1206088703" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>BMW M3</label>
+<label id="2091334697" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1984658609" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>Ferrari F40</label>
+<label id="0045996779" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1578974664" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>Mini Cooper</label>
+<label id="0463340630" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="0907890016" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>Audi A4 3.0 TDI</label>
+<label id="1511764938" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1834952252" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>Peugeot 106 GTI</label>
+<label id="0109585269" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1520572553" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>Peugeot 206 S16</label>
+<label id="1562408436" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1239078570" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>null</label>
+<label id="0235853679" style="background-color: #e5ed00; flex: 1 0 auto; justify-content: center; align-items: center; text-align: center">
+<input id="1143140471" style="margin: 4px; vertical-align: middle; float: left"type="checkbox"></input>ss</label></div></div>
+<div id="0452178642" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="2110669520">
+<img id="0702477937" style="max-width: 24px"src="add2.png"></img></a></div></div>
+<div id="0914845090" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0558986014" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1563421240" class=" adding" style="background-color: Red; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1787337017" style="color: white">Red</label></div></div>
+<div id="1824103472" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1550021570" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0853315021" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1689915109">BMW M3</label></div></div>
+<div id="0388959939" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1103846158" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0071377341">Ferrari F40</label></div></div>
+<div id="0809028342" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1594790692" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1141289184">ss</label></div></div></div>
+<div id="1229401364" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="1695686928">
+<img id="1540386691" class="img"src="edit.png"></img></a>
+<a id="1595990599">
+<img id="1375970455" class="img"src="delete.png"></img></a></div></div>
+<div id="0175600931" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1377668336" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0194677347" class=" adding" style="background-color: Black; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1156751515" style="color: white">Black</label></div></div>
+<div id="1964837707" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1264149268" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0349118862" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1164492276">Mini Cooper</label></div></div></div>
+<div id="1479717185" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="1483942032">
+<img id="0895328577" class="img"src="edit.png"></img></a>
+<a id="0895106307">
+<img id="2024745552" class="img"src="delete.png"></img></a></div></div>
+<div id="0970566269" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1633043374" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0092330146" class=" adding" style="background-color: Green; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0083660776" style="color: white">Green</label></div></div>
+<div id="1879201608" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0597307861" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0551336140" class=" adding" style="background-color: #e5ed00; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; justify-content: center; align-items: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1077932272">Audi S4</label></div></div></div>
+<div id="0577066920" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="1350815400">
+<img id="0358352556" class="img"src="edit.png"></img></a>
+<a id="0710663303">
+<img id="0571151987" class="img"src="delete.png"></img></a></div></div>
+<div id="1823701524" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0430925896" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1843666974" class=" adding" style="background-color: Blue; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0396761951" style="color: white">Blue</label></div></div>
+<div id="1622323301" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="0045967635" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="1310023050">
+<img id="1775160308" class="img"src="edit.png"></img></a>
+<a id="0478838576">
+<img id="1972791363" class="img"src="delete.png"></img></a></div></div>
+<div id="0294359670" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0243628760" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="1094318023" class=" adding" style="background-color: Orange; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0120277971" style="color: white">Orange</label></div></div>
+<div id="1258189154" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="1871216991" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="1627509926">
+<img id="1009348230" class="img"src="edit.png"></img></a>
+<a id="0090533120">
+<img id="0776767114" class="img"src="delete.png"></img></a></div></div>
+<div id="1091027713" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="0917362937" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0403619393" class=" adding" style="background-color: White; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="1379664668" style="color: white">White</label></div></div>
+<div id="0769445265" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="1978577603" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="0419427977">
+<img id="0719921769" class="img"src="edit.png"></img></a>
+<a id="1637008096">
+<img id="1642732731" class="img"src="delete.png"></img></a></div></div>
+<div id="0113698225" class=" adding" style="flex-direction: row; overflow: hidden; flex: 0 1 auto; display: flex; flex-wrap: nowrap">
+<div id="1709143402" class=" adding" style="flex-direction: row; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap">
+<div id="0313339635" class=" adding" style="background-color: Yellow; flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; padding-left: 2px; justify-content: center; align-items: flex-start; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<label id="0596895705" style="color: white">Yellow</label></div></div>
+<div id="0306799991" class=" adding" style="flex-direction: column; overflow: auto; flex: 1 1 0%; display: flex; flex-wrap: nowrap"></div>
+<div id="0203634289" class="buttonDiv adding" style="background-color: white; flex-direction: row; overflow: auto; flex: 0; display: flex; justify-content: center; margin-bottom: 1px; flex-wrap: nowrap; margin-right: 1px">
+<a id="2005031856">
+<img id="1267980214" class="img"src="edit.png"></img></a>
+<a id="0313028974">
+<img id="0120409588" class="img"src="delete.png"></img></a></div></div></div></div></div>
+<div id="1645730170" class=" adding" style="padding: 10px; flex-direction: row; display: flex; justify-content: space-around; flex-wrap: nowrap">
+<button id="0019606235">Save</button>
+<button id="0731765096">Flash</button>
+<button id="2110940950">Mount</button>
+<label id="1534258642">Last update: 2016-11-22 11:20:40</label>
+<button id="1391555065">Unmount</button>
+<button id="0058532972">ShiftTs</button>
+<label id="1685700342">0</label>
+<button id="0324490528">Collect</button></div></div></body>
+</html>
