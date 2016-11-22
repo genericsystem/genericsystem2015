@@ -41,58 +41,6 @@ function onMessageReceived(evt) {
 				}));
 			};
 			break;
-		case "input":
-			elt.type = message.type;
-			switch (message.type) {
-			case "text":
-				elt.onkeyup = function(e) {
-					var code = (e.keyCode ? e.keyCode : e.which)
-					if (code == 13) {
-						wsocket.send(JSON.stringify({
-							msgType : "A",
-							nodeId : this.id
-						}));
-					} else {
-						wsocket.send(JSON.stringify({
-							msgType : "U",
-							nodeId : this.id,
-							textContent : this.value
-						}));
-					}
-				};
-				elt.onblur = function(e) {
-					wsocket.send(JSON.stringify({
-						msgType : "A",
-						nodeId : this.id
-					}));
-				}
-				break;
-
-			case "checkbox":
-				elt.onchange = function() {
-					wsocket.send(JSON.stringify({
-						msgType : "U",
-						nodeId : this.id,
-						eltType : elt.type,
-						checked : this.checked
-					}));
-				};
-				elt.checked = message.checked;
-				break;
-
-			case "radio":
-				elt.name = document.getElementById(message.parentId).parentNode.id;
-				elt.onclick = function() {
-					wsocket.send(JSON.stringify({
-						msgType : "U",
-						nodeId : this.parentNode.parentNode.id,
-						eltType : elt.type,
-						selectedIndex : selectIndex(this.name)
-					}));
-				};
-				break;
-			}
-			break;
 
 		case "select":
 			elt.onchange = function() {
@@ -172,6 +120,56 @@ function onMessageReceived(evt) {
 					}
 				}
 			}
+		if (message.attributeName == "type") {
+			switch (message.attributeValue) {
+			case "text":
+				elt.onkeyup = function(e) {
+					var code = (e.keyCode ? e.keyCode : e.which)
+					if (code == 13) {
+						wsocket.send(JSON.stringify({
+							msgType : "A",
+							nodeId : this.id
+						}));
+					} else {
+						wsocket.send(JSON.stringify({
+							msgType : "U",
+							nodeId : this.id,
+							textContent : this.value
+						}));
+					}
+				};
+				elt.onblur = function(e) {
+					wsocket.send(JSON.stringify({
+						msgType : "A",
+						nodeId : this.id
+					}));
+				}
+				break;
+			case "checkbox":
+				elt.onchange = function() {
+					wsocket.send(JSON.stringify({
+						msgType : "U",
+						nodeId : this.id,
+						eltType : elt.type,
+						checked : this.checked
+					}));
+				};
+				elt.checked = message.checked;
+				break;
+
+			case "radio":
+				elt.name = document.getElementById(message.parentId).parentNode.id;
+				elt.onclick = function() {
+					wsocket.send(JSON.stringify({
+						msgType : "U",
+						nodeId : this.parentNode.parentNode.id,
+						eltType : elt.type,
+						selectedIndex : selectIndex(this.name)
+					}));
+				};
+				break;
+			}
+		}
 		break;
 	case 'RA':
 		elt.removeAttribute(message.attributeName);

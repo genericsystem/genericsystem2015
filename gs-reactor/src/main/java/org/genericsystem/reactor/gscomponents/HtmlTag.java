@@ -155,9 +155,8 @@ public class HtmlTag {
 		@Override
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
-
 				{
-					HtmlInputText.this.addAttribute("type", "HtmlInputText");
+					HtmlInputText.this.addAttribute("type", "text");
 				}
 
 				@Override
@@ -214,15 +213,13 @@ public class HtmlTag {
 		}
 	}
 
-	public static class HtmlRadio extends TagImpl implements ActionDefaults {
+	public static class HtmlRadio extends TagImpl {
 
 		@Override
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
-
 				{
-					HtmlRadio.this.addAttribute("type", "HtmlRadio");
-
+					HtmlRadio.this.addAttribute("type", "radio");
 				}
 			};
 		}
