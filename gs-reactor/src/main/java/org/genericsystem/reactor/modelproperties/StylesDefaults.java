@@ -1,11 +1,11 @@
 package org.genericsystem.reactor.modelproperties;
 
-import javafx.beans.property.Property;
-import javafx.collections.ObservableMap;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
+
+import javafx.beans.property.Property;
+import javafx.collections.ObservableMap;
 
 public interface StylesDefaults extends MapStringDefaults {
 
@@ -14,7 +14,7 @@ public interface StylesDefaults extends MapStringDefaults {
 	<T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag);
 
 	default ObservableMap<String, String> getDomNodeStyles(Context model) {
-		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener);
+		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener, tag -> tag.getObservableStyles());
 	}
 
 	default void inheritStyle(String styleName) {

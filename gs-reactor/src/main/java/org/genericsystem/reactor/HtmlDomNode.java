@@ -75,7 +75,7 @@ public class HtmlDomNode {
 			return size;
 		};
 	};
-	private ListChangeListener<Tag> listener = change -> {
+	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
 			if (change.wasRemoved()) {
 				for (Tag childTag : change.getRemoved()) {
@@ -220,6 +220,7 @@ public class HtmlDomNode {
 		context.register(this);
 		if (parent != null)
 			insertChild(index);
+		tag.getDomNodeStyles(context).entrySet().stream().forEach(entry -> sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, entry.getKey()).put(STYLE_VALUE, entry.getValue())));
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
 		assert (!context.containsProperty(tag, "filteredChildren"));
@@ -227,7 +228,7 @@ public class HtmlDomNode {
 		tag.createNewInitializedProperty("filteredChildren", context, c -> filteredChildren);
 		for (Tag childTag : filteredChildren.filteredList)
 			tagAdder.accept(childTag);
-		filteredChildren.filteredList.addListener(listener);
+		filteredChildren.filteredList.addListener(tagListener);
 		for (Consumer<Context> binding : tag.getPostFixedBindings())
 			binding.accept(context);
 	}

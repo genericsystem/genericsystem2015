@@ -1,9 +1,10 @@
 package org.genericsystem.reactor.gscomponents;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
+
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 public abstract class AbstractTag implements Tag {
 
@@ -24,8 +25,12 @@ public abstract class AbstractTag implements Tag {
 
 	@Override
 	public ObservableList<Tag> getObservableChildren() {
-		// System.out.println("getObservableChildren on " + this);
 		return getTagNode().getObservableChildren();
+	}
+
+	@Override
+	public ObservableMap<String, String> getObservableStyles() {
+		return getTagNode().getObservableStyles();
 	}
 
 	@Override

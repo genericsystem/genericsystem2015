@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.genericsystem.api.core.IGeneric.SystemProperty;
-
 /**
  * Indicates the <code>Class</code> value for an axed property.
  * 
@@ -21,7 +19,7 @@ public @interface AxedPropertyClassValue {
 	 * 
 	 * @return the <code>Class</code> of the axed property.
 	 */
-	Class<? extends SystemProperty> propertyClass();
+	Class<?> propertyClass();
 
 	/**
 	 * The position of the axed property.

@@ -12,8 +12,6 @@ import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.LongStringConverter;
 import javafx.util.converter.ShortStringConverter;
 
-import org.genericsystem.api.core.IGeneric.SystemProperty;
-
 /**
  * Statics constants and methods useful when dealing with Generics.
  *
@@ -91,14 +89,14 @@ public class ApiStatics {
 
 				@Override
 				public String toString(AxedPropertyClass object) {
-					return object.toString();
+					return object != null ? object.toString() : null;
 				}
 
 				@Override
 				public AxedPropertyClass fromString(String string) {
 					try {
 						String[] parts = string.trim().split("#");
-						return new AxedPropertyClass((Class<? extends SystemProperty>) Class.forName(parts[0]), Integer.parseInt(parts[1]));
+						return new AxedPropertyClass(Class.forName(parts[0]), Integer.parseInt(parts[1]));
 					} catch (ArrayIndexOutOfBoundsException | ClassNotFoundException | ClassCastException | NumberFormatException e) {
 						throw new IllegalStateException();
 					}

@@ -1,5 +1,9 @@
 package org.genericsystem.reactor.gscomponents;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.genericsystem.api.core.AxedPropertyClass;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
@@ -10,8 +14,10 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueClassCons
 import org.genericsystem.api.core.annotations.constraints.NoInheritance;
 import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
+import org.genericsystem.api.core.annotations.value.AxedPropertyClassValue;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
@@ -21,10 +27,17 @@ import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.Annotatio
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleName;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.StyleValue;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.TagAnnotation;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
+import org.genericsystem.reactor.tagadmin.TagAdmin;
 
 import com.google.common.base.Objects;
 
+import javafx.beans.binding.MapBinding;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 public class ExtendedRootTag extends RootTagImpl {
 
@@ -79,6 +92,37 @@ public class ExtendedRootTag extends RootTagImpl {
 			return children;
 		}
 
+		@Override
+		public ObservableMap<String, String> getObservableStyles() {
+			return new MapBinding<String, String>() {
+				private final ObservableList<Generic> stylesGenerics;
+				private final Map<Generic, ObservableValue<Generic>[]> stylesValuesGenerics = new HashMap<>(); // Prevents garbage collection
+
+				{
+					this.stylesGenerics = new ObservableListWrapperExtended<Generic>(delegate.getObservableHolders(delegate.getRoot().find(StyleName.class)), style -> {
+						ObservableValue<Generic>[] styleValue = new ObservableValue[] { style.getObservableHolder(delegate.getRoot().find(StyleValue.class)) };
+						stylesValuesGenerics.put(style, styleValue);
+						return styleValue;
+					});
+					stylesGenerics.addListener((ListChangeListener<? super Generic>) c -> {
+						while (c.next()) {
+							System.out.println("------- Change to stylesGenerics " + c + ", removed : " + c.getRemoved() + " added : " + c.getAddedSubList() + " on tag " + delegate);
+						}
+					});
+					bind(stylesGenerics);
+				}
+
+				@Override
+				protected ObservableMap<String, String> computeValue() {
+					ObservableMap<String, String> result = FXCollections.observableHashMap();
+					result.putAll(stylesGenerics.stream().filter(g -> stylesValuesGenerics.get(g)[0].getValue() != null).collect(Collectors.toMap(g -> (String) g.getValue(), g -> (String) stylesValuesGenerics.get(g)[0].getValue().getValue())));
+					if (delegate.getValue().equals(new AxedPropertyClass(TagAdmin.class, 0)))
+						System.out.println("computeValue, tag " + delegate + ", styles : " + result);
+					return result;
+				}
+			};
+		}
+
 		public GTag getDelegateGeneric() {
 			return delegate;
 		}
@@ -91,8 +135,6 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	void processDelegateComposites(Tag tag) {
 		GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
-		for (Generic style : delegate.getObservableHolders(delegate.getRoot().find(StyleName.class)))
-			ExtendedRootTag.super.processStyle(tag, (String) style.getValue(), (String) style.getHolder(delegate.getRoot().find(StyleValue.class)).getValue());
 
 		Generic gvbColor = delegate.getComposite(GenericValueBackgroundColor.class);
 		if (gvbColor != null && gvbColor.isInstanceOf(delegate.getRoot().find(TagAnnotation.class)))
@@ -143,7 +185,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	@SystemGeneric
 	@InstanceClass(GTag.class)
 	@Dependencies({ TagAnnotation.class, StyleName.class, StyleValue.class })
-	// @InstanceValueClassConstraint(AxedPropertyClass.class)
+	@InstanceValueClassConstraint(AxedPropertyClass.class)
 	public static interface GTagType extends Generic {
 
 		@SystemGeneric
@@ -189,6 +231,7 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	@SystemGeneric
 	@Meta(GTagType.class)
+	@AxedPropertyClassValue(propertyClass = HtmlDiv.class, pos = 0)
 	public static interface GTag extends Generic {
 
 	}
