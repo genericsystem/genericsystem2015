@@ -18,7 +18,7 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 
 	public static final ObservableListExtractor INSTANCES = generics -> {
 		// System.out.println("INSTANCES : " + Arrays.toString(generics) + " " + generics[0].getObservableInstances());
-		return generics[0].getObservableSubInstances();
+		return generics[0].getObservableInstances();
 	};
 
 	public static final ObservableListExtractor SUBINSTANCES = generics -> {
@@ -84,6 +84,13 @@ public interface ObservableListExtractor extends Function<Generic[], ObservableL
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return OTHER_COMPONENTS_2.apply(generics);
+		}
+	}
+
+	public static class INSTANCES implements ObservableListExtractor {
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return INSTANCES.apply(generics);
 		}
 	}
 
