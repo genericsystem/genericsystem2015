@@ -48,8 +48,8 @@ import javafx.beans.binding.Bindings;
 @Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
-@SetText(path = HtmlButton.class, pos = 2, value = "Cancel")
-@BindAction(path = HtmlButton.class, pos = 2, value = CANCEL.class)
+@SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
+@BindAction(path = HtmlButton.class, pos = 1, value = CANCEL.class)
 @BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.LAST_UPDATE.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
@@ -66,8 +66,8 @@ public class Monitor extends FlexDiv {
 	@SetText(path = HtmlButton.class, pos = 5, value = "Collect")
 	@BindAction(path = HtmlButton.class, pos = 5, value = GC.class)
 	@BindText(path = HtmlLabel.class, pos = 1, value = TextBinding.CACHE_LEVEL.class)
-	@SetText(path = HtmlButton.class, pos = 1, value = "Flash")
-	@BindAction(path = HtmlButton.class, pos = 1, value = FLASH.class)
+	@SetText(path = HtmlButton.class, pos = 6, value = "Flash")
+	@BindAction(path = HtmlButton.class, pos = 6, value = FLASH.class)
 	public static class MonitorExtended extends Monitor {
 	}
 
