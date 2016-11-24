@@ -1,6 +1,7 @@
 package org.genericsystem.reactor.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -13,7 +14,11 @@ public interface StringExtractor extends Function<Generic, String> {
 		if (generic == null)
 			return "";
 		Serializable value = generic.getValue();
-		return value instanceof Class ? ((Class<?>) value).getSimpleName() : Objects.toString(value);
+		if (value instanceof Class)
+			return ((Class<?>) value).getSimpleName();
+		if (value != null && value.getClass().isArray())
+			return Arrays.toString((Object[]) value);
+		return Objects.toString(value);
 	};
 
 	public static final StringExtractor MANAGEMENT = g -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(g) + "(s) Management";
