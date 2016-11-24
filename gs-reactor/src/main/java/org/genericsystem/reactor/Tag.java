@@ -259,7 +259,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void addStyle(String propertyName, String value) {
-		addPrefixBinding(model -> getDomNodeStyles(model).put(propertyName, value));
+		getRootTag().processStyle(this, propertyName, value);
 	}
 
 	@Override

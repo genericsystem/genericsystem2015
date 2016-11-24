@@ -1,22 +1,17 @@
 package org.genericsystem.reactor.gscomponents;
 
+import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 
+@Style(name = "display", value = "flex")
+@Style(name = "flex-wrap", value = "nowrap")
+@FlexDirectionStyle(FlexDirection.COLUMN)
 public class FlexDiv extends HtmlDiv {
 	private final Property<FlexDirection> direction = new SimpleObjectProperty<>();
-
-	public FlexDiv() {
-		this(FlexDirection.COLUMN);
-	}
-
-	public FlexDiv(FlexDirection direction) {
-		setDirection(direction);
-		addStyle("display", "flex");
-		addStyle("flex-wrap", "nowrap");
-	}
 
 	public void setDirection(FlexDirection direction) {
 		this.direction.setValue(direction);
@@ -38,7 +33,7 @@ public class FlexDiv extends HtmlDiv {
 	public void reverseDirection() {
 		if (FlexDiv.class.isAssignableFrom(getParent().getClass())) {
 			Property<FlexDirection> parentDirection = ((FlexDiv) getParent()).getDirectionProperty();
-			setDirection(parentDirection.getValue().reverse());
+			setDirection(parentDirection.getValue() != null ? parentDirection.getValue().reverse() : FlexDirection.ROW);
 			parentDirection.addListener((o, v, nv) -> setDirection(nv.reverse()));
 		} else
 			throw new IllegalStateException("The class of the parent must extend GSDiv when reverseDirection is used.");
@@ -53,15 +48,7 @@ public class FlexDiv extends HtmlDiv {
 			throw new IllegalStateException("The class of the parent must extend GSDiv when keepDirection is used.");
 	}
 
-	public static class FlexColumn extends FlexDiv {
-		public FlexColumn() {
-			super(FlexDirection.COLUMN);
-		}
-	}
-
+	@FlexDirectionStyle(FlexDirection.ROW)
 	public static class FlexRow extends FlexDiv {
-		public FlexRow() {
-			super(FlexDirection.ROW);
-		}
 	}
 }

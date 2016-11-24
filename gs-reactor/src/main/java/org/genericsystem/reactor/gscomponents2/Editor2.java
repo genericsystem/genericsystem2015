@@ -235,7 +235,7 @@ public class Editor2 extends FlexDiv implements SelectionDefaults {
 				@Style(name = "flex-wrap", value = "wrap")
 				@Select(ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR.class)
 				@Children({ SubcellEditor.class, SubcellAdder.class })
-				public static class AttributeEditionColumn extends FlexColumn {
+				public static class AttributeEditionColumn extends FlexDiv {
 
 					@ForEach(ObservableListExtractor.HOLDERS.class)
 					@Children({ HolderEditor.class, BooleanHolderEditor.class, LinkEditor.class, RemovalLink.class })

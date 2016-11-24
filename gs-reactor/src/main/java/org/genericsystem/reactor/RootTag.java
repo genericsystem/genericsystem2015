@@ -47,7 +47,7 @@ public interface RootTag extends Tag {
 	}
 
 	default void processStyle(Tag tag, String name, String value) {
-		tag.addStyle(name, value);
+		tag.addPrefixBinding(model -> tag.getDomNodeStyles(model).put(name, value));
 	}
 
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
