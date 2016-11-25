@@ -69,6 +69,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	private GTag storeClass(Class<?> clazz) {
+		System.out.println("storeClass " + clazz);
 		if (!Tag.class.isAssignableFrom(clazz))
 			return getEngine().find(GTag.class);
 
@@ -89,7 +90,22 @@ public class ExtendedRootTag extends RootTagImpl {
 			Generic posParam = annotationGeneric.setHolder(annotationParameter, "pos");
 			posParam.setHolder(parameterValue, childrenAnnotation.pos());
 		}
+
+		Style[] styleAnnotations = clazz.getAnnotationsByType(Style.class);
+		for (int i = 0; i < styleAnnotations.length; i++) {
+			Style styleAnnotation = styleAnnotations[i];
+			Generic styleAnnotationGeneric = classGeneric.setHolder(tagAnnotationType, new AxedPropertyClass(Style.class, i));
+			Generic pathParam = styleAnnotationGeneric.setHolder(annotationParameter, "path");
+			pathParam.setHolder(parameterValue, styleAnnotation.path());
+			Generic valueParam = styleAnnotationGeneric.setHolder(annotationParameter, "value");
+			valueParam.setHolder(parameterValue, styleAnnotation.value());
+			Generic posParam = styleAnnotationGeneric.setHolder(annotationParameter, "pos");
+			posParam.setHolder(parameterValue, styleAnnotation.pos());
+			Generic nameParam = styleAnnotationGeneric.setHolder(annotationParameter, "name");
+			nameParam.setHolder(parameterValue, styleAnnotation.name());
+		}
 		storedClasses.add(clazz);
+		getEngine().getCurrentCache().flush();
 		return classGeneric;
 	}
 
