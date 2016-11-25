@@ -3,7 +3,9 @@ package org.genericsystem.reactor.gscomponents;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.AxedPropertyClass;
@@ -40,8 +42,12 @@ public class ExtendedRootTag extends RootTagImpl {
 	private final Generic annotationParameter;
 	private final Generic parameterValue;
 
+	// To avoid duplicate work.
+	private final Set<Class<?>> storedClasses = new HashSet<>();
+
 	public ExtendedRootTag(Root engine) {
 		this.engine = engine;
+		storedClasses.add(AbstractTag.class);
 		tagAnnotationType = engine.find(TagAnnotation.class);
 		annotationParameter = engine.find(AnnotationParameter.class);
 		parameterValue = engine.find(AnnotationParameterValue.class);
@@ -65,22 +71,25 @@ public class ExtendedRootTag extends RootTagImpl {
 	private GTag storeClass(Class<?> clazz) {
 		if (!Tag.class.isAssignableFrom(clazz))
 			return getEngine().find(GTag.class);
-		GTag classGeneric = (GTag) getEngine().find(GTagType.class).getInstance(clazz);
-		if (classGeneric == null) {
-			Generic parentGeneric = storeClass(clazz.getSuperclass());
-			classGeneric = (GTag) parentGeneric.getMeta().setInstance(parentGeneric, clazz);
-			Children[] annotations = clazz.getAnnotationsByType(Children.class);
-			for (int i = 0; i < annotations.length; i++) {
-				Children childrenAnnotation = annotations[i];
-				Generic annotationGeneric = classGeneric.addHolder(tagAnnotationType, new AxedPropertyClass(Children.class, i));
-				Generic pathParam = annotationGeneric.addHolder(annotationParameter, "path");
-				pathParam.addHolder(parameterValue, childrenAnnotation.path());
-				Generic valueParam = annotationGeneric.addHolder(annotationParameter, "value");
-				valueParam.addHolder(parameterValue, childrenAnnotation.value());
-				Generic posParam = annotationGeneric.addHolder(annotationParameter, "pos");
-				posParam.addHolder(parameterValue, childrenAnnotation.pos());
-			}
+
+		if (storedClasses.contains(clazz))
+			return (GTag) getEngine().find(GTagType.class).getInstance(clazz);
+
+		Generic parentGeneric = storeClass(clazz.getSuperclass());
+		GTag classGeneric = (GTag) parentGeneric.getMeta().setInstance(parentGeneric, clazz);
+
+		Children[] annotations = clazz.getAnnotationsByType(Children.class);
+		for (int i = 0; i < annotations.length; i++) {
+			Children childrenAnnotation = annotations[i];
+			Generic annotationGeneric = classGeneric.setHolder(tagAnnotationType, new AxedPropertyClass(Children.class, i));
+			Generic pathParam = annotationGeneric.setHolder(annotationParameter, "path");
+			pathParam.setHolder(parameterValue, childrenAnnotation.path());
+			Generic valueParam = annotationGeneric.setHolder(annotationParameter, "value");
+			valueParam.setHolder(parameterValue, childrenAnnotation.value());
+			Generic posParam = annotationGeneric.setHolder(annotationParameter, "pos");
+			posParam.setHolder(parameterValue, childrenAnnotation.pos());
 		}
+		storedClasses.add(clazz);
 		return classGeneric;
 	}
 
@@ -115,8 +124,7 @@ public class ExtendedRootTag extends RootTagImpl {
 				current = current.getParent();
 			}
 			if (applyingAnnotation != null) {
-				Generic applyingAnnotation_ = applyingAnnotation;
-				Class<? extends TagImpl>[] childrenClasses = (Class<? extends TagImpl>[]) applyingAnnotation_.getHolder(annotationParameter, "value").getHolder(parameterValue).getValue();
+				Class<? extends TagImpl>[] childrenClasses = (Class<? extends TagImpl>[]) applyingAnnotation.getHolder(annotationParameter, "value").getHolder(parameterValue).getValue();
 				for (Class<? extends TagImpl> childClass : childrenClasses) {
 					AbstractTag result = createChild(tag, childClass);
 					GenericTagNode tagNode = new GenericTagNode(result);
