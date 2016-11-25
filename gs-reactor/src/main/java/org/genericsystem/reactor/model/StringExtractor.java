@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.genericsystem.common.Generic;
 
@@ -16,8 +17,11 @@ public interface StringExtractor extends Function<Generic, String> {
 		Serializable value = generic.getValue();
 		if (value instanceof Class)
 			return ((Class<?>) value).getSimpleName();
-		if (value != null && value.getClass().isArray())
+		if (value != null && value.getClass().isArray()) {
+			if (int[].class.equals(value.getClass()))
+				return Arrays.stream((int[]) value).boxed().collect(Collectors.toList()).toString();
 			return Arrays.toString((Object[]) value);
+		}
 		return Objects.toString(value);
 	};
 

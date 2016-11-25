@@ -120,7 +120,7 @@ public class AnnotationsManager {
 		}
 	}
 
-	static boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation, Tag testedTag) {
+	public static boolean posMatches(int[] posAnnotation, Class<?>[] pathAnnotation, Tag testedTag) {
 		if (posAnnotation.length == 0)
 			return true;
 		Tag tag = testedTag;
@@ -166,7 +166,7 @@ public class AnnotationsManager {
 		return annotationsFound;
 	}
 
-	static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
+	public static boolean isAssignableFrom(List<Class<?>> list1, List<Class<?>> list2) {
 		if (list1.size() != list2.size())
 			return false;
 		for (int i = 0; i < list1.size(); i++)

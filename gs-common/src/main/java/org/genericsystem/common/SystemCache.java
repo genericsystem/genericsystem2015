@@ -23,6 +23,7 @@ import org.genericsystem.api.core.annotations.constraints.UniqueValueConstraint;
 import org.genericsystem.api.core.annotations.value.AxedPropertyClassValue;
 import org.genericsystem.api.core.annotations.value.BooleanValue;
 import org.genericsystem.api.core.annotations.value.ByteArrayValue;
+import org.genericsystem.api.core.annotations.value.ClassGenericValue;
 import org.genericsystem.api.core.annotations.value.DoubleValue;
 import org.genericsystem.api.core.annotations.value.EngineValue;
 import org.genericsystem.api.core.annotations.value.FloatValue;
@@ -185,6 +186,10 @@ public abstract class SystemCache {
 		ByteArrayValue byteArrayValue = clazz.getAnnotation(ByteArrayValue.class);
 		if (byteArrayValue != null)
 			return byteArrayValue.value();
+
+		ClassGenericValue classValue = clazz.getAnnotation(ClassGenericValue.class);
+		if (classValue != null)
+			return classValue.value();
 
 		DoubleValue doubleValue = clazz.getAnnotation(DoubleValue.class);
 		if (doubleValue != null)

@@ -80,6 +80,8 @@ public class ApiStatics {
 			put(7, Short.class);
 			put(8, String.class);
 			put(9, Class.class);
+			put(10, Class[].class);
+			put(11, int[].class);
 		}
 	};
 
