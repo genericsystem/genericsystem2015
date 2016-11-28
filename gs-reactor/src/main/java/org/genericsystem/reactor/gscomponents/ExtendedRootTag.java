@@ -3,9 +3,9 @@ package org.genericsystem.reactor.gscomponents;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.AxedPropertyClass;
@@ -43,11 +43,11 @@ public class ExtendedRootTag extends RootTagImpl {
 	private final Generic parameterValue;
 
 	// To avoid duplicate work.
-	private final Set<Class<?>> storedClasses = new HashSet<>();
+	private final Map<Class<?>, GTag> storedClasses = new HashMap<>();
 
 	public ExtendedRootTag(Root engine) {
 		this.engine = engine;
-		storedClasses.add(TagImpl.class);
+		storedClasses.put(TagImpl.class, engine.find(GTag.class));
 		tagAnnotationType = engine.find(TagAnnotation.class);
 		annotationParameter = engine.find(AnnotationParameter.class);
 		parameterValue = engine.find(AnnotationParameterValue.class);
@@ -72,8 +72,8 @@ public class ExtendedRootTag extends RootTagImpl {
 		if (!TagImpl.class.isAssignableFrom(clazz))
 			return getEngine().find(GTag.class);
 
-		if (storedClasses.contains(clazz))
-			return (GTag) getEngine().find(GTagType.class).getInstance(clazz);
+		if (storedClasses.containsKey(clazz))
+			return storedClasses.get(clazz);
 
 		Generic parentGeneric = storeClass(clazz.getSuperclass());
 		GTag classGeneric = (GTag) parentGeneric.getMeta().setInstance(parentGeneric, clazz);
@@ -103,7 +103,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			Generic nameParam = styleAnnotationGeneric.setHolder(annotationParameter, "name");
 			nameParam.setHolder(parameterValue, styleAnnotation.name());
 		}
-		storedClasses.add(clazz);
+		storedClasses.put(clazz, classGeneric);
 		getEngine().getCurrentCache().flush();
 		return classGeneric;
 	}
