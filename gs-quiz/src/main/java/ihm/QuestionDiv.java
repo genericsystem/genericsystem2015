@@ -21,12 +21,12 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.model.ContextAction;
-import org.genericsystem.reactor.model.ContextAction.PREVIOUS;
 import org.genericsystem.reactor.model.ObservableListExtractor;
 import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import ihm.QuestionDiv.Empty;
 import ihm.QuestionDiv.FooterDiv;
+import ihm.QuestionDiv.FooterDiv.FinishBtn;
 import ihm.QuestionDiv.FooterDiv.NextBtn;
 import ihm.QuestionDiv.FooterDiv.PreviousBtn;
 import ihm.QuestionDiv.UnitDiv;
@@ -72,17 +72,18 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	//
 	@Style(name = "display", value = "flex")
 	@Style(name = "flex-wrap", value = "wrap")
-	@Style(name = "flex-direction", value = "row")
 	@Style(name = "justify-content", value = "space-around")
 	@Style(name = "margin", value = "10px")
 	@Style(name = "border", value = "1px solid silver")
+	@Style(name = "align-items", value = "center")
+	@StyleClass("fdirection-r-r-c")
 	public static class AnswersDiv extends HtmlDiv {
 
 	}
 
 	@Children({ HtmlCheckBox.class, HtmlLabel.class })
 	//
-	@Style(name = "width", value = "35%")
+	@Style(name = "min-width", value = "174px")
 	@Style(name = "display", value = "flex")
 	@Style(name = "flex-wrap", value = "nowrap")
 	@Style(name = "flex-direction", value = "row")
@@ -94,6 +95,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	@Style(path = HtmlLabel.class, name = "word-wrap", value = "break-word")
 	@Style(path = HtmlLabel.class, name = "hyphens", value = "auto")
 	@Style(path = HtmlLabel.class, name = "max-width", value = "100%")
+	@StyleClass("width-35-35-90")
 	@StyleClass(path = HtmlLabel.class, value = "vertical-align")
 	@StyleClass(path = HtmlCheckBox.class, value = "vertical-align")
 	//
@@ -103,7 +105,8 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 
 	}
 
-	@Children({ PreviousBtn.class, NextBtn.class/* , FinishBtn.class */ })
+	@Children({ PreviousBtn.class, NextBtn.class, FinishBtn.class })
+	//
 	@Style(name = "display", value = "flex")
 	@Style(name = "justify-content", value = "space-around")
 	@Style(name = "align-self", value = "flex-end")
@@ -112,39 +115,31 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	public static class FooterDiv extends HtmlDiv {
 
 		@SetText("Next >")
+		//
+		@Style(name = "text-align", value = "center")
+		//
 		@BindAction(NEXT_TAG.class)
-		public static class NextBtn extends HtmlButton implements StepperDefaults {
+		public static class NextBtn extends HtmlButton implements StepperBis {
 
 		}
 
 		@SetText("< Previous")
-		@BindAction(PREVIOUS.class)
-		public static class PreviousBtn extends HtmlButton implements StepperDefaults {
+		//
+		@Style(name = "display", value = "none")
+		@Style(name = "text-align", value = "center")
+		//
+		@BindAction(PREVIOUS_TAG.class)
+		public static class PreviousBtn extends HtmlButton implements StepperBis {
 
 		}
+
+		@SetText("Finish")
 		//
-		// @SetText("Finish")
-		// public static class FinishBtn extends HtmlButton implements StepperDefaults {
-		//
-		// // @Override
-		// // public void init() {
-		// // addPrefixBinding(context -> {
-		// // Property<Integer> index = getIteratorIndexProperty(context);
-		// // Tag stepperTag = getStepperTag(context);
-		// // ObservableList<Context> contexts = context.getSubContexts(stepperTag);
-		// // for (Context c : contexts) {
-		// // System.out.println("Context -> " + c.getClass().getName());
-		// // }
-		// //
-		// // if (index.getValue() + 1 < contexts.size()) {
-		// // this.addStyle("display", "none");
-		// // }
-		// // if (index.getValue() + 1 == contexts.size()) {
-		// // this.addStyle("display", "flex");
-		// // }
-		// // });
-		// // }
-		// }
+		@Style(name = "display", value = "none")
+		@Style(name = "text-align", value = "center")
+		public static class FinishBtn extends HtmlButton implements StepperBis {
+
+		}
 
 	}
 
@@ -155,12 +150,30 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 
 				// Réussir à insérer les tags de navigation (PREVIOUS, NEXT, FINISH)
 
-				// Tag tag = tagNext.getParent();
-				// Tag tagPrevious = tag.getObservableChildren();
+				Tag tag = tagNext.getParent();
+				Tag tagPrevious = tag.find(PreviousBtn.class);
+				Tag tagFinish = tag.find(FinishBtn.class);
 
-				((StepperBis) tagNext).next(context, tagNext/* , tagPrevious, tagFinish */);
+				((StepperBis) tagNext).next(context, tagNext, tagPrevious, tagFinish);
+
 			} else
 				log.warn("The NEXT action is applicable only to a tag implementing StepperDefaults.");
+		}
+	}
+
+	public static class PREVIOUS_TAG implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tagPrevious) {
+			if (StepperBis.class.isAssignableFrom(tagPrevious.getClass())) {
+
+				Tag tag = tagPrevious.getParent();
+				Tag tagNext = tag.find(NextBtn.class);
+				Tag tagFinish = tag.find(FinishBtn.class);
+
+				((StepperBis) tagPrevious).prev(context, tagNext, tagPrevious, tagFinish);
+
+			} else
+				log.warn("The PREVIOUS action is applicable only to a tag implementing StepperDefaults.");
 		}
 	}
 

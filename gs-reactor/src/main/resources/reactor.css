@@ -237,78 +237,17 @@ section .adding .modal-content{
 		margin-bottom	: auto;
 		min-width		: 50px;
 		height			: 35px;
+	}
+	/* Responsive large device row, medium devices row, small device column*/
+	.fdirection-r-r-c {
+		flex-direction	: row;
 	}	
+	.width-35-35-90 {
+		width			: 35%;
+	}
 }
 
-/*	
-@media only screen and (max-width:479px) and (orientation : portrait), 
-only screen and (max-device-width:479px) and (orientation : portrait){
-*/
-@media screen and (max-width: 499px) {
-	.body {
-		font			: 8px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-		line-height		: 1.4em;
-		background		: #eaeaea;
-		color			: #4d4d4d;
-		width			: 100%;
-		margin			: 0 auto;
-		font-smoothing	: antialiased;
-		display			: flex;
-		flex-direction	: column;
-		flex-wrap		: nowrap;
-		justify-content	: center;	
-	}
-	.buttonDiv {
-		min-width 		: 40px;
-	}
-	.screenResponsive {
-		min-width 		: 7cm;
-	}	
-	.widthResponsive{
-		max-width		: 80%;
-	}	
-	.img{
-		max-width 		: 16px;
-	}
-	.divWithTitle{
-		-webkit-flex 	: 1 0 200px;
-	}
-	.monitorResponsive {
-		display			: flex;
-		flex-flow		: column nowrap;	
-		justify-content	: space-around;
-		background-color: black;
-	}
-	.monitorButton {
-		width 			: 40%;
-		min-width		: 40px;
-		heigth			: 100%;
-		min-height		: 40px;
-		border-radius	: 5px;
-	}
-	.monitorLabel {
-		display			: flex;
-		text-align		: center;
-		margin-top		: 10px;
-		margin-bottom	: 10px; 	
-	}
-	.loginResponsive {
-		display			: flex;
-		flex-flow		: column nowrap;	
-		justify-content	: space-around;
-	}
-	.inputTxtResponsive {
-		border-radius	: 5px;
-		height			: 30px;
-		margin-left		: 10px;
-		margin-right	: 10px;
-		margin-bottom	: 10px;
-	}
-	.choiceResponsive {
-		margin-right	: 10px;
-		width			: 40%;		
-	}	
-}
+
 
 /*
 @media only screen and (max-width:960px) and (orientation : landscape),
@@ -376,6 +315,88 @@ only screen and (max-device-width: 960px) and (orientation : landscape){
 		width			: 40%;
 		min-width		: 50px; 
 	}
-	
+	/* Responsive large device row, medium devices row, small device column*/
+	.fdirection-r-r-c {
+		flex-direction	: row;
+	}
+	.width-35-35-90 {
+		width			: 35%;
+	}
+}
+
+/*	
+@media only screen and (max-width:479px) and (orientation : portrait), 
+only screen and (max-device-width:479px) and (orientation : portrait){
+*/
+@media screen and (max-width: 499px) {
+	.body {
+		font			: 8px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		line-height		: 1.4em;
+		background		: #eaeaea;
+		color			: #4d4d4d;
+		width			: 100%;
+		margin			: 0 auto;
+		font-smoothing	: antialiased;
+		display			: flex;
+		flex-direction	: column;
+		flex-wrap		: nowrap;
+		justify-content	: center;	
+	}
+	.buttonDiv {
+		min-width 		: 40px;
+	}	
+	.screenResponsive {
+		min-width 		: 7cm;
+	}		
+	.widthResponsive{
+		max-width		: 80%;
+	}		
+	.img{
+		max-width 		: 16px;
+	}	
+	.divWithTitle{
+		-webkit-flex 	: 1 0 200px;
+	}	
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}
+	.monitorButton {
+		width 			: 40%;
+		min-width		: 40px;
+		heigth			: 100%;
+		min-height		: 40px;
+		border-radius	: 5px;
+	}	
+	.monitorLabel {
+		display			: flex;
+		text-align		: center;
+		margin-top		: 10px;
+		margin-bottom	: 10px; 	
+	}	
+	.loginResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}	
+	.inputTxtResponsive {
+		border-radius	: 5px;
+		height			: 30px;
+		margin-left		: 10px;
+		margin-right	: 10px;
+		margin-bottom	: 10px;
+	}	
+	.choiceResponsive {
+		margin-right	: 10px;
+		width			: 40%;		
+	}	
+	/* Responsive large device row, medium devices row, small device column*/
+	.fdirection-r-r-c {
+		flex-direction	: column;
+	}
+	.width-35-35-90 {
+		width			: 90%;
+	}
 }
 
