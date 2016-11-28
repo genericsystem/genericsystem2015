@@ -1,11 +1,10 @@
 package org.genericsystem.reactor;
 
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.StringExtractor;
 
 public interface RootTag extends Tag {
 

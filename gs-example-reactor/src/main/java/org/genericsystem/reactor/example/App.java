@@ -15,24 +15,24 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.SelectModel;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
+import org.genericsystem.reactor.context.ObservableContextSelector;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.reactor.gscomponents2.Editor2;
 import org.genericsystem.reactor.gscomponents2.Editor2.HorizontalGSEditor;
 import org.genericsystem.reactor.gscomponents2.Monitor2.MonitorExtended2;
 import org.genericsystem.reactor.gscomponents2.Table2;
 import org.genericsystem.reactor.gscomponents2.Table2.HorizontalTable;
-import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
 @Children({ Table2.class, HorizontalTable.class, Editor2.class, HorizontalGSEditor.class, Table2.class, MonitorExtended2.class })
 @DirectSelect(path = Table2.class, pos = 0, value = Car.class)
 @DirectSelect(path = HorizontalTable.class, value = Car.class)
-@SelectModel(path = Editor2.class, value = ObservableModelSelector.SELECTION_SELECTOR.class)
+@SelectContext(path = Editor2.class, value = ObservableContextSelector.SELECTION_SELECTOR.class)
 @DirectSelect(path = Table2.class, pos = 2, value = Color.class)
 @Style(name = "justify-content", value = "center")
 public class App extends RootTagImpl {

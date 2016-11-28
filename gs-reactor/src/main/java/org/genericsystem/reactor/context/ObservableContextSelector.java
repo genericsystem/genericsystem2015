@@ -1,6 +1,4 @@
-package org.genericsystem.reactor.model;
-
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
+package org.genericsystem.reactor.context;
 
 import java.util.function.BiFunction;
 
@@ -8,14 +6,15 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
-public interface ObservableModelSelector extends BiFunction<Context, Tag, ObservableValue<Context>> {
+public interface ObservableContextSelector extends BiFunction<Context, Tag, ObservableValue<Context>> {
 
-	public static class SELECTION_SELECTOR implements ObservableModelSelector {
+	public static class SELECTION_SELECTOR implements ObservableContextSelector {
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
@@ -25,7 +24,7 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		}
 	}
 
-	public static class REMOVABLE_HOLDER_SELECTOR implements ObservableModelSelector {
+	public static class REMOVABLE_HOLDER_SELECTOR implements ObservableContextSelector {
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getParent().getGenerics());
@@ -34,7 +33,7 @@ public interface ObservableModelSelector extends BiFunction<Context, Tag, Observ
 		}
 	}
 
-	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements ObservableModelSelector {
+	public static class HOLDER_ADDITION_ENABLED_SELECTOR implements ObservableContextSelector {
 		@Override
 		public ObservableValue<Context> apply(Context context, Tag tag) {
 			ObservableList<Generic> holders = ObservableListExtractor.HOLDERS.apply(context.getGenerics());

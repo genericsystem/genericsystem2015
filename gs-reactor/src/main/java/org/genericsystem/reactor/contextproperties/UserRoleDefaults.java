@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.modelproperties;
+package org.genericsystem.reactor.contextproperties;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;

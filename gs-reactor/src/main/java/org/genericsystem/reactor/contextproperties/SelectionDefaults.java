@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.modelproperties;
+package org.genericsystem.reactor.contextproperties;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -7,7 +7,7 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.context.StringExtractor;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;

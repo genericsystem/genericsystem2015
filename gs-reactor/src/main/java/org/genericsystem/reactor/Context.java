@@ -8,7 +8,7 @@ import java.util.Map;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.model.RootContext;
+import org.genericsystem.reactor.context.RootContext;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;

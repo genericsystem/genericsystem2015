@@ -1,12 +1,11 @@
-package org.genericsystem.reactor.model;
-
-import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
+package org.genericsystem.reactor.context;
 
 import java.util.function.BiFunction;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
 import org.genericsystem.security.model.Role.Admin;
 import org.genericsystem.security.model.UserRole;
 

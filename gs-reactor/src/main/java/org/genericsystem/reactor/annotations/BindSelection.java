@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.annotations;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,6 +9,7 @@ import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindSelection.BindSelectionProcessor;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

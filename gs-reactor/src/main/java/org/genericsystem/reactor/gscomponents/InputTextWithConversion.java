@@ -1,15 +1,14 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.PasswordDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import java.io.Serializable;
 
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
+import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.contextproperties.PasswordDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 
 import io.vertx.core.logging.Logger;

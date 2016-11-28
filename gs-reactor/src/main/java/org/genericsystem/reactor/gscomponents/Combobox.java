@@ -1,18 +1,17 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.Combobox.HtmlRepeatedOption;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSelect;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.property.Property;
 

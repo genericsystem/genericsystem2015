@@ -11,8 +11,8 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Select.SelectProcessor;
 import org.genericsystem.reactor.annotations.Select.Selects;
+import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.ObservableValueSelector;
 
 /**
  * @author Nicolas Feybesse

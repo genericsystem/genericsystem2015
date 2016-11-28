@@ -21,7 +21,7 @@ import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Process;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SelectModel;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
@@ -57,7 +57,7 @@ public class AnnotationsManager {
 		registerAnnotation(Children.class);
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
-		registerAnnotation(SelectModel.class);
+		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
 		registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);

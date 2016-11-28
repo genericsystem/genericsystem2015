@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.modelproperties;
+package org.genericsystem.reactor.contextproperties;
 
 import java.io.Serializable;
 import java.util.function.BiConsumer;

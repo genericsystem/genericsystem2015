@@ -1,13 +1,5 @@
 package org.genericsystem.reactor;
 
-import org.genericsystem.reactor.modelproperties.AttributesDefaults;
-import org.genericsystem.reactor.modelproperties.DisplayDefaults;
-import org.genericsystem.reactor.modelproperties.GenericStringDefaults;
-import org.genericsystem.reactor.modelproperties.StyleClassesDefaults;
-import org.genericsystem.reactor.modelproperties.StylesDefaults;
-import org.genericsystem.reactor.modelproperties.TextPropertyDefaults;
-import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -20,8 +12,15 @@ import java.util.function.Function;
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.TagSwitcher;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.contextproperties.AttributesDefaults;
+import org.genericsystem.reactor.contextproperties.DisplayDefaults;
+import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
+import org.genericsystem.reactor.contextproperties.StyleClassesDefaults;
+import org.genericsystem.reactor.contextproperties.StylesDefaults;
+import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
+import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

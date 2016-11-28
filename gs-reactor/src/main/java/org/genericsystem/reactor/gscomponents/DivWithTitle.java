@@ -1,18 +1,17 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents.InstanceStepEditor.HorizontalInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents.InstancesTable.HorizontalInstancesTable;
-import org.genericsystem.reactor.model.StringExtractor;
 
 //Apple
 //@StyleClass("divWithTitle")

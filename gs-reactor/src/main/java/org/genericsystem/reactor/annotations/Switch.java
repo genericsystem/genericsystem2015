@@ -11,8 +11,8 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Switch.Modes;
 import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.TagSwitcher;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })

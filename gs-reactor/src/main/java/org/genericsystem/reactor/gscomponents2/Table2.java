@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -13,6 +11,20 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.context.ContextAction.REMOVE;
+import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
+import org.genericsystem.reactor.context.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
+import org.genericsystem.reactor.context.ObservableListExtractor.ATTRIBUTES_OF_TYPE;
+import org.genericsystem.reactor.context.ObservableListExtractor.HOLDERS;
+import org.genericsystem.reactor.context.ObservableListExtractor.OTHER_COMPONENTS_1;
+import org.genericsystem.reactor.context.ObservableListExtractor.OTHER_COMPONENTS_2;
+import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES;
+import org.genericsystem.reactor.context.ObservableValueSelector.CHECK_BOX_DISPLAYER;
+import org.genericsystem.reactor.context.ObservableValueSelector.LABEL_DISPLAYER;
+import org.genericsystem.reactor.context.ObservableValueSelector.RELATION_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -41,19 +53,6 @@ import org.genericsystem.reactor.gscomponents2.Table2.TitleRow.TypeAttribute.Att
 import org.genericsystem.reactor.gscomponents2.Table2.TitleRow.TypeAttribute.RelationName;
 import org.genericsystem.reactor.gscomponents2.Table2.TitleRow.TypeAttribute.RelationName.ComponentName;
 import org.genericsystem.reactor.gscomponents2.Table2.TitleRow.TypeName;
-import org.genericsystem.reactor.model.ContextAction.REMOVE;
-import org.genericsystem.reactor.model.ContextAction.SET_SELECTION;
-import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
-import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_TYPE;
-import org.genericsystem.reactor.model.ObservableListExtractor.HOLDERS;
-import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_1;
-import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;
-import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES;
-import org.genericsystem.reactor.model.ObservableValueSelector.CHECK_BOX_DISPLAYER;
-import org.genericsystem.reactor.model.ObservableValueSelector.LABEL_DISPLAYER;
-import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.model.StringExtractor;
 
 @Children({ TableTitle.class, TableContent.class })
 @Style(name = "flex", value = "1")

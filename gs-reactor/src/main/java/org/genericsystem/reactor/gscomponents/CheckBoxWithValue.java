@@ -1,10 +1,9 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 
 import javafx.beans.property.Property;

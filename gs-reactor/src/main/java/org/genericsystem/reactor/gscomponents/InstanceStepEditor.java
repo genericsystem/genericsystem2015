@@ -7,6 +7,8 @@ import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.context.ContextAction.NEXT;
+import org.genericsystem.reactor.context.ContextAction.PREVIOUS;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeContent;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeEdition;
@@ -14,8 +16,6 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.InstanceName;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEditor;
 import org.genericsystem.reactor.gscomponents.InstanceStepEditor.StepNavigator;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
-import org.genericsystem.reactor.model.ContextAction.NEXT;
-import org.genericsystem.reactor.model.ContextAction.PREVIOUS;
 
 @Style(path = { Composite.class, StepNavigator.class }, name = "flex", value = "")
 @Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class, StepNavigator.class })

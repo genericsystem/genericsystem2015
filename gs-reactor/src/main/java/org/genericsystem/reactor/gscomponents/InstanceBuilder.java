@@ -1,9 +1,5 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
-import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-import org.genericsystem.reactor.modelproperties.PasswordDefaults;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +13,18 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.context.ContextAction.CREATE_INSTANCE;
+import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
+import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
+import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
+import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.context.TextBinding.ERROR_COMPONENTS;
+import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
+import org.genericsystem.reactor.contextproperties.PasswordDefaults;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
@@ -36,15 +44,6 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordAdder;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.HolderBuilder.HolderBuilderInput;
-import org.genericsystem.reactor.model.ContextAction.CREATE_INSTANCE;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
-import org.genericsystem.reactor.model.ObservableValueSelector;
-import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
-import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
-import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.model.TagSwitcher;
-import org.genericsystem.reactor.model.TextBinding.ERROR_COMPONENTS;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;

@@ -1,9 +1,5 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +14,22 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SelectModel;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableContextSelector;
+import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.context.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
+import org.genericsystem.reactor.context.ObservableListExtractor.OTHER_COMPONENTS_2;
+import org.genericsystem.reactor.context.ObservableValueSelector.RELATION_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
+import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.Combobox.ComboboxWithEmptyEntry;
@@ -80,14 +87,6 @@ import org.genericsystem.reactor.gscomponents2.Editor2.EditorContent.LinkTitles.
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorTitle;
 import org.genericsystem.reactor.gscomponents2.Editor2.EditorTitle.EditorTitleContent;
 import org.genericsystem.reactor.gscomponents2.Table2.TitleRow.TypeAttribute.AttributeName;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor.ATTRIBUTES_OF_INSTANCES;
-import org.genericsystem.reactor.model.ObservableListExtractor.OTHER_COMPONENTS_2;
-import org.genericsystem.reactor.model.ObservableModelSelector;
-import org.genericsystem.reactor.model.ObservableValueSelector;
-import org.genericsystem.reactor.model.ObservableValueSelector.RELATION_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.model.StringExtractor;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -322,7 +321,7 @@ public class Editor2 extends FlexDiv implements SelectionDefaults {
 					}
 
 					// To add a new holder/link if it’s possible.
-					@SelectModel(ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR.class)
+					@SelectContext(ObservableContextSelector.HOLDER_ADDITION_ENABLED_SELECTOR.class)
 					@Children({ HolderAdder.class, BooleanHolderAdder.class, LinkAdder.class })
 					public static class SubcellAdder extends SubcellEditorContainerDiv {
 

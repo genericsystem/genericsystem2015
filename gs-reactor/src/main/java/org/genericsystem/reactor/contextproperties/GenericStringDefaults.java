@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.modelproperties;
+package org.genericsystem.reactor.contextproperties;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -7,7 +7,7 @@ import javafx.beans.value.ObservableValue;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.model.StringExtractor;
+import org.genericsystem.reactor.context.StringExtractor;
 
 public interface GenericStringDefaults extends TextPropertyDefaults {
 

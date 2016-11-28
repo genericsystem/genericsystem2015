@@ -1,8 +1,5 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.PasswordDefaults;
-import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
-
 import java.util.Arrays;
 
 import org.genericsystem.common.Generic;
@@ -14,6 +11,21 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ContextAction.CREATE_USER;
+import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE_CANCEL;
+import org.genericsystem.reactor.context.ContextAction.FLASH;
+import org.genericsystem.reactor.context.ContextAction.FLUSH;
+import org.genericsystem.reactor.context.ContextAction.GC;
+import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
+import org.genericsystem.reactor.context.ContextAction.MOUNT;
+import org.genericsystem.reactor.context.ContextAction.SHIFTTS;
+import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
+import org.genericsystem.reactor.contextproperties.PasswordDefaults;
+import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
@@ -26,19 +38,6 @@ import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv.ModeSwitchButtons;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv;
 import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoginDiv.ValidateButton;
-import org.genericsystem.reactor.model.ContextAction;
-import org.genericsystem.reactor.model.ContextAction.CANCEL;
-import org.genericsystem.reactor.model.ContextAction.CREATE_USER;
-import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE_CANCEL;
-import org.genericsystem.reactor.model.ContextAction.FLASH;
-import org.genericsystem.reactor.model.ContextAction.FLUSH;
-import org.genericsystem.reactor.model.ContextAction.GC;
-import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
-import org.genericsystem.reactor.model.ContextAction.MOUNT;
-import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
-import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
-import org.genericsystem.reactor.model.TagSwitcher;
-import org.genericsystem.reactor.model.TextBinding;
 import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;

@@ -1,8 +1,5 @@
 package org.genericsystem.reactor.gscomponents2;
 
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -14,6 +11,10 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -36,8 +37,6 @@ import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.Link
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.LinkBuilder.ComponentBuilder;
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.InstanceNameBuilder;
 import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.InstanceNameBuilder.InstanceNameBuilderInput;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableValueSelector;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;

@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.annotations;
 
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -14,6 +12,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindSelection.BindSelectionProcessor;
 import org.genericsystem.reactor.annotations.Stepper.StepperProcessor;
 import org.genericsystem.reactor.annotations.Stepper.Steppers;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

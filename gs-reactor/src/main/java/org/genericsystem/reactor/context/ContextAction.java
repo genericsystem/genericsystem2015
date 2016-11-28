@@ -1,11 +1,4 @@
-package org.genericsystem.reactor.model;
-
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-import org.genericsystem.reactor.modelproperties.GSBuilderDefaults.GenericValueComponents;
-import org.genericsystem.reactor.modelproperties.PasswordDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
+package org.genericsystem.reactor.context;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -19,6 +12,12 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
+import org.genericsystem.reactor.contextproperties.PasswordDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults.GenericValueComponents;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;

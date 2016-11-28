@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
-import org.genericsystem.reactor.model.TagSwitcher;
+import org.genericsystem.reactor.context.TagSwitcher;
 
 public abstract class TagImpl extends AbstractTag {
 

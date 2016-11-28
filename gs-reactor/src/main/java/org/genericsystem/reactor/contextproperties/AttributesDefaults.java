@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.modelproperties;
+package org.genericsystem.reactor.contextproperties;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;

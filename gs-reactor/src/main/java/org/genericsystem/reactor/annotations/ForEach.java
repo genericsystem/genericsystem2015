@@ -11,9 +11,9 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach.ForEachProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
 
 /**
  * @author Nicolas Feybesse

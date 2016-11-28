@@ -1,4 +1,4 @@
-package org.genericsystem.reactor.model;
+package org.genericsystem.reactor.context;
 
 import java.io.Serializable;
 import java.util.Arrays;

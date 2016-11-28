@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.annotations;
 
-import org.genericsystem.reactor.modelproperties.ActionDefaults;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -13,8 +11,9 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction.BindActionProcessor;
 import org.genericsystem.reactor.annotations.BindAction.BindActions;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.ContextAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

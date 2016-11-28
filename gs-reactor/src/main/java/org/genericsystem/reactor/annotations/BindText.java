@@ -11,9 +11,9 @@ import java.util.function.BiConsumer;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindText.BindTextProcessor;
 import org.genericsystem.reactor.annotations.BindText.BindTexts;
+import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.TextBinding;
-import org.genericsystem.reactor.model.TextBinding.GENERIC_STRING;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })

@@ -9,35 +9,35 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.SelectModel.SelectModelProcessor;
-import org.genericsystem.reactor.annotations.SelectModel.SelectModels;
+import org.genericsystem.reactor.annotations.SelectContext.SelectContextProcessor;
+import org.genericsystem.reactor.annotations.SelectContext.SelectContexts;
+import org.genericsystem.reactor.context.ObservableContextSelector;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.genericsystem.reactor.model.ObservableModelSelector;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-@Repeatable(SelectModels.class)
-@Process(SelectModelProcessor.class)
-public @interface SelectModel {
+@Repeatable(SelectContexts.class)
+@Process(SelectContextProcessor.class)
+public @interface SelectContext {
 	Class<? extends TagImpl>[] path() default {};
 
-	Class<? extends ObservableModelSelector> value();
+	Class<? extends ObservableContextSelector> value();
 
 	int[] pos() default {};
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.TYPE })
-	public @interface SelectModels {
-		SelectModel[] value();
+	public @interface SelectContexts {
+		SelectContext[] value();
 	}
 
-	public static class SelectModelProcessor implements BiConsumer<Annotation, Tag> {
+	public static class SelectContextProcessor implements BiConsumer<Annotation, Tag> {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			tag.select__(context -> {
 				try {
-					return ((SelectModel) annotation).value().newInstance().apply(context, tag);
+					return ((SelectContext) annotation).value().newInstance().apply(context, tag);
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalStateException(e);
 				}

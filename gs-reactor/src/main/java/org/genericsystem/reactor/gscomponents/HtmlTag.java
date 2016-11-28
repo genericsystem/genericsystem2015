@@ -1,15 +1,14 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.ActionDefaults;
-import org.genericsystem.reactor.modelproperties.GSBuilderDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
-
 import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.contextproperties.ActionDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;

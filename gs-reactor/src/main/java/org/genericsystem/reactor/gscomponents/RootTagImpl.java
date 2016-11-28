@@ -1,8 +1,5 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
-
 import java.lang.annotation.Annotation;
 
 import org.genericsystem.reactor.AnnotationsManager;
@@ -10,6 +7,8 @@ import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.CustomAnnotations;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

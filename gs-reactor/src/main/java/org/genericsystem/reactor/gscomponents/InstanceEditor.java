@@ -1,12 +1,5 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.ComponentsDefaults;
-import org.genericsystem.reactor.modelproperties.ConvertedValueDefaults;
-import org.genericsystem.reactor.modelproperties.PasswordDefaults;
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
-import org.genericsystem.reactor.modelproperties.UserRoleDefaults;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
@@ -20,12 +13,32 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SelectModel;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.ContextAction.ADD_HOLDER;
+import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
+import org.genericsystem.reactor.context.ContextAction.REMOVE;
+import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
+import org.genericsystem.reactor.context.ObservableContextSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
+import org.genericsystem.reactor.context.ObservableContextSelector.REMOVABLE_HOLDER_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.TYPE_SELECTOR;
+import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
+import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
+import org.genericsystem.reactor.contextproperties.PasswordDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
+import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
@@ -47,20 +60,6 @@ import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
 import org.genericsystem.reactor.gscomponents2.CellDiv.ActionLink;
-import org.genericsystem.reactor.model.ContextAction.ADD_HOLDER;
-import org.genericsystem.reactor.model.ContextAction.MODAL_DISPLAY_FLEX;
-import org.genericsystem.reactor.model.ContextAction.REMOVE;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.model.ObservableListExtractor.NO_FOR_EACH;
-import org.genericsystem.reactor.model.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
-import org.genericsystem.reactor.model.ObservableModelSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
-import org.genericsystem.reactor.model.ObservableModelSelector.REMOVABLE_HOLDER_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector;
-import org.genericsystem.reactor.model.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
-import org.genericsystem.reactor.model.ObservableValueSelector.TYPE_SELECTOR;
 import org.genericsystem.security.model.User.Salt;
 
 import javafx.beans.binding.Bindings;
@@ -243,7 +242,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Style(path = ValueComponents.class, name = "flex", value = "1 0 auto")
 	@Children(value = { PasswordEditor.class, PasswordAdder.class })
 	@ForEach(path = PasswordEditor.class, value = ObservableListExtractor.HOLDERS.class)
-	@SelectModel(path = PasswordAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
+	@SelectContext(path = PasswordAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")
@@ -259,7 +258,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Children({ Header.class, Content.class, ActionLink.class })
 	@Children(path = Header.class, value = { InputTextEditorWithConversion.class, CheckBoxEditor.class })
 	@Children(path = Content.class, value = DirectRelationComponentEditor.class)
-	@SelectModel(path = ActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
+	@SelectContext(path = ActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
 	@Select(path = { Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
 	@Select(path = { Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	@SetText(path = ActionLink.class, value = "×")
@@ -271,7 +270,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Children(value = { ValueComponentsEditor.class, HolderAdder.class })
 	@Children(path = { HolderAdder.class, Header.class }, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@ForEach(path = HolderAdder.class, value = NO_FOR_EACH.class)
-	@SelectModel(path = HolderAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
+	@SelectContext(path = HolderAdder.class, value = HOLDER_ADDITION_ENABLED_SELECTOR.class)
 	@FlexDirectionStyle(FlexDirection.COLUMN)
 	@Style(name = "flex-wrap", value = "wrap")
 	@Style(name = "overflow", value = "auto")

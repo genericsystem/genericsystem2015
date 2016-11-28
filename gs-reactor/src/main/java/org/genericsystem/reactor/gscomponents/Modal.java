@@ -1,22 +1,21 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.modelproperties.SelectionDefaults;
-
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.SelectModel;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE;
+import org.genericsystem.reactor.context.ContextAction.FLUSH_CLOSE;
+import org.genericsystem.reactor.context.ContextAction.UNMOUNT_CLOSE;
+import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
-import org.genericsystem.reactor.model.ContextAction.DISPLAY_NONE;
-import org.genericsystem.reactor.model.ContextAction.FLUSH_CLOSE;
-import org.genericsystem.reactor.model.ContextAction.UNMOUNT_CLOSE;
-import org.genericsystem.reactor.model.ObservableModelSelector.SELECTION_SELECTOR;
 
 import javafx.beans.binding.Bindings;
 
@@ -44,7 +43,7 @@ public class Modal extends FlexDiv {
 	@Style(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, name = "flex", value = "1 1 auto")
 	@Attribute(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, name = "name", value = "close")
 	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = FlexDirection.ROW)
-	@SelectModel(path = { FlexDiv.class, TitledInstanceEditor.class }, value = SELECTION_SELECTOR.class)
+	@SelectContext(path = { FlexDiv.class, TitledInstanceEditor.class }, value = SELECTION_SELECTOR.class)
 	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = FLUSH_CLOSE.class)
 	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = UNMOUNT_CLOSE.class)
 	public static class ModalEditor extends Modal implements SelectionDefaults {

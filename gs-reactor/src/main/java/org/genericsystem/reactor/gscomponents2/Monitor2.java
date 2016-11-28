@@ -6,6 +6,13 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.context.ContextAction.CANCEL;
+import org.genericsystem.reactor.context.ContextAction.FLUSH;
+import org.genericsystem.reactor.context.ContextAction.GC;
+import org.genericsystem.reactor.context.ContextAction.MOUNT;
+import org.genericsystem.reactor.context.ContextAction.SHIFTTS;
+import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
@@ -13,13 +20,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents2.Monitor2.CancelButton;
 import org.genericsystem.reactor.gscomponents2.Monitor2.LastUpdateLabel;
 import org.genericsystem.reactor.gscomponents2.Monitor2.SaveButton;
-import org.genericsystem.reactor.model.ContextAction.CANCEL;
-import org.genericsystem.reactor.model.ContextAction.FLUSH;
-import org.genericsystem.reactor.model.ContextAction.GC;
-import org.genericsystem.reactor.model.ContextAction.MOUNT;
-import org.genericsystem.reactor.model.ContextAction.SHIFTTS;
-import org.genericsystem.reactor.model.ContextAction.UNMOUNT;
-import org.genericsystem.reactor.model.TextBinding;
 
 @Children({ SaveButton.class, CancelButton.class, LastUpdateLabel.class })
 @FlexDirectionStyle(FlexDirection.ROW)

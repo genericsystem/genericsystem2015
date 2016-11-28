@@ -13,8 +13,8 @@ import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DependsOnModel;
+import org.genericsystem.reactor.context.RootContext;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.reactor.model.RootContext;
 
 import io.vertx.core.json.JsonObject;
 
