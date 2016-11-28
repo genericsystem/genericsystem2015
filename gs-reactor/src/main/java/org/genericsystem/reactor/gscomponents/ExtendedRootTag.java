@@ -1,11 +1,13 @@
 package org.genericsystem.reactor.gscomponents;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.genericsystem.api.core.AxedPropertyClass;
@@ -82,30 +84,35 @@ public class ExtendedRootTag extends RootTagImpl {
 		for (int i = 0; i < annotations.length; i++) {
 			Children childrenAnnotation = annotations[i];
 			Generic annotationGeneric = classGeneric.setHolder(tagAnnotationType, new AxedPropertyClass(Children.class, i));
-			Generic pathParam = annotationGeneric.setHolder(annotationParameter, "path");
-			pathParam.setHolder(parameterValue, childrenAnnotation.path());
-			Generic valueParam = annotationGeneric.setHolder(annotationParameter, "value");
-			valueParam.setHolder(parameterValue, childrenAnnotation.value());
-			Generic posParam = annotationGeneric.setHolder(annotationParameter, "pos");
-			posParam.setHolder(parameterValue, childrenAnnotation.pos());
+			storeAnnotationParameter(annotationGeneric, "path", childrenAnnotation.path());
+			storeAnnotationParameter(annotationGeneric, "value", childrenAnnotation.value());
+			storeAnnotationParameter(annotationGeneric, "pos", childrenAnnotation.pos());
 		}
 
 		Style[] styleAnnotations = clazz.getAnnotationsByType(Style.class);
 		for (int i = 0; i < styleAnnotations.length; i++) {
 			Style styleAnnotation = styleAnnotations[i];
 			Generic styleAnnotationGeneric = classGeneric.setHolder(tagAnnotationType, new AxedPropertyClass(Style.class, i));
-			Generic pathParam = styleAnnotationGeneric.setHolder(annotationParameter, "path");
-			pathParam.setHolder(parameterValue, styleAnnotation.path());
-			Generic valueParam = styleAnnotationGeneric.setHolder(annotationParameter, "value");
-			valueParam.setHolder(parameterValue, styleAnnotation.value());
-			Generic posParam = styleAnnotationGeneric.setHolder(annotationParameter, "pos");
-			posParam.setHolder(parameterValue, styleAnnotation.pos());
-			Generic nameParam = styleAnnotationGeneric.setHolder(annotationParameter, "name");
-			nameParam.setHolder(parameterValue, styleAnnotation.name());
+			storeAnnotationParameter(styleAnnotationGeneric, "path", styleAnnotation.path());
+			storeAnnotationParameter(styleAnnotationGeneric, "value", styleAnnotation.value());
+			storeAnnotationParameter(styleAnnotationGeneric, "pos", styleAnnotation.pos());
+			storeAnnotationParameter(styleAnnotationGeneric, "name", styleAnnotation.name());
 		}
 		storedClasses.put(clazz, classGeneric);
 		getEngine().getCurrentCache().flush();
 		return classGeneric;
+	}
+
+	private void storeAnnotationParameter(Generic annotationGeneric, String parameterName, Serializable value) {
+		Generic paramName = annotationGeneric.getComposites(parameterName).filter(g -> annotationParameter.equals(g.getMeta())).first();
+		if (paramName == null)
+			paramName = annotationGeneric.addHolder(annotationParameter, parameterName);
+		Generic paramValue = paramName.getComposites().filter(g -> parameterValue.equals(g.getMeta())).first();
+		if (paramValue != null) {
+			if (!Objects.deepEquals(value, paramValue.getValue()))
+				paramName.setHolder(parameterValue, value);
+		} else
+			paramName.addHolder(parameterValue, value);
 	}
 
 	@Override
