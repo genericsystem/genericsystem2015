@@ -50,6 +50,7 @@ function onMessageReceived(evt) {
 					selectedIndex : this.selectedIndex
 				}));
 			}
+
 			break;
 		case "section":
 			elt.classList.add("adding");
