@@ -47,7 +47,7 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	public ExtendedRootTag(Root engine) {
 		this.engine = engine;
-		storedClasses.add(AbstractTag.class);
+		storedClasses.add(TagImpl.class);
 		tagAnnotationType = engine.find(TagAnnotation.class);
 		annotationParameter = engine.find(AnnotationParameter.class);
 		parameterValue = engine.find(AnnotationParameterValue.class);
@@ -69,8 +69,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	private GTag storeClass(Class<?> clazz) {
-		System.out.println("storeClass " + clazz);
-		if (!Tag.class.isAssignableFrom(clazz))
+		if (!TagImpl.class.isAssignableFrom(clazz))
 			return getEngine().find(GTag.class);
 
 		if (storedClasses.contains(clazz))
@@ -142,7 +141,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			if (applyingAnnotation != null) {
 				Class<? extends TagImpl>[] childrenClasses = (Class<? extends TagImpl>[]) applyingAnnotation.getHolder(annotationParameter, "value").getHolder(parameterValue).getValue();
 				for (Class<? extends TagImpl> childClass : childrenClasses) {
-					AbstractTag result = createChild(tag, childClass);
+					TagImpl result = createChild(tag, childClass);
 					GenericTagNode tagNode = new GenericTagNode(result);
 					result.setTagNode(tagNode);
 					tagNode.init();
@@ -217,7 +216,7 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	@SystemGeneric
 	@Meta(GTagType.class)
-	@ClassGenericValue(AbstractTag.class)
+	@ClassGenericValue(TagImpl.class)
 	public static interface GTag extends Generic {
 
 	}

@@ -6,14 +6,48 @@ import java.util.function.Consumer;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.MetaBinding;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.context.TagSwitcher;
 
-public abstract class TagImpl extends AbstractTag {
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+
+public abstract class TagImpl implements Tag {
 
 	private MetaBinding<?> metaBinding;
 	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();
 	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
 	protected List<TagSwitcher> switchers = new ArrayList<>();
+	protected TagNode tagNode;
+	private Tag parent;
+
+	public TagNode getTagNode() {
+		return tagNode;
+	}
+
+	public void setTagNode(TagNode tagNode) {
+		this.tagNode = tagNode;
+	}
+
+	public void setParent(Tag parent) {
+		this.parent = parent;
+	}
+
+	@Override
+	public ObservableList<Tag> getObservableChildren() {
+		return getTagNode().getObservableChildren();
+	}
+
+	@Override
+	public ObservableMap<String, String> getObservableStyles() {
+		return getTagNode().getObservableStyles();
+	}
+
+	@Override
+	public <COMPONENT extends Tag> COMPONENT getParent() {
+		return (COMPONENT) parent;
+	}
 
 	@Override
 	public String toString() {
