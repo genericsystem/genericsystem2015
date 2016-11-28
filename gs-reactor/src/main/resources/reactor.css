@@ -1,34 +1,55 @@
+/* Comprendre l'utilisation réélle du @viewport
+@-webkit-viewport{
+   	width	: device-width;
+   	scale	: 1;
+}
+@-moz-viewport {
+   	width	: device-width;
+   	scale	: 1;
+}
+@-ms-viewport {
+   	width	: device-width;
+   	scale	: 1;
+}
+@-o-viewport {
+   	width	: device-width;
+   	scale	: 1;
+}
+@viewport {
+   	width	: device-width;
+   	scale	: 1;
+}
+*/
+
 html, body,input,section,header,footer {
-	margin: 0;
-	padding: 0;
-	border: 0;
+	margin			: 0;
+	padding			: 0;
+	border			: 0;
 }
 
 body {
-	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	line-height: 1.4em;
-	background: #eaeaea;
-	color: #4d4d4d;
-	width: 100%;
-	margin: 0 auto;
-	font-smoothing: antialiased;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: center;
-	
+	font				: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height			: 1.4em;
+	background			: #eaeaea;
+	color				: #4d4d4d;
+	width				: 100%;
+	margin				: 0 auto;
+	font-smoothing		: antialiased;
+	display				: flex;
+	flex-direction		: column;
+	flex-wrap			: nowrap;
+	justify-content		: center;	
 }
 
 section .adding {
-	animation: appeareffect 2s;
+	animation			: appeareffect 2s;
 }
 
-
 .opaque{
-	font-style : italic;
-	font-weight : bold;
-	font-size : 108%;
-	-webkit-backface-visibility: hidden;
+	font-style 					: italic;
+	font-weight 				: bold;
+	font-size 					: 108%;
+	-webkit-backface-visibility	: hidden;
 /* 	-webkit-filter: opacity(89%); */
 /*   	-moz-filter: opacity(89%); */
 /*   	-o-filter: opacity(89%); */
@@ -41,13 +62,13 @@ section .adding {
  */
 
 .invalid {
-	background : white;
-	animation: invalideffect 0.5s 5 forwards;
+	background 		: white;
+	animation		: invalideffect 0.5s 5 forwards;
 }
 
 @keyframes appeareffect { 
 	0% {
-		box-shadow: inset 0 0 15px rgba(0, 100, 0, 1);
+		box-shadow	: inset 0 0 15px rgba(0, 100, 0, 1);
 	}
 
 	100%
@@ -67,7 +88,7 @@ section .adding {
 
 @keyframes invalideffect { 
 	0% {
-		box-shadow: none;
+		box-shadow	: none;
 	}
 	100%
 	{
@@ -76,137 +97,285 @@ section .adding {
 }
 
 .close {
-		font-size: 40px;
-		font-weight: bold;
-		text-align:right;
-		text-decoration: none;
-		position:  absolute;
-		right: 10px;
-		top: 10px;
-		z-index: 1;
+	font-size		: 40px;
+	font-weight		: bold;
+	text-align		:right;
+	text-decoration	: none;
+	position		:  absolute;
+	right			: 10px;
+	top				: 10px;
+	z-index			: 1;
 }
+
 .img{
-	max-width : 24px; 
+	max-width 		: 24px; 
 }
+
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    display				: none; /* Hidden by default */
+    position			: fixed; /* Stay in place */
+    z-index				: 1; /* Sit on top */
+    left				: 0;
+    top					: 0;
+    width				: 100%; /* Full width */
+    height				: 100%; /* Full height */
+    overflow			: auto; /* Enable scroll if needed */
+    background-color	: rgb(0,0,0); /* Fallback color */
+    background-color	: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
 .modal-content {
-	position: relative;
-    background-color: #fefefe;
-    margin: auto;
-    border: 1px solid #888;
-    width: 100%;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-    animation: animatetop 0.4s
+	position			: relative;
+    background-color	: #fefefe;
+    margin				: auto;
+    border				: 1px solid #888;
+    width				: 100%;
+    box-shadow			: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation			: animatetop 0.4s
 }
 
 section .adding .modal-content{
-	animation: animatetop 0.4s
+	animation			: animatetop 0.4s
 } 
 
 
 @keyframes animatetop {
-    from {top: -300px; opacity: 0}
-    to {top: 0; opacity: 1}
+    from 	{top: -300px; opacity: 0}
+    to 		{top: 0; opacity: 1}
 }
 
 .buttonUser {
-			-webkit-border-radius: 30px;
--moz-border-radius: 30px;
-border-radius: 30px;
-	margin-left: auto;
-    margin-right: auto;
-	background-color: #F2F3F4;
-	text-align: center;
-	color: black;
-	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	line-height: 1.4em;
-	color: #4d4d4d;
-	height: 40px;
-	width: 100px;
+	-webkit-border-radius	: 30px;
+	-moz-border-radius		: 30px;
+	border-radius			: 30px;
+	margin-left				: auto;
+    margin-right			: auto;
+	background-color		: #F2F3F4;
+	text-align				: center;
+	color					: black;
+	font					: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height				: 1.4em;
+	color					: #4d4d4d;
+	height					: 40px;
+	width					: 100px;
 }
-@media screen and (min-device-width:480px) and (max-device-width:4000px) {
+
+.vertical-align {
+	display				: flex;
+	justify-content		: center;
+	flex-direction		: column;
+	flex-wrap			: nowrap;
+	margin-top			: auto;
+	margin-bottom		: auto;
+}
+
+.margin-lr-10 {
+	margin-left			: 10px;
+	margin-right		: 10px;
+}
+
+.margin-t-10 {
+	margin-top			: 10px;
+}
+
+.padding-lr-5 {
+	padding-left		: 5px;
+	padding-right		: 5px;
+}
+
+.white {
+	color				: white;
+}
+
+/*
+@media screen and (min-device-width:480px) and (max-device-width:4000px) { 
+*/
+@media screen and (min-width: 1024px) {
 	.buttonDiv{
-	min-width : 70px;
+		min-width 		: 70px;
 	}
 	.screenResponsive {
-	min-width : 22cm;
+		min-width 		: 22cm;
 	}
 	.widthResponsive{
-		max-width:60%;
-
-	}.img{
-	max-width : 24px;
+		max-width		: 60%;
 	}
+	.img{
+		max-width 		: 24px;
+	}
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: row nowrap;	
+		justify-content	: space-around;
+	}
+	.monitorButton {
+		margin-right	: 10px;
+		margin-top		: auto;
+		margin-bottom	: auto;
+		height			: 35px;
+		border-radius	: 5px;
+		max-width		: 40%;
+		width			: 100px;
+	}
+	.monitorLabel {
+		text-align		: center;
+	}
+	.loginResponsive {
+		display			: -webkit-flex; /* Safari */
+		display			: flex;
+		flex-flow		: row nowrap;	
+		justify-content	: space-around;
+	}
+	.inputTxtResponsive {
+		border-radius	: 0px;
+		height			: 35px;
+		margin			: auto;
+	}
+	.choiceResponsive {
+		margin-right	: 10px;
+		margin-top		: auto;
+		margin-bottom	: auto;
+		min-width		: 50px;
+		height			: 35px;
+	}	
 }
-@media only screen and (max-width:480px) and (orientation : portrait), 
-only screen and (max-device-width:480px) and (orientation : portrait){
+
+/*	
+@media only screen and (max-width:479px) and (orientation : portrait), 
+only screen and (max-device-width:479px) and (orientation : portrait){
+*/
+@media screen and (max-width: 499px) {
 	.body {
-	font: 8px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	line-height: 1.4em;
-	background: #eaeaea;
-	color: #4d4d4d;
-	width: 100%;
-	margin: 0 auto;
-	font-smoothing: antialiased;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: center;
-	
-}.buttonDiv{
-	min-width : 40px;
+		font			: 8px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		line-height		: 1.4em;
+		background		: #eaeaea;
+		color			: #4d4d4d;
+		width			: 100%;
+		margin			: 0 auto;
+		font-smoothing	: antialiased;
+		display			: flex;
+		flex-direction	: column;
+		flex-wrap		: nowrap;
+		justify-content	: center;	
 	}
-	.screenResponsive{
-	min-width : 7cm;
+	.buttonDiv {
+		min-width 		: 40px;
 	}
+	.screenResponsive {
+		min-width 		: 7cm;
+	}	
 	.widthResponsive{
-		max-width:80%;
-	}.img{
-	max-width : 16px;
+		max-width		: 80%;
+	}	
+	.img{
+		max-width 		: 16px;
 	}
-}.divWithTitle{
-	-webkit-flex : 1 0 200px;
+	.divWithTitle{
+		-webkit-flex 	: 1 0 200px;
+	}
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+		background-color: black;
+	}
+	.monitorButton {
+		width 			: 40%;
+		min-width		: 40px;
+		heigth			: 100%;
+		min-height		: 40px;
+		border-radius	: 5px;
+	}
+	.monitorLabel {
+		display			: flex;
+		text-align		: center;
+		margin-top		: 10px;
+		margin-bottom	: 10px; 	
+	}
+	.loginResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}
+	.inputTxtResponsive {
+		border-radius	: 5px;
+		height			: 30px;
+		margin-left		: 10px;
+		margin-right	: 10px;
+		margin-bottom	: 10px;
+	}
+	.choiceResponsive {
+		margin-right	: 10px;
+		width			: 40%;		
+	}	
 }
 
+/*
 @media only screen and (max-width:960px) and (orientation : landscape),
 only screen and (max-device-width: 960px) and (orientation : landscape){
+*/
+@media screen and (min-width: 500px) and (max-width: 1023px) {
 	.body {
-	font: 10px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	line-height: 1.4em;
-	background: #eaeaea;
-	color: #4d4d4d;
-	width: 100%;
-	margin: 0 auto;
-	font-smoothing: antialiased;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: center;
+		font			: 10px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		line-height		: 1.4em;
+		background		: #eaeaea;
+		color			: #4d4d4d;
+		width			: 100%;
+		margin			: 0 auto;
+		font-smoothing	: antialiased;
+		display			: flex;
+		flex-direction	: column;
+		flex-wrap		: nowrap;
+		justify-content	: center;
+	}
+	.buttonDiv {
+		min-width 		: 60px;
+	}
+	.screenResponsive {
+		min-width 		: 14cm;
+	}
+	.widthResponsive {
+		max-width		: 80%;
+	}
+	.img {
+		max-width 		: 16px;
+	}
+	.divWithTitle {
+		-webkit-flex 	: 1 0 400px;
+	}
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}
+	.monitorButton {
+		width 			: 40%;
+		min-width		: 60px;
+		heigth			: 100%;
+		min-height		: 40px;
+		border-radius	: 5px;
+	}
+	.monitorLabel {
+		text-align		: center;
+		margin-top		: 10px;
+		margin-bottom	: 10px; 	
+	}
+	.loginResponsive {
+		display			: flex;
+		flex-flow		: row nowrap;	
+		justify-content	: end;
+	}
+	.inputTxtResponsive {
+		border-radius	: 5px;
+		height			: 30px;
+		margin-left		: 10px;
+		margin-right	: 10px;
+	}
+	.choiceResponsive {
+		margin-right	: 10px;
+		width			: 40%;
+		min-width		: 50px; 
+	}
 	
-}.buttonDiv{
-	min-width : 60px;
-	}
-	.screenResponsive{
-	min-width : 14cm;
-	}
-	.widthResponsive{
-		max-width:80%;
-	}.img{
-	max-width : 16px;
-	}
-}.divWithTitle{
-	-webkit-flex : 1 0 400px;
 }
 
