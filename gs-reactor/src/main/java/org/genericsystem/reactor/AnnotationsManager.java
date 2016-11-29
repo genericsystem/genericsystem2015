@@ -89,7 +89,7 @@ public class AnnotationsManager {
 				List<Annotation> annotationsFound = selectAnnotations(current.getClass(), processor.getAnnotationClass(), classesToResult, tag);
 				if (!DirectSelect.class.equals(processor.getAnnotationClass())) {
 					Class<?> superClass = current.getClass().getSuperclass();
-					while (annotationsFound.isEmpty() && superClass != null) {
+					while (annotationsFound.isEmpty() && Tag.class.isAssignableFrom(superClass)) {
 						annotationsFound = selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag);
 						superClass = superClass.getSuperclass();
 					}
@@ -106,7 +106,7 @@ public class AnnotationsManager {
 			while (current != null) {
 				Class<?> superClass = current.getClass();
 				List<Annotation> annotationsFound = new ArrayList<>();
-				while (superClass != null) {
+				while (Tag.class.isAssignableFrom(superClass)) {
 					annotationsFound.addAll(selectAnnotations(superClass, processor.getAnnotationClass(), classesToResult, tag));
 					superClass = superClass.getSuperclass();
 				}

@@ -136,7 +136,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			while (current != null) {
 				Generic annotationFound = selectAnnotation(current.getClass(), Children.class, classesToResult, tag);
 				Class<?> superClass = current.getClass().getSuperclass();
-				while (annotationFound == null && superClass != null) {
+				while (annotationFound == null && Tag.class.isAssignableFrom(superClass)) {
 					annotationFound = selectAnnotation(superClass, Children.class, classesToResult, tag);
 					superClass = superClass.getSuperclass();
 				}
