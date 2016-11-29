@@ -1,6 +1,12 @@
-package model;
+package org.genericsystem.quiz.model;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.quiz.model.QuestionDiv.Empty;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv;
+import org.genericsystem.quiz.model.QuestionDiv.UnitDiv;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.NextBtn;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.PreviousBtn;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -23,12 +29,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 
 import javafx.collections.ObservableList;
-import model.QuestionDiv.Empty;
-import model.QuestionDiv.FooterDiv;
-import model.QuestionDiv.UnitDiv;
-import model.QuestionDiv.FooterDiv.FinishBtn;
-import model.QuestionDiv.FooterDiv.NextBtn;
-import model.QuestionDiv.FooterDiv.PreviousBtn;
 
 @Children({ UnitDiv.class, FooterDiv.class, Empty.class })
 //

@@ -1,8 +1,12 @@
-package org.genericsystem.quiz;
+package org.genericsystem.quiz.app;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.quiz.QuizAdmin.QuizScript;
+import org.genericsystem.quiz.app.QuizAdmin.QuizScript;
+import org.genericsystem.quiz.model.Answer;
+import org.genericsystem.quiz.model.Question;
+import org.genericsystem.quiz.model.Quiz;
+import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.CustomAnnotations;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -22,11 +26,6 @@ import org.genericsystem.reactor.gscomponents.Monitor;
 import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.User;
-
-import model.Answer;
-import model.Question;
-import model.Quiz;
-import model.UserAnswer;
 
 /**
  * @author Nicolas Feybesse

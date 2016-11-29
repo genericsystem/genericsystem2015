@@ -1,4 +1,4 @@
-package model;
+package org.genericsystem.quiz.model;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;

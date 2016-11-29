@@ -1,8 +1,12 @@
-package org.genericsystem.quiz;
+package org.genericsystem.quiz.app;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.quiz.QuizApp.QuizzScript;
+import org.genericsystem.quiz.app.QuizApp.QuizzScript;
+import org.genericsystem.quiz.model.Answer;
+import org.genericsystem.quiz.model.Question;
+import org.genericsystem.quiz.model.QuestionDiv;
+import org.genericsystem.quiz.model.Quiz;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
@@ -11,11 +15,6 @@ import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.User;
-
-import model.Answer;
-import model.Question;
-import model.QuestionDiv;
-import model.Quiz;
 
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class })
