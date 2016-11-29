@@ -343,6 +343,20 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		return new HtmlDomNode(parent, modelContext, this);
 	};
 
+	default void createSubTree() {
+		getRootTag().getAnnotationsManager().processChildrenAnnotations(this);
+		for (Tag child : getObservableChildren())
+			child.createSubTree();
+	}
+
+	default Tag initTree() {
+		getRootTag().processAnnotations(this);
+		init();
+		for (Tag child : getObservableChildren())
+			child.initTree();
+		return this;
+	}
+
 	@Override
 	public ObservableList<Tag> getObservableChildren();
 

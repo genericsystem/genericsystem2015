@@ -16,24 +16,23 @@ import javafx.collections.ObservableMap;
 
 public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, UserRoleDefaults {
 
-	private AnnotationsManager annotationsManager;
+	protected AnnotationsManager annotationsManager;
 
 	public RootTagImpl() {
 		createSelectionProperty();
 		createLoggedUserProperty();
 		createAdminModeProperty();
+		initRoot();
+	}
+
+	protected void initRoot() {
 		annotationsManager = new AnnotationsManager();
 		Annotation annotations = getClass().getAnnotation(CustomAnnotations.class);
 		if (annotations != null)
 			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
 				annotationsManager.registerAnnotation(annotation);
-		initRoot();
-	}
-
-	protected void initRoot() {
 		setTagNode(buildTagNode(this));
-		processAnnotations(this);
-		init();
+		createSubTree();
 	}
 
 	@Override

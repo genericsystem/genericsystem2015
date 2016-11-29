@@ -17,6 +17,7 @@ import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.Children.ChildrenProcessor;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Process;
@@ -54,7 +55,6 @@ public class AnnotationsManager {
 	}
 
 	public AnnotationsManager() {
-		registerAnnotation(Children.class);
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
@@ -73,6 +73,14 @@ public class AnnotationsManager {
 		registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
+	}
+
+	public void processChildrenAnnotations(Tag tag) {
+		try {
+			processAnnotation(new AnnotationProcessor(Children.class, ChildrenProcessor.class.newInstance(), false), tag);
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public void processAnnotations(Tag tag) {

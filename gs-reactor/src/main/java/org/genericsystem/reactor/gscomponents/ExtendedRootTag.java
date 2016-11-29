@@ -23,10 +23,12 @@ import org.genericsystem.api.core.annotations.value.ClassGenericValue;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.reactor.AnnotationsManager;
+import org.genericsystem.reactor.ExtendedAnnotationsManager;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.CustomAnnotations;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.AnnotationParameter;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.AnnotationParameterValue;
@@ -53,7 +55,14 @@ public class ExtendedRootTag extends RootTagImpl {
 		tagAnnotationType = engine.find(TagAnnotation.class);
 		annotationParameter = engine.find(AnnotationParameter.class);
 		parameterValue = engine.find(AnnotationParameterValue.class);
-		super.initRoot();
+		storeClass(this.getClass());
+		annotationsManager = new ExtendedAnnotationsManager();
+		Annotation annotations = getClass().getAnnotation(CustomAnnotations.class);
+		if (annotations != null)
+			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
+				annotationsManager.registerAnnotation(annotation);
+		setTagNode(buildTagNode(this));
+		createSubTree();
 	}
 
 	@Override
@@ -66,7 +75,6 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	@Override
 	public TagNode buildTagNode(Tag tag) {
-		storeClass(tag.getClass());
 		return new GenericTagNode(tag).init();
 	}
 
@@ -84,9 +92,12 @@ public class ExtendedRootTag extends RootTagImpl {
 		for (int i = 0; i < annotations.length; i++) {
 			Children childrenAnnotation = annotations[i];
 			Generic annotationGeneric = classGeneric.setHolder(tagAnnotationType, new AxedPropertyClass(Children.class, i));
+			Class<?>[] childClasses = childrenAnnotation.value();
 			storeAnnotationParameter(annotationGeneric, "path", childrenAnnotation.path());
-			storeAnnotationParameter(annotationGeneric, "value", childrenAnnotation.value());
+			storeAnnotationParameter(annotationGeneric, "value", childClasses);
 			storeAnnotationParameter(annotationGeneric, "pos", childrenAnnotation.pos());
+			for (Class<?> childClass : childClasses)
+				storeClass(childClass);
 		}
 
 		Style[] styleAnnotations = clazz.getAnnotationsByType(Style.class);
@@ -115,12 +126,6 @@ public class ExtendedRootTag extends RootTagImpl {
 			paramName.addHolder(parameterValue, value);
 	}
 
-	@Override
-	public void processChildren(Tag tag, Class<? extends TagImpl>[] classes) {
-		for (Class<?> clazz : classes)
-			storeClass(clazz);
-	}
-
 	public class GenericTagNode implements TagNode {
 		private ObservableList<Tag> children = FXCollections.observableArrayList();
 		private Tag tag;
@@ -147,22 +152,15 @@ public class ExtendedRootTag extends RootTagImpl {
 			}
 			if (applyingAnnotation != null) {
 				Class<? extends TagImpl>[] childrenClasses = (Class<? extends TagImpl>[]) applyingAnnotation.getHolder(annotationParameter, "value").getHolder(parameterValue).getValue();
-				for (Class<? extends TagImpl> childClass : childrenClasses) {
-					TagImpl result = createChild(tag, childClass);
-					GenericTagNode tagNode = new GenericTagNode(result);
-					result.setTagNode(tagNode);
-					tagNode.init();
-					processAnnotations(result);
-					result.init();
-					children.add(result);
-				}
+				for (Class<? extends TagImpl> childClass : childrenClasses)
+					children.add(createChild(tag, childClass));
 			}
 			return this;
 		}
 
 		private Generic selectAnnotation(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
 			Generic annotationFound = null;
-			Generic tagClass = storeClass(annotatedClass);
+			Generic tagClass = storedClasses.get(annotatedClass);
 			List<Generic> annotations = tagClass.getObservableHolders(tagAnnotationType).filtered(g -> annotationClass.equals(((AxedPropertyClass) g.getValue()).getClazz()));
 			for (Generic annotation : annotations) {
 				Class<?>[] path = (Class<?>[]) annotation.getHolder(annotationParameter, "path").getHolder(parameterValue).getValue();

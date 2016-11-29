@@ -29,8 +29,6 @@ public interface RootTag extends Tag {
 		for (Class<? extends TagImpl> clazz : classes) {
 			TagImpl result = createChild(tag, clazz);
 			result.setTagNode(buildTagNode(result));
-			processAnnotations(result);
-			result.init();
 		}
 	}
 

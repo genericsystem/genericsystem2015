@@ -41,11 +41,11 @@ public class PersistentApplication {
 			log.info("Script has run");
 		}
 		try {
-			tagTree = getApplicationClass().newInstance();
+			tagTree = (RootTag) getApplicationClass().newInstance().initTree();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
 			try {
 				engine.newCache().start();
-				tagTree = getApplicationClass().getConstructor(Root.class).newInstance(engine);
+				tagTree = (RootTag) getApplicationClass().getConstructor(Root.class).newInstance(engine).initTree();
 				engine.getCurrentCache().flush();
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException | NoSuchMethodException ex) {
 				throw new IllegalStateException(ex);
