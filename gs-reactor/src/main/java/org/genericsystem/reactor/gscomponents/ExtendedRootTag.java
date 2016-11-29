@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,10 @@ public class ExtendedRootTag extends RootTagImpl {
 		return new GenericTagNode(tag).init();
 	}
 
+	static long start;
+	static long time;
+	static long total;
+
 	private GTag storeClass(Class<?> clazz) {
 		if (!TagImpl.class.isAssignableFrom(clazz))
 			return getEngine().find(GTag.class);
@@ -109,6 +114,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			storeAnnotationParameter(styleAnnotationGeneric, "pos", styleAnnotation.pos());
 			storeAnnotationParameter(styleAnnotationGeneric, "name", styleAnnotation.name());
 		}
+
 		storedClasses.put(clazz, classGeneric);
 		getEngine().getCurrentCache().flush();
 		return classGeneric;
@@ -128,6 +134,7 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	public class GenericTagNode implements TagNode {
 		private ObservableList<Tag> children = FXCollections.observableArrayList();
+		private ObservableList<Generic> applyingStyles = FXCollections.observableArrayList();
 		private Tag tag;
 
 		public GenericTagNode(Tag tag) {
@@ -136,17 +143,19 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		public GenericTagNode init() {
 			List<Class<?>> classesToResult = new ArrayList<>();
+
+			// @Children annotations
 			Tag current = tag;
 			Generic applyingAnnotation = null;
 			while (current != null) {
-				Generic annotationFound = selectAnnotation(current.getClass(), Children.class, classesToResult, tag);
+				List<Generic> annotationFound = selectAnnotations(current.getClass(), Children.class, classesToResult, tag);
 				Class<?> superClass = current.getClass().getSuperclass();
-				while (annotationFound == null && Tag.class.isAssignableFrom(superClass)) {
-					annotationFound = selectAnnotation(superClass, Children.class, classesToResult, tag);
+				while (annotationFound.isEmpty() && Tag.class.isAssignableFrom(superClass)) {
+					annotationFound = selectAnnotations(superClass, Children.class, classesToResult, tag);
 					superClass = superClass.getSuperclass();
 				}
-				if (annotationFound != null)
-					applyingAnnotation = annotationFound;
+				if (!annotationFound.isEmpty())
+					applyingAnnotation = annotationFound.get(0);
 				classesToResult.add(0, current.getClass());
 				current = current.getParent();
 			}
@@ -155,13 +164,29 @@ public class ExtendedRootTag extends RootTagImpl {
 				for (Class<? extends TagImpl> childClass : childrenClasses)
 					children.add(createChild(tag, childClass));
 			}
+
+			classesToResult = new ArrayList<>();
+			current = tag;
+			while (current != null) {
+				Class<?> superClass = current.getClass();
+				List<Generic> annotationsFound = new ArrayList<>();
+				while (Tag.class.isAssignableFrom(superClass)) {
+					annotationsFound.addAll(selectAnnotations(superClass, Style.class, classesToResult, tag));
+					superClass = superClass.getSuperclass();
+				}
+				Collections.reverse(annotationsFound);
+				applyingStyles.addAll(annotationsFound);
+				classesToResult.add(0, current.getClass());
+				current = current.getParent();
+			}
+
 			return this;
 		}
 
-		private Generic selectAnnotation(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
-			Generic annotationFound = null;
+		private List<Generic> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
+			List<Generic> annotationFound = new ArrayList<>();
 			Generic tagClass = storedClasses.get(annotatedClass);
-			List<Generic> annotations = tagClass.getObservableHolders(tagAnnotationType).filtered(g -> annotationClass.equals(((AxedPropertyClass) g.getValue()).getClazz()));
+			List<Generic> annotations = tagClass.getObservableComposites().filtered(g -> tagAnnotationType.equals(g.getMeta()) && annotationClass.equals(((AxedPropertyClass) g.getValue()).getClazz()));
 			for (Generic annotation : annotations) {
 				Class<?>[] path = (Class<?>[]) annotation.getHolder(annotationParameter, "path").getHolder(parameterValue).getValue();
 				int[] pos = (int[]) annotation.getHolder(annotationParameter, "pos").getHolder(parameterValue).getValue();
@@ -169,10 +194,10 @@ public class ExtendedRootTag extends RootTagImpl {
 					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + Arrays.stream(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
 				if (AnnotationsManager.isAssignableFrom(Arrays.asList(path), classesToResult) && AnnotationsManager.posMatches(pos, path, tag)) {
-					if (annotationFound != null && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
+					if (!annotationFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-					annotationFound = annotation;
+					annotationFound.add(annotation);
 				}
 			}
 			return annotationFound;
@@ -185,7 +210,17 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		@Override
 		public ObservableMap<String, String> getObservableStyles() {
-			return FXCollections.observableHashMap();
+			start = System.currentTimeMillis();
+			ObservableMap<String, String> styles = FXCollections.observableHashMap();
+			for (Generic applyingStyle : applyingStyles) {
+				Generic styleName = applyingStyle.getHolder(annotationParameter, "name").getHolder(parameterValue);
+				Generic styleValue = applyingStyle.getHolder(annotationParameter, "value").getHolder(parameterValue);
+				styles.put((String) styleName.getValue(), (String) styleValue.getValue());
+			}
+			time = System.currentTimeMillis() - start;
+			total += time;
+			System.out.println("===== Temps passé sur calcul des styles (" + tag.getClass().getSimpleName() + ") : " + time + ", total : " + total);
+			return styles;
 		}
 	}
 

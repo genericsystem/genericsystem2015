@@ -42,19 +42,11 @@ public class AnnotationsManager {
 
 	public static final Logger log = LoggerFactory.getLogger(AnnotationsManager.class);
 
-	public void registerAnnotation(Class<? extends Annotation> annotationClass) {
-		Annotation processAnnotation = annotationClass.getAnnotation(Process.class);
-		if (processAnnotation != null) {
-			try {
-				processors.add(new AnnotationProcessor(annotationClass, ((Process) processAnnotation).value().newInstance(), ((Process) processAnnotation).repeatable()));
-			} catch (IllegalAccessException | InstantiationException e) {
-				throw new IllegalStateException(e);
-			}
-		} else
-			log.warn("Unable to find a processor on annotation : " + annotationClass.getSimpleName());
+	public AnnotationsManager() {
+		initManager();
 	}
 
-	public AnnotationsManager() {
+	public void initManager() {
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
@@ -73,6 +65,18 @@ public class AnnotationsManager {
 		registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
+	}
+
+	public void registerAnnotation(Class<? extends Annotation> annotationClass) {
+		Annotation processAnnotation = annotationClass.getAnnotation(Process.class);
+		if (processAnnotation != null) {
+			try {
+				processors.add(new AnnotationProcessor(annotationClass, ((Process) processAnnotation).value().newInstance(), ((Process) processAnnotation).repeatable()));
+			} catch (IllegalAccessException | InstantiationException e) {
+				throw new IllegalStateException(e);
+			}
+		} else
+			log.warn("Unable to find a processor on annotation : " + annotationClass.getSimpleName());
 	}
 
 	public void processChildrenAnnotations(Tag tag) {
