@@ -1,10 +1,11 @@
-package org.genericsystem.quiz;
+package org.genericsystem.quiz.app;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.quiz.QuizzApp2.QuizzScript;
+import org.genericsystem.quiz.app.QuizApp.QuizzScript;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
+import org.genericsystem.quiz.model.QuestionDiv;
 import org.genericsystem.quiz.model.Quiz;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -15,8 +16,6 @@ import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.User;
 
-import ihm.QuestionDiv;
-
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class })
 @Children(QuestionDiv.class)
@@ -24,13 +23,13 @@ import ihm.QuestionDiv;
 // @Children(path = Responsive.class, value = TitledInstancesTable.class)
 @Style(name = "background-color", value = "grey")
 // @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = Question.class)
-public class QuizzApp2 extends RootTagImpl {
+public class QuizApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, QuizzApp2.class, "/QuizzApp");
+		ApplicationServer.startSimpleGenericApp(mainArgs, QuizApp.class, "/QuizzApp");
 	}
 
-	public QuizzApp2() {
+	public QuizApp() {
 		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 

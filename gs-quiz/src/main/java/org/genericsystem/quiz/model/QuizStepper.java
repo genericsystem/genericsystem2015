@@ -1,13 +1,13 @@
-package utils;
+package org.genericsystem.quiz.model;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 
-public interface StepperBis extends StepperDefaults {
+public interface QuizStepper extends StepperDefaults {
 
 	// Tests -> Mettre un tag (bouton "Next") en argument de méthode, afin de le changer si on arrive a la fin de la liste
 	// TODO -> Refaire apparaitre le bouton lorsqu'on appuie sur "Previous"

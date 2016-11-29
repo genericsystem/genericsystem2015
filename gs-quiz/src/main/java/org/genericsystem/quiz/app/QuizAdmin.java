@@ -1,8 +1,8 @@
-package org.genericsystem.quiz;
+package org.genericsystem.quiz.app;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.quiz.QuizApp.QuizScript;
+import org.genericsystem.quiz.app.QuizAdmin.QuizScript;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.Quiz;
@@ -39,12 +39,12 @@ import org.genericsystem.security.model.User;
 @Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "Java Appraisal")
 @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { Quiz.class, Question.class, Answer.class, UserAnswer.class, User.class })
-public class QuizApp extends RootTagImpl {
+public class QuizAdmin extends RootTagImpl {
 	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, QuizApp.class, "/quiz");
+		ApplicationServer.startSimpleGenericApp(mainArgs, QuizAdmin.class, "/quiz");
 	}
 
-	public QuizApp() {
+	public QuizAdmin() {
 		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 
@@ -73,6 +73,7 @@ public class QuizApp extends RootTagImpl {
 			answer1.setLink(userAnswer, false, fabienne);
 
 			engine.getCurrentCache().flush();
+
 		}
 
 	}

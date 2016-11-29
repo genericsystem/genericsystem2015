@@ -1,8 +1,12 @@
-package ihm;
+package org.genericsystem.quiz.model;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.model.Answer;
-import org.genericsystem.quiz.model.Question;
+import org.genericsystem.quiz.model.QuestionDiv.Empty;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv;
+import org.genericsystem.quiz.model.QuestionDiv.UnitDiv;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.NextBtn;
+import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.PreviousBtn;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -14,24 +18,17 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.model.ContextAction;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
-import ihm.QuestionDiv.Empty;
-import ihm.QuestionDiv.FooterDiv;
-import ihm.QuestionDiv.FooterDiv.FinishBtn;
-import ihm.QuestionDiv.FooterDiv.NextBtn;
-import ihm.QuestionDiv.FooterDiv.PreviousBtn;
-import ihm.QuestionDiv.UnitDiv;
 import javafx.collections.ObservableList;
-import utils.StepperBis;
 
 @Children({ UnitDiv.class, FooterDiv.class, Empty.class })
 //
@@ -119,7 +116,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		@Style(name = "text-align", value = "center")
 		//
 		@BindAction(NEXT_TAG.class)
-		public static class NextBtn extends HtmlButton implements StepperBis {
+		public static class NextBtn extends HtmlButton implements QuizStepper {
 
 		}
 
@@ -129,7 +126,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		@Style(name = "text-align", value = "center")
 		//
 		@BindAction(PREVIOUS_TAG.class)
-		public static class PreviousBtn extends HtmlButton implements StepperBis {
+		public static class PreviousBtn extends HtmlButton implements QuizStepper {
 
 		}
 
@@ -137,7 +134,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		//
 		@Style(name = "display", value = "none")
 		@Style(name = "text-align", value = "center")
-		public static class FinishBtn extends HtmlButton implements StepperBis {
+		public static class FinishBtn extends HtmlButton implements QuizStepper {
 
 		}
 
@@ -146,7 +143,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	public static class NEXT_TAG implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tagNext) {
-			if (StepperBis.class.isAssignableFrom(tagNext.getClass())) {
+			if (QuizStepper.class.isAssignableFrom(tagNext.getClass())) {
 
 				// Réussir à insérer les tags de navigation (PREVIOUS, NEXT, FINISH)
 
@@ -154,7 +151,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 				Tag tagPrevious = tag.find(PreviousBtn.class);
 				Tag tagFinish = tag.find(FinishBtn.class);
 
-				((StepperBis) tagNext).next(context, tagNext, tagPrevious, tagFinish);
+				((QuizStepper) tagNext).next(context, tagNext, tagPrevious, tagFinish);
 
 			} else
 				log.warn("The NEXT action is applicable only to a tag implementing StepperDefaults.");
@@ -164,13 +161,13 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	public static class PREVIOUS_TAG implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tagPrevious) {
-			if (StepperBis.class.isAssignableFrom(tagPrevious.getClass())) {
+			if (QuizStepper.class.isAssignableFrom(tagPrevious.getClass())) {
 
 				Tag tag = tagPrevious.getParent();
 				Tag tagNext = tag.find(NextBtn.class);
 				Tag tagFinish = tag.find(FinishBtn.class);
 
-				((StepperBis) tagPrevious).prev(context, tagNext, tagPrevious, tagFinish);
+				((QuizStepper) tagPrevious).prev(context, tagNext, tagPrevious, tagFinish);
 
 			} else
 				log.warn("The PREVIOUS action is applicable only to a tag implementing StepperDefaults.");
