@@ -73,6 +73,7 @@ public class QuizApp extends RootTagImpl {
 			answer1.setLink(userAnswer, false, fabienne);
 
 			engine.getCurrentCache().flush();
+
 		}
 
 	}

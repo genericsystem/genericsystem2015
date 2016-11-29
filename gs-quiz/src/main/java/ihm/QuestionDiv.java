@@ -14,15 +14,15 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.model.ContextAction;
-import org.genericsystem.reactor.model.ObservableListExtractor;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
 
 import ihm.QuestionDiv.Empty;
 import ihm.QuestionDiv.FooterDiv;

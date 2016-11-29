@@ -2,7 +2,7 @@ package utils;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.modelproperties.StepperDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
