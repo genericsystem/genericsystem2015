@@ -226,13 +226,13 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				GSBuilderDefaults buildTag = (GSBuilderDefaults) tag;
 				Generic type = context.getGeneric();
 				Map<Generic, GenericValueComponents> gvc = buildTag.getGenericValueComponents(context).getValue();
-				Generic[] components = gvc.get(type).getComponents().entrySet().stream().filter(obs -> obs.getValue() != null && obs.getValue().getValue() != null).map(entry -> entry.getKey().setInstance(entry.getValue().getValue()))
+				Generic[] components = gvc.get(type).getComponents().entrySet().stream().filter(obs -> obs.getValue() != null && obs.getValue().getValue() != null).map(entry -> getOrSetInstance(entry.getKey(), entry.getValue().getValue()))
 						.filter(gen -> gen != null).toArray(Generic[]::new);
 				if ((gvc.get(type).getGenericValue().getValue() != null || components.length != 0) && components.length == type.getComponents().size()) {
 					Generic newInstance = type.setInstance(gvc.get(type).getGenericValue().getValue(), components);
 					for (Entry<Generic, GenericValueComponents> entry : gvc.entrySet().stream().filter(e -> !e.getKey().equals(type)).collect(Collectors.toSet())) {
 						Generic[] selectedGenerics = entry.getValue().getComponents().entrySet().stream().filter(entry_ -> entry_.getValue() != null && entry_.getValue().getValue() != null)
-								.map(entry_ -> entry_.getKey().setInstance(entry_.getValue().getValue())).filter(gen -> gen != null).toArray(Generic[]::new);
+								.map(entry_ -> getOrSetInstance(entry_.getKey(), entry_.getValue().getValue())).filter(gen -> gen != null).toArray(Generic[]::new);
 						if ((entry.getValue().getGenericValue().getValue() != null || selectedGenerics.length != 0) && selectedGenerics.length + 1 == entry.getKey().getComponents().size()) {
 							Generic newHolder = newInstance.setHolder(entry.getKey(), entry.getValue().getGenericValue().getValue(), selectedGenerics);
 							if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass()) && context.find(Password.class) != null && newHolder.isInstanceOf(context.find(Password.class)))
@@ -257,6 +257,12 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				}
 			} else
 				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults.");
+		}
+
+		// Necessary because setInstance returns only instances without a super, whereas getInstance can return instances with a super too.
+		private Generic getOrSetInstance(Generic type, Serializable value) {
+			Generic instance = type.getInstance(value);
+			return instance != null ? instance : type.addInstance(value);
 		}
 
 	}
