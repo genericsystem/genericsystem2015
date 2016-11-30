@@ -15,7 +15,7 @@
 		<java.version>1.8</java.version>
 
 		<maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
-		<maven-eclipse-plugin.version>2.9</maven-eclipse-plugin.version>
+		<maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
 		<wildfly-maven-plugin.version>1.0.2.Final</wildfly-maven-plugin.version>
 		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
 		<maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
@@ -50,8 +50,8 @@
 		<module>gs-example-jsf</module>
 		<module>gs-example-javafx</module>
 		<module>gs-todomvc</module>
-		<module>gs-carcolor-model</module>
-		<module>gs-extendedcarcolor-model</module>
+		<module>gs-carcolor</module>
+		<module>gs-extendedcarcolor</module>
 		<module>gs-security-model</module>
 		<module>gs-security</module>
 	</modules>

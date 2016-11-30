@@ -1,12 +1,14 @@
-package org.genericsystem.quiz.model;
+package org.genericsystem.quiz.app;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.model.QuestionDiv.Empty;
-import org.genericsystem.quiz.model.QuestionDiv.FooterDiv;
-import org.genericsystem.quiz.model.QuestionDiv.UnitDiv;
-import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.FinishBtn;
-import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.NextBtn;
-import org.genericsystem.quiz.model.QuestionDiv.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.app.QuestionDiv.Empty;
+import org.genericsystem.quiz.app.QuestionDiv.FooterDiv;
+import org.genericsystem.quiz.app.QuestionDiv.UnitDiv;
+import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.NextBtn;
+import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.model.Answer;
+import org.genericsystem.quiz.model.Question;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
