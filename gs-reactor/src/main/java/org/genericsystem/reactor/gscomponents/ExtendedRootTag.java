@@ -213,8 +213,10 @@ public class ExtendedRootTag extends RootTagImpl {
 			start = System.currentTimeMillis();
 			ObservableMap<String, String> styles = FXCollections.observableHashMap();
 			for (Generic applyingStyle : applyingStyles) {
-				Generic styleName = applyingStyle.getHolder(annotationParameter, "name").getHolder(parameterValue);
-				Generic styleValue = applyingStyle.getHolder(annotationParameter, "value").getHolder(parameterValue);
+				Generic styleName = applyingStyle.getComposites("name").filter(g -> annotationParameter.equals(g.getMeta())).first().getComposites().filter(g -> parameterValue.equals(g.getMeta())).first();
+				Generic styleValue = applyingStyle.getComposites("value").filter(g -> annotationParameter.equals(g.getMeta())).first().getComposites().filter(g -> parameterValue.equals(g.getMeta())).first();
+				//				Generic styleName = applyingStyle.getHolder(annotationParameter, "name").getHolder(parameterValue);
+				//				Generic styleValue = applyingStyle.getHolder(annotationParameter, "value").getHolder(parameterValue);
 				styles.put((String) styleName.getValue(), (String) styleValue.getValue());
 			}
 			time = System.currentTimeMillis() - start;
@@ -242,6 +244,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		@SystemGeneric
 		@Components(TagAnnotation.class)
 		@InstanceValueClassConstraint(String.class)
+		@NoInheritance
 		public static interface AnnotationParameter extends Generic {
 
 		}
@@ -249,6 +252,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		@SystemGeneric
 		@Components(AnnotationParameter.class)
 		@PropertyConstraint
+		@NoInheritance
 		public static interface AnnotationParameterValue extends Generic {
 
 		}
