@@ -20,21 +20,25 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ObservableContextSelector;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstancesTable;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceStepEditor;
+import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorExtended;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.reactor.gscomponents2.Editor2;
-import org.genericsystem.reactor.gscomponents2.Editor2.HorizontalGSEditor;
-import org.genericsystem.reactor.gscomponents2.Monitor2.MonitorExtended2;
-import org.genericsystem.reactor.gscomponents2.Table2;
-import org.genericsystem.reactor.gscomponents2.Table2.HorizontalTable;
 
 @DependsOnModel({ Car.class, Power.class, UsedCar.class, Color.class, CarColor.class, CarColor2.class })
 @RunScript(ExampleReactorScript.class)
-@Children({ Table2.class, HorizontalTable.class, Editor2.class, HorizontalGSEditor.class, Table2.class, MonitorExtended2.class })
-@DirectSelect(path = Table2.class, pos = 0, value = Car.class)
-@DirectSelect(path = HorizontalTable.class, value = Car.class)
-@SelectContext(path = Editor2.class, value = ObservableContextSelector.SELECTION_SELECTOR.class)
-@DirectSelect(path = Table2.class, pos = 2, value = Color.class)
-@Style(name = "justify-content", value = "center")
+@Children({ TitledInstancesTable.class, TitledHorizontalInstancesTable.class, TitledInstancesTable.class, TitledInstanceEditor.class, TitledHorizontalInstanceEditor.class, TitledInstanceStepEditor.class, TitledHorizontalInstanceStepEditor.class,
+		MonitorExtended.class })
+@DirectSelect(path = TitledInstancesTable.class, pos = 0, value = Car.class)
+@DirectSelect(path = TitledHorizontalInstancesTable.class, pos = 0, value = Car.class)
+@DirectSelect(path = TitledInstancesTable.class, pos = 2, value = Color.class)
+@SelectContext(path = TitledInstanceEditor.class, value = ObservableContextSelector.SELECTION_SELECTOR.class)
+@Style(name = "flex-wrap", value = "wrap")
+@Style(name = "flex", value = "1 1 0%")
 public class App extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {

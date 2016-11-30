@@ -19,15 +19,15 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.ContextAction.ADD_HOLDER;
 import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
 import org.genericsystem.reactor.context.ContextAction.REMOVE;
-import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
-import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
 import org.genericsystem.reactor.context.ObservableContextSelector.HOLDER_ADDITION_ENABLED_SELECTOR;
 import org.genericsystem.reactor.context.ObservableContextSelector.REMOVABLE_HOLDER_SELECTOR;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
+import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
@@ -59,7 +59,6 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEdit
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
-import org.genericsystem.reactor.gscomponents2.CellDiv.ActionLink;
 import org.genericsystem.security.model.User.Salt;
 
 import javafx.beans.binding.Bindings;
@@ -356,6 +355,12 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 					selectedComponents.getValue().put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
 			});
 		}
+	}
+
+	@Style(name = "justify-content", value = "center")
+	@Style(name = "height", value = "100%")
+	@Style(name = "text-decoration", value = "none")
+	public static class ActionLink extends HtmlHyperLink {
 	}
 
 	@FlexDirectionStyle(FlexDirection.ROW)

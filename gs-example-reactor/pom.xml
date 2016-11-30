@@ -23,7 +23,7 @@
 
 		<dependency>
 			<groupId>org.genericsystem</groupId>
-			<artifactId>gs-carcolor-model</artifactId>
+			<artifactId>gs-carcolor</artifactId>
 			<version>4.0-SNAPSHOT</version>
 		</dependency>
 

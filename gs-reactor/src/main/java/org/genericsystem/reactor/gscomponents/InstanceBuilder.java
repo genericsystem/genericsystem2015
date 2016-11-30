@@ -13,14 +13,14 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.ContextAction.CREATE_INSTANCE;
+import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
+import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
 import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
 import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding.ERROR_COMPONENTS;
 import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
 import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
@@ -33,6 +33,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.AddLink;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.GSHolderBuilderDiv;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.HolderBuilder.BooleanHolderBuilderInput;
+import org.genericsystem.reactor.gscomponents.InstanceBuilder.HolderBuilder.HolderBuilderInput;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.MultiCheckboxBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceBuilder.PasswordBuilder;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.Checkbox;
@@ -42,8 +44,6 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.HolderAdder;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordAdder;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
-import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.BooleanHolderBuilder.CheckboxContainerBuildDiv.BooleanHolderBuilderInput;
-import org.genericsystem.reactor.gscomponents2.InstanceBuilder2.BuilderCell.HolderBuilder.HolderBuilderInput;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -131,6 +131,33 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 				if (getGenericValueComponents(context) != null)
 					getGenericValueComponents(context).getValue().get(context.getGeneric()).setComponents(getComponentsProperty(context).getValue());
 			});
+		}
+
+		@Style(name = "flex", value = "1")
+		@Style(name = "height", value = "100%")
+		@Style(name = "width", value = "100%")
+		public static class HolderBuilderInput extends InputTextWithConversion implements GSBuilderDefaults {
+
+			@Override
+			public void init() {
+				addPrefixBinding(context -> {
+					if (getGenericValueComponents(context) != null)
+						getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+					if (getInvalidListProperty(context) != null)
+						getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
+				});
+			}
+		}
+
+		public static class BooleanHolderBuilderInput extends CheckBoxWithValue implements GSBuilderDefaults {
+
+			@Override
+			public void init() {
+				addPrefixBinding(context -> {
+					if (getGenericValueComponents(context) != null)
+						getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+				});
+			}
 		}
 	}
 
