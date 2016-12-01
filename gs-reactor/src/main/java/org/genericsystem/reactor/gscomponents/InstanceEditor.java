@@ -71,11 +71,10 @@ import javafx.beans.value.ObservableValue;
 @ReverseFlexDirection(path = Composite.class)
 @Style(path = { Composite.class, ValueComponents.class }, pos = { -1, 0 }, name = "flex", value = "0.3")
 @Style(path = { Composite.class, ValueComponents.class }, name = "color", value = "white")
-
 @GenericValueBackgroundColor(path = { Composite.class, ValueComponents.class, FlexDiv.class }, value = "#ea0084")
 @Children({ InstanceName.class, AttributeEdition.class })
-@Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class,/* StepNavigator.class */ })
-@Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class, /* StepNavigator.class */ })
+@Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class })
+@Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class })
 @Children(path = { AttributeEdition.class, Content.class }, value = { HoldersEditor.class, MultiCheckbox.class })
 @Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Header.class, Content.class })
 @ForEach(path = AttributeEdition.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
@@ -83,7 +82,6 @@ import javafx.beans.value.ObservableValue;
 @ForEach(path = { AttributeEdition.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { InstanceName.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
 @Select(path = { AttributeEdition.class, ValueComponents.class, Header.class }, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
-// @Stepper(switchClass = Composite.class, switchClassPos = 1, headerClass = Composite.class, headerClassPos = 0)
 public class InstanceEditor extends FlexDiv implements SelectionDefaults, StepperDefaults {
 
 	public static class InstanceName extends Composite {

@@ -199,10 +199,9 @@ public class ApplicationServer extends AbstractBackEnd {
 					indexHtml += "<script type=\"text/javascript\" src=\"" + (appPath.isEmpty() ? "" : ("/" + appPath)) + "/" + application.getApplicationClass().getSimpleName().toLowerCase() + ".js\"></script>";
 					indexHtml += "</head>";
 					indexHtml += "<body onload=\"connect();\" id=\"" + application.getRootId() + "\">";
-					application.setIndexHtml(indexHtml);
 					indexHtml += "</body>";
 					indexHtml += "</html>";
-					System.out.println(indexHtml);
+					application.setIndexHtml(indexHtml);
 					request.response().end(indexHtml);
 				} else {
 					InputStream input = application.getApplicationClass().getResourceAsStream("/" + resourceToServe);

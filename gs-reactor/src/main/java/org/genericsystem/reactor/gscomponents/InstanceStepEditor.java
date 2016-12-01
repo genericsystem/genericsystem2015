@@ -20,7 +20,7 @@ import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 @Style(path = { Composite.class, StepNavigator.class }, name = "flex", value = "")
 @Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class, StepNavigator.class })
 @Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class, StepNavigator.class })
-@Stepper(switchClass = Composite.class, switchClassPos = 1, headerClass = Composite.class, headerClassPos = 0)
+@Stepper(switchClass = AttributeEdition.class, headerClass = InstanceName.class)
 public class InstanceStepEditor extends InstanceEditor {
 
 	@FlexDirectionStyle(FlexDirection.ROW)
