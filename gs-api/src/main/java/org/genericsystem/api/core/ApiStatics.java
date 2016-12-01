@@ -82,6 +82,7 @@ public class ApiStatics {
 			put(9, Class.class);
 			put(10, Class[].class);
 			put(11, int[].class);
+			put(12, TagAnnotation.class);
 		}
 	};
 

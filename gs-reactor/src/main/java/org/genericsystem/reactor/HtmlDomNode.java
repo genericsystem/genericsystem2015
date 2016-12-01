@@ -12,8 +12,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.AnnotationContent;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
