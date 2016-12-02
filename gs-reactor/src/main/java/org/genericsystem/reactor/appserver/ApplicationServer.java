@@ -7,9 +7,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.genericsystem.common.AbstractBackEnd;
@@ -33,6 +31,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.impl.EventLoopContext;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -108,16 +107,41 @@ public class ApplicationServer extends AbstractBackEnd {
 		}
 	}
 
+	private class CacheSocketContext {
+		private Cache cache;
+		private ServerWebSocket socket;
+		private Context context;
+
+		public CacheSocketContext(Cache cache, ServerWebSocket socket, Context context) {
+			this.cache = cache;
+			this.socket = socket;
+			this.context = context;
+		}
+
+		public Cache getCache() {
+			return cache;
+		}
+
+		public ServerWebSocket getSocket() {
+			return socket;
+		}
+
+		public Context getContext() {
+			return context;
+		}
+	}
+
 	private class WebSocketsServer extends AbstractWebSocketsServer {
 
-		private Map<Cache, Map<ServerWebSocket, Context>> caches = new ConcurrentHashMap<Cache, Map<ServerWebSocket, Context>>();
+		private Set<CacheSocketContext> caches = new ConcurrentHashSet<>();
 
 		public WebSocketsServer(String host, int port) {
 			super(host, port);
 
-			GSVertx.vertx().getVertx().setPeriodic(1000, l -> caches.forEach((cache, map) -> {
-				((EventLoopContext) map.values().stream().findFirst().get()).executeAsync(v -> {
-					if (caches.containsKey(cache))
+			GSVertx.vertx().getVertx().setPeriodic(1000, l -> caches.forEach(cacheSocketContext -> {
+				((EventLoopContext) cacheSocketContext.getContext()).executeAsync(v -> {
+					Cache cache = cacheSocketContext.getCache();
+					if (caches.stream().anyMatch(csc -> cache.equals(csc.getCache())))
 						cache.safeConsum((f) -> cache.shiftTs());
 				});
 			}));
@@ -133,10 +157,7 @@ public class ApplicationServer extends AbstractBackEnd {
 			Cache cache = (Cache) application.getEngine().newCache();
 			DomNodeVerticle domNodeVerticle = new DomNodeVerticle(cache, webSocket, application);
 			GSVertx.vertx().getVertx().deployVerticle(domNodeVerticle, new DeploymentOptions().setWorker(true));
-			Map<ServerWebSocket, Context> map = new ConcurrentHashMap<ServerWebSocket, Context>();
-			map.put(webSocket, GSVertx.vertx().getVertx().getOrCreateContext());
-			caches.put(cache, map);
-			// log.info("Open new socket : " + socket);
+			caches.add(new CacheSocketContext(cache, webSocket, GSVertx.vertx().getVertx().getOrCreateContext()));
 			return buffer -> {
 				// log.info("Receive new message for socket : " + socket);
 				GSBuffer gsBuffer = new GSBuffer(buffer);
@@ -157,12 +178,10 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public Handler<Void> getCloseHandler(ServerWebSocket socket) {
 			return (v) -> {
-				System.out.println("Close socket");
-				for (Entry<Cache, Map<ServerWebSocket, Context>> entry : caches.entrySet()) {
-					if (entry.getValue().keySet().contains(socket))
-						caches.remove(entry.getKey());
+				for (CacheSocketContext cacheSocketContext : caches) {
+					if (socket.equals(cacheSocketContext.getSocket()))
+						caches.remove(cacheSocketContext);
 				}
-
 			};
 		}
 
