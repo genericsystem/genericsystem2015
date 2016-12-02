@@ -31,7 +31,7 @@ public interface StepperDefaults extends ContextProperty {
 			createNewInitializedProperty(STEPPER_TAG, context, c -> switchedTag);
 		});
 		instanceNameTag.addStyle("display", "flex");
-		switchedTag.addPrefixBinding(context -> switchedTag.getDomNodeStyles(context).put("display", "none"));
+		switchedTag.addPostfixBinding(context -> switchedTag.getDomNodeStyles(context).put("display", "none"));
 	}
 
 	default void next(Context context) {

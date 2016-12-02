@@ -18,10 +18,7 @@ import org.genericsystem.security.model.User;
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class })
 @Children(QuestionDiv.class)
-// @Children(Responsive.class)
-// @Children(path = Responsive.class, value = TitledInstancesTable.class)
 @Style(name = "background-color", value = "grey")
-// @DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = Question.class)
 public class QuizApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
@@ -29,7 +26,7 @@ public class QuizApp extends RootTagImpl {
 	}
 
 	public QuizApp() {
-		addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+		// addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
 	}
 
 	public static class QuizzScript implements Script {
@@ -38,7 +35,7 @@ public class QuizApp extends RootTagImpl {
 		public void run(Root engine) {
 			// Create user
 			Generic user = engine.find(User.class);
-			Generic robert = user.setInstance("Robert DJ");
+			user.setInstance("Robert DJ");
 
 			// Create Quiz
 			Generic quiz = engine.find(Quiz.class);
@@ -48,18 +45,19 @@ public class QuizApp extends RootTagImpl {
 			Generic question = engine.find(Question.class);
 			Generic q01 = quizTest.setHolder(question, "Quel est le résultat de la séquence : \nArrayList<String> mots ;\nmots.add('azer') ;");
 			Generic q02 = quizTest.setHolder(question, "Portée des attributs : laquelle de ces affirmations est vraie ?");
-			Generic q03 = quizTest.setHolder(question, "laquelle de ces affirmations est vraie ?");
+			quizTest.setHolder(question, "laquelle de ces affirmations est vraie ?");
 
 			// Create Answers (Answer.class is a component of Question.class)
+			String answerD = "Aucune de ces réponses";
 			Generic answer = engine.find(Answer.class);
-			Generic a01 = q01.setHolder(answer, "la chaine 'azer' est ajoutée à la liste");
-			Generic a02 = q01.setHolder(answer, "un ArrayOutOfBoundsException");
-			Generic a03 = q01.setHolder(answer, "un NullPointerException");
-			Generic a04 = q01.setHolder(answer, "Aucune de ces réponses");
-			Generic a05 = q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe");
-			Generic a06 = q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles seulement dans les méthodes déclarées après l'attribut");
-			Generic a07 = q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe seulement si leur visibilité est public");
-			Generic a08 = q02.setHolder(answer, "Aucune de ces réponses");
+			q01.setHolder(answer, "la chaine 'azer' est ajoutée à la liste");
+			q01.setHolder(answer, "un ArrayOutOfBoundsException");
+			q01.setHolder(answer, "un NullPointerException");
+			q01.setHolder(answer, answerD);
+			q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe");
+			q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles seulement dans les méthodes déclarées après l'attribut");
+			q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe seulement si leur visibilité est public");
+			q02.setHolder(answer, answerD);
 
 			engine.getCurrentCache().flush();
 		}
