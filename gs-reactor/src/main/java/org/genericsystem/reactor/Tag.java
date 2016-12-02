@@ -360,6 +360,8 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	@Override
 	public ObservableList<Tag> getObservableChildren();
 
+	public TagNode getTagNode();
+
 	default void init() {
 	}
 

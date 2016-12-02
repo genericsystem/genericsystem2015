@@ -79,7 +79,6 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	@Override
 	public long shiftTs() throws RollbackException {
-
 		transactionProperty.set(buildTransaction());
 		listener.triggersRefreshEvent();
 		return getTs();

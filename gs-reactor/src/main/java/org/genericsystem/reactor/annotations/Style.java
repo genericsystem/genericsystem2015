@@ -52,16 +52,6 @@ public @interface Style {
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			tag.getRootTag().processStyle(tag, ((Style) annotation).name(), ((Style) annotation).value());
-			// if (ExtendedRootTag.class.isAssignableFrom(tag.getRootTag().getClass())) {
-			// GTag delegate = ((GenericTagNode) ((TagImpl) tag).getTagNode()).getDelegateGeneric();
-			// // long startTime = System.currentTimeMillis();
-			// Generic style = delegate.setHolder(delegate.getRoot().find(StyleName.class), ((Style) annotation).name());
-			// style.setHolder(delegate.getRoot().find(StyleValue.class), ((Style) annotation).value());
-			// // long endTime = System.currentTimeMillis();
-			// // styleTime += endTime - startTime;
-			// // System.out.println("Style, temps passé : " + (endTime - startTime) + ", temps total : " + styleTime + ", nombre de styles : " + (++stylesNumber) + ", temps par style : " + (styleTime / stylesNumber));
-			// }
-			// tag.addStyle(((Style) annotation).name(), ((Style) annotation).value());
 		}
 	}
 

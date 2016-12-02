@@ -15,7 +15,6 @@ import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstancesTable;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.AnnotationContent;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.TagAnnotationGeneric;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
@@ -31,9 +30,9 @@ import org.genericsystem.reactor.tagadmin.TagAdmin.TagScript;
 @RunScript(TagScript.class)
 @Style(name = "background-color", value = "#00afeb")
 @Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
-@Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class })
+@Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "App administration")
-@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { GTagType.class, TagAnnotationGeneric.class, AnnotationContent.class })
+@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { GTagType.class, TagAnnotationGeneric.class })
 public class TagAdmin extends ExtendedRootTag {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, TagAdmin.class, "tags");

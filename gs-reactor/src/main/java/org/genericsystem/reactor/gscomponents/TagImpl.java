@@ -22,6 +22,7 @@ public abstract class TagImpl implements Tag {
 	protected TagNode tagNode;
 	private Tag parent;
 
+	@Override
 	public TagNode getTagNode() {
 		return tagNode;
 	}

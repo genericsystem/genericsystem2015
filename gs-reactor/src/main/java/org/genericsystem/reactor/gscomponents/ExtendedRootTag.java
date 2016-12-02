@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +27,8 @@ import org.genericsystem.common.Root;
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ExtendedAnnotationsManager;
+import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Attribute;
@@ -36,9 +40,12 @@ import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagType.TagAnnota
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import javafx.beans.binding.MapBinding;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.collections.WeakListChangeListener;
 
 public class ExtendedRootTag extends RootTagImpl {
 
@@ -49,6 +56,56 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	// To avoid duplicate work.
 	private final Map<Class<?>, GTag> storedClasses = new HashMap<>();
+
+	private final ListChangeListener<? super Generic> listener = c -> {
+		while (c.next()) {
+			if (c.wasRemoved()) {
+				for (Generic valueGeneric : c.getRemoved()) {
+					Generic tagAnnotationGeneric = valueGeneric.getBaseComponent();
+					TagAnnotation tagAnnotation = (TagAnnotation) tagAnnotationGeneric.getValue();
+					Class<?>[] path = tagAnnotation.getPath();
+					Class<?> targetTagClass = path.length == 0 ? (Class<?>) tagAnnotationGeneric.getBaseComponent().getValue() : path[path.length - 1];
+					if (Style.class.equals(tagAnnotation.getAnnotationClass())) {
+						Set<Tag> concernedTags = searchTags(this, targetTagClass, tagAnnotation.getPath(), tagAnnotation.getPos());
+						concernedTags.forEach(tag -> ((GenericTagNode) tag.getTagNode()).applyingStyles.remove(tagAnnotationGeneric));
+					}
+				}
+			}
+			if (c.wasAdded()) {
+				for (Generic valueGeneric : c.getAddedSubList()) {
+					Generic tagAnnotationGeneric = valueGeneric.getBaseComponent();
+					TagAnnotation tagAnnotation = (TagAnnotation) tagAnnotationGeneric.getValue();
+					Class<?>[] path = tagAnnotation.getPath();
+					Class<?> targetTagClass = path.length == 0 ? (Class<?>) tagAnnotationGeneric.getBaseComponent().getValue() : path[path.length - 1];
+					if (Style.class.equals(tagAnnotation.getAnnotationClass())) {
+						Set<Tag> concernedTags = searchTags(this, targetTagClass, tagAnnotation.getPath(), tagAnnotation.getPos());
+						concernedTags.forEach(tag -> updateStyle(tag, tagAnnotationGeneric));
+					}
+				}
+			}
+		}
+	};
+
+	private Set<Tag> searchTags(Tag subTree, Class<?> targetTagClass, Class<?>[] path, int[] pos) {
+		Set<Tag> foundTags = new HashSet<>();
+		if (targetTagClass.equals(subTree.getClass()) && AnnotationsManager.posMatches(pos, path, subTree))
+			foundTags.add(subTree);
+		subTree.getObservableChildren().forEach(child -> foundTags.addAll(searchTags(child, targetTagClass, path, pos)));
+		return foundTags;
+	}
+
+	private void updateStyle(Tag tag, Generic tagAnnotationGeneric) {
+		List<Generic> applyingStyles = ((GenericTagNode) tag.getTagNode()).applyingStyles;
+		Generic applyingAnnotation = tagAnnotationGeneric;
+		TagAnnotation newAnnotation = (TagAnnotation) tagAnnotationGeneric.getValue();
+		for (Generic styleAnnotationGeneric : applyingStyles) {
+			TagAnnotation annotation = (TagAnnotation) styleAnnotationGeneric.getValue();
+			if (annotation.getName().equals(newAnnotation.getName()) && annotation.getPath().length > newAnnotation.getPath().length)
+				applyingAnnotation = styleAnnotationGeneric;
+		}
+		if (tagAnnotationGeneric.equals(applyingAnnotation))
+			applyingStyles.add(tagAnnotationGeneric);
+	}
 
 	public ExtendedRootTag(Root engine) {
 		this.engine = engine;
@@ -68,6 +125,17 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	@Override
 	protected void initRoot() {
+	}
+
+	@Override
+	public RootHtmlDomNode init(Context rootModelContext, String rootId, Sender send) {
+		return new RootHtmlDomNode(rootModelContext, this, rootId, send) {
+			private final ObservableList<Generic> annotationContentInstances;
+			{
+				annotationContentInstances = annotationContent.getObservableSubInstances();
+				annotationContentInstances.addListener(new WeakListChangeListener<>(listener));
+			}
+		};
 	}
 
 	public Root getEngine() {
@@ -113,7 +181,6 @@ public class ExtendedRootTag extends RootTagImpl {
 	private void storeChildrenAnnotation(Generic tagClassGeneric, Children annotation) {
 		Generic annotationGeneric = tagClassGeneric.setHolder(tagAnnotationType, new TagAnnotation(Children.class, annotation.path(), annotation.pos()));
 		JsonObject json = new JsonObject();
-		//		JsonArray childClasses = new JsonArray(Arrays.stream(annotation.value()).map(clazz -> clazz.getName()).collect(Collectors.toList()));
 		json.put("value", new JsonArray(Arrays.asList(annotation.value())));
 		annotationGeneric.setHolder(annotationContent, json.encodePrettily());
 	}
@@ -125,6 +192,28 @@ public class ExtendedRootTag extends RootTagImpl {
 		styleAnnotationGeneric.setHolder(annotationContent, json.encodePrettily());
 	}
 
+	// Called only by addStyle, not used to treat @Style annotations.
+	// Use the most precise path and pos possible to make sure that this style applies to the given tag and nothing else.
+	// Problems:
+	// – All the annotations are stored on the root tag.
+	// – This method is slow.
+	@Override
+	public void processStyle(Tag tag, String name, String value) {
+		Generic tagClassGeneric = storedClasses.get(tag.getRootTag().getClass());
+		List<Class<?>> path = new ArrayList<>();
+		List<Integer> pos = new ArrayList<>();
+		Tag current = tag;
+		while (current != null) {
+			path.add(0, current.getClass());
+			pos.add(0, current.getParent() != null ? AnnotationsManager.position(current, current.getClass()) : -1);
+			current = current.getParent();
+		}
+		Generic styleAnnotationGeneric = tagClassGeneric.setHolder(tagAnnotationType, new TagAnnotation(Style.class, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray(), name));
+		JsonObject json = new JsonObject();
+		json.put("value", value);
+		styleAnnotationGeneric.setHolder(annotationContent, json.encode());
+	}
+
 	public class GenericTagNode implements TagNode {
 		private ObservableList<Tag> children = FXCollections.observableArrayList();
 		private ObservableList<Generic> applyingStyles = FXCollections.observableArrayList();
@@ -132,6 +221,10 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		public GenericTagNode(Tag tag) {
 			this.tag = tag;
+		}
+
+		public List<Generic> getApplyingStyles() {
+			return applyingStyles;
 		}
 
 		public GenericTagNode init() {
@@ -166,6 +259,7 @@ public class ExtendedRootTag extends RootTagImpl {
 					children.add(createChild(tag, (Class<? extends TagImpl>) childClass));
 			}
 
+			// @Style annotations
 			classesToResult = new ArrayList<>();
 			current = tag;
 			while (current != null) {
@@ -211,12 +305,21 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		@Override
 		public ObservableMap<String, String> getObservableStyles() {
-			ObservableMap<String, String> styles = FXCollections.observableHashMap();
-			for (Generic applyingStyle : applyingStyles) {
-				JsonObject json = new JsonObject((String) applyingStyle.getComposites().filter(g -> annotationContent.equals(g.getMeta())).first().getValue());
-				styles.put(((TagAnnotation) applyingStyle.getValue()).getName(), json.getString("value"));
-			}
-			return styles;
+			return new MapBinding<String, String>() {
+				{
+					bind(applyingStyles);
+				}
+
+				@Override
+				protected ObservableMap<String, String> computeValue() {
+					ObservableMap<String, String> styles = FXCollections.observableHashMap();
+					for (Generic applyingStyle : applyingStyles) {
+						JsonObject json = new JsonObject((String) applyingStyle.getComposites().filter(g -> annotationContent.equals(g.getMeta())).first().getValue());
+						styles.put(((TagAnnotation) applyingStyle.getValue()).getName(), json.getString("value"));
+					}
+					return styles;
+				}
+			};
 		}
 	}
 

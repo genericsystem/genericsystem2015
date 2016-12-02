@@ -153,7 +153,19 @@ public class ApiStatics {
 						throw new IllegalStateException();
 					}
 				}
+			});
+			put(TagAnnotation.class, new StringConverter<TagAnnotation>() {
 
+				@Override
+				public String toString(TagAnnotation object) {
+					return object.toString();
+				}
+
+				@Override
+				public TagAnnotation fromString(String string) {
+					System.out.println("fromString method not implemented yet for TagAnnotation");
+					return null;
+				}
 			});
 		}
 	};
