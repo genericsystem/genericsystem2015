@@ -1,15 +1,18 @@
 package org.genericsystem.quiz.app;
 
+import java.util.List;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.QuestionDiv.Empty;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv;
-import org.genericsystem.quiz.app.QuestionDiv.UnitDiv;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.FinishBtn;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.NextBtn;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.app.QuestionDiv.UnitDiv;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
@@ -102,6 +105,48 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	@BindText(path = HtmlLabel.class)
 	public static class AnswerDiv extends HtmlDiv {
 
+		@Override
+		public void init() {
+			// Mets un for entre un label et une checkbox
+			// Les 2 Tags doivent être des children de la meme div parente et etre des enfant directs de cette div
+			addPostfixBinding(context -> {
+				List<HtmlDomNode> nodes = context.getHtmlDomNode(this).getChildren();
+				String idTag = null;
+				Tag label = null;
+
+				for (HtmlDomNode n : nodes) {
+
+					if (n.getTag() instanceof HtmlCheckBox)
+						idTag = n.getId();
+					if (n.getTag() instanceof HtmlLabel)
+						label = n.getTag();
+
+				}
+
+				if (label != null && idTag != null)
+					label.addAttribute(context, "for", idTag);
+
+			});
+		}
+
+		/*
+		 * public void forLabel(Class tag) {
+		 * 
+		 * addPostfixBinding(context -> { List<HtmlDomNode> nodes = context.getHtmlDomNode(this).getChildren(); String idTag = null; Tag label = null;
+		 * 
+		 * for (HtmlDomNode n : nodes) {
+		 * 
+		 * if (n.getTag() instanceof HtmlCheckBox) idTag = n.getId(); if (n.getTag() instanceof HtmlLabel) label = n.getTag();
+		 * 
+		 * }
+		 * 
+		 * if (label != null && idTag != null) label.addAttribute(context, "for", idTag);
+		 * 
+		 * });
+		 * 
+		 * }
+		 */
+
 	}
 
 	@Children({ PreviousBtn.class, NextBtn.class, FinishBtn.class })
@@ -142,16 +187,16 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 
 	}
 
+	///////////////////////////////// Traitements \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 	public static class NEXT_TAG implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tagNext) {
 			if (QuizStepper.class.isAssignableFrom(tagNext.getClass())) {
 
-				// Réussir à insérer les tags de navigation (PREVIOUS, NEXT, FINISH)
-
-				Tag tag = tagNext.getParent();
-				Tag tagPrevious = tag.find(PreviousBtn.class);
-				Tag tagFinish = tag.find(FinishBtn.class);
+				Tag tagParent = tagNext.getParent();
+				Tag tagPrevious = tagParent.find(PreviousBtn.class);
+				Tag tagFinish = tagParent.find(FinishBtn.class);
 
 				((QuizStepper) tagNext).next(context, tagNext, tagPrevious, tagFinish);
 
@@ -165,9 +210,9 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		public void accept(Context context, Tag tagPrevious) {
 			if (QuizStepper.class.isAssignableFrom(tagPrevious.getClass())) {
 
-				Tag tag = tagPrevious.getParent();
-				Tag tagNext = tag.find(NextBtn.class);
-				Tag tagFinish = tag.find(FinishBtn.class);
+				Tag tagParent = tagPrevious.getParent();
+				Tag tagNext = tagParent.find(NextBtn.class);
+				Tag tagFinish = tagParent.find(FinishBtn.class);
 
 				((QuizStepper) tagPrevious).prev(context, tagNext, tagPrevious, tagFinish);
 
