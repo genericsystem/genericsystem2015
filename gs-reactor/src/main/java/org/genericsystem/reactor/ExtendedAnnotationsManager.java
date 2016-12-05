@@ -21,6 +21,11 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 
 public class ExtendedAnnotationsManager extends AnnotationsManager {
 
+	public ExtendedAnnotationsManager(Class<? extends RootTag> clazz) {
+		super(clazz);
+
+	}
+
 	@Override
 	public void initManager() {
 		registerAnnotation(DirectSelect.class);
@@ -37,7 +42,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(SetText.class);
 		registerAnnotation(BindText.class);
 		registerAnnotation(BindAction.class);
-		//		registerAnnotation(Style.class);
+		// registerAnnotation(Style.class);
 		registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);

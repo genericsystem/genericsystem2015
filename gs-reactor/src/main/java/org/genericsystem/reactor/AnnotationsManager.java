@@ -18,6 +18,7 @@ import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Children.ChildrenProcessor;
+import org.genericsystem.reactor.annotations.CustomAnnotations;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Process;
@@ -42,8 +43,16 @@ public class AnnotationsManager {
 
 	public static final Logger log = LoggerFactory.getLogger(AnnotationsManager.class);
 
-	public AnnotationsManager() {
+	public AnnotationsManager(Class<? extends RootTag> clazz) {
+		registerCustomAnnotations(clazz);
 		initManager();
+	}
+
+	private void registerCustomAnnotations(Class<? extends RootTag> clazz) {
+		Annotation annotations = clazz.getAnnotation(CustomAnnotations.class);
+		if (annotations != null)
+			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
+				registerAnnotation(annotation);
 	}
 
 	public void initManager() {

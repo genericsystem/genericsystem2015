@@ -1,18 +1,15 @@
 package org.genericsystem.reactor.gscomponents;
 
-import java.lang.annotation.Annotation;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
-import org.genericsystem.reactor.annotations.CustomAnnotations;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
 public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, UserRoleDefaults {
 
@@ -26,11 +23,7 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 	}
 
 	protected void initRoot() {
-		annotationsManager = new AnnotationsManager();
-		Annotation annotations = getClass().getAnnotation(CustomAnnotations.class);
-		if (annotations != null)
-			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
-				annotationsManager.registerAnnotation(annotation);
+		annotationsManager = new AnnotationsManager(getClass());
 		setTagNode(buildTagNode(this));
 		createSubTree();
 	}

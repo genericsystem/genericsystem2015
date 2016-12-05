@@ -44,11 +44,11 @@ public interface RootTag extends Tag {
 	}
 
 	default void processStyle(Tag tag, String name, String value) {
-		tag.addPrefixBinding(model -> tag.getDomNodeStyles(model).put(name, value));
+		tag.addPrefixBinding(context -> tag.getDomNodeStyles(context).put(name, value));
 	}
 
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
-		tag.addPrefixBinding(
-				context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
+		tag.addPrefixBinding(context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue()
+				: value));
 	}
 }
