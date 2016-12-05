@@ -191,18 +191,19 @@ public class ExtendedRootTag2 extends RootTagImpl {
 	// – This method is slow.
 	@Override
 	public void processStyle(Tag tag, String name, String value) {
-		Generic tagClassGeneric = storedClasses.get(tag.getRootTag().getClass());
 		List<Class<?>> path = new ArrayList<>();
 		List<Integer> pos = new ArrayList<>();
 		Tag current = tag;
-		while (current != null) {
+		while (current != null && current.getParent() != null) {
 			path.add(0, current.getClass());
-			pos.add(0, current.getParent() != null ? AnnotationsManager.position(current, current.getClass()) : -1);
+			pos.add(0, AnnotationsManager.position(current, current.getClass()));
 			current = current.getParent();
 		}
-		Generic styleAnnotationGeneric = tagClassGeneric.setHolder(tagAnnotationAttribute, new TagAnnotation(Style.class, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray(), name));
+		Generic tagClassGeneric = storedClasses.get(current.getClass());
+		GTagAnnotation styleAnnotationGeneric = (GTagAnnotation) tagClassGeneric.setHolder(tagAnnotationAttribute, new TagAnnotation(Style.class, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray(), name));
 		JsonObject json = new JsonObject();
 		json.put("value", value);
+		((GenericTagNode) tag.getTagNode()).applyingStyles.add(styleAnnotationGeneric);
 		styleAnnotationGeneric.setHolder(tagAnnotationContentAttribute, json.encode());
 	}
 
