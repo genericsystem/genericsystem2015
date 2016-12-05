@@ -7,5 +7,5 @@ public interface TagNode {
 
 	public ObservableList<Tag> getObservableChildren();
 
-	public ObservableMap<String, String> getObservableStyles();
+	public ObservableMap<String, String> buildObservableStyles();
 }

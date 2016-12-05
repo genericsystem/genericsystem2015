@@ -41,8 +41,8 @@ public abstract class TagImpl implements Tag {
 	}
 
 	@Override
-	public ObservableMap<String, String> getObservableStyles() {
-		return getTagNode().getObservableStyles();
+	public ObservableMap<String, String> buildObservableStyles() {
+		return getTagNode().buildObservableStyles();
 	}
 
 	@Override

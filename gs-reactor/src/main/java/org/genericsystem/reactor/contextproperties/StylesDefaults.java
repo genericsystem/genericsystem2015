@@ -14,7 +14,7 @@ public interface StylesDefaults extends MapStringDefaults {
 	<T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag);
 
 	default ObservableMap<String, String> getDomNodeStyles(Context model) {
-		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener, tag -> tag.getObservableStyles());
+		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener, tag -> tag.buildObservableStyles());
 	}
 
 	default void inheritStyle(String styleName) {

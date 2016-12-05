@@ -33,7 +33,7 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		return annotationsManager;
 	}
 
-	public static class SimpleTableNode implements TagNode {
+	public static class SimpleTagNode implements TagNode {
 		private final ObservableList<Tag> children = FXCollections.observableArrayList();
 
 		@Override
@@ -42,7 +42,7 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		}
 
 		@Override
-		public ObservableMap<String, String> getObservableStyles() {
+		public ObservableMap<String, String> buildObservableStyles() {
 			return FXCollections.observableHashMap();
 		}
 	}
@@ -52,7 +52,7 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		Tag parent = child.getParent();
 		if (parent != null)
 			parent.getObservableChildren().add(child);
-		return new SimpleTableNode();
+		return new SimpleTagNode();
 	}
 
 	@Override
