@@ -210,6 +210,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 				confirmPassword.getDomNodeAttributes(context).put("value", "");
 				context.flush();
 				context.unmount();
+				context.flush();
 			} else {
 				invalidConfirmPassword.addStyle(context, "display", "inline");
 				context.unmount();

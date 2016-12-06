@@ -1,8 +1,10 @@
 package org.genericsystem.quiz.app;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.quiz.app.QuestionDiv.AnswerDiv.QuizCheckBox;
 import org.genericsystem.quiz.app.QuestionDiv.Empty;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.FinishBtn;
@@ -23,18 +25,22 @@ import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.StepperDefaults;
+import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 
 import javafx.collections.ObservableList;
 
+@Switch(TagSwitcher.LOGGED_USER.class)
+//
 @Children({ UnitDiv.class, FooterDiv.class, Empty.class })
 //
 @Style(name = "display", value = "flex")
@@ -51,6 +57,12 @@ import javafx.collections.ObservableList;
 @BindText(path = { UnitDiv.class, TitleDiv.class, HtmlH2.class })
 @Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
 public class QuestionDiv extends HtmlDiv implements StepperDefaults {
+
+	// Créé une propriété qui stockera les réponses de l'utilisateur
+	@Override
+	public void init() {
+		createNewInitializedProperty("userResponse", context -> new HashMap<Generic, Boolean>());
+	}
 
 	// TODO Remplacer cette classe (temporaire, afin de faire fonctionner le stepper)
 	// par une autre Div affichant une information non steppable
@@ -83,15 +95,15 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 
 	}
 
-	@Children({ HtmlCheckBox.class, HtmlLabel.class })
+	@Children({ QuizCheckBox.class, HtmlLabel.class })
 	//
 	@Style(name = "min-width", value = "174px")
 	@Style(name = "display", value = "flex")
 	@Style(name = "flex-wrap", value = "nowrap")
 	@Style(name = "flex-direction", value = "row")
-	@Style(path = HtmlCheckBox.class, name = "margin-right", value = "10px")
-	@Style(path = HtmlCheckBox.class, name = "min-height", value = "15px")
-	@Style(path = HtmlCheckBox.class, name = "min-width", value = "15px")
+	@Style(path = QuizCheckBox.class, name = "margin-right", value = "10px")
+	@Style(path = QuizCheckBox.class, name = "min-height", value = "15px")
+	@Style(path = QuizCheckBox.class, name = "min-width", value = "15px")
 	@Style(path = HtmlLabel.class, name = "margin-top", value = "10px")
 	@Style(path = HtmlLabel.class, name = "margin-bottom", value = "10px")
 	@Style(path = HtmlLabel.class, name = "word-wrap", value = "break-word")
@@ -99,7 +111,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	@Style(path = HtmlLabel.class, name = "max-width", value = "100%")
 	@StyleClass("width-35-35-90")
 	@StyleClass(path = HtmlLabel.class, value = "vertical-align")
-	@StyleClass(path = HtmlCheckBox.class, value = "vertical-align")
+	@StyleClass(path = QuizCheckBox.class, value = "vertical-align")
 	//
 	@ForEach(ANSWERS_EXTRACTOR.class)
 	@BindText(path = HtmlLabel.class)
@@ -116,7 +128,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 
 				for (HtmlDomNode n : nodes) {
 
-					if (n.getTag() instanceof HtmlCheckBox)
+					if (n.getTag() instanceof QuizCheckBox)
 						idTag = n.getId();
 					if (n.getTag() instanceof HtmlLabel)
 						label = n.getTag();
@@ -129,23 +141,9 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 			});
 		}
 
-		/*
-		 * public void forLabel(Class tag) {
-		 * 
-		 * addPostfixBinding(context -> { List<HtmlDomNode> nodes = context.getHtmlDomNode(this).getChildren(); String idTag = null; Tag label = null;
-		 * 
-		 * for (HtmlDomNode n : nodes) {
-		 * 
-		 * if (n.getTag() instanceof HtmlCheckBox) idTag = n.getId(); if (n.getTag() instanceof HtmlLabel) label = n.getTag();
-		 * 
-		 * }
-		 * 
-		 * if (label != null && idTag != null) label.addAttribute(context, "for", idTag);
-		 * 
-		 * });
-		 * 
-		 * }
-		 */
+		public static class QuizCheckBox extends CheckBoxWithValue {
+
+		}
 
 	}
 
@@ -181,6 +179,8 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		//
 		@Style(name = "display", value = "none")
 		@Style(name = "text-align", value = "center")
+		//
+		@BindAction(SAVE_QUIZ_RESULT.class)
 		public static class FinishBtn extends HtmlButton implements QuizStepper {
 
 		}
@@ -229,6 +229,53 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return generics[0].getObservableHolders(generics[0].getRoot().find(Answer.class));
+		}
+	}
+
+	public static class SAVE_QUIZ_RESULT implements ContextAction {
+		@Override
+		public void accept(Context context, Tag tag) {
+			// context.mount();
+
+			// Récupérer les valeurs des HtmlCheckbox
+
+			Tag unitDiv = tag.getParent().getParent().find(UnitDiv.class);
+			// System.out.println("Taille de unitDivs " + unitDivs.size());
+			System.out.println(context.getHtmlDomNode(unitDiv));
+
+			// HtmlInputText name = tag.getParent().getParent().find(HtmlInputText.class);
+			// HtmlInputText passwordInput = tag.getParent().getParent().find(HtmlInputText.class, 1);
+			// HtmlInputText confirmPassword = tag.getParent().getParent().find(HtmlInputText.class, 2);
+			// HtmlSpan invalidUsername = tag.getParent().getParent().find(HtmlSpan.class);
+			// HtmlSpan invalidConfirmPassword = tag.getParent().getParent().find(HtmlSpan.class, 1);
+			//
+			// String psw1 = passwordInput.getDomNodeAttributes(context).get("value");
+			// String psw2 = confirmPassword.getDomNodeAttributes(context).get("value");
+			// Generic user;
+			// try {
+			// user = context.find(User.class).addInstance(name.getDomNodeAttributes(context).get("value"));
+			// } catch (RollbackException e) {
+			// invalidUsername.addStyle(context, "display", "inline");
+			// return;
+			// }
+			// if (psw1 != null && psw1.equals(psw2)) {
+			// invalidConfirmPassword.addStyle(context, "display", "none");
+			// invalidUsername.addStyle(context, "display", "none");
+			// byte[] salt = EncryptionUtils.generateSalt();
+			// byte[] hash = EncryptionUtils.getEncryptedPassword(psw1, salt);
+			// Generic hashGeneric = user.setHolder(context.find(Password.class), hash);
+			// hashGeneric.setHolder(context.find(Salt.class), salt);
+			// tag.getDisplayProperty(context).setValue("none");
+			// name.getDomNodeAttributes(context).put("value", "");
+			// passwordInput.getDomNodeAttributes(context).put("value", "");
+			// confirmPassword.getDomNodeAttributes(context).put("value", "");
+			// context.flush();
+			// context.unmount();
+			// context.flush();
+			// } else {
+			// invalidConfirmPassword.addStyle(context, "display", "inline");
+			// context.unmount();
+			// }
 		}
 	}
 }

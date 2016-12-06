@@ -17,7 +17,7 @@ import org.genericsystem.security.model.User;
 
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class })
-@Children(QuestionDiv.class)
+@Children(QuizAppPage.class)
 @Style(name = "background-color", value = "grey")
 public class QuizApp extends RootTagImpl {
 

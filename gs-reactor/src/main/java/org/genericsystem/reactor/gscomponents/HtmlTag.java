@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.ReactorStatics;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
@@ -144,6 +145,7 @@ public class HtmlTag {
 		}
 	}
 
+	@Attribute(name = "type", value = "text")
 	public static class HtmlInputText extends TagImpl implements ActionDefaults {
 
 		@Override
@@ -154,9 +156,6 @@ public class HtmlTag {
 		@Override
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
-				{
-					HtmlInputText.this.addAttribute("type", "text");
-				}
 
 				@Override
 				public void handleMessage(JsonObject json) {
