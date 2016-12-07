@@ -11,15 +11,15 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.TagSwitcher;
-import org.genericsystem.reactor.context.ContextAction.REMOVE;
-import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
-import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE;
-import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.context.ContextAction.REMOVE;
+import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
@@ -124,8 +124,7 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	}
 
 	@Style(name = "background-color", value = "white")
-	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, value = "img")
-	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, value = "img")
+	@StyleClass(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { -1, 0 }, value = "img")
 	@Children({ HtmlHyperLink.class, HtmlHyperLink.class })
 	@Children(path = HtmlHyperLink.class, value = HtmlImg.class)
 	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "src", value = "delete.png")

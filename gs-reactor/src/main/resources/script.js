@@ -96,15 +96,18 @@ function onMessageReceived(evt) {
 		elt.style.removeProperty(message.styleProperty);
 		break;
 	case 'AA':
-		elt.setAttribute(message.attributeName, message.attributeValue);
 		switch (message.attributeName) {
 		case "value":
 			elt.value = message.attributeValue;
 			break;
 		case "checked":
-			elt.checked = message.attributeValue;
+			elt.checked = true;
+			break;
+		case "disabled":
+			elt.disabled = true;
 			break;
 		case "list":
+			elt.setAttribute(message.attributeName, message.attributeValue);
 			elt.oninput = function(e) {
 				console.log("oninput");
 				var val = elt.value;
@@ -126,8 +129,10 @@ function onMessageReceived(evt) {
 			}
 			break;
 		case "type":
+			elt.setAttribute(message.attributeName, message.attributeValue);
 			switch (message.attributeValue) {
 			case "text":
+			case "password":
 				elt.onkeyup = function(e) {
 					var code = (e.keyCode ? e.keyCode : e.which)
 					if (code == 13) {
@@ -174,6 +179,9 @@ function onMessageReceived(evt) {
 				};
 				break;
 			}
+			break;
+		default:
+			elt.setAttribute(message.attributeName, message.attributeValue);
 			break;
 		}
 		break;

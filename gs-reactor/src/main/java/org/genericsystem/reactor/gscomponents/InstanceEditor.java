@@ -46,6 +46,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel.GSLabelDisplayer;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.InputTextEditorWithConversion;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
@@ -71,17 +72,18 @@ import javafx.beans.value.ObservableValue;
 @ReverseFlexDirection(path = Composite.class)
 @Style(path = { Composite.class, ValueComponents.class }, pos = { -1, 0 }, name = "flex", value = "0.3")
 @Style(path = { Composite.class, ValueComponents.class }, name = "color", value = "white")
-@GenericValueBackgroundColor(path = { Composite.class, ValueComponents.class, FlexDiv.class }, value = "#ea0084")
+@GenericValueBackgroundColor(path = { Composite.class, ValueComponents.class, FlexDiv.class }, pos = { -1, 0, -1 }, value = "#ea0084")
 @Children({ InstanceName.class, AttributeEdition.class })
 @Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class })
 @Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class })
+@Children(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = GSLabelDisplayer.class)
 @Children(path = { AttributeEdition.class, Content.class }, value = { HoldersEditor.class, MultiCheckbox.class })
-@Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Header.class, Content.class })
+@Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Content.class, Header.class })
 @ForEach(path = AttributeEdition.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { AttributeEdition.class, AttributeContent.class }, value = ObservableListExtractor.NO_FOR_EACH.class)
 @ForEach(path = { AttributeEdition.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { InstanceName.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
-@Select(path = { AttributeEdition.class, ValueComponents.class, Header.class }, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+@Select(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 public class InstanceEditor extends FlexDiv implements SelectionDefaults, StepperDefaults {
 
 	public static class InstanceName extends Composite {
@@ -127,8 +129,8 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 		public void init() {
 			initValueProperty(context -> context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric()) != null ? true : false);
 			storeProperty("exists", context -> {
-				ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()).getValue() != null ? true : false,
-						context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric()));
+				ObservableValue<Generic> observableLink = context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric());
+				ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> observableLink.getValue() != null ? true : false, observableLink);
 				exists.addListener((o, v, nva) -> {
 					if (!context.isDestroyed())
 						getConvertedValueProperty(context).setValue(nva);

@@ -17,7 +17,8 @@ public class CheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDef
 
 	public static class CheckBoxEditor extends CheckBoxWithValue implements SelectionDefaults {
 
-		public CheckBoxEditor() {
+		@Override
+		public void init() {
 			initValueProperty(model -> (Boolean) model.getGeneric().getValue());
 			addConvertedValueChangeListener((model, nva) -> {
 				Generic updatedGeneric = model.getGeneric().updateValue(nva);
@@ -30,7 +31,9 @@ public class CheckBoxWithValue extends HtmlCheckBox implements ConvertedValueDef
 
 	public static class CheckBoxDisplayer extends CheckBoxEditor {
 
-		public CheckBoxDisplayer() {
+		@Override
+		public void init() {
+			super.init();
 			addAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED);
 		}
 	}

@@ -35,6 +35,7 @@ public class HtmlTag {
 		}
 	}
 
+	@Attribute(name = "type", value = "checkbox")
 	public static class HtmlCheckBox extends TagImpl {
 
 		@Override
@@ -45,10 +46,6 @@ public class HtmlTag {
 		@Override
 		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
 			return new HtmlDomNode(parent, modelContext, this) {
-				{
-					HtmlCheckBox.this.addAttribute("type", "checkbox");
-				}
-
 				@Override
 				public void handleMessage(JsonObject json) {
 					getTag().getDomNodeAttributes(getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
@@ -211,16 +208,8 @@ public class HtmlTag {
 		}
 	}
 
+	@Attribute(name = "type", value = "radio")
 	public static class HtmlRadio extends TagImpl {
-
-		@Override
-		public HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-			return new HtmlDomNode(parent, modelContext, this) {
-				{
-					HtmlRadio.this.addAttribute("type", "radio");
-				}
-			};
-		}
 
 		@Override
 		public String getTag() {
