@@ -87,22 +87,23 @@ public interface SelectionDefaults extends Tag {
 	}
 
 	default void bindSelection(Tag subElement) {
-		addPostfixBinding(model -> {
-			ObservableList<Context> subContexts = model.getSubContexts(subElement);
-			Property<Context> selection = getSelectionProperty(model);
-			subContexts.addListener((ListChangeListener<Context>) change -> {
-				if (selection != null && selection.getValue() != null)
-					while (change.next())
-						if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().stream().map(c -> c.getGeneric()).collect(Collectors.toList()).contains(selection.getValue().getGeneric()))
-							selection.setValue(null);
-			});
-			Property<Generic> updatedGeneric = getProperty(UPDATED_GENERIC, model);
-			if (selection != null && updatedGeneric != null)
+		addPostfixBinding(context -> {
+			ObservableList<Context> subContexts = context.getSubContexts(subElement);
+			Property<Context> selection = getSelectionProperty(context);
+			Property<Generic> updatedGeneric = getUpdatedGenericProperty(context);
+			if (selection != null && updatedGeneric != null) {
+				subContexts.addListener((ListChangeListener<Context>) change -> {
+					if (selection.getValue() != null)
+						while (change.next())
+							if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().stream().map(c -> c.getGeneric()).collect(Collectors.toList()).contains(selection.getValue().getGeneric()))
+								selection.setValue(null);
+				});
 				updatedGeneric.addListener((o, v, nv) -> {
 					Optional<? extends Context> updatedModel = subContexts.stream().filter(m -> m.getGeneric().equals(nv)).findFirst();
-					if (updatedModel.isPresent())
-						getSelectionProperty(model).setValue(updatedModel.get());
+					if (updatedModel.isPresent() && selection.getValue() == null)
+						selection.setValue(updatedModel.get());
 				});
+			}
 		});
 	}
 }
