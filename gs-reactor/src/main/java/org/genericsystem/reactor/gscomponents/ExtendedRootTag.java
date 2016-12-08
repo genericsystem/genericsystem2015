@@ -201,7 +201,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		GTag gTag = storedClasses.get(current.getClass());
 		GTagAnnotation styleAnnotation = (GTagAnnotation) gTag.setHolder(tagAnnotationAttribute, new TagAnnotation(Style.class, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray(), name));
 		((GenericTagNode) tag.getTagNode()).tagAnnotations.add(styleAnnotation);
-		styleAnnotation.setHolder(tagAnnotationContentAttribute, new JsonObject().put("value", value).encode());
+		styleAnnotation.setHolder(tagAnnotationContentAttribute, new JsonObject().put("value", value).encodePrettily());
 	}
 
 	private static <T> T getTagClass(Tag tag, String className) {
