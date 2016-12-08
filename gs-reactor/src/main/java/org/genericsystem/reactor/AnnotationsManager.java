@@ -2,9 +2,11 @@ package org.genericsystem.reactor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -102,7 +104,7 @@ public class AnnotationsManager {
 	}
 
 	static <T extends Tag> void processAnnotation(AnnotationProcessor processor, Tag tag) {
-		List<Class<?>> classesToResult = new ArrayList<>();
+		Deque<Class<?>> classesToResult = new ArrayDeque<>();
 		Tag current = tag;
 		if (!processor.isRepeatable()) {
 			Annotation applyingAnnotation = null;
@@ -117,7 +119,7 @@ public class AnnotationsManager {
 				}
 				if (!annotationsFound.isEmpty())
 					applyingAnnotation = annotationsFound.get(0);
-				classesToResult.add(0, current.getClass());
+				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 			if (applyingAnnotation != null)
@@ -133,7 +135,7 @@ public class AnnotationsManager {
 				}
 				Collections.reverse(annotationsFound);
 				applyingAnnotations.addAll(annotationsFound);
-				classesToResult.add(0, current.getClass());
+				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 			for (Annotation applyingAnnotation : applyingAnnotations)
@@ -165,7 +167,7 @@ public class AnnotationsManager {
 		return result;
 	}
 
-	static List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
+	static List<Annotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, Deque<Class<?>> classesToResult, Tag tag) {
 		List<Annotation> annotationsFound = new ArrayList<>();
 		Annotation[] annotations = annotatedClass.getAnnotationsByType(annotationClass);
 		for (Annotation annotation : annotations)
@@ -175,7 +177,7 @@ public class AnnotationsManager {
 				if (pos.length != 0 && pos.length != path.length)
 					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + IntStream.of(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
-				if (isAssignableFrom(Arrays.asList(path), classesToResult) && posMatches(pos, path, tag)) {
+				if (isAssignableFrom(Arrays.asList(path), new ArrayList<>(classesToResult)) && posMatches(pos, path, tag)) {
 					if (!annotationsFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));

@@ -1,12 +1,11 @@
 package org.genericsystem.reactor.gscomponents;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
 import java.lang.annotation.Annotation;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,13 +14,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javafx.beans.binding.MapBinding;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.WeakListChangeListener;
 
 import org.genericsystem.api.core.TagAnnotation;
 import org.genericsystem.api.core.annotations.Components;
@@ -47,6 +39,15 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import javafx.beans.binding.MapBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.WeakListChangeListener;
 
 public class ExtendedRootTag extends RootTagImpl {
 
@@ -189,12 +190,12 @@ public class ExtendedRootTag extends RootTagImpl {
 	// – This method is slow.
 	@Override
 	public void processStyle(Tag tag, String name, String value) {
-		List<Class<?>> path = new ArrayList<>();
-		List<Integer> pos = new ArrayList<>();
+		Deque<Class<?>> path = new ArrayDeque<>();
+		Deque<Integer> pos = new ArrayDeque<>();
 		Tag current = tag;
 		while (current != null && current.getParent() != null) {
-			path.add(0, current.getClass());
-			pos.add(0, AnnotationsManager.position(current, current.getClass()));
+			path.push(current.getClass());
+			pos.push(AnnotationsManager.position(current, current.getClass()));
 			current = current.getParent();
 		}
 		GTag gTag = storedClasses.get(current.getClass());
@@ -219,7 +220,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		public GenericTagNode init(Tag tag) {
-			List<Class<?>> classesToResult = new ArrayList<>();
+			Deque<Class<?>> classesToResult = new ArrayDeque<>();
 
 			// @Children annotations
 			Tag current = tag;
@@ -233,7 +234,7 @@ public class ExtendedRootTag extends RootTagImpl {
 				}
 				if (!annotationFound.isEmpty())
 					applyingAnnotation = annotationFound.get(0);
-				classesToResult.add(0, current.getClass());
+				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 			if (applyingAnnotation != null)
@@ -241,7 +242,7 @@ public class ExtendedRootTag extends RootTagImpl {
 						.forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
 
 			// @Style annotations
-			classesToResult = new ArrayList<>();
+			classesToResult = new ArrayDeque<>();
 			current = tag;
 			while (current != null) {
 				Class<?> superClass = current.getClass();
@@ -252,14 +253,14 @@ public class ExtendedRootTag extends RootTagImpl {
 				}
 				Collections.reverse(annotationsFound);
 				tagAnnotations.addAll(annotationsFound);
-				classesToResult.add(0, current.getClass());
+				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 
 			return this;
 		}
 
-		private List<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, List<Class<?>> classesToResult, Tag tag) {
+		private List<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, Deque<Class<?>> classesToResult, Tag tag) {
 			List<GTagAnnotation> annotationFound = new ArrayList<>();
 			Generic tagClass = storedClasses.get(annotatedClass);
 			List<GTagAnnotation> annotations = (List) tagClass.getObservableComposites().filtered(g -> tagAnnotationAttribute.equals(g.getMeta()) && annotationClass.equals(((TagAnnotation) g.getValue()).getAnnotationClass()));
@@ -269,7 +270,7 @@ public class ExtendedRootTag extends RootTagImpl {
 				if (pos.length != 0 && pos.length != path.length)
 					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + Arrays.stream(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
-				if (AnnotationsManager.isAssignableFrom(Arrays.asList(path), classesToResult) && AnnotationsManager.posMatches(pos, path, tag)) {
+				if (AnnotationsManager.isAssignableFrom(Arrays.asList(path), new ArrayList<>(classesToResult)) && AnnotationsManager.posMatches(pos, path, tag)) {
 					if (!annotationFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
 						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
 								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
