@@ -113,7 +113,6 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		storeClass(this.getClass());
 		annotationsManager = new ExtendedAnnotationsManager(getClass());
-		setTagNode(buildTagNode(this));
 		createSubTree();
 	}
 
