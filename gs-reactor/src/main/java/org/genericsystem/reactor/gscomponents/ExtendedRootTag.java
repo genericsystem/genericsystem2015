@@ -291,8 +291,9 @@ public class ExtendedRootTag extends RootTagImpl {
 				protected ObservableMap<String, String> computeValue() {
 					ObservableMap<String, String> styles = FXCollections.observableHashMap();
 					for (GTagAnnotation tagAnnotation : tagAnnotations) {
-						JsonObject json = new JsonObject((String) tagAnnotation.getComposites().filter(g -> tagAnnotationContentAttribute.equals(g.getMeta())).first().getValue());
-						styles.put(tagAnnotation.getValue().getName(), json.getString("value"));
+						GTagAnnotationContent annotationContent = (GTagAnnotationContent) tagAnnotation.getComposites().filter(g -> tagAnnotationContentAttribute.equals(g.getMeta())).first();
+						if (annotationContent != null)
+							styles.put(tagAnnotation.getValue().getName(), new JsonObject(annotationContent.getValue()).getString("value"));
 					}
 					return styles;
 				}

@@ -148,7 +148,7 @@ public class AnnotationsManager {
 			return true;
 		Tag tag = testedTag;
 		for (int i = pathAnnotation.length - 1; i >= 0; i--) {
-			if (posAnnotation[i] != -1 && position(tag, pathAnnotation[i]) != posAnnotation[i])
+			if (tag.getParent() == null || posAnnotation[i] != -1 && position(tag, pathAnnotation[i]) != posAnnotation[i])
 				return false;
 			tag = tag.getParent();
 		}
