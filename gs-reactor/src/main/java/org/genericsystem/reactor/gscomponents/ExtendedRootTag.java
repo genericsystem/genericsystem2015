@@ -1,5 +1,6 @@
 package org.genericsystem.reactor.gscomponents;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,18 +169,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			pos.push(AnnotationsManager.position(current, current.getClass()));
 			current = current.getParent();
 		}
-		GTag gTag = storedClasses.get(current.getClass());
-		GTagAnnotation styleAnnotation = (GTagAnnotation) gTag.setHolder(engine.find(TagAnnotationAttribute.class), new TagAnnotation(Style.class, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray(), name));
-		((GenericTagNode) tag.getTagNode()).tagAnnotations.add(styleAnnotation);
-		styleAnnotation.setHolder(engine.find(TagAnnotationContentAttribute.class), new JsonObject().put("value", value).encodePrettily());
-	}
-
-	private static <T> T getTagClass(Tag tag, String className) {
-		try {
-			return (T) Class.forName(className);
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException("Class " + className + " not found in children of " + tag.getClass().getSimpleName());
-		}
+		((GenericTagNode) tag.getTagNode()).tagAnnotations.add(storedClasses.get(current.getClass()).setAnnotation(Style.class, name, value, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray()));
 	}
 
 	public class GenericTagNode extends SimpleTagNode {
@@ -219,16 +209,12 @@ public class ExtendedRootTag extends RootTagImpl {
 			// Build children if there are any.
 			Optional<GTagAnnotation> childrenAnnotation = tagAnnotations.stream().filter(ta -> Children.class.equals(ta.getValue().getAnnotationClass())).findFirst();
 			if (childrenAnnotation.isPresent())
-				new JsonObject((String) childrenAnnotation.get().getHolder(engine.find(TagAnnotationContentAttribute.class)).getValue()).getJsonArray("value").stream().map(className -> getTagClass(tag, (String) className))
-						.forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
+				childrenAnnotation.get().childrenClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
 		}
 
-		@SuppressWarnings("unchecked")
 		private Set<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Deque<Class<?>> classesToResult, Tag tag) {
 			Set<GTagAnnotation> annotationsFound = new HashSet<>();
-			Generic tagClass = storedClasses.get(annotatedClass);
-			Snapshot<GTagAnnotation> annotations = (Snapshot) tagClass.getHolders(engine.find(TagAnnotationAttribute.class));
-			for (GTagAnnotation annotation : annotations) {
+			for (GTagAnnotation annotation : storedClasses.get(annotatedClass).getAnnotations()) {
 				Class<?>[] path = annotation.getValue().getPath();
 				int[] pos = annotation.getValue().getPos();
 				Class<?> annotationClass = annotation.getValue().getAnnotationClass();
@@ -296,15 +282,26 @@ public class ExtendedRootTag extends RootTagImpl {
 			return (Class<?>) Generic.super.getValue();
 		}
 
+		@SuppressWarnings("unchecked")
+		default Snapshot<GTagAnnotation> getAnnotations() {
+			return (Snapshot) getHolders(getRoot().find(TagAnnotationAttribute.class));
+		}
+
+		default GTagAnnotation setAnnotation(Class<? extends Annotation> annotationClass, String name, String value, Class<?>[] path, int[] positions) {
+			GTagAnnotation styleAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(annotationClass, path, positions, name));
+			styleAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", value).encodePrettily());
+			return styleAnnotation;
+		}
+
+		default void setStyleAnnotation(Style annotation) {
+			setAnnotation(annotation.getClass(), annotation.name(), annotation.value(), annotation.path(), annotation.pos());
+		}
+
 		default void setChildrenAnnotation(Children annotation) {
 			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(Children.class, annotation.path(), annotation.pos()));
 			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
 		}
 
-		default void setStyleAnnotation(Style annotation) {
-			GTagAnnotation gStyleAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(Style.class, annotation.path(), annotation.pos(), annotation.name()));
-			gStyleAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", annotation.value()).encodePrettily());
-		}
 	}
 
 	public static interface GTagAnnotation extends Generic {
@@ -317,6 +314,26 @@ public class ExtendedRootTag extends RootTagImpl {
 		default public TagAnnotation getValue() {
 			return (TagAnnotation) Generic.super.getValue();
 		}
+
+		@SuppressWarnings("unchecked")
+		default public Stream<Class<?>> childrenClassesStream() {
+			return (Stream) getContentJSonArray().stream().map(className -> {
+				try {
+					return Class.forName((String) className);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalStateException("Class " + className + " not found");
+				}
+			});
+		}
+
+		default public JsonArray getContentJSonArray() {
+			return ((GTagAnnotationContent) getHolder(getRoot().find(TagAnnotationContentAttribute.class))).getJSonValue().getJsonArray("value");
+		}
+
+		default public String getContent() {
+			return (String) getHolder(getRoot().find(TagAnnotationContentAttribute.class)).getValue();
+		}
+
 	}
 
 	public static interface GTagAnnotationContent extends Generic {
