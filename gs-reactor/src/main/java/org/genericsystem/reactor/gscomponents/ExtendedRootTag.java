@@ -1,15 +1,15 @@
 package org.genericsystem.reactor.gscomponents;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -34,7 +34,6 @@ import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
-import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
@@ -42,11 +41,13 @@ import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotat
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import javafx.beans.binding.ListBinding;
 import javafx.beans.binding.MapBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 import javafx.collections.WeakListChangeListener;
 
 public class ExtendedRootTag extends RootTagImpl {
@@ -92,7 +93,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			Class<?> targetTagClass = path.length == 0 ? (Class<?>) gTagAnnotation.getBaseComponent().getValue() : path[path.length - 1];
 			if (Style.class.equals(tagAnnotation.getAnnotationClass())) {
 				Set<Tag> concernedTags = searchTags(this, targetTagClass, tagAnnotation.getPath(), tagAnnotation.getPos());
-				concernedTags.forEach(tag -> action.accept(((GenericTagNode) tag.getTagNode()).tagAnnotations, gTagAnnotation));
+				concernedTags.forEach(tag -> action.accept(((GenericTagNode) tag.getTagNode()).styleAnnotations, gTagAnnotation));
 			}
 		});
 	}
@@ -137,7 +138,7 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	@Override
 	public TagNode buildTagNode(Tag tag) {
-		return new GenericTagNode().init(tag);
+		return new GenericTagNode(tag);
 	}
 
 	static long start;
@@ -183,10 +184,8 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	// Called only by addStyle, not used to treat @Style annotations.
-	// Use the most precise path and pos possible to make sure that this style applies to the given tag and nothing else.
-	// Problems:
-	// – All the annotations are stored on the root tag.
-	// – This method is slow.
+	// Use the most precise path and pos possible to make sure that this style applies to the given tag and nothing else,
+	// so the generic annotations created here are on the root tag’s class.
 	@Override
 	public void processStyle(Tag tag, String name, String value) {
 		Deque<Class<?>> path = new ArrayDeque<>();
@@ -212,84 +211,84 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	public class GenericTagNode extends SimpleTagNode {
-		private ObservableList<GTagAnnotation> tagAnnotations = FXCollections.observableArrayList();
 
-		public List<GTagAnnotation> getTagAnnotations() {
-			return tagAnnotations;
-		}
+		private ObservableSet<GTagAnnotation> tagAnnotations = FXCollections.observableSet(new HashSet<GTagAnnotation>() {
 
-		public GenericTagNode init(Tag tag) {
+			private static final long serialVersionUID = 1887068618788935803L;
+
+			@Override
+			public boolean add(GTagAnnotation annotation) {
+				Optional<GTagAnnotation> overriddenElement = this.stream().filter(gta -> {
+					TagAnnotation ta = gta.getValue();
+					TagAnnotation newAnnotation = annotation.getValue();
+					return Objects.equals(ta.getAnnotationClass(), newAnnotation.getAnnotationClass()) && Objects.equals(ta.getName(), newAnnotation.getName());
+				}).findAny();
+				if (overriddenElement.isPresent())
+					remove(overriddenElement.get());
+				return super.add(annotation);
+			}
+		});
+		private ObservableList<GTagAnnotation> styleAnnotations = new ListBinding<GTagAnnotation>() {
+			{
+				bind(tagAnnotations);
+			}
+
+			@Override
+			protected ObservableList<GTagAnnotation> computeValue() {
+				ObservableList<GTagAnnotation> result = FXCollections.observableArrayList();
+				result.addAll(tagAnnotations.stream().filter(gta -> Style.class.equals(gta.getValue().getAnnotationClass())).collect(Collectors.toList()));
+				return result;
+			}
+		};
+
+		public GenericTagNode(Tag tag) {
 			Deque<Class<?>> classesToResult = new ArrayDeque<>();
 
-			// @Children annotations
+			// Retrieve all applying annotations.
 			Tag current = tag;
-			Generic applyingAnnotation = null;
 			while (current != null) {
-				List<GTagAnnotation> annotationFound = selectAnnotations(current.getClass(), Children.class, classesToResult, tag);
-				Class<?> superClass = current.getClass().getSuperclass();
-				while (annotationFound.isEmpty() && Tag.class.isAssignableFrom(superClass)) {
-					annotationFound = selectAnnotations(superClass, Children.class, classesToResult, tag);
-					superClass = superClass.getSuperclass();
-				}
-				if (!annotationFound.isEmpty())
-					applyingAnnotation = annotationFound.get(0);
-				classesToResult.push(current.getClass());
-				current = current.getParent();
-			}
-			if (applyingAnnotation != null)
-				new JsonObject((String) applyingAnnotation.getHolder(tagAnnotationContentAttribute).getValue()).getJsonArray("value").stream().map(className -> getTagClass(tag, (String) className))
-						.forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
-
-			// @Style annotations
-			classesToResult = new ArrayDeque<>();
-			current = tag;
-			while (current != null) {
-				Class<?> superClass = current.getClass();
-				List<GTagAnnotation> annotationsFound = new ArrayList<>();
-				while (Tag.class.isAssignableFrom(superClass)) {
-					annotationsFound.addAll(selectAnnotations(superClass, Style.class, classesToResult, tag));
-					superClass = superClass.getSuperclass();
-				}
-				Collections.reverse(annotationsFound);
+				List<GTagAnnotation> annotationsFound = selectAnnotations(current.getClass(), classesToResult, tag);
 				tagAnnotations.addAll(annotationsFound);
 				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 
-			return this;
+			// Build children if there are any.
+			Optional<GTagAnnotation> childrenAnnotation = tagAnnotations.stream().filter(ta -> Children.class.equals(ta.getValue().getAnnotationClass())).findFirst();
+			if (childrenAnnotation.isPresent())
+				new JsonObject((String) childrenAnnotation.get().getHolder(tagAnnotationContentAttribute).getValue()).getJsonArray("value").stream().map(className -> getTagClass(tag, (String) className))
+						.forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
 		}
 
-		private List<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Class<? extends Annotation> annotationClass, Deque<Class<?>> classesToResult, Tag tag) {
-			List<GTagAnnotation> annotationFound = new ArrayList<>();
+		private List<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Deque<Class<?>> classesToResult, Tag tag) {
+			List<GTagAnnotation> annotationsFound = new ArrayList<>();
 			Generic tagClass = storedClasses.get(annotatedClass);
-			List<GTagAnnotation> annotations = (List) tagClass.getObservableComposites().filtered(g -> tagAnnotationAttribute.equals(g.getMeta()) && annotationClass.equals(((TagAnnotation) g.getValue()).getAnnotationClass()));
+			List<GTagAnnotation> annotations = (List) tagClass.getObservableHolders(tagAnnotationAttribute);
 			for (GTagAnnotation annotation : annotations) {
 				Class<?>[] path = annotation.getValue().getPath();
 				int[] pos = annotation.getValue().getPos();
+				Class<?> annotationClass = annotation.getValue().getAnnotationClass();
 				if (pos.length != 0 && pos.length != path.length)
 					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + Arrays.stream(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
 				if (AnnotationsManager.isAssignableFrom(Arrays.asList(path), new ArrayList<>(classesToResult)) && AnnotationsManager.posMatches(pos, path, tag)) {
-					if (!annotationFound.isEmpty() && !(Style.class.equals(annotationClass) || Attribute.class.equals(annotationClass)))
-						throw new IllegalStateException("Multiple annotations applicable to same tag defined at same level. Annotation: " + annotationClass.getSimpleName() + ", path to tag: "
-								+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()));
-					annotationFound.add(annotation);
+					annotationsFound.add(annotation);
 				}
 			}
-			return annotationFound;
+			return annotationsFound;
 		}
 
 		@Override
 		public ObservableMap<String, String> buildObservableStyles() {
 			return new MapBinding<String, String>() {// don't transmit successive invalidations
 				{
-					bind(tagAnnotations);
+					bind(styleAnnotations);
 				}
 
 				@Override
 				protected ObservableMap<String, String> computeValue() {
 					ObservableMap<String, String> styles = FXCollections.observableHashMap();
-					for (GTagAnnotation tagAnnotation : tagAnnotations) {
+					for (GTagAnnotation tagAnnotation : styleAnnotations) {
 						GTagAnnotationContent annotationContent = (GTagAnnotationContent) tagAnnotation.getComposites().filter(g -> tagAnnotationContentAttribute.equals(g.getMeta())).first();
 						if (annotationContent != null)
 							styles.put(tagAnnotation.getValue().getName(), new JsonObject(annotationContent.getValue()).getString("value"));
@@ -310,10 +309,8 @@ public class ExtendedRootTag extends RootTagImpl {
 		@Components(TagType.class)
 		@InstanceValueClassConstraint(TagAnnotation.class)
 		@Dependencies({ TagAnnotationContentAttribute.class })
-		@NoInheritance
 		@InstanceClass(GTagAnnotation.class)
 		public static interface TagAnnotationAttribute extends Generic {
-
 		}
 
 		@SystemGeneric
@@ -323,7 +320,6 @@ public class ExtendedRootTag extends RootTagImpl {
 		@NoInheritance
 		@InstanceClass(GTagAnnotationContent.class)
 		public static interface TagAnnotationContentAttribute extends Generic {
-
 		}
 	}
 
