@@ -1,8 +1,5 @@
 package org.genericsystem.reactor.gscomponents;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,20 +7,11 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javafx.beans.binding.MapBinding;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
-import javafx.collections.WeakListChangeListener;
 
 import org.genericsystem.api.core.Snapshot;
 import org.genericsystem.api.core.TagAnnotation;
@@ -50,6 +38,16 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import javafx.beans.binding.MapBinding;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
+import javafx.collections.WeakListChangeListener;
+
 public class ExtendedRootTag extends RootTagImpl {
 
 	private final Root engine;
@@ -67,15 +65,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	};
 
 	private static BiConsumer<ObservableSet<GTagAnnotation>, GTagAnnotation> ON_ADD = (styles, gTagAnnotation) -> {
-		GTagAnnotation applyingAnnotation = gTagAnnotation;
-		TagAnnotation newAnnotation = gTagAnnotation.getValue();
-		for (GTagAnnotation styleAnnotationGeneric : styles) {
-			TagAnnotation annotation = styleAnnotationGeneric.getValue();
-			if (Style.class.equals(annotation.getAnnotationClass()) && annotation.getName().equals(newAnnotation.getName()) && annotation.getPath().length > newAnnotation.getPath().length)
-				applyingAnnotation = styleAnnotationGeneric;
-		}
-		if (gTagAnnotation.equals(applyingAnnotation))
-			styles.add(gTagAnnotation);
+		styles.add(gTagAnnotation);
 	};
 
 	private static BiConsumer<ObservableSet<GTagAnnotation>, GTagAnnotation> ON_REMOVE = (styles, gTagAnnotation) -> {
@@ -200,13 +190,16 @@ public class ExtendedRootTag extends RootTagImpl {
 
 			@Override
 			public boolean add(GTagAnnotation annotation) {
-				Optional<GTagAnnotation> overriddenElement = this.stream().filter(gta -> {
-					TagAnnotation ta = gta.getValue();
-					TagAnnotation newAnnotation = annotation.getValue();
-					return Objects.equals(ta.getAnnotationClass(), newAnnotation.getAnnotationClass()) && Objects.equals(ta.getName(), newAnnotation.getName());
-				}).findAny();
-				if (overriddenElement.isPresent())
-					remove(overriddenElement.get());
+				Optional<GTagAnnotation> equivAnnotation = this.stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
+				if (equivAnnotation.isPresent()) {
+					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
+					if (overriddenAnnotation.getValue().getPath().length <= annotation.getValue().getPath().length) {
+						remove(overriddenAnnotation);
+					} else
+						// Found an annotation applying to this tag that’s more precise than the new annotation,
+						// so the new annotation is not added to the Set.
+						return false;
+				}
 				return super.add(annotation);
 			}
 		});
