@@ -22,8 +22,6 @@ import org.genericsystem.reactor.gscomponents.InstancesTable.HorizontalInstances
 public class DivWithTitle extends FlexDiv {
 
 	@Style(name = "background-color", value = "#EA4500")
-	@Style(name = "margin-right", value = "1px")
-	@Style(name = "margin-bottom", value = "1px")
 	@Style(name = "color", value = "White")
 	@Style(name = "justify-content", value = "center")
 	@Style(name = "align-items", value = "center")

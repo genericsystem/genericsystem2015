@@ -69,6 +69,9 @@ import javafx.beans.value.ObservableValue;
 
 @Style(name = "flex", value = "1 1 0%")
 @Style(name = "overflow", value = "hidden")
+@Style(name = "background-color", value = "lightgrey")
+@Style(name = "padding-left", value = "1px")
+@Style(name = "padding-top", value = "1px")
 @ReverseFlexDirection(path = Composite.class)
 @Style(path = { Composite.class, ValueComponents.class }, pos = { -1, 0 }, name = "flex", value = "0.3")
 @Style(path = { Composite.class, ValueComponents.class }, name = "color", value = "white")
