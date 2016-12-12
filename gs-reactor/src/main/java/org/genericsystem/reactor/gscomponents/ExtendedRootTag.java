@@ -294,7 +294,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default void setStyleAnnotation(Style annotation) {
-			setAnnotation(annotation.getClass(), annotation.name(), annotation.value(), annotation.path(), annotation.pos());
+			setAnnotation(Style.class, annotation.name(), annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setChildrenAnnotation(Children annotation) {
