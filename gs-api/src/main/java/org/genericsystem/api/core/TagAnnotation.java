@@ -42,6 +42,10 @@ public class TagAnnotation implements Serializable {
 		return name;
 	}
 
+	public boolean equivs(TagAnnotation otherAnnotation) {
+		return Objects.equals(annotationClass, otherAnnotation.annotationClass) && Objects.equals(name, otherAnnotation.name);
+	}
+
 	@Override
 	public int hashCode() {
 		return annotationClass.hashCode();
