@@ -27,6 +27,7 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.value.ClassGenericValue;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
+import org.genericsystem.defaults.tools.AbstractMinimalChangesObservableList.MinimalChangesObservableList;
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ExtendedAnnotationsManager;
@@ -46,7 +47,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
 import javafx.collections.WeakListChangeListener;
 
 public class ExtendedRootTag extends RootTagImpl {
@@ -65,15 +65,15 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 	};
 
-	private static BiConsumer<ObservableSet<GTagAnnotation>, GTagAnnotation> ON_ADD = (styles, gTagAnnotation) -> {
+	private static BiConsumer<ObservableList<GTagAnnotation>, GTagAnnotation> ON_ADD = (styles, gTagAnnotation) -> {
 		styles.add(gTagAnnotation);
 	};
 
-	private static BiConsumer<ObservableSet<GTagAnnotation>, GTagAnnotation> ON_REMOVE = (styles, gTagAnnotation) -> {
+	private static BiConsumer<ObservableList<GTagAnnotation>, GTagAnnotation> ON_REMOVE = (styles, gTagAnnotation) -> {
 		styles.remove(gTagAnnotation);
 	};
 
-	private void doStyle(Stream<? extends GTagAnnotationContent> streamToConsum, BiConsumer<ObservableSet<GTagAnnotation>, GTagAnnotation> action) {
+	private void doStyle(Stream<? extends GTagAnnotationContent> streamToConsum, BiConsumer<ObservableList<GTagAnnotation>, GTagAnnotation> action) {
 		streamToConsum.forEach(valueGeneric -> {
 			GTagAnnotation gTagAnnotation = valueGeneric.getBaseComponent();
 			TagAnnotation tagAnnotation = gTagAnnotation.getValue();
@@ -174,14 +174,14 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	public class GenericTagNode extends SimpleTagNode {
 
-		private ObservableSet<GTagAnnotation> tagAnnotations = FXCollections.observableSet(new HashSet<GTagAnnotation>() {
-
-			private static final long serialVersionUID = 1887068618788935803L;
+		private ObservableList<GTagAnnotation> tagAnnotations = new MinimalChangesObservableList<GTagAnnotation>(FXCollections.observableArrayList()) {
 
 			@Override
 			public boolean add(GTagAnnotation annotation) {
 				Optional<GTagAnnotation> equivAnnotation = this.stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
-				if (equivAnnotation.isPresent()) {
+				// Allow addition of an already present annotation because the flush() causes the same generic
+				// to be added twice before being remove once.
+				if (equivAnnotation.isPresent() && !equivAnnotation.get().equals(annotation)) {
 					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
 					if (overriddenAnnotation.getValue().getPath().length <= annotation.getValue().getPath().length) {
 						remove(overriddenAnnotation);
@@ -192,7 +192,7 @@ public class ExtendedRootTag extends RootTagImpl {
 				}
 				return super.add(annotation);
 			}
-		});
+		};
 
 		public GenericTagNode(Tag tag) {
 			Deque<Class<?>> classesToResult = new ArrayDeque<>();
