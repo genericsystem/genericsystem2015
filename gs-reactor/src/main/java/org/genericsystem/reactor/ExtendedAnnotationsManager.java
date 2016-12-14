@@ -17,13 +17,19 @@ import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 import org.genericsystem.reactor.gscomponents.TagImpl;
+
+import io.vertx.core.json.JsonObject;
+import javafx.collections.ObservableList;
 
 public class ExtendedAnnotationsManager extends AnnotationsManager {
 
 	public ExtendedAnnotationsManager(Class<? extends RootTag> clazz) {
 		super(clazz);
-
 	}
 
 	@Override
@@ -43,7 +49,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(BindText.class);
 		registerAnnotation(BindAction.class);
 		// registerAnnotation(Style.class);
-		registerAnnotation(GenericValueBackgroundColor.class);
+		// registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
 	}
@@ -51,5 +57,20 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	@Override
 	public void processChildrenAnnotations(Tag tag) {
 		((TagImpl) tag).setTagNode(tag.getRootTag().buildTagNode(tag));
+	}
+
+	@Override
+	public void processAnnotations(Tag tag) {
+		super.processAnnotations(tag);
+		processStoredAnnotations(tag);
+	}
+
+	public void processStoredAnnotations(Tag tag) {
+		ObservableList<GTagAnnotation> gvbColor = ((GenericTagNode) tag.getTagNode()).getTagAnnotations().filtered(gta -> GenericValueBackgroundColor.class.equals(gta.getValue().getAnnotationClass()));
+		if (!gvbColor.isEmpty()) {
+			GTagAnnotationContent annotationContent = (GTagAnnotationContent) gvbColor.get(0).getComposites().filter(g -> gvbColor.get(0).getRoot().find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
+			if (annotationContent != null)
+				tag.getRootTag().processGenericValueBackgroundColor(tag, new JsonObject(annotationContent.getValue()).getString("value"));
+		}
 	}
 }

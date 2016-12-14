@@ -167,6 +167,7 @@ public class HtmlDomNode {
 		this.parent = parent;
 		this.tag = tag;
 		this.context = context;
+		tag.getRootTag().initDomNode(this);
 	}
 
 	private <BETWEEN> Consumer<Tag> tagAdder() {
