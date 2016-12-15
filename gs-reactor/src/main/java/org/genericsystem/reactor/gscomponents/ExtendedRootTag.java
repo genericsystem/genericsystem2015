@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -70,18 +71,34 @@ public class ExtendedRootTag extends RootTagImpl {
 		streamToConsum.forEach(valueGeneric -> {
 			GTagAnnotation gTagAnnotation = valueGeneric.getBaseComponent();
 			TagAnnotation tagAnnotation = gTagAnnotation.getValue();
-			Class<?>[] path = tagAnnotation.getPath();
-			Class<?> targetTagClass = path.length == 0 ? (Class<?>) gTagAnnotation.getBaseComponent().getValue() : path[path.length - 1];
-			Set<Tag> concernedTags = searchTags(this, targetTagClass, tagAnnotation.getPath(), tagAnnotation.getPos());
+			LinkedList<Class<?>> path = new LinkedList<>(Stream.of(tagAnnotation.getPath()).collect(Collectors.toList()));
+			path.addFirst(gTagAnnotation.getBaseComponent().getValue());
+			LinkedList<Integer> pos = Arrays.stream(tagAnnotation.getPos()).boxed().collect(Collectors.toCollection(LinkedList<Integer>::new));
+			if (!pos.isEmpty())
+				pos.addFirst(-1);
+			Set<Tag> concernedTags = searchTags(this, path, pos);
 			concernedTags.forEach(tag -> action.accept(((GenericTagNode) tag.getTagNode()).tagAnnotations, gTagAnnotation));
 		});
 	}
 
-	private Set<Tag> searchTags(Tag subTree, Class<?> targetTagClass, Class<?>[] path, int[] pos) {
+	// pos is either empty or the same length as path.
+	private Set<Tag> searchTags(Tag subTree, LinkedList<Class<?>> path, LinkedList<Integer> pos) {
 		Set<Tag> foundTags = new HashSet<>();
-		if (targetTagClass.equals(subTree.getClass()) && AnnotationsManager.posMatches(pos, path, subTree))
-			foundTags.add(subTree);
-		subTree.getObservableChildren().forEach(child -> foundTags.addAll(searchTags(child, targetTagClass, path, pos)));
+		foundTags.addAll(searchTagsFromFirst(subTree, path, pos));
+		subTree.getObservableChildren().forEach(child -> foundTags.addAll(searchTags(child, path, pos)));
+		return foundTags;
+	}
+
+	private Set<Tag> searchTagsFromFirst(Tag firstTag, LinkedList<Class<?>> path, LinkedList<Integer> pos) {
+		if (path.isEmpty())
+			return new HashSet<>();
+		Set<Tag> foundTags = new HashSet<>();
+		if (path.peek().isAssignableFrom(firstTag.getClass()) && (pos.isEmpty() || pos.peek() == -1 || firstTag.getParent() != null && AnnotationsManager.position(firstTag, path.peek()) == pos.peek())) {
+			if (path.size() == 1)
+				foundTags.add(firstTag);
+			else
+				firstTag.getObservableChildren().forEach(child -> foundTags.addAll(searchTagsFromFirst(child, new LinkedList<>(path.subList(1, path.size())), pos.isEmpty() ? pos : new LinkedList<>(pos.subList(1, pos.size())))));
+		}
 		return foundTags;
 	}
 
