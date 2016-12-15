@@ -46,9 +46,6 @@ public @interface Style {
 
 	public static class StyleProcessor implements BiConsumer<Annotation, Tag> {
 
-		static long styleTime;
-		static int stylesNumber = 0;
-
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			tag.getRootTag().processStyle(tag, ((Style) annotation).name(), ((Style) annotation).value());

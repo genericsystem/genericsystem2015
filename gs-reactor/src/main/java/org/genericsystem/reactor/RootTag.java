@@ -48,7 +48,10 @@ public interface RootTag extends Tag {
 	}
 
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
-		tag.addPrefixBinding(context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue()
-				: value));
+		tag.addPrefixBinding(
+				context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
+	}
+
+	default void initDomNode(HtmlDomNode htmlDomNode) {
 	}
 }

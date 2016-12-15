@@ -13,6 +13,7 @@ import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.PreviousBtn;
 import org.genericsystem.quiz.app.QuestionDiv.UnitDiv;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
+import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
@@ -139,10 +140,30 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 					label.addAttribute(context, "for", idTag);
 
 			});
+
 		}
 
 		public static class QuizCheckBox extends CheckBoxWithValue {
 
+			@Override
+			public void init() {
+
+				// affiche les réponses précédentes
+
+				initValueProperty(context -> {
+
+					try {
+						return (Boolean) context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue()).getValue();
+
+					} catch (NullPointerException ex) {
+						return context.getGeneric().setLink(context.find(UserAnswer.class), false, getLoggedUserProperty(context).getValue());
+					}
+
+				});
+
+				// Place un listener sur la checkbox qui écoute l'état de la checkbox et modifie la valeur de UserAnswer en conséquence
+				addConvertedValueChangeListener((context, nva) -> context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue()).updateValue(nva));
+			}
 		}
 
 	}
@@ -225,7 +246,6 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		// generics[0] est l'element courant.
 		// Le getRoot permet d'utiliser la methode find (Le root donne accès à tous les éléments du context)
 		// TODO Rendre la méthode générique -> lui faire trouver les enfants d'un generic ssi il y a un unique enfant
-		// OU
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return generics[0].getObservableHolders(generics[0].getRoot().find(Answer.class));
@@ -235,47 +255,10 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 	public static class SAVE_QUIZ_RESULT implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			// context.mount();
 
-			// Récupérer les valeurs des HtmlCheckbox
+			context.flush();
+			System.out.println("flush effectué");
 
-			Tag unitDiv = tag.getParent().getParent().find(UnitDiv.class);
-			// System.out.println("Taille de unitDivs " + unitDivs.size());
-			System.out.println(context.getHtmlDomNode(unitDiv));
-
-			// HtmlInputText name = tag.getParent().getParent().find(HtmlInputText.class);
-			// HtmlInputText passwordInput = tag.getParent().getParent().find(HtmlInputText.class, 1);
-			// HtmlInputText confirmPassword = tag.getParent().getParent().find(HtmlInputText.class, 2);
-			// HtmlSpan invalidUsername = tag.getParent().getParent().find(HtmlSpan.class);
-			// HtmlSpan invalidConfirmPassword = tag.getParent().getParent().find(HtmlSpan.class, 1);
-			//
-			// String psw1 = passwordInput.getDomNodeAttributes(context).get("value");
-			// String psw2 = confirmPassword.getDomNodeAttributes(context).get("value");
-			// Generic user;
-			// try {
-			// user = context.find(User.class).addInstance(name.getDomNodeAttributes(context).get("value"));
-			// } catch (RollbackException e) {
-			// invalidUsername.addStyle(context, "display", "inline");
-			// return;
-			// }
-			// if (psw1 != null && psw1.equals(psw2)) {
-			// invalidConfirmPassword.addStyle(context, "display", "none");
-			// invalidUsername.addStyle(context, "display", "none");
-			// byte[] salt = EncryptionUtils.generateSalt();
-			// byte[] hash = EncryptionUtils.getEncryptedPassword(psw1, salt);
-			// Generic hashGeneric = user.setHolder(context.find(Password.class), hash);
-			// hashGeneric.setHolder(context.find(Salt.class), salt);
-			// tag.getDisplayProperty(context).setValue("none");
-			// name.getDomNodeAttributes(context).put("value", "");
-			// passwordInput.getDomNodeAttributes(context).put("value", "");
-			// confirmPassword.getDomNodeAttributes(context).put("value", "");
-			// context.flush();
-			// context.unmount();
-			// context.flush();
-			// } else {
-			// invalidConfirmPassword.addStyle(context, "display", "inline");
-			// context.unmount();
-			// }
 		}
 	}
 }

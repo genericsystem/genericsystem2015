@@ -6,6 +6,7 @@ import org.genericsystem.quiz.app.QuizApp.QuizzScript;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.Quiz;
+import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
@@ -16,7 +17,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.User;
 
 @RunScript(QuizzScript.class)
-@DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class })
+@DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class })
 @Children(QuizAppPage.class)
 @Style(name = "background-color", value = "grey")
 public class QuizApp extends RootTagImpl {
@@ -26,7 +27,7 @@ public class QuizApp extends RootTagImpl {
 	}
 
 	public QuizApp() {
-		// addPrefixBinding(context -> getAdminModeProperty(context).setValue(true));
+		// addPrefixBinding(context -> getLoggedUserProperty(context).setValue(context.find(User.class).getInstance("Robert DJ")));
 	}
 
 	public static class QuizzScript implements Script {
@@ -35,7 +36,7 @@ public class QuizApp extends RootTagImpl {
 		public void run(Root engine) {
 			// Create user
 			Generic user = engine.find(User.class);
-			user.setInstance("Robert DJ");
+			Generic robert = user.setInstance("Robert DJ");
 
 			// Create Quiz
 			Generic quiz = engine.find(Quiz.class);
@@ -50,14 +51,25 @@ public class QuizApp extends RootTagImpl {
 			// Create Answers (Answer.class is a component of Question.class)
 			String answerD = "Aucune de ces réponses";
 			Generic answer = engine.find(Answer.class);
-			q01.setHolder(answer, "la chaine 'azer' est ajoutée à la liste");
-			q01.setHolder(answer, "un ArrayOutOfBoundsException");
-			q01.setHolder(answer, "un NullPointerException");
-			q01.setHolder(answer, answerD);
-			q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe");
-			q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles seulement dans les méthodes déclarées après l'attribut");
-			q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe seulement si leur visibilité est public");
-			q02.setHolder(answer, answerD);
+			Generic answer0101 = q01.setHolder(answer, "la chaine 'azer' est ajoutée à la liste");
+			Generic answer0102 = q01.setHolder(answer, "un ArrayOutOfBoundsException");
+			Generic answer0103 = q01.setHolder(answer, "un NullPointerException");
+			Generic answer0104 = q01.setHolder(answer, answerD);
+			Generic answer0201 = q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe");
+			Generic answer0202 = q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles seulement dans les méthodes déclarées après l'attribut");
+			Generic answer0203 = q02.setHolder(answer, "les attributs déclarés dans une classe sont visibles dans toutes les méthodes de la classe seulement si leur visibilité est public");
+			Generic answer0204 = q02.setHolder(answer, answerD);
+
+			// Create UserAnswer
+			Generic userAnswer = engine.find(UserAnswer.class);
+			answer0101.setLink(userAnswer, true, robert);
+			answer0102.setLink(userAnswer, false, robert);
+			answer0103.setLink(userAnswer, true, robert);
+			answer0104.setLink(userAnswer, false, robert);
+			answer0201.setLink(userAnswer, true, robert);
+			answer0202.setLink(userAnswer, false, robert);
+			answer0203.setLink(userAnswer, false, robert);
+			answer0204.setLink(userAnswer, false, robert);
 
 			engine.getCurrentCache().flush();
 		}
