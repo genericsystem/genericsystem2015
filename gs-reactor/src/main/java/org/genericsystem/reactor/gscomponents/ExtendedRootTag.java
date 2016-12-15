@@ -40,6 +40,8 @@ import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 
@@ -132,24 +134,30 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	private ListChangeListener<? super GTagAnnotation> getApplyingAnnotationsListener(Tag tag, Context context) {
 		return c -> {
-			while (c.next()) {
-				if (c.wasRemoved()) {
-					c.getRemoved().forEach(gTagAnnotation -> {
-						Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
-						GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
-						if (Style.class.equals(annotationClass) && annotationContent != null)
-							tag.getDomNodeStyles(context).remove(gTagAnnotation.getValue().getName());
-					});
+			if (!context.isDestroyed())
+				while (c.next()) {
+					if (c.wasRemoved()) {
+						c.getRemoved().forEach(gTagAnnotation -> {
+							Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
+							GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
+							if (Style.class.equals(annotationClass) && annotationContent != null)
+								tag.getDomNodeStyles(context).remove(gTagAnnotation.getValue().getName());
+							if (GenericValueBackgroundColor.class.equals(annotationClass) && annotationContent != null)
+								tag.getDomNodeStyles(context).remove("background-color");
+						});
+					}
+					if (c.wasAdded()) {
+						c.getAddedSubList().forEach(gTagAnnotation -> {
+							Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
+							GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
+							if (Style.class.equals(annotationClass) && annotationContent != null)
+								tag.addStyle(context, gTagAnnotation.getValue().getName(), annotationContent.getJSonValue().getString("value"));
+							if (GenericValueBackgroundColor.class.equals(annotationClass) && annotationContent != null)
+								tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue()
+										: annotationContent.getJSonValue().getString("value"));
+						});
+					}
 				}
-				if (c.wasAdded()) {
-					c.getAddedSubList().forEach(gTagAnnotation -> {
-						Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
-						GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
-						if (Style.class.equals(annotationClass) && annotationContent != null)
-							tag.addStyle(context, gTagAnnotation.getValue().getName(), annotationContent.getJSonValue().getString("value"));
-					});
-				}
-			}
 		};
 	}
 
