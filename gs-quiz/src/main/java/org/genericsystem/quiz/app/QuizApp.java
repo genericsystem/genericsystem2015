@@ -6,6 +6,7 @@ import org.genericsystem.quiz.app.QuizApp.QuizzScript;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.Quiz;
+import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
@@ -17,7 +18,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.User;
 
 @RunScript(QuizzScript.class)
-@DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class })
+@DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class })
 @Children(QuizAppPage.class)
 @Style(name = "background-color", value = "grey")
 public class QuizApp extends RootTagImpl {
