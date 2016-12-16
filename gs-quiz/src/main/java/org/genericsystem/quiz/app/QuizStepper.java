@@ -11,7 +11,7 @@ public interface QuizStepper extends StepperDefaults {
 
 	// Tests -> Mettre un tag (bouton "Next") en argument de méthode, afin de le changer si on arrive a la fin de la liste
 	// TODO -> Refaire apparaitre le bouton lorsqu'on appuie sur "Previous"
-	public default void next(Context context, Tag tagNext, Tag tagPrevious, Tag tagFinish) {
+	default void next(Context context, Tag tagNext, Tag tagPrevious, Tag tagFinish) {
 		Property<Integer> index = getIteratorIndexProperty(context);
 		Tag stepperTag = getStepperTag(context);
 		ObservableList<Context> contexts = context.getSubContexts(stepperTag);
