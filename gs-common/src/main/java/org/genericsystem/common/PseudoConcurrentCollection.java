@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.genericsystem.api.core.IteratorSnapshot;
+
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
-
-import org.genericsystem.api.core.IteratorSnapshot;
 
 /**
  * @author Nicolas Feybesse
@@ -106,7 +106,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		private Predicate<T> predicate;
 
 		private ChangeListener<T> listener = (o, oldT, newT) -> {
-			if (predicate.test(newT)) {
+			if (fireInvalidations && predicate.test(newT)) {
 				super.fireValueChangedEvent();
 			}
 		};
@@ -120,7 +120,18 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 	}
 
+	private boolean fireInvalidations = true;
+
 	public Observable getFilteredInvalidator(T generic, Predicate<T> predicate) {
 		return new FilteredInvalidator(predicate);
+	}
+
+	public void disableInvalidations() {
+		fireInvalidations = false;
+
+	}
+
+	public void enableInvalidations() {
+		fireInvalidations = true;
 	}
 }
