@@ -38,7 +38,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
-		registerAnnotation(StyleClass.class);
+		// registerAnnotation(StyleClass.class);
 		// registerAnnotation(FlexDirectionStyle.class);
 		// registerAnnotation(KeepFlexDirection.class);
 		// registerAnnotation(ReverseFlexDirection.class);
@@ -65,6 +65,10 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	public void processStoredAnnotations(Tag tag) {
 		GenericTagNode tagNode = (GenericTagNode) tag.getTagNode();
 
+		GTagAnnotation styleClassAnnotation = tagNode.getTagAnnotation(StyleClass.class);
+		if (styleClassAnnotation != null)
+			styleClassAnnotation.getContentJSonArray().forEach(styleClass -> tag.addStyleClass((String) styleClass));
+
 		GTagAnnotation flexDirection = tagNode.getTagAnnotation(FlexDirectionStyle.class);
 		if (flexDirection != null)
 			tag.getRootTag().processFlexDirectionStyle(tag, FlexDirection.valueOf(flexDirection.getContentValue()));
@@ -77,7 +81,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		if (reverseFlexDirection != null)
 			tag.getRootTag().processReverseFlexDirection(tag);
 
-		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Style.class))
+		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Style.class).keySet())
 			tag.addStyle(tagAnnotation.getValue().getName(), tagAnnotation.getContentValue());
 
 		GTagAnnotation gvbColor = tagNode.getTagAnnotation(GenericValueBackgroundColor.class);

@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +29,6 @@ import org.genericsystem.api.core.annotations.constraints.PropertyConstraint;
 import org.genericsystem.api.core.annotations.value.ClassGenericValue;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
-import org.genericsystem.defaults.tools.AbstractMinimalChangesObservableList.MinimalChangesObservableList;
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ExtendedAnnotationsManager;
@@ -44,17 +43,21 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 
+import com.sun.javafx.collections.ObservableMapWrapper;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.WeakListChangeListener;
 
 public class ExtendedRootTag extends RootTagImpl {
@@ -69,11 +72,11 @@ public class ExtendedRootTag extends RootTagImpl {
 			if (c.wasRemoved())
 				updateApplyingAnnotations(c.getRemoved().stream(), (annotations, gTagAnnotation) -> annotations.remove(gTagAnnotation));
 			if (c.wasAdded())
-				updateApplyingAnnotations(c.getAddedSubList().stream(), (annotations, gTagAnnotation) -> annotations.add(gTagAnnotation));
+				updateApplyingAnnotations(c.getAddedSubList().stream(), (annotations, gTagAnnotation) -> annotations.put(gTagAnnotation, gTagAnnotation.getContent()));
 		}
 	};
 
-	private void updateApplyingAnnotations(Stream<? extends GTagAnnotationContent> streamToConsum, BiConsumer<ObservableList<GTagAnnotation>, GTagAnnotation> action) {
+	private void updateApplyingAnnotations(Stream<? extends GTagAnnotationContent> streamToConsum, BiConsumer<ObservableMap<GTagAnnotation, GTagAnnotationContent>, GTagAnnotation> action) {
 		streamToConsum.forEach(valueGeneric -> {
 			GTagAnnotation gTagAnnotation = valueGeneric.getBaseComponent();
 			TagAnnotation tagAnnotation = gTagAnnotation.getValue();
@@ -136,54 +139,63 @@ public class ExtendedRootTag extends RootTagImpl {
 		((GenericTagNode) htmlDomNode.getTag().getTagNode()).getTagAnnotations().addListener(getApplyingAnnotationsListener(htmlDomNode.getTag(), htmlDomNode.getModelContext()));
 	}
 
-	private ListChangeListener<? super GTagAnnotation> getApplyingAnnotationsListener(Tag tag, Context context) {
+	private MapChangeListener<? super GTagAnnotation, ? super GTagAnnotationContent> getApplyingAnnotationsListener(Tag tag, Context context) {
 		return c -> {
-			if (!context.isDestroyed())
-				while (c.next()) {
-					if (c.wasRemoved()) {
-						c.getRemoved().forEach(gTagAnnotation -> {
-							Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
-							GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
-							if (Style.class.equals(annotationClass) && annotationContent != null)
-								tag.getDomNodeStyles(context).remove(gTagAnnotation.getValue().getName());
-							if (GenericValueBackgroundColor.class.equals(annotationClass) && annotationContent != null)
-								tag.getDomNodeStyles(context).remove("background-color");
+			if (!context.isDestroyed()) {
+				GTagAnnotation gTagAnnotation = c.getKey();
+				if (c.wasRemoved()) {
+					Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
+
+					if (Style.class.equals(annotationClass))
+						tag.getDomNodeStyles(context).remove(gTagAnnotation.getValue().getName());
+
+					if (GenericValueBackgroundColor.class.equals(annotationClass))
+						tag.getDomNodeStyles(context).remove("background-color");
+
+					if (StyleClass.class.equals(annotationClass))
+						c.getValueRemoved().getJSonValue().getJsonArray("value").forEach(styleClass -> {
+							tag.removeStyleClass((String) styleClass);
+							tag.removeStyleClass(context, (String) styleClass);
 						});
-					}
-					if (c.wasAdded()) {
-						c.getAddedSubList().forEach(gTagAnnotation -> {
-							Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
-							GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
-
-							if (Style.class.equals(annotationClass) && annotationContent != null)
-								tag.addStyle(context, gTagAnnotation.getValue().getName(), annotationContent.getJSonValue().getString("value"));
-
-							if (GenericValueBackgroundColor.class.equals(annotationClass) && annotationContent != null) {
-								tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue()
-										: annotationContent.getJSonValue().getString("value"));
-								tag.addPrefixBinding(context_ -> tag.addStyle(context_, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta()))
-										? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : annotationContent.getJSonValue().getString("value")));
-							}
-
-							if (FlexDirectionStyle.class.equals(annotationClass) && annotationContent != null) {
-								FlexDirection direction = FlexDirection.valueOf(gTagAnnotation.getContentValue());
-								if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
-									((FlexDirectionDefaults) tag).setDirection(context, direction);
-								tag.getRootTag().processFlexDirectionStyle(tag, direction);
-							}
-
-							if (ReverseFlexDirection.class.equals(annotationClass) && annotationContent != null) {
-								tag.getRootTag().processReverseFlexDirection(tag);
-								((FlexDirectionDefaults) tag).reverseDirection(context);
-							}
-
-							if (KeepFlexDirection.class.equals(annotationClass) && annotationContent != null) {
-								tag.getRootTag().processKeepFlexDirection(tag);
-								((FlexDirectionDefaults) tag).keepDirection(context);
-							}
-						});
-					}
+					// TODO: Other annotations.
 				}
+				if (c.wasAdded()) {
+					Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
+
+					if (Style.class.equals(annotationClass))
+						tag.addStyle(context, gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
+
+					if (GenericValueBackgroundColor.class.equals(annotationClass)) {
+						tag.addStyle(context, "background-color",
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : gTagAnnotation.getContentValue());
+						tag.addPrefixBinding(context_ -> tag.addStyle(context_, "background-color",
+								"Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : gTagAnnotation.getContentValue()));
+					}
+
+					if (FlexDirectionStyle.class.equals(annotationClass)) {
+						FlexDirection direction = FlexDirection.valueOf(gTagAnnotation.getContentValue());
+						if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
+							((FlexDirectionDefaults) tag).setDirection(context, direction);
+						tag.getRootTag().processFlexDirectionStyle(tag, direction);
+					}
+
+					if (ReverseFlexDirection.class.equals(annotationClass)) {
+						tag.getRootTag().processReverseFlexDirection(tag);
+						((FlexDirectionDefaults) tag).reverseDirection(context);
+					}
+
+					if (KeepFlexDirection.class.equals(annotationClass)) {
+						tag.getRootTag().processKeepFlexDirection(tag);
+						((FlexDirectionDefaults) tag).keepDirection(context);
+					}
+
+					if (StyleClass.class.equals(annotationClass))
+						gTagAnnotation.getContentJSonArray().forEach(styleClass -> {
+							tag.addStyleClass((String) styleClass);
+							tag.addStyleClass(context, (String) styleClass);
+						});
+				}
+			}
 		};
 	}
 
@@ -230,43 +242,44 @@ public class ExtendedRootTag extends RootTagImpl {
 		for (ReverseFlexDirection rfdAnnotation : clazz.getAnnotationsByType(ReverseFlexDirection.class))
 			result.setReverseFlexDirectionAnnotation(rfdAnnotation);
 
+		for (StyleClass scAnnotation : clazz.getAnnotationsByType(StyleClass.class))
+			result.setStyleClassAnnotation(scAnnotation);
+
 		getEngine().getCurrentCache().flush();
 		return result;
 	}
 
 	public class GenericTagNode extends SimpleTagNode {
 
-		private ObservableList<GTagAnnotation> tagAnnotations = new MinimalChangesObservableList<GTagAnnotation>(FXCollections.observableArrayList()) {
+		private ObservableMap<GTagAnnotation, GTagAnnotationContent> tagAnnotations = new ObservableMapWrapper<GTagAnnotation, GTagAnnotationContent>(new LinkedHashMap<>()) {
 
 			@Override
-			public boolean add(GTagAnnotation annotation) {
-				Optional<GTagAnnotation> equivAnnotation = this.stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
-				// Allow addition of an already present annotation because the flush() causes the same generic
-				// to be added twice before being removed once.
-				if (equivAnnotation.isPresent() && !equivAnnotation.get().equals(annotation)) {
+			public GTagAnnotationContent put(GTagAnnotation annotation, GTagAnnotationContent value) {
+				Optional<GTagAnnotation> equivAnnotation = this.keySet().stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
+				if (equivAnnotation.isPresent()) {
 					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
 					if (overriddenAnnotation.getValue().getPath().length <= annotation.getValue().getPath().length) {
 						remove(overriddenAnnotation);
 					} else
 						// Found an annotation applying to this tag that’s more precise than the new annotation,
 						// so the new annotation is not added to the Set.
-						return false;
+						return null;
 				}
-				return super.add(annotation);
+				return super.put(annotation, value);
 			}
 		};
 
-		public ObservableList<GTagAnnotation> getTagAnnotations() {
+		public ObservableMap<GTagAnnotation, GTagAnnotationContent> getTagAnnotations() {
 			return tagAnnotations;
 		}
 
-		public List<GTagAnnotation> getTagAnnotations(Class<? extends Annotation> annotationClass) {
-			return tagAnnotations.filtered(gta -> annotationClass.equals(gta.getValue().getAnnotationClass()));
+		public Map<GTagAnnotation, GTagAnnotationContent> getTagAnnotations(Class<? extends Annotation> annotationClass) {
+			return tagAnnotations.keySet().stream().filter(gta -> annotationClass.equals(gta.getValue().getAnnotationClass())).collect(Collectors.toMap(key -> key, key -> tagAnnotations.get(key)));
 		}
 
 		public GTagAnnotation getTagAnnotation(Class<? extends Annotation> annotationClass) {
-			List<GTagAnnotation> annotations = getTagAnnotations(annotationClass);
-			return annotations.isEmpty() ? null : annotations.get(0);
+			Map<GTagAnnotation, GTagAnnotationContent> annotations = getTagAnnotations(annotationClass);
+			return annotations.isEmpty() ? null : annotations.keySet().stream().findAny().get();
 		}
 
 		public GenericTagNode(Tag tag) {
@@ -276,13 +289,13 @@ public class ExtendedRootTag extends RootTagImpl {
 			Tag current = tag;
 			while (current != null) {
 				Set<GTagAnnotation> annotationsFound = selectAnnotations(current.getClass(), classesToResult, tag);
-				tagAnnotations.addAll(annotationsFound);
+				annotationsFound.forEach(annotation -> tagAnnotations.put(annotation, annotation.getContent()));
 				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 
 			// Build children if there are any.
-			Optional<GTagAnnotation> childrenAnnotation = tagAnnotations.stream().filter(ta -> Children.class.equals(ta.getValue().getAnnotationClass())).findFirst();
+			Optional<GTagAnnotation> childrenAnnotation = tagAnnotations.keySet().stream().filter(ta -> Children.class.equals(ta.getValue().getAnnotationClass())).findFirst();
 			if (childrenAnnotation.isPresent())
 				childrenAnnotation.get().childrenClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
 		}
@@ -373,6 +386,11 @@ public class ExtendedRootTag extends RootTagImpl {
 		default void setReverseFlexDirectionAnnotation(ReverseFlexDirection annotation) {
 			setAnnotation(ReverseFlexDirection.class, null, null, annotation.path(), annotation.pos());
 		}
+
+		default void setStyleClassAnnotation(StyleClass annotation) {
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(StyleClass.class, annotation.path(), annotation.pos()));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+		}
 	}
 
 	public static interface GTagAnnotation extends Generic {
@@ -397,6 +415,10 @@ public class ExtendedRootTag extends RootTagImpl {
 			});
 		}
 
+		default GTagAnnotationContent getContent() {
+			return (GTagAnnotationContent) getHolder(getRoot().find(TagAnnotationContentAttribute.class));
+		}
+
 		default public JsonArray getContentJSonArray() {
 			return getContentJsonObject().getJsonArray("value");
 		}
@@ -406,7 +428,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default public JsonObject getContentJsonObject() {
-			return ((GTagAnnotationContent) getHolder(getRoot().find(TagAnnotationContentAttribute.class))).getJSonValue();
+			return getContent().getJSonValue();
 		}
 	}
 

@@ -299,6 +299,10 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		getDomNodeStyleClasses(context).remove(styleClass);
 	}
 
+	default void removeStyleClass(String styleClass) {
+		addPrefixBinding(context -> getDomNodeStyleClasses(context).remove(styleClass));
+	}
+
 	default void bindAttribute(String attributeName, String propertyName) {
 		bindMapElement(attributeName, propertyName, model -> getDomNodeAttributes(model));
 	}

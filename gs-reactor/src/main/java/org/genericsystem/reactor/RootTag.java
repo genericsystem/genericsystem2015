@@ -75,6 +75,11 @@ public interface RootTag extends Tag {
 			log.warn("Warning: KeepFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
 	}
 
+	default void processStyleClass(Tag tag, String[] classes) {
+		for (String sc : classes)
+			tag.addStyleClass(sc);
+	}
+
 	default void initDomNode(HtmlDomNode htmlDomNode) {
 	}
 }

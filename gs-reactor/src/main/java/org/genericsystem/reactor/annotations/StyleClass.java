@@ -34,8 +34,7 @@ public @interface StyleClass {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			for (String sc : ((StyleClass) annotation).value())
-				tag.addStyleClass(sc);
+			tag.getRootTag().processStyleClass(tag, ((StyleClass) annotation).value());
 		}
 	}
 }
