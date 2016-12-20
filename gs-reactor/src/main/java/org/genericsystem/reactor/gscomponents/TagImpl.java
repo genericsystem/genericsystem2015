@@ -11,7 +11,6 @@ import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.context.TagSwitcher;
 
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
 public abstract class TagImpl implements Tag {
 
@@ -38,11 +37,6 @@ public abstract class TagImpl implements Tag {
 	@Override
 	public ObservableList<Tag> getObservableChildren() {
 		return getTagNode().getObservableChildren();
-	}
-
-	@Override
-	public ObservableMap<String, String> buildObservableStyles() {
-		return getTagNode().buildObservableStyles();
 	}
 
 	@Override

@@ -3,7 +3,9 @@ package org.genericsystem.reactor;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 public interface RootTag extends Tag {
@@ -50,6 +52,27 @@ public interface RootTag extends Tag {
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
 		tag.addPrefixBinding(
 				context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
+	}
+
+	default void processFlexDirectionStyle(Tag tag, FlexDirection flexDirection) {
+		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
+			((FlexDirectionDefaults) tag).setDirection(flexDirection);
+		else
+			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+	}
+
+	default void processReverseFlexDirection(Tag tag) {
+		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
+			((FlexDirectionDefaults) tag).reverseDirection();
+		else
+			log.warn("Warning: ReverseFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+	}
+
+	default void processKeepFlexDirection(Tag tag) {
+		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
+			((FlexDirectionDefaults) tag).keepDirection();
+		else
+			log.warn("Warning: KeepFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
 	}
 
 	default void initDomNode(HtmlDomNode htmlDomNode) {

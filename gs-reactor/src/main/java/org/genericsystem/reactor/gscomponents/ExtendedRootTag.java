@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -39,8 +40,12 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
+import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
@@ -50,7 +55,6 @@ import io.vertx.core.json.JsonObject;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.collections.WeakListChangeListener;
 
 public class ExtendedRootTag extends RootTagImpl {
@@ -150,11 +154,33 @@ public class ExtendedRootTag extends RootTagImpl {
 						c.getAddedSubList().forEach(gTagAnnotation -> {
 							Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
 							GTagAnnotationContent annotationContent = (GTagAnnotationContent) gTagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
+
 							if (Style.class.equals(annotationClass) && annotationContent != null)
 								tag.addStyle(context, gTagAnnotation.getValue().getName(), annotationContent.getJSonValue().getString("value"));
-							if (GenericValueBackgroundColor.class.equals(annotationClass) && annotationContent != null)
+
+							if (GenericValueBackgroundColor.class.equals(annotationClass) && annotationContent != null) {
 								tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue()
 										: annotationContent.getJSonValue().getString("value"));
+								tag.addPrefixBinding(context_ -> tag.addStyle(context_, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta()))
+										? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : annotationContent.getJSonValue().getString("value")));
+							}
+
+							if (FlexDirectionStyle.class.equals(annotationClass) && annotationContent != null) {
+								FlexDirection direction = FlexDirection.valueOf(gTagAnnotation.getContentValue());
+								if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
+									((FlexDirectionDefaults) tag).setDirection(context, direction);
+								tag.getRootTag().processFlexDirectionStyle(tag, direction);
+							}
+
+							if (ReverseFlexDirection.class.equals(annotationClass) && annotationContent != null) {
+								tag.getRootTag().processReverseFlexDirection(tag);
+								((FlexDirectionDefaults) tag).reverseDirection(context);
+							}
+
+							if (KeepFlexDirection.class.equals(annotationClass) && annotationContent != null) {
+								tag.getRootTag().processKeepFlexDirection(tag);
+								((FlexDirectionDefaults) tag).keepDirection(context);
+							}
 						});
 					}
 				}
@@ -195,28 +221,17 @@ public class ExtendedRootTag extends RootTagImpl {
 		for (GenericValueBackgroundColor gvbColorAnnotation : clazz.getAnnotationsByType(GenericValueBackgroundColor.class))
 			result.setGVBColorAnnotation(gvbColorAnnotation);
 
-		// FlexDirectionStyle
-		// KeepFlexDirection
-		// ReverseFlexDirection
+		for (FlexDirectionStyle fdAnnotation : clazz.getAnnotationsByType(FlexDirectionStyle.class))
+			result.setFlexDirectionAnnotation(fdAnnotation);
+
+		for (KeepFlexDirection kfdAnnotation : clazz.getAnnotationsByType(KeepFlexDirection.class))
+			result.setKeepFlexDirectionAnnotation(kfdAnnotation);
+
+		for (ReverseFlexDirection rfdAnnotation : clazz.getAnnotationsByType(ReverseFlexDirection.class))
+			result.setReverseFlexDirectionAnnotation(rfdAnnotation);
 
 		getEngine().getCurrentCache().flush();
 		return result;
-	}
-
-	// Called only by addStyle, not used to treat @Style annotations.
-	// Use the most precise path and pos possible to make sure that this style applies to the given tag and nothing else,
-	// so the generic annotations created here are on the root tag’s class.
-	@Override
-	public void processStyle(Tag tag, String name, String value) {
-		Deque<Class<?>> path = new ArrayDeque<>();
-		Deque<Integer> pos = new ArrayDeque<>();
-		Tag current = tag;
-		while (current != null && current.getParent() != null) {
-			path.push(current.getClass());
-			pos.push(AnnotationsManager.position(current, current.getClass()));
-			current = current.getParent();
-		}
-		((GenericTagNode) tag.getTagNode()).tagAnnotations.add(storedClasses.get(current.getClass()).setAnnotation(Style.class, name, value, path.stream().toArray(Class<?>[]::new), pos.stream().mapToInt(i -> i).toArray()));
 	}
 
 	public class GenericTagNode extends SimpleTagNode {
@@ -227,7 +242,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			public boolean add(GTagAnnotation annotation) {
 				Optional<GTagAnnotation> equivAnnotation = this.stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
 				// Allow addition of an already present annotation because the flush() causes the same generic
-				// to be added twice before being remove once.
+				// to be added twice before being removed once.
 				if (equivAnnotation.isPresent() && !equivAnnotation.get().equals(annotation)) {
 					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
 					if (overriddenAnnotation.getValue().getPath().length <= annotation.getValue().getPath().length) {
@@ -243,6 +258,15 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		public ObservableList<GTagAnnotation> getTagAnnotations() {
 			return tagAnnotations;
+		}
+
+		public List<GTagAnnotation> getTagAnnotations(Class<? extends Annotation> annotationClass) {
+			return tagAnnotations.filtered(gta -> annotationClass.equals(gta.getValue().getAnnotationClass()));
+		}
+
+		public GTagAnnotation getTagAnnotation(Class<? extends Annotation> annotationClass) {
+			List<GTagAnnotation> annotations = getTagAnnotations(annotationClass);
+			return annotations.isEmpty() ? null : annotations.get(0);
 		}
 
 		public GenericTagNode(Tag tag) {
@@ -277,17 +301,6 @@ public class ExtendedRootTag extends RootTagImpl {
 				}
 			}
 			return annotationsFound;
-		}
-
-		@Override
-		public ObservableMap<String, String> buildObservableStyles() {
-			ObservableMap<String, String> styles = FXCollections.observableHashMap();
-			for (GTagAnnotation tagAnnotation : tagAnnotations.filtered(gta -> Style.class.equals(gta.getValue().getAnnotationClass()))) {
-				GTagAnnotationContent annotationContent = (GTagAnnotationContent) tagAnnotation.getComposites().filter(g -> engine.find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
-				if (annotationContent != null)
-					styles.put(tagAnnotation.getValue().getName(), new JsonObject(annotationContent.getValue()).getString("value"));
-			}
-			return styles;
 		}
 	}
 
@@ -347,6 +360,19 @@ public class ExtendedRootTag extends RootTagImpl {
 		default void setGVBColorAnnotation(GenericValueBackgroundColor annotation) {
 			setAnnotation(GenericValueBackgroundColor.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
+
+		default void setFlexDirectionAnnotation(FlexDirectionStyle annotation) {
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(FlexDirectionStyle.class, annotation.path(), annotation.pos()));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", annotation.value()).encodePrettily());
+		}
+
+		default void setKeepFlexDirectionAnnotation(KeepFlexDirection annotation) {
+			setAnnotation(KeepFlexDirection.class, null, null, annotation.path(), annotation.pos());
+		}
+
+		default void setReverseFlexDirectionAnnotation(ReverseFlexDirection annotation) {
+			setAnnotation(ReverseFlexDirection.class, null, null, annotation.path(), annotation.pos());
+		}
 	}
 
 	public static interface GTagAnnotation extends Generic {
@@ -372,13 +398,16 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default public JsonArray getContentJSonArray() {
-			return ((GTagAnnotationContent) getHolder(getRoot().find(TagAnnotationContentAttribute.class))).getJSonValue().getJsonArray("value");
+			return getContentJsonObject().getJsonArray("value");
 		}
 
-		default public String getContent() {
-			return (String) getHolder(getRoot().find(TagAnnotationContentAttribute.class)).getValue();
+		default public String getContentValue() {
+			return getContentJsonObject().getString("value");
 		}
 
+		default public JsonObject getContentJsonObject() {
+			return ((GTagAnnotationContent) getHolder(getRoot().find(TagAnnotationContentAttribute.class))).getJSonValue();
+		}
 	}
 
 	public static interface GTagAnnotationContent extends Generic {

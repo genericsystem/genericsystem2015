@@ -108,19 +108,21 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	public static class ButtonDiv extends FlexDiv {
 		@Override
 		public void init() {
-			if (FlexDirection.ROW.equals(getDirection())) {
-				addStyle("flex", "0");
-				addStyleClass("buttonDiv");
-			} else {
-				addStyle("flex", "1");
-			}
-			getDirectionProperty().addListener((o, v, nv) -> {
-				if (FlexDirection.ROW.equals(nv)) {
-					addStyle("flex", "0");
-					addStyleClass("buttonDiv");
+			addPrefixBinding(context -> {
+				if (FlexDirection.ROW.equals(getDirectionProperty(context).getValue())) {
+					addStyle(context, "flex", "0");
+					addStyleClass(context, "buttonDiv");
 				} else {
-					addStyle("flex", "1");
+					addStyle(context, "flex", "1");
 				}
+				getDirectionProperty(context).addListener((o, v, nv) -> {
+					if (FlexDirection.ROW.equals(nv)) {
+						addStyle(context, "flex", "0");
+						addStyleClass(context, "buttonDiv");
+					} else {
+						addStyle(context, "flex", "1");
+					}
+				});
 			});
 		}
 	}

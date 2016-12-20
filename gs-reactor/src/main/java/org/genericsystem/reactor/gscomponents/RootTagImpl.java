@@ -1,15 +1,14 @@
 package org.genericsystem.reactor.gscomponents;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, UserRoleDefaults {
 
@@ -39,11 +38,6 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 		@Override
 		public ObservableList<Tag> getObservableChildren() {
 			return children;
-		}
-
-		@Override
-		public ObservableMap<String, String> buildObservableStyles() {
-			return FXCollections.observableHashMap();
 		}
 	}
 

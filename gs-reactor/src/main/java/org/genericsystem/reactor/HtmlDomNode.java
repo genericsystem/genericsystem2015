@@ -220,7 +220,6 @@ public class HtmlDomNode {
 		context.register(this);
 		if (parent != null)
 			insertChild(index);
-		tag.getDomNodeStyles(context).entrySet().stream().forEach(entry -> sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, entry.getKey()).put(STYLE_VALUE, entry.getValue())));
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
 		assert (!context.containsProperty(tag, "filteredChildren"));

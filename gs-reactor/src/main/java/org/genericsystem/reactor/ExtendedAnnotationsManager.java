@@ -11,6 +11,7 @@ import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
+import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
@@ -18,13 +19,9 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
+import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-
-import io.vertx.core.json.JsonObject;
-import javafx.collections.ObservableList;
 
 public class ExtendedAnnotationsManager extends AnnotationsManager {
 
@@ -42,9 +39,9 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
 		registerAnnotation(StyleClass.class);
-		registerAnnotation(FlexDirectionStyle.class);
-		registerAnnotation(KeepFlexDirection.class);
-		registerAnnotation(ReverseFlexDirection.class);
+		// registerAnnotation(FlexDirectionStyle.class);
+		// registerAnnotation(KeepFlexDirection.class);
+		// registerAnnotation(ReverseFlexDirection.class);
 		registerAnnotation(SetText.class);
 		registerAnnotation(BindText.class);
 		registerAnnotation(BindAction.class);
@@ -66,11 +63,25 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	}
 
 	public void processStoredAnnotations(Tag tag) {
-		ObservableList<GTagAnnotation> gvbColor = ((GenericTagNode) tag.getTagNode()).getTagAnnotations().filtered(gta -> GenericValueBackgroundColor.class.equals(gta.getValue().getAnnotationClass()));
-		if (!gvbColor.isEmpty()) {
-			GTagAnnotationContent annotationContent = (GTagAnnotationContent) gvbColor.get(0).getComposites().filter(g -> gvbColor.get(0).getRoot().find(TagAnnotationContentAttribute.class).equals(g.getMeta())).first();
-			if (annotationContent != null)
-				tag.getRootTag().processGenericValueBackgroundColor(tag, new JsonObject(annotationContent.getValue()).getString("value"));
-		}
+		GenericTagNode tagNode = (GenericTagNode) tag.getTagNode();
+
+		GTagAnnotation flexDirection = tagNode.getTagAnnotation(FlexDirectionStyle.class);
+		if (flexDirection != null)
+			tag.getRootTag().processFlexDirectionStyle(tag, FlexDirection.valueOf(flexDirection.getContentValue()));
+
+		GTagAnnotation keepFlexDirection = tagNode.getTagAnnotation(KeepFlexDirection.class);
+		if (keepFlexDirection != null)
+			tag.getRootTag().processKeepFlexDirection(tag);
+
+		GTagAnnotation reverseFlexDirection = tagNode.getTagAnnotation(ReverseFlexDirection.class);
+		if (reverseFlexDirection != null)
+			tag.getRootTag().processReverseFlexDirection(tag);
+
+		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Style.class))
+			tag.addStyle(tagAnnotation.getValue().getName(), tagAnnotation.getContentValue());
+
+		GTagAnnotation gvbColor = tagNode.getTagAnnotation(GenericValueBackgroundColor.class);
+		if (gvbColor != null)
+			tag.getRootTag().processGenericValueBackgroundColor(tag, gvbColor.getContentValue());
 	}
 }
