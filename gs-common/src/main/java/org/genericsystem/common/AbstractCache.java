@@ -36,8 +36,7 @@ import javafx.collections.ObservableList;
  *
  */
 public abstract class AbstractCache extends CheckedContext implements DefaultCache<Generic> {
-	//
-	// differentialProperty);
+
 	public Generic setMeta(int dim) {
 		return setInstance(null, Collections.emptyList(), getRoot().getValue(), Arrays.asList(rootComponents(dim)));
 	}
@@ -219,13 +218,13 @@ public abstract class AbstractCache extends CheckedContext implements DefaultCac
 
 	protected void doSynchronizedApplyInSubContext() throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
 		Differential originalCacheElement = getDifferential();
-		if (getDifferential().getSubDifferential() instanceof Differential)
-			this.differentialProperty.set((Differential) getDifferential().getSubDifferential());
-		try {
-			synchronizedApply(originalCacheElement);
-		} finally {
-			this.differentialProperty.set(originalCacheElement);
-		}
+		// if (getDifferential().getSubDifferential() instanceof Differential)
+		// this.differentialProperty.set((Differential) getDifferential().getSubDifferential());
+		// try {
+		synchronizedApply(originalCacheElement);
+		// } finally {
+		// this.differentialProperty.set(originalCacheElement);
+		// }
 	}
 
 	private void synchronizedApply(Differential cacheElement) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
