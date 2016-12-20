@@ -19,7 +19,6 @@ import javafx.beans.value.WeakChangeListener;
  */
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
-	// TODO size and get(index) !!!
 	private Node<T> head = null;
 	private Node<T> tail = null;
 	final Map<T, T> map = new HashMap<>();
@@ -106,15 +105,13 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		private Predicate<T> predicate;
 
 		private ChangeListener<T> listener = (o, oldT, newT) -> {
-			if (fireInvalidations && predicate.test(newT)) {
+			if (fireInvalidations && predicate.test(newT))
 				super.fireValueChangedEvent();
-			}
 		};
 
 		private FilteredInvalidator(Predicate<T> predicate) {
 			this.predicate = predicate;
-			addProperty.addListener(listener);
-			// addProperty.addListener(new WeakChangeListener<T>((a, b, c) -> System.out.println("changeevent")));
+			addProperty.addListener(new WeakChangeListener<T>(listener));
 			removeProperty.addListener(new WeakChangeListener<T>(listener));
 		}
 
@@ -128,7 +125,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 	public void disableInvalidations() {
 		fireInvalidations = false;
-
 	}
 
 	public void enableInvalidations() {
