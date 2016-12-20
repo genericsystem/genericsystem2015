@@ -113,8 +113,7 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 		private FilteredInvalidator(Predicate<T> predicate) {
 			this.predicate = predicate;
-			addProperty.addListener(listener);
-			// addProperty.addListener(new WeakChangeListener<T>((a, b, c) -> System.out.println("changeevent")));
+			addProperty.addListener(new WeakChangeListener<T>(listener));
 			removeProperty.addListener(new WeakChangeListener<T>(listener));
 		}
 
@@ -128,7 +127,6 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
 	public void disableInvalidations() {
 		fireInvalidations = false;
-
 	}
 
 	public void enableInvalidations() {
