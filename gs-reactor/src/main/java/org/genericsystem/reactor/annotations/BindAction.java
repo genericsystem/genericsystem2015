@@ -12,10 +12,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction.BindActionProcessor;
 import org.genericsystem.reactor.annotations.BindAction.BindActions;
 import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
@@ -35,20 +32,10 @@ public @interface BindAction {
 	}
 
 	public static class BindActionProcessor implements BiConsumer<Annotation, Tag> {
-		private static final Logger log = LoggerFactory.getLogger(BindActionProcessor.class);
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			if (ActionDefaults.class.isAssignableFrom(tag.getClass()))
-				((ActionDefaults) tag).bindAction(context -> {
-					try {
-						((BindAction) annotation).value().newInstance().accept(context, tag);
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				});
-			else
-				log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
+			tag.getRootTag().processBindAction(tag, ((BindAction) annotation).value());
 		}
 	}
 }

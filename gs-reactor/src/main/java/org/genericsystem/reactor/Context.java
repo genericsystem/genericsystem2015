@@ -91,6 +91,10 @@ public class Context {
 		return propertiesMap.values();
 	}
 
+	public Map<String, ObservableValue<?>> getPropertiesMaps(Tag tag) {
+		return propertiesMap.get(tag);
+	}
+
 	protected void storeProperty(Tag tag, String propertyName, ObservableValue<?> value) {
 		assert htmlDomNodesMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))

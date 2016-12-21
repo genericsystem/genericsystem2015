@@ -32,6 +32,11 @@ public interface TextPropertyDefaults extends ContextProperty {
 		addPrefixBinding(context -> setText(context, value));
 	}
 
+	default void bindText(Context context, Function<Context, ObservableValue<String>> applyOnModel) {
+		storeProperty(TEXT_BINDING, context, applyOnModel);
+		getDomNodeTextProperty(context).bind(getObservableValue(TEXT_BINDING, context));
+	}
+
 	default void bindText(Function<Context, ObservableValue<String>> applyOnModel) {
 		storeProperty(TEXT_BINDING, applyOnModel);
 		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getObservableValue(TEXT_BINDING, model)));

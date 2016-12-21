@@ -2,7 +2,11 @@ package org.genericsystem.reactor;
 
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
+import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.context.TextBinding;
+import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
+import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
@@ -92,6 +96,58 @@ public interface RootTag extends Tag {
 			tag.setText(context, texts[0]);
 		else
 			tag.setText(context, texts[AnnotationsManager.position(tag, path[path.length - 1])]);
+	}
+
+	default void processBindText(Tag tag, Class<? extends TextBinding> value) {
+		if (GENERIC_STRING.class.equals(value))
+			tag.bindText();
+		else
+			tag.bindText(context -> {
+				try {
+					return value.newInstance().apply(context, tag);
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+	}
+
+	default void processBindText(Tag tag, Context context, Class<? extends TextBinding> value) {
+		if (GENERIC_STRING.class.equals(value))
+			tag.bindText();
+		else
+			tag.bindText(context_ -> {
+				try {
+					return value.newInstance().apply(context_, tag);
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+	}
+
+	default void processBindAction(Tag tag, Class<? extends ContextAction> value) {
+		if (ActionDefaults.class.isAssignableFrom(tag.getClass()))
+			((ActionDefaults) tag).bindAction(context -> {
+				try {
+					value.newInstance().accept(context, tag);
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		else
+			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
+	}
+
+	default void processBindAction(Tag tag, Context context, Class<? extends ContextAction> value) {
+		if (ActionDefaults.class.isAssignableFrom(tag.getClass()))
+			((ActionDefaults) tag).bindAction(context, context_ -> {
+				try {
+					value.newInstance().accept(context_, tag);
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		else
+			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
 	}
 
 	default void initDomNode(HtmlDomNode htmlDomNode) {

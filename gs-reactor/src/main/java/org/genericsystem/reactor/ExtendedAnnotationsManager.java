@@ -1,5 +1,7 @@
 package org.genericsystem.reactor;
 
+import java.util.Map.Entry;
+
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
@@ -18,7 +20,10 @@ import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
@@ -43,8 +48,8 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		// registerAnnotation(KeepFlexDirection.class);
 		// registerAnnotation(ReverseFlexDirection.class);
 		// registerAnnotation(SetText.class);
-		registerAnnotation(BindText.class);
-		registerAnnotation(BindAction.class);
+		// registerAnnotation(BindText.class);
+		// registerAnnotation(BindAction.class);
 		// registerAnnotation(Style.class);
 		// registerAnnotation(GenericValueBackgroundColor.class);
 		// registerAnnotation(Attribute.class);
@@ -65,34 +70,42 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	public void processStoredAnnotations(Tag tag) {
 		GenericTagNode tagNode = (GenericTagNode) tag.getTagNode();
 
-		GTagAnnotation styleClassAnnotation = tagNode.getTagAnnotation(StyleClass.class);
+		Entry<GTagAnnotation, GTagAnnotationContent> styleClassAnnotation = tagNode.getTagAnnotation(StyleClass.class);
 		if (styleClassAnnotation != null)
-			styleClassAnnotation.getContentJSonArray().forEach(styleClass -> tag.addStyleClass((String) styleClass));
+			styleClassAnnotation.getValue().getContentJSonArray().forEach(styleClass -> tag.addStyleClass((String) styleClass));
 
-		GTagAnnotation flexDirection = tagNode.getTagAnnotation(FlexDirectionStyle.class);
+		Entry<GTagAnnotation, GTagAnnotationContent> flexDirection = tagNode.getTagAnnotation(FlexDirectionStyle.class);
 		if (flexDirection != null)
-			tag.getRootTag().processFlexDirectionStyle(tag, FlexDirection.valueOf(flexDirection.getContentValue()));
+			tag.getRootTag().processFlexDirectionStyle(tag, FlexDirection.valueOf(flexDirection.getValue().getContentValue()));
 
-		GTagAnnotation keepFlexDirection = tagNode.getTagAnnotation(KeepFlexDirection.class);
+		Entry<GTagAnnotation, GTagAnnotationContent> keepFlexDirection = tagNode.getTagAnnotation(KeepFlexDirection.class);
 		if (keepFlexDirection != null)
 			tag.getRootTag().processKeepFlexDirection(tag);
 
-		GTagAnnotation reverseFlexDirection = tagNode.getTagAnnotation(ReverseFlexDirection.class);
+		Entry<GTagAnnotation, GTagAnnotationContent> reverseFlexDirection = tagNode.getTagAnnotation(ReverseFlexDirection.class);
 		if (reverseFlexDirection != null)
 			tag.getRootTag().processReverseFlexDirection(tag);
 
-		GTagAnnotation setText = tagNode.getTagAnnotation(SetText.class);
+		Entry<GTagAnnotation, GTagAnnotationContent> setText = tagNode.getTagAnnotation(SetText.class);
 		if (setText != null)
-			tag.getRootTag().processSetText(tag, setText.getValue().getPath(), setText.getContentJSonArray().stream().toArray(String[]::new));
+			tag.getRootTag().processSetText(tag, setText.getKey().getValue().getPath(), setText.getValue().getContentJSonArray().stream().toArray(String[]::new));
 
-		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Style.class).keySet())
-			tag.addStyle(tagAnnotation.getValue().getName(), tagAnnotation.getContentValue());
+		Entry<GTagAnnotation, GTagAnnotationContent> bindText = tagNode.getTagAnnotation(BindText.class);
+		if (bindText != null)
+			tag.getRootTag().processBindText(tag, (Class<? extends TextBinding>) bindText.getValue().getClassContent());
 
-		GTagAnnotation gvbColor = tagNode.getTagAnnotation(GenericValueBackgroundColor.class);
+		Entry<GTagAnnotation, GTagAnnotationContent> bindAction = tagNode.getTagAnnotation(BindAction.class);
+		if (bindAction != null)
+			tag.getRootTag().processBindAction(tag, (Class<? extends ContextAction>) bindAction.getValue().getClassContent());
+
+		for (Entry<GTagAnnotation, GTagAnnotationContent> tagAnnotation : tagNode.getTagAnnotations(Style.class).entrySet())
+			tag.addStyle(tagAnnotation.getKey().getValue().getName(), tagAnnotation.getValue().getContentValue());
+
+		Entry<GTagAnnotation, GTagAnnotationContent> gvbColor = tagNode.getTagAnnotation(GenericValueBackgroundColor.class);
 		if (gvbColor != null)
-			tag.getRootTag().processGenericValueBackgroundColor(tag, gvbColor.getContentValue());
+			tag.getRootTag().processGenericValueBackgroundColor(tag, gvbColor.getValue().getContentValue());
 
-		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Attribute.class).keySet())
-			tag.addAttribute(tagAnnotation.getValue().getName(), tagAnnotation.getContentValue());
+		for (Entry<GTagAnnotation, GTagAnnotationContent> tagAnnotation : tagNode.getTagAnnotations(Attribute.class).entrySet())
+			tag.addAttribute(tagAnnotation.getKey().getValue().getName(), tagAnnotation.getValue().getContentValue());
 	}
 }
