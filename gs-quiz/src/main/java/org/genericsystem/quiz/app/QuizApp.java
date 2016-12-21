@@ -53,6 +53,9 @@ public class QuizApp extends RootTagImpl {
 			Generic q03 = quiz2.setHolder(question, "Question 1 !");
 			Generic q04 = quiz2.setHolder(question, "Question 2 !");
 			Generic q05 = quiz2.setHolder(question, "Question 3 !");
+			Generic q06 = quiz2.setHolder(question, "Question 4 !");
+			Generic q07 = quiz2.setHolder(question, "Question 5 !");
+			Generic q08 = quiz2.setHolder(question, "Question 6 !");
 
 			// Create Answers (Answer.class is a component of Question.class)
 			String answerD = "Aucune de ces réponses";
@@ -78,6 +81,18 @@ public class QuizApp extends RootTagImpl {
 			Generic answer0502 = q05.setHolder(answer, "Answer 02");
 			Generic answer0503 = q05.setHolder(answer, "Answer 03");
 			Generic answer0504 = q05.setHolder(answer, answerD);
+			Generic answer0601 = q06.setHolder(answer, "Answer 01");
+			Generic answer0602 = q06.setHolder(answer, "Answer 02");
+			Generic answer0603 = q06.setHolder(answer, "Answer 03");
+			Generic answer0604 = q06.setHolder(answer, answerD);
+			Generic answer0701 = q07.setHolder(answer, "Answer 01");
+			Generic answer0702 = q07.setHolder(answer, "Answer 02");
+			Generic answer0703 = q07.setHolder(answer, "Answer 03");
+			Generic answer0704 = q07.setHolder(answer, answerD);
+			Generic answer0801 = q08.setHolder(answer, "Answer 01");
+			Generic answer0802 = q08.setHolder(answer, "Answer 02");
+			Generic answer0803 = q08.setHolder(answer, "Answer 03");
+			Generic answer0804 = q08.setHolder(answer, answerD);
 
 			// Create UserAnswer
 			Generic userAnswer = engine.find(UserAnswer.class);
@@ -111,6 +126,18 @@ public class QuizApp extends RootTagImpl {
 			answer0502.setLink(userAnswer, false, sUser);
 			answer0503.setLink(userAnswer, false, sUser);
 			answer0504.setLink(userAnswer, false, sUser);
+			answer0601.setLink(userAnswer, false, sUser);
+			answer0602.setLink(userAnswer, true, sUser);
+			answer0603.setLink(userAnswer, false, sUser);
+			answer0604.setLink(userAnswer, false, sUser);
+			answer0701.setLink(userAnswer, true, sUser);
+			answer0702.setLink(userAnswer, false, sUser);
+			answer0703.setLink(userAnswer, false, sUser);
+			answer0704.setLink(userAnswer, false, sUser);
+			answer0801.setLink(userAnswer, true, sUser);
+			answer0802.setLink(userAnswer, false, sUser);
+			answer0803.setLink(userAnswer, false, sUser);
+			answer0804.setLink(userAnswer, false, sUser);
 
 			engine.getCurrentCache().flush();
 		}
