@@ -147,8 +147,10 @@ public class ExtendedRootTag extends RootTagImpl {
 				if (c.wasRemoved()) {
 					Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
 
-					if (Style.class.equals(annotationClass))
+					if (Style.class.equals(annotationClass)) {
 						tag.getDomNodeStyles(context).remove(gTagAnnotation.getValue().getName());
+						tag.addPrefixBinding(context_ -> tag.getDomNodeStyles(context_).remove(gTagAnnotation.getValue().getName()));
+					}
 
 					if (GenericValueBackgroundColor.class.equals(annotationClass))
 						tag.getDomNodeStyles(context).remove("background-color");
@@ -168,8 +170,10 @@ public class ExtendedRootTag extends RootTagImpl {
 				if (c.wasAdded()) {
 					Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
 
-					if (Style.class.equals(annotationClass))
+					if (Style.class.equals(annotationClass)) {
 						tag.addStyle(context, gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
+						tag.addStyle(gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
+					}
 
 					if (GenericValueBackgroundColor.class.equals(annotationClass)) {
 						tag.addStyle(context, "background-color",
