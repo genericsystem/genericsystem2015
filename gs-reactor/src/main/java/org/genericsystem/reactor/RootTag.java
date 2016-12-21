@@ -80,6 +80,20 @@ public interface RootTag extends Tag {
 			tag.addStyleClass(sc);
 	}
 
+	default void processSetText(Tag tag, Class<?>[] path, String[] texts) {
+		if (texts.length == 1)
+			tag.setText(texts[0]);
+		else
+			tag.setText(texts[AnnotationsManager.position(tag, path[path.length - 1])]);
+	}
+
+	default void processSetText(Tag tag, Context context, Class<?>[] path, String[] texts) {
+		if (texts.length == 1)
+			tag.setText(context, texts[0]);
+		else
+			tag.setText(context, texts[AnnotationsManager.position(tag, path[path.length - 1])]);
+	}
+
 	default void initDomNode(HtmlDomNode htmlDomNode) {
 	}
 }

@@ -42,7 +42,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		// registerAnnotation(FlexDirectionStyle.class);
 		// registerAnnotation(KeepFlexDirection.class);
 		// registerAnnotation(ReverseFlexDirection.class);
-		registerAnnotation(SetText.class);
+		// registerAnnotation(SetText.class);
 		registerAnnotation(BindText.class);
 		registerAnnotation(BindAction.class);
 		// registerAnnotation(Style.class);
@@ -80,6 +80,10 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		GTagAnnotation reverseFlexDirection = tagNode.getTagAnnotation(ReverseFlexDirection.class);
 		if (reverseFlexDirection != null)
 			tag.getRootTag().processReverseFlexDirection(tag);
+
+		GTagAnnotation setText = tagNode.getTagAnnotation(SetText.class);
+		if (setText != null)
+			tag.getRootTag().processSetText(tag, setText.getValue().getPath(), setText.getContentJSonArray().stream().toArray(String[]::new));
 
 		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Style.class).keySet())
 			tag.addStyle(tagAnnotation.getValue().getName(), tagAnnotation.getContentValue());

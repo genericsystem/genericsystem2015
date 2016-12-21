@@ -39,6 +39,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
@@ -165,6 +166,12 @@ public class ExtendedRootTag extends RootTagImpl {
 						tag.getDomNodeAttributes(context).remove(gTagAnnotation.getValue().getName());
 						tag.addPrefixBinding(context_ -> tag.getDomNodeAttributes(context_).remove(gTagAnnotation.getValue().getName()));
 					}
+
+					if (SetText.class.equals(annotationClass)) {
+						tag.getRootTag().processSetText(tag, gTagAnnotation.getValue().getPath(), new String[] { "" });
+						tag.getRootTag().processSetText(tag, context, gTagAnnotation.getValue().getPath(), new String[] { "" });
+					}
+
 					// TODO: Other annotations.
 				}
 				if (c.wasAdded()) {
@@ -208,6 +215,11 @@ public class ExtendedRootTag extends RootTagImpl {
 					if (Attribute.class.equals(annotationClass)) {
 						tag.addAttribute(context, gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
 						tag.addAttribute(gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
+					}
+
+					if (SetText.class.equals(annotationClass)) {
+						tag.getRootTag().processSetText(tag, gTagAnnotation.getValue().getPath(), gTagAnnotation.getContentJSonArray().stream().toArray(String[]::new));
+						tag.getRootTag().processSetText(tag, context, gTagAnnotation.getValue().getPath(), gTagAnnotation.getContentJSonArray().stream().toArray(String[]::new));
 					}
 				}
 			}
@@ -262,6 +274,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		for (Attribute annotation : clazz.getAnnotationsByType(Attribute.class))
 			result.setAttributeAnnotation(annotation);
+
+		for (SetText annotation : clazz.getAnnotationsByType(SetText.class))
+			result.setSetTextAnnotation(annotation);
 
 		getEngine().getCurrentCache().flush();
 		return result;
@@ -412,6 +427,11 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		default void setAttributeAnnotation(Attribute annotation) {
 			setAnnotation(Attribute.class, annotation.name(), annotation.value(), annotation.path(), annotation.pos());
+		}
+
+		default void setSetTextAnnotation(SetText annotation) {
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(SetText.class, annotation.path(), annotation.pos()));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
 		}
 	}
 

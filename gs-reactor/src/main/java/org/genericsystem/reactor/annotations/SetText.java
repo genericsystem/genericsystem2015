@@ -6,10 +6,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.SetText.SetTextProcessor;
 import org.genericsystem.reactor.annotations.SetText.SetTexts;
@@ -36,16 +34,7 @@ public @interface SetText {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			try {
-				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
-				String[] texts = ((SetText) annotation).value();
-				if (texts.length == 1)
-					tag.setText(texts[0]);
-				else
-					tag.setText(texts[AnnotationsManager.position(tag, path[path.length - 1])]);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalStateException(e);
-			}
+			tag.getRootTag().processSetText(tag, ((SetText) annotation).path(), ((SetText) annotation).value());
 		}
 	}
 }
