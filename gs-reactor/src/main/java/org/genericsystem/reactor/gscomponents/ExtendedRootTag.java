@@ -37,6 +37,7 @@ import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
@@ -157,6 +158,11 @@ public class ExtendedRootTag extends RootTagImpl {
 							tag.removeStyleClass((String) styleClass);
 							tag.removeStyleClass(context, (String) styleClass);
 						});
+
+					if (Attribute.class.equals(annotationClass)) {
+						tag.getDomNodeAttributes(context).remove(gTagAnnotation.getValue().getName());
+						tag.addPrefixBinding(context_ -> tag.getDomNodeAttributes(context_).remove(gTagAnnotation.getValue().getName()));
+					}
 					// TODO: Other annotations.
 				}
 				if (c.wasAdded()) {
@@ -194,6 +200,11 @@ public class ExtendedRootTag extends RootTagImpl {
 							tag.addStyleClass((String) styleClass);
 							tag.addStyleClass(context, (String) styleClass);
 						});
+
+					if (Attribute.class.equals(annotationClass)) {
+						tag.addAttribute(context, gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
+						tag.addAttribute(gTagAnnotation.getValue().getName(), gTagAnnotation.getContentValue());
+					}
 				}
 			}
 		};
@@ -244,6 +255,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		for (StyleClass scAnnotation : clazz.getAnnotationsByType(StyleClass.class))
 			result.setStyleClassAnnotation(scAnnotation);
+
+		for (Attribute annotation : clazz.getAnnotationsByType(Attribute.class))
+			result.setAttributeAnnotation(annotation);
 
 		getEngine().getCurrentCache().flush();
 		return result;
@@ -390,6 +404,10 @@ public class ExtendedRootTag extends RootTagImpl {
 		default void setStyleClassAnnotation(StyleClass annotation) {
 			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(StyleClass.class, annotation.path(), annotation.pos()));
 			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+		}
+
+		default void setAttributeAnnotation(Attribute annotation) {
+			setAnnotation(Attribute.class, annotation.name(), annotation.value(), annotation.path(), annotation.pos());
 		}
 	}
 

@@ -47,7 +47,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(BindAction.class);
 		// registerAnnotation(Style.class);
 		// registerAnnotation(GenericValueBackgroundColor.class);
-		registerAnnotation(Attribute.class);
+		// registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
 	}
 
@@ -87,5 +87,8 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		GTagAnnotation gvbColor = tagNode.getTagAnnotation(GenericValueBackgroundColor.class);
 		if (gvbColor != null)
 			tag.getRootTag().processGenericValueBackgroundColor(tag, gvbColor.getContentValue());
+
+		for (GTagAnnotation tagAnnotation : tagNode.getTagAnnotations(Attribute.class).keySet())
+			tag.addAttribute(tagAnnotation.getValue().getName(), tagAnnotation.getContentValue());
 	}
 }
