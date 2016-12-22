@@ -113,9 +113,9 @@ public interface RootTag extends Tag {
 
 	default void processBindText(Tag tag, Context context, Class<? extends TextBinding> value) {
 		if (GENERIC_STRING.class.equals(value))
-			tag.bindText();
+			tag.bindText(context);
 		else
-			tag.bindText(context_ -> {
+			tag.bindText(context, context_ -> {
 				try {
 					return value.newInstance().apply(context_, tag);
 				} catch (InstantiationException | IllegalAccessException e) {

@@ -181,12 +181,12 @@ public class ExtendedRootTag extends RootTagImpl {
 					}
 
 					if (BindText.class.equals(annotationClass)) {
-						System.out.println("unbind text property");
-						// TODO: Not working
 						tag.addPrefixBinding(context_ -> tag.getDomNodeTextProperty(context_).unbind());
-						tag.getDomNodeTextProperty(context).unbind();
 						tag.addPrefixBinding(context_ -> context_.getPropertiesMaps(tag).remove(TextPropertyDefaults.TEXT_BINDING));
+						tag.addPrefixBinding(context_ -> getDomNodeTextProperty(context).setValue(null));
+						tag.getDomNodeTextProperty(context).unbind();
 						context.getPropertiesMaps(tag).remove(TextPropertyDefaults.TEXT_BINDING);
+						tag.getDomNodeTextProperty(context).setValue(null);
 					}
 
 					if (BindAction.class.equals(annotationClass)) {
@@ -245,8 +245,6 @@ public class ExtendedRootTag extends RootTagImpl {
 					}
 
 					if (BindText.class.equals(annotationClass)) {
-						System.out.println("New text binding");
-						// TODO: Not working
 						tag.getRootTag().processBindText(tag, (Class<? extends TextBinding>) annotationContent.getClassContent());
 						tag.getRootTag().processBindText(tag, context, (Class<? extends TextBinding>) annotationContent.getClassContent());
 					}

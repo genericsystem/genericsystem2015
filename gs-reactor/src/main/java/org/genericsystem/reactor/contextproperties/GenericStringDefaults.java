@@ -21,7 +21,11 @@ public interface GenericStringDefaults extends TextPropertyDefaults {
 	}
 
 	default void bindText() {
-		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getGenericStringProperty(model)));
+		addPrefixBinding(context -> bindText(context));
+	}
+
+	default void bindText(Context context) {
+		getDomNodeTextProperty(context).bind(getGenericStringProperty(context));
 	}
 
 	default StringExtractor getStringExtractor(Context model) {
