@@ -9,6 +9,7 @@ import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
+import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
@@ -50,45 +51,101 @@ public interface RootTag extends Tag {
 	}
 
 	default void processStyle(Tag tag, String name, String value) {
-		tag.addPrefixBinding(context -> tag.getDomNodeStyles(context).put(name, value));
+		tag.addPrefixBinding(context -> processStyle(tag, context, name, value));
+	}
+
+	default void processStyle(Tag tag, Context context, String name, String value) {
+		tag.addStyle(context, name, value);
+	}
+
+	default void removeStyle(Tag tag, Context context, String name) {
+		tag.getDomNodeStyles(context).remove(name);
+	}
+
+	default void processAttribute(Tag tag, String name, String value) {
+		tag.addPrefixBinding(context -> processAttribute(tag, context, name, value));
+	}
+
+	default void processAttribute(Tag tag, Context context, String name, String value) {
+		tag.addAttribute(context, name, value);
+	}
+
+	default void removeAttribute(Tag tag, Context context, String name) {
+		tag.getDomNodeAttributes(context).remove(name);
 	}
 
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
-		tag.addPrefixBinding(
-				context -> tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value));
+		tag.addPrefixBinding(context -> processGenericValueBackgroundColor(tag, context, value));
+	}
+
+	default void processGenericValueBackgroundColor(Tag tag, Context context, String value) {
+		tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value);
+	}
+
+	default void removeGenericValueBackgroundColor(Tag tag, Context context) {
+		tag.getDomNodeStyles(context).remove("background-color");
 	}
 
 	default void processFlexDirectionStyle(Tag tag, FlexDirection flexDirection) {
+		tag.addPrefixBinding(context -> processFlexDirectionStyle(tag, context, flexDirection));
+	}
+
+	default void processFlexDirectionStyle(Tag tag, Context context, FlexDirection flexDirection) {
 		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
-			((FlexDirectionDefaults) tag).setDirection(flexDirection);
+			((FlexDirectionDefaults) tag).setDirection(context, flexDirection);
+		else
+			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
+	}
+
+	default void removeFlexDirectionStyle(Tag tag, Context context) {
+		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
+			((FlexDirectionDefaults) tag).setDirection(context, null);
 		else
 			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
 	}
 
 	default void processReverseFlexDirection(Tag tag) {
+		tag.addPrefixBinding(context -> processReverseFlexDirection(tag, context));
+	}
+
+	default void processReverseFlexDirection(Tag tag, Context context) {
 		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
-			((FlexDirectionDefaults) tag).reverseDirection();
+			((FlexDirectionDefaults) tag).reverseDirection(context);
 		else
 			log.warn("Warning: ReverseFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
 	}
 
+	default void removeDirectionTracking(Tag tag, Context context) {
+		((FlexDirectionDefaults) tag).stopTrackingDirection(context);
+	}
+
 	default void processKeepFlexDirection(Tag tag) {
+		tag.addPrefixBinding(context -> processKeepFlexDirection(tag, context));
+	}
+
+	default void processKeepFlexDirection(Tag tag, Context context) {
 		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
-			((FlexDirectionDefaults) tag).keepDirection();
+			((FlexDirectionDefaults) tag).keepDirection(context);
 		else
 			log.warn("Warning: KeepFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
 	}
 
 	default void processStyleClass(Tag tag, String[] classes) {
+		tag.addPrefixBinding(context -> processStyleClass(tag, context, classes));
+	}
+
+	default void processStyleClass(Tag tag, Context context, String[] classes) {
 		for (String sc : classes)
-			tag.addStyleClass(sc);
+			tag.addStyleClass(context, sc);
+	}
+
+	default void removeStyleClass(Tag tag, Context context, String[] classes) {
+		for (String styleClass : classes)
+			tag.removeStyleClass(context, styleClass);
 	}
 
 	default void processSetText(Tag tag, Class<?>[] path, String[] texts) {
-		if (texts.length == 1)
-			tag.setText(texts[0]);
-		else
-			tag.setText(texts[AnnotationsManager.position(tag, path[path.length - 1])]);
+		tag.addPrefixBinding(context -> processSetText(tag, context, path, texts));
 	}
 
 	default void processSetText(Tag tag, Context context, Class<?>[] path, String[] texts) {
@@ -98,17 +155,12 @@ public interface RootTag extends Tag {
 			tag.setText(context, texts[AnnotationsManager.position(tag, path[path.length - 1])]);
 	}
 
+	default void removeSetText(Tag tag, Context context) {
+		tag.setText(context, "");
+	}
+
 	default void processBindText(Tag tag, Class<? extends TextBinding> value) {
-		if (GENERIC_STRING.class.equals(value))
-			tag.bindText();
-		else
-			tag.bindText(context -> {
-				try {
-					return value.newInstance().apply(context, tag);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
+		tag.addPrefixBinding(context -> processBindText(tag, context, value));
 	}
 
 	default void processBindText(Tag tag, Context context, Class<? extends TextBinding> value) {
@@ -124,17 +176,14 @@ public interface RootTag extends Tag {
 			});
 	}
 
+	default void removeBindText(Tag tag, Context context) {
+		tag.getDomNodeTextProperty(context).unbind();
+		context.getPropertiesMaps(tag).remove(TextPropertyDefaults.TEXT_BINDING);
+		tag.getDomNodeTextProperty(context).setValue(null);
+	}
+
 	default void processBindAction(Tag tag, Class<? extends ContextAction> value) {
-		if (ActionDefaults.class.isAssignableFrom(tag.getClass()))
-			((ActionDefaults) tag).bindAction(context -> {
-				try {
-					value.newInstance().accept(context, tag);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
-		else
-			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
+		tag.addPrefixBinding(context -> processBindAction(tag, context, value));
 	}
 
 	default void processBindAction(Tag tag, Context context, Class<? extends ContextAction> value) {
@@ -150,6 +199,26 @@ public interface RootTag extends Tag {
 			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
 	}
 
-	default void initDomNode(HtmlDomNode htmlDomNode) {
+	default void removeBindAction(Tag tag, Context context) {
+		context.getPropertiesMaps(tag).remove(ActionDefaults.ACTION);
+	}
+
+	default void processSetStringExtractor(Tag tag, Class<? extends StringExtractor> value) {
+		tag.addPrefixBinding(context -> processSetStringExtractor(tag, context, value));
+	}
+
+	default void processSetStringExtractor(Tag tag, Context context, Class<? extends StringExtractor> value) {
+		try {
+			tag.setStringExtractor(context, value.newInstance());
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	default void removeStringExtractor(Tag tag, Context context) {
+		context.getPropertiesMaps(tag).remove(GenericStringDefaults.EXTRACTOR);
+	}
+
+	default void initDomNode(HtmlDomNode domNode) {
 	}
 }

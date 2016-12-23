@@ -36,7 +36,7 @@ public @interface Attribute {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			tag.addAttribute(((Attribute) annotation).name(), ((Attribute) annotation).value());
+			tag.getRootTag().processAttribute(tag, ((Attribute) annotation).name(), ((Attribute) annotation).value());
 		}
 	}
 

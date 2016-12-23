@@ -35,11 +35,7 @@ public @interface SetStringExtractor {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			try {
-				tag.setStringExtractor(((SetStringExtractor) annotation).value().newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
+			tag.getRootTag().processSetStringExtractor(tag, ((SetStringExtractor) annotation).value());
 		}
 	}
 }
