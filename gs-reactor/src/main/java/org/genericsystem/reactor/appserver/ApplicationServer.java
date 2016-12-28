@@ -99,6 +99,8 @@ public class ApplicationServer extends AbstractBackEnd {
 			}, res -> {
 				if (res.succeeded())
 					rootHtmlDomNode = (RootHtmlDomNode) res.result();
+				else
+					res.cause().printStackTrace();
 			});
 		}
 
