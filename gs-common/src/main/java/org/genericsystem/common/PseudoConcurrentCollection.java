@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.genericsystem.api.core.IteratorSnapshot;
+
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
-
-import org.genericsystem.api.core.IteratorSnapshot;
 
 /**
  * @author Nicolas Feybesse
@@ -19,7 +19,6 @@ import org.genericsystem.api.core.IteratorSnapshot;
  */
 public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 
-	// TODO size and get(index) !!!
 	private Node<T> head = null;
 	private Node<T> tail = null;
 	final Map<T, T> map = new HashMap<>();
@@ -106,21 +105,29 @@ public class PseudoConcurrentCollection<T> implements IteratorSnapshot<T> {
 		private Predicate<T> predicate;
 
 		private ChangeListener<T> listener = (o, oldT, newT) -> {
-			if (predicate.test(newT)) {
+			if (fireInvalidations && predicate.test(newT))
 				super.fireValueChangedEvent();
-			}
 		};
 
 		private FilteredInvalidator(Predicate<T> predicate) {
 			this.predicate = predicate;
-			addProperty.addListener(listener);
-			// addProperty.addListener(new WeakChangeListener<T>((a, b, c) -> System.out.println("changeevent")));
+			addProperty.addListener(new WeakChangeListener<T>(listener));
 			removeProperty.addListener(new WeakChangeListener<T>(listener));
 		}
 
 	}
 
+	private boolean fireInvalidations = true;
+
 	public Observable getFilteredInvalidator(T generic, Predicate<T> predicate) {
 		return new FilteredInvalidator(predicate);
+	}
+
+	public void disableInvalidations() {
+		fireInvalidations = false;
+	}
+
+	public void enableInvalidations() {
+		fireInvalidations = true;
 	}
 }

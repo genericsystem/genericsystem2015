@@ -20,10 +20,7 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection.ReverseF
 import org.genericsystem.reactor.annotations.Style.StyleProcessor;
 import org.genericsystem.reactor.annotations.Style.Styles;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
-import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
@@ -70,14 +67,9 @@ public @interface Style {
 		}
 
 		public static class FlexDirectionStyleProcessor implements BiConsumer<Annotation, Tag> {
-			private static final Logger log = LoggerFactory.getLogger(FlexDirectionStyleProcessor.class);
-
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				if (FlexDiv.class.isAssignableFrom(tag.getClass()))
-					((FlexDiv) tag).setDirection(((FlexDirectionStyle) annotation).value());
-				else
-					log.warn("Warning: FlexDirection is applicable only to GSDiv extensions.");
+				tag.getRootTag().processFlexDirectionStyle(tag, ((FlexDirectionStyle) annotation).value());
 			}
 		}
 	}
@@ -98,14 +90,9 @@ public @interface Style {
 		}
 
 		public static class KeepFlexDirectionProcessor implements BiConsumer<Annotation, Tag> {
-			private static final Logger log = LoggerFactory.getLogger(ReverseFlexDirectionProcessor.class);
-
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				if (FlexDiv.class.isAssignableFrom(tag.getClass()))
-					((FlexDiv) tag).keepDirection();
-				else
-					log.warn("Warning: KeepFlexDirection is applicable only to GSDiv extensions.");
+				tag.getRootTag().processKeepFlexDirection(tag);
 			}
 		}
 	}
@@ -126,14 +113,9 @@ public @interface Style {
 		}
 
 		public static class ReverseFlexDirectionProcessor implements BiConsumer<Annotation, Tag> {
-			private static final Logger log = LoggerFactory.getLogger(ReverseFlexDirectionProcessor.class);
-
 			@Override
 			public void accept(Annotation annotation, Tag tag) {
-				if (FlexDiv.class.isAssignableFrom(tag.getClass()))
-					((FlexDiv) tag).reverseDirection();
-				else
-					log.warn("Warning: ReverseFlexDirection is applicable only to GSDiv extensions.");
+				tag.getRootTag().processReverseFlexDirection(tag);
 			}
 		}
 	}

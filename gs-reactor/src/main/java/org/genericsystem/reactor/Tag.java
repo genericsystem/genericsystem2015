@@ -258,7 +258,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void addStyle(String propertyName, String value) {
-		getRootTag().processStyle(this, propertyName, value);
+		addPrefixBinding(context -> addStyle(context, propertyName, value));
 	}
 
 	@Override
@@ -297,6 +297,10 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	default void removeStyleClass(Context context, String styleClass) {
 		getDomNodeStyleClasses(context).remove(styleClass);
+	}
+
+	default void removeStyleClass(String styleClass) {
+		addPrefixBinding(context -> getDomNodeStyleClasses(context).remove(styleClass));
 	}
 
 	default void bindAttribute(String attributeName, String propertyName) {

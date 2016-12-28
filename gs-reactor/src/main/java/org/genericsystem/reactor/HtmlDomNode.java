@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.value.ChangeListener;
@@ -31,7 +33,6 @@ public class HtmlDomNode {
 	protected static final String ADD = "A";
 	protected static final String UPDATE = "U";
 	static final String REMOVE = "R";
-	@Deprecated
 	static final String UPDATE_TEXT = "UT";
 	private static final String UPDATE_SELECTION = "US";
 	static final String ADD_STYLECLASS = "AC";
@@ -220,7 +221,6 @@ public class HtmlDomNode {
 		context.register(this);
 		if (parent != null)
 			insertChild(index);
-		tag.getDomNodeStyles(context).entrySet().stream().forEach(entry -> sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, entry.getKey()).put(STYLE_VALUE, entry.getValue())));
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
 		assert (!context.containsProperty(tag, "filteredChildren"));
@@ -303,7 +303,6 @@ public class HtmlDomNode {
 			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementRemoved()));
 	};
 
-	@Deprecated
 	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
 
 	private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
@@ -318,7 +317,6 @@ public class HtmlDomNode {
 		return indexListener;
 	}
 
-	@Deprecated
 	public ChangeListener<String> getTextListener() {
 		return textListener;
 	}

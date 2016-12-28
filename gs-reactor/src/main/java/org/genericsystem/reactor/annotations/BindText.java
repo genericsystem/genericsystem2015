@@ -36,16 +36,7 @@ public @interface BindText {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			if (GENERIC_STRING.class.equals(((BindText) annotation).value()))
-				tag.bindText();
-			else
-				tag.bindText(context -> {
-					try {
-						return ((BindText) annotation).value().newInstance().apply(context, tag);
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				});
+			tag.getRootTag().processBindText(tag, ((BindText) annotation).value());
 		}
 	}
 }

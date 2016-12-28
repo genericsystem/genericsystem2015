@@ -1,6 +1,5 @@
 package org.genericsystem.quiz.app;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.genericsystem.common.Generic;
@@ -10,7 +9,9 @@ import org.genericsystem.quiz.app.QuestionDiv.FooterDiv;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.FinishBtn;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.NextBtn;
 import org.genericsystem.quiz.app.QuestionDiv.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.app.QuestionDiv.QUESTIONS_EXTRACTOR;
 import org.genericsystem.quiz.app.QuestionDiv.UnitDiv;
+import org.genericsystem.quiz.app.QuizUtils.SAVE_QUIZ_RESULT;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.UserAnswer;
@@ -20,16 +21,18 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
@@ -53,17 +56,25 @@ import javafx.collections.ObservableList;
 @Style(path = { UnitDiv.class, TitleDiv.class }, name = "padding", value = "10px")
 @Style(path = { UnitDiv.class, TitleDiv.class }, name = "margin", value = "10px")
 //
-@DirectSelect(Question.class)
-@ForEach(path = UnitDiv.class, value = ObservableListExtractor.SUBINSTANCES.class)
+@ForEach(path = UnitDiv.class, value = QUESTIONS_EXTRACTOR.class)
 @BindText(path = { UnitDiv.class, TitleDiv.class, HtmlH2.class })
+@SelectContext(SELECTION_SELECTOR.class)
 @Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
-public class QuestionDiv extends HtmlDiv implements StepperDefaults {
+public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDefaults {
 
-	// Créé une propriété qui stockera les réponses de l'utilisateur
 	@Override
 	public void init() {
-		createNewInitializedProperty("userResponse", context -> new HashMap<Generic, Boolean>());
+		addPrefixBinding(context -> {
+			context.flush();
+			context.unmount();
+		});
 	}
+
+	// Créé une propriété qui stockera les réponses de l'utilisateur
+	// @Override
+	// public void init() {
+	// createNewInitializedProperty("userResponse", context -> new HashMap<Generic, Boolean>());
+	// }
 
 	// TODO Remplacer cette classe (temporaire, afin de faire fonctionner le stepper)
 	// par une autre Div affichant une information non steppable
@@ -148,16 +159,15 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 			@Override
 			public void init() {
 
-				// affiche les réponses précédentes
-
+				// affiche les réponses précédentes du User logged
 				initValueProperty(context -> {
 
-					try {
-						return (Boolean) context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue()).getValue();
+					Generic userA = context.getGeneric().getLink(context.find(UserAnswer.class), getLoggedUserProperty(context).getValue());
 
-					} catch (NullPointerException ex) {
-						return context.getGeneric().setLink(context.find(UserAnswer.class), false, getLoggedUserProperty(context).getValue());
-					}
+					if (userA == null)
+						userA = context.getGeneric().setLink(context.find(UserAnswer.class), false, getLoggedUserProperty(context).getValue());
+
+					return (Boolean) userA.getValue();
 
 				});
 
@@ -252,13 +262,14 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults {
 		}
 	}
 
-	public static class SAVE_QUIZ_RESULT implements ContextAction {
+	public static class QUESTIONS_EXTRACTOR implements ObservableListExtractor {
+		// generics[0] est l'element courant.
+		// Le getRoot permet d'utiliser la methode find (Le root donne accès à tous les éléments du context)
+		// TODO Rendre la méthode générique -> lui faire trouver les enfants d'un generic ssi il y a un unique enfant
 		@Override
-		public void accept(Context context, Tag tag) {
-
-			context.flush();
-			System.out.println("flush effectué");
-
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return generics[0].getObservableHolders(generics[0].getRoot().find(Question.class));
 		}
 	}
+
 }

@@ -90,10 +90,14 @@ public class Differential implements IDifferential<Generic> {
 
 	@Override
 	public void apply(Snapshot<Generic> removes, Snapshot<Generic> adds) throws ConcurrencyControlException, OptimisticLockConstraintViolationException {
+		this.removes.disableInvalidations();
+		this.adds.disableInvalidations();
 		for (Generic generic : removes)
 			unplug(generic);
 		for (Generic generic : adds)
 			plug(generic);
+		this.removes.enableInvalidations();
+		this.adds.enableInvalidations();
 	}
 
 	@Override

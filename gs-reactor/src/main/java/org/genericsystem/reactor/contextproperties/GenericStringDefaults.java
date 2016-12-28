@@ -1,13 +1,13 @@
 package org.genericsystem.reactor.contextproperties;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ObservableValue;
-
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.StringExtractor;
+
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 
 public interface GenericStringDefaults extends TextPropertyDefaults {
 
@@ -21,7 +21,11 @@ public interface GenericStringDefaults extends TextPropertyDefaults {
 	}
 
 	default void bindText() {
-		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getGenericStringProperty(model)));
+		addPrefixBinding(context -> bindText(context));
+	}
+
+	default void bindText(Context context) {
+		getDomNodeTextProperty(context).bind(getGenericStringProperty(context));
 	}
 
 	default StringExtractor getStringExtractor(Context model) {
@@ -29,12 +33,17 @@ public interface GenericStringDefaults extends TextPropertyDefaults {
 		return stringExtractorProperty != null ? stringExtractorProperty.getValue() : StringExtractor.SIMPLE_CLASS_EXTRACTOR;
 	}
 
+	default void setStringExtractor(Context context, StringExtractor extractor) {
+		if (!context.containsProperty((Tag) this, EXTRACTOR))
+			storeProperty(EXTRACTOR, context, m -> {
+				Property<StringExtractor> extractorProperty = new SimpleObjectProperty<>(extractor);
+				return extractorProperty;
+			});
+		else
+			getProperty(EXTRACTOR, context).setValue(extractor);
+	}
+
 	default void setStringExtractor(StringExtractor extractor) {
-		addPrefixBinding(model -> {
-			if (!model.containsProperty((Tag) this, EXTRACTOR))
-				storeProperty(EXTRACTOR, model, m -> new ReadOnlyObjectWrapper<>(extractor));
-			else
-				getProperty(EXTRACTOR, model).setValue(extractor);
-		});
+		addPrefixBinding(context -> setStringExtractor(context, extractor));
 	}
 }

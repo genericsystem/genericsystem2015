@@ -14,7 +14,7 @@ import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
 import org.genericsystem.defaults.tools.AbstractMinimalChangesObservableList.MinimalChangesObservableList;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.defaults.tools.InheritanceComputer;
-import org.genericsystem.defaults.tools.ObservableInheritanceComputer2;
+import org.genericsystem.defaults.tools.ObservableInheritanceComputer;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 
@@ -114,7 +114,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	default ObservableList<T> getObservableAttributes(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-			return new MinimalChangesObservableList<>(new ObservableInheritanceComputer2<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
+			return new MinimalChangesObservableList<>(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
 		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
 	}
 
@@ -186,7 +186,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	default ObservableList<T> getObservableHolders(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-			return new MinimalChangesObservableList<>(new ObservableInheritanceComputer2<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
+			return new MinimalChangesObservableList<>(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
 		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
 	}
 
