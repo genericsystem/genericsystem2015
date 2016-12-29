@@ -216,7 +216,7 @@ public interface RootTag extends Tag {
 	}
 
 	default void removeStringExtractor(Tag tag, Context context) {
-		context.getPropertiesMaps(tag).remove(GenericStringDefaults.EXTRACTOR);
+		tag.getStringExtractorProperty(context).setValue(null);
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {

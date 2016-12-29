@@ -31,7 +31,7 @@ public class DivWithTitle extends FlexDiv {
 	}
 
 	@Children({ TitleDiv.class, InstancesTable.class })
-	@SetStringExtractor(path = TitleDiv.class, value = StringExtractor.MANAGEMENT.class)
+	@SetStringExtractor(path = { TitleDiv.class, HtmlH2.class }, value = StringExtractor.MANAGEMENT.class)
 	public static class TitledInstancesTable extends DivWithTitle {
 	}
 
@@ -40,7 +40,7 @@ public class DivWithTitle extends FlexDiv {
 	}
 
 	@Children({ TitleDiv.class, InstanceEditor.class })
-	@SetStringExtractor(path = TitleDiv.class, value = StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
+	@SetStringExtractor(path = { TitleDiv.class, HtmlH2.class }, value = StringExtractor.TYPE_INSTANCE_EXTRACTOR.class)
 	public static class TitledInstanceEditor extends DivWithTitle implements SelectionDefaults {
 	}
 

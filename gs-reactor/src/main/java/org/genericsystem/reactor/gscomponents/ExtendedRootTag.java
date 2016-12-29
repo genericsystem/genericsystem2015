@@ -208,6 +208,9 @@ public class ExtendedRootTag extends RootTagImpl {
 					if (Attribute.class.equals(annotationClass))
 						processAttribute(tag, context, gTagAnnotation.getValue().getName(), annotationContent.getContentValue());
 
+					if (SetStringExtractor.class.equals(annotationClass))
+						processSetStringExtractor(tag, context, (Class<? extends StringExtractor>) annotationContent.getClassContent());
+
 					if (SetText.class.equals(annotationClass))
 						processSetText(tag, context, gTagAnnotation.getValue().getPath(), annotationContent.getContentJSonArray().stream().toArray(String[]::new));
 
@@ -216,9 +219,6 @@ public class ExtendedRootTag extends RootTagImpl {
 
 					if (BindAction.class.equals(annotationClass))
 						processBindAction(tag, context, (Class<? extends ContextAction>) annotationContent.getClassContent());
-
-					if (SetStringExtractor.class.equals(annotationClass))
-						processSetStringExtractor(tag, context, (Class<? extends StringExtractor>) annotationContent.getClassContent());
 				}
 			}
 		};
