@@ -41,6 +41,10 @@ import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.DirectSelect;
+import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.Select;
+import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
@@ -225,7 +229,33 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	private MapChangeListener<? super GTagAnnotation, ? super GTagAnnotationContent> getApplyingAnnotationsListener(Tag tag) {
-		return c -> tag.addPrefixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
+		return c -> {
+			GTagAnnotation gTagAnnotation = c.getKey();
+			Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
+
+			// System.out.println("---------- tag change listener : " + c);
+			if (DirectSelect.class.equals(annotationClass) || Select.class.equals(annotationClass) || SelectContext.class.equals(annotationClass) || ForEach.class.equals(annotationClass)) {
+				if (c.wasRemoved())
+					removeMetaBinding(tag);
+
+				if (c.wasAdded()) {
+					GTagAnnotationContent annotationContent = c.getValueAdded();
+
+					if (DirectSelect.class.equals(annotationClass))
+						processDirectSelect(tag, gTagAnnotation.getValue().getPath(), annotationContent.getClassArrayContent());
+
+					if (Select.class.equals(annotationClass))
+						processSelect(tag, annotationContent.getClassContent());
+
+					if (SelectContext.class.equals(annotationClass))
+						processSelectContext(tag, annotationContent.getClassContent());
+
+					if (ForEach.class.equals(annotationClass))
+						processForEach(tag, annotationContent.getClassContent());
+				}
+			} else
+				tag.addPrefixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
+		};
 	}
 
 	public Root getEngine() {
@@ -289,6 +319,18 @@ public class ExtendedRootTag extends RootTagImpl {
 		for (SetStringExtractor annotation : clazz.getAnnotationsByType(SetStringExtractor.class))
 			result.setSetStringExtractorAnnotation(annotation);
 
+		for (DirectSelect annotation : clazz.getAnnotationsByType(DirectSelect.class))
+			result.setDirectSelectAnnotation(annotation);
+
+		for (Select annotation : clazz.getAnnotationsByType(Select.class))
+			result.setSelectAnnotation(annotation);
+
+		for (SelectContext annotation : clazz.getAnnotationsByType(SelectContext.class))
+			result.setSelectContextAnnotation(annotation);
+
+		for (ForEach annotation : clazz.getAnnotationsByType(ForEach.class))
+			result.setForEachAnnotation(annotation);
+
 		getEngine().getCurrentCache().flush();
 		return result;
 	}
@@ -344,7 +386,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			// Build children if there are any.
 			Optional<GTagAnnotation> childrenAnnotation = tagAnnotations.keySet().stream().filter(ta -> Children.class.equals(ta.getValue().getAnnotationClass())).findFirst();
 			if (childrenAnnotation.isPresent())
-				tagAnnotations.get(childrenAnnotation.get()).childrenClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
+				tagAnnotations.get(childrenAnnotation.get()).getClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
 		}
 
 		private Set<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Deque<Class<?>> classesToResult, Tag tag) {
@@ -458,6 +500,23 @@ public class ExtendedRootTag extends RootTagImpl {
 		default void setSetStringExtractorAnnotation(SetStringExtractor annotation) {
 			setAnnotation(SetStringExtractor.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
 		}
+
+		default void setDirectSelectAnnotation(DirectSelect annotation) {
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(DirectSelect.class, annotation.path(), annotation.pos()));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+		}
+
+		default void setSelectAnnotation(Select annotation) {
+			setAnnotation(Select.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
+		}
+
+		default void setSelectContextAnnotation(SelectContext annotation) {
+			setAnnotation(SelectContext.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
+		}
+
+		default void setForEachAnnotation(ForEach annotation) {
+			setAnnotation(ForEach.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
+		}
 	}
 
 	public static interface GTagAnnotation extends Generic {
@@ -484,7 +543,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		@SuppressWarnings("unchecked")
-		default public Stream<Class<?>> childrenClassesStream() {
+		default public Stream<Class<?>> getClassesStream() {
 			return (Stream) getContentJSonArray().stream().map(className -> {
 				try {
 					return Class.forName((String) className);
@@ -517,6 +576,10 @@ public class ExtendedRootTag extends RootTagImpl {
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException("Class " + getContentValue() + " not found");
 			}
+		}
+
+		default public Class<?>[] getClassArrayContent() {
+			return getClassesStream().toArray(Class<?>[]::new);
 		}
 	}
 }

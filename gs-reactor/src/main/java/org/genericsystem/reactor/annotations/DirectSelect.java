@@ -6,10 +6,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.DirectSelect.DirectSelects;
 import org.genericsystem.reactor.annotations.DirectSelect.Processor;
@@ -40,16 +38,7 @@ public @interface DirectSelect {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			try {
-				Class<?>[] path = (Class<?>[]) annotation.annotationType().getDeclaredMethod("path").invoke(annotation);
-				Class<?>[] selects = ((DirectSelect) annotation).value();
-				if (selects.length == 1)
-					tag.select(selects[0]);
-				else
-					tag.select(selects[AnnotationsManager.position(tag, path[path.length - 1])]);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalStateException(e);
-			}
+			tag.getRootTag().processDirectSelect(tag, ((DirectSelect) annotation).path(), ((DirectSelect) annotation).value());
 		}
 	}
 }

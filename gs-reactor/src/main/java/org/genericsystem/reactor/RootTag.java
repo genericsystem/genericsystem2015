@@ -3,6 +3,10 @@ package org.genericsystem.reactor;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.ObservableContextSelector;
+import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
@@ -217,6 +221,53 @@ public interface RootTag extends Tag {
 
 	default void removeStringExtractor(Tag tag, Context context) {
 		tag.getStringExtractorProperty(context).setValue(null);
+	}
+
+	default void processSelect(Tag tag, Class<?> value) {
+		if (ObservableValueSelector.class.isAssignableFrom(value))
+			try {
+				tag.select((ObservableValueSelector) value.newInstance());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		else
+			throw new IllegalStateException("Select value must implement ObservableValueSelector. Given class: " + value.getName());
+	}
+
+	default void processSelectContext(Tag tag, Class<?> value) {
+		if (ObservableContextSelector.class.isAssignableFrom(value))
+			tag.select__(context -> {
+				try {
+					return ((ObservableContextSelector) value.newInstance()).apply(context, tag);
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		else
+			throw new IllegalStateException("SelectContext value must implement ObservableContextSelector. Given class: " + value.getName());
+	}
+
+	default void processForEach(Tag tag, Class<?> value) {
+		if (ObservableListExtractor.class.isAssignableFrom(value))
+			try {
+				if (!NO_FOR_EACH.class.equals(value))
+					tag.forEach((ObservableListExtractor) value.newInstance());
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
+		else
+			throw new IllegalStateException("ForEach value must implement ObservableListExtractor. Given class: " + value.getName());
+	}
+
+	default void processDirectSelect(Tag tag, Class<?>[] path, Class<?>[] selects) {
+		if (selects.length == 1)
+			tag.select(selects[0]);
+		else
+			tag.select(selects[AnnotationsManager.position(tag, path[path.length - 1])]);
+	}
+
+	default void removeMetaBinding(Tag tag) {
+		((TagImpl) tag).setMetaBinding(null);
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {

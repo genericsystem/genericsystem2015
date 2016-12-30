@@ -10,11 +10,13 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.context.TagSwitcher;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 public abstract class TagImpl implements Tag {
 
-	private MetaBinding<?> metaBinding;
+	private Property<MetaBinding<?>> metaBinding = new SimpleObjectProperty<>();
 	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();
 	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
 	protected List<TagSwitcher> switchers = new ArrayList<>();
@@ -62,14 +64,18 @@ public abstract class TagImpl implements Tag {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <BETWEEN> MetaBinding<BETWEEN> getMetaBinding() {
-		return (MetaBinding<BETWEEN>) metaBinding;
+		return (MetaBinding<BETWEEN>) metaBinding.getValue();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Property<MetaBinding<?>> getMetaBindingProperty() {
+		return metaBinding;
 	}
 
 	@Override
 	public <BETWEEN> void setMetaBinding(MetaBinding<BETWEEN> metaBinding) {
-		if (this.metaBinding != null)
-			throw new IllegalStateException("MetaBinding already defined");
-		this.metaBinding = metaBinding;
+		this.metaBinding.setValue(metaBinding);
 	}
 
 	@Override

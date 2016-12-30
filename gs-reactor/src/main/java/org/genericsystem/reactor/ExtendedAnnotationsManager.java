@@ -1,10 +1,6 @@
 package org.genericsystem.reactor;
 
 import org.genericsystem.reactor.annotations.BindSelection;
-import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.TagImpl;
@@ -17,10 +13,10 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 
 	@Override
 	public void initManager() {
-		registerAnnotation(DirectSelect.class);
-		registerAnnotation(Select.class);
-		registerAnnotation(SelectContext.class);
-		registerAnnotation(ForEach.class);
+		// registerAnnotation(DirectSelect.class);
+		// registerAnnotation(Select.class);
+		// registerAnnotation(SelectContext.class);
+		// registerAnnotation(ForEach.class);
 		registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);
 		// registerAnnotation(SetStringExtractor.class);

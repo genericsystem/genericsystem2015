@@ -35,13 +35,7 @@ public @interface SelectContext {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			tag.select__(context -> {
-				try {
-					return ((SelectContext) annotation).value().newInstance().apply(context, tag);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
+			tag.getRootTag().processSelectContext(tag, ((SelectContext) annotation).value());
 		}
 	}
 }
