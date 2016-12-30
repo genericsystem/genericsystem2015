@@ -302,7 +302,9 @@ public class ExtendedRootTag extends RootTagImpl {
 				Optional<GTagAnnotation> equivAnnotation = this.keySet().stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
 				if (equivAnnotation.isPresent()) {
 					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
-					if (overriddenAnnotation.getValue().getPath().length <= annotation.getValue().getPath().length)
+					Class<?>[] pathFound = overriddenAnnotation.getValue().getPath();
+					Class<?>[] newPath = annotation.getValue().getPath();
+					if (pathFound.length < newPath.length || AnnotationsManager.isAssignableFrom(Arrays.asList(newPath), Arrays.asList(pathFound)))
 						remove(overriddenAnnotation);
 					else
 						// Found an annotation applying to this tag that’s more precise than the new annotation,
