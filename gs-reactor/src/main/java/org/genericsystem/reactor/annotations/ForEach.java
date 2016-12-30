@@ -12,7 +12,6 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.ForEach.ForEachProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
 import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**
@@ -40,12 +39,7 @@ public @interface ForEach {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			try {
-				if (!NO_FOR_EACH.class.equals(((ForEach) annotation).value()))
-					tag.forEach(((ForEach) annotation).value().newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
+			tag.getRootTag().processForEach(tag, ((ForEach) annotation).value());
 		}
 	}
 }

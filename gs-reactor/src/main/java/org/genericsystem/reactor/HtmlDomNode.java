@@ -14,10 +14,9 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 
 import io.vertx.core.json.JsonObject;
+import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -173,19 +172,29 @@ public class HtmlDomNode {
 
 	private <BETWEEN> Consumer<Tag> tagAdder() {
 		return childTag -> {
-			MetaBinding<BETWEEN> metaBinding = childTag.getMetaBinding();
-			if (metaBinding != null) {
-				if (context.getSubContexts(childTag) == null)
-					context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
-						Context childContext = metaBinding.buildModel(context, between);
-						childTag.createNode(this, childContext).init(computeIndex(i, childTag));
-						if (childContext.isOpaque())
-							childTag.addStyleClass(childContext, "opaque");
-						return childContext;
-					}, Context::destroy));
-			} else if (context.getHtmlDomNode(childTag) == null)
-				childTag.createNode(this, context).init(computeIndex(0, childTag));
+			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
+			metaBinding.addListener((o, v, nv) -> {
+				// System.out.println("MetaBinding listener, tag: " + tag + ", contexte: " + Arrays.asList(context.getGenerics()));
+				deepRemove(context, childTag);
+				sizeBySubTag.remove(childTag);
+				updateMetaBinding(childTag, nv);
+			});
+			updateMetaBinding(childTag, metaBinding.getValue());
 		};
+	}
+
+	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
+		if (metaBinding != null) {
+			if (context.getSubContexts(childTag) == null)
+				context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
+					Context childContext = metaBinding.buildModel(context, between);
+					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
+					if (childContext.isOpaque())
+						childTag.addStyleClass(childContext, "opaque");
+					return childContext;
+				}, Context::destroy));
+		} else if (context.getHtmlDomNode(childTag) == null)
+			childTag.createNode(this, context).init(computeIndex(0, childTag));
 	}
 
 	private boolean destroyed = false;

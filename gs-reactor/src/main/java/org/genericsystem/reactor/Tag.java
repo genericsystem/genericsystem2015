@@ -51,6 +51,8 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	public <BETWEEN> MetaBinding<BETWEEN> getMetaBinding();
 
+	public <BETWEEN> Property<MetaBinding<BETWEEN>> getMetaBindingProperty();
+
 	public <BETWEEN> void setMetaBinding(MetaBinding<BETWEEN> metaBinding);
 
 	@Override

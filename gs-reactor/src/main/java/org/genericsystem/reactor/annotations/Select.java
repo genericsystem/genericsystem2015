@@ -39,11 +39,7 @@ public @interface Select {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			try {
-				tag.select(((Select) annotation).value().newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalStateException(e);
-			}
+			tag.getRootTag().processSelect(tag, ((Select) annotation).value());
 		}
 	}
 }
