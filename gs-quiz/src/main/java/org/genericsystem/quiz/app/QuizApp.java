@@ -3,6 +3,7 @@ package org.genericsystem.quiz.app;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.quiz.app.QuizApp.QuizzScript;
+import org.genericsystem.quiz.components.QuizAppPage;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.Quiz;

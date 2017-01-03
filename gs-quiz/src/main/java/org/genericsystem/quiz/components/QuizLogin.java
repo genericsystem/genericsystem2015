@@ -1,15 +1,15 @@
-package org.genericsystem.quiz.app;
+package org.genericsystem.quiz.components;
 
 import java.util.Arrays;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv.InputTextLogin;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv.InputTextPassword;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv.QuizChoiceOptions;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QUIZ_MODAL_DISPLAY_FLEX;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizUserCreation;
-import org.genericsystem.quiz.app.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizValidateButton;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.InputTextLogin;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.InputTextPassword;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QUIZ_MODAL_DISPLAY_FLEX;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizUserCreation;
+import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizValidateButton;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
@@ -36,11 +36,12 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents.Modal.ModalWithDisplay;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin.LoggedUserDiv;
 import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 
-@Children(QuizLoginDiv.class)
+@Children({ QuizLoginDiv.class, LoggedUserDiv.class })
 public class QuizLogin extends HtmlDiv {
 
 	@Switch(TagSwitcher.NO_LOGGED_USER.class)
