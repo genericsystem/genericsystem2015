@@ -305,6 +305,8 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			tag.getLoggedUserProperty(context).setValue(null);
 			tag.getAdminModeProperty(context).setValue(false);
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
 		}
 	}
 }
