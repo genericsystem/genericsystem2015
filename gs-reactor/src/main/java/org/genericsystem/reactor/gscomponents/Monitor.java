@@ -11,9 +11,8 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.TagSwitcher;
-import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.context.ContextAction.CANCEL;
 import org.genericsystem.reactor.context.ContextAction.CREATE_USER;
 import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE_CANCEL;
@@ -24,9 +23,10 @@ import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
 import org.genericsystem.reactor.context.ContextAction.MOUNT;
 import org.genericsystem.reactor.context.ContextAction.SHIFTTS;
 import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
 import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
@@ -48,7 +48,7 @@ import javafx.beans.binding.Bindings;
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
 @SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
-@BindAction(path = HtmlButton.class, pos = 1, value = CANCEL.class)
+@BindAction(path = HtmlButton.class, pos = 1, value = { CANCEL.class, UNMOUNT.class })
 @BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.LAST_UPDATE.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")

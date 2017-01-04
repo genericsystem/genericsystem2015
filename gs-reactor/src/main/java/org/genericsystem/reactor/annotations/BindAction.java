@@ -21,7 +21,7 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 public @interface BindAction {
 	Class<? extends TagImpl>[] path() default {};
 
-	Class<? extends ContextAction> value();
+	Class<? extends ContextAction>[] value();
 
 	int[] pos() default {};
 

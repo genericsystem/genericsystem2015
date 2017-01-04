@@ -7,12 +7,13 @@ import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE;
-import org.genericsystem.reactor.context.ContextAction.FLUSH_CLOSE;
-import org.genericsystem.reactor.context.ContextAction.UNMOUNT_CLOSE;
+import org.genericsystem.reactor.context.ContextAction.FLUSH;
+import org.genericsystem.reactor.context.ContextAction.RESET_SELECTION;
+import org.genericsystem.reactor.context.ContextAction.UNMOUNT;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledInstanceEditor;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
@@ -44,8 +45,8 @@ public class Modal extends FlexDiv {
 	@Attribute(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, name = "name", value = "close")
 	@FlexDirectionStyle(path = { FlexDiv.class, FlexDiv.class }, pos = { 0, 1 }, value = FlexDirection.ROW)
 	@SelectContext(path = { FlexDiv.class, TitledInstanceEditor.class }, value = SELECTION_SELECTOR.class)
-	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = FLUSH_CLOSE.class)
-	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = UNMOUNT_CLOSE.class)
+	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 0 }, value = { FLUSH.class, UNMOUNT.class, RESET_SELECTION.class })
+	@BindAction(path = { FlexDiv.class, FlexDiv.class, HtmlButton.class }, pos = { 0, 1, 1 }, value = { UNMOUNT.class, RESET_SELECTION.class })
 	public static class ModalEditor extends Modal implements SelectionDefaults {
 		@Override
 		public void init() {
