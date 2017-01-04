@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
-import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.context.RootContext;
 
 import io.vertx.core.logging.Logger;
@@ -125,21 +124,11 @@ public class Context {
 	}
 
 	public void destroy() {
-		htmlDomNodesMap.values().iterator().next().sendRemove();
-		internalDestroy();
-	}
-
-	public void internalDestroy() {
 		// System.out.println("InternalDestroy : " + this);
 		assert !destroyed;
 		destroyed = true;
 		for (HtmlDomNode htmlDomNode : htmlDomNodesMap.values()) {
 			htmlDomNode.destroy();
-		}
-		for (ObservableList<Context> subModels : subContextsMap.values()) {
-			((TransformationObservableList<?, ?>) subModels).unbind();
-			for (Context subModel : subModels)
-				subModel.internalDestroy();
 		}
 		subContextsMap = new HashMap<>();
 		htmlDomNodesMap = new LinkedHashMap<>();
