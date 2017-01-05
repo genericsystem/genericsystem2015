@@ -13,6 +13,7 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.context.ContextAction.MOUNT;
 import org.genericsystem.reactor.context.ContextAction.REMOVE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.context.ObservableListExtractor;
@@ -134,7 +135,7 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 1, 0 }, name = "src", value = "delete.png")
 	@Attribute(path = { HtmlHyperLink.class, HtmlImg.class }, pos = { 0, 0 }, name = "src", value = "edit.png")
 	@BindAction(path = HtmlHyperLink.class, pos = 1, value = REMOVE.class)
-	@BindAction(path = HtmlHyperLink.class, pos = 0, value = SET_SELECTION.class)
+	@BindAction(path = HtmlHyperLink.class, pos = 0, value = { MOUNT.class, SET_SELECTION.class })
 	public static class LinksDiv extends ButtonDiv {
 	}
 }

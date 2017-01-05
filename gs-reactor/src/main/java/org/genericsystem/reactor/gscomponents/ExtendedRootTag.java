@@ -222,7 +222,7 @@ public class ExtendedRootTag extends RootTagImpl {
 						processBindText(tag, context, (Class<? extends TextBinding>) annotationContent.getClassContent());
 
 					if (BindAction.class.equals(annotationClass))
-						processBindAction(tag, context, (Class<? extends ContextAction>) annotationContent.getClassContent());
+						processBindAction(tag, context, (Class<? extends ContextAction>[]) annotationContent.getClassArrayContent());
 				}
 			}
 		};
@@ -494,7 +494,8 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default void setBindActionAnnotation(BindAction annotation) {
-			setAnnotation(BindAction.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(BindAction.class, annotation.path(), annotation.pos()));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
 		}
 
 		default void setSetStringExtractorAnnotation(SetStringExtractor annotation) {

@@ -186,18 +186,19 @@ public interface RootTag extends Tag {
 		tag.getDomNodeTextProperty(context).setValue(null);
 	}
 
-	default void processBindAction(Tag tag, Class<? extends ContextAction> value) {
+	default void processBindAction(Tag tag, Class<? extends ContextAction>[] value) {
 		tag.addPrefixBinding(context -> processBindAction(tag, context, value));
 	}
 
-	default void processBindAction(Tag tag, Context context, Class<? extends ContextAction> value) {
+	default void processBindAction(Tag tag, Context context, Class<? extends ContextAction>[] value) {
 		if (ActionDefaults.class.isAssignableFrom(tag.getClass()))
 			((ActionDefaults) tag).bindAction(context, context_ -> {
-				try {
-					value.newInstance().accept(context_, tag);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
+				for (Class<? extends ContextAction> classValue : value)
+					try {
+						classValue.newInstance().accept(context_, tag);
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
 			});
 		else
 			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");

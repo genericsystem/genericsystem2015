@@ -59,7 +59,6 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		@Override
 		public void accept(Context context, Tag tag) {
 			context.flush();
-			context.unmount();
 		}
 	}
 
@@ -74,23 +73,10 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		}
 	}
 
-	public static class FLUSH_CLOSE implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			context.flush();
-			context.unmount();
-			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
-				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
-			else
-				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
-		}
-	}
-
 	public static class CANCEL implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
 			context.cancel();
-			context.unmount();
 		}
 	}
 
@@ -105,17 +91,6 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		@Override
 		public void accept(Context context, Tag tag) {
 			context.unmount();
-		}
-	}
-
-	public static class UNMOUNT_CLOSE implements ContextAction {
-		@Override
-		public void accept(Context context, Tag tag) {
-			context.unmount();
-			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
-				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
-			else
-				log.warn("The RESET_SELECTION action can apply only to a tag class implementing SelectionDefaults.");
 		}
 	}
 
@@ -160,7 +135,6 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 	public static class SET_SELECTION implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			context.mount();
 			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
 				((SelectionDefaults) tag).getSelectionProperty(context).setValue(context);
 			else
@@ -305,6 +279,8 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			tag.getLoggedUserProperty(context).setValue(null);
 			tag.getAdminModeProperty(context).setValue(false);
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).setValue(null);
 		}
 	}
 }
