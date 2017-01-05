@@ -26,4 +26,25 @@ public class QuizTagSwitcher {
 			return Bindings.createBooleanBinding(() -> selectionProperty.getValue() == null, selectionProperty);
 		}
 	}
+
+	public static class QUIZ_END implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return tag.getProperty("Quiz Done", context);
+		}
+	}
+
+	public static class QUIZ_RUNNING implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			Property<Boolean> selectionProperty = tag.getProperty("Quiz Done", context);
+			return Bindings.createBooleanBinding(() -> {
+				System.out.println("Etat de Quiz Done : " + selectionProperty.getValue());
+				return selectionProperty.getValue() == false;
+			}, selectionProperty);
+		}
+
+	}
 }

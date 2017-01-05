@@ -21,6 +21,7 @@ import org.genericsystem.security.model.User;
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class })
 @Children(QuizAppPage.class)
+// @Children({ HomePage.class, QuizPage.class, ResultPage.class })
 @Style(name = "background-color", value = "grey")
 public class QuizApp extends RootTagImpl {
 
@@ -29,7 +30,8 @@ public class QuizApp extends RootTagImpl {
 	}
 
 	public QuizApp() {
-		// addPrefixBinding(context -> getLoggedUserProperty(context).setValue(context.find(User.class).getInstance("Robert DJ")));
+		createNewInitializedProperty("Quiz Done", context -> false);
+		// createNewInitializedProperty("selectedClass", context -> HomePage.class);
 	}
 
 	public static class QuizzScript implements Script {
