@@ -125,21 +125,14 @@ public class Context {
 	}
 
 	public void destroy() {
-		htmlDomNodesMap.values().iterator().next().sendRemove();
-		internalDestroy();
-	}
-
-	public void internalDestroy() {
 		// System.out.println("InternalDestroy : " + this);
 		assert !destroyed;
 		destroyed = true;
-		for (HtmlDomNode htmlDomNode : htmlDomNodesMap.values()) {
-			htmlDomNode.destroy();
-		}
+		htmlDomNodesMap.values().stream().findFirst().get().destroy();
 		for (ObservableList<Context> subModels : subContextsMap.values()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
 			for (Context subModel : subModels)
-				subModel.internalDestroy();
+				subModel.destroy();
 		}
 		subContextsMap = new HashMap<>();
 		htmlDomNodesMap = new LinkedHashMap<>();
