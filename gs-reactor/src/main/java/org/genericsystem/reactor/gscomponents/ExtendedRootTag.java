@@ -207,7 +207,7 @@ public class ExtendedRootTag extends RootTagImpl {
 						processKeepFlexDirection(tag, context);
 
 					if (StyleClass.class.equals(annotationClass))
-						processStyleClass(tag, context, annotationContent.getContentJSonArray().stream().toArray(String[]::new));
+						processStyleClass(tag, context, annotationContent.getStringArrayContent());
 
 					if (Attribute.class.equals(annotationClass))
 						processAttribute(tag, context, gTagAnnotation.getValue().getName(), annotationContent.getContentValue());
@@ -216,7 +216,7 @@ public class ExtendedRootTag extends RootTagImpl {
 						processSetStringExtractor(tag, context, (Class<? extends StringExtractor>) annotationContent.getClassContent());
 
 					if (SetText.class.equals(annotationClass))
-						processSetText(tag, context, gTagAnnotation.getValue().getPath(), annotationContent.getContentJSonArray().stream().toArray(String[]::new));
+						processSetText(tag, context, gTagAnnotation.getValue().getPath(), annotationContent.getStringArrayContent());
 
 					if (BindText.class.equals(annotationClass))
 						processBindText(tag, context, (Class<? extends TextBinding>) annotationContent.getClassContent());
@@ -449,13 +449,17 @@ public class ExtendedRootTag extends RootTagImpl {
 			return styleAnnotation;
 		}
 
+		default void setArrayValueAnnotation(Class<? extends Annotation> annotationClass, String name, Object[] value, Class<?>[] path, int[] positions) {
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(annotationClass, path, positions));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(value))).encodePrettily());
+		}
+
 		default void setStyleAnnotation(Style annotation) {
 			setAnnotation(Style.class, annotation.name(), annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setChildrenAnnotation(Children annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(Children.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+			setArrayValueAnnotation(Children.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setGVBColorAnnotation(GenericValueBackgroundColor annotation) {
@@ -476,8 +480,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default void setStyleClassAnnotation(StyleClass annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(StyleClass.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+			setArrayValueAnnotation(StyleClass.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setAttributeAnnotation(Attribute annotation) {
@@ -485,8 +488,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default void setSetTextAnnotation(SetText annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(SetText.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+			setArrayValueAnnotation(SetText.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setBindTextAnnotation(BindText annotation) {
@@ -494,8 +496,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default void setBindActionAnnotation(BindAction annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(BindAction.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+			setArrayValueAnnotation(BindAction.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setSetStringExtractorAnnotation(SetStringExtractor annotation) {
@@ -503,8 +504,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		default void setDirectSelectAnnotation(DirectSelect annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(DirectSelect.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(annotation.value()))).encodePrettily());
+			setArrayValueAnnotation(DirectSelect.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 
 		default void setSelectAnnotation(Select annotation) {
@@ -581,6 +581,10 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		default public Class<?>[] getClassArrayContent() {
 			return getClassesStream().toArray(Class<?>[]::new);
+		}
+
+		default public String[] getStringArrayContent() {
+			return getContentJSonArray().stream().toArray(String[]::new);
 		}
 	}
 }
