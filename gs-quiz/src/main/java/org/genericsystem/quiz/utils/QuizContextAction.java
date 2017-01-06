@@ -1,15 +1,35 @@
 package org.genericsystem.quiz.utils;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.quiz.app.pages.HomePage;
+import org.genericsystem.quiz.app.pages.QuizPage;
+import org.genericsystem.quiz.app.pages.ResultPage;
 import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.FinishBtn;
 import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.NextBtn;
 import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.PreviousBtn;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.security.model.User;
 
 public class QuizContextAction {
+
+	public static class QuizNextAction implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			Class<?> from = tag.getParent().getClass();
+			Class<?> to = null;
+			if (HomePage.class.equals(from))
+				to = QuizPage.class;
+			if (QuizPage.class.equals(from))
+				to = ResultPage.class;
+			if (ResultPage.class.equals(from))
+				to = HomePage.class;
+			tag.getProperty("selectedClass", context).setValue(to);
+		}
+	}
 
 	public static class NEXT_TAG implements ContextAction {
 		@Override
@@ -55,13 +75,19 @@ public class QuizContextAction {
 			context.flush();
 
 			ScoreUtils.setResult(context, quiz, sUser, loggedUser);
-
 			ScoreUtils.getResult(context, quiz, loggedUser);
-			System.out.println("Scores -> ");
-			ScoreUtils.getScores(context, quiz).forEach(System.out::println);
 
-			System.out.println("Note de " + loggedUser + " -> " + ScoreUtils.calculateSimpleGrade(context, quiz, loggedUser) + " / 20");
-
+			tag.getProperty("Quiz Done", context).setValue(true);
 		}
+	}
+
+	public static class SELECT_CONTEXT implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+				((SelectionDefaults) tag).getSelectionProperty(context).getValue();
+		}
+
 	}
 }

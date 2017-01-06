@@ -18,6 +18,7 @@ import org.genericsystem.quiz.utils.QuizContextAction.SAVE_QUIZ_RESULT;
 import org.genericsystem.quiz.utils.QuizExtractors.ANSWERS_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.QUESTIONS_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizStepper;
+import org.genericsystem.quiz.utils.QuizTagSwitcher;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -41,7 +42,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 
-@Switch(TagSwitcher.LOGGED_USER.class)
+@Switch({ TagSwitcher.LOGGED_USER.class, QuizTagSwitcher.QUIZ_RUNNING.class })
 @Children(QuestionDiv_.class)
 public class QuestionDiv extends HtmlDiv {
 	//
@@ -62,13 +63,14 @@ public class QuestionDiv extends HtmlDiv {
 	@Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
 	public static class QuestionDiv_ extends HtmlDiv implements StepperDefaults, SelectionDefaults {
 
-		@Override
-		public void init() {
-			addPrefixBinding(context -> {
-				context.flush();
-				context.unmount();
-			});
-		}
+		// Le SET_SELECTOR mount le cache. L'init permet de sauvegarder le context et travailler sur le cache du niveau inférieur
+		// @Override
+		// public void init() {
+		// addPrefixBinding(context -> {
+		// context.flush();
+		// context.unmount();
+		// });
+		// }
 
 		// Créé une propriété qui stockera les réponses de l'utilisateur
 		// @Override
@@ -139,12 +141,10 @@ public class QuestionDiv extends HtmlDiv {
 					Tag label = null;
 
 					for (HtmlDomNode n : nodes) {
-
 						if (n.getTag() instanceof QuizCheckBox)
 							idTag = n.getId();
 						if (n.getTag() instanceof HtmlLabel)
 							label = n.getTag();
-
 					}
 
 					if (label != null && idTag != null)
@@ -211,7 +211,7 @@ public class QuestionDiv extends HtmlDiv {
 			@Style(name = "display", value = "none")
 			@Style(name = "text-align", value = "center")
 			//
-			@BindAction(SAVE_QUIZ_RESULT.class)
+			@BindAction({ SAVE_QUIZ_RESULT.class })
 			public static class FinishBtn extends HtmlButton implements QuizStepper {
 
 			}
