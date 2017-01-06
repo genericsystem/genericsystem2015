@@ -48,12 +48,29 @@ public class QuizTagSwitcher {
 	}
 
 	// ************* NAVIGATION ENTRE LES PAGES **********************
+
+	public static class HOME_PAGE implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return tag.getProperty("HomePage", context);
+		}
+	}
+
+	public static class QUESTION_PAGE implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return tag.getProperty("QuestionPage", context);
+		}
+	}
+
 	public static class RESULT_PAGE implements TagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
 			return tag.getProperty("ResultPage", context);
 		}
-
 	}
+
 }

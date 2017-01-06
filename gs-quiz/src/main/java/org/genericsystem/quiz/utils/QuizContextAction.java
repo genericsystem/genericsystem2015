@@ -62,6 +62,33 @@ public class QuizContextAction {
 	}
 
 	// NAVIGATION ENTRE LES PAGES
+
+	public static class CLEAR_PAGES implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			if (tag.getProperty("HomePage", context) != null)
+				tag.getProperty("HomePage", context).setValue(false);
+			if (tag.getProperty("QuestionPage", context) != null)
+				tag.getProperty("QuestionPage", context).setValue(false);
+			if (tag.getProperty("ResultPage", context) != null)
+				tag.getProperty("ResultPage", context).setValue(false);
+		}
+
+	}
+
+	public static class CALL_HOME_PAGE implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			Property<Boolean> homePage = tag.getProperty("HomePage", context);
+			if (homePage == null)
+				tag.createNewInitializedProperty("HomePage", context, c -> true);
+			else
+				homePage.setValue(true);
+		}
+	}
+
 	public static class CALL_RESULT_PAGE implements ContextAction {
 
 		@Override
@@ -74,4 +101,16 @@ public class QuizContextAction {
 		}
 	}
 
+	public static class CALL_QUESTION_PAGE implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			Property<Boolean> questionPage = tag.getProperty("QuestionPage", context);
+			if (questionPage == null)
+				tag.createNewInitializedProperty("QuestionPage", context, c -> true);
+			else
+				questionPage.setValue(true);
+		}
+
+	}
 }
