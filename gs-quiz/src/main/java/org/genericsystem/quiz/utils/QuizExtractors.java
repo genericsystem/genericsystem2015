@@ -17,7 +17,6 @@ public class QuizExtractors {
 		// TODO Rendre la méthode générique -> lui faire trouver les enfants d'un generic ssi il y a un unique enfant
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			System.out.println("*********** ANSWERS_EXTRACTOR generics[0] -> " + generics[0]);
 			return generics[0].getObservableHolders(generics[0].getRoot().find(Answer.class));
 		}
 	}
@@ -26,8 +25,6 @@ public class QuizExtractors {
 
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			System.out.println("*********** SCORE_EXTRACTOR generics[0] -> " + generics[0]);
-			System.out.println(generics[0].getObservableHolders(generics[0].getRoot().find(ScoreUserQuiz.class)));
 			return generics[0].getObservableHolders(generics[0].getRoot().find(ScoreUserQuiz.class));
 		}
 
@@ -36,7 +33,6 @@ public class QuizExtractors {
 	public static class QUESTIONS_EXTRACTOR implements ObservableListExtractor {
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			System.out.println("*********** QUESTIONS_EXTRACTOR generics[0] -> " + generics[0]);
 			return generics[0].getObservableHolders(generics[0].getRoot().find(Question.class));
 		}
 	}
@@ -45,8 +41,6 @@ public class QuizExtractors {
 
 		@Override
 		public Generic apply(Generic[] generics) {
-			System.out.println("*********** USER_EXTRACTOR generics[0] -> " + generics[0]);
-			System.out.println(generics[0].getComponent(0));
 			return generics[0].getComponent(0);
 		}
 

@@ -1,35 +1,17 @@
 package org.genericsystem.quiz.utils;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.app.pages.HomePage;
-import org.genericsystem.quiz.app.pages.QuizPage;
-import org.genericsystem.quiz.app.pages.ResultPage;
 import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.FinishBtn;
 import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.NextBtn;
 import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.PreviousBtn;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.security.model.User;
 
+import javafx.beans.property.Property;
+
 public class QuizContextAction {
-
-	public static class QuizNextAction implements ContextAction {
-
-		@Override
-		public void accept(Context context, Tag tag) {
-			Class<?> from = tag.getParent().getClass();
-			Class<?> to = null;
-			if (HomePage.class.equals(from))
-				to = QuizPage.class;
-			if (QuizPage.class.equals(from))
-				to = ResultPage.class;
-			if (ResultPage.class.equals(from))
-				to = HomePage.class;
-			tag.getProperty("selectedClass", context).setValue(to);
-		}
-	}
 
 	public static class NEXT_TAG implements ContextAction {
 		@Override
@@ -72,22 +54,24 @@ public class QuizContextAction {
 			Generic sUser = context.find(User.class).getInstance("Anti-Seche");
 			Generic loggedUser = tag.getLoggedUserProperty(context).getValue();
 
-			context.flush();
-
 			ScoreUtils.setResult(context, quiz, sUser, loggedUser);
 			ScoreUtils.getResult(context, quiz, loggedUser);
 
-			tag.getProperty("Quiz Done", context).setValue(true);
+			tag.getProperty("QuizDone", context).setValue(true);
 		}
 	}
 
-	public static class SELECT_CONTEXT implements ContextAction {
+	// NAVIGATION ENTRE LES PAGES
+	public static class CALL_RESULT_PAGE implements ContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
-				((SelectionDefaults) tag).getSelectionProperty(context).getValue();
+			Property<Boolean> resultPage = tag.getProperty("ResultPage", context);
+			if (resultPage == null)
+				tag.createNewInitializedProperty("ResultPage", context, c -> true);
+			else
+				resultPage.setValue(true);
 		}
-
 	}
+
 }

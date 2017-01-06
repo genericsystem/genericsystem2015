@@ -16,6 +16,7 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
@@ -51,6 +52,7 @@ public class QuizResult extends HtmlDiv {
 		@Style(name = "display", value = "flex")
 		@Style(name = "flex", value = "1")
 		@Style(name = "flex-direction", value = "row")
+		@StyleClass("white")
 		public static class ScoreDiv extends HtmlDiv {
 
 			public static class ResultDiv extends HtmlDiv {
@@ -59,18 +61,16 @@ public class QuizResult extends HtmlDiv {
 				public void init() {
 
 					addPrefixBinding(context -> {
-
 						Generic scoreUserQuiz = context.getGeneric();
 
-						if (!(scoreUserQuiz.getMeta().equals(scoreUserQuiz.getRoot().find(ScoreUserQuiz.class)))) {
+						if (!(scoreUserQuiz.getMeta().equals(scoreUserQuiz.getRoot().find(ScoreUserQuiz.class))))
 							return;
-						}
 
 						Generic user = scoreUserQuiz.getComponent(0);
 						Generic quiz = scoreUserQuiz.getComponent(1);
-						Double result = ScoreUtils.calculateSimpleGrade(context, quiz, user);
-						System.out.println("RESULTAT ----------------- " + result);
-						this.setText(context, " -> " + result + " / 20");
+						Double grade01 = ScoreUtils.calculateSimpleGrade(context, quiz, user);
+						Double grade02 = ScoreUtils.calculateDualGrade(context, quiz, user);
+						this.setText(context, " -> " + grade01 + " / 20  -> " + grade02 + " / 20");
 					});
 				}
 			}

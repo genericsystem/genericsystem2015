@@ -19,10 +19,6 @@ public class ScoreUtils {
 		Snapshot<Generic> questions = quiz.getHolders(context.find(Question.class));
 		List<Generic> listQuestions = questions.stream().collect(Collectors.toList());
 
-		System.out.println("**************************************************************************");
-		System.out.println("Quiz " + quiz);
-		System.out.println();
-
 		int total = 0;
 
 		for (Generic question : listQuestions) {
@@ -31,28 +27,18 @@ public class ScoreUtils {
 
 			int pointByQuestion = 0;
 
-			System.out.println(question);
-
 			for (Generic answer : listAnswers) {
 				Generic goodAnswer = answer.getLink(context.find(UserAnswer.class), sUser);
 				Generic userAnswer = answer.getLink(context.find(UserAnswer.class), loggedUser);
-
-				System.out.println("\t" + answer);
-				System.out.println("\tGood answer -> \t" + goodAnswer.getValue());
-				System.out.println("\t" + loggedUser + "'s answer -> \t" + userAnswer.getValue());
 
 				pointByQuestion = (goodAnswer.getValue().equals(userAnswer.getValue())) ? ++pointByQuestion : --pointByQuestion;
 
 			}
 
-			System.out.println(pointByQuestion + " points sur " + listAnswers.size() + " possibles.\n");
-
 			if (pointByQuestion == listAnswers.size())
 				++total;
 
 		}
-		System.out.println("Résultat du test : " + total + " bonne(s) réponse(s)");
-		System.out.println("Précédent résultat : " + quiz.getLink(context.find(ScoreUserQuiz.class), loggedUser));
 
 		return total;
 	}
@@ -128,34 +114,44 @@ public class ScoreUtils {
 
 	// Calcul de la note sur 20 en fonction des résultats précédents
 	public static Double calculateSimpleGrade(Context context, Generic quiz, Generic user) {
-		List<Double> scores = getScores(context, quiz).collect(Collectors.toList());
 
+		List<Double> scores = getScores(context, quiz).collect(Collectors.toList());
 		Double scoreMin = scores.get(0);
 		Double scoreMax = scores.get(scores.size() - 1);
 		Double average = getAverageScore(getScores(context, quiz));
 
-		System.out.println("Score minimal = " + scoreMin);
-		System.out.println("Score max = " + scoreMax);
-		System.out.println("Score moyen = " + average);
-
-		// Définir l'equation y = ax + b... y est le score du User
+		// Définir la fonction affine y = ax + b... y est le score du User
 		Double y = getScore(context, quiz, user);
-
 		// Point de la droite pour x = 0 (quand y = average) -> calcul de b
 		Double b = average;
 		Double a = null;
 
-		if (Math.abs(scoreMax) >= Math.abs(scoreMin)) {
+		if (Math.abs(scoreMax) >= Math.abs(scoreMin))
 			a = getA(scoreMax, b, 10d);
-			System.out.println("a = aMax");
-		} else {
+		else
 			a = getA(scoreMin, b, -10d);
-			System.out.println("a = aMin");
-		}
 
-		System.out.println("Formule :\n\ty = " + a + " * x + " + b);
+		return (double) Math.round(calculateSimpleGrade(a, y, b) * 100) / 100;
+	}
 
-		return calculateSimpleGrade(a, y, b);
+	public static Double calculateDualGrade(Context context, Generic quiz, Generic user) {
+		List<Double> scores = getScores(context, quiz).collect(Collectors.toList());
+		Double scoreMin = scores.get(0);
+		Double scoreMax = scores.get(scores.size() - 1);
+		Double average = getAverageScore(getScores(context, quiz));
+
+		// Définir la fonction affine y = ax + b... y est le score du User
+		Double y = getScore(context, quiz, user);
+		// Point de la droite pour x = 0 (quand y = average) -> calcul de b
+		Double b = average;
+		Double a = null;
+
+		if (y >= b)
+			a = getA(scoreMax, b, 10d);
+		else
+			a = getA(scoreMin, b, -10d);
+
+		return (double) Math.round(calculateSimpleGrade(a, y, b) * 100) / 100;
 	}
 
 	public static Double calculateSimpleGrade(Double a, Double y, Double b) {

@@ -30,7 +30,7 @@ public class QuizApp extends RootTagImpl {
 	}
 
 	public QuizApp() {
-		createNewInitializedProperty("Quiz Done", context -> false);
+		createNewInitializedProperty("QuizDone", context -> false);
 		// createNewInitializedProperty("selectedClass", context -> HomePage.class);
 	}
 
