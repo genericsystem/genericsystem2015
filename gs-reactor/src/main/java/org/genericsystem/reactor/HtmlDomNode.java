@@ -199,7 +199,7 @@ public class HtmlDomNode {
 	private boolean destroyed = false;
 
 	void destroy() {
-		// System.out.println("Attempt to destroy : " + getNode().getId());
+		// System.out.println("Attempt to destroy : " + getId());
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
 		sendRemove();
@@ -209,18 +209,19 @@ public class HtmlDomNode {
 
 	private void deepRemove(Context context, Tag tag, MetaBinding<?> oldMetaBinding) {
 		if (oldMetaBinding == null) {
-			for (Tag childTag : context.getRootContext().getObservableChildren(tag))
+			for (Tag childTag : tag.getObservableChildren())
 				deepRemove(context, childTag, childTag.getMetaBinding());
 			if (context.getHtmlDomNode(tag) != null)
-				context.getHtmlDomNode(tag).destroy();
+				context.getHtmlDomNode(tag).sendRemove();
 			context.removeProperties(tag);
 			context.removeHtmlDomNode(tag);
 		} else if (context.getSubContexts(tag) != null) {
+			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
 			for (Context subContext : context.getSubContexts(tag)) {
-				for (Tag childTag : context.getRootContext().getObservableChildren(tag))
+				for (Tag childTag : tag.getObservableChildren())
 					deepRemove(subContext, childTag, childTag.getMetaBinding());
 				if (subContext.getHtmlDomNode(tag) != null)
-					subContext.getHtmlDomNode(tag).destroy();
+					subContext.getHtmlDomNode(tag).sendRemove();
 				subContext.removeProperties(tag);
 			}
 			context.removeSubContexts(tag);// remove tag ref

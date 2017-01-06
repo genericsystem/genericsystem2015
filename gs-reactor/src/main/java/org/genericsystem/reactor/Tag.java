@@ -110,16 +110,16 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	default void select__(Function<Context, ObservableValue<Context>> applyOnModelContext) {
 		// fix probable issues with transmitSuccessiveInvalidations
-		select_(model -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Context>() {
-			ObservableValue<Context> ov = applyOnModelContext.apply(model);
+		select_(context -> BindingsTools.transmitSuccessiveInvalidations(new ListBinding<Context>() {
+			ObservableValue<Context> ov = applyOnModelContext.apply(context);
 			{
 				bind(ov);
 			}
 
 			@Override
 			protected ObservableList<Context> computeValue() {
-				Context model = ov.getValue();
-				return model != null ? FXCollections.singletonObservableList(model) : FXCollections.emptyObservableList();
+				Context context_ = ov.getValue();
+				return context_ != null ? FXCollections.singletonObservableList(context_) : FXCollections.emptyObservableList();
 			}
 		}));
 	}
@@ -133,7 +133,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	@Override
-	default <T> Property<T> getProperty(String propertyName, Context model) {
+	default <T> Property<T> getProperty(String propertyName, Context context) {
 		class PropertyComputer {
 			Property<T> getProperty(String propertyName, Context[] models) {
 				Tag tag = Tag.this;
@@ -147,7 +147,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 				return null;
 			}
 		}
-		return new PropertyComputer().getProperty(propertyName, new Context[] { model });
+		return new PropertyComputer().getProperty(propertyName, new Context[] { context });
 	}
 
 	@Override

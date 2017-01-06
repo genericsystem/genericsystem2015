@@ -37,14 +37,6 @@ public class Context {
 		this.generics = generics;
 	}
 
-	void firstCall() {
-
-		Context rootContext = getRootContext();
-		Tag rootTag = htmlDomNodesMap.keySet().iterator().next();
-		HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
-		rootNode.getChildren();
-	}
-
 	public Map<Tag, HtmlDomNode> getHtmlDomNodesMap() {
 		return htmlDomNodesMap;
 	}
@@ -125,7 +117,7 @@ public class Context {
 	}
 
 	public void destroy() {
-		// System.out.println("InternalDestroy : " + this);
+		// System.out.println("context destroy : " + this);
 		assert !destroyed;
 		destroyed = true;
 		htmlDomNodesMap.values().stream().findFirst().get().destroy();
