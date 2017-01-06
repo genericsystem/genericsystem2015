@@ -127,9 +127,7 @@ public class Context {
 		// System.out.println("InternalDestroy : " + this);
 		assert !destroyed;
 		destroyed = true;
-		for (HtmlDomNode htmlDomNode : htmlDomNodesMap.values()) {
-			htmlDomNode.destroy();
-		}
+		htmlDomNodesMap.values().stream().findFirst().get().destroy();
 		subContextsMap = new HashMap<>();
 		htmlDomNodesMap = new LinkedHashMap<>();
 		propertiesMap = new HashMap<>();

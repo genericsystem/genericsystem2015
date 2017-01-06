@@ -79,7 +79,7 @@ public class HtmlDomNode {
 		while (change.next()) {
 			if (change.wasRemoved()) {
 				for (Tag childTag : change.getRemoved()) {
-					deepRemove(context, childTag);
+					deepRemove(context, childTag, childTag.getMetaBinding());
 					sizeBySubTag.remove(childTag);
 				}
 			}
@@ -174,8 +174,7 @@ public class HtmlDomNode {
 		return childTag -> {
 			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
 			metaBinding.addListener((o, v, nv) -> {
-				// System.out.println("MetaBinding listener, tag: " + tag + ", contexte: " + Arrays.asList(context.getGenerics()));
-				deepRemove(context, childTag);
+				deepRemove(context, childTag, v);
 				sizeBySubTag.remove(childTag);
 				updateMetaBinding(childTag, nv);
 			});
@@ -208,16 +207,18 @@ public class HtmlDomNode {
 		parent.decrementSize(tag);
 	}
 
-	private void deepRemove(Context context, Tag tag) {
-		if (tag.getMetaBinding() == null) {
+	private void deepRemove(Context context, Tag tag, MetaBinding<?> oldMetaBinding) {
+		if (oldMetaBinding == null) {
 			for (Tag childTag : context.getRootContext().getObservableChildren(tag))
-				deepRemove(context, childTag);
+				deepRemove(context, childTag, childTag.getMetaBinding());
 			if (context.getHtmlDomNode(tag) != null)
 				context.getHtmlDomNode(tag).destroy();
 			context.removeProperties(tag);
 			context.removeHtmlDomNode(tag);
 		} else if (context.getSubContexts(tag) != null) {
 			for (Context subContext : context.getSubContexts(tag)) {
+				for (Tag childTag : context.getRootContext().getObservableChildren(tag))
+					deepRemove(subContext, childTag, childTag.getMetaBinding());
 				if (subContext.getHtmlDomNode(tag) != null)
 					subContext.getHtmlDomNode(tag).destroy();
 				subContext.removeProperties(tag);
