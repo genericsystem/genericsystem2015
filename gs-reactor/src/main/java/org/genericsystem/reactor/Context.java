@@ -37,14 +37,6 @@ public class Context {
 		this.generics = generics;
 	}
 
-	void firstCall() {
-
-		Context rootContext = getRootContext();
-		Tag rootTag = htmlDomNodesMap.keySet().iterator().next();
-		HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
-		rootNode.getChildren();
-	}
-
 	public Map<Tag, HtmlDomNode> getHtmlDomNodesMap() {
 		return htmlDomNodesMap;
 	}
@@ -125,21 +117,14 @@ public class Context {
 	}
 
 	public void destroy() {
-		htmlDomNodesMap.values().iterator().next().sendRemove();
-		internalDestroy();
-	}
-
-	public void internalDestroy() {
-		// System.out.println("InternalDestroy : " + this);
+		// System.out.println("context destroy : " + this);
 		assert !destroyed;
 		destroyed = true;
-		for (HtmlDomNode htmlDomNode : htmlDomNodesMap.values()) {
-			htmlDomNode.destroy();
-		}
+		htmlDomNodesMap.values().stream().findFirst().get().destroy();
 		for (ObservableList<Context> subModels : subContextsMap.values()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
 			for (Context subModel : subModels)
-				subModel.internalDestroy();
+				subModel.destroy();
 		}
 		subContextsMap = new HashMap<>();
 		htmlDomNodesMap = new LinkedHashMap<>();

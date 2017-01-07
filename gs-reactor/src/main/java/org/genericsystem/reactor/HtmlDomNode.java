@@ -79,7 +79,7 @@ public class HtmlDomNode {
 		while (change.next()) {
 			if (change.wasRemoved()) {
 				for (Tag childTag : change.getRemoved()) {
-					deepRemove(context, childTag);
+					deepRemove(context, childTag, childTag.getMetaBinding());
 					sizeBySubTag.remove(childTag);
 				}
 			}
@@ -174,8 +174,7 @@ public class HtmlDomNode {
 		return childTag -> {
 			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
 			metaBinding.addListener((o, v, nv) -> {
-				// System.out.println("MetaBinding listener, tag: " + tag + ", contexte: " + Arrays.asList(context.getGenerics()));
-				deepRemove(context, childTag);
+				deepRemove(context, childTag, v);
 				sizeBySubTag.remove(childTag);
 				updateMetaBinding(childTag, nv);
 			});
@@ -200,28 +199,31 @@ public class HtmlDomNode {
 	private boolean destroyed = false;
 
 	void destroy() {
-		// System.out.println("Attempt to destroy : " + getNode().getId());
+		// System.out.println("Attempt to destroy : " + getId());
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
+		sendRemove();
 		getRootHtmlDomNode().remove(getId());
 		parent.decrementSize(tag);
 	}
 
-	private void deepRemove(Context context, Tag tag) {
-		if (tag.getMetaBinding() == null) {
-			for (Tag childTag : context.getRootContext().getObservableChildren(tag))
-				deepRemove(context, childTag);
+	private void deepRemove(Context context, Tag tag, MetaBinding<?> oldMetaBinding) {
+		if (oldMetaBinding == null) {
+			for (Tag childTag : tag.getObservableChildren())
+				deepRemove(context, childTag, childTag.getMetaBinding());
 			if (context.getHtmlDomNode(tag) != null)
 				context.getHtmlDomNode(tag).sendRemove();
 			context.removeProperties(tag);
 			context.removeHtmlDomNode(tag);
 		} else if (context.getSubContexts(tag) != null) {
+			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
 			for (Context subContext : context.getSubContexts(tag)) {
+				for (Tag childTag : tag.getObservableChildren())
+					deepRemove(subContext, childTag, childTag.getMetaBinding());
 				if (subContext.getHtmlDomNode(tag) != null)
-					subContext.getHtmlDomNode(tag).sendRemove();// necessary ?
+					subContext.getHtmlDomNode(tag).sendRemove();
 				subContext.removeProperties(tag);
 			}
-			context.getSubContexts(tag).removeAll();// destroy subcontexts // necessary ?
 			context.removeSubContexts(tag);// remove tag ref
 		}
 	}

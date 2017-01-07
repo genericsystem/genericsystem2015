@@ -31,7 +31,7 @@ public class QuizTagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return tag.getProperty("Quiz Done", context);
+			return tag.getProperty("QuizDone", context);
 		}
 	}
 
@@ -39,12 +39,38 @@ public class QuizTagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<Boolean> selectionProperty = tag.getProperty("Quiz Done", context);
+			Property<Boolean> selectionProperty = tag.getProperty("QuizDone", context);
 			return Bindings.createBooleanBinding(() -> {
 				System.out.println("Etat de Quiz Done : " + selectionProperty.getValue());
 				return selectionProperty.getValue() == false;
 			}, selectionProperty);
 		}
-
 	}
+
+	// ************* NAVIGATION ENTRE LES PAGES **********************
+
+	public static class HOME_PAGE implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return tag.getProperty("HomePage", context);
+		}
+	}
+
+	public static class QUESTION_PAGE implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return tag.getProperty("QuestionPage", context);
+		}
+	}
+
+	public static class RESULT_PAGE implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return tag.getProperty("ResultPage", context);
+		}
+	}
+
 }

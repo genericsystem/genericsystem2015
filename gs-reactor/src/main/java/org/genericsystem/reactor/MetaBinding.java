@@ -3,9 +3,9 @@ package org.genericsystem.reactor;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.common.Generic;
+
+import javafx.collections.ObservableList;
 
 public class MetaBinding<BETWEEN> {
 	private final Function<Context, ObservableList<BETWEEN>> betweenChildren;
@@ -27,11 +27,11 @@ public class MetaBinding<BETWEEN> {
 		return modelBuilder.apply(parent, betweenChild);
 	}
 
-	static MetaBinding<Context> selectMetaBinding(Function<Context, ObservableList<Context>> betweenChildren) {
+	public static MetaBinding<Context> selectMetaBinding(Function<Context, ObservableList<Context>> betweenChildren) {
 		return new MetaBinding<Context>(betweenChildren, MODEL_CLONER);
 	}
 
-	static MetaBinding<Generic> forEachMetaBinding(Function<Context, ObservableList<Generic>> betweenChildren) {
+	public static MetaBinding<Generic> forEachMetaBinding(Function<Context, ObservableList<Generic>> betweenChildren) {
 		return new MetaBinding<Generic>(betweenChildren, MODEL_BUILDER);
 	}
 

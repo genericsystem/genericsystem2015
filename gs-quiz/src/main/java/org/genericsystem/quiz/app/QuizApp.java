@@ -30,8 +30,10 @@ public class QuizApp extends RootTagImpl {
 	}
 
 	public QuizApp() {
-		createNewInitializedProperty("Quiz Done", context -> false);
-		// createNewInitializedProperty("selectedClass", context -> HomePage.class);
+		// createNewInitializedProperty("HomePage", c -> true);
+		// createNewInitializedProperty("QuestionPage", c -> false);
+		// createNewInitializedProperty("ResultPage", c -> false);
+		createNewInitializedProperty("QuizDone", context -> false);
 	}
 
 	public static class QuizzScript implements Script {

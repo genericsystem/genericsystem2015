@@ -63,21 +63,6 @@ public class QuestionDiv extends HtmlDiv {
 	@Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
 	public static class QuestionDiv_ extends HtmlDiv implements StepperDefaults, SelectionDefaults {
 
-		// Le SET_SELECTOR mount le cache. L'init permet de sauvegarder le context et travailler sur le cache du niveau inférieur
-		// @Override
-		// public void init() {
-		// addPrefixBinding(context -> {
-		// context.flush();
-		// context.unmount();
-		// });
-		// }
-
-		// Créé une propriété qui stockera les réponses de l'utilisateur
-		// @Override
-		// public void init() {
-		// createNewInitializedProperty("userResponse", context -> new HashMap<Generic, Boolean>());
-		// }
-
 		// TODO Remplacer cette classe (temporaire, afin de faire fonctionner le stepper)
 		// par une autre Div affichant une information non steppable
 		// Ou faire évoluer le Stepper afin qu'il puisse prendre uniquement la switchClass en paramètre
