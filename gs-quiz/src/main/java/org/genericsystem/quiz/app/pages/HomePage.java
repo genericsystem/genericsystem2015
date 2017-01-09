@@ -23,8 +23,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 @SetText(path = { HtmlDiv.class, HtmlButton.class }, value = "Quiz")
 @SetText(path = HtmlP.class, pos = 1, value = "Veuillez vous connecter pour passer un quiz")
 @BindAction(path = { HtmlDiv.class, HtmlButton.class }, value = { CLEAR_PAGES.class, CALL_QUESTION_PAGE.class })
-@Switch(path = HtmlDiv.class, value = LOGGED_USER.class)
-@Switch(path = HtmlP.class, pos = 1, value = NO_LOGGED_USER.class)
+@Switch(path = HtmlDiv.class, value = { HOME_PAGE.class, LOGGED_USER.class })
+@Switch(path = HtmlP.class, pos = 1, value = { HOME_PAGE.class, NO_LOGGED_USER.class })
 public class HomePage extends HtmlDiv {
 
 }

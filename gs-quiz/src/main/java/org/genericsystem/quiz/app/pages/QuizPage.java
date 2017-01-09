@@ -13,7 +13,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 @Children(path = HtmlDiv.class, value = HtmlDiv.class)
 @SetText(path = HtmlH1.class, value = "QUESTIONNAIRE")
 @SetText(path = { HtmlDiv.class, HtmlDiv.class }, value = "Division avec Stepper et Questions")
-@Switch(path = HtmlDiv.class, value = LOGGED_USER.class)
+@Switch(path = HtmlDiv.class, value = { QUESTION_PAGE.class, LOGGED_USER.class })
 public class QuizPage extends HtmlDiv {
 
 }
