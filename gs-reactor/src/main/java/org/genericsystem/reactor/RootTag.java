@@ -8,6 +8,7 @@ import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
@@ -269,6 +270,20 @@ public interface RootTag extends Tag {
 
 	default void removeMetaBinding(Tag tag) {
 		((TagImpl) tag).setMetaBinding(null);
+	}
+
+	default void processSwitch(Tag tag, Class<? extends TagSwitcher>[] value) {
+		try {
+			for (Class<? extends TagSwitcher> switcher : value)
+				tag.addSwitcher(switcher.newInstance());
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	default void removeSwitches(Tag tag, Class<? extends TagSwitcher>[] value) {
+		for (Class<? extends TagSwitcher> switcherClass : value)
+			tag.getObservableSwitchers().removeAll(tag.getObservableSwitchers().filtered(switcher -> switcherClass.equals(switcher.getClass())));
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {

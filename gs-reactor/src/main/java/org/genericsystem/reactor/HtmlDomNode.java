@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.context.TagSwitcher;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
@@ -245,12 +245,29 @@ public class HtmlDomNode {
 	}
 
 	private class FilteredChildren {
-		final Map<Tag, ObservableValue<Boolean>[]> selectorsByTag = new HashMap<Tag, ObservableValue<Boolean>[]>();// Prevents garbage collection
+		final Map<Tag, ObservableList<TagSwitcher>> selectorsByTag = new HashMap<Tag, ObservableList<TagSwitcher>>();// Prevents garbage collection
+		final Map<Tag, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsByTagAndSwitcher = new HashMap<Tag, Map<TagSwitcher, ObservableValue<Boolean>>>() {
+
+			private static final long serialVersionUID = -5831485781427983238L;
+
+			@Override
+			public Map<TagSwitcher, ObservableValue<Boolean>> get(Object key) {
+				Map<TagSwitcher, ObservableValue<Boolean>> result = super.get(key);
+				if (result == null)
+					put((Tag) key, result = new HashMap<TagSwitcher, ObservableValue<Boolean>>());
+				return result;
+			}
+		};
+
 		final ObservableList<Tag> filteredList = new FilteredList<Tag>(new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
-			ObservableValue<Boolean>[] result = child.getSwitchers().stream().map(s -> s.apply(context, child)).toArray(ObservableValue[]::new);
+			ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<TagSwitcher>(child.getObservableSwitchers(), s -> {
+				ObservableValue<Boolean> selector = s.apply(context, child);
+				selectorsByTagAndSwitcher.get(child).put(s, selector);
+				return new ObservableValue[] { selector };
+			});
 			selectorsByTag.put(child, result);
-			return result;
-		}), child -> Arrays.stream(selectorsByTag.get(child)).allMatch(s -> Boolean.TRUE.equals(s.getValue())));
+			return new ObservableList[] { result };
+		}), child -> selectorsByTagAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByTag.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {

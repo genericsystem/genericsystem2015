@@ -53,8 +53,10 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.StringExtractor;
+import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
@@ -228,15 +230,19 @@ public class ExtendedRootTag extends RootTagImpl {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	private MapChangeListener<? super GTagAnnotation, ? super GTagAnnotationContent> getApplyingAnnotationsListener(Tag tag) {
 		return c -> {
 			GTagAnnotation gTagAnnotation = c.getKey();
 			Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
 
 			// System.out.println("---------- tag change listener : " + c);
-			if (DirectSelect.class.equals(annotationClass) || Select.class.equals(annotationClass) || SelectContext.class.equals(annotationClass) || ForEach.class.equals(annotationClass)) {
+			if (DirectSelect.class.equals(annotationClass) || Select.class.equals(annotationClass) || SelectContext.class.equals(annotationClass) || ForEach.class.equals(annotationClass) || Switch.class.equals(annotationClass)) {
 				if (c.wasRemoved())
-					removeMetaBinding(tag);
+					if (Switch.class.equals(annotationClass))
+						removeSwitches(tag, (Class<? extends TagSwitcher>[]) c.getValueRemoved().getClassArrayContent());
+					else
+						removeMetaBinding(tag);
 
 				if (c.wasAdded()) {
 					GTagAnnotationContent annotationContent = c.getValueAdded();
@@ -252,6 +258,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 					if (ForEach.class.equals(annotationClass))
 						processForEach(tag, annotationContent.getClassContent());
+
+					if (Switch.class.equals(annotationClass))
+						processSwitch(tag, (Class<? extends TagSwitcher>[]) annotationContent.getClassArrayContent());
 				}
 			} else
 				tag.addPrefixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
@@ -330,6 +339,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		for (ForEach annotation : clazz.getAnnotationsByType(ForEach.class))
 			result.setForEachAnnotation(annotation);
+
+		for (Switch annotation : clazz.getAnnotationsByType(Switch.class))
+			result.setSwitchAnnotation(annotation);
 
 		getEngine().getCurrentCache().flush();
 		return result;
@@ -517,6 +529,10 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		default void setForEachAnnotation(ForEach annotation) {
 			setAnnotation(ForEach.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
+		}
+
+		default void setSwitchAnnotation(Switch annotation) {
+			setArrayValueAnnotation(Switch.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 	}
 

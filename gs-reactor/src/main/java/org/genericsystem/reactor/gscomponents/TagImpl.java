@@ -12,6 +12,7 @@ import org.genericsystem.reactor.context.TagSwitcher;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public abstract class TagImpl implements Tag {
@@ -19,7 +20,7 @@ public abstract class TagImpl implements Tag {
 	private Property<MetaBinding<?>> metaBinding = new SimpleObjectProperty<>();
 	private final List<Consumer<Context>> preFixedBindings = new ArrayList<>();
 	private final List<Consumer<Context>> postFixedBindings = new ArrayList<>();
-	protected List<TagSwitcher> switchers = new ArrayList<>();
+	protected ObservableList<TagSwitcher> switchers = FXCollections.observableArrayList();
 	protected TagNode tagNode;
 	private Tag parent;
 
@@ -84,7 +85,7 @@ public abstract class TagImpl implements Tag {
 	}
 
 	@Override
-	public List<TagSwitcher> getSwitchers() {
+	public ObservableList<TagSwitcher> getObservableSwitchers() {
 		return switchers;
 	}
 }
