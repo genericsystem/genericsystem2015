@@ -120,7 +120,7 @@ public class Context {
 		// System.out.println("context destroy : " + this);
 		assert !destroyed;
 		destroyed = true;
-		htmlDomNodesMap.values().stream().findFirst().get().destroy();
+		htmlDomNodesMap.values().iterator().next().destroy();
 		for (ObservableList<Context> subModels : subContextsMap.values()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
 			for (Context subModel : subModels)

@@ -203,6 +203,7 @@ public class HtmlDomNode {
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
 		sendRemove();
+		((FilteredChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
 		getRootHtmlDomNode().remove(getId());
 		parent.decrementSize(tag);
 	}
@@ -212,7 +213,7 @@ public class HtmlDomNode {
 			for (Tag childTag : tag.getObservableChildren())
 				deepRemove(context, childTag, childTag.getMetaBinding());
 			if (context.getHtmlDomNode(tag) != null)
-				context.getHtmlDomNode(tag).sendRemove();
+				context.getHtmlDomNode(tag).destroy();
 			context.removeProperties(tag);
 			context.removeHtmlDomNode(tag);
 		} else if (context.getSubContexts(tag) != null) {
@@ -221,8 +222,9 @@ public class HtmlDomNode {
 				for (Tag childTag : tag.getObservableChildren())
 					deepRemove(subContext, childTag, childTag.getMetaBinding());
 				if (subContext.getHtmlDomNode(tag) != null)
-					subContext.getHtmlDomNode(tag).sendRemove();
+					subContext.getHtmlDomNode(tag).destroy();
 				subContext.removeProperties(tag);
+				subContext.removeHtmlDomNode(tag);
 			}
 			context.removeSubContexts(tag);// remove tag ref
 		}
