@@ -43,5 +43,4 @@ public class QuizTagSwitcher {
 			return Bindings.createBooleanBinding(() -> RESULT_PAGE.equals(pageProperty.getValue()), pageProperty);
 		}
 	}
-
 }

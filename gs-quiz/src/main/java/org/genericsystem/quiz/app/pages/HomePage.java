@@ -18,8 +18,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 @Switch(HOME_PAGE.class)
 @Children({ HtmlH1.class, HtmlP.class, HtmlP.class, HtmlDiv.class })
 @Children(path = HtmlDiv.class, value = QuizChoice.class)
-@Switch(path = { HtmlDiv.class, QuizChoice.class }, value = { /* HOME_PAGE.class, */LOGGED_USER.class })
-@Switch(path = HtmlP.class, pos = 1, value = { /* HOME_PAGE.class, */NO_LOGGED_USER.class })
+@Switch(path = { HtmlDiv.class, QuizChoice.class }, value = LOGGED_USER.class)
+@Switch(path = HtmlP.class, pos = 1, value = NO_LOGGED_USER.class)
 //
 @BindAction(path = { HtmlDiv.class, QuizChoice.class, QuizButton.class }, value = { SET_SELECTION.class, CALL_QUESTION_PAGE.class })
 //
