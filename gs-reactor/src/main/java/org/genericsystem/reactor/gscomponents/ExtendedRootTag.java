@@ -358,7 +358,7 @@ public class ExtendedRootTag extends RootTagImpl {
 					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
 					Class<?>[] pathFound = overriddenAnnotation.getValue().getPath();
 					Class<?>[] newPath = annotation.getValue().getPath();
-					if (pathFound.length < newPath.length || AnnotationsManager.isAssignableFrom(Arrays.asList(newPath), Arrays.asList(pathFound)))
+					if (pathFound.length < newPath.length || AnnotationsManager.isAssignableFrom(Arrays.asList(pathFound), Arrays.asList(newPath)))
 						remove(overriddenAnnotation);
 					else
 						// Found an annotation applying to this tag that’s more precise than the new annotation,
