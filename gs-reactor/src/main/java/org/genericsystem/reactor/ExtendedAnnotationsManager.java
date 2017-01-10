@@ -2,7 +2,6 @@ package org.genericsystem.reactor;
 
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.Stepper;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 public class ExtendedAnnotationsManager extends AnnotationsManager {
@@ -30,7 +29,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		// registerAnnotation(Style.class);
 		// registerAnnotation(GenericValueBackgroundColor.class);
 		// registerAnnotation(Attribute.class);
-		registerAnnotation(Switch.class);
+		// registerAnnotation(Switch.class);
 	}
 
 	@Override

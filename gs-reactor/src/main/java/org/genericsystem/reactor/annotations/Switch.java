@@ -35,12 +35,7 @@ public @interface Switch {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			try {
-				for (Class<? extends TagSwitcher> switcher : ((Switch) annotation).value())
-					tag.addSwitcher(switcher.newInstance());
-			} catch (IllegalAccessException | InstantiationException e) {
-				throw new IllegalStateException(e);
-			}
+			tag.getRootTag().processSwitch(tag, ((Switch) annotation).value());
 		}
 	}
 }

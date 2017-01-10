@@ -377,7 +377,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		return getParent().getRootTag();
 	}
 
-	public List<TagSwitcher> getSwitchers();
+	public ObservableList<TagSwitcher> getObservableSwitchers();
 
 	public void addSwitcher(TagSwitcher switcher);
 

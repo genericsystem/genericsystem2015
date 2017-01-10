@@ -3,12 +3,13 @@ package org.genericsystem.quiz.app;
 import org.genericsystem.common.Generic;
 import org.genericsystem.common.Root;
 import org.genericsystem.quiz.app.QuizApp.QuizzScript;
-import org.genericsystem.quiz.components.QuizAppPage;
+import org.genericsystem.quiz.app.pages.AppPage;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.Quiz;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.model.UserAnswer;
+import org.genericsystem.quiz.utils.QuizTagSwitcher;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.RunScript;
@@ -20,7 +21,7 @@ import org.genericsystem.security.model.User;
 
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class })
-@Children(QuizAppPage.class)
+@Children(AppPage.class)
 // @Children({ HomePage.class, QuizPage.class, ResultPage.class })
 @Style(name = "background-color", value = "grey")
 public class QuizApp extends RootTagImpl {
@@ -30,10 +31,12 @@ public class QuizApp extends RootTagImpl {
 	}
 
 	public QuizApp() {
+		createNewInitializedProperty(QuizTagSwitcher.PAGE, c -> QuizTagSwitcher.HOME_PAGE);
+
 		// createNewInitializedProperty("HomePage", c -> true);
 		// createNewInitializedProperty("QuestionPage", c -> false);
 		// createNewInitializedProperty("ResultPage", c -> false);
-		createNewInitializedProperty("QuizDone", context -> false);
+		// createNewInitializedProperty("QuizDone", context -> false);
 	}
 
 	public static class QuizzScript implements Script {

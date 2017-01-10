@@ -14,7 +14,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 @SetText(path = HtmlH1.class, value = "RESULTATS")
 @SetText(path = { HtmlDiv.class, HtmlDiv.class }, pos = { 0, 0 }, value = "Division contenant mes résultats (N'apparait que si l'utilisateur est loggé)")
 @SetText(path = HtmlDiv.class, pos = 1, value = "Division contenant TOUS les résultats")
-@Switch(path = HtmlDiv.class, pos = 0, value = LOGGED_USER.class)
+@Switch(path = HtmlDiv.class, pos = 0, value = { RESULT_PAGE.class, LOGGED_USER.class })
 public class ResultPage extends HtmlDiv {
 
 }
