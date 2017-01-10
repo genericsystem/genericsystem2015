@@ -56,4 +56,11 @@ public interface TextBinding extends BiFunction<Context, Tag, ObservableValue<St
 			}, context.getTsObservableValue());
 		}
 	}
+
+	public static class LOGGED_USER implements TextBinding {
+		@Override
+		public ObservableValue<String> apply(Context context, Tag tag) {
+			return Bindings.createStringBinding(() -> tag.getLoggedUserProperty(context).getValue() != null ? "Current user: " + (String) tag.getLoggedUserProperty(context).getValue().getValue() : "No user logged.", tag.getLoggedUserProperty(context));
+		}
+	}
 }
