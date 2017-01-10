@@ -1,13 +1,12 @@
 package org.genericsystem.quiz.components;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.components.QuizResult.AllResults.ScoreDiv;
-import org.genericsystem.quiz.components.QuizResult.AllResults.ScoreDiv.ResultDiv;
-import org.genericsystem.quiz.components.QuizResult.QuizResult_;
+import org.genericsystem.quiz.components.QuizResult.AllSumResults.ScoreDiv;
+import org.genericsystem.quiz.components.QuizResult.AllSumResults.ScoreDiv.ResultDiv;
+import org.genericsystem.quiz.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizExtractors.SCORES_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
-import org.genericsystem.quiz.utils.QuizTagSwitcher;
 import org.genericsystem.quiz.utils.ScoreUtils;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -17,31 +16,29 @@ import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 
-@Switch(QuizTagSwitcher.QUIZ_END.class)
-@Children(QuizResult_.class)
+@Children(SummaryResults.class)
 @SetText("DIV DE RESULTATS !!!!!!!!!!")
 public class QuizResult extends HtmlDiv {
 
-	@Children({ MyResult.class, AllResults.class })
+	@Children({ MySumResult.class, AllSumResults.class })
 	@SelectContext(SELECTION_SELECTOR.class)
-	public static class QuizResult_ extends HtmlDiv implements SelectionDefaults {
+	public static class SummaryResults extends HtmlDiv implements SelectionDefaults {
 
 	}
 
 	// TODO Créer un affichage des résultats pour tous les users et pour le user connecté
 
-	public static class MyResult extends HtmlDiv {
+	public static class MySumResult extends HtmlDiv {
 
 	}
 
 	@Children(ScoreDiv.class)
 	@SetText("Tous les résultats :")
-	public static class AllResults extends HtmlDiv {
+	public static class AllSumResults extends HtmlDiv {
 
 		@Children({ HtmlDiv.class, HtmlDiv.class, ResultDiv.class })
 		@ForEach(SCORES_EXTRACTOR.class)
