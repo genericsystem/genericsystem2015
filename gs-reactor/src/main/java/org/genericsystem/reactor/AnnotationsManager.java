@@ -35,9 +35,10 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
+import org.genericsystem.reactor.annotations.SwitcherStep;
+import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +66,7 @@ public class AnnotationsManager {
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
 		registerAnnotation(Switcher.class);
+		registerAnnotation(SwitcherStep.class);
 		registerAnnotation(SwitcherSubSteps.class);
 		registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);

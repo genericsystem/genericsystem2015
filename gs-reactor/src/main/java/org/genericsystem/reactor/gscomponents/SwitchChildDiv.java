@@ -22,10 +22,11 @@ import org.genericsystem.reactor.gscomponents.SwitchChildDiv.MainSwitcher;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 
 @Switch(MainSwitcher.class)
 @Children({ HtmlButton.class, HtmlButton.class })
@@ -88,23 +89,49 @@ public class SwitchChildDiv extends HtmlDiv {
 		}
 	}
 
+	public static class SwitchSubSteps {
+		private final Property<Class<? extends TagImpl>> classProperty;
+		private final SimpleIntegerProperty indexProperty = new SimpleIntegerProperty(0);
+		private final ObservableIntegerValue observableSize;
+
+		public SwitchSubSteps(Property<Class<? extends TagImpl>> classProperty) {
+			this.classProperty = classProperty;
+			observableSize = new SimpleIntegerProperty(1);
+		}
+
+		public SwitchSubSteps(Property<Class<? extends TagImpl>> classProperty, ObservableList<?> observableList) {
+			this.classProperty = classProperty;
+			observableSize = Bindings.size(observableList);
+		}
+
+		public SimpleIntegerProperty getIndexProperty() {
+			return indexProperty;
+		}
+
+		public ObservableIntegerValue getObservableSize() {
+			return observableSize;
+		}
+
+		public void previous(Class<? extends TagImpl> previousClass) {
+			if (indexProperty.get() > 0)
+				indexProperty.set(indexProperty.get() - 1);
+			else
+				classProperty.setValue(previousClass);
+		}
+
+		public void next(Class<? extends TagImpl> nextClass) {
+			if (indexProperty.get() + 1 < observableSize.get())
+				indexProperty.set(indexProperty.get() + 1);
+			else
+				classProperty.setValue(nextClass);
+		}
+
+	}
+
 	public static class PrevAction implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			if (tag.getParent().getMetaBinding() == null) {
-				SwitchChildDiv.Prev prev = tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class);
-				tag.getProperty(Switcher.SELECTED_CLASS, context).setValue(prev.value());
-			} else {
-				Property<Map<Tag, SimpleIntegerProperty>> property = tag.getParent().<Map<Tag, SimpleIntegerProperty>> getProperty(Switcher.TAG_INDEX_MAP, context);
-				Map<Tag, SimpleIntegerProperty> map = property.getValue();
-				SimpleIntegerProperty indexProperty = map.get(tag.getParent());
-				if (indexProperty.get() != 0)
-					indexProperty.set(indexProperty.get() - 1);
-				else {
-					SwitchChildDiv.Prev prev = tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class);
-					tag.getProperty(Switcher.SELECTED_CLASS, context).setValue(prev.value());
-				}
-			}
+			tag.getParent().<Map<Tag, SwitchSubSteps>> getProperty(Switcher.SWITCHER_MAP, context).getValue().get(tag.getParent()).previous(tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class).value());
 		}
 	}
 
@@ -112,20 +139,7 @@ public class SwitchChildDiv extends HtmlDiv {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			if (tag.getParent().getMetaBinding() == null) {
-				SwitchChildDiv.Next next = tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class);
-				tag.getProperty(Switcher.SELECTED_CLASS, context).setValue(next.value());
-			} else {
-				Property<Map<Tag, SimpleIntegerProperty>> property = tag.getParent().<Map<Tag, SimpleIntegerProperty>> getProperty(Switcher.TAG_INDEX_MAP, context);
-				Map<Tag, SimpleIntegerProperty> map = property.getValue();
-				SimpleIntegerProperty indexProperty = map.get(tag.getParent());
-				if (indexProperty.get() != 1)
-					indexProperty.set(indexProperty.get() + 1);
-				else {
-					SwitchChildDiv.Next next = tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class);
-					tag.getProperty(Switcher.SELECTED_CLASS, context).setValue(next.value());
-				}
-			}
+			tag.getParent().<Map<Tag, SwitchSubSteps>> getProperty(Switcher.SWITCHER_MAP, context).getValue().get(tag.getParent()).next(tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class).value());
 		}
 
 	}
@@ -135,7 +149,11 @@ public class SwitchChildDiv extends HtmlDiv {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			SwitchChildDiv.Prev prev = tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class);
-			return new ReadOnlyStringWrapper(prev.text() + (tag.getParent().getMetaBinding() != null ? "#" + tag.getParent().<Map<Tag, SimpleIntegerProperty>> getProperty(Switcher.TAG_INDEX_MAP, context).getValue().get(tag.getParent()).get() : ""));
+			if (prev != null) {
+				SwitchSubSteps switchSubSteps = tag.getParent().<Map<Tag, SwitchSubSteps>> getProperty(Switcher.SWITCHER_MAP, context).getValue().get(tag.getParent());
+				return new ReadOnlyStringWrapper(prev.text() + "#" + switchSubSteps.getIndexProperty().get() + "/" + switchSubSteps.getObservableSize().get());
+			} else
+				return new ReadOnlyStringWrapper("None");
 		}
 
 	}
@@ -145,8 +163,11 @@ public class SwitchChildDiv extends HtmlDiv {
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
 			SwitchChildDiv.Next next = tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class);
-			return new ReadOnlyStringWrapper(
-					next != null ? next.text() + (tag.getParent().getMetaBinding() != null ? "#" + tag.getParent().<Map<Tag, SimpleIntegerProperty>> getProperty(Switcher.TAG_INDEX_MAP, context).getValue().get(tag.getParent()).get() : "") : ">>");
+			if (next != null) {
+				SwitchSubSteps switchSubSteps = tag.getParent().<Map<Tag, SwitchSubSteps>> getProperty(Switcher.SWITCHER_MAP, context).getValue().get(tag.getParent());
+				return new ReadOnlyStringWrapper(next.text() + "#" + switchSubSteps.getIndexProperty().get() + "/" + switchSubSteps.getObservableSize().get());
+			} else
+				return new ReadOnlyStringWrapper("None");
 		}
 
 	}
@@ -155,15 +176,9 @@ public class SwitchChildDiv extends HtmlDiv {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			if (tag.getParent().getMetaBinding() == null)
-				return new ReadOnlyBooleanWrapper(tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class) != null);
-			else {
-				Property<Map<Tag, SimpleIntegerProperty>> property = tag.getParent().<Map<Tag, SimpleIntegerProperty>> getProperty(Switcher.TAG_INDEX_MAP, context);
-				Map<Tag, SimpleIntegerProperty> map = property.getValue();
-				SimpleIntegerProperty indexProperty = map.get(tag.getParent());
-				return Bindings.createBooleanBinding(() -> indexProperty.get() != 0 || tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class) != null, indexProperty);
-			}
-
+			SwitchSubSteps switchSubSteps = tag.getParent().<Map<Tag, SwitchSubSteps>> getProperty(Switcher.SWITCHER_MAP, context).getValue().get(tag.getParent());
+			SimpleIntegerProperty indexProperty = switchSubSteps.getIndexProperty();
+			return Bindings.createBooleanBinding(() -> (indexProperty.get() > 0) || tag.getParent().getClass().getAnnotation(SwitchChildDiv.Prev.class) != null, indexProperty);
 		}
 
 	}
@@ -172,14 +187,9 @@ public class SwitchChildDiv extends HtmlDiv {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			if (tag.getParent().getMetaBinding() == null)
-				return new ReadOnlyBooleanWrapper(tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class) != null);
-			else {
-				Property<Map<Tag, SimpleIntegerProperty>> property = tag.getParent().<Map<Tag, SimpleIntegerProperty>> getProperty(Switcher.TAG_INDEX_MAP, context);
-				Map<Tag, SimpleIntegerProperty> map = property.getValue();
-				SimpleIntegerProperty indexProperty = map.get(tag.getParent());
-				return Bindings.createBooleanBinding(() -> indexProperty.get() != 1 || tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class) != null, indexProperty);
-			}
+			SwitchSubSteps switchSubSteps = tag.getParent().<Map<Tag, SwitchSubSteps>> getProperty(Switcher.SWITCHER_MAP, context).getValue().get(tag.getParent());
+			SimpleIntegerProperty indexProperty = switchSubSteps.getIndexProperty();
+			return Bindings.createBooleanBinding(() -> (indexProperty.get() + 1 < switchSubSteps.getObservableSize().get()) || tag.getParent().getClass().getAnnotation(SwitchChildDiv.Next.class) != null, indexProperty);
 		}
 	}
 }

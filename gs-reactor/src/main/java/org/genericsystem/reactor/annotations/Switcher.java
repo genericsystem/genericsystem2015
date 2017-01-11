@@ -10,15 +10,14 @@ import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Switcher.SwicherProcessor;
+import org.genericsystem.reactor.gscomponents.SwitchChildDiv.SwitchSubSteps;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-
-import javafx.beans.property.SimpleIntegerProperty;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Process(SwicherProcessor.class)
 public @interface Switcher {
-	public static final String TAG_INDEX_MAP = "tagIndexMap";
+	public static final String SWITCHER_MAP = "switcherMap";
 	public static final String SELECTED_CLASS = "selectedClass";
 
 	Class<? extends TagImpl> value();
@@ -31,12 +30,8 @@ public @interface Switcher {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			tag.addPrefixBinding(context -> {
-				if (!context.containsProperty(tag, SELECTED_CLASS))
-					tag.createNewInitializedProperty(SELECTED_CLASS, context, context_ -> ((Switcher) annotation).value());
-				if (!context.containsProperty(tag, TAG_INDEX_MAP))
-					tag.createNewInitializedProperty(TAG_INDEX_MAP, context, context_ -> new HashMap<Tag, SimpleIntegerProperty>());
-			});
+			tag.createNewInitializedProperty(SELECTED_CLASS, context -> ((Switcher) annotation).value());
+			tag.createNewInitializedProperty(SWITCHER_MAP, context -> new HashMap<Tag, SwitchSubSteps>());
 		}
 	}
 }
