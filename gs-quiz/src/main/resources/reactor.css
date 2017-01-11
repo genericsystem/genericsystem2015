@@ -1,0 +1,401 @@
+html, body,input,section,header,footer {
+	margin			: 0;
+	padding			: 0;
+	border			: 0;
+}
+
+body {
+	font				: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height			: 1.4em;
+	background			: #eaeaea;
+	color				: #4d4d4d;
+	width				: 100%;
+	margin				: 0 auto;
+	font-smoothing		: antialiased;
+	display				: flex;
+	flex-direction		: column;
+	flex-wrap			: nowrap;
+	justify-content		: center;	
+}
+
+section .adding {
+	animation			: appeareffect 2s;
+}
+
+.opaque{
+	font-style 					: italic;
+	font-weight 				: bold;
+	font-size 					: 108%;
+	-webkit-backface-visibility	: hidden;
+}
+
+.invalid {
+	background 		: white;
+	animation		: invalideffect 0.5s 5 forwards;
+}
+
+@keyframes appeareffect { 
+	0% {
+		box-shadow	: inset 0 0 15px rgba(0, 100, 0, 1);
+	}
+
+	100%
+	{
+		box-shadow:none;
+	}
+}
+
+@keyframes invalideffect { 
+	0% {
+		box-shadow	: none;
+	}
+	100%
+	{
+		box-shadow: inset 0 0 15px rgba(255,0,0,1);
+	}
+}
+
+.close {
+	font-size		: 40px;
+	font-weight		: bold;
+	text-align		:right;
+	text-decoration	: none;
+	position		:  absolute;
+	right			: 10px;
+	top				: 10px;
+	z-index			: 1;
+}
+
+.img{
+	max-width 		: 24px; 
+}
+
+.modal {
+    display				: none; /* Hidden by default */
+    position			: fixed; /* Stay in place */
+    z-index				: 1; /* Sit on top */
+    left				: 0;
+    top					: 0;
+    width				: 100%; /* Full width */
+    height				: 100%; /* Full height */
+    overflow			: auto; /* Enable scroll if needed */
+    background-color	: rgb(0,0,0); /* Fallback color */
+    background-color	: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+	position			: relative;
+    background-color	: #fefefe;
+    margin				: auto;
+    border				: 1px solid #888;
+    width				: 100%;
+    box-shadow			: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation			: animatetop 0.4s
+}
+
+section .adding .modal-content{
+	animation			: animatetop 0.4s
+} 
+
+
+@keyframes animatetop {
+    from 	{top: -300px; opacity: 0}
+    to 		{top: 0; opacity: 1}
+}
+
+.buttonUser {
+	-webkit-border-radius	: 30px;
+	-moz-border-radius		: 30px;
+	border-radius			: 30px;
+	margin-left				: auto;
+    margin-right			: auto;
+	background-color		: #F2F3F4;
+	text-align				: center;
+	color					: black;
+	font					: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height				: 1.4em;
+	color					: #4d4d4d;
+	height					: 40px;
+	width					: 100px;
+}
+
+.vertical-align {
+	display				: flex;
+	justify-content		: center;
+	flex-direction		: column;
+	flex-wrap			: nowrap;
+	margin-top			: auto;
+	margin-bottom		: auto;
+}
+
+.margin-lr-10 {
+	margin-left			: 10px;
+	margin-right		: 10px;
+}
+
+.margin-t-10 {
+	margin-top			: 10px;
+}
+
+.padding-lr-5 {
+	padding-left		: 5px;
+	padding-right		: 5px;
+}
+
+.white {
+	color				: white;
+}
+
+/*
+@media screen and (min-device-width:480px) and (max-device-width:4000px) { 
+*/
+@media screen and (min-width: 1024px) {
+	.buttonDiv{
+		min-width 		: 70px;
+	}
+	.screenResponsive {
+		min-width 		: 22cm;
+	}
+	.widthResponsive{
+		max-width		: 60%;
+	}
+	.img{
+		max-width 		: 24px;
+	}
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: row nowrap;	
+		justify-content	: space-around;
+	}
+	.monitorButton {
+		margin-right	: 10px;
+		margin-top		: auto;
+		margin-bottom	: auto;
+		height			: 35px;
+		border-radius	: 5px;
+		max-width		: 40%;
+		width			: 100px;
+	}
+	.monitorLabel {
+		text-align		: center;
+	}
+	.loginResponsive {
+		display			: -webkit-flex; /* Safari */
+		display			: flex;
+		flex-flow		: row nowrap;	
+		justify-content	: space-around;
+	}
+	.inputTxtResponsive {
+		border-radius	: 5px;
+		height			: 35px;
+		margin			: auto;
+	}
+	.choiceResponsive {
+		margin-right	: 10px;
+		margin-top		: auto;
+		margin-bottom	: auto;
+		min-width		: 50px;
+		height			: 35px;
+	}
+	/* Responsive large device row, medium devices row, small device column*/
+	.fdirection-r-r-c {
+		flex-direction	: row;
+	}	
+	.width-35-35-90 {
+		width			: 35%;
+	}
+}
+
+
+
+/*
+@media only screen and (max-width:960px) and (orientation : landscape),
+only screen and (max-device-width: 960px) and (orientation : landscape){
+*/
+@media screen and (min-width: 500px) and (max-width: 1023px) {
+	.body {
+		font			: 10px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		line-height		: 1.4em;
+		background		: #eaeaea;
+		color			: #4d4d4d;
+		width			: 100%;
+		margin			: 0 auto;
+		font-smoothing	: antialiased;
+		display			: flex;
+		flex-direction	: column;
+		flex-wrap		: nowrap;
+		justify-content	: center;
+	}
+	.buttonDiv {
+		min-width 		: 60px;
+	}
+	.screenResponsive {
+		min-width 		: 14cm;
+	}
+	.widthResponsive {
+		max-width		: 80%;
+	}
+	.img {
+		max-width 		: 16px;
+	}
+	.divWithTitle {
+		-webkit-flex 	: 1 0 400px;
+	}
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}
+	.monitorButton {
+		width 			: 40%;
+		min-width		: 60px;
+		heigth			: 100%;
+		min-height		: 40px;
+		border-radius	: 5px;
+	}
+	.monitorLabel {
+		text-align		: center;
+		margin-top		: 10px;
+		margin-bottom	: 10px; 	
+	}
+	.loginResponsive {
+		display			: flex;
+		flex-flow		: row nowrap;	
+		justify-content	: end;
+	}
+	.inputTxtResponsive {
+		border-radius	: 5px;
+		height			: 30px;
+		margin-left		: 10px;
+		margin-right	: 10px;
+	}
+	.choiceResponsive {
+		margin-right	: 10px;
+		width			: 40%;
+		min-width		: 50px; 
+	}
+	/* Responsive large device row, medium devices row, small device column*/
+	.fdirection-r-r-c {
+		flex-direction	: row;
+	}
+	.width-35-35-90 {
+		width			: 35%;
+	}
+}
+
+/*	
+@media only screen and (max-width:479px) and (orientation : portrait), 
+only screen and (max-device-width:479px) and (orientation : portrait){
+*/
+@media screen and (max-width: 499px) {
+	.body {
+		font			: 8px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		line-height		: 1.4em;
+		background		: #eaeaea;
+		color			: #4d4d4d;
+		width			: 100%;
+		margin			: 0 auto;
+		font-smoothing	: antialiased;
+		display			: flex;
+		flex-direction	: column;
+		flex-wrap		: nowrap;
+		justify-content	: center;	
+	}
+	.buttonDiv {
+		min-width 		: 40px;
+	}	
+	.screenResponsive {
+		min-width 		: 7cm;
+	}		
+	.widthResponsive{
+		max-width		: 80%;
+	}		
+	.img{
+		max-width 		: 16px;
+	}	
+	.divWithTitle{
+		-webkit-flex 	: 1 0 200px;
+	}	
+	.monitorResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}
+	.monitorButton {
+		width 			: 40%;
+		min-width		: 40px;
+		heigth			: 100%;
+		min-height		: 40px;
+		border-radius	: 5px;
+	}	
+	.monitorLabel {
+		display			: flex;
+		text-align		: center;
+		margin-top		: 10px;
+		margin-bottom	: 10px; 	
+	}	
+	.loginResponsive {
+		display			: flex;
+		flex-flow		: column nowrap;	
+		justify-content	: space-around;
+	}	
+	.inputTxtResponsive {
+		border-radius	: 5px;
+		height			: 30px;
+		margin-left		: 10px;
+		margin-right	: 10px;
+		margin-bottom	: 10px;
+	}	
+	.choiceResponsive {
+		margin-right	: 10px;
+		width			: 40%;		
+	}	
+	/* Responsive large device row, medium devices row, small device column*/
+	.fdirection-r-r-c {
+		flex-direction	: column;
+	}
+	.width-35-35-90 {
+		width			: 90%;
+	}
+}
+
+/* ****************** CSS Pour GS-Quiz ************************ */
+.navQA {
+	text-decoration		: none;
+	color				: grey;
+}
+
+.navQLi {
+	display				: inline-flex;
+	height				: 70px;
+	min-width			: 150px;
+	justify-content		: center;
+}
+
+.navQLi:hover {
+	background-color	: grey;
+}
+
+.navQLi:hover a {
+		color			: white;
+}
+
+.loginQ {
+	display				: flex;
+	flex-flow			: column nowrap;	
+	justify-content		: space-around;
+}
+
+.inputTextQ {
+	border-radius	: 5px;
+	height			: 35px;
+	padding-left	: 1em;
+	padding-right	: 1em;
+}	
+
+
+
+
+
+
+

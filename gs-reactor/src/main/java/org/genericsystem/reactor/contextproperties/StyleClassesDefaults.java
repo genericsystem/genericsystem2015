@@ -5,7 +5,6 @@ import org.genericsystem.reactor.Tag;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
-import javafx.collections.WeakSetChangeListener;
 
 public interface StyleClassesDefaults extends ContextProperty {
 
@@ -15,7 +14,7 @@ public interface StyleClassesDefaults extends ContextProperty {
 		if (!model.containsProperty((Tag) this, STYLE_CLASSES)) {
 			createNewInitializedProperty(STYLE_CLASSES, model, m -> {
 				ObservableSet<String> styleClasses = FXCollections.observableSet();
-				styleClasses.addListener(new WeakSetChangeListener<>(model.getHtmlDomNode((Tag) this).getStyleClassesListener()));
+				styleClasses.addListener(model.getHtmlDomNode((Tag) this).getStyleClassesListener());
 				return styleClasses;
 			});
 		}

@@ -59,6 +59,8 @@ public class HtmlDomNode {
 	private Tag tag;
 	private Context context;
 
+	private boolean destroyed = false;
+
 	public static interface Sender {
 		public void send(String message);
 	}
@@ -77,12 +79,8 @@ public class HtmlDomNode {
 	};
 	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
-			if (change.wasRemoved()) {
-				for (Tag childTag : change.getRemoved()) {
-					deepRemove(context, childTag, childTag.getMetaBinding());
-					sizeBySubTag.remove(childTag);
-				}
-			}
+			if (change.wasRemoved())
+				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding()));
 			if (change.wasAdded())
 				change.getAddedSubList().forEach(tagAdder::accept);
 		}
@@ -173,11 +171,7 @@ public class HtmlDomNode {
 	private <BETWEEN> Consumer<Tag> tagAdder() {
 		return childTag -> {
 			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
-			metaBinding.addListener((o, v, nv) -> {
-				deepRemove(context, childTag, v);
-				sizeBySubTag.remove(childTag);
-				updateMetaBinding(childTag, nv);
-			});
+			metaBinding.addListener(metaBindingListeners.get(childTag));
 			updateMetaBinding(childTag, metaBinding.getValue());
 		};
 	}
@@ -196,15 +190,17 @@ public class HtmlDomNode {
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
 	}
 
-	private boolean destroyed = false;
-
 	void destroy() {
 		// System.out.println("Attempt to destroy : " + getId());
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
-		sendRemove();
 		((FilteredChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
-		tag.getDomNodeTextProperty(context).unbind();
+		for (Tag childTag : tag.getObservableChildren())
+			childTag.getMetaBindingProperty().removeListener(metaBindingListeners.get(childTag));
+		tag.getDomNodeTextProperty(context).removeListener(textListener);
+		tag.getDomNodeStyles(context).removeListener(stylesListener);
+		tag.getDomNodeAttributes(context).removeListener(attributesListener);
+		tag.getDomNodeStyleClasses(context).removeListener(styleClassesListener);
 		getRootHtmlDomNode().remove(getId());
 		parent.decrementSize(tag);
 	}
@@ -213,20 +209,17 @@ public class HtmlDomNode {
 		if (oldMetaBinding == null) {
 			for (Tag childTag : tag.getObservableChildren())
 				deepRemove(context, childTag, childTag.getMetaBinding());
-			if (context.getHtmlDomNode(tag) != null)
-				context.getHtmlDomNode(tag).destroy();
+			HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
+			if (htmlDomNode != null) {
+				htmlDomNode.destroy();
+				htmlDomNode.sendRemove();
+			}
 			context.removeProperties(tag);
 			context.removeHtmlDomNode(tag);
 		} else if (context.getSubContexts(tag) != null) {
 			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
-			for (Context subContext : context.getSubContexts(tag)) {
-				for (Tag childTag : tag.getObservableChildren())
-					deepRemove(subContext, childTag, childTag.getMetaBinding());
-				if (subContext.getHtmlDomNode(tag) != null)
-					subContext.getHtmlDomNode(tag).destroy();
-				subContext.removeProperties(tag);
-				subContext.removeHtmlDomNode(tag);
-			}
+			for (Context subContext : context.getSubContexts(tag))
+				subContext.destroy();
 			context.removeSubContexts(tag);// remove tag ref
 		}
 	}
@@ -335,6 +328,24 @@ public class HtmlDomNode {
 	};
 
 	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+
+	private final Map<Tag, ChangeListener<MetaBinding<?>>> metaBindingListeners = new HashMap<Tag, ChangeListener<MetaBinding<?>>>() {
+
+		private static final long serialVersionUID = 6179552869588758790L;
+
+		@Override
+		public ChangeListener<MetaBinding<?>> get(Object key) {
+			ChangeListener<MetaBinding<?>> listener = super.get(key);
+			if (listener == null && key instanceof Tag) {
+				Tag childTag = (Tag) key;
+				put(childTag, listener = (o, ov, nv) -> {
+					deepRemove(context, childTag, ov);
+					updateMetaBinding(childTag, nv);
+				});
+			}
+			return listener;
+		}
+	};
 
 	private final ChangeListener<Number> indexListener = (o, old, newValue) -> {
 		// System.out.println(new JsonObject().put(MSG_TYPE,

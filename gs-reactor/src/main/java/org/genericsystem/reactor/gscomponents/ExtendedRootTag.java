@@ -39,6 +39,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -188,6 +189,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 					if (SetStringExtractor.class.equals(annotationClass))
 						removeStringExtractor(tag, context);
+
+					if (BindSelection.class.equals(annotationClass))
+						removeBindSelection(tag, context, (Class<? extends TagImpl>) annotationContent.getClassContent(), annotationContent.getJsonValue().getInteger("valuePos").intValue());
 				}
 
 				if (c.wasAdded()) {
@@ -225,6 +229,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 					if (BindAction.class.equals(annotationClass))
 						processBindAction(tag, context, (Class<? extends ContextAction>[]) annotationContent.getClassArrayContent());
+
+					if (BindSelection.class.equals(annotationClass))
+						processBindSelection(tag, context, (Class<? extends TagImpl>) annotationContent.getClassContent(), annotationContent.getJsonValue().getInteger("valuePos").intValue());
 				}
 			}
 		};
@@ -262,7 +269,9 @@ public class ExtendedRootTag extends RootTagImpl {
 					if (Switch.class.equals(annotationClass))
 						processSwitch(tag, (Class<? extends TagSwitcher>[]) annotationContent.getClassArrayContent());
 				}
-			} else
+			} else if (BindSelection.class.equals(annotationClass))
+				tag.addPostfixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
+			else
 				tag.addPrefixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
 		};
 	}
@@ -343,6 +352,9 @@ public class ExtendedRootTag extends RootTagImpl {
 		for (Switch annotation : clazz.getAnnotationsByType(Switch.class))
 			result.setSwitchAnnotation(annotation);
 
+		for (BindSelection annotation : clazz.getAnnotationsByType(BindSelection.class))
+			result.setBindSelectionAnnotation(annotation);
+
 		getEngine().getCurrentCache().flush();
 		return result;
 	}
@@ -358,7 +370,7 @@ public class ExtendedRootTag extends RootTagImpl {
 					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
 					Class<?>[] pathFound = overriddenAnnotation.getValue().getPath();
 					Class<?>[] newPath = annotation.getValue().getPath();
-					if (pathFound.length < newPath.length || AnnotationsManager.isAssignableFrom(Arrays.asList(newPath), Arrays.asList(pathFound)))
+					if (pathFound.length < newPath.length || AnnotationsManager.isAssignableFrom(Arrays.asList(pathFound), Arrays.asList(newPath)))
 						remove(overriddenAnnotation);
 					else
 						// Found an annotation applying to this tag that’s more precise than the new annotation,
@@ -533,6 +545,11 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		default void setSwitchAnnotation(Switch annotation) {
 			setArrayValueAnnotation(Switch.class, null, annotation.value(), annotation.path(), annotation.pos());
+		}
+
+		default void setBindSelectionAnnotation(BindSelection annotation) {
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(BindSelection.class, annotation.path(), annotation.pos()));
+			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", annotation.value().getName()).put("valuePos", annotation.valuePos()).encodePrettily());
 		}
 	}
 

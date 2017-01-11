@@ -48,7 +48,10 @@ public class QuizLogin extends HtmlDiv {
 	//
 	@Children({ InputTextLogin.class, InputTextPassword.class, QuizChoiceOptions.class })
 	//
-	@StyleClass("loginResponsive")
+	@StyleClass("loginQ")
+	@StyleClass(path = { HtmlDiv.class, HtmlInputText.class }, value = { "inputTextQ", "vertical-align" })
+	@Style(path = HtmlDiv.class, name = "margin-top", value = "10px")
+	@Style(path = QuizChoiceOptions.class, name = "margin-bottom", value = "10px")
 	public static class QuizLoginDiv extends QuizLogin {
 
 		@Children({ HtmlLabel.class, HtmlInputText.class, HtmlSpan.class })
@@ -57,9 +60,8 @@ public class QuizLogin extends HtmlDiv {
 		@SetText(path = HtmlSpan.class, value = "Invalid username.")
 		//
 		@Style(path = HtmlSpan.class, name = "display", value = "none")
-		@StyleClass(path = HtmlLabel.class, value = { "margin-lr-10", "white", "vertical-align" })
-		@StyleClass(path = HtmlSpan.class, value = { "margin-lr-10", "white", "vertical-align" })
-		@StyleClass(path = HtmlInputText.class, value = { "inputTxtResponsive", "vertical-align" })
+		@StyleClass(path = HtmlLabel.class, value = { "margin-lr-10", "vertical-align" })
+		@StyleClass(path = HtmlSpan.class, value = { "margin-lr-10", "vertical-align" })
 		public static class InputTextLogin extends HtmlDiv {
 
 		}
