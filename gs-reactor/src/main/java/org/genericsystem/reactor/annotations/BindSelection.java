@@ -9,7 +9,6 @@ import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindSelection.BindSelectionProcessor;
-import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +30,7 @@ public @interface BindSelection {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
-				((SelectionDefaults) tag).bindSelection(tag.find(((BindSelection) annotation).value(), ((BindSelection) annotation).valuePos()));
-			else
-				log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
-
+			tag.getRootTag().processBindSelection(tag, ((BindSelection) annotation).value(), ((BindSelection) annotation).valuePos());
 		}
 	}
 }

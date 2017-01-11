@@ -1,6 +1,5 @@
 package org.genericsystem.reactor;
 
-import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
@@ -17,7 +16,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		// registerAnnotation(SelectContext.class);
 		// registerAnnotation(ForEach.class);
 		registerAnnotation(Stepper.class);
-		registerAnnotation(BindSelection.class);
+		// registerAnnotation(BindSelection.class);
 		// registerAnnotation(SetStringExtractor.class);
 		// registerAnnotation(StyleClass.class);
 		// registerAnnotation(FlexDirectionStyle.class);
