@@ -22,7 +22,6 @@ import org.genericsystem.security.model.User;
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class })
 @Children(AppPage.class)
-// @Children({ HomePage.class, QuizPage.class, ResultPage.class })
 @Style(name = "background-color", value = "grey")
 public class QuizApp extends RootTagImpl {
 
@@ -32,11 +31,6 @@ public class QuizApp extends RootTagImpl {
 
 	public QuizApp() {
 		createNewInitializedProperty(QuizTagSwitcher.PAGE, c -> QuizTagSwitcher.HOME_PAGE);
-
-		// createNewInitializedProperty("HomePage", c -> true);
-		// createNewInitializedProperty("QuestionPage", c -> false);
-		// createNewInitializedProperty("ResultPage", c -> false);
-		// createNewInitializedProperty("QuizDone", context -> false);
 	}
 
 	public static class QuizzScript implements Script {

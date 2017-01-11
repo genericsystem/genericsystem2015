@@ -204,6 +204,7 @@ public class HtmlDomNode {
 		destroyed = true;
 		sendRemove();
 		((FilteredChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
+		tag.getDomNodeTextProperty(context).unbind();
 		getRootHtmlDomNode().remove(getId());
 		parent.decrementSize(tag);
 	}

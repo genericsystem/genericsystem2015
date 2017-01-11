@@ -42,8 +42,6 @@ import org.genericsystem.security.model.User;
 import org.genericsystem.security.model.User.Password;
 import org.genericsystem.security.model.User.Salt;
 
-import javafx.beans.binding.Bindings;
-
 @Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
@@ -77,13 +75,9 @@ public class Monitor extends FlexDiv {
 		@Children({ ModeSwitchButtons.class, HtmlLabel.class, HtmlButton.class })
 		@FlexDirectionStyle(FlexDirection.ROW)
 		@SetText(path = HtmlButton.class, value = "Disconnect")
+		@BindText(path = HtmlLabel.class, value = TextBinding.LOGGED_USER.class)
 		@BindAction(path = HtmlButton.class, value = ContextAction.DISCONNECT.class)
 		public static class LoggedUserDiv extends FlexDiv implements UserRoleDefaults {
-			@Override
-			public void init() {
-				find(HtmlLabel.class).bindText(context -> Bindings.createStringBinding(() -> getLoggedUserProperty(context).getValue() != null ? "Current user: " + (String) getLoggedUserProperty(context).getValue().getValue() : "No user logged.",
-						getLoggedUserProperty(context)));
-			}
 
 			@Children({ HtmlButton.class, HtmlButton.class })
 			@SetText(path = HtmlButton.class, pos = 0, value = "Admin mode")

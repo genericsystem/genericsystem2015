@@ -1,9 +1,9 @@
 package org.genericsystem.quiz.utils;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.FinishBtn;
-import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.NextBtn;
-import org.genericsystem.quiz.components.QuestionDiv.QuestionDiv_.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.NextBtn;
+import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.PreviousBtn;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
@@ -56,8 +56,6 @@ public class QuizContextAction {
 
 			ScoreUtils.setResult(context, quiz, sUser, loggedUser);
 			ScoreUtils.getResult(context, quiz, loggedUser);
-
-			tag.getProperty("QuizDone", context).setValue(true);
 		}
 	}
 
@@ -67,16 +65,8 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-
 			if (tag.getProperty(QuizTagSwitcher.PAGE, context) != null)
 				tag.getProperty(QuizTagSwitcher.PAGE, context).setValue(null);
-
-			// if (tag.getProperty("HomePage", context) != null)
-			// tag.getProperty("HomePage", context).setValue(false);
-			// if (tag.getProperty("QuestionPage", context) != null)
-			// tag.getProperty("QuestionPage", context).setValue(false);
-			// if (tag.getProperty("ResultPage", context) != null)
-			// tag.getProperty("ResultPage", context).setValue(false);
 		}
 
 	}
@@ -86,11 +76,11 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> selectionProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
-			// if (selectionProperty == null)
-			// tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.HOME_PAGE);
-			// else
-			selectionProperty.setValue(QuizTagSwitcher.HOME_PAGE);
+			Property<String> pageProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
+			if (pageProperty == null)
+				tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.HOME_PAGE);
+			else
+				pageProperty.setValue(QuizTagSwitcher.HOME_PAGE);
 		}
 	}
 
@@ -98,11 +88,11 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> selectionProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
-			// if (selectionProperty == null)
-			// tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.RESULT_PAGE);
-			// else
-			selectionProperty.setValue(QuizTagSwitcher.RESULT_PAGE);
+			Property<String> pageProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
+			if (pageProperty == null)
+				tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.RESULT_PAGE);
+			else
+				pageProperty.setValue(QuizTagSwitcher.RESULT_PAGE);
 		}
 	}
 
@@ -110,11 +100,11 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> selectionProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
-			// if (selectionProperty == null)
-			// tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.QUIZ_PAGE);
-			// else
-			selectionProperty.setValue(QuizTagSwitcher.QUIZ_PAGE);
+			Property<String> pageProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
+			if (pageProperty == null)
+				tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.QUESTION_PAGE);
+			else
+				pageProperty.setValue(QuizTagSwitcher.QUESTION_PAGE);
 		}
 
 	}
