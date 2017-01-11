@@ -8,7 +8,6 @@ import org.genericsystem.reactor.Tag;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
 
 public interface TextPropertyDefaults extends ContextProperty {
 
@@ -19,7 +18,7 @@ public interface TextPropertyDefaults extends ContextProperty {
 		if (!model.containsProperty((Tag) this, TEXT)) {
 			storeProperty(TEXT, model, m -> new SimpleStringProperty());
 			Property<String> text = getProperty(TEXT, model);
-			text.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag) this).getTextListener()));
+			text.addListener(model.getHtmlDomNode((Tag) this).getTextListener());
 		}
 		return getProperty(TEXT, model);
 	}

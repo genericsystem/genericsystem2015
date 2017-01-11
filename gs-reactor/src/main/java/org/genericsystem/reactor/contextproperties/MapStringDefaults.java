@@ -9,7 +9,6 @@ import org.genericsystem.reactor.Tag;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
-import javafx.collections.WeakMapChangeListener;
 
 public interface MapStringDefaults extends ContextProperty {
 
@@ -17,7 +16,7 @@ public interface MapStringDefaults extends ContextProperty {
 		if (!model.containsProperty((Tag) this, propertyName)) {
 			createNewInitializedProperty(propertyName, model, m -> {
 				ObservableMap<String, String> map = FXCollections.observableHashMap();
-				map.addListener(new WeakMapChangeListener<>(getListener.apply(model.getHtmlDomNode((Tag) this))));
+				map.addListener(getListener.apply(model.getHtmlDomNode((Tag) this)));
 				return map;
 			});
 		}
