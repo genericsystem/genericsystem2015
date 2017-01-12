@@ -8,15 +8,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Attribute.AttributeGenericProcessor;
 import org.genericsystem.reactor.annotations.Attribute.AttributeProcessor;
 import org.genericsystem.reactor.annotations.Attribute.Attributes;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Repeatable(Attributes.class)
 @Process(value = AttributeProcessor.class, repeatable = true)
+@GenericProcess(AttributeGenericProcessor.class)
 public @interface Attribute {
 	Class<? extends TagImpl>[] path() default {};
 
@@ -40,4 +47,22 @@ public @interface Attribute {
 		}
 	}
 
+	public static class AttributeGenericProcessor implements IGenericAnnotationProcessor {
+
+		@Override
+		public void setAnnotation(GTag gTag, Annotation annotation) {
+			Attribute annotation_ = (Attribute) annotation;
+			gTag.setAnnotation(Attribute.class, annotation_.name(), annotation_.value(), annotation_.path(), annotation_.pos());
+		}
+
+		@Override
+		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			tag.getDomNodeAttributes(context).remove(gTagAnnotation.getValue().getName());
+		}
+
+		@Override
+		public void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			tag.getRootTag().processAttribute(tag, context, gTagAnnotation.getValue().getName(), annotationContent.getContentValue());
+		}
+	}
 }

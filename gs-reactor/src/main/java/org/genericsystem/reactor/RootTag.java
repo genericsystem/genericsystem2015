@@ -15,7 +15,6 @@ import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
@@ -64,10 +63,6 @@ public interface RootTag extends Tag {
 		tag.addStyle(context, name, value);
 	}
 
-	default void removeStyle(Tag tag, Context context, String name) {
-		tag.getDomNodeStyles(context).remove(name);
-	}
-
 	default void processAttribute(Tag tag, String name, String value) {
 		tag.addPrefixBinding(context -> processAttribute(tag, context, name, value));
 	}
@@ -76,20 +71,12 @@ public interface RootTag extends Tag {
 		tag.addAttribute(context, name, value);
 	}
 
-	default void removeAttribute(Tag tag, Context context, String name) {
-		tag.getDomNodeAttributes(context).remove(name);
-	}
-
 	default void processGenericValueBackgroundColor(Tag tag, String value) {
 		tag.addPrefixBinding(context -> processGenericValueBackgroundColor(tag, context, value));
 	}
 
 	default void processGenericValueBackgroundColor(Tag tag, Context context, String value) {
 		tag.addStyle(context, "background-color", "Color".equals(StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(context.getGeneric().getMeta())) ? ((GenericStringDefaults) tag).getGenericStringProperty(context).getValue() : value);
-	}
-
-	default void removeGenericValueBackgroundColor(Tag tag, Context context) {
-		tag.getDomNodeStyles(context).remove("background-color");
 	}
 
 	default void processFlexDirectionStyle(Tag tag, FlexDirection flexDirection) {
@@ -103,13 +90,6 @@ public interface RootTag extends Tag {
 			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
 	}
 
-	default void removeFlexDirectionStyle(Tag tag, Context context) {
-		if (FlexDirectionDefaults.class.isAssignableFrom(tag.getClass()))
-			((FlexDirectionDefaults) tag).setDirection(context, null);
-		else
-			log.warn("Warning: FlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
-	}
-
 	default void processReverseFlexDirection(Tag tag) {
 		tag.addPrefixBinding(context -> processReverseFlexDirection(tag, context));
 	}
@@ -119,10 +99,6 @@ public interface RootTag extends Tag {
 			((FlexDirectionDefaults) tag).reverseDirection(context);
 		else
 			log.warn("Warning: ReverseFlexDirection is applicable only to classes implementing FlexDirectionDefaults.");
-	}
-
-	default void removeDirectionTracking(Tag tag, Context context) {
-		((FlexDirectionDefaults) tag).stopTrackingDirection(context);
 	}
 
 	default void processKeepFlexDirection(Tag tag) {
@@ -145,11 +121,6 @@ public interface RootTag extends Tag {
 			tag.addStyleClass(context, sc);
 	}
 
-	default void removeStyleClass(Tag tag, Context context, String[] classes) {
-		for (String styleClass : classes)
-			tag.removeStyleClass(context, styleClass);
-	}
-
 	default void processSetText(Tag tag, Class<?>[] path, String[] texts) {
 		tag.addPrefixBinding(context -> processSetText(tag, context, path, texts));
 	}
@@ -159,10 +130,6 @@ public interface RootTag extends Tag {
 			tag.setText(context, texts[0]);
 		else
 			tag.setText(context, texts[AnnotationsManager.position(tag, path[path.length - 1])]);
-	}
-
-	default void removeSetText(Tag tag, Context context) {
-		tag.setText(context, "");
 	}
 
 	default void processBindText(Tag tag, Class<? extends TextBinding> value) {
@@ -180,12 +147,6 @@ public interface RootTag extends Tag {
 					throw new IllegalStateException(e);
 				}
 			});
-	}
-
-	default void removeBindText(Tag tag, Context context) {
-		tag.getDomNodeTextProperty(context).unbind();
-		context.getPropertiesMaps(tag).remove(TextPropertyDefaults.TEXT_BINDING);
-		tag.getDomNodeTextProperty(context).setValue(null);
 	}
 
 	default void processBindAction(Tag tag, Class<? extends ContextAction>[] value) {
@@ -206,10 +167,6 @@ public interface RootTag extends Tag {
 			log.warn("BindAction is applicable only to tags implementing ActionDefaults.");
 	}
 
-	default void removeBindAction(Tag tag, Context context) {
-		context.getPropertiesMaps(tag).remove(ActionDefaults.ACTION);
-	}
-
 	default void processSetStringExtractor(Tag tag, Class<? extends StringExtractor> value) {
 		tag.addPrefixBinding(context -> processSetStringExtractor(tag, context, value));
 	}
@@ -220,10 +177,6 @@ public interface RootTag extends Tag {
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	default void removeStringExtractor(Tag tag, Context context) {
-		tag.getStringExtractorProperty(context).setValue(null);
 	}
 
 	default void processSelect(Tag tag, Class<?> value) {
@@ -269,10 +222,6 @@ public interface RootTag extends Tag {
 			tag.select(selects[AnnotationsManager.position(tag, path[path.length - 1])]);
 	}
 
-	default void removeMetaBinding(Tag tag) {
-		((TagImpl) tag).setMetaBinding(null);
-	}
-
 	default void processSwitch(Tag tag, Class<? extends TagSwitcher>[] value) {
 		try {
 			for (Class<? extends TagSwitcher> switcher : value)
@@ -280,11 +229,6 @@ public interface RootTag extends Tag {
 		} catch (IllegalAccessException | InstantiationException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	default void removeSwitches(Tag tag, Class<? extends TagSwitcher>[] value) {
-		for (Class<? extends TagSwitcher> switcherClass : value)
-			tag.getObservableSwitchers().removeAll(tag.getObservableSwitchers().filtered(switcher -> switcherClass.equals(switcher.getClass())));
 	}
 
 	default void processBindSelection(Tag tag, Context context, Class<? extends TagImpl> value, int valuePos) {
@@ -296,10 +240,6 @@ public interface RootTag extends Tag {
 
 	default void processBindSelection(Tag tag, Class<? extends TagImpl> value, int valuePos) {
 		tag.addPostfixBinding(context -> processBindSelection(tag, context, value, valuePos));
-	}
-
-	default void removeBindSelection(Tag tag, Context context, Class<? extends TagImpl> value, int valuePos) {
-		((SelectionDefaults) tag).unbindSelection(tag.find(value, valuePos), context);
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {

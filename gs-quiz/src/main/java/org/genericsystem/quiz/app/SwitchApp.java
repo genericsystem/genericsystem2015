@@ -7,18 +7,22 @@ import org.genericsystem.quiz.app.SwitchApp.SwitchDiv2;
 import org.genericsystem.quiz.app.SwitchApp.SwitchDiv3;
 import org.genericsystem.quiz.app.SwitchApp.SwitchDiv4;
 import org.genericsystem.quiz.app.SwitchApp.SwitchDiv5;
+import org.genericsystem.reactor.annotations.BindAction;
+import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.SetText;
+import org.genericsystem.reactor.annotations.Step;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
-import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.gscomponents.Controller;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
-import org.genericsystem.reactor.gscomponents.SwitchChildDiv;
-import org.genericsystem.reactor.gscomponents.SwitchChildDiv.Next;
-import org.genericsystem.reactor.gscomponents.SwitchChildDiv.Prev;
 
 @Switcher(SwitchDiv1.class)
 @RunScript(SwitchAppScript.class)
@@ -39,106 +43,44 @@ public class SwitchApp extends RootTagImpl {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SwitchApp.class, "/switchapp");
 	}
 
-	@SetText("Step 1")
-	@Next(SwitchDiv2.class)
-	public static class SwitchDiv1 extends SwitchChildDiv {
+	@Switch(Controller.MainSwitcher.class)
+	@Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
+	@BindAction(path = HtmlButton.class, pos = { 0 }, value = Controller.PrevAction.class)
+	@BindAction(path = HtmlButton.class, pos = { 1 }, value = Controller.NextAction.class)
+	@BindText(path = HtmlButton.class, pos = { 0 }, value = Controller.PrevTextBinding.class)
+	@BindText(path = HtmlLabel.class, value = Controller.CountTextBinding.class)
+	@BindText(path = HtmlButton.class, pos = { 1 }, value = Controller.NextTextBinding.class)
+	@Switch(path = HtmlButton.class, pos = { 0 }, value = Controller.PrevSwitcher.class)
+	@Switch(path = HtmlButton.class, pos = { 1 }, value = Controller.NextSwitcher.class)
+	public static class StepDiv extends HtmlDiv {
 
 	}
 
-	@SetText("Step 2")
-	@Prev(SwitchDiv1.class)
-	@Next(SwitchDiv3.class)
-	public static class SwitchDiv2 extends SwitchChildDiv {
+	@Step(nextClass = SwitchDiv2.class)
+	public static class SwitchDiv1 extends StepDiv {
 
 	}
 
-	@SetText("Step 3")
-	@Prev(SwitchDiv2.class)
-	@Next(SwitchDiv4.class)
-	public static class SwitchDiv3 extends SwitchChildDiv {
+	@Step(nextClass = SwitchDiv3.class)
+	public static class SwitchDiv2 extends StepDiv {
 
 	}
 
-	@SetText("Step 4")
-	@Prev(SwitchDiv3.class)
-	@Next(SwitchDiv5.class)
-	@SwitcherSubSteps(ObservableListExtractor.INSTANCES.class)
-	public static class SwitchDiv4 extends SwitchChildDiv {
+	@Step(nextClass = SwitchDiv4.class)
+	public static class SwitchDiv3 extends StepDiv {
 
 	}
 
-	@SetText("Step 5")
-	@Prev(SwitchDiv4.class)
-	@SwitcherSubSteps(ObservableListExtractor.INSTANCES.class)
-	public static class SwitchDiv5 extends SwitchChildDiv {
+	@Step(nextClass = SwitchDiv5.class)
+	@ForEach(ObservableListExtractor.COMPONENTS.class)
+	public static class SwitchDiv4 extends StepDiv {
 
 	}
 
-//	@Children({ SwitchDiv1.class, SwitchDiv2.class, SwitchDiv3.class })
-//	public class SwitchApp extends RootTagImpl {
-//
-//		public static void main(String[] mainArgs) {
-//			ApplicationServer.startSimpleGenericApp(mainArgs, SwitchApp.class, "/switchapp");
-//		}
-//
-//		@Override
-//		public void init() {
-//			createNewInitializedProperty("selectedClass", context -> SwitchDiv2.class);
-//		}
-//
-//		public static class NextAction implements ContextAction {
-//
-//			@Override
-//			public void accept(Context context, Tag tag) {
-//				Class<?> from = tag.getParent().getClass();
-//				Class<?> to = null;
-//				if (SwitchDiv1.class.equals(from))
-//					to = SwitchDiv2.class;
-//				if (SwitchDiv2.class.equals(from))
-//					to = SwitchDiv3.class;
-//				if (SwitchDiv3.class.equals(from))
-//					to = SwitchDiv1.class;
-//				tag.getProperty("selectedClass", context).setValue(to);
-//			}
-//
-//		}
-//
-//		@Switch(NextSwitcher.class)
-//		@SetText("SwitchDiv1")
-//		@Children(HtmlButton.class)
-//		@BindAction(path = HtmlButton.class, value = NextAction.class)
-//		@SetText(path = HtmlButton.class, value = "Next")
-//		public static class SwitchDiv1 extends HtmlDiv {
-//
-//		}
-//
-//		@Switch(NextSwitcher.class)
-//		@SetText("SwitchDiv2")
-//		@Children(HtmlButton.class)
-//		@BindAction(path = HtmlButton.class, value = NextAction.class)
-//		@SetText(path = HtmlButton.class, value = "Next")
-//		public static class SwitchDiv2 extends HtmlDiv {
-//
-//		}
-//
-//		@Switch(NextSwitcher.class)
-//		@SetText("SwitchDiv3")
-//		@Children(HtmlButton.class)
-//		@BindAction(path = HtmlButton.class, value = NextAction.class)
-//		@SetText(path = HtmlButton.class, value = "First")
-//		public static class SwitchDiv3 extends HtmlDiv {
-//
-//		}
-//
-//		public static class NextSwitcher implements TagSwitcher {
-//
-//			@Override
-//			public ObservableValue<Boolean> apply(Context context, Tag tag) {
-//				Property<?> selectedClassProperty = tag.getProperty("selectedClass", context);
-//				return Bindings.createBooleanBinding(() -> tag.getClass().equals(selectedClassProperty.getValue()), selectedClassProperty);
-//			}
-//
-//		}
-//	}
+	@Step(nextClass = SwitchDiv5.class)
+	@ForEach(ObservableListExtractor.INSTANCES.class)
+	public static class SwitchDiv5 extends StepDiv {
+
+	}
 
 }

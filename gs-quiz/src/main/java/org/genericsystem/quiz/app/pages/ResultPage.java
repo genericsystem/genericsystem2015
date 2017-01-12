@@ -1,6 +1,6 @@
 package org.genericsystem.quiz.app.pages;
 
-import org.genericsystem.quiz.components.QuizResult;
+import org.genericsystem.quiz.app.pages.components.QuizResult;
 import org.genericsystem.quiz.utils.QuizTagSwitcher.RESULT_PAGE;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;

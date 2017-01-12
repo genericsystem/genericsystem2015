@@ -1,4 +1,4 @@
-package org.genericsystem.quiz.app.pages;
+package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.quiz.utils.QuizContextAction.CALL_HOME_PAGE;
 import org.genericsystem.quiz.utils.QuizContextAction.CALL_RESULT_PAGE;
@@ -31,6 +31,6 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 @SetText(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 0, 0 }, value = "<strong>ACCUEIL</strong>")
 @SetText(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 1, 0 }, value = "<strong>RESULTATS</strong>")
 @SetText(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 2, 0 }, value = "<strong>MES SCORES</strong>")
-public class Nav extends FlexRow {
+public class QuizNav extends FlexRow {
 
 }

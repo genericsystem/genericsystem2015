@@ -359,25 +359,41 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 	}
 }
 
-/* ****************** CSS Pour GS-Quiz ************************ */
+/* **************************** CSS Pour GS-Quiz ***************************** */
+/* **** L'objectif est de passer ces classes en responsive ultèrieurement **** */
+
+.appQ {
+	background-color	: #B0C4DE;
+	color				: black;
+	min-width			: 800px;
+}
+.headerQ {
+	justify-content		: space-between;
+	background-color	: #729fcf;
+}
+
 .navQA {
 	text-decoration		: none;
-	color				: grey;
+	color				: #000000;
+	height				: 100%;
+	width				: 100%;
+	text-align			: center;
 }
 
 .navQLi {
 	display				: inline-flex;
 	height				: 70px;
 	min-width			: 150px;
+	border-radius		: 2%;
 	justify-content		: center;
 }
 
 .navQLi:hover {
-	background-color	: grey;
+	background-color	: #204a87;
 }
 
 .navQLi:hover a {
-		color			: white;
+	color				: white;
 }
 
 .loginQ {
@@ -387,13 +403,49 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 }
 
 .inputTextQ {
-	border-radius	: 5px;
-	height			: 35px;
-	padding-left	: 1em;
-	padding-right	: 1em;
+	border-radius		: 5px;
+	height				: 35px;
+	padding-left		: 1em;
+	padding-right		: 1em;
 }	
 
+.sideDivQHeader {
+	max-width			: 25%;
+	min-width			: 200px;
+}
 
+.mainDivBodyQ {
+	width				: 90%;
+	margin-left			: auto;
+	margin-right		: auto;
+	margin-top			: 20px;
+	margin-bottom		: 20px;
+}
+
+.selectQButton {
+	width 				: 40%;
+	min-width			: 40px;
+	height				: 50px;
+	border-radius		: 5px;
+	margin-top			: auto;
+	margin-bottom		: auto;
+}
+
+.greenButton {
+	background-color	: green;
+	color				: white;
+	text-align			: center;
+	border-radius		: 5px;
+	font-weight			: bold;
+}
+
+.redButton {
+	background-color	: red;
+	color				: white;
+	text-align			: center;
+	border-radius		: 5px;
+	font-weight			: bold;
+}
 
 
 

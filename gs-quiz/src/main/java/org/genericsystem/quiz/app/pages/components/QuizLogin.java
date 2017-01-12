@@ -1,15 +1,15 @@
-package org.genericsystem.quiz.components;
+package org.genericsystem.quiz.app.pages.components;
 
 import java.util.Arrays;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.InputTextLogin;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.InputTextPassword;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QUIZ_MODAL_DISPLAY_FLEX;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizUserCreation;
-import org.genericsystem.quiz.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizValidateButton;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv.InputTextLogin;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv.InputTextPassword;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QUIZ_MODAL_DISPLAY_FLEX;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizUserCreation;
+import org.genericsystem.quiz.app.pages.components.QuizLogin.QuizLoginDiv.QuizChoiceOptions.QuizValidateButton;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
 import org.genericsystem.reactor.Tag;
@@ -18,7 +18,6 @@ import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ContextAction;
@@ -26,8 +25,8 @@ import org.genericsystem.reactor.context.ContextAction.CREATE_USER;
 import org.genericsystem.reactor.context.ContextAction.DISPLAY_NONE_CANCEL;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
-import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
+import org.genericsystem.reactor.gscomponents.FlexDiv.FlexRow;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
@@ -79,18 +78,19 @@ public class QuizLogin extends HtmlDiv {
 		//
 		@SetText(path = HtmlHyperLink.class, value = "Sign up")
 		//
-		@FlexDirectionStyle(FlexDirection.ROW)
-		@StyleClass(path = HtmlHyperLink.class, value = { "vertical-align", "choiceResponsive" })
-		@StyleClass(path = QuizValidateButton.class, value = { "choiceResponsive", "vertical-align", "monitorButton" })
 		@StyleClass("vertical-align")
+		@Style(name = "justify-content", value = "space-between")
+		@Style(name = "padding-right", value = "1em")
+		@StyleClass(path = HtmlHyperLink.class, value = { "vertical-align", "choiceResponsive" })
 		@Style(path = HtmlHyperLink.class, name = "text-align", value = "center")
-		@Style(name = "justify-content", value = "space-around")
-		@Style(name = "margin-left", value = "10px")
+		@StyleClass(path = QuizValidateButton.class, value = { "choiceResponsive", "vertical-align", "monitorButton", "white" })
+		@Style(path = QuizValidateButton.class, name = "text-align", value = "center")
+		@Style(path = QuizValidateButton.class, name = "background-color", value = "green")
 		//
 		@BindAction(path = HtmlHyperLink.class, value = QUIZ_MODAL_DISPLAY_FLEX.class)
-		public static class QuizChoiceOptions extends FlexDiv {
+		public static class QuizChoiceOptions extends FlexRow {
 
-			@SetText("OK")
+			@SetText("<strong>OK</strong>")
 			//
 			@Style(name = "text-align", value = "center")
 			public static class QuizValidateButton extends HtmlButton implements PasswordDefaults {

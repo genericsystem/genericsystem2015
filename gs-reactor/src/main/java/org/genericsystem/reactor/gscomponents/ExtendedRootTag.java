@@ -32,33 +32,13 @@ import org.genericsystem.common.Root;
 import org.genericsystem.reactor.AnnotationsManager;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ExtendedAnnotationsManager;
+import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.TagNode;
-import org.genericsystem.reactor.annotations.Attribute;
-import org.genericsystem.reactor.annotations.BindAction;
-import org.genericsystem.reactor.annotations.BindSelection;
-import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
-import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.Select;
-import org.genericsystem.reactor.annotations.SelectContext;
-import org.genericsystem.reactor.annotations.SetStringExtractor;
-import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
-import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
-import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
-import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
-import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.StringExtractor;
-import org.genericsystem.reactor.context.TagSwitcher;
-import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 
@@ -125,9 +105,9 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	public ExtendedRootTag(Root engine) {
 		this.engine = engine;
+		annotationsManager = new ExtendedAnnotationsManager(getClass());
 		storedClasses.put(TagImpl.class, engine.find(GTag.class));
 		storeClass(this.getClass());
-		annotationsManager = new ExtendedAnnotationsManager(getClass());
 		createSubTree();
 	}
 
@@ -157,81 +137,13 @@ public class ExtendedRootTag extends RootTagImpl {
 			if (!context.isDestroyed()) {
 				GTagAnnotation gTagAnnotation = c.getKey();
 				Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
-				if (c.wasRemoved()) {
-					GTagAnnotationContent annotationContent = c.getValueRemoved();
+				Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
 
-					if (Style.class.equals(annotationClass))
-						removeStyle(tag, context, gTagAnnotation.getValue().getName());
-
-					if (GenericValueBackgroundColor.class.equals(annotationClass))
-						removeGenericValueBackgroundColor(tag, context);
-
-					if (FlexDirectionStyle.class.equals(annotationClass))
-						removeFlexDirectionStyle(tag, context);
-
-					if (ReverseFlexDirection.class.equals(annotationClass) || KeepFlexDirection.class.equals(annotationClass))
-						removeDirectionTracking(tag, context);
-
-					if (StyleClass.class.equals(annotationClass))
-						removeStyleClass(tag, context, annotationContent.getContentJSonArray().stream().toArray(String[]::new));
-
-					if (Attribute.class.equals(annotationClass))
-						removeAttribute(tag, context, gTagAnnotation.getValue().getName());
-
-					if (SetText.class.equals(annotationClass))
-						removeSetText(tag, context);
-
-					if (BindText.class.equals(annotationClass))
-						removeBindText(tag, context);
-
-					if (BindAction.class.equals(annotationClass))
-						removeBindAction(tag, context);
-
-					if (SetStringExtractor.class.equals(annotationClass))
-						removeStringExtractor(tag, context);
-
-					if (BindSelection.class.equals(annotationClass))
-						removeBindSelection(tag, context, (Class<? extends TagImpl>) annotationContent.getClassContent(), annotationContent.getJsonValue().getInteger("valuePos").intValue());
-				}
-
-				if (c.wasAdded()) {
-					GTagAnnotationContent annotationContent = c.getValueAdded();
-
-					if (Style.class.equals(annotationClass))
-						processStyle(tag, context, gTagAnnotation.getValue().getName(), annotationContent.getContentValue());
-
-					if (GenericValueBackgroundColor.class.equals(annotationClass))
-						processGenericValueBackgroundColor(tag, context, annotationContent.getContentValue());
-
-					if (FlexDirectionStyle.class.equals(annotationClass))
-						processFlexDirectionStyle(tag, context, FlexDirection.valueOf(annotationContent.getContentValue()));
-
-					if (ReverseFlexDirection.class.equals(annotationClass))
-						processReverseFlexDirection(tag, context);
-
-					if (KeepFlexDirection.class.equals(annotationClass))
-						processKeepFlexDirection(tag, context);
-
-					if (StyleClass.class.equals(annotationClass))
-						processStyleClass(tag, context, annotationContent.getStringArrayContent());
-
-					if (Attribute.class.equals(annotationClass))
-						processAttribute(tag, context, gTagAnnotation.getValue().getName(), annotationContent.getContentValue());
-
-					if (SetStringExtractor.class.equals(annotationClass))
-						processSetStringExtractor(tag, context, (Class<? extends StringExtractor>) annotationContent.getClassContent());
-
-					if (SetText.class.equals(annotationClass))
-						processSetText(tag, context, gTagAnnotation.getValue().getPath(), annotationContent.getStringArrayContent());
-
-					if (BindText.class.equals(annotationClass))
-						processBindText(tag, context, (Class<? extends TextBinding>) annotationContent.getClassContent());
-
-					if (BindAction.class.equals(annotationClass))
-						processBindAction(tag, context, (Class<? extends ContextAction>[]) annotationContent.getClassArrayContent());
-
-					if (BindSelection.class.equals(annotationClass))
-						processBindSelection(tag, context, (Class<? extends TagImpl>) annotationContent.getClassContent(), annotationContent.getJsonValue().getInteger("valuePos").intValue());
+				if (processors.containsKey(annotationClass)) {
+					if (c.wasRemoved())
+						processors.get(annotationClass).onRemove(tag, context, gTagAnnotation, c.getValueRemoved());
+					if (c.wasAdded())
+						processors.get(annotationClass).onAdd(tag, context, gTagAnnotation, c.getValueAdded());
 				}
 			}
 		};
@@ -242,37 +154,14 @@ public class ExtendedRootTag extends RootTagImpl {
 		return c -> {
 			GTagAnnotation gTagAnnotation = c.getKey();
 			Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
+			Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
 
-			// System.out.println("---------- tag change listener : " + c);
-			if (DirectSelect.class.equals(annotationClass) || Select.class.equals(annotationClass) || SelectContext.class.equals(annotationClass) || ForEach.class.equals(annotationClass) || Switch.class.equals(annotationClass)) {
+			if (processors.containsKey(annotationClass)) {
 				if (c.wasRemoved())
-					if (Switch.class.equals(annotationClass))
-						removeSwitches(tag, (Class<? extends TagSwitcher>[]) c.getValueRemoved().getClassArrayContent());
-					else
-						removeMetaBinding(tag);
-
-				if (c.wasAdded()) {
-					GTagAnnotationContent annotationContent = c.getValueAdded();
-
-					if (DirectSelect.class.equals(annotationClass))
-						processDirectSelect(tag, gTagAnnotation.getValue().getPath(), annotationContent.getClassArrayContent());
-
-					if (Select.class.equals(annotationClass))
-						processSelect(tag, annotationContent.getClassContent());
-
-					if (SelectContext.class.equals(annotationClass))
-						processSelectContext(tag, annotationContent.getClassContent());
-
-					if (ForEach.class.equals(annotationClass))
-						processForEach(tag, annotationContent.getClassContent());
-
-					if (Switch.class.equals(annotationClass))
-						processSwitch(tag, (Class<? extends TagSwitcher>[]) annotationContent.getClassArrayContent());
-				}
-			} else if (BindSelection.class.equals(annotationClass))
-				tag.addPostfixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
-			else
-				tag.addPrefixBinding(context -> getApplyingAnnotationsListener(tag, context).onChanged(c));
+					processors.get(annotationClass).onRemove(tag, gTagAnnotation, c.getValueRemoved());
+				if (c.wasAdded())
+					processors.get(annotationClass).onAdd(tag, gTagAnnotation, c.getValueAdded());
+			}
 		};
 	}
 
@@ -304,56 +193,9 @@ public class ExtendedRootTag extends RootTagImpl {
 				storeClass(childClass);
 		}
 
-		for (Style styleAnnotation : clazz.getAnnotationsByType(Style.class))
-			result.setStyleAnnotation(styleAnnotation);
-
-		for (GenericValueBackgroundColor gvbColorAnnotation : clazz.getAnnotationsByType(GenericValueBackgroundColor.class))
-			result.setGVBColorAnnotation(gvbColorAnnotation);
-
-		for (FlexDirectionStyle fdAnnotation : clazz.getAnnotationsByType(FlexDirectionStyle.class))
-			result.setFlexDirectionAnnotation(fdAnnotation);
-
-		for (KeepFlexDirection kfdAnnotation : clazz.getAnnotationsByType(KeepFlexDirection.class))
-			result.setKeepFlexDirectionAnnotation(kfdAnnotation);
-
-		for (ReverseFlexDirection rfdAnnotation : clazz.getAnnotationsByType(ReverseFlexDirection.class))
-			result.setReverseFlexDirectionAnnotation(rfdAnnotation);
-
-		for (StyleClass scAnnotation : clazz.getAnnotationsByType(StyleClass.class))
-			result.setStyleClassAnnotation(scAnnotation);
-
-		for (Attribute annotation : clazz.getAnnotationsByType(Attribute.class))
-			result.setAttributeAnnotation(annotation);
-
-		for (SetText annotation : clazz.getAnnotationsByType(SetText.class))
-			result.setSetTextAnnotation(annotation);
-
-		for (BindText annotation : clazz.getAnnotationsByType(BindText.class))
-			result.setBindTextAnnotation(annotation);
-
-		for (BindAction annotation : clazz.getAnnotationsByType(BindAction.class))
-			result.setBindActionAnnotation(annotation);
-
-		for (SetStringExtractor annotation : clazz.getAnnotationsByType(SetStringExtractor.class))
-			result.setSetStringExtractorAnnotation(annotation);
-
-		for (DirectSelect annotation : clazz.getAnnotationsByType(DirectSelect.class))
-			result.setDirectSelectAnnotation(annotation);
-
-		for (Select annotation : clazz.getAnnotationsByType(Select.class))
-			result.setSelectAnnotation(annotation);
-
-		for (SelectContext annotation : clazz.getAnnotationsByType(SelectContext.class))
-			result.setSelectContextAnnotation(annotation);
-
-		for (ForEach annotation : clazz.getAnnotationsByType(ForEach.class))
-			result.setForEachAnnotation(annotation);
-
-		for (Switch annotation : clazz.getAnnotationsByType(Switch.class))
-			result.setSwitchAnnotation(annotation);
-
-		for (BindSelection annotation : clazz.getAnnotationsByType(BindSelection.class))
-			result.setBindSelectionAnnotation(annotation);
+		for (Class<? extends Annotation> annotationClass : ((ExtendedAnnotationsManager) annotationsManager).getProcessors().keySet())
+			for (Annotation annotation : clazz.getAnnotationsByType(annotationClass))
+				((ExtendedAnnotationsManager) annotationsManager).getProcessors().get(annotationClass).setAnnotation(result, annotation);
 
 		getEngine().getCurrentCache().flush();
 		return result;
@@ -478,78 +320,8 @@ public class ExtendedRootTag extends RootTagImpl {
 			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(value))).encodePrettily());
 		}
 
-		default void setStyleAnnotation(Style annotation) {
-			setAnnotation(Style.class, annotation.name(), annotation.value(), annotation.path(), annotation.pos());
-		}
-
 		default void setChildrenAnnotation(Children annotation) {
 			setArrayValueAnnotation(Children.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setGVBColorAnnotation(GenericValueBackgroundColor annotation) {
-			setAnnotation(GenericValueBackgroundColor.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setFlexDirectionAnnotation(FlexDirectionStyle annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(FlexDirectionStyle.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", annotation.value()).encodePrettily());
-		}
-
-		default void setKeepFlexDirectionAnnotation(KeepFlexDirection annotation) {
-			setAnnotation(KeepFlexDirection.class, null, null, annotation.path(), annotation.pos());
-		}
-
-		default void setReverseFlexDirectionAnnotation(ReverseFlexDirection annotation) {
-			setAnnotation(ReverseFlexDirection.class, null, null, annotation.path(), annotation.pos());
-		}
-
-		default void setStyleClassAnnotation(StyleClass annotation) {
-			setArrayValueAnnotation(StyleClass.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setAttributeAnnotation(Attribute annotation) {
-			setAnnotation(Attribute.class, annotation.name(), annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setSetTextAnnotation(SetText annotation) {
-			setArrayValueAnnotation(SetText.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setBindTextAnnotation(BindText annotation) {
-			setAnnotation(BindText.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
-		}
-
-		default void setBindActionAnnotation(BindAction annotation) {
-			setArrayValueAnnotation(BindAction.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setSetStringExtractorAnnotation(SetStringExtractor annotation) {
-			setAnnotation(SetStringExtractor.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
-		}
-
-		default void setDirectSelectAnnotation(DirectSelect annotation) {
-			setArrayValueAnnotation(DirectSelect.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setSelectAnnotation(Select annotation) {
-			setAnnotation(Select.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
-		}
-
-		default void setSelectContextAnnotation(SelectContext annotation) {
-			setAnnotation(SelectContext.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
-		}
-
-		default void setForEachAnnotation(ForEach annotation) {
-			setAnnotation(ForEach.class, null, annotation.value().getName(), annotation.path(), annotation.pos());
-		}
-
-		default void setSwitchAnnotation(Switch annotation) {
-			setArrayValueAnnotation(Switch.class, null, annotation.value(), annotation.path(), annotation.pos());
-		}
-
-		default void setBindSelectionAnnotation(BindSelection annotation) {
-			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(BindSelection.class, annotation.path(), annotation.pos()));
-			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", annotation.value().getName()).put("valuePos", annotation.valuePos()).encodePrettily());
 		}
 	}
 

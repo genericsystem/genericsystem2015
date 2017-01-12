@@ -8,7 +8,7 @@ import org.genericsystem.common.Generic;
 import javafx.collections.ObservableList;
 
 public class MetaBinding<BETWEEN> {
-	private final Function<Context, ObservableList<BETWEEN>> betweenChildren;
+	private Function<Context, ObservableList<BETWEEN>> betweenChildren;
 	private final BiFunction<Context, BETWEEN, Context> modelBuilder;
 
 	private static BiFunction<Context, Generic, Context> MODEL_BUILDER = (model, generic) -> new Context(model, Context.addToGenerics(generic, model.getGenerics()));
@@ -19,8 +19,12 @@ public class MetaBinding<BETWEEN> {
 		this.modelBuilder = modelBuilder;
 	}
 
-	public ObservableList<BETWEEN> buildBetweenChildren(Context model) {
-		return betweenChildren.apply(model);
+	public ObservableList<BETWEEN> buildBetweenChildren(Context context) {
+		return betweenChildren.apply(context);
+	}
+
+	public Function<Context, ObservableList<BETWEEN>> getBetweenChildren() {
+		return betweenChildren;
 	}
 
 	public Context buildModel(Context parent, BETWEEN betweenChild) {
@@ -33,6 +37,10 @@ public class MetaBinding<BETWEEN> {
 
 	public static MetaBinding<Generic> forEachMetaBinding(Function<Context, ObservableList<Generic>> betweenChildren) {
 		return new MetaBinding<Generic>(betweenChildren, MODEL_BUILDER);
+	}
+
+	public void setBetweenChildren(Function<Context, ObservableList<BETWEEN>> betweenChildren) {
+		this.betweenChildren = betweenChildren;
 	}
 
 }

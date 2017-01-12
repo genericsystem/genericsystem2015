@@ -1,9 +1,9 @@
 package org.genericsystem.quiz.utils;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.FinishBtn;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.NextBtn;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.NextBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.PreviousBtn;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;

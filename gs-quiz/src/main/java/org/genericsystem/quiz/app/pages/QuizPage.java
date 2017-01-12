@@ -1,8 +1,8 @@
 package org.genericsystem.quiz.app.pages;
 
-import org.genericsystem.quiz.components.QuestionDiv;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.FinishBtn;
 import org.genericsystem.quiz.utils.QuizContextAction.CALL_RESULT_PAGE;
 import org.genericsystem.quiz.utils.QuizContextAction.SAVE_QUIZ_RESULT;
 import org.genericsystem.quiz.utils.QuizTagSwitcher.QUESTION_PAGE;

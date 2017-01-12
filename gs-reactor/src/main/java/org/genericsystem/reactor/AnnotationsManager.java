@@ -28,6 +28,7 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
+import org.genericsystem.reactor.annotations.Step;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
@@ -35,7 +36,6 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class AnnotationsManager {
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
 		registerAnnotation(Switcher.class);
-		registerAnnotation(SwitcherSubSteps.class);
+		registerAnnotation(Step.class);
 		registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
@@ -83,10 +83,10 @@ public class AnnotationsManager {
 	}
 
 	public void registerAnnotation(Class<? extends Annotation> annotationClass) {
-		Annotation processAnnotation = annotationClass.getAnnotation(Process.class);
+		Process processAnnotation = annotationClass.getAnnotation(Process.class);
 		if (processAnnotation != null) {
 			try {
-				processors.add(new AnnotationProcessor(annotationClass, ((Process) processAnnotation).value().newInstance(), ((Process) processAnnotation).repeatable()));
+				processors.add(new AnnotationProcessor(annotationClass, processAnnotation.value().newInstance(), processAnnotation.repeatable()));
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}
