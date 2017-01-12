@@ -14,6 +14,7 @@ import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
@@ -284,6 +285,21 @@ public interface RootTag extends Tag {
 	default void removeSwitches(Tag tag, Class<? extends TagSwitcher>[] value) {
 		for (Class<? extends TagSwitcher> switcherClass : value)
 			tag.getObservableSwitchers().removeAll(tag.getObservableSwitchers().filtered(switcher -> switcherClass.equals(switcher.getClass())));
+	}
+
+	default void processBindSelection(Tag tag, Context context, Class<? extends TagImpl> value, int valuePos) {
+		if (SelectionDefaults.class.isAssignableFrom(tag.getClass()))
+			((SelectionDefaults) tag).bindSelection(tag.find(value, valuePos), context);
+		else
+			log.warn("BindSelection is applicable only to a class implementing SelectionDefaults.");
+	}
+
+	default void processBindSelection(Tag tag, Class<? extends TagImpl> value, int valuePos) {
+		tag.addPostfixBinding(context -> processBindSelection(tag, context, value, valuePos));
+	}
+
+	default void removeBindSelection(Tag tag, Context context, Class<? extends TagImpl> value, int valuePos) {
+		((SelectionDefaults) tag).unbindSelection(tag.find(value, valuePos), context);
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {

@@ -22,7 +22,7 @@ import org.genericsystem.security.model.User;
 @RunScript(QuizzScript.class)
 @DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class })
 @Children(AppPage.class)
-@Style(name = "background-color", value = "grey")
+@Style(name = "background-color", value = "#F5F5F5")
 public class QuizApp extends RootTagImpl {
 
 	public static void main(String[] mainArgs) {
@@ -49,8 +49,8 @@ public class QuizApp extends RootTagImpl {
 
 			// Create Questions (Question.class is a component of Quiz.class)
 			Generic question = engine.find(Question.class);
-			Generic q01 = quizTest.setHolder(question, "Quel est le résultat de la séquence : \nArrayList<String> mots ;\nmots.add('azer') ;");
-			Generic q02 = quizTest.setHolder(question, "Portée des attributs : laquelle de ces affirmations est vraie ?");
+			Generic q01 = quizTest.setHolder(question, "Quel est le résultat de la séquence : <em><br>ArrayList<String> mots ;<br>mots.add('azer') ;</em>");
+			Generic q02 = quizTest.setHolder(question, "Portée <br>des attributs : laquelle de ces affirmations est vraie ?");
 			// quizTest.setHolder(question, "laquelle de ces affirmations est vraie ?");
 			Generic q03 = quiz2.setHolder(question, "Question 1 !");
 			Generic q04 = quiz2.setHolder(question, "Question 2 !");

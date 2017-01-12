@@ -393,8 +393,6 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		int posFound = 0;
 		for (Tag child : getObservableChildren()) {
 			if (tagClass.isAssignableFrom(child.getClass())) {
-				if (!tagClass.equals(child.getClass()))
-					System.out.println("Search : " + tagClass.getSimpleName() + " find polymorphic class : " + child.getClass().getSimpleName());
 				if (posFound == pos)
 					return (T) child;
 				posFound++;

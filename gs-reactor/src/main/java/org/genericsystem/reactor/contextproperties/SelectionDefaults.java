@@ -12,6 +12,7 @@ import org.genericsystem.reactor.context.StringExtractor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.ListChangeListener;
@@ -28,6 +29,8 @@ public interface SelectionDefaults extends Tag {
 	public static final String SELECTION_INDEX = "selectionIndex";
 	public static final String SELECTION_SHIFT = "selectionShift";
 	public static final String SELECTION_STRING = "selectionString";
+	public static final String CONTEXTS_LISTENER = "contextsListener";
+	public static final String UPDATED_GENERIC_LISTENER = "updatedGenericListener";
 
 	default void createSelectionProperty() {
 		createNewProperty(SELECTION);
@@ -41,29 +44,45 @@ public interface SelectionDefaults extends Tag {
 		createNewProperty(UPDATED_GENERIC);
 	}
 
-	default Property<Context> getSelectionProperty(Context model) {
-		return getProperty(SELECTION, model);
+	default Property<Context> getSelectionProperty(Context context) {
+		return getProperty(SELECTION, context);
 	}
 
-	default Property<Generic> getUpdatedGenericProperty(Context model) {
-		return getProperty(UPDATED_GENERIC, model);
+	default Property<Generic> getUpdatedGenericProperty(Context context) {
+		return getProperty(UPDATED_GENERIC, context);
 	}
 
-	default Property<Integer> getSelectionIndex(Context model) {
-		return getProperty(SELECTION_INDEX, model);
+	default Property<Integer> getSelectionIndex(Context context) {
+		return getProperty(SELECTION_INDEX, context);
 	}
 
 	default void setSelectionShift(int shift) {
-		createNewInitializedProperty(SELECTION_SHIFT, model -> shift);
+		createNewInitializedProperty(SELECTION_SHIFT, context -> shift);
 	}
 
-	default int getSelectionShift(Context model) {
-		Property<Integer> selectionShiftProperty = getProperty(SELECTION_SHIFT, model);
+	default int getSelectionShift(Context context) {
+		Property<Integer> selectionShiftProperty = getProperty(SELECTION_SHIFT, context);
 		return selectionShiftProperty != null ? selectionShiftProperty.getValue() : 0;
 	}
 
-	default ObservableValue<String> getSelectionString(Context model) {
-		return getObservableValue(SELECTION_STRING, model);
+	default ObservableValue<String> getSelectionString(Context context) {
+		return getObservableValue(SELECTION_STRING, context);
+	}
+
+	default Property<ListChangeListener<Context>> getContextsListenerProperty(Context context) {
+		return getProperty(CONTEXTS_LISTENER, context);
+	}
+
+	default Property<ChangeListener<Generic>> getUpdatedGenericListenerProperty(Context context) {
+		return getProperty(UPDATED_GENERIC_LISTENER, context);
+	}
+
+	default <T> void createOrSetPropertyValue(String propertyName, Context context, T value) {
+		Property<T> property = getProperty(propertyName, context);
+		if (property == null)
+			createNewInitializedProperty(propertyName, context, context_ -> value);
+		else
+			property.setValue(value);
 	}
 
 	default void bindBiDirectionalSelection(Tag subElement) {
@@ -86,24 +105,37 @@ public interface SelectionDefaults extends Tag {
 		});
 	}
 
-	default void bindSelection(Tag subElement) {
-		addPostfixBinding(context -> {
-			ObservableList<Context> subContexts = context.getSubContexts(subElement);
-			Property<Context> selection = getSelectionProperty(context);
-			Property<Generic> updatedGeneric = getUpdatedGenericProperty(context);
-			if (selection != null && updatedGeneric != null) {
-				subContexts.addListener((ListChangeListener<Context>) change -> {
-					if (selection.getValue() != null)
-						while (change.next())
-							if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().stream().map(c -> c.getGeneric()).collect(Collectors.toList()).contains(selection.getValue().getGeneric()))
-								selection.setValue(null);
-				});
-				updatedGeneric.addListener((o, v, nv) -> {
-					Optional<? extends Context> updatedModel = subContexts.stream().filter(m -> m.getGeneric().equals(nv)).findFirst();
-					if (updatedModel.isPresent() && selection.getValue() == null)
-						selection.setValue(updatedModel.get());
-				});
-			}
+	default void bindSelection(Tag subElement, Context context) {
+		ObservableList<Context> subContexts = context.getSubContexts(subElement);
+		Property<Context> selection = getSelectionProperty(context);
+		Property<Generic> updatedGeneric = getUpdatedGenericProperty(context);
+
+		createOrSetPropertyValue(CONTEXTS_LISTENER, context, (ListChangeListener<Context>) change -> {
+			if (selection.getValue() != null)
+				while (change.next())
+					if (change.wasRemoved() && !change.wasAdded() && change.getRemoved().stream().map(c -> c.getGeneric()).collect(Collectors.toList()).contains(selection.getValue().getGeneric()))
+						selection.setValue(null);
 		});
+		createOrSetPropertyValue(UPDATED_GENERIC_LISTENER, context, (ChangeListener<Generic>) (o, v, nv) -> {
+			Optional<? extends Context> updatedContext = subContexts.stream().filter(m -> m.getGeneric().equals(nv)).findFirst();
+			if (updatedContext.isPresent() && selection.getValue() == null)
+				selection.setValue(updatedContext.get());
+		});
+
+		if (selection != null && updatedGeneric != null) {
+			subContexts.addListener(getContextsListenerProperty(context).getValue());
+			updatedGeneric.addListener(getUpdatedGenericListenerProperty(context).getValue());
+		}
+	}
+
+	default void unbindSelection(Tag subElement, Context context) {
+		ObservableList<Context> subContexts = context.getSubContexts(subElement);
+		Property<Context> selection = getSelectionProperty(context);
+		Property<Generic> updatedGeneric = getUpdatedGenericProperty(context);
+
+		if (selection != null && updatedGeneric != null) {
+			subContexts.removeListener(getContextsListenerProperty(context).getValue());
+			updatedGeneric.removeListener(getUpdatedGenericListenerProperty(context).getValue());
+		}
 	}
 }
