@@ -8,6 +8,12 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
@@ -15,12 +21,6 @@ import org.genericsystem.reactor.annotations.Step.StepProcessor;
 import org.genericsystem.reactor.gscomponents.Controller;
 import org.genericsystem.reactor.gscomponents.Controller.SwitchStep;
 import org.genericsystem.reactor.gscomponents.TagImpl;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
@@ -30,7 +30,7 @@ public @interface Step {
 
 	int[] pos() default {};
 
-	Class<? extends TagImpl> nextClass();
+	Class<? extends TagImpl> next();
 
 	String prevText() default "<<";
 
@@ -45,7 +45,7 @@ public @interface Step {
 					Controller controller = Controller.get(tag, context);
 					SwitchStep subSteps = controller.getSwitchStep(tag);
 					if (subSteps == null)
-						subSteps = controller.addSwitchStep(tag, new SimpleIntegerProperty(1), ((Step) annotation).nextClass(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
+						subSteps = controller.addSwitchStep(tag, new SimpleIntegerProperty(1), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
 				});
 			} else {
 				Function<Context, ObservableList<Object>> contextOl = tag.getMetaBinding().getBetweenChildren();
@@ -54,7 +54,7 @@ public @interface Step {
 					Controller controller = Controller.get(tag, context);
 					SwitchStep subSteps = controller.getSwitchStep(tag);
 					if (subSteps == null)
-						subSteps = controller.addSwitchStep(tag, Bindings.size(ol), ((Step) annotation).nextClass(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
+						subSteps = controller.addSwitchStep(tag, Bindings.size(ol), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
 					SimpleIntegerProperty indexProperty = subSteps.getIndexProperty();
 					return BindingsTools.transmitSuccessiveInvalidations(new ListBinding() {
 						{

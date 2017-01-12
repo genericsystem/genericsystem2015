@@ -12,6 +12,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.RunScript;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Step;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
@@ -56,28 +57,28 @@ public class SwitchApp extends RootTagImpl {
 
 	}
 
-	@Step(nextClass = SwitchDiv2.class)
+	@Step(next = SwitchDiv2.class)
 	public static class SwitchDiv1 extends StepDiv {
 
 	}
 
-	@Step(nextClass = SwitchDiv3.class)
+	@Step(next = SwitchDiv3.class)
 	public static class SwitchDiv2 extends StepDiv {
 
 	}
 
-	@Step(nextClass = SwitchDiv4.class)
+	@Step(next = SwitchDiv4.class)
 	public static class SwitchDiv3 extends StepDiv {
 
 	}
 
-	@Step(nextClass = SwitchDiv5.class)
-	@ForEach(ObservableListExtractor.COMPONENTS.class)
+	@Step(next = SwitchDiv5.class)
+	@ForEach(ObservableListExtractor.INSTANCES.class)
 	public static class SwitchDiv4 extends StepDiv {
 
 	}
 
-	@Step(nextClass = SwitchDiv5.class)
+	@Step(next = SwitchDiv5.class)
 	@ForEach(ObservableListExtractor.INSTANCES.class)
 	public static class SwitchDiv5 extends StepDiv {
 

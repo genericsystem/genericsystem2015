@@ -2,13 +2,6 @@ package org.genericsystem.reactor.gscomponents;
 
 import java.util.Map.Entry;
 
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Switcher;
-import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.TagSwitcher;
-import org.genericsystem.reactor.context.TextBinding;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -17,6 +10,13 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Switcher;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.context.TextBinding;
 
 public class Controller {
 	private final Class<? extends TagImpl> firstClass;
@@ -79,7 +79,7 @@ public class Controller {
 
 	public SwitchStep getPreviousStep(Class<? extends Tag> clazz) {
 		for (Entry<Tag, SwitchStep> entry : switcherSteps.entrySet())
-			if (entry.getValue().getNextClass().equals(clazz))
+			if (entry.getValue().getNextClass().equals(clazz) && !entry.getValue().getNextClass().equals(entry.getValue().getTag().getClass()))
 				return entry.getValue();
 		return null;
 	}
@@ -114,7 +114,7 @@ public class Controller {
 			this.observableSize = observableSize;
 			this.nextClass = nextClass;
 			this.hasPrev = Bindings.createBooleanBinding(() -> {
-				return /* !tag.getClass().equals(previousClass) || */ (getIndexProperty().get() > 0);
+				return getPreviousStep(tag.getClass()) != null || (getIndexProperty().get() > 0);
 			}, getIndexProperty());
 			this.hasNext = Bindings.createBooleanBinding(() -> {
 				return !tag.getClass().equals(nextClass) || (getIndexProperty().get() + 1 < getObservableSize().get());
