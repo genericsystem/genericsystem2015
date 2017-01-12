@@ -35,9 +35,9 @@ import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
-import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
+import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,10 +83,10 @@ public class AnnotationsManager {
 	}
 
 	public void registerAnnotation(Class<? extends Annotation> annotationClass) {
-		Annotation processAnnotation = annotationClass.getAnnotation(Process.class);
+		Process processAnnotation = annotationClass.getAnnotation(Process.class);
 		if (processAnnotation != null) {
 			try {
-				processors.add(new AnnotationProcessor(annotationClass, ((Process) processAnnotation).value().newInstance(), ((Process) processAnnotation).repeatable()));
+				processors.add(new AnnotationProcessor(annotationClass, processAnnotation.value().newInstance(), processAnnotation.repeatable()));
 			} catch (IllegalAccessException | InstantiationException e) {
 				throw new IllegalStateException(e);
 			}
