@@ -38,6 +38,7 @@ public @interface Step {
 
 	public static class StepProcessor implements BiConsumer<Annotation, Tag> {
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			if (tag.getMetaBinding() == null) {
