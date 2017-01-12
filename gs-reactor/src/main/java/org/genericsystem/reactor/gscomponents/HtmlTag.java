@@ -107,6 +107,38 @@ public class HtmlTag {
 		}
 	}
 
+	public static class HtmlH3 extends TagImpl {
+
+		@Override
+		public String getTag() {
+			return "h3";
+		}
+	}
+
+	public static class HtmlH4 extends TagImpl {
+
+		@Override
+		public String getTag() {
+			return "h4";
+		}
+	}
+
+	public static class HtmlH5 extends TagImpl {
+
+		@Override
+		public String getTag() {
+			return "h5";
+		}
+	}
+
+	public static class HtmlH6 extends TagImpl {
+
+		@Override
+		public String getTag() {
+			return "h6";
+		}
+	}
+
 	public static class HtmlHeader extends TagImpl {
 
 		@Override
