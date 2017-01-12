@@ -13,18 +13,22 @@ import javafx.collections.ObservableMap;
 
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Switcher;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding;
 
 public class Controller {
+	public static final String CONTROLLER = "controller";
 	private final Class<? extends TagImpl> firstClass;
 	private final Property<Class<? extends Tag>> classProperty;
 	private final ObservableMap<Tag, SwitchStep> switcherSteps = FXCollections.observableHashMap();
 
+	public static void initialize(Tag tag, Class<? extends TagImpl> clazz) {
+		tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(clazz));
+	}
+
 	public static Controller get(Tag tag, Context context) {
-		return tag.<Controller> getProperty(Switcher.CONTROLLER, context).getValue();
+		return tag.<Controller> getProperty(CONTROLLER, context).getValue();
 	}
 
 	public Controller(Class<? extends TagImpl> firstClass) {
@@ -247,5 +251,4 @@ public class Controller {
 			return Controller.get(tag.getParent(), context).hasNext(tag.getParent());
 		}
 	}
-
 }

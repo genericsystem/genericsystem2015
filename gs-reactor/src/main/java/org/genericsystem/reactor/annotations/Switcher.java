@@ -16,7 +16,6 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 @Target({ ElementType.TYPE })
 @Process(SwicherProcessor.class)
 public @interface Switcher {
-	public static final String CONTROLLER = "controller";
 
 	Class<? extends TagImpl> value();
 
@@ -28,7 +27,7 @@ public @interface Switcher {
 
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(((Switcher) annotation).value()));
+			Controller.initialize(tag, ((Switcher) annotation).value());
 		}
 	}
 }
