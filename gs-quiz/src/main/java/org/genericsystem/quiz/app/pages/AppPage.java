@@ -1,5 +1,6 @@
 package org.genericsystem.quiz.app.pages;
 
+import org.genericsystem.quiz.app.pages.components.QuizHeader;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;

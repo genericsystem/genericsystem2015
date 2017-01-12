@@ -1,13 +1,13 @@
-package org.genericsystem.quiz.components;
+package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.components.QuizResult.AllSumResults.ScoreDiv;
-import org.genericsystem.quiz.components.QuizResult.AllSumResults.ScoreDiv.ResultDiv01;
-import org.genericsystem.quiz.components.QuizResult.AllSumResults.ScoreDiv.ResultDiv02;
-import org.genericsystem.quiz.components.QuizResult.AllSumResults.TitleResult;
-import org.genericsystem.quiz.components.QuizResult.MySumResult.MyResultP;
-import org.genericsystem.quiz.components.QuizResult.MySumResult.TitleResultH1;
-import org.genericsystem.quiz.components.QuizResult.SummaryResults;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllSumResults.ScoreDiv;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllSumResults.ScoreDiv.ResultDiv01;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllSumResults.ScoreDiv.ResultDiv02;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllSumResults.TitleResult;
+import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.MyResultP;
+import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleResultH1;
+import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizExtractors.SCORES_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
