@@ -9,7 +9,6 @@ import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv;
 import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.FinishBtn;
 import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.NextBtn;
 import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.PreviousBtn;
-import org.genericsystem.quiz.app.pages.components.QuestionDiv.TitleDiv2;
 import org.genericsystem.quiz.app.pages.components.QuestionDiv.UnitDiv;
 import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.quiz.utils.QuizContextAction.NEXT_TAG;
@@ -34,29 +33,27 @@ import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitleDiv;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 
 @Children({ UnitDiv.class, FooterDiv.class, Empty.class })
 //
-@Style(name = "display", value = "flex")
 @Style(name = "flex", value = "1")
-@Style(name = "flex-direction", value = "column")
 @Style(name = "padding", value = "10px")
 @Style(name = "background-color", value = "#DCDCDC")
+@Style(name = "border-radius", value = "10px")
 @Style(path = { UnitDiv.class, TitleDiv.class }, name = "background-color", value = "#708090")
 @Style(path = { UnitDiv.class, TitleDiv.class }, name = "padding", value = "10px")
 @Style(path = { UnitDiv.class, TitleDiv.class }, name = "margin", value = "10px")
 //
 @ForEach(path = UnitDiv.class, value = QUESTIONS_EXTRACTOR.class)
 @BindText(path = { UnitDiv.class, TitleDiv.class, HtmlH2.class })
-@BindText(path = { UnitDiv.class, TitleDiv2.class })
 @SelectContext(SELECTION_SELECTOR.class)
 @Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
-public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDefaults {
+public class QuestionDiv extends FlexDiv implements StepperDefaults, SelectionDefaults {
 
 	// TODO Remplacer cette classe (temporaire, afin de faire fonctionner le stepper)
 	// par une autre Div affichant une information non steppable
@@ -65,7 +62,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDe
 
 	}
 
-	@Children({ TitleDiv.class, TitleDiv2.class, AnswersDiv.class })
+	@Children({ TitleDiv.class, AnswersDiv.class })
 	//
 	@Style(name = "display", value = "flex")
 	@Style(name = "flex", value = "1")
@@ -73,10 +70,6 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDe
 	@Style(name = "flex-direction", value = "column")
 	@Style(path = HtmlDiv.class, name = "border-radius", value = "10px")
 	public static class UnitDiv extends HtmlDiv {
-
-	}
-
-	public static class TitleDiv2 extends HtmlP {
 
 	}
 
