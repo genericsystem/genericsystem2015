@@ -28,6 +28,7 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
 import org.genericsystem.reactor.annotations.SetText;
+import org.genericsystem.reactor.annotations.Step;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
@@ -37,7 +38,6 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
-import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class AnnotationsManager {
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
 		registerAnnotation(Switcher.class);
-		registerAnnotation(SwitcherSubSteps.class);
+		registerAnnotation(Step.class);
 		registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
