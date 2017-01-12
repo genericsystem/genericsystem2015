@@ -363,6 +363,9 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 .navQA {
 	text-decoration		: none;
 	color				: grey;
+	height				: 100%;
+	width				: 100%;
+	text-align			: center;
 }
 
 .navQLi {
@@ -387,10 +390,10 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 }
 
 .inputTextQ {
-	border-radius	: 5px;
-	height			: 35px;
-	padding-left	: 1em;
-	padding-right	: 1em;
+	border-radius		: 5px;
+	height				: 35px;
+	padding-left		: 1em;
+	padding-right		: 1em;
 }	
 
 

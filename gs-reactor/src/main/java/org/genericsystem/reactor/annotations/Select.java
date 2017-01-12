@@ -9,9 +9,14 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.DirectSelect.MetaBindingAnnotationProcessor;
+import org.genericsystem.reactor.annotations.Select.SelectGenericProcessor;
 import org.genericsystem.reactor.annotations.Select.SelectProcessor;
 import org.genericsystem.reactor.annotations.Select.Selects;
 import org.genericsystem.reactor.context.ObservableValueSelector;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**
@@ -22,6 +27,7 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 @Target({ ElementType.TYPE })
 @Repeatable(Selects.class)
 @Process(SelectProcessor.class)
+@GenericProcess(SelectGenericProcessor.class)
 public @interface Select {
 	Class<? extends TagImpl>[] path() default {};
 
@@ -40,6 +46,19 @@ public @interface Select {
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			tag.getRootTag().processSelect(tag, ((Select) annotation).value());
+		}
+	}
+
+	public static class SelectGenericProcessor implements MetaBindingAnnotationProcessor {
+
+		@Override
+		public void setAnnotation(GTag gTag, Annotation annotation) {
+			gTag.setAnnotation(Select.class, null, ((Select) annotation).value().getName(), ((Select) annotation).path(), ((Select) annotation).pos());
+		}
+
+		@Override
+		public void onAdd(Tag tag, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			tag.getRootTag().processSelect(tag, annotationContent.getClassContent());
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package org.genericsystem.quiz.app.pages;
 
-import org.genericsystem.quiz.components.QuizAppPage.QuizButton;
-import org.genericsystem.quiz.components.QuizAppPage.QuizChoice;
+import org.genericsystem.quiz.app.pages.components.QuizSelect.QuizButton;
+import org.genericsystem.quiz.app.pages.components.QuizSelect.QuizChoice;
 import org.genericsystem.quiz.utils.QuizContextAction.CALL_QUESTION_PAGE;
 import org.genericsystem.quiz.utils.QuizTagSwitcher.HOME_PAGE;
 import org.genericsystem.reactor.annotations.BindAction;

@@ -1,15 +1,16 @@
-package org.genericsystem.quiz.components;
+package org.genericsystem.quiz.app.pages.components;
 
 import java.util.List;
 
 import org.genericsystem.common.Generic;
-import org.genericsystem.quiz.components.QuestionDiv.AnswerDiv.QuizCheckBox;
-import org.genericsystem.quiz.components.QuestionDiv.Empty;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.FinishBtn;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.NextBtn;
-import org.genericsystem.quiz.components.QuestionDiv.FooterDiv.PreviousBtn;
-import org.genericsystem.quiz.components.QuestionDiv.UnitDiv;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.AnswerDiv.QuizCheckBox;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.Empty;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.FinishBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.NextBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.FooterDiv.PreviousBtn;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.TitleDiv2;
+import org.genericsystem.quiz.app.pages.components.QuestionDiv.UnitDiv;
 import org.genericsystem.quiz.model.UserAnswer;
 import org.genericsystem.quiz.utils.QuizContextAction.NEXT_TAG;
 import org.genericsystem.quiz.utils.QuizContextAction.PREVIOUS_TAG;
@@ -37,6 +38,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH2;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 
 @Children({ UnitDiv.class, FooterDiv.class, Empty.class })
 //
@@ -51,6 +53,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 //
 @ForEach(path = UnitDiv.class, value = QUESTIONS_EXTRACTOR.class)
 @BindText(path = { UnitDiv.class, TitleDiv.class, HtmlH2.class })
+@BindText(path = { UnitDiv.class, TitleDiv2.class })
 @SelectContext(SELECTION_SELECTOR.class)
 @Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
 public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDefaults {
@@ -62,7 +65,7 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDe
 
 	}
 
-	@Children({ TitleDiv.class, AnswersDiv.class })
+	@Children({ TitleDiv.class, TitleDiv2.class, AnswersDiv.class })
 	//
 	@Style(name = "display", value = "flex")
 	@Style(name = "flex", value = "1")
@@ -70,6 +73,10 @@ public class QuestionDiv extends HtmlDiv implements StepperDefaults, SelectionDe
 	@Style(name = "flex-direction", value = "column")
 	@Style(path = HtmlDiv.class, name = "border-radius", value = "10px")
 	public static class UnitDiv extends HtmlDiv {
+
+	}
+
+	public static class TitleDiv2 extends HtmlP {
 
 	}
 

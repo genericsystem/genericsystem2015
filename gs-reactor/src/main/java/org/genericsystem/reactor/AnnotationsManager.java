@@ -38,6 +38,7 @@ import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
+import org.genericsystem.reactor.annotations.SwitcherSubSteps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

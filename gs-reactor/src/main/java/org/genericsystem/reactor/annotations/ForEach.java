@@ -9,9 +9,14 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.DirectSelect.MetaBindingAnnotationProcessor;
+import org.genericsystem.reactor.annotations.ForEach.ForEachGenericProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
 import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**
@@ -22,6 +27,7 @@ import org.genericsystem.reactor.gscomponents.TagImpl;
 @Target({ ElementType.TYPE })
 @Repeatable(ForEachs.class)
 @Process(ForEachProcessor.class)
+@GenericProcess(ForEachGenericProcessor.class)
 public @interface ForEach {
 	Class<? extends TagImpl>[] path() default {};
 
@@ -40,6 +46,19 @@ public @interface ForEach {
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
 			tag.getRootTag().processForEach(tag, ((ForEach) annotation).value());
+		}
+	}
+
+	public static class ForEachGenericProcessor implements MetaBindingAnnotationProcessor {
+
+		@Override
+		public void setAnnotation(GTag gTag, Annotation annotation) {
+			gTag.setAnnotation(ForEach.class, null, ((ForEach) annotation).value().getName(), ((ForEach) annotation).path(), ((ForEach) annotation).pos());
+		}
+
+		@Override
+		public void onAdd(Tag tag, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			tag.getRootTag().processForEach(tag, annotationContent.getClassContent());
 		}
 	}
 }
