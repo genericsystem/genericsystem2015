@@ -48,18 +48,17 @@ public class AnnotationsManager {
 	public static final Logger log = LoggerFactory.getLogger(AnnotationsManager.class);
 
 	public AnnotationsManager(Class<? extends RootTag> clazz) {
-		registerCustomAnnotations(clazz);
-		initManager();
+		initManager(clazz);
 	}
 
-	private void registerCustomAnnotations(Class<? extends RootTag> clazz) {
+	protected void registerCustomAnnotations(Class<? extends RootTag> clazz) {
 		Annotation annotations = clazz.getAnnotation(CustomAnnotations.class);
 		if (annotations != null)
 			for (Class<? extends Annotation> annotation : ((CustomAnnotations) annotations).value())
 				registerAnnotation(annotation);
 	}
 
-	public void initManager() {
+	public void initManager(Class<? extends RootTag> clazz) {
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
@@ -80,6 +79,7 @@ public class AnnotationsManager {
 		registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
+		registerCustomAnnotations(clazz);
 	}
 
 	public void registerAnnotation(Class<? extends Annotation> annotationClass) {

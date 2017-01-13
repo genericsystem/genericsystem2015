@@ -41,7 +41,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	}
 
 	@Override
-	public void initManager() {
+	public void initManager(Class<? extends RootTag> clazz) {
 		processors = new LinkedHashMap<>();
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
@@ -61,6 +61,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(GenericValueBackgroundColor.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
+		registerCustomAnnotations(clazz);
 	}
 
 	@Override
