@@ -2,6 +2,12 @@ package org.genericsystem.reactor.gscomponents;
 
 import java.util.Map.Entry;
 
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.context.ContextAction;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.context.TextBinding;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -11,27 +17,23 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.context.ContextAction;
-import org.genericsystem.reactor.context.TagSwitcher;
-import org.genericsystem.reactor.context.TextBinding;
-
 public class Controller {
 	public static final String CONTROLLER = "controller";
+	private final Tag containerTag;
 	private final Class<? extends TagImpl> firstClass;
 	private final Property<Class<? extends Tag>> classProperty;
 	private final ObservableMap<Tag, SwitchStep> switcherSteps = FXCollections.observableHashMap();
 
 	public static void initialize(Tag tag, Class<? extends TagImpl> clazz) {
-		tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(clazz));
+		tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(tag, clazz));
 	}
 
 	public static Controller get(Tag tag, Context context) {
 		return tag.<Controller> getProperty(CONTROLLER, context).getValue();
 	}
 
-	public Controller(Class<? extends TagImpl> firstClass) {
+	public Controller(Tag containerTag, Class<? extends TagImpl> firstClass) {
+		this.containerTag = containerTag;
 		this.firstClass = firstClass;
 		classProperty = new SimpleObjectProperty<>(firstClass);
 	}
@@ -41,7 +43,13 @@ public class Controller {
 	}
 
 	public SwitchStep getSwitchStep(Tag tag) {
-		return switcherSteps.get(tag);
+		Tag tag_ = tag;
+		SwitchStep result = null;
+		while (result == null && !containerTag.equals(tag_)) {
+			result = switcherSteps.get(tag_);
+			tag_ = tag_.getParent();
+		}
+		return result;
 	}
 
 	public SwitchStep addSwitchStep(Tag tag, ObservableIntegerValue observableSize, Class<? extends TagImpl> nextClass, String prevText, String nextText) {
@@ -195,7 +203,7 @@ public class Controller {
 	public static class PrevAction implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			Controller.get(tag.getParent(), context).previous(tag.getParent());
+			Controller.get(tag, context).previous(tag);
 		}
 	}
 
@@ -203,7 +211,7 @@ public class Controller {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Controller.get(tag.getParent(), context).next(tag.getParent());
+			Controller.get(tag, context).next(tag);
 		}
 
 	}
@@ -212,7 +220,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag.getParent(), context).countText(tag.getParent());
+			return Controller.get(tag, context).countText(tag);
 		}
 
 	}
@@ -221,7 +229,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag.getParent(), context).prevText(tag.getParent());
+			return Controller.get(tag, context).prevText(tag);
 		}
 
 	}
@@ -230,7 +238,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag.getParent(), context).nextText(tag.getParent());
+			return Controller.get(tag, context).nextText(tag);
 		}
 
 	}
@@ -239,7 +247,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return Controller.get(tag.getParent(), context).hasPrev(tag.getParent());
+			return Controller.get(tag, context).hasPrev(tag);
 		}
 
 	}
@@ -248,7 +256,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			return Controller.get(tag.getParent(), context).hasNext(tag.getParent());
+			return Controller.get(tag, context).hasNext(tag);
 		}
 	}
 }

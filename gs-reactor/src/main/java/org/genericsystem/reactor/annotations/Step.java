@@ -2,11 +2,21 @@ package org.genericsystem.reactor.annotations;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Step.StepProcessor;
+import org.genericsystem.reactor.annotations.Step.Steps;
+import org.genericsystem.reactor.gscomponents.Controller;
+import org.genericsystem.reactor.gscomponents.Controller.SwitchStep;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
@@ -14,17 +24,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.Step.StepProcessor;
-import org.genericsystem.reactor.gscomponents.Controller;
-import org.genericsystem.reactor.gscomponents.Controller.SwitchStep;
-import org.genericsystem.reactor.gscomponents.TagImpl;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Process(StepProcessor.class)
+@Repeatable(Steps.class)
 public @interface Step {
 	Class<? extends TagImpl>[] path() default {};
 
@@ -35,6 +38,12 @@ public @interface Step {
 	String prevText() default "<<";
 
 	String nextText() default ">>";
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.TYPE })
+	public @interface Steps {
+		Step[] value();
+	}
 
 	public static class StepProcessor implements BiConsumer<Annotation, Tag> {
 
