@@ -3,7 +3,7 @@ package org.genericsystem.reactor.gscomponents;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Stepper;
+import org.genericsystem.reactor.annotations.Stepper2;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
@@ -20,7 +20,7 @@ import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
 @Style(path = { Composite.class, StepNavigator.class }, name = "flex", value = "")
 @Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class, StepNavigator.class })
 @Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class, StepNavigator.class })
-@Stepper(switchClass = AttributeEdition.class, headerClass = InstanceName.class)
+@Stepper2(switchClass = AttributeEdition.class, headerClass = InstanceName.class)
 public class InstanceStepEditor extends InstanceEditor {
 
 	@FlexDirectionStyle(FlexDirection.ROW)

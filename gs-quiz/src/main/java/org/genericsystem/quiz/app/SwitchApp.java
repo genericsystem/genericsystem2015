@@ -13,8 +13,8 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.RunScript;
 import org.genericsystem.reactor.annotations.Step;
+import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.annotations.Switcher;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ObservableListExtractor;
@@ -24,7 +24,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
-@Switcher(SwitchDiv1.class)
+@Stepper(first = SwitchDiv1.class)
 @RunScript(SwitchAppScript.class)
 @Children({ SwitchDiv1.class, SwitchDiv2.class, SwitchDiv3.class, SwitchDiv4.class, SwitchDiv5.class })
 public class SwitchApp extends RootTagImpl {

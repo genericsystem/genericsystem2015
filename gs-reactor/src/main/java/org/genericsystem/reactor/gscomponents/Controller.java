@@ -22,10 +22,10 @@ public class Controller {
 	private final Tag containerTag;
 	private final Class<? extends TagImpl> firstClass;
 	private final Property<Class<? extends Tag>> classProperty;
-	private final ObservableMap<Tag, SwitchStep> switcherSteps = FXCollections.observableHashMap();
+	private final ObservableMap<Tag, StepsStep> steps = FXCollections.observableHashMap();
 
-	public static void initialize(Tag tag, Class<? extends TagImpl> clazz) {
-		tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(tag, clazz));
+	public static void initialize(Tag tag, Class<? extends TagImpl> firstClass) {
+		tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(tag, firstClass));
 	}
 
 	public static Controller get(Tag tag, Context context) {
@@ -42,67 +42,67 @@ public class Controller {
 		return classProperty;
 	}
 
-	public SwitchStep getSwitchStep(Tag tag) {
+	public StepsStep getStep(Tag tag) {
 		Tag tag_ = tag;
-		SwitchStep result = null;
+		StepsStep result = null;
 		while (result == null && !containerTag.equals(tag_)) {
-			result = switcherSteps.get(tag_);
+			result = steps.get(tag_);
 			tag_ = tag_.getParent();
 		}
 		return result;
 	}
 
-	public SwitchStep addSwitchStep(Tag tag, ObservableIntegerValue observableSize, Class<? extends TagImpl> nextClass, String prevText, String nextText) {
-		SwitchStep result = new SwitchStep(tag, observableSize, nextClass, prevText, nextText);
-		switcherSteps.put(tag, result);
+	public StepsStep addStep(Tag tag, ObservableIntegerValue observableSize, Class<? extends TagImpl> nextClass, String prevText, String nextText) {
+		StepsStep result = new StepsStep(tag, observableSize, nextClass, prevText, nextText);
+		steps.put(tag, result);
 		return result;
 	}
 
 	public ObservableValue<String> prevText(Tag tag) {
-		return getSwitchStep(tag).prevText();
+		return getStep(tag).prevText();
 	}
 
 	public ObservableValue<String> nextText(Tag tag) {
-		return getSwitchStep(tag).nextText();
+		return getStep(tag).nextText();
 	}
 
 	public void previous(Tag tag) {
-		getSwitchStep(tag).previous();
+		getStep(tag).prev();
 	}
 
 	public void next(Tag tag) {
-		getSwitchStep(tag).next();
+		getStep(tag).next();
 	}
 
 	public ObservableValue<Boolean> hasPrev(Tag tag) {
-		return getSwitchStep(tag).hasPrev();
+		return getStep(tag).hasPrev();
 	}
 
 	public ObservableValue<Boolean> hasNext(Tag tag) {
-		return getSwitchStep(tag).hasNext();
+		return getStep(tag).hasNext();
 	}
 
-	public SwitchStep getStep(Class<? extends TagImpl> clazz) {
-		for (Entry<Tag, SwitchStep> entry : switcherSteps.entrySet())
+	public StepsStep getStep(Class<? extends TagImpl> clazz) {
+		for (Entry<Tag, StepsStep> entry : steps.entrySet())
 			if (entry.getKey().getClass().equals(clazz))
 				return entry.getValue();
 		return null;
 	}
 
-	public SwitchStep getPreviousStep(Class<? extends Tag> clazz) {
-		for (Entry<Tag, SwitchStep> entry : switcherSteps.entrySet())
+	public StepsStep getPreviousStep(Class<? extends Tag> clazz) {
+		for (Entry<Tag, StepsStep> entry : steps.entrySet())
 			if (entry.getValue().getNextClass().equals(clazz) && !entry.getValue().getNextClass().equals(entry.getValue().getTag().getClass()))
 				return entry.getValue();
 		return null;
 	}
 
 	public ObservableValue<String> countText(Tag tag) {
-		// SwitchStep switchStep = getSwitchStep(tag);
-		Tag realTag = getSwitchStep(tag).getTag();
-		SimpleIntegerProperty indexProperty = getSwitchStep(tag).getIndexProperty();
+		StepsStep tagStep = getStep(tag);
+		Tag realTag = tagStep.getTag();
+		SimpleIntegerProperty indexProperty = tagStep.getIndexProperty();
 		return Bindings.createStringBinding(() -> {
 			int size = 0;
-			SwitchStep step = getStep(firstClass);
+			StepsStep step = getStep(firstClass);
 			while (step != null) {
 				if (realTag.equals(step.tag))
 					break;
@@ -110,10 +110,10 @@ public class Controller {
 				step = step.getNextStep();
 			}
 			return "Step : " + Integer.toString(indexProperty.get() + size + 1);
-		}, switcherSteps, indexProperty);
+		}, steps, indexProperty);
 	}
 
-	public class SwitchStep {
+	public class StepsStep {
 		private final Tag tag;
 		private final Class<? extends TagImpl> nextClass;
 		private final SimpleIntegerProperty indexProperty = new SimpleIntegerProperty(0);
@@ -123,7 +123,7 @@ public class Controller {
 		private final ObservableValue<String> prevText;
 		private final ObservableValue<String> nextText;
 
-		public SwitchStep(Tag tag, ObservableIntegerValue observableSize, Class<? extends TagImpl> nextClass, String prevText, String nextText) {
+		public StepsStep(Tag tag, ObservableIntegerValue observableSize, Class<? extends TagImpl> nextClass, String prevText, String nextText) {
 			this.tag = tag;
 			this.observableSize = observableSize;
 			this.nextClass = nextClass;
@@ -150,7 +150,7 @@ public class Controller {
 			return nextClass;
 		}
 
-		public SwitchStep getNextStep() {
+		public StepsStep getNextStep() {
 			return !tag.getClass().equals(nextClass) ? getStep(nextClass) : null;
 		}
 
@@ -162,7 +162,7 @@ public class Controller {
 			return observableSize;
 		}
 
-		public void previous() {
+		public void prev() {
 			if (indexProperty.get() > 0)
 				indexProperty.set(indexProperty.get() - 1);
 			else
@@ -269,6 +269,5 @@ public class Controller {
 			ObservableValue<Boolean> notLast = Controller.get(tag, context).hasNext(tag);
 			return Bindings.createBooleanBinding(() -> !notLast.getValue(), notLast);
 		}
-
 	}
 }

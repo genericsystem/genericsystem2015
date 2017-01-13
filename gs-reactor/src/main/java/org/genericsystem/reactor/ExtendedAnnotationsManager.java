@@ -24,7 +24,7 @@ import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.annotations.Switcher;
+import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
@@ -49,7 +49,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
-		super.registerAnnotation(Switcher.class);
+		super.registerAnnotation(Stepper.class);
 		super.registerAnnotation(Step.class);
 		// super.registerAnnotation(Stepper.class);
 		registerAnnotation(BindSelection.class);
