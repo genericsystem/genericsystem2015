@@ -12,7 +12,6 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.RunScript;
-import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Step;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.Switcher;
@@ -44,7 +43,6 @@ public class SwitchApp extends RootTagImpl {
 		ApplicationServer.startSimpleGenericApp(mainArgs, SwitchApp.class, "/switchapp");
 	}
 
-	@Switch(Controller.MainSwitcher.class)
 	@Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 	@BindAction(path = HtmlButton.class, pos = { 0 }, value = Controller.PrevAction.class)
 	@BindAction(path = HtmlButton.class, pos = { 1 }, value = Controller.NextAction.class)

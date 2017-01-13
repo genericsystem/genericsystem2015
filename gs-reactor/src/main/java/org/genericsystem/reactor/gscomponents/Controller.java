@@ -97,12 +97,13 @@ public class Controller {
 	}
 
 	public ObservableValue<String> countText(Tag tag) {
+		Tag realTag = getSwitchStep(tag).getTag();
 		SimpleIntegerProperty indexProperty = getSwitchStep(tag).getIndexProperty();
 		return Bindings.createStringBinding(() -> {
 			int size = 0;
 			SwitchStep step = getStep(firstClass);
 			while (step != null) {
-				if (tag.equals(step.tag))
+				if (realTag.equals(step.tag))
 					break;
 				size += step.getObservableSize().intValue();
 				step = step.getNextStep();

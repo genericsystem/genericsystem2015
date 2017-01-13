@@ -15,6 +15,7 @@ import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Step.StepProcessor;
 import org.genericsystem.reactor.annotations.Step.Steps;
 import org.genericsystem.reactor.gscomponents.Controller;
+import org.genericsystem.reactor.gscomponents.Controller.MainSwitcher;
 import org.genericsystem.reactor.gscomponents.Controller.SwitchStep;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
@@ -78,6 +79,7 @@ public @interface Step {
 					});
 				});
 			}
+			tag.getRootTag().processSwitch(tag, new Class[] { MainSwitcher.class });
 		}
 	}
 }
