@@ -182,7 +182,7 @@ public class HtmlDomNode {
 				context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
 					Context childContext = metaBinding.buildModel(context, between);
 					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
-					if (childContext.isOpaque())
+					if (childContext.isInCache())
 						childTag.addStyleClass(childContext, "opaque");
 					return childContext;
 				}, Context::destroy));
