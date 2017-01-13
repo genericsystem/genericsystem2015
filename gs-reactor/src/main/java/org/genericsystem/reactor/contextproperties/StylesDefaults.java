@@ -5,6 +5,7 @@ import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.Tag;
 
 import javafx.beans.property.Property;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 
 public interface StylesDefaults extends MapStringDefaults {
@@ -17,17 +18,28 @@ public interface StylesDefaults extends MapStringDefaults {
 		return getDomNodeMap(model, STYLES, HtmlDomNode::getStylesListener);
 	}
 
+	default void inheritStyle(Context context, String styleName) {
+		Context[] modelArray = new Context[] { context };
+		Tag[] tagArray = new Tag[] { (Tag) this };
+		Property<ObservableMap<String, String>> ancestorStyles = getInheritedProperty(STYLES, modelArray, tagArray);
+		while (ancestorStyles != null)
+			if (ancestorStyles.getValue().containsKey(styleName)) {
+				ObservableMap<String, String> styles = getDomNodeStyles(context);
+				styles.put(styleName, ancestorStyles.getValue().get(styleName));
+				ancestorStyles.getValue().addListener((MapChangeListener<String, String>) c -> {
+					if (c.getKey().equals(styleName)) {
+						if (c.wasRemoved())
+							styles.remove(styleName);
+						if (c.wasAdded())
+							styles.put(styleName, c.getValueAdded());
+					}
+				});
+				break;
+			} else
+				ancestorStyles = getInheritedProperty(STYLES, modelArray, tagArray);
+	}
+
 	default void inheritStyle(String styleName) {
-		addPrefixBinding(model -> {
-			Context[] modelArray = new Context[] { model };
-			Tag[] tagArray = new Tag[] { (Tag) this };
-			Property<ObservableMap<String, String>> styles = getInheritedProperty(STYLES, modelArray, tagArray);
-			while (styles != null)
-				if (styles.getValue().containsKey(styleName)) {
-					getDomNodeStyles(model).put(styleName, styles.getValue().get(styleName));
-					break;
-				} else
-					styles = getInheritedProperty(STYLES, modelArray, tagArray);
-		});
+		addPrefixBinding(context -> inheritStyle(context, styleName));
 	}
 }

@@ -11,6 +11,7 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.GenericProcess;
+import org.genericsystem.reactor.annotations.InheritStyle;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetStringExtractor;
@@ -59,6 +60,7 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(BindAction.class);
 		registerAnnotation(Style.class);
 		registerAnnotation(GenericValueBackgroundColor.class);
+		registerAnnotation(InheritStyle.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
 		registerCustomAnnotations(clazz);

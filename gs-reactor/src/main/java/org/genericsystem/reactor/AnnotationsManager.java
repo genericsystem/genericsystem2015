@@ -23,6 +23,7 @@ import org.genericsystem.reactor.annotations.Children.ChildrenProcessor;
 import org.genericsystem.reactor.annotations.CustomAnnotations;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.InheritStyle;
 import org.genericsystem.reactor.annotations.Process;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
@@ -77,6 +78,7 @@ public class AnnotationsManager {
 		registerAnnotation(BindAction.class);
 		registerAnnotation(Style.class);
 		registerAnnotation(GenericValueBackgroundColor.class);
+		registerAnnotation(InheritStyle.class);
 		registerAnnotation(Attribute.class);
 		registerAnnotation(Switch.class);
 		registerCustomAnnotations(clazz);
