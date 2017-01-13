@@ -221,7 +221,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).countText(tag);
+			return Controller.get(tag, context).countText(tag.getParent().getParent());
 		}
 
 	}
