@@ -327,6 +327,7 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 		heigth			: 100%;
 		min-height		: 40px;
 		border-radius	: 5px;
+		text-align		: center;
 	}	
 	.monitorLabel {
 		display			: flex;
@@ -365,7 +366,7 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 .appQ {
 	background-color	: #B0C4DE;
 	color				: black;
-	min-width			: 800px;
+	min-width			: 850px;
 }
 .headerQ {
 	justify-content		: space-between;

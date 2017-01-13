@@ -83,7 +83,7 @@ public class QuizLogin extends HtmlDiv {
 		@Style(name = "padding-right", value = "1em")
 		@StyleClass(path = HtmlHyperLink.class, value = { "vertical-align", "choiceResponsive" })
 		@Style(path = HtmlHyperLink.class, name = "text-align", value = "center")
-		@StyleClass(path = QuizValidateButton.class, value = { "choiceResponsive", "vertical-align", "monitorButton", "white" })
+		@StyleClass(path = QuizValidateButton.class, value = { "choiceResponsive", "monitorButton", "white" })
 		@Style(path = QuizValidateButton.class, name = "text-align", value = "center")
 		@Style(path = QuizValidateButton.class, name = "background-color", value = "green")
 		//
