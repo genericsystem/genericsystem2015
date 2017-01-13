@@ -220,7 +220,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).countText(tag);
+			return Controller.get(tag, context).countText(tag.getParent().getParent());
 		}
 
 	}
@@ -258,5 +258,15 @@ public class Controller {
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
 			return Controller.get(tag, context).hasNext(tag);
 		}
+	}
+
+	public static class LastSwitcher implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			ObservableValue<Boolean> notLast = Controller.get(tag, context).hasNext(tag);
+			return Bindings.createBooleanBinding(() -> !notLast.getValue(), notLast);
+		}
+
 	}
 }
