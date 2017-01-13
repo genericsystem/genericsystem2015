@@ -97,6 +97,7 @@ public class Controller {
 	}
 
 	public ObservableValue<String> countText(Tag tag) {
+		// SwitchStep switchStep = getSwitchStep(tag);
 		Tag realTag = getSwitchStep(tag).getTag();
 		SimpleIntegerProperty indexProperty = getSwitchStep(tag).getIndexProperty();
 		return Bindings.createStringBinding(() -> {
@@ -141,6 +142,10 @@ public class Controller {
 
 		}
 
+		private Tag getTag() {
+			return tag;
+		}
+
 		public Object getNextClass() {
 			return nextClass;
 		}
@@ -162,10 +167,6 @@ public class Controller {
 				indexProperty.set(indexProperty.get() - 1);
 			else
 				classProperty.setValue(getPreviousStep(tag.getClass()).getTag().getClass());
-		}
-
-		private Tag getTag() {
-			return tag;
 		}
 
 		public void next() {
@@ -221,7 +222,7 @@ public class Controller {
 
 		@Override
 		public ObservableValue<String> apply(Context context, Tag tag) {
-			return Controller.get(tag, context).countText(tag.getParent().getParent());
+			return Controller.get(tag, context).countText(tag);
 		}
 
 	}

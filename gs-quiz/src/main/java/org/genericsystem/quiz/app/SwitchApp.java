@@ -66,7 +66,7 @@ public class SwitchApp extends RootTagImpl {
 	}
 
 	@Step(next = SwitchDiv4.class)
-	public static class SwitchDiv3 extends StepDiv {
+	public static class SwitchDiv3 extends HtmlDiv {
 
 	}
 
