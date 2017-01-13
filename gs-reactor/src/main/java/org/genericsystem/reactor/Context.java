@@ -163,8 +163,8 @@ public class Context {
 	}
 
 	public void flush() {
-		traverse();
 		getGeneric().getCurrentCache().flush();
+		traverse();
 	}
 
 	public void cancel() {
@@ -176,7 +176,6 @@ public class Context {
 	}
 
 	public ObservableLongValue getTsObservableValue() {
-
 		return getGeneric().getCurrentCache().getTsObservableValue();
 	}
 
@@ -186,9 +185,10 @@ public class Context {
 
 	public void unmount() {
 		getGeneric().getCurrentCache().unmount();
+		traverse();
 	}
 
-	public boolean isOpaque() {
+	public boolean isInCache() {
 		// System.out.println(getGeneric().info() + getGeneric().getCurrentCache().contains(getGeneric()));
 		return getGeneric().getCurrentCache().contains(getGeneric());
 	}
@@ -198,7 +198,9 @@ public class Context {
 	}
 
 	public void traverse() {
-		if (isOpaque())
+		if (isInCache())
+			htmlDomNodesMap.keySet().stream().forEach(tag -> tag.addStyleClass(this, "opaque"));
+		else
 			htmlDomNodesMap.keySet().stream().forEach(tag -> tag.removeStyleClass(this, "opaque"));
 		subContextsMap.values().stream().flatMap(c -> c.stream()).forEach(Context::traverse);
 	}
