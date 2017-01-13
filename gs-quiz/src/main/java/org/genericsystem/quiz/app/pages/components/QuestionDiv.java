@@ -25,7 +25,7 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
-import org.genericsystem.reactor.annotations.Stepper;
+import org.genericsystem.reactor.annotations.Stepper2;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
@@ -52,7 +52,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 @ForEach(path = UnitDiv.class, value = QUESTIONS_EXTRACTOR.class)
 @BindText(path = { UnitDiv.class, TitleDiv.class, HtmlH2.class })
 @SelectContext(SELECTION_SELECTOR.class)
-@Stepper(switchClass = UnitDiv.class, headerClass = Empty.class)
+@Stepper2(switchClass = UnitDiv.class, headerClass = Empty.class)
 public class QuestionDiv extends FlexDiv implements StepperDefaults, SelectionDefaults {
 
 	// TODO Remplacer cette classe (temporaire, afin de faire fonctionner le stepper)

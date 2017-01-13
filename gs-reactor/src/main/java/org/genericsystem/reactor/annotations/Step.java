@@ -16,7 +16,7 @@ import org.genericsystem.reactor.annotations.Step.StepProcessor;
 import org.genericsystem.reactor.annotations.Step.Steps;
 import org.genericsystem.reactor.gscomponents.Controller;
 import org.genericsystem.reactor.gscomponents.Controller.MainSwitcher;
-import org.genericsystem.reactor.gscomponents.Controller.SwitchStep;
+import org.genericsystem.reactor.gscomponents.Controller.StepsStep;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import javafx.beans.binding.Bindings;
@@ -54,18 +54,18 @@ public @interface Step {
 			if (tag.getMetaBinding() == null) {
 				tag.addPrefixBinding(context -> {
 					Controller controller = Controller.get(tag, context);
-					SwitchStep subSteps = controller.getSwitchStep(tag);
+					StepsStep subSteps = controller.getStep(tag);
 					if (subSteps == null)
-						subSteps = controller.addSwitchStep(tag, new SimpleIntegerProperty(1), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
+						subSteps = controller.addStep(tag, new SimpleIntegerProperty(1), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
 				});
 			} else {
 				Function<Context, ObservableList<Object>> contextOl = tag.getMetaBinding().getBetweenChildren();
 				tag.getMetaBinding().setBetweenChildren(context -> {
 					ObservableList ol = contextOl.apply(context);
 					Controller controller = Controller.get(tag, context);
-					SwitchStep subSteps = controller.getSwitchStep(tag);
+					StepsStep subSteps = controller.getStep(tag);
 					if (subSteps == null)
-						subSteps = controller.addSwitchStep(tag, Bindings.size(ol), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
+						subSteps = controller.addStep(tag, Bindings.size(ol), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
 					SimpleIntegerProperty indexProperty = subSteps.getIndexProperty();
 					return BindingsTools.transmitSuccessiveInvalidations(new ListBinding() {
 						{
