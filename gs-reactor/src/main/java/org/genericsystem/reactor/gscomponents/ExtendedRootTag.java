@@ -45,10 +45,9 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 
-import com.sun.javafx.collections.ObservableListWrapper;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
@@ -299,7 +298,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			public ObservableList<GenericAnnotationWithContent> get(Object key) {
 				ObservableList<GenericAnnotationWithContent> result = super.get(key);
 				if (result == null && key instanceof AnnotationClassName) {
-					result = new ObservableListWrapper<>(new ArrayList<GenericAnnotationWithContent>());
+					result = FXCollections.observableArrayList();
 					SortedList<GenericAnnotationWithContent> sortedList = new SortedList<>(result, new Comparator<GenericAnnotationWithContent>() {
 
 						@Override
