@@ -1,5 +1,7 @@
 package org.genericsystem.quiz.utils;
 
+import java.util.Comparator;
+
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
@@ -25,7 +27,15 @@ public class QuizExtractors {
 
 		@Override
 		public ObservableList<Generic> apply(Generic[] generics) {
-			return generics[0].getObservableHolders(generics[0].getRoot().find(ScoreUserQuiz.class));
+			Comparator<Generic> byScoreUser = (score1, score2) -> {
+				if (!score1.getClass().isAssignableFrom(score1.getRoot().find(ScoreUserQuiz.class).getClass()) || !score2.getClass().isAssignableFrom(score2.getRoot().find(ScoreUserQuiz.class).getClass()))
+					return 0;
+				else
+					return Integer.compare((Integer) score2.getValue(), (Integer) score1.getValue());
+			};
+
+			System.out.println(generics[0].getObservableSubInstances().sorted(byScoreUser));
+			return generics[0].getObservableSubInstances().sorted(byScoreUser);
 		}
 
 	}
@@ -42,6 +52,15 @@ public class QuizExtractors {
 		@Override
 		public Generic apply(Generic[] generics) {
 			return generics[0].getComponent(0);
+		}
+
+	}
+
+	public static class QUIZ_EXTRACTOR implements ObservableValueSelector {
+
+		@Override
+		public Generic apply(Generic[] generics) {
+			return generics[0].getComponent(1);
 		}
 
 	}

@@ -1,6 +1,7 @@
 package org.genericsystem.quiz.utils;
 
 import org.genericsystem.common.Generic;
+import org.genericsystem.quiz.model.Quiz;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ContextAction;
@@ -10,6 +11,30 @@ import org.genericsystem.security.model.User;
 import javafx.beans.property.Property;
 
 public class QuizContextAction {
+
+	public final static String SELECTED_QUIZ = "selectedQuiz";
+
+	public static class SELECT_QUIZ implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+
+			Generic quiz = context.getGeneric();
+			Property<Generic> selectedQuiz = tag.getProperty(SELECTED_QUIZ, context);
+
+			// Compare le type du tag avec la classe "Quiz" du modèle
+			if (!quiz.getRoot().find(Quiz.class).equals(quiz.getMeta()))
+				return;
+
+			if (selectedQuiz == null)
+				tag.getRootTag().createNewInitializedProperty(SELECTED_QUIZ, context.getRootContext(), c -> quiz);
+			else if (!selectedQuiz.getValue().equals(quiz))
+				selectedQuiz.setValue(quiz);
+
+			System.out.println("Creation de selectedQuiz " + tag.getProperty(SELECTED_QUIZ, context));
+		}
+
+	}
 
 	public static class SAVE_QUIZ_RESULT implements ContextAction {
 

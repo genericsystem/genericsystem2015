@@ -2,6 +2,7 @@ package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.DivInt;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.QuizDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score01;
@@ -13,7 +14,9 @@ import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleR
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizExtractors.QUIZ_EXTRACTOR;
+import org.genericsystem.quiz.utils.QuizExtractors.SCORES_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
+import org.genericsystem.quiz.utils.QuizTagSwitcher.Filtered_By_Quiz;
 import org.genericsystem.quiz.utils.ScoreUtils;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -23,8 +26,8 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
-import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDiv.FlexRow;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
@@ -75,10 +78,12 @@ public class QuizResult extends HtmlDiv {
 	}
 
 	@DirectSelect(ScoreUserQuiz.class)
-	@Children({ TitleResult.class, ScoreDiv.class })
-	@ForEach(path = ScoreDiv.class, value = SUBINSTANCES.class)
+	@Children({ TitleResult.class, /* ScoreDiv.class, */DivInt.class })
+	@ForEach(path = DivInt.class, value = SCORES_EXTRACTOR.class)
+	@Switch(path = { DivInt.class, ScoreDiv.class }, value = Filtered_By_Quiz.class)
 	@Style(name = "width", value = "90%")
 	@Style(path = { HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
+	@Style(path = { HtmlDiv.class, HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
 	public static class AllResults extends HtmlDiv {
 
 		@Children({ HtmlDiv.class, HtmlDiv.class, HtmlDiv.class, HtmlDiv.class, HtmlDiv.class })
@@ -89,6 +94,11 @@ public class QuizResult extends HtmlDiv {
 		@SetText(path = HtmlDiv.class, pos = 4, value = "Quiz")
 		//
 		public static class TitleResult extends FlexRow {
+
+		}
+
+		@Children(ScoreDiv.class)
+		public static class DivInt extends HtmlDiv {
 
 		}
 
@@ -113,8 +123,9 @@ public class QuizResult extends HtmlDiv {
 						if (!context.isDestroyed()) {
 							if (nv == null)
 								this.addStyle(context, "font-weight", "normal");
-							if (nv != null && nv.equals(context.getGeneric().getComponent(0)))
+							if (nv != null && nv.equals(context.getGeneric().getComponent(0))) {
 								this.addStyle(context, "font-weight", "bold");
+							}
 						}
 					});
 				});
