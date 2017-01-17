@@ -4,12 +4,15 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -42,15 +45,13 @@ import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 
-import com.sun.javafx.collections.ObservableMapWrapper;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.collections.WeakListChangeListener;
+import javafx.collections.transformation.SortedList;
 
 public class ExtendedRootTag extends RootTagImpl {
 
@@ -62,15 +63,17 @@ public class ExtendedRootTag extends RootTagImpl {
 	private final ListChangeListener<? super GTagAnnotationContent> listener = c -> {
 		while (c.next()) {
 			if (c.wasRemoved())
-				updateApplyingAnnotations(c.getRemoved().stream(), (annotations, gTagAnnotation) -> annotations.remove(gTagAnnotation));
+				updateApplyingAnnotations(c.getRemoved().stream(), (annotations, value) -> annotations.remove(value));
 			if (c.wasAdded())
-				updateApplyingAnnotations(c.getAddedSubList().stream(), (annotations, gTagAnnotation) -> annotations.put(gTagAnnotation, gTagAnnotation.getContent()));
+				updateApplyingAnnotations(c.getAddedSubList().stream(), (annotations, value) -> annotations.add(value));
 		}
 	};
 
-	private void updateApplyingAnnotations(Stream<? extends GTagAnnotationContent> streamToConsum, BiConsumer<ObservableMap<GTagAnnotation, GTagAnnotationContent>, GTagAnnotation> action) {
+	private void updateApplyingAnnotations(Stream<? extends GTagAnnotationContent> streamToConsum, BiConsumer<ObservableList<GenericAnnotationWithContent>, GenericAnnotationWithContent> action) {
 		streamToConsum.forEach(valueGeneric -> {
 			GTagAnnotation gTagAnnotation = valueGeneric.getBaseComponent();
+			AnnotationClassName key = new AnnotationClassName(gTagAnnotation.getValue().getAnnotationClass(), gTagAnnotation.getValue().getName());
+			GenericAnnotationWithContent value = new GenericAnnotationWithContent(gTagAnnotation, valueGeneric);
 			TagAnnotation tagAnnotation = gTagAnnotation.getValue();
 			LinkedList<Class<?>> path = new LinkedList<>(Stream.of(tagAnnotation.getPath()).collect(Collectors.toList()));
 			path.addFirst(gTagAnnotation.getBaseComponent().getValue());
@@ -78,7 +81,7 @@ public class ExtendedRootTag extends RootTagImpl {
 			if (!pos.isEmpty())
 				pos.addFirst(-1);
 			Set<Tag> concernedTags = searchTags(this, path, pos);
-			concernedTags.forEach(tag -> action.accept(((GenericTagNode) tag.getTagNode()).tagAnnotations, gTagAnnotation));
+			concernedTags.forEach(tag -> action.accept(((GenericTagNode) tag.getTagNode()).tagAnnotations.get(key), value));
 		});
 	}
 
@@ -128,39 +131,57 @@ public class ExtendedRootTag extends RootTagImpl {
 
 	@Override
 	public void initDomNode(HtmlDomNode htmlDomNode) {
-		((GenericTagNode) htmlDomNode.getTag().getTagNode()).getTagAnnotations().addListener(getApplyingAnnotationsListener(htmlDomNode.getTag(), htmlDomNode.getModelContext()));
+		((GenericTagNode) htmlDomNode.getTag().getTagNode()).getSortedAnnotationsLists().entrySet()
+				.forEach(entry -> entry.getValue().addListener(getApplyingAnnotationsListener(htmlDomNode.getTag(), htmlDomNode.getModelContext(), entry.getKey().getAnnotationClass())));
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	private MapChangeListener<? super GTagAnnotation, ? super GTagAnnotationContent> getApplyingAnnotationsListener(Tag tag, Context context) {
+	private ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Context context, Class<? extends Annotation> annotationClass) {
 		return c -> {
 			if (!context.isDestroyed()) {
-				GTagAnnotation gTagAnnotation = c.getKey();
-				Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
 				Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
-
 				if (processors.containsKey(annotationClass)) {
-					if (c.wasRemoved())
-						processors.get(annotationClass).onRemove(tag, context, gTagAnnotation, c.getValueRemoved());
-					if (c.wasAdded())
-						processors.get(annotationClass).onAdd(tag, context, gTagAnnotation, c.getValueAdded());
+					while (c.next()) {
+						if (c.wasAdded() && c.getFrom() == 0) {
+							if (c.getList().size() > c.getAddedSize()) {
+								GenericAnnotationWithContent formerApplyingAnnotation = c.getList().get(c.getAddedSize());
+								processors.get(annotationClass).onRemove(tag, context, formerApplyingAnnotation.getgTagAnnotation(), formerApplyingAnnotation.getAnnotationContent());
+							}
+							processors.get(annotationClass).onAdd(tag, context, c.getAddedSubList().get(0).getgTagAnnotation(), c.getAddedSubList().get(0).getAnnotationContent());
+						}
+						if (c.wasRemoved() && c.getFrom() == 0) {
+							processors.get(annotationClass).onRemove(tag, context, c.getRemoved().get(0).getgTagAnnotation(), c.getRemoved().get(0).getAnnotationContent());
+							if (!c.getList().isEmpty()) {
+								GenericAnnotationWithContent newApplyingAnnotation = c.getList().get(0);
+								processors.get(annotationClass).onAdd(tag, context, newApplyingAnnotation.getgTagAnnotation(), newApplyingAnnotation.getAnnotationContent());
+							}
+						}
+					}
 				}
 			}
 		};
 	}
 
-	@SuppressWarnings("unchecked")
-	private MapChangeListener<? super GTagAnnotation, ? super GTagAnnotationContent> getApplyingAnnotationsListener(Tag tag) {
+	private ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Class<? extends Annotation> annotationClass) {
 		return c -> {
-			GTagAnnotation gTagAnnotation = c.getKey();
-			Class<?> annotationClass = gTagAnnotation.getValue().getAnnotationClass();
 			Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
-
 			if (processors.containsKey(annotationClass)) {
-				if (c.wasRemoved())
-					processors.get(annotationClass).onRemove(tag, gTagAnnotation, c.getValueRemoved());
-				if (c.wasAdded())
-					processors.get(annotationClass).onAdd(tag, gTagAnnotation, c.getValueAdded());
+				while (c.next()) {
+					if (c.wasAdded() && c.getFrom() == 0) {
+						if (c.getList().size() > c.getAddedSize()) {
+							GenericAnnotationWithContent formerApplyingAnnotation = c.getList().get(c.getAddedSize());
+							processors.get(annotationClass).onRemove(tag, formerApplyingAnnotation.getgTagAnnotation(), formerApplyingAnnotation.getAnnotationContent());
+						}
+						processors.get(annotationClass).onAdd(tag, c.getAddedSubList().get(0).getgTagAnnotation(), c.getAddedSubList().get(0).getAnnotationContent());
+					}
+					if (c.wasRemoved() && c.getFrom() == 0) {
+						processors.get(annotationClass).onRemove(tag, c.getRemoved().get(0).getgTagAnnotation(), c.getRemoved().get(0).getAnnotationContent());
+						if (!c.getList().isEmpty()) {
+							GenericAnnotationWithContent newApplyingAnnotation = c.getList().get(0);
+							processors.get(annotationClass).onAdd(tag, newApplyingAnnotation.getgTagAnnotation(), newApplyingAnnotation.getAnnotationContent());
+						}
+					}
+				}
 			}
 		};
 	}
@@ -201,58 +222,136 @@ public class ExtendedRootTag extends RootTagImpl {
 		return result;
 	}
 
+	public static class AnnotationClassName {
+		private Class<? extends Annotation> annotationClass;
+		private String name;
+
+		public AnnotationClassName(Class<? extends Annotation> annotationClass, String name) {
+			this.annotationClass = annotationClass;
+			this.name = name;
+		}
+
+		public Class<? extends Annotation> getAnnotationClass() {
+			return annotationClass;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof AnnotationClassName))
+				return false;
+			AnnotationClassName other = (AnnotationClassName) obj;
+			return annotationClass.equals(other.annotationClass) && Objects.equals(name, other.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return annotationClass.hashCode();
+		}
+	}
+
+	public class GenericAnnotationWithContent {
+		private GTagAnnotation gTagAnnotation;
+		private GTagAnnotationContent annotationContent;
+
+		public GenericAnnotationWithContent(GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			this.gTagAnnotation = gTagAnnotation;
+			this.annotationContent = annotationContent;
+		}
+
+		public GTagAnnotation getgTagAnnotation() {
+			return gTagAnnotation;
+		}
+
+		public GTagAnnotationContent getAnnotationContent() {
+			return annotationContent;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof GenericAnnotationWithContent))
+				return false;
+			GenericAnnotationWithContent other = (GenericAnnotationWithContent) obj;
+			return gTagAnnotation.equals(other.gTagAnnotation) && Objects.equals(annotationContent, other.annotationContent);
+		}
+
+		@Override
+		public int hashCode() {
+			return gTagAnnotation.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "GenericAnnotationValue [gTagAnnotation=" + gTagAnnotation + ", annotationContent=" + annotationContent + "]";
+		}
+	}
+
 	public class GenericTagNode extends SimpleTagNode {
 
-		private ObservableMap<GTagAnnotation, GTagAnnotationContent> tagAnnotations = new ObservableMapWrapper<GTagAnnotation, GTagAnnotationContent>(new HashMap<>()) {
+		private final Tag tag;
+
+		private Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = new LinkedHashMap<>();
+		private Map<AnnotationClassName, ObservableList<GenericAnnotationWithContent>> tagAnnotations = new HashMap<AnnotationClassName, ObservableList<GenericAnnotationWithContent>>() {
+
+			private static final long serialVersionUID = -3404232263162064472L;
 
 			@Override
-			public GTagAnnotationContent put(GTagAnnotation annotation, GTagAnnotationContent value) {
-				Optional<GTagAnnotation> equivAnnotation = this.keySet().stream().filter(gta -> gta.getValue().equivs(annotation.getValue())).findAny();
-				if (equivAnnotation.isPresent()) {
-					GTagAnnotation overriddenAnnotation = equivAnnotation.get();
-					Class<?>[] pathFound = overriddenAnnotation.getValue().getPath();
-					Class<?>[] newPath = annotation.getValue().getPath();
-					if (pathFound.length < newPath.length || AnnotationsManager.isAssignableFrom(Arrays.asList(pathFound), Arrays.asList(newPath)))
-						remove(overriddenAnnotation);
-					else
-						// Found an annotation applying to this tag that’s more precise than the new annotation,
-						// so the new annotation is not added to the Set.
-						return null;
+			public ObservableList<GenericAnnotationWithContent> get(Object key) {
+				ObservableList<GenericAnnotationWithContent> result = super.get(key);
+				if (result == null && key instanceof AnnotationClassName) {
+					result = FXCollections.observableArrayList();
+					SortedList<GenericAnnotationWithContent> sortedList = new SortedList<>(result, new Comparator<GenericAnnotationWithContent>() {
+
+						@Override
+						public int compare(GenericAnnotationWithContent o1, GenericAnnotationWithContent o2) {
+							Class<?>[] firstPath = o1.getgTagAnnotation().getValue().getPath();
+							Class<?>[] secondPath = o2.getgTagAnnotation().getValue().getPath();
+							return firstPath.length < secondPath.length || firstPath.length == secondPath.length && AnnotationsManager.isAssignableFrom(Arrays.asList(firstPath), Arrays.asList(secondPath)) ? 1 : -1;
+						}
+					});
+					sortedAnnotationsLists.put((AnnotationClassName) key, sortedList);
+					put((AnnotationClassName) key, result);
 				}
-				return super.put(annotation, value);
+				return result;
 			}
 		};
 
-		public ObservableMap<GTagAnnotation, GTagAnnotationContent> getTagAnnotations() {
+		public Map<AnnotationClassName, ObservableList<GenericAnnotationWithContent>> getTagAnnotations() {
 			return tagAnnotations;
 		}
 
-		public Map<GTagAnnotation, GTagAnnotationContent> getTagAnnotations(Class<? extends Annotation> annotationClass) {
-			return tagAnnotations.keySet().stream().filter(gta -> annotationClass.equals(gta.getValue().getAnnotationClass())).collect(Collectors.toMap(key -> key, key -> tagAnnotations.get(key)));
-		}
-
-		public Entry<GTagAnnotation, GTagAnnotationContent> getTagAnnotation(Class<? extends Annotation> annotationClass) {
-			Map<GTagAnnotation, GTagAnnotationContent> annotations = getTagAnnotations(annotationClass);
-			return annotations.isEmpty() ? null : annotations.entrySet().stream().findAny().get();
+		public Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> getSortedAnnotationsLists() {
+			return sortedAnnotationsLists;
 		}
 
 		public GenericTagNode(Tag tag) {
-			tagAnnotations.addListener(getApplyingAnnotationsListener(tag));
+			this.tag = tag;
 			Deque<Class<?>> classesToResult = new ArrayDeque<>();
 
 			// Retrieve all applying annotations.
 			Tag current = tag;
 			while (current != null) {
 				Set<GTagAnnotation> annotationsFound = selectAnnotations(current.getClass(), classesToResult, tag);
-				annotationsFound.forEach(annotation -> tagAnnotations.put(annotation, annotation.getContent()));
+				annotationsFound.forEach(annotation -> tagAnnotations.get(new AnnotationClassName(annotation.getValue().getAnnotationClass(), annotation.getValue().getName())).add(new GenericAnnotationWithContent(annotation, annotation.getContent())));
 				classesToResult.push(current.getClass());
 				current = current.getParent();
 			}
 
 			// Build children if there are any.
-			Optional<GTagAnnotation> childrenAnnotation = tagAnnotations.keySet().stream().filter(ta -> Children.class.equals(ta.getValue().getAnnotationClass())).findFirst();
-			if (childrenAnnotation.isPresent())
-				tagAnnotations.get(childrenAnnotation.get()).getClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
+			Optional<AnnotationClassName> childrenAnnotation = sortedAnnotationsLists.keySet().stream().filter(ta -> Children.class.equals(ta.getAnnotationClass())).findFirst();
+			if (childrenAnnotation.isPresent() && !sortedAnnotationsLists.get(childrenAnnotation.get()).isEmpty())
+				sortedAnnotationsLists.get(childrenAnnotation.get()).get(0).getAnnotationContent().getClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
+
+			// TODO: Put in processAnnotations.
+			// Apply the first annotation of each sort and add listeners.
+			Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
+			for (Entry<AnnotationClassName, SortedList<GenericAnnotationWithContent>> entry : sortedAnnotationsLists.entrySet()) {
+				Class<? extends Annotation> annotationClass = entry.getKey().getAnnotationClass();
+				if (processors.containsKey(annotationClass)) {
+					GenericAnnotationWithContent applyingAnnotation = entry.getValue().get(0);
+					processors.get(annotationClass).onAdd(tag, applyingAnnotation.getgTagAnnotation(), applyingAnnotation.getAnnotationContent());
+					entry.getValue().addListener(getApplyingAnnotationsListener(tag, annotationClass));
+				}
+			}
 		}
 
 		private Set<GTagAnnotation> selectAnnotations(Class<?> annotatedClass, Deque<Class<?>> classesToResult, Tag tag) {
@@ -260,9 +359,8 @@ public class ExtendedRootTag extends RootTagImpl {
 			for (GTagAnnotation annotation : storedClasses.get(annotatedClass).getAnnotations()) {
 				Class<?>[] path = annotation.getValue().getPath();
 				int[] pos = annotation.getValue().getPos();
-				Class<?> annotationClass = annotation.getValue().getAnnotationClass();
 				if (pos.length != 0 && pos.length != path.length)
-					throw new IllegalStateException("The annotation " + annotationClass.getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
+					throw new IllegalStateException("The annotation " + annotation.getValue().getAnnotationClass().getSimpleName() + " contains a path and an array of class positions of different lengths. path: "
 							+ Arrays.asList(path).stream().map(c -> c.getSimpleName()).collect(Collectors.toList()) + ", positions: " + Arrays.stream(pos).boxed().collect(Collectors.toList()) + " found on class " + annotatedClass.getSimpleName());
 				if (AnnotationsManager.isAssignableFrom(Arrays.asList(path), new ArrayList<>(classesToResult)) && AnnotationsManager.posMatches(pos, path, tag))
 					annotationsFound.add(annotation);
