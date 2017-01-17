@@ -109,6 +109,14 @@ public class QuizResult extends HtmlDiv {
 					if (context.getGeneric().getComponent(0).equals(getLoggedUserProperty(context).getValue())) {
 						this.addStyle(context, "font-weight", "bold");
 					}
+					getLoggedUserProperty(context).addListener((o, ov, nv) -> {
+						if (!context.isDestroyed()) {
+							if (nv == null)
+								this.addStyle(context, "font-weight", "normal");
+							if (nv != null && nv.equals(context.getGeneric().getComponent(0)))
+								this.addStyle(context, "font-weight", "bold");
+						}
+					});
 				});
 			}
 
