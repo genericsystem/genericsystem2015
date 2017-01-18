@@ -7,7 +7,6 @@ import org.genericsystem.reactor.context.TagSwitcher;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 
 public class QuizTagSwitcher {
@@ -52,23 +51,76 @@ public class QuizTagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Generic scoreUser = context.getGeneric();
-			Generic quiz = scoreUser.getComponent(1);
+			Generic quiz = context.getGeneric().getComponent(1);
 			Property<Generic> selectedQuiz = tag.getProperty(QuizContextAction.SELECTED_QUIZ, context);
-			Property<Generic> loggedUser = tag.getLoggedUserProperty(context);
 
-			if (loggedUser.getValue() != null && selectedQuiz != null)
-				return Bindings.createBooleanBinding(() -> {
-					return quiz.equals(selectedQuiz.getValue());
-				}, selectedQuiz, loggedUser);
+			if (selectedQuiz == null)
+				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_QUIZ);
 
-			if (selectedQuiz != null)
-				return Bindings.createBooleanBinding(() -> {
-					return quiz.equals(selectedQuiz.getValue());
-				}, selectedQuiz);
+			return Bindings.createBooleanBinding(() -> {
 
-			return new SimpleBooleanProperty(true);
+				if (selectedQuiz.getValue() == null)
+					return true;
+
+				Boolean isQuiz = quiz.equals(selectedQuiz.getValue());
+
+				return isQuiz;
+			}, selectedQuiz);
+		}
+	}
+
+	public static class Filtered_By_User implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			Generic user = context.getGeneric().getComponent(0);
+			Property<Generic> selectedUser = tag.getLoggedUserProperty(context);
+
+			if (selectedUser == null)
+				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_USER);
+
+			return Bindings.createBooleanBinding(() -> {
+
+				if (selectedUser.getValue() == null)
+					return true;
+
+				return selectedUser.getValue().equals(user);
+			}, selectedUser);
 		}
 
+	}
+
+	public static class Filtered implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			Generic quiz = context.getGeneric().getComponent(1);
+			Generic user = context.getGeneric().getComponent(0);
+
+			if (tag.getProperty(QuizContextAction.SELECTED_QUIZ, context) == null)
+				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_QUIZ, context.getRootContext());
+			if (tag.getProperty(QuizContextAction.SELECTED_USER, context) == null)
+				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_USER, context.getRootContext());
+
+			Property<Generic> selectedQuiz = tag.getProperty(QuizContextAction.SELECTED_QUIZ, context);
+			Property<Generic> selectedUser = tag.getProperty(QuizContextAction.SELECTED_USER, context);
+
+			return Bindings.createBooleanBinding(() -> {
+
+				if (selectedQuiz.getValue() == null && selectedUser.getValue() == null)
+					return true;
+
+				boolean isQuiz = quiz.equals(selectedQuiz.getValue());
+				boolean isUser = user.equals(selectedUser.getValue());
+
+				if (selectedQuiz.getValue() != null && selectedUser.getValue() == null)
+					return isQuiz;
+				if (selectedQuiz.getValue() == null && selectedUser.getValue() != null)
+					return isUser;
+
+				return (isQuiz && isUser);
+
+			}, selectedUser, selectedQuiz);
+		}
 	}
 }

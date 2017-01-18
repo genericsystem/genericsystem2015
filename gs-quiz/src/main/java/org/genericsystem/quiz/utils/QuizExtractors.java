@@ -23,6 +23,11 @@ public class QuizExtractors {
 		}
 	}
 
+	/*
+	 * Extract and Sort ScoreUserQuiz by quiz name (alphabetical order) then by score (descending order)
+	 * 
+	 * return an ObservableList<ScoreUserQuiz>
+	 */
 	public static class SCORES_EXTRACTOR implements ObservableListExtractor {
 
 		@Override
@@ -34,8 +39,14 @@ public class QuizExtractors {
 					return Integer.compare((Integer) score2.getValue(), (Integer) score1.getValue());
 			};
 
-			System.out.println(generics[0].getObservableSubInstances().sorted(byScoreUser));
-			return generics[0].getObservableSubInstances().sorted(byScoreUser);
+			Comparator<Generic> byQuiz = (score1, score2) -> {
+				if (!score1.getClass().isAssignableFrom(score1.getRoot().find(ScoreUserQuiz.class).getClass()) || !score2.getClass().isAssignableFrom(score2.getRoot().find(ScoreUserQuiz.class).getClass()))
+					return 0;
+				else
+					return score1.getComponent(1).compareTo(score2.getComponent(1));
+			};
+
+			return generics[0].getObservableSubInstances().sorted(byQuiz.thenComparing(byScoreUser));
 		}
 
 	}

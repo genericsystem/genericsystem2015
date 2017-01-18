@@ -16,7 +16,7 @@ import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.quiz.utils.QuizExtractors.QUIZ_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.SCORES_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
-import org.genericsystem.quiz.utils.QuizTagSwitcher.Filtered_By_Quiz;
+import org.genericsystem.quiz.utils.QuizTagSwitcher.Filtered;
 import org.genericsystem.quiz.utils.ScoreUtils;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -80,7 +80,7 @@ public class QuizResult extends HtmlDiv {
 	@DirectSelect(ScoreUserQuiz.class)
 	@Children({ TitleResult.class, /* ScoreDiv.class, */DivInt.class })
 	@ForEach(path = DivInt.class, value = SCORES_EXTRACTOR.class)
-	@Switch(path = { DivInt.class, ScoreDiv.class }, value = Filtered_By_Quiz.class)
+	@Switch(path = { DivInt.class, ScoreDiv.class }, value = { Filtered.class })
 	@Style(name = "width", value = "90%")
 	@Style(path = { HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
 	@Style(path = { HtmlDiv.class, HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
@@ -97,6 +97,8 @@ public class QuizResult extends HtmlDiv {
 
 		}
 
+		// Necessaire : il faut mettre le foreach et le switch "Filtered-By-Quiz" sur 2 div distinctes.
+		// Les 2 annotations interrogent le contexte parent et il y a conflit si sur le meme tag.
 		@Children(ScoreDiv.class)
 		public static class DivInt extends HtmlDiv {
 
@@ -119,11 +121,11 @@ public class QuizResult extends HtmlDiv {
 					if (context.getGeneric().getComponent(0).equals(getLoggedUserProperty(context).getValue())) {
 						this.addStyle(context, "font-weight", "bold");
 					}
-					getLoggedUserProperty(context).addListener((o, ov, nv) -> {
+					getLoggedUserProperty(context).addListener((observable, oldValue, newValue) -> {
 						if (!context.isDestroyed()) {
-							if (nv == null)
+							if (newValue == null)
 								this.addStyle(context, "font-weight", "normal");
-							if (nv != null && nv.equals(context.getGeneric().getComponent(0))) {
+							if (newValue != null && newValue.equals(context.getGeneric().getComponent(0))) {
 								this.addStyle(context, "font-weight", "bold");
 							}
 						}
