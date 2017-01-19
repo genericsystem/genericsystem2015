@@ -2,37 +2,41 @@ package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults;
-import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.DivInt;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.QuizDiv;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score01;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.Score02;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.ScoreDiv.UserDiv;
+import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.Search;
 import org.genericsystem.quiz.app.pages.components.QuizResult.AllResults.TitleResult;
 import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.MyResultP;
 import org.genericsystem.quiz.app.pages.components.QuizResult.MySumResult.TitleResultH1;
 import org.genericsystem.quiz.app.pages.components.QuizResult.SummaryResults;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
+import org.genericsystem.quiz.utils.QuizContextAction;
 import org.genericsystem.quiz.utils.QuizExtractors.QUIZ_EXTRACTOR;
-import org.genericsystem.quiz.utils.QuizExtractors.SCORES_EXTRACTOR;
+import org.genericsystem.quiz.utils.QuizExtractors.SCORES_FILTERED;
 import org.genericsystem.quiz.utils.QuizExtractors.USER_EXTRACTOR;
-import org.genericsystem.quiz.utils.QuizTagSwitcher.Filtered;
 import org.genericsystem.quiz.utils.ScoreUtils;
+import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
-import org.genericsystem.reactor.annotations.ForEach;
+import org.genericsystem.reactor.annotations.ForEachContext;
 import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
-import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDiv.FlexRow;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
+import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
+
+import javafx.collections.MapChangeListener;
 
 @Children({ SummaryResults.class, AllResults.class })
 public class QuizResult extends HtmlDiv {
@@ -78,13 +82,35 @@ public class QuizResult extends HtmlDiv {
 	}
 
 	@DirectSelect(ScoreUserQuiz.class)
-	@Children({ TitleResult.class, /* ScoreDiv.class, */DivInt.class })
-	@ForEach(path = DivInt.class, value = SCORES_EXTRACTOR.class)
-	@Switch(path = { DivInt.class, ScoreDiv.class }, value = { Filtered.class })
+	@Children({ HtmlDiv.class, TitleResult.class, ScoreDiv.class })
+	@Children(path = HtmlDiv.class, pos = 0, value = Search.class)
+	//
 	@Style(name = "width", value = "90%")
+	@Style(path = { TitleResult.class, HtmlDiv.class }, name = "flex", value = "1")
 	@Style(path = { HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
 	@Style(path = { HtmlDiv.class, HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
+	//
+	// L'étape suivant est de se passer du bouton "Rechercher" et permettre une recherche active pendant que l'on tape le texte.
+	@SetText(path = { HtmlDiv.class, HtmlButton.class }, value = "Rechercher")
 	public static class AllResults extends HtmlDiv {
+
+		@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
+		public static class Search extends HtmlInputText {
+
+			@Override
+			public void init() {
+				addPrefixBinding(context -> {
+					this.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+
+						if ("value".equals(change.getKey())) {
+							if (change.wasAdded())
+								getProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
+						}
+
+					});
+				});
+			}
+		}
 
 		@Children({ HtmlDiv.class, HtmlDiv.class, HtmlDiv.class, HtmlDiv.class, HtmlDiv.class })
 		@SetText(path = HtmlDiv.class, pos = 0, value = "Pseudo")
@@ -92,18 +118,11 @@ public class QuizResult extends HtmlDiv {
 		@SetText(path = HtmlDiv.class, pos = 2, value = "Score 1")
 		@SetText(path = HtmlDiv.class, pos = 3, value = "Score 2")
 		@SetText(path = HtmlDiv.class, pos = 4, value = "Quiz")
-		//
 		public static class TitleResult extends FlexRow {
 
 		}
 
-		// Necessaire : il faut mettre le foreach et le switch "Filtered-By-Quiz" sur 2 div distinctes.
-		// Les 2 annotations interrogent le contexte parent et il y a conflit si sur le meme tag.
-		@Children(ScoreDiv.class)
-		public static class DivInt extends HtmlDiv {
-
-		}
-
+		@ForEachContext(SCORES_FILTERED.class)
 		@Children({ UserDiv.class, HtmlDiv.class, Score01.class, Score02.class, QuizDiv.class })
 		@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
 		@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)
@@ -116,8 +135,6 @@ public class QuizResult extends HtmlDiv {
 			public void init() {
 				addPrefixBinding(context -> {
 
-					// REMARQUE : context.getGeneric().getComponent(0) == User.
-					// context.getGeneric().getComponent(1) == Quiz.
 					if (context.getGeneric().getComponent(0).equals(getLoggedUserProperty(context).getValue())) {
 						this.addStyle(context, "font-weight", "bold");
 					}

@@ -81,6 +81,15 @@ public class QuizContextAction {
 
 	}
 
+	public static class SELECT_LOGGEDUSER implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			tag.getProperty(SELECTED_USER, context).setValue(tag.getLoggedUserProperty(context).getName());
+		}
+
+	}
+
 	public static class SAVE_QUIZ_RESULT implements ContextAction {
 
 		@Override

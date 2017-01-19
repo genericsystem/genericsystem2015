@@ -6,9 +6,14 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.model.Answer;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.context.ObservableListExtractor;
+import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
 import org.genericsystem.reactor.context.ObservableValueSelector;
 
+import javafx.beans.binding.ListBinding;
+import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 
 public class QuizExtractors {
@@ -21,34 +26,6 @@ public class QuizExtractors {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return generics[0].getObservableHolders(generics[0].getRoot().find(Answer.class));
 		}
-	}
-
-	/*
-	 * Extract and Sort ScoreUserQuiz by quiz name (alphabetical order) then by score (descending order)
-	 * 
-	 * return an ObservableList<ScoreUserQuiz>
-	 */
-	public static class SCORES_EXTRACTOR implements ObservableListExtractor {
-
-		@Override
-		public ObservableList<Generic> apply(Generic[] generics) {
-			Comparator<Generic> byScoreUser = (score1, score2) -> {
-				if (!score1.getClass().isAssignableFrom(score1.getRoot().find(ScoreUserQuiz.class).getClass()) || !score2.getClass().isAssignableFrom(score2.getRoot().find(ScoreUserQuiz.class).getClass()))
-					return 0;
-				else
-					return Integer.compare((Integer) score2.getValue(), (Integer) score1.getValue());
-			};
-
-			Comparator<Generic> byQuiz = (score1, score2) -> {
-				if (!score1.getClass().isAssignableFrom(score1.getRoot().find(ScoreUserQuiz.class).getClass()) || !score2.getClass().isAssignableFrom(score2.getRoot().find(ScoreUserQuiz.class).getClass()))
-					return 0;
-				else
-					return score1.getComponent(1).compareTo(score2.getComponent(1));
-			};
-
-			return generics[0].getObservableSubInstances().sorted(byQuiz.thenComparing(byScoreUser));
-		}
-
 	}
 
 	public static class QUESTIONS_EXTRACTOR implements ObservableListExtractor {
@@ -72,6 +49,60 @@ public class QuizExtractors {
 		@Override
 		public Generic apply(Generic[] generics) {
 			return generics[0].getComponent(1);
+		}
+
+	}
+
+	public static class SCORES_FILTERED implements ObservableListExtractorFromContext {
+
+		@Override
+		public ObservableList<Generic> apply(Context context, Tag tag) {
+			Comparator<Generic> byScoreUser = (score1, score2) -> {
+				if (!score1.getClass().isAssignableFrom(score1.getRoot().find(ScoreUserQuiz.class).getClass()) || !score2.getClass().isAssignableFrom(score2.getRoot().find(ScoreUserQuiz.class).getClass()))
+					return 0;
+				else
+					return Integer.compare((Integer) score2.getValue(), (Integer) score1.getValue());
+			};
+
+			Comparator<Generic> byQuiz = (score1, score2) -> {
+				if (!score1.getClass().isAssignableFrom(score1.getRoot().find(ScoreUserQuiz.class).getClass()) || !score2.getClass().isAssignableFrom(score2.getRoot().find(ScoreUserQuiz.class).getClass()))
+					return 0;
+				else
+					return score1.getComponent(1).compareTo(score2.getComponent(1));
+			};
+
+			if (tag.getProperty(QuizContextAction.SELECTED_QUIZ, context) == null)
+				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_QUIZ, context.getRootContext());
+			if (tag.getProperty(QuizContextAction.SELECTED_USER, context) == null)
+				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_USER, context.getRootContext());
+
+			Property<Generic> selectedQuiz = tag.getProperty(QuizContextAction.SELECTED_QUIZ, context);
+			Property<String> selectedUser = tag.getProperty(QuizContextAction.SELECTED_USER, context);
+
+			return new ListBinding<Generic>() {
+				{
+					bind(selectedQuiz, selectedUser);
+				}
+
+				@Override
+				protected ObservableList<Generic> computeValue() {
+					return context.getGeneric().getObservableSubInstances().sorted(byQuiz.thenComparing(byScoreUser)).filtered(scoreUser -> {
+
+						if (selectedQuiz.getValue() == null && selectedUser.getValue() == null)
+							return true;
+
+						boolean isQuiz = scoreUser.getComponent(1).equals(selectedQuiz.getValue());
+						boolean isUser = ((String) scoreUser.getComponent(0).getValue()).trim().toLowerCase().contains(selectedUser.getValue().trim().toLowerCase());
+
+						if (selectedQuiz.getValue() != null && (selectedUser.getValue() == null || selectedUser.getValue().trim().isEmpty()))
+							return isQuiz;
+						if (selectedQuiz.getValue() == null && (selectedUser.getValue() != null || selectedUser.getValue().trim().isEmpty()))
+							return isUser;
+
+						return (isQuiz && isUser);
+					});
+				}
+			};
 		}
 
 	}
