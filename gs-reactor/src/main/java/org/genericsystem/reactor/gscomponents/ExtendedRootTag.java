@@ -8,13 +8,14 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -289,7 +290,10 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		private final Tag tag;
 
-		private Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = new LinkedHashMap<>();
+		private Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = new TreeMap<>((an1, an2) -> {
+			List<Class<? extends Annotation>> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors().keySet().stream().collect(Collectors.toList());
+			return Integer.compare(processors.indexOf(an1.getAnnotationClass()), processors.indexOf(an2.getAnnotationClass()));
+		});
 		private Map<AnnotationClassName, ObservableList<GenericAnnotationWithContent>> tagAnnotations = new HashMap<AnnotationClassName, ObservableList<GenericAnnotationWithContent>>() {
 
 			private static final long serialVersionUID = -3404232263162064472L;
