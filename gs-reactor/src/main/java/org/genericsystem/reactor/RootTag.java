@@ -1,11 +1,14 @@
 package org.genericsystem.reactor;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableContextSelector;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
+import org.genericsystem.reactor.context.ObservableListExtractorFromContext;
 import org.genericsystem.reactor.context.ObservableValueSelector;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
@@ -213,6 +216,19 @@ public interface RootTag extends Tag {
 			}
 		else
 			throw new IllegalStateException("ForEach value must implement ObservableListExtractor. Given class: " + value.getName());
+	}
+
+	default void processForEachContext(Tag tag, Class<?> value) {
+		if (ObservableListExtractorFromContext.class.isAssignableFrom(value))
+			tag.forEach2(context -> {
+				try {
+					return ((ObservableListExtractorFromContext) value.getDeclaredConstructor().newInstance()).apply(context, tag);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		else
+			throw new IllegalStateException("ForEach value must implement ObservableListExtractorFromContext. Given class: " + value.getName());
 	}
 
 	default void processDirectSelect(Tag tag, Class<?>[] path, Class<?>[] selects) {
