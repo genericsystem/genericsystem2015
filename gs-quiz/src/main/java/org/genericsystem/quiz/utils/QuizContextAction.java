@@ -85,7 +85,15 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			tag.getProperty(SELECTED_USER, context).setValue(tag.getLoggedUserProperty(context).getName());
+			Property<String> selectedUser = tag.getProperty(SELECTED_USER, context);
+			Property<Generic> loggedUser = tag.getLoggedUserProperty(context);
+
+			if (loggedUser == null)
+				return;
+			if (selectedUser == null)
+				tag.getRootTag().createNewInitializedProperty(SELECTED_USER, context.getRootContext(), c -> loggedUser.getValue() + "");
+			else
+				selectedUser.setValue(loggedUser.getValue() + "");
 		}
 
 	}
@@ -105,7 +113,6 @@ public class QuizContextAction {
 	}
 
 	// NAVIGATION ENTRE LES PAGES
-
 	public static class CLEAR_PAGES implements ContextAction {
 
 		@Override

@@ -92,12 +92,14 @@ public class QuizExtractors {
 							return true;
 
 						boolean isQuiz = scoreUser.getComponent(1).equals(selectedQuiz.getValue());
-						boolean isUser = ((String) scoreUser.getComponent(0).getValue()).trim().toLowerCase().contains(selectedUser.getValue().trim().toLowerCase());
+						boolean isUser = true;
 
 						if (selectedQuiz.getValue() != null && (selectedUser.getValue() == null || selectedUser.getValue().trim().isEmpty()))
 							return isQuiz;
-						if (selectedQuiz.getValue() == null && (selectedUser.getValue() != null || selectedUser.getValue().trim().isEmpty()))
+						if (selectedQuiz.getValue() == null && (selectedUser.getValue() != null || !selectedUser.getValue().trim().isEmpty())) {
+							isUser = ((String) scoreUser.getComponent(0).getValue()).trim().toLowerCase().contains(selectedUser.getValue().trim().toLowerCase());
 							return isUser;
+						}
 
 						return (isQuiz && isUser);
 					});

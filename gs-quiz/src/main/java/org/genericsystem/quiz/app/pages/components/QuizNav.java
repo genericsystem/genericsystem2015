@@ -4,6 +4,7 @@ import org.genericsystem.quiz.utils.QuizContextAction.CALL_HOME_PAGE;
 import org.genericsystem.quiz.utils.QuizContextAction.CALL_RESULT_PAGE;
 import org.genericsystem.quiz.utils.QuizContextAction.CLEAR_QUIZ;
 import org.genericsystem.quiz.utils.QuizContextAction.CLEAR_QUIZCONTEXT_PROPERTIES;
+import org.genericsystem.quiz.utils.QuizContextAction.SELECT_LOGGEDUSER;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.SetText;
@@ -23,7 +24,7 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 //
 @BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 0, 0 }, value = CALL_HOME_PAGE.class)
 @BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 1, 0 }, value = { CLEAR_QUIZCONTEXT_PROPERTIES.class, CALL_RESULT_PAGE.class })
-@BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 2, 0 }, value = { CLEAR_QUIZ.class, CALL_RESULT_PAGE.class })
+@BindAction(path = { HtmlUl.class, HtmlLi.class, HtmlHyperLink.class }, pos = { 0, 2, 0 }, value = { CLEAR_QUIZ.class, SELECT_LOGGEDUSER.class, CALL_RESULT_PAGE.class })
 //
 @Style(name = "justify-content", value = "center")
 @Style(path = HtmlUl.class, name = "padding", value = "0px")

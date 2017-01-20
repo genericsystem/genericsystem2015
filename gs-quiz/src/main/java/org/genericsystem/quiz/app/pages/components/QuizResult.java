@@ -27,9 +27,10 @@ import org.genericsystem.reactor.annotations.Select;
 import org.genericsystem.reactor.annotations.SelectContext;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
+import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.context.ObservableContextSelector.SELECTION_SELECTOR;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-import org.genericsystem.reactor.gscomponents.FlexDiv.FlexRow;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
@@ -39,7 +40,8 @@ import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlP;
 import javafx.collections.MapChangeListener;
 
 @Children({ SummaryResults.class, AllResults.class })
-public class QuizResult extends HtmlDiv {
+@Style(name = "align-items", value = "center")
+public class QuizResult extends FlexDiv {
 
 	// Pour s'afficher, SummaryResult a besoin d'un Quiz en context. Il est utilisé pour afficher les scores d'un utilisateur après qu'il ait passé un quiz
 	@Children({ MySumResult.class })
@@ -47,8 +49,6 @@ public class QuizResult extends HtmlDiv {
 	public static class SummaryResults extends HtmlDiv implements SelectionDefaults {
 
 	}
-
-	// TODO Créer un affichage des résultats pour tous les users et pour le user connecté
 
 	@Children({ TitleResultH1.class, MyResultP.class })
 	public static class MySumResult extends HtmlDiv {
@@ -74,8 +74,9 @@ public class QuizResult extends HtmlDiv {
 					Double grade02 = ScoreUtils.calculateDualGrade(context, quiz, user);
 
 					String goodAnswer = (Integer) scoreUserQuiz.getValue() > 1 ? " bonnes réponses" : " bonne réponse";
+					String point = grade02 > 1 ? " points" : " point";
 
-					this.setText(context, "Vous venez de terminer le quiz.\nVotre Score est de " + grade02 + " sur 20\nVous avez eu " + scoreUserQuiz + goodAnswer);
+					this.setText(context, "Vous venez de terminer le quiz.\nVotre Score est de " + grade02 + point + "\nVous avez eu " + scoreUserQuiz + goodAnswer);
 				});
 			}
 		}
@@ -86,15 +87,23 @@ public class QuizResult extends HtmlDiv {
 	@Children(path = HtmlDiv.class, pos = 0, value = Search.class)
 	//
 	@Style(name = "width", value = "90%")
-	@Style(path = { TitleResult.class, HtmlDiv.class }, name = "flex", value = "1")
-	@Style(path = { HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
-	@Style(path = { HtmlDiv.class, HtmlDiv.class, HtmlDiv.class }, name = "flex", value = "1")
+	@Style(path = FlexDiv.class, name = "flex", value = "1")
+	@Style(path = { FlexDiv.class, FlexDiv.class }, name = "flex", value = "1")
+	@Style(path = HtmlDiv.class, pos = 0, name = "text-align", value = "right")
+	@Style(path = HtmlDiv.class, pos = 0, name = "margin-bottom", value = "15px")
+	@Style(path = TitleResult.class, name = "min-height", value = "40px")
+	@StyleClass(path = TitleResult.class, value = "titleTableDivQ")
+	@StyleClass(path = { TitleResult.class, FlexDiv.class }, value = "titleTableCellQ")
+	@StyleClass(path = { ScoreDiv.class, FlexDiv.class }, value = "scoreTableCellQ")
+	@Style(path = { ScoreDiv.class, UserDiv.class }, name = "border-left", value = "0.5px solid grey")
+	@Style(path = { ScoreDiv.class, QuizDiv.class }, name = "border-right", value = "0.5px solid grey")
 	//
 	// L'étape suivant est de se passer du bouton "Rechercher" et permettre une recherche active pendant que l'on tape le texte.
 	@SetText(path = { HtmlDiv.class, HtmlButton.class }, value = "Rechercher")
-	public static class AllResults extends HtmlDiv {
+	public static class AllResults extends FlexDiv {
 
 		@Attribute(name = "placeholder", value = "Entrer un nom d'utilisateur")
+		@StyleClass({ "inputTextQ", "inputTextSearchQ" })
 		public static class Search extends HtmlInputText {
 
 			@Override
@@ -112,18 +121,18 @@ public class QuizResult extends HtmlDiv {
 			}
 		}
 
-		@Children({ HtmlDiv.class, HtmlDiv.class, HtmlDiv.class, HtmlDiv.class, HtmlDiv.class })
-		@SetText(path = HtmlDiv.class, pos = 0, value = "Pseudo")
-		@SetText(path = HtmlDiv.class, pos = 1, value = "Réponses correctes")
-		@SetText(path = HtmlDiv.class, pos = 2, value = "Score 1")
-		@SetText(path = HtmlDiv.class, pos = 3, value = "Score 2")
-		@SetText(path = HtmlDiv.class, pos = 4, value = "Quiz")
+		@Children({ FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class, FlexDiv.class })
+		@SetText(path = FlexDiv.class, pos = 0, value = "Pseudo")
+		@SetText(path = FlexDiv.class, pos = 1, value = "Réponses correctes")
+		@SetText(path = FlexDiv.class, pos = 2, value = "Score 1")
+		@SetText(path = FlexDiv.class, pos = 3, value = "Score 2")
+		@SetText(path = FlexDiv.class, pos = 4, value = "Quiz")
 		public static class TitleResult extends FlexRow {
 
 		}
 
 		@ForEachContext(SCORES_FILTERED.class)
-		@Children({ UserDiv.class, HtmlDiv.class, Score01.class, Score02.class, QuizDiv.class })
+		@Children({ UserDiv.class, FlexDiv.class, Score01.class, Score02.class, QuizDiv.class })
 		@Select(path = UserDiv.class, value = USER_EXTRACTOR.class)
 		@Select(path = QuizDiv.class, value = QUIZ_EXTRACTOR.class)
 		@BindText(path = UserDiv.class)
@@ -136,25 +145,34 @@ public class QuizResult extends HtmlDiv {
 				addPrefixBinding(context -> {
 
 					if (context.getGeneric().getComponent(0).equals(getLoggedUserProperty(context).getValue())) {
+						this.addStyle(context, "background-color", "#FFE9C5");
 						this.addStyle(context, "font-weight", "bold");
 					}
+
 					getLoggedUserProperty(context).addListener((observable, oldValue, newValue) -> {
 						if (!context.isDestroyed()) {
-							if (newValue == null)
+
+							if (newValue == null) {
+								this.addStyle(context, "background-color", "inherit");
 								this.addStyle(context, "font-weight", "normal");
+							}
+
 							if (newValue != null && newValue.equals(context.getGeneric().getComponent(0))) {
+								this.addStyle(context, "background-color", "#FFE9C5");
 								this.addStyle(context, "font-weight", "bold");
 							}
+
 						}
 					});
+
 				});
 			}
 
-			public static class UserDiv extends HtmlDiv {
+			public static class UserDiv extends FlexDiv {
 
 			}
 
-			public static class Score01 extends HtmlDiv {
+			public static class Score01 extends FlexDiv {
 
 				@Override
 				public void init() {
@@ -165,7 +183,7 @@ public class QuizResult extends HtmlDiv {
 				}
 			}
 
-			public static class Score02 extends HtmlDiv {
+			public static class Score02 extends FlexDiv {
 
 				@Override
 				public void init() {
@@ -177,7 +195,7 @@ public class QuizResult extends HtmlDiv {
 				}
 			}
 
-			public static class QuizDiv extends HtmlDiv {
+			public static class QuizDiv extends FlexDiv {
 
 			}
 		}

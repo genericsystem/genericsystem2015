@@ -2,6 +2,7 @@ package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.quiz.app.pages.components.QuizSelect.QuizChoice;
 import org.genericsystem.quiz.model.Quiz;
+import org.genericsystem.quiz.utils.QuizTagSwitcher.QUIZ_NOT_DONE;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
@@ -9,6 +10,7 @@ import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
@@ -42,11 +44,13 @@ public class QuizSelect extends HtmlDiv {
 	}
 
 	@SetText("Commencer !")
+	@Switch(QUIZ_NOT_DONE.class)
 	public static class QuizButton extends HtmlButton {
 
 	}
 
 	@SetText("Scores")
+	@Style(name = "margin-left", value = "auto")
 	public static class ResultButton extends HtmlButton {
 
 	}
