@@ -292,7 +292,11 @@ public class ExtendedRootTag extends RootTagImpl {
 
 		private Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = new TreeMap<>((an1, an2) -> {
 			List<Class<? extends Annotation>> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors().keySet().stream().collect(Collectors.toList());
-			return Integer.compare(processors.indexOf(an1.getAnnotationClass()), processors.indexOf(an2.getAnnotationClass()));
+			Class<? extends Annotation> class1 = an1.getAnnotationClass();
+			Class<? extends Annotation> class2 = an2.getAnnotationClass();
+			if (an1.equals(an2))
+				return 0;
+			return class1.equals(class2) ? an1.getName().compareTo(an2.getName()) : Integer.compare(processors.indexOf(class1), processors.indexOf(class2));
 		});
 		private Map<AnnotationClassName, ObservableList<GenericAnnotationWithContent>> tagAnnotations = new HashMap<AnnotationClassName, ObservableList<GenericAnnotationWithContent>>() {
 
