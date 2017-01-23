@@ -2,6 +2,7 @@ package org.genericsystem.quiz.app.pages.components;
 
 import org.genericsystem.quiz.app.pages.components.QuizSelect.QuizChoice;
 import org.genericsystem.quiz.model.Quiz;
+import org.genericsystem.quiz.utils.QuizExtractors.DESCRIPTION_EXTRACTOR;
 import org.genericsystem.quiz.utils.QuizTagSwitcher.QUIZ_NOT_DONE;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
@@ -28,9 +29,11 @@ public class QuizSelect extends HtmlDiv {
 	@Children(path = FlexDiv.class, pos = 0, value = { HtmlH4.class, HtmlP.class })
 	@Children(path = FlexRow.class, value = { QuizButton.class, ResultButton.class })
 	@ForEach(ObservableListExtractor.SUBINSTANCES.class)
+	@ForEach(path = { FlexDiv.class, HtmlP.class }, value = DESCRIPTION_EXTRACTOR.class)
 	//
 	@BindText(path = { FlexDiv.class, HtmlH4.class })
-	@SetText(path = { FlexDiv.class, HtmlP.class }, value = "<em>Description du quiz...<em>")
+	@BindText(path = { FlexDiv.class, HtmlP.class })
+	// @SetText(path = { FlexDiv.class, HtmlP.class }, value = "<em>Description du quiz...<em>")
 	//
 	@Style(name = "width", value = "100%")
 	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "1")

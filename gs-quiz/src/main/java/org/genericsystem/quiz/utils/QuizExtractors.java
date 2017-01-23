@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.quiz.model.Answer;
+import org.genericsystem.quiz.model.Description;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
 import org.genericsystem.reactor.Context;
@@ -33,6 +34,15 @@ public class QuizExtractors {
 		public ObservableList<Generic> apply(Generic[] generics) {
 			return generics[0].getObservableHolders(generics[0].getRoot().find(Question.class));
 		}
+	}
+
+	public static class DESCRIPTION_EXTRACTOR implements ObservableListExtractor {
+
+		@Override
+		public ObservableList<Generic> apply(Generic[] generics) {
+			return generics[0].getObservableHolders(generics[0].getRoot().find(Description.class));
+		}
+
 	}
 
 	public static class USER_EXTRACTOR implements ObservableValueSelector {
