@@ -236,6 +236,10 @@ public class ExtendedRootTag extends RootTagImpl {
 			return annotationClass;
 		}
 
+		public String getName() {
+			return name;
+		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (!(obj instanceof AnnotationClassName))
