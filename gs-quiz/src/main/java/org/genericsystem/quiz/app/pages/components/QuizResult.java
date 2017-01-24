@@ -46,12 +46,17 @@ public class QuizResult extends FlexDiv {
 	// Pour s'afficher, SummaryResult a besoin d'un Quiz en context. Il est utilisé pour afficher les scores d'un utilisateur après qu'il ait passé un quiz
 	@Children({ MySumResult.class })
 	@SelectContext(SELECTION_SELECTOR.class)
-	public static class SummaryResults extends HtmlDiv implements SelectionDefaults {
+	@Style(name = "width", value = "100%")
+	@Style(name = "align-items", value = "center")
+	public static class SummaryResults extends FlexDiv implements SelectionDefaults {
 
 	}
 
 	@Children({ TitleResultH1.class, MyResultP.class })
-	public static class MySumResult extends HtmlDiv {
+	//
+	@Style(name = "width", value = "90%")
+	@StyleClass("myResultDiv")
+	public static class MySumResult extends FlexDiv {
 
 		public static class TitleResultH1 extends HtmlH1 {
 
