@@ -80,7 +80,7 @@ public class HtmlDomNode {
 	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
 			if (change.wasRemoved())
-				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding()));
+				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding() == null));
 			if (change.wasAdded())
 				change.getAddedSubList().forEach(tagAdder::accept);
 		}
@@ -207,7 +207,7 @@ public class HtmlDomNode {
 					if (subContext.isInCache())
 						childTag.addStyleClass(subContext, "opaque");
 					return subContext;
-				}, subContext -> deepRemove(subContext, childTag, null)));
+				}, subContext -> deepRemove(subContext, childTag, true)));
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
@@ -228,10 +228,10 @@ public class HtmlDomNode {
 		parent.decrementSize(tag);
 	}
 
-	private void deepRemove(Context context, Tag tag, MetaBinding<?> oldMetaBinding) {
-		if (oldMetaBinding == null) {
+	private void deepRemove(Context context, Tag tag, boolean htmlDomNodeExistsWithTheseContextAndTag) {
+		if (htmlDomNodeExistsWithTheseContextAndTag) {
 			for (Tag childTag : tag.getObservableChildren())
-				deepRemove(context, childTag, childTag.getMetaBinding());
+				deepRemove(context, childTag, childTag.getMetaBinding() == null);
 			HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
 			if (htmlDomNode != null) {
 				htmlDomNode.destroy();
@@ -364,7 +364,7 @@ public class HtmlDomNode {
 			if (listener == null && key instanceof Tag) {
 				Tag childTag = (Tag) key;
 				put(childTag, listener = (o, ov, nv) -> {
-					deepRemove(context, childTag, ov);
+					deepRemove(context, childTag, ov == null);
 					updateMetaBinding(childTag, nv);
 				});
 			}
