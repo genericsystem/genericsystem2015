@@ -176,16 +176,39 @@ public class HtmlDomNode {
 		};
 	}
 
+	final Map<Context, ObservableList<TagSwitcher>> selectorsBySubContext = new HashMap<>();// Prevents garbage collection
+	final Map<Context, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsBySubContextAndSwitcher = new HashMap<Context, Map<TagSwitcher, ObservableValue<Boolean>>>() {
+
+		private static final long serialVersionUID = 8433634652535244598L;
+
+		@Override
+		public Map<TagSwitcher, ObservableValue<Boolean>> get(Object key) {
+			Map<TagSwitcher, ObservableValue<Boolean>> result = super.get(key);
+			if (result == null)
+				put((Context) key, result = new HashMap<>());
+			return result;
+		}
+	};
+
 	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
 		if (metaBinding != null) {
-			if (context.getSubContexts(childTag) == null)
-				context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
-					Context childContext = metaBinding.buildModel(context, between);
-					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
-					if (childContext.isInCache())
-						childTag.addStyleClass(childContext, "opaque");
-					return childContext;
-				}, Context::destroy));
+			if (context.getSubContexts(childTag) == null) {
+				ObservableList<Context> subContexts = new FilteredList<>(new TransformationObservableList<>(metaBinding.buildBetweenChildren(context), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
+					ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<>(childTag.getObservableSwitchers(), s -> {
+						ObservableValue<Boolean> selector = s.apply(childContext, childTag);
+						selectorsBySubContextAndSwitcher.get(childContext).put(s, selector);
+						return new ObservableValue[] { selector };
+					});
+					selectorsBySubContext.put(childContext, result);
+					return new ObservableList[] { result };
+				}), childContext -> selectorsBySubContextAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsBySubContext.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+				context.setSubContexts(childTag, new TransformationObservableList<>(subContexts, (i, subContext) -> {
+					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
+					if (subContext.isInCache())
+						childTag.addStyleClass(subContext, "opaque");
+					return subContext;
+				}, subContext -> deepRemove(subContext, childTag, null)));
+			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
 	}
@@ -241,7 +264,7 @@ public class HtmlDomNode {
 	}
 
 	private class FilteredChildren {
-		final Map<Tag, ObservableList<TagSwitcher>> selectorsByTag = new HashMap<Tag, ObservableList<TagSwitcher>>();// Prevents garbage collection
+		final Map<Tag, ObservableList<TagSwitcher>> selectorsByTag = new HashMap<>();// Prevents garbage collection
 		final Map<Tag, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsByTagAndSwitcher = new HashMap<Tag, Map<TagSwitcher, ObservableValue<Boolean>>>() {
 
 			private static final long serialVersionUID = -5831485781427983238L;
@@ -250,20 +273,22 @@ public class HtmlDomNode {
 			public Map<TagSwitcher, ObservableValue<Boolean>> get(Object key) {
 				Map<TagSwitcher, ObservableValue<Boolean>> result = super.get(key);
 				if (result == null)
-					put((Tag) key, result = new HashMap<TagSwitcher, ObservableValue<Boolean>>());
+					put((Tag) key, result = new HashMap<>());
 				return result;
 			}
 		};
 
-		final ObservableList<Tag> filteredList = new FilteredList<Tag>(new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
-			ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<TagSwitcher>(child.getObservableSwitchers(), s -> {
+		final ObservableList<Tag> filteredList = new FilteredList<>(new ObservableListWrapperExtended<>(context.getRootContext().getObservableChildren(tag), child -> {
+			if (child.getMetaBinding() != null)
+				return new ObservableValue[] {};
+			ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<>(child.getObservableSwitchers(), s -> {
 				ObservableValue<Boolean> selector = s.apply(context, child);
 				selectorsByTagAndSwitcher.get(child).put(s, selector);
 				return new ObservableValue[] { selector };
 			});
 			selectorsByTag.put(child, result);
 			return new ObservableList[] { result };
-		}), child -> selectorsByTagAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByTag.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+		}), child -> child.getMetaBinding() != null || selectorsByTagAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByTag.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {

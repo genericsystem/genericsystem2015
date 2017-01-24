@@ -7,12 +7,12 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
-
-import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
  * @author Nicolas Feybesse
@@ -100,6 +100,15 @@ public class TransformationObservableList<SOURCE, TARGET> extends ObservableList
 
 	public TransformationObservableList(ObservableList<SOURCE> external, BiFunction<Integer, SOURCE, TARGET> add, Consumer<TARGET> consumer) {
 		super(new ArrayList<>());
+		this.external = external; // prevents of listener garbage collection
+		this.addBiConsumer = (index, src) -> add(index, add.apply(index, src));
+		this.removeConsumer = index -> consumer.accept(remove(index.intValue()));
+		bind();
+		init();
+	}
+
+	public TransformationObservableList(ObservableList<SOURCE> external, BiFunction<Integer, SOURCE, TARGET> add, Consumer<TARGET> consumer, Callback<TARGET, Observable[]> extractor) {
+		super(new ArrayList<>(), extractor);
 		this.external = external; // prevents of listener garbage collection
 		this.addBiConsumer = (index, src) -> add(index, add.apply(index, src));
 		this.removeConsumer = index -> consumer.accept(remove(index.intValue()));
