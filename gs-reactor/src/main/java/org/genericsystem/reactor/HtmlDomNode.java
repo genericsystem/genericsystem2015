@@ -80,7 +80,7 @@ public class HtmlDomNode {
 	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
 			if (change.wasRemoved())
-				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding()));
+				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding() == null));
 			if (change.wasAdded())
 				change.getAddedSubList().forEach(tagAdder::accept);
 		}
@@ -178,14 +178,16 @@ public class HtmlDomNode {
 
 	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
 		if (metaBinding != null) {
-			if (context.getSubContexts(childTag) == null)
-				context.setSubContexts(childTag, new TransformationObservableList<BETWEEN, Context>(metaBinding.buildBetweenChildren(context), (i, between) -> {
-					Context childContext = metaBinding.buildModel(context, between);
-					childTag.createNode(this, childContext).init(computeIndex(i, childTag));
-					if (childContext.isInCache())
-						childTag.addStyleClass(childContext, "opaque");
-					return childContext;
-				}, Context::destroy));
+			if (context.getSubContexts(childTag) == null) {
+				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag);
+				childTag.createNewInitializedProperty("filteredContexts", context, c -> subContexts);
+				context.setSubContexts(childTag, new TransformationObservableList<>(subContexts.filteredSubContexts, (i, subContext) -> {
+					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
+					if (subContext.isInCache())
+						childTag.addStyleClass(subContext, "opaque");
+					return subContext;
+				}, subContext -> deepRemove(subContext, childTag, true)));
+			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
 	}
@@ -194,9 +196,12 @@ public class HtmlDomNode {
 		// System.out.println("Attempt to destroy : " + getId());
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
-		((FilteredChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
-		for (Tag childTag : tag.getObservableChildren())
+		((FilteredTagChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
+		for (Tag childTag : tag.getObservableChildren()) {
 			childTag.getMetaBindingProperty().removeListener(metaBindingListeners.get(childTag));
+			if (childTag.getMetaBinding() != null && context.getSubContexts(childTag) != null)
+				((FilteredChildContexts<?>) childTag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
+		}
 		tag.getDomNodeTextProperty(context).removeListener(textListener);
 		tag.getDomNodeStyles(context).removeListener(stylesListener);
 		tag.getDomNodeAttributes(context).removeListener(attributesListener);
@@ -205,10 +210,10 @@ public class HtmlDomNode {
 		parent.decrementSize(tag);
 	}
 
-	private void deepRemove(Context context, Tag tag, MetaBinding<?> oldMetaBinding) {
-		if (oldMetaBinding == null) {
+	private void deepRemove(Context context, Tag tag, boolean htmlDomNodeExistsWithTheseContextAndTag) {
+		if (htmlDomNodeExistsWithTheseContextAndTag) {
 			for (Tag childTag : tag.getObservableChildren())
-				deepRemove(context, childTag, childTag.getMetaBinding());
+				deepRemove(context, childTag, childTag.getMetaBinding() == null);
 			HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
 			if (htmlDomNode != null) {
 				htmlDomNode.destroy();
@@ -218,8 +223,10 @@ public class HtmlDomNode {
 			context.removeHtmlDomNode(tag);
 		} else if (context.getSubContexts(tag) != null) {
 			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
+			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
 			for (Context subContext : context.getSubContexts(tag))
 				subContext.destroy();
+			context.removeProperties(tag);
 			context.removeSubContexts(tag);// remove tag ref
 		}
 	}
@@ -231,7 +238,7 @@ public class HtmlDomNode {
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
 		assert (!context.containsProperty(tag, "filteredChildren"));
-		FilteredChildren filteredChildren = new FilteredChildren();
+		FilteredTagChildren filteredChildren = new FilteredTagChildren();
 		tag.createNewInitializedProperty("filteredChildren", context, c -> filteredChildren);
 		for (Tag childTag : filteredChildren.filteredList)
 			tagAdder.accept(childTag);
@@ -240,9 +247,9 @@ public class HtmlDomNode {
 			binding.accept(context);
 	}
 
-	private class FilteredChildren {
-		final Map<Tag, ObservableList<TagSwitcher>> selectorsByTag = new HashMap<Tag, ObservableList<TagSwitcher>>();// Prevents garbage collection
-		final Map<Tag, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsByTagAndSwitcher = new HashMap<Tag, Map<TagSwitcher, ObservableValue<Boolean>>>() {
+	private class FilteredChildren<T> {
+		final Map<T, ObservableList<TagSwitcher>> selectorsByChild = new HashMap<>();// Prevents garbage collection
+		final Map<T, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsByChildAndSwitcher = new HashMap<T, Map<TagSwitcher, ObservableValue<Boolean>>>() {
 
 			private static final long serialVersionUID = -5831485781427983238L;
 
@@ -250,20 +257,44 @@ public class HtmlDomNode {
 			public Map<TagSwitcher, ObservableValue<Boolean>> get(Object key) {
 				Map<TagSwitcher, ObservableValue<Boolean>> result = super.get(key);
 				if (result == null)
-					put((Tag) key, result = new HashMap<TagSwitcher, ObservableValue<Boolean>>());
+					put((T) key, result = new HashMap<>());
 				return result;
 			}
 		};
+	}
 
-		final ObservableList<Tag> filteredList = new FilteredList<Tag>(new ObservableListWrapperExtended<Tag>(context.getRootContext().getObservableChildren(tag), child -> {
-			ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<TagSwitcher>(child.getObservableSwitchers(), s -> {
+	private class FilteredTagChildren extends FilteredChildren<Tag> {
+
+		final ObservableList<Tag> filteredList = new FilteredList<>(new ObservableListWrapperExtended<>(context.getRootContext().getObservableChildren(tag), child -> {
+			if (child.getMetaBinding() != null)
+				return new ObservableValue[] {};
+			ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<>(child.getObservableSwitchers(), s -> {
 				ObservableValue<Boolean> selector = s.apply(context, child);
-				selectorsByTagAndSwitcher.get(child).put(s, selector);
+				selectorsByChildAndSwitcher.get(child).put(s, selector);
 				return new ObservableValue[] { selector };
 			});
-			selectorsByTag.put(child, result);
+			selectorsByChild.put(child, result);
 			return new ObservableList[] { result };
-		}), child -> selectorsByTagAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByTag.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+		}), child -> child.getMetaBinding() != null || selectorsByChildAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByChild.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+	}
+
+	private class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
+		final ObservableList<Context> filteredSubContexts;
+		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
+
+		FilteredChildContexts(MetaBinding<BETWEEN> metaBinding, Tag childTag) {
+			transformationListSubContexts = new TransformationObservableList<>(metaBinding.buildBetweenChildren(context), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
+				ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<>(childTag.getObservableSwitchers(), s -> {
+					ObservableValue<Boolean> selector = s.apply(childContext, childTag);
+					selectorsByChildAndSwitcher.get(childContext).put(s, selector);
+					return new ObservableValue[] { selector };
+				});
+				selectorsByChild.put(childContext, result);
+				return new ObservableList[] { result };
+			});
+			filteredSubContexts = new FilteredList<>(transformationListSubContexts,
+					childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+		}
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {
@@ -339,7 +370,7 @@ public class HtmlDomNode {
 			if (listener == null && key instanceof Tag) {
 				Tag childTag = (Tag) key;
 				put(childTag, listener = (o, ov, nv) -> {
-					deepRemove(context, childTag, ov);
+					deepRemove(context, childTag, ov == null);
 					updateMetaBinding(childTag, nv);
 				});
 			}
