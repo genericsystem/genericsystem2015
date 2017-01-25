@@ -54,7 +54,6 @@ public class Context {
 	}
 
 	public void createNewProperty(Tag tag, String propertyName) {
-		assert htmlDomNodesMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
 		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
@@ -62,10 +61,8 @@ public class Context {
 
 	private Map<String, ObservableValue<?>> getProperties(Tag tag) {
 		Map<String, ObservableValue<?>> properties = propertiesMap.get(tag);
-		if (properties == null) {
-			assert htmlDomNodesMap.keySet().contains(tag);
-			propertiesMap.put(tag, properties = new HashMap<String, ObservableValue<?>>());
-		}
+		if (properties == null)
+			propertiesMap.put(tag, properties = new HashMap<>());
 		return properties;
 	}
 
@@ -88,7 +85,6 @@ public class Context {
 	}
 
 	protected void storeProperty(Tag tag, String propertyName, ObservableValue<?> value) {
-		assert htmlDomNodesMap.keySet().contains(tag);
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
 		getProperties(tag).put(propertyName, value);
@@ -118,7 +114,7 @@ public class Context {
 
 	public void destroy() {
 		// System.out.println("context destroy : " + this);
-		assert !destroyed;
+		assert !destroyed : this;
 		destroyed = true;
 		for (ObservableList<Context> subModels : subContextsMap.values()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
