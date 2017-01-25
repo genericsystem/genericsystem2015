@@ -232,6 +232,10 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		addPrefixBinding(modelContext -> modelContext.createNewProperty(this, propertyName));
 	}
 
+	default void createNewProperty(String propertyName, Context context) {
+		context.createNewProperty(this, propertyName);
+	}
+
 	@Override
 	default <T> void createNewInitializedProperty(String propertyName, Context context, Function<Context, T> getInitialValue) {
 		context.createNewProperty(this, propertyName);

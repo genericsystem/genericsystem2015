@@ -13,6 +13,53 @@ import javafx.beans.property.Property;
 public class QuizContextAction {
 
 	public final static String SELECTED_QUIZ = "selectedQuiz";
+	public final static String SELECTED_USER = "selectedUser";
+
+	public static class CLEAR_QUIZ implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			Property<Generic> selectedQuiz = tag.getProperty(SELECTED_QUIZ, context);
+
+			if (selectedQuiz == null) {
+				tag.getRootTag().createNewProperty(SELECTED_QUIZ);
+				return;
+			}
+
+			if (selectedQuiz.getValue() == null)
+				return;
+
+			selectedQuiz.setValue(null);
+		}
+	}
+
+	public static class CLEAR_USER implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			Property<Generic> selectedUser = tag.getProperty(SELECTED_USER, context);
+
+			if (selectedUser == null) {
+				tag.getRootTag().createNewProperty(SELECTED_USER);
+				return;
+			}
+
+			if (selectedUser.getValue() == null)
+				return;
+
+			selectedUser.setValue(null);
+		}
+	}
+
+	public static class CLEAR_QUIZCONTEXT_PROPERTIES implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			new CLEAR_USER().accept(context, tag);
+			new CLEAR_QUIZ().accept(context, tag);
+		}
+
+	}
 
 	public static class SELECT_QUIZ implements ContextAction {
 
@@ -28,10 +75,25 @@ public class QuizContextAction {
 
 			if (selectedQuiz == null)
 				tag.getRootTag().createNewInitializedProperty(SELECTED_QUIZ, context.getRootContext(), c -> quiz);
-			else if (!selectedQuiz.getValue().equals(quiz))
+			else if (!quiz.equals(selectedQuiz.getValue()))
 				selectedQuiz.setValue(quiz);
+		}
 
-			System.out.println("Creation de selectedQuiz " + tag.getProperty(SELECTED_QUIZ, context));
+	}
+
+	public static class SELECT_LOGGEDUSER implements ContextAction {
+
+		@Override
+		public void accept(Context context, Tag tag) {
+			Property<String> selectedUser = tag.getProperty(SELECTED_USER, context);
+			Property<Generic> loggedUser = tag.getLoggedUserProperty(context);
+
+			if (loggedUser == null)
+				return;
+			if (selectedUser == null)
+				tag.getRootTag().createNewInitializedProperty(SELECTED_USER, context.getRootContext(), c -> loggedUser.getValue() + "");
+			else
+				selectedUser.setValue(loggedUser.getValue() + "");
 		}
 
 	}
@@ -51,7 +113,6 @@ public class QuizContextAction {
 	}
 
 	// NAVIGATION ENTRE LES PAGES
-
 	public static class CLEAR_PAGES implements ContextAction {
 
 		@Override

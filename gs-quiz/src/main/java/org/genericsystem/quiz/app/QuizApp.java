@@ -5,6 +5,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.quiz.app.QuizApp.QuizzScript;
 import org.genericsystem.quiz.app.pages.AppPage;
 import org.genericsystem.quiz.model.Answer;
+import org.genericsystem.quiz.model.Description;
 import org.genericsystem.quiz.model.Question;
 import org.genericsystem.quiz.model.Quiz;
 import org.genericsystem.quiz.model.ScoreUserQuiz;
@@ -20,7 +21,7 @@ import org.genericsystem.reactor.gscomponents.RootTagImpl;
 import org.genericsystem.security.model.User;
 
 @RunScript(QuizzScript.class)
-@DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class })
+@DependsOnModel({ Quiz.class, Question.class, Answer.class, User.class, UserAnswer.class, ScoreUserQuiz.class, Description.class })
 @Children(AppPage.class)
 @Style(name = "background-color", value = "#F5F5F5")
 public class QuizApp extends RootTagImpl {
@@ -46,6 +47,11 @@ public class QuizApp extends RootTagImpl {
 			Generic quiz = engine.find(Quiz.class);
 			Generic quizTest = quiz.setInstance("Petit Test");
 			Generic quiz2 = quiz.setInstance("Quiz n°2");
+
+			// Create Description for each Quiz
+			Generic description = engine.find(Description.class);
+			quizTest.setHolder(description, "<em>Testez vos connaissances en JEE...</em>");
+			quiz2.setHolder(description, "<em>Blind Test !</em>");
 
 			// Create Questions (Question.class is a component of Quiz.class)
 			Generic question = engine.find(Question.class);

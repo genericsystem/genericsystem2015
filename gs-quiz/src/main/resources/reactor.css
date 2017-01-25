@@ -368,6 +368,7 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 	color				: black;
 	min-width			: 850px;
 }
+
 .headerQ {
 	justify-content		: space-between;
 	background-color	: #729fcf;
@@ -410,6 +411,11 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 	padding-right		: 1em;
 }	
 
+.inputTextSearchQ {
+	min-width			: 100px;
+	width				: 35%;
+}
+
 .sideDivQHeader {
 	max-width			: 25%;
 	min-width			: 200px;
@@ -448,7 +454,37 @@ only screen and (max-device-width:479px) and (orientation : portrait){
 	font-weight			: bold;
 }
 
+.titleTableDivQ{
+	background-color	: #081F54;
+	color				: white;
+	font-weight			: bold;
+}
 
+.titleTableCellQ {	
+	justify-content		: center;
+	text-align			: center;
+	border-bottom		: 1px solid black;
+	border-top			: 1px solid black;
+	border-left			: 0.5px solid black;
+	border-right		: 0.5px solid black;
+}
 
+.scoreTableCellQ {
+	padding				: 0.5em;
+	padding-right		: 1.5em;
+	border-bottom		: 0.5px solid grey;
+	text-align			: right;
+	align-items			: flex-end;
+	justify-content		: center;
+}
 
+.myResultDiv {
+	background-color	: #FFE9C5;
+	border-radius		: 10px;
+	border				: 3px solid #204a87;
+	padding				: 1em;
+	margin-top			: 2em;
+	margin-bottom		: 3em;
+	text-align			: center;	
+}
 
