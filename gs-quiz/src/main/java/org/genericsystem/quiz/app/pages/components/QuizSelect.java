@@ -33,7 +33,6 @@ public class QuizSelect extends HtmlDiv {
 	//
 	@BindText(path = { FlexDiv.class, HtmlH4.class })
 	@BindText(path = { FlexDiv.class, HtmlP.class })
-	// @SetText(path = { FlexDiv.class, HtmlP.class }, value = "<em>Description du quiz...<em>")
 	//
 	@Style(name = "width", value = "100%")
 	@Style(path = FlexDiv.class, pos = 0, name = "flex", value = "1")
@@ -46,7 +45,7 @@ public class QuizSelect extends HtmlDiv {
 
 	}
 
-	@SetText("Commencer !")
+	@SetText("Commencer")
 	@Switch(QUIZ_NOT_DONE.class)
 	public static class QuizButton extends HtmlButton {
 

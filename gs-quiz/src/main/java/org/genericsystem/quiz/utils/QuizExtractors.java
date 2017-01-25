@@ -98,18 +98,13 @@ public class QuizExtractors {
 				protected ObservableList<Generic> computeValue() {
 					return context.getGeneric().getObservableSubInstances().sorted(byQuiz.thenComparing(byScoreUser)).filtered(scoreUser -> {
 
-						if (selectedQuiz.getValue() == null && selectedUser.getValue() == null)
-							return true;
-
-						boolean isQuiz = scoreUser.getComponent(1).equals(selectedQuiz.getValue());
+						boolean isQuiz = true;
 						boolean isUser = true;
 
-						if (selectedQuiz.getValue() != null && (selectedUser.getValue() == null || selectedUser.getValue().trim().isEmpty()))
-							return isQuiz;
-						if (selectedQuiz.getValue() == null && (selectedUser.getValue() != null || !selectedUser.getValue().trim().isEmpty())) {
+						if (selectedQuiz.getValue() != null)
+							isQuiz = scoreUser.getComponent(1).equals(selectedQuiz.getValue());
+						if (selectedUser.getValue() != null && !selectedUser.getValue().trim().isEmpty())
 							isUser = ((String) scoreUser.getComponent(0).getValue()).trim().toLowerCase().contains(selectedUser.getValue().trim().toLowerCase());
-							return isUser;
-						}
 
 						return (isQuiz && isUser);
 					});
