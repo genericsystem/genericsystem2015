@@ -80,7 +80,7 @@ public class HtmlDomNode {
 	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
 			if (change.wasRemoved())
-				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding() == null));
+				change.getRemoved().forEach(childTag -> deepRemove(context, childTag));
 			if (change.wasAdded())
 				change.getAddedSubList().forEach(tagAdder::accept);
 		}
@@ -186,7 +186,7 @@ public class HtmlDomNode {
 					if (subContext.isInCache())
 						childTag.addStyleClass(subContext, "opaque");
 					return subContext;
-				}, subContext -> deepRemove(subContext, childTag, true)));
+				}, subContext -> deepRemove(subContext, childTag)));
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
@@ -210,23 +210,21 @@ public class HtmlDomNode {
 		parent.decrementSize(tag);
 	}
 
-	private void deepRemove(Context context, Tag tag, boolean htmlDomNodeExistsWithTheseContextAndTag) {
-		if (htmlDomNodeExistsWithTheseContextAndTag) {
+	private void deepRemove(Context context, Tag tag) {
+		HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
+		if (htmlDomNode != null) {
 			for (Tag childTag : tag.getObservableChildren())
-				deepRemove(context, childTag, childTag.getMetaBinding() == null);
-			HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
-			if (htmlDomNode != null) {
-				htmlDomNode.destroy();
-				htmlDomNode.sendRemove();
-			}
-			context.removeTag(tag);
-		} else if (context.getSubContexts(tag) != null) {
+				deepRemove(context, childTag);
+			htmlDomNode.destroy();
+			htmlDomNode.sendRemove();
+		}
+		if (context.getSubContexts(tag) != null) {
 			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
 			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
 			for (Context subContext : context.getSubContexts(tag))
 				subContext.destroy();
-			context.removeTag(tag);
 		}
+		context.removeTag(tag);
 	}
 
 	protected <BETWEEN> void init(int index) {
@@ -368,7 +366,7 @@ public class HtmlDomNode {
 			if (listener == null && key instanceof Tag) {
 				Tag childTag = (Tag) key;
 				put(childTag, listener = (o, ov, nv) -> {
-					deepRemove(context, childTag, ov == null);
+					deepRemove(context, childTag);
 					updateMetaBinding(childTag, nv);
 				});
 			}
