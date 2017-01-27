@@ -1,9 +1,11 @@
 package org.genericsystem.reactor;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
@@ -26,19 +28,39 @@ import javafx.collections.ObservableList;
 public class Context {
 	protected static Logger log = LoggerFactory.getLogger(Context.class);
 	private Context parent;
-	private Map<Tag, HtmlDomNode> htmlDomNodesMap = new LinkedHashMap<>();
-	private Map<Tag, ObservableList<Context>> subContextsMap = new HashMap<>();
-	private Map<Tag, Map<String, ObservableValue<?>>> propertiesMap = new HashMap<>();
+	private Map<Tag, TagData> tagDataMap = new LinkedHashMap<>();
 	private final Generic[] generics;
 	private boolean destroyed = false;
+
+	private static class TagData {
+		private HtmlDomNode htmlDomNode;
+		private ObservableList<Context> subContexts;
+		private final Map<String, ObservableValue<?>> properties = new HashMap<>();
+
+		public HtmlDomNode getHtmlDomNode() {
+			return htmlDomNode;
+		}
+
+		public ObservableList<Context> getSubContexts() {
+			return subContexts;
+		}
+
+		public Map<String, ObservableValue<?>> getProperties() {
+			return properties;
+		}
+
+		public void setHtmlDomNode(HtmlDomNode htmlDomNode) {
+			this.htmlDomNode = htmlDomNode;
+		}
+
+		public void setSubContexts(ObservableList<Context> subContexts) {
+			this.subContexts = subContexts;
+		}
+	}
 
 	public Context(Context parent, Generic[] generics) {
 		this.parent = parent;
 		this.generics = generics;
-	}
-
-	public Map<Tag, HtmlDomNode> getHtmlDomNodesMap() {
-		return htmlDomNodesMap;
 	}
 
 	public Context getParent() {
@@ -46,11 +68,19 @@ public class Context {
 	}
 
 	public ObservableList<Context> getSubContexts(Tag tag) {
-		return subContextsMap.get(tag);
+		return tagDataMap.get(tag) != null ? tagDataMap.get(tag).getSubContexts() : null;
+	}
+
+	public List<Context> getSubContexts() {
+		return tagDataMap.values().stream().map(tagData -> tagData.getSubContexts()).filter(list -> list != null).flatMap(list -> list.stream()).collect(Collectors.toList());
+	}
+
+	public List<ObservableList<Context>> getSubContextsLists() {
+		return tagDataMap.values().stream().map(tagData -> tagData.getSubContexts()).filter(list -> list != null).collect(Collectors.toList());
 	}
 
 	public boolean containsProperty(Tag tag, String propertyName) {
-		return propertiesMap.containsKey(tag) ? propertiesMap.get(tag).containsKey(propertyName) : false;
+		return tagDataMap.containsKey(tag) ? tagDataMap.get(tag).getProperties().containsKey(propertyName) : false;
 	}
 
 	public void createNewProperty(Tag tag, String propertyName) {
@@ -59,11 +89,11 @@ public class Context {
 		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
 	}
 
-	private Map<String, ObservableValue<?>> getProperties(Tag tag) {
-		Map<String, ObservableValue<?>> properties = propertiesMap.get(tag);
-		if (properties == null)
-			propertiesMap.put(tag, properties = new HashMap<>());
-		return properties;
+	public Map<String, ObservableValue<?>> getProperties(Tag tag) {
+		TagData tagData = tagDataMap.get(tag);
+		if (tagData == null)
+			tagDataMap.put(tag, tagData = new TagData());
+		return tagData.getProperties();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -76,61 +106,58 @@ public class Context {
 		return (Property<T>) getProperties(tag).get(propertyName);
 	}
 
-	public Collection<Map<String, ObservableValue<?>>> getPropertiesMaps() {
-		return propertiesMap.values();
-	}
-
-	public Map<String, ObservableValue<?>> getPropertiesMaps(Tag tag) {
-		return propertiesMap.get(tag);
-	}
-
 	protected void storeProperty(Tag tag, String propertyName, ObservableValue<?> value) {
 		if (getProperties(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
 		getProperties(tag).put(propertyName, value);
 	}
 
-	public void removeSubContexts(Tag tag) {
-		subContextsMap.remove(tag);
-	}
-
-	public void removeProperties(Tag tag) {
-		propertiesMap.remove(tag);
-	}
-
-	public void removeHtmlDomNode(Tag tag) {
-		htmlDomNodesMap.remove(tag);
+	public void removeTag(Tag tag) {
+		tagDataMap.remove(tag);
 	}
 
 	void setSubContexts(Tag tag, ObservableList<Context> subContexts) {
-		assert subContextsMap.get(tag) == null;
-		subContextsMap.put(tag, subContexts);
+		TagData tagData = tagDataMap.get(tag);
+		assert tagData == null || tagData.getSubContexts() == null;
+		if (tagData == null)
+			tagDataMap.put(tag, tagData = new TagData());
+		tagData.setSubContexts(subContexts);
 	}
 
 	public void register(HtmlDomNode htmlDomNode) {
-		HtmlDomNode previous = htmlDomNodesMap.put(htmlDomNode.getTag(), htmlDomNode);
-		assert previous == null;
+		TagData domNodeTagData = tagDataMap.get(htmlDomNode.getTag());
+		assert domNodeTagData == null || domNodeTagData.getHtmlDomNode() == null;
+		if (domNodeTagData == null)
+			tagDataMap.put(htmlDomNode.getTag(), domNodeTagData = new TagData());
+		domNodeTagData.setHtmlDomNode(htmlDomNode);
 	}
 
 	public void destroy() {
 		// System.out.println("context destroy : " + this);
 		assert !destroyed : this;
 		destroyed = true;
-		for (ObservableList<Context> subModels : subContextsMap.values()) {
+		for (ObservableList<Context> subModels : getSubContextsLists()) {
 			((TransformationObservableList<?, ?>) subModels).unbind();
 			for (Context subModel : subModels)
 				subModel.destroy();
 		}
-		htmlDomNodesMap.values().forEach(htmlDomNode -> htmlDomNode.destroy());
-		if (htmlDomNodesMap.values().iterator().hasNext())
-			htmlDomNodesMap.values().iterator().next().sendRemove();
-		subContextsMap = new HashMap<>();
-		htmlDomNodesMap = new LinkedHashMap<>();
-		propertiesMap = new HashMap<>();
+		List<HtmlDomNode> domNodes = getHtmlDomNodes();
+		domNodes.forEach(htmlDomNode -> htmlDomNode.destroy());
+		if (!domNodes.isEmpty())
+			domNodes.get(0).sendRemove();
+		tagDataMap = new LinkedHashMap<>();
 	}
 
-	public HtmlDomNode getHtmlDomNode(Tag element) {
-		return htmlDomNodesMap.get(element);
+	public HtmlDomNode getHtmlDomNode(Tag tag) {
+		return tagDataMap.get(tag) != null ? tagDataMap.get(tag).getHtmlDomNode() : null;
+	}
+
+	public List<HtmlDomNode> getHtmlDomNodes() {
+		return tagDataMap.values().stream().map(tagData -> tagData.getHtmlDomNode()).filter(htmlDomNode -> htmlDomNode != null).collect(Collectors.toList());
+	}
+
+	public Map<Tag, TagData> getTagDataMap() {
+		return tagDataMap;
 	}
 
 	public Generic[] getGenerics() {
@@ -194,11 +221,12 @@ public class Context {
 	}
 
 	public void traverse() {
+		Stream<Tag> tagsWithDomNode = tagDataMap.entrySet().stream().filter(entry -> entry.getValue().getHtmlDomNode() != null).map(entry -> entry.getKey());
 		if (isInCache())
-			htmlDomNodesMap.keySet().stream().forEach(tag -> tag.addStyleClass(this, "opaque"));
+			tagsWithDomNode.forEach(tag -> tag.addStyleClass(this, "opaque"));
 		else
-			htmlDomNodesMap.keySet().stream().forEach(tag -> tag.removeStyleClass(this, "opaque"));
-		subContextsMap.values().stream().flatMap(c -> c.stream()).forEach(Context::traverse);
+			tagsWithDomNode.forEach(tag -> tag.removeStyleClass(this, "opaque"));
+		getSubContexts().forEach(Context::traverse);
 	}
 
 	public boolean isDestroyed() {

@@ -219,15 +219,13 @@ public class HtmlDomNode {
 				htmlDomNode.destroy();
 				htmlDomNode.sendRemove();
 			}
-			context.removeProperties(tag);
-			context.removeHtmlDomNode(tag);
+			context.removeTag(tag);
 		} else if (context.getSubContexts(tag) != null) {
 			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
 			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
 			for (Context subContext : context.getSubContexts(tag))
 				subContext.destroy();
-			context.removeProperties(tag);
-			context.removeSubContexts(tag);// remove tag ref
+			context.removeTag(tag);
 		}
 	}
 

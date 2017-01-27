@@ -56,7 +56,7 @@ public @interface BindAction {
 
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			context.getPropertiesMaps(tag).remove(ActionDefaults.ACTION);
+			context.getProperties(tag).remove(ActionDefaults.ACTION);
 		}
 
 		@Override
