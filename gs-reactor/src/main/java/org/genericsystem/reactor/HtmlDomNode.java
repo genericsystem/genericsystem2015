@@ -80,7 +80,7 @@ public class HtmlDomNode {
 	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
 			if (change.wasRemoved())
-				change.getRemoved().forEach(childTag -> deepRemove(context, childTag));
+				change.getRemoved().forEach(childTag -> context.removeTag(childTag));
 			if (change.wasAdded())
 				change.getAddedSubList().forEach(tagAdder::accept);
 		}
@@ -186,7 +186,7 @@ public class HtmlDomNode {
 					if (subContext.isInCache())
 						childTag.addStyleClass(subContext, "opaque");
 					return subContext;
-				}, subContext -> deepRemove(subContext, childTag)));
+				}, subContext -> subContext.removeTag(childTag)));
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
@@ -208,23 +208,6 @@ public class HtmlDomNode {
 		tag.getDomNodeStyleClasses(context).removeListener(styleClassesListener);
 		getRootHtmlDomNode().remove(getId());
 		parent.decrementSize(tag);
-	}
-
-	private void deepRemove(Context context, Tag tag) {
-		HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
-		if (htmlDomNode != null) {
-			for (Tag childTag : tag.getObservableChildren())
-				deepRemove(context, childTag);
-			htmlDomNode.destroy();
-			htmlDomNode.sendRemove();
-		}
-		if (context.getSubContexts(tag) != null) {
-			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
-			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
-			for (Context subContext : context.getSubContexts(tag))
-				subContext.destroy();
-		}
-		context.removeTag(tag);
 	}
 
 	protected <BETWEEN> void init(int index) {
@@ -274,7 +257,7 @@ public class HtmlDomNode {
 		}), child -> child.getMetaBinding() != null || selectorsByChildAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByChild.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 	}
 
-	private class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
+	class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
 		final ObservableList<Context> filteredSubContexts;
 		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
 
@@ -366,7 +349,7 @@ public class HtmlDomNode {
 			if (listener == null && key instanceof Tag) {
 				Tag childTag = (Tag) key;
 				put(childTag, listener = (o, ov, nv) -> {
-					deepRemove(context, childTag);
+					context.removeTag(childTag);
 					updateMetaBinding(childTag, nv);
 				});
 			}

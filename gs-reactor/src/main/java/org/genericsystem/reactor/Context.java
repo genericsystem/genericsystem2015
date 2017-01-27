@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.HtmlDomNode.FilteredChildContexts;
 import org.genericsystem.reactor.context.RootContext;
 
 import io.vertx.core.logging.Logger;
@@ -113,6 +114,19 @@ public class Context {
 	}
 
 	public void removeTag(Tag tag) {
+		HtmlDomNode htmlDomNode = getHtmlDomNode(tag);
+		if (htmlDomNode != null) {
+			for (Tag childTag : tag.getObservableChildren())
+				removeTag(childTag);
+			htmlDomNode.destroy();
+			htmlDomNode.sendRemove();
+		}
+		if (getSubContexts(tag) != null) {
+			((TransformationObservableList<?, ?>) getSubContexts(tag)).unbind();
+			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", this).getValue()).transformationListSubContexts.unbind();
+			for (Context subContext : getSubContexts(tag))
+				subContext.destroy();
+		}
 		tagDataMap.remove(tag);
 	}
 
