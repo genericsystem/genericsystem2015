@@ -35,6 +35,7 @@ import org.genericsystem.reactor.gscomponents.InstancesTable.HeaderRow;
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.LinksDiv;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
+import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder;
 
 @Switch(path = { FlexDiv.class, ButtonDiv.class }, pos = { -1, 0 }, value = TagSwitcher.ADMIN_MODE_ONLY.class)
 @Style(name = "overflow", value = "hidden")
