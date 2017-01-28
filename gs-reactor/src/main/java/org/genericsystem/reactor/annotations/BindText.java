@@ -58,7 +58,7 @@ public @interface BindText {
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
 			tag.getDomNodeTextProperty(context).unbind();
-			context.getPropertiesMaps(tag).remove(TextPropertyDefaults.TEXT_BINDING);
+			context.getProperties(tag).remove(TextPropertyDefaults.TEXT_BINDING);
 			tag.getDomNodeTextProperty(context).setValue(null);
 		}
 
