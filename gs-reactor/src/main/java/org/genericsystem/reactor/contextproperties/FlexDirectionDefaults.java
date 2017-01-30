@@ -70,6 +70,6 @@ public interface FlexDirectionDefaults extends ContextProperty {
 		Context parentContext = ((Tag) this).getMetaBinding() != null ? context.getParent() : context;
 		Property<FlexDirection> parentDirection = ((FlexDirectionDefaults) ((Tag) this).getParent()).getDirectionProperty(parentContext);
 		parentDirection.removeListener(getDirectionListenerProperty(context).getValue());
-		context.getPropertiesMaps((Tag) this).remove(PARENT_DIRECTION_LISTENER);
+		context.getProperties((Tag) this).remove(PARENT_DIRECTION_LISTENER);
 	}
 }

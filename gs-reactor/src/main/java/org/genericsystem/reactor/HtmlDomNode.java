@@ -1,5 +1,7 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.json.JsonObject;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,11 +13,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.context.TagSwitcher;
-
-import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,6 +21,10 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
+
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.context.TagSwitcher;
 
 public class HtmlDomNode {
 
@@ -80,7 +81,7 @@ public class HtmlDomNode {
 	private ListChangeListener<Tag> tagListener = change -> {
 		while (change.next()) {
 			if (change.wasRemoved())
-				change.getRemoved().forEach(childTag -> deepRemove(context, childTag, childTag.getMetaBinding() == null));
+				change.getRemoved().forEach(childTag -> context.removeTag(childTag));
 			if (change.wasAdded())
 				change.getAddedSubList().forEach(tagAdder::accept);
 		}
@@ -181,12 +182,12 @@ public class HtmlDomNode {
 			if (context.getSubContexts(childTag) == null) {
 				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag);
 				childTag.createNewInitializedProperty("filteredContexts", context, c -> subContexts);
-				context.setSubContexts(childTag, new TransformationObservableList<>(subContexts.filteredSubContexts, (i, subContext) -> {
+				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
 					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
 					if (subContext.isInCache())
 						childTag.addStyleClass(subContext, "opaque");
 					return subContext;
-				}, subContext -> deepRemove(subContext, childTag, true)));
+				}, subContext -> subContext.removeTag(childTag)));
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
@@ -208,27 +209,6 @@ public class HtmlDomNode {
 		tag.getDomNodeStyleClasses(context).removeListener(styleClassesListener);
 		getRootHtmlDomNode().remove(getId());
 		parent.decrementSize(tag);
-	}
-
-	private void deepRemove(Context context, Tag tag, boolean htmlDomNodeExistsWithTheseContextAndTag) {
-		if (htmlDomNodeExistsWithTheseContextAndTag) {
-			for (Tag childTag : tag.getObservableChildren())
-				deepRemove(context, childTag, childTag.getMetaBinding() == null);
-			HtmlDomNode htmlDomNode = context.getHtmlDomNode(tag);
-			if (htmlDomNode != null) {
-				htmlDomNode.destroy();
-				htmlDomNode.sendRemove();
-			}
-			context.removeProperties(tag);
-			context.removeHtmlDomNode(tag);
-		} else if (context.getSubContexts(tag) != null) {
-			((TransformationObservableList<?, ?>) context.getSubContexts(tag)).unbind();
-			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
-			for (Context subContext : context.getSubContexts(tag))
-				subContext.destroy();
-			context.removeProperties(tag);
-			context.removeSubContexts(tag);// remove tag ref
-		}
 	}
 
 	protected <BETWEEN> void init(int index) {
@@ -278,7 +258,7 @@ public class HtmlDomNode {
 		}), child -> child.getMetaBinding() != null || selectorsByChildAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByChild.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 	}
 
-	private class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
+	class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
 		final ObservableList<Context> filteredSubContexts;
 		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
 
@@ -292,8 +272,8 @@ public class HtmlDomNode {
 				selectorsByChild.put(childContext, result);
 				return new ObservableList[] { result };
 			});
-			filteredSubContexts = new FilteredList<>(transformationListSubContexts,
-					childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+			filteredSubContexts = new FilteredList<>(transformationListSubContexts, childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream()
+					.allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 		}
 	}
 
@@ -370,7 +350,7 @@ public class HtmlDomNode {
 			if (listener == null && key instanceof Tag) {
 				Tag childTag = (Tag) key;
 				put(childTag, listener = (o, ov, nv) -> {
-					deepRemove(context, childTag, ov == null);
+					context.removeTag(childTag);
 					updateMetaBinding(childTag, nv);
 				});
 			}

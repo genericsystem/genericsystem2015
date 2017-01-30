@@ -7,22 +7,21 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.genericsystem.api.core.ApiStatics;
-import org.genericsystem.api.core.IGeneric;
-import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
-import org.genericsystem.defaults.tools.AbstractMinimalChangesObservableList.MinimalChangesObservableList;
-import org.genericsystem.defaults.tools.BindingsTools;
-import org.genericsystem.defaults.tools.InheritanceComputer;
-import org.genericsystem.defaults.tools.ObservableInheritanceComputer;
-
-import com.sun.javafx.collections.ObservableListWrapper;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ListBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import org.genericsystem.api.core.ApiStatics;
+import org.genericsystem.api.core.IGeneric;
+import org.genericsystem.api.core.Snapshot;
+import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
+import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.defaults.tools.InheritanceComputer;
+import org.genericsystem.defaults.tools.ObservableInheritanceComputer;
+
+import com.sun.javafx.collections.ObservableListWrapper;
 
 /**
  * @author Nicolas Feybesse
@@ -114,7 +113,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	default ObservableList<T> getObservableAttributes(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-			return new MinimalChangesObservableList<>(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
+			return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.STRUCTURAL));
 		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.STRUCTURAL);
 	}
 
@@ -186,7 +185,7 @@ public interface DefaultCompositesInheritance<T extends DefaultGeneric<T>> exten
 	default ObservableList<T> getObservableHolders(T attribute) {
 		T nonHeritableProperty = getKey(NonHeritableProperty.class, ApiStatics.NO_POSITION);
 		if (nonHeritableProperty == null || attribute.inheritsFrom(nonHeritableProperty) || attribute.isInheritanceEnabled())
-			return new MinimalChangesObservableList<>(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
+			return BindingsTools.createMinimalUnitaryChangesBinding(new ObservableInheritanceComputer<>((T) DefaultCompositesInheritance.this, attribute, ApiStatics.CONCRETE));
 		return getObservableComposites().filtered(holder -> holder.isSpecializationOf(attribute) && holder.getLevel() == ApiStatics.CONCRETE);
 	}
 
