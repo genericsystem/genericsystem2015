@@ -34,16 +34,11 @@ public abstract class TransitiveObservableList<T> extends AbstractMinimalChanges
 	}
 
 	protected void onMasterInvalidation() {
-		unbindAllSlaves();
+		for (Observable slave : slaves)
+			unbind(slave);
+		slaves.clear();
 		invalidate();
 		for (T elt : master)
 			bindSlave(observableSlaves.apply(elt));
 	}
-
-	protected void unbindAllSlaves() {
-		for (Observable slave : slaves)
-			unbind(slave);
-		slaves.clear();
-	}
-
 }
