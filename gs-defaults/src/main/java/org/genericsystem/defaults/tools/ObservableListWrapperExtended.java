@@ -19,6 +19,19 @@ public class ObservableListWrapperExtended<E> extends ObservableListWrapper<E> i
 	private final Consumer<Integer> removeConsumer;
 	private BindingHelperObserver<E> observer;
 
+	public ObservableListWrapperExtended(ObservableList<E> external, Callback<E, Observable[]> extractor) {
+		super(new ArrayList<>(), extractor);
+		this.external = external; // prevents of listener garbage collection
+		this.addBiConsumer = (index, src) -> add(index, src);
+		this.removeConsumer = index -> remove(index.intValue());
+		bind();
+		int i = 0;
+		beginChange();
+		for (E element : external)
+			getAddBiConsumer().accept(i++, element);
+		endChange();
+	}
+
 	public final void bind() {
 		if (observer == null)
 			observer = new BindingHelperObserver<>(this);
@@ -37,43 +50,6 @@ public class ObservableListWrapperExtended<E> extends ObservableListWrapper<E> i
 
 	public Consumer<Integer> getRemoveConsumer() {
 		return removeConsumer;
-	}
-
-	public static class BindingHelperObserver<E> implements ListChangeListener<E> {
-
-		private final WeakReference<ObservableListWrapperExtended<E>> ref;
-
-		public BindingHelperObserver(ObservableListWrapperExtended<E> transformationList) {
-			if (transformationList == null) {
-				throw new NullPointerException("Binding has to be specified.");
-			}
-			ref = new WeakReference<ObservableListWrapperExtended<E>>(transformationList);
-		}
-
-		@Override
-		public void onChanged(Change<? extends E> change) {
-			final ObservableListWrapperExtended<E> binding = ref.get();
-			if (binding == null) {
-				change.getList().removeListener(this);
-			} else {
-				binding.onChanged(change);
-			}
-
-		}
-
-	}
-
-	public ObservableListWrapperExtended(ObservableList<E> external, Callback<E, Observable[]> extractor) {
-		super(new ArrayList<>(), extractor);
-		this.external = external; // prevents of listener garbage collection
-		this.addBiConsumer = (index, src) -> add(index, src);
-		this.removeConsumer = index -> remove(index.intValue());
-		bind();
-		int i = 0;
-		beginChange();
-		for (E element : external)
-			getAddBiConsumer().accept(i++, element);
-		endChange();
 	}
 
 	@Override
@@ -100,5 +76,29 @@ public class ObservableListWrapperExtended<E> extends ObservableListWrapper<E> i
 			}
 			endChange();
 		}
+	}
+
+	public static class BindingHelperObserver<E> implements ListChangeListener<E> {
+
+		private final WeakReference<ObservableListWrapperExtended<E>> ref;
+
+		public BindingHelperObserver(ObservableListWrapperExtended<E> transformationList) {
+			if (transformationList == null) {
+				throw new NullPointerException("Binding has to be specified.");
+			}
+			ref = new WeakReference<>(transformationList);
+		}
+
+		@Override
+		public void onChanged(Change<? extends E> change) {
+			final ObservableListWrapperExtended<E> binding = ref.get();
+			if (binding == null) {
+				change.getList().removeListener(this);
+			} else {
+				binding.onChanged(change);
+			}
+
+		}
+
 	}
 }

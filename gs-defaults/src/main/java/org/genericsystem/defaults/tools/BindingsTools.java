@@ -1,6 +1,9 @@
 package org.genericsystem.defaults.tools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -30,9 +33,9 @@ public class BindingsTools {
 		return transmitSuccessiveInvalidations(Bindings.createObjectBinding(() -> "", observables));
 	}
 
-	public static <T> Observable createTransitive(ObservableValue<T> master, Function<T, Observable> slaveFromValue) {
+	public static <T> Observable createTransitive(ObservableValue<T> master, Function<T, Observable[]> slavesFromValue) {
 		return transmitSuccessiveInvalidations(new ObjectBinding<Object>() {
-			private Observable slave;
+			private Observable[] slaves;
 			private InvalidationListener onMasterInvalidion = (c) -> onMasterInvalidation();
 
 			{
@@ -41,9 +44,9 @@ public class BindingsTools {
 			}
 
 			private void onMasterInvalidation() {
-				unbind(slave);
+				unbind(slaves);
 				invalidate();
-				bind(slave = slaveFromValue.apply(master.getValue()));
+				bind(slaves = slavesFromValue.apply(master.getValue()));
 			}
 
 			@Override
@@ -56,9 +59,10 @@ public class BindingsTools {
 	public static <E> ObservableList<E> createMinimalUnitaryChangesBinding(ObservableList<E> source) {
 		return new ListBinding<E>() {
 			private ObservableList<E> internal = FXCollections.observableArrayList();
-			private ListChangeListener<E> onSrcInvalidion = (c) -> MinimalUnitaryChanges.doMinimalChanges(source, internal);
+
+			private ListChangeListener<E> onSrcInvalidation = (c) -> MinimalUnitaryChanges.doMinimalChanges(source, internal);
 			{
-				source.addListener(new WeakListChangeListener<E>(onSrcInvalidion));
+				source.addListener(new WeakListChangeListener<>(onSrcInvalidation));
 				MinimalUnitaryChanges.doMinimalChanges(source, internal);
 			}
 
@@ -68,4 +72,30 @@ public class BindingsTools {
 			}
 		};
 	}
+
+	public static <E> ObservableList<E> createMinimalUnitaryChangesBinding(ObservableList<E> source, Supplier<List<E>> subElements, Function<E, Observable> slaveSupplier) {
+		return createMinimalUnitaryChangesBinding(new ListBinding<E>() {
+			private List<Observable> slaveInvalidators = new ArrayList<>();
+			private ListChangeListener<E> onSrcInvalidation = (c) -> onSrcInvalidation();
+			{
+				source.addListener(new WeakListChangeListener<>(onSrcInvalidation));
+				onSrcInvalidation();
+			}
+
+			@Override
+			protected ObservableList<E> computeValue() {
+				return FXCollections.observableList(subElements.get());
+			}
+
+			void onSrcInvalidation() {
+				slaveInvalidators.forEach(this::unbind);
+				slaveInvalidators.clear();
+				invalidate();
+				source.forEach(e -> slaveInvalidators.add(slaveSupplier.apply(e)));
+				slaveInvalidators.forEach(this::bind);
+			}
+
+		});
+	}
+
 }
