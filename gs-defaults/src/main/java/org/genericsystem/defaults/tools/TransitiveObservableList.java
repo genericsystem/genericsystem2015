@@ -19,11 +19,11 @@ public abstract class TransitiveObservableList<T> extends AbstractMinimalChanges
 	private final List<Observable> slaves = new ArrayList<>();
 	protected final ObservableList<T> master;
 	private final InvalidationListener listener = l -> onMasterInvalidation();
-	private final Function<T, Observable> observableSlaves;
+	private final Function<T, Observable> slaveSupplier;
 
-	public TransitiveObservableList(ObservableList<T> master, Function<T, Observable> observableSlaves) {
+	public TransitiveObservableList(ObservableList<T> master, Function<T, Observable> slaveSupplier) {
 		this.master = master;
-		this.observableSlaves = observableSlaves;
+		this.slaveSupplier = slaveSupplier;
 		this.master.addListener(new WeakInvalidationListener(listener));
 		onMasterInvalidation();
 	}
@@ -39,6 +39,6 @@ public abstract class TransitiveObservableList<T> extends AbstractMinimalChanges
 		slaves.clear();
 		invalidate();
 		for (T elt : master)
-			bindSlave(observableSlaves.apply(elt));
+			bindSlave(slaveSupplier.apply(elt));
 	}
 }
