@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
@@ -27,16 +26,13 @@ import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue;
 import org.genericsystem.reactor.gscomponents.Composite;
-import org.genericsystem.reactor.gscomponents.FlexDiv;
-import org.genericsystem.reactor.gscomponents.HtmlTag;
-import org.genericsystem.reactor.gscomponents.InputTextWithConversion;
-import org.genericsystem.reactor.gscomponents.InstanceEditor;
-import org.genericsystem.reactor.gscomponents.InstancesTable;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
+import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlImg;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
+import org.genericsystem.reactor.gscomponents.InputTextWithConversion;
 import org.genericsystem.reactor.gscomponents.InputTextWithConversion.PasswordInput;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.Checkbox;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.CheckboxLabel;
@@ -47,10 +43,10 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordAdder;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ButtonDiv;
 import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.AddLink;
 import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.GSHolderBuilderDiv;
-import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.MultiCheckboxBuilder;
-import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.PasswordBuilder;
 import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.HolderBuilder.BooleanHolderBuilderInput;
 import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.HolderBuilder.HolderBuilderInput;
+import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.MultiCheckboxBuilder;
+import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder.PasswordBuilder;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -185,9 +181,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 
 		@Override
 		public void init() {
-			bindAttribute(ReactorStatics.DISABLED, ReactorStatics.DISABLED,
-					model -> Bindings.createStringBinding(
-							() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? ReactorStatics.DISABLED : "",
+			bindStyle("visibility", "visibility",
+					model -> Bindings.createStringBinding(() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? "hidden" : "visible",
 							getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
 		}
 	}
