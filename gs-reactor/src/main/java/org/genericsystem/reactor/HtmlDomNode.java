@@ -1,5 +1,7 @@
 package org.genericsystem.reactor;
 
+import io.vertx.core.json.JsonObject;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,11 +13,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.context.TagSwitcher;
-
-import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,6 +21,10 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
+
+import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.context.TagSwitcher;
 
 public class HtmlDomNode {
 
@@ -181,7 +182,7 @@ public class HtmlDomNode {
 			if (context.getSubContexts(childTag) == null) {
 				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag);
 				childTag.createNewInitializedProperty("filteredContexts", context, c -> subContexts);
-				context.setSubContexts(childTag, new TransformationObservableList<>(subContexts.filteredSubContexts, (i, subContext) -> {
+				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
 					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
 					if (subContext.isInCache())
 						childTag.addStyleClass(subContext, "opaque");
@@ -271,8 +272,8 @@ public class HtmlDomNode {
 				selectorsByChild.put(childContext, result);
 				return new ObservableList[] { result };
 			});
-			filteredSubContexts = new FilteredList<>(transformationListSubContexts,
-					childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+			filteredSubContexts = new FilteredList<>(transformationListSubContexts, childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream()
+					.allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 		}
 	}
 
