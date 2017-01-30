@@ -46,7 +46,7 @@ import org.genericsystem.security.model.User.Salt;
 @SetText(path = HtmlButton.class, pos = 0, value = "Save")
 @BindAction(path = HtmlButton.class, pos = 0, value = FLUSH.class)
 @SetText(path = HtmlButton.class, pos = 1, value = "Cancel")
-@BindAction(path = HtmlButton.class, pos = 1, value = { CANCEL.class, UNMOUNT.class })
+@BindAction(path = HtmlButton.class, pos = 1, value = CANCEL.class)
 @BindText(path = HtmlLabel.class, pos = 0, value = TextBinding.LAST_UPDATE.class)
 @FlexDirectionStyle(FlexDirection.ROW)
 @Style(name = "justify-content", value = "space-around")
