@@ -9,7 +9,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.context.ObservableListExtractor;
@@ -192,7 +191,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap) {
-		bindBiDirectionalMapElement(propertyName, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
+		bindBiDirectionalMapElement(propertyName, name, getMap, ReactorStatics.STRING_CONVERTERS.get(String.class));
 	}
 
 	default <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
