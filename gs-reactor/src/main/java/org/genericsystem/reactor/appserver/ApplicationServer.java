@@ -18,6 +18,7 @@ import org.genericsystem.common.Root;
 import org.genericsystem.kernel.Cache;
 import org.genericsystem.reactor.HtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
+import org.genericsystem.reactor.RootTag;
 import org.genericsystem.reactor.appserver.WebAppsConfig.SimpleWebAppConfig;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
 
@@ -83,6 +84,7 @@ public class ApplicationServer extends AbstractBackEnd {
 		private Cache cache;
 		private ServerWebSocket socket;
 		private PersistentApplication application;
+		private RootTag tagTree;
 		private RootHtmlDomNode rootHtmlDomNode;
 
 		DomNodeVerticle(Cache cache, ServerWebSocket socket, PersistentApplication application) {
@@ -94,7 +96,18 @@ public class ApplicationServer extends AbstractBackEnd {
 		@Override
 		public void start(Future<Void> startFuture) {
 			GSVertx.vertx().getVertx().executeBlocking(future -> {
-				RootHtmlDomNode result = cache.safeSupply(() -> application.init(s -> socket.writeFinalTextFrame(s)));
+				try {
+					tagTree = (RootTag) application.getApplicationClass().newInstance().initTree();
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
+					try {
+						cache.start();
+						tagTree = (RootTag) application.getApplicationClass().getConstructor(Root.class).newInstance(application.getEngine()).initTree();
+						cache.flush();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException | NoSuchMethodException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}
+				RootHtmlDomNode result = cache.safeSupply(() -> application.init(s -> socket.writeFinalTextFrame(s), tagTree));
 				future.complete(result);
 			}, res -> {
 				if (res.succeeded())
