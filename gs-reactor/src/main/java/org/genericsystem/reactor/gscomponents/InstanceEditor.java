@@ -56,6 +56,7 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeEdition;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.InstanceName;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordHoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEditor;
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
@@ -80,7 +81,7 @@ import javafx.beans.value.ObservableValue;
 @Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class })
 @Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class })
 @Children(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = GSLabelDisplayer.class)
-@Children(path = { AttributeEdition.class, Content.class }, value = { HoldersEditor.class, MultiCheckbox.class })
+@Children(path = { AttributeEdition.class, Content.class }, value = { PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
 @Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Content.class, Header.class })
 @ForEach(path = AttributeEdition.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { AttributeEdition.class, AttributeContent.class }, value = ObservableListExtractor.NO_FOR_EACH.class)
