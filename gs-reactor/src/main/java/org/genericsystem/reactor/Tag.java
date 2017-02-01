@@ -20,6 +20,7 @@ import org.genericsystem.reactor.contextproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.contextproperties.StylesDefaults;
 import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -352,7 +353,20 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		return new HtmlDomNode(parent, modelContext, this);
 	};
 
+	default <T extends TagImpl> TagImpl createChild(Class<T> clazz) {
+		T result = null;
+		try {
+			result = clazz.newInstance();
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		}
+		result.setParent(this);
+		getObservableChildren().add(result);
+		return result;
+	}
+
 	default void createSubTree() {
+		setTagNode(getRootTag().buildTagNode(this));
 		getRootTag().getAnnotationsManager().processChildrenAnnotations(this);
 		for (Tag child : getObservableChildren())
 			child.createSubTree();
@@ -370,6 +384,8 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	public ObservableList<Tag> getObservableChildren();
 
 	public TagNode getTagNode();
+
+	public void setTagNode(TagNode tagNode);
 
 	default void init() {
 	}

@@ -11,9 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
@@ -163,7 +161,7 @@ public class ExtendedRootTag extends RootTagImpl {
 		};
 	}
 
-	private ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Class<? extends Annotation> annotationClass) {
+	public ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Class<? extends Annotation> annotationClass) {
 		return c -> {
 			Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
 			if (processors.containsKey(annotationClass)) {
@@ -210,7 +208,6 @@ public class ExtendedRootTag extends RootTagImpl {
 		storedClasses.put(clazz, result);
 
 		for (Children childrenAnnotation : clazz.getAnnotationsByType(Children.class)) {
-			result.setChildrenAnnotation(childrenAnnotation);
 			for (Class<?> childClass : childrenAnnotation.value())
 				storeClass(childClass);
 		}
@@ -290,9 +287,8 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 	}
 
+	// Stores all the (generic) annotations applying to a tag.
 	public class GenericTagNode extends SimpleTagNode {
-
-		private final Tag tag;
 
 		private Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = new TreeMap<>((an1, an2) -> {
 			List<Class<? extends Annotation>> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors().keySet().stream().collect(Collectors.toList());
@@ -336,33 +332,14 @@ public class ExtendedRootTag extends RootTagImpl {
 		}
 
 		public GenericTagNode(Tag tag) {
-			this.tag = tag;
 			Deque<Class<?>> classesToResult = new ArrayDeque<>();
 
-			// Retrieve all applying annotations.
 			Tag current = tag;
 			while (current != null) {
 				Set<GTagAnnotation> annotationsFound = selectAnnotations(current.getClass(), classesToResult, tag);
 				annotationsFound.forEach(annotation -> tagAnnotations.get(new AnnotationClassName(annotation.getValue().getAnnotationClass(), annotation.getValue().getName())).add(new GenericAnnotationWithContent(annotation, annotation.getContent())));
 				classesToResult.push(current.getClass());
 				current = current.getParent();
-			}
-
-			// Build children if there are any.
-			Optional<AnnotationClassName> childrenAnnotation = sortedAnnotationsLists.keySet().stream().filter(ta -> Children.class.equals(ta.getAnnotationClass())).findFirst();
-			if (childrenAnnotation.isPresent() && !sortedAnnotationsLists.get(childrenAnnotation.get()).isEmpty())
-				sortedAnnotationsLists.get(childrenAnnotation.get()).get(0).getAnnotationContent().getClassesStream().forEach(childClass -> getObservableChildren().add(createChild(tag, (Class<? extends TagImpl>) childClass)));
-
-			// TODO: Put in processAnnotations.
-			// Apply the first annotation of each sort and add listeners.
-			Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();
-			for (Entry<AnnotationClassName, SortedList<GenericAnnotationWithContent>> entry : sortedAnnotationsLists.entrySet()) {
-				Class<? extends Annotation> annotationClass = entry.getKey().getAnnotationClass();
-				if (processors.containsKey(annotationClass)) {
-					GenericAnnotationWithContent applyingAnnotation = entry.getValue().get(0);
-					processors.get(annotationClass).onAdd(tag, applyingAnnotation.getgTagAnnotation(), applyingAnnotation.getAnnotationContent());
-					entry.getValue().addListener(getApplyingAnnotationsListener(tag, annotationClass));
-				}
 			}
 		}
 
@@ -428,10 +405,6 @@ public class ExtendedRootTag extends RootTagImpl {
 		default void setArrayValueAnnotation(Class<? extends Annotation> annotationClass, String name, Object[] value, Class<?>[] path, int[] positions) {
 			GTagAnnotation gTagAnnotation = (GTagAnnotation) setHolder(getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(annotationClass, path, positions));
 			gTagAnnotation.setHolder(getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("value", new JsonArray(Arrays.asList(value))).encodePrettily());
-		}
-
-		default void setChildrenAnnotation(Children annotation) {
-			setArrayValueAnnotation(Children.class, null, annotation.value(), annotation.path(), annotation.pos());
 		}
 	}
 

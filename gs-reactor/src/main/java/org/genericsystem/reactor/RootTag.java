@@ -41,21 +41,8 @@ public interface RootTag extends Tag {
 	TagNode buildTagNode(Tag child);
 
 	default void processChildren(Tag tag, Class<? extends TagImpl>[] classes) {
-		for (Class<? extends TagImpl> clazz : classes) {
-			TagImpl result = createChild(tag, clazz);
-			result.setTagNode(buildTagNode(result));
-		}
-	}
-
-	default <T extends TagImpl> TagImpl createChild(Tag tag, Class<T> clazz) {
-		T result = null;
-		try {
-			result = clazz.newInstance();
-		} catch (IllegalAccessException | InstantiationException e) {
-			throw new IllegalStateException(e);
-		}
-		result.setParent(tag);
-		return result;
+		for (Class<? extends TagImpl> clazz : classes)
+			tag.createChild(clazz);
 	}
 
 	default void processStyle(Tag tag, String name, String value) {
