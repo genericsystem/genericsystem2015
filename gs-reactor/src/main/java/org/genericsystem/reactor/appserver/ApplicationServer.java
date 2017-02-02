@@ -97,11 +97,11 @@ public class ApplicationServer extends AbstractBackEnd {
 		public void start(Future<Void> startFuture) {
 			GSVertx.vertx().getVertx().executeBlocking(future -> {
 				try {
-					tagTree = (RootTag) application.getApplicationClass().newInstance().initTree();
+					tagTree = application.getApplicationClass().newInstance();
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
 					try {
 						cache.start();
-						tagTree = (RootTag) application.getApplicationClass().getConstructor(Root.class).newInstance(application.getEngine()).initTree();
+						tagTree = application.getApplicationClass().getConstructor(Root.class).newInstance(application.getEngine());
 						cache.flush();
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException | NoSuchMethodException ex) {
 						throw new IllegalStateException(ex);

@@ -110,7 +110,9 @@ public class ExtendedRootTag extends RootTagImpl {
 		annotationsManager = new ExtendedAnnotationsManager(getClass());
 		storedClasses.put(TagImpl.class, engine.find(GTag.class));
 		storeClass(this.getClass());
-		createSubTree();
+		setTagNode(buildTagNode(this));
+		processAnnotations(this);
+		init();
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public class ExtendedRootTag extends RootTagImpl {
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	private ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Context context, Class<? extends Annotation> annotationClass) {
+	public ListChangeListener<? super GenericAnnotationWithContent> getApplyingAnnotationsListener(Tag tag, Context context, Class<? extends Annotation> annotationClass) {
 		return c -> {
 			if (!context.isDestroyed()) {
 				Map<Class<? extends Annotation>, IGenericAnnotationProcessor> processors = ((ExtendedAnnotationsManager) annotationsManager).getProcessors();

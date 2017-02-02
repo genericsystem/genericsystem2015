@@ -8,12 +8,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
-import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Children.ChildrenGenericProcessor;
 import org.genericsystem.reactor.annotations.Children.ChildrenMult;
 import org.genericsystem.reactor.annotations.Children.ChildrenProcessor;
+import org.genericsystem.reactor.annotations.DirectSelect.AnnotationProcessorNoActionWithContext;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
@@ -49,7 +48,7 @@ public @interface Children {
 		}
 	}
 
-	public static class ChildrenGenericProcessor implements IGenericAnnotationProcessor {
+	public static class ChildrenGenericProcessor implements AnnotationProcessorNoActionWithContext {
 
 		@Override
 		public void setAnnotation(GTag gTag, Annotation annotation) {
@@ -57,13 +56,8 @@ public @interface Children {
 		}
 
 		@Override
-		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			// TODO Auto-generated method stub
-		}
-
-		@Override
-		public void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			// TODO Auto-generated method stub
+		public void onRemove(Tag tag, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			tag.getObservableChildren().clear();
 		}
 
 		@Override

@@ -360,24 +360,16 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		} catch (IllegalAccessException | InstantiationException e) {
 			throw new IllegalStateException(e);
 		}
-		result.setParent(this);
-		getObservableChildren().add(result);
+		result.initTag(this);
 		return result;
 	}
 
-	default void createSubTree() {
+	default void initTag(Tag parent) {
+		setParent(parent);
 		setTagNode(getRootTag().buildTagNode(this));
-		getRootTag().getAnnotationsManager().processChildrenAnnotations(this);
-		for (Tag child : getObservableChildren())
-			child.createSubTree();
-	}
-
-	default Tag initTree() {
 		getRootTag().processAnnotations(this);
 		init();
-		for (Tag child : getObservableChildren())
-			child.initTree();
-		return this;
+		parent.getObservableChildren().add(this);
 	}
 
 	@Override
@@ -391,6 +383,8 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	public <COMPONENT extends Tag> COMPONENT getParent();
+
+	public void setParent(Tag parent);
 
 	default RootTag getRootTag() {
 		return getParent().getRootTag();

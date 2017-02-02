@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
@@ -79,23 +78,11 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	}
 
 	@Override
-	public void processChildrenAnnotations(Tag tag) {
-		GenericTagNode tagNode = (GenericTagNode) tag.getTagNode();
-		Map<AnnotationClassName, SortedList<GenericAnnotationWithContent>> sortedAnnotationsLists = tagNode.getSortedAnnotationsLists();
-		Optional<Entry<AnnotationClassName, SortedList<GenericAnnotationWithContent>>> childrenAnnotationsEntry = sortedAnnotationsLists.entrySet().stream().filter(entry -> Children.class.equals(entry.getKey().getAnnotationClass())).findFirst();
-		if (childrenAnnotationsEntry.isPresent() && !childrenAnnotationsEntry.get().getValue().isEmpty()) {
-			GenericAnnotationWithContent applyingAnnotation = childrenAnnotationsEntry.get().getValue().get(0);
-			processors.get(Children.class).onAdd(tag, applyingAnnotation.getgTagAnnotation(), applyingAnnotation.getAnnotationContent());
-			childrenAnnotationsEntry.get().getValue().addListener(((ExtendedRootTag) tag.getRootTag()).getApplyingAnnotationsListener(tag, Children.class));
-		}
-	}
-
-	@Override
 	public void processAnnotations(Tag tag) {
 		GenericTagNode tagNode = (GenericTagNode) tag.getTagNode();
 		for (Entry<AnnotationClassName, SortedList<GenericAnnotationWithContent>> entry : tagNode.getSortedAnnotationsLists().entrySet()) {
 			Class<? extends Annotation> annotationClass = entry.getKey().getAnnotationClass();
-			if (!Children.class.equals(annotationClass) && processors.containsKey(annotationClass)) {
+			if (processors.containsKey(annotationClass)) {
 				GenericAnnotationWithContent applyingAnnotation = entry.getValue().get(0);
 				processors.get(annotationClass).onAdd(tag, applyingAnnotation.getgTagAnnotation(), applyingAnnotation.getAnnotationContent());
 				entry.getValue().addListener(((ExtendedRootTag) tag.getRootTag()).getApplyingAnnotationsListener(tag, annotationClass));

@@ -1,21 +1,16 @@
 package org.genericsystem.reactor.gscomponents;
 
-import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
+import org.genericsystem.reactor.annotations.StyleClass;
 
 @FlexDirectionStyle(FlexDirection.ROW)
-@Style(name = "flex-wrap", value = "wrap")
+@Style(path = TagImpl.class, name = "flex-wrap", value = "wrap")
+@Style(path = TagImpl.class, name = "margin", value = "10px")
+@Style(path = TagImpl.class, name = "padding", value = "10px")
+@Style(path = TagImpl.class, name = "border-radius", value = "10px")
+@Style(path = TagImpl.class, name = "background-color", value = "white")
+@StyleClass(path = TagImpl.class, value = "screenResponsive")
+@Style(path = TagImpl.class, name = "max-width", value = "100%")
 public class Responsive extends FlexDiv {
-	@Override
-	public void init() {
-		for (Tag tag : getObservableChildren()) {
-			tag.addStyle("margin", "10px");
-			tag.addStyle("padding", "10px");
-			tag.addStyle("border-radius", "10px");
-			tag.addStyle("background-color", "white");
-			tag.addStyleClass("screenResponsive");
-			tag.addStyle("max-width", "100%");
-		}
-	}
 }

@@ -49,20 +49,20 @@ public @interface DirectSelect {
 		}
 	}
 
-	public static interface AnnotationProcessorListenerInDomNode extends IGenericAnnotationProcessor {
+	public static interface AnnotationProcessorNoActionWithContext extends IGenericAnnotationProcessor {
 
 		@Override
 		default void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			// Nothing to do, listener defined in parent HtmlDomNode.
+			// Nothing to do.
 		}
 
 		@Override
 		default void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			// Nothing to do, listener defined in parent HtmlDomNode.
+			// Nothing to do.
 		}
 	}
 
-	public static interface MetaBindingAnnotationProcessor extends AnnotationProcessorListenerInDomNode {
+	public static interface MetaBindingAnnotationProcessor extends AnnotationProcessorNoActionWithContext {
 
 		@Override
 		default void onRemove(Tag tag, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
