@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Tag;
-import org.genericsystem.reactor.annotations.DirectSelect.AnnotationProcessorListenerInDomNode;
+import org.genericsystem.reactor.annotations.DirectSelect.AnnotationProcessorNoActionWithContext;
 import org.genericsystem.reactor.annotations.Switch.Modes;
 import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
 import org.genericsystem.reactor.annotations.Switch.SwitchGenericProcessor;
@@ -45,7 +45,7 @@ public @interface Switch {
 		}
 	}
 
-	public static class SwitchGenericProcessor implements AnnotationProcessorListenerInDomNode {
+	public static class SwitchGenericProcessor implements AnnotationProcessorNoActionWithContext {
 
 		@Override
 		public void setAnnotation(GTag gTag, Annotation annotation) {
