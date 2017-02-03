@@ -6,17 +6,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.RandomAccess;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.sun.javafx.collections.NonIterableChange;
+import com.sun.javafx.collections.SortableList;
+
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableListBase;
 import javafx.util.Callback;
 
 public class ObservableListWrapper<E> extends ModifiableObservableListBase<E>
@@ -243,8 +250,56 @@ public class ObservableListWrapper<E> extends ModifiableObservableListBase<E>
 		}
 	}
 
-	public static class BindingHelperObserver<E> implements ListChangeListener<E> {
+	public static class SimplePermutationChange<E> extends NonIterableChange<E> {
+		private final int[] permutation;
 
+		public SimplePermutationChange(int from, int to, int[] permutation, ObservableList<E> list) {
+			super(from, to, list);
+			this.permutation = permutation;
+		}
+
+		@Override
+		public List<E> getRemoved() {
+			checkState();
+			return Collections.<E> emptyList();
+		}
+
+		@Override
+		protected int[] getPermutation() {
+			checkState();
+			return permutation;
+		}
+	}
+
+	public static interface SortableList<E> extends List<E> {
+
+		/**
+		 * Sort using default comparator
+		 *
+		 * @throws ClassCastException
+		 *             if some of the elements cannot be cast to Comparable
+		 * @throws UnsupportedOperationException
+		 *             if list's iterator doesn't support set
+		 */
+		public void sort();
+
+		/**
+		 * Sort using comparator
+		 *
+		 * @param comparator
+		 *            the comparator to use
+		 * @throws ClassCastException
+		 *             if the list contains elements that are not <i>mutually comparable</i> using the specified
+		 *             comparator.
+		 * @throws UnsupportedOperationException
+		 *             if the specified list's list-iterator does not support the <tt>set</tt> operation.
+		 */
+		@Override
+		public void sort(Comparator<? super E> comparator);
+
+	}
+
+	public static class BindingHelperObserver<E> implements ListChangeListener<E> {
 		private final WeakReference<ObservableListWrapper<E>> ref;
 
 		public BindingHelperObserver(ObservableListWrapper<E> transformationList) {
@@ -265,6 +320,68 @@ public class ObservableListWrapper<E> extends ModifiableObservableListBase<E>
 
 		}
 
+	}
+
+	public static class ElementObserver<E> {
+		private static class ElementsMapElement {
+			InvalidationListener listener;
+			int counter;
+
+			public ElementsMapElement(InvalidationListener listener) {
+				this.listener = listener;
+				this.counter = 1;
+			}
+
+			public void increment() {
+				counter++;
+			}
+
+			public int decrement() {
+				return --counter;
+			}
+
+			private InvalidationListener getListener() {
+				return listener;
+			}
+		}
+
+		private Callback<E, Observable[]> extractor;
+		private final Callback<E, InvalidationListener> listenerGenerator;
+		private final ObservableListBase<E> list;
+		private IdentityHashMap<E, ElementObserver.ElementsMapElement> elementsMap = new IdentityHashMap<>();
+
+		ElementObserver(Callback<E, Observable[]> extractor, Callback<E, InvalidationListener> listenerGenerator,
+				ObservableListBase<E> list) {
+			this.extractor = extractor;
+			this.listenerGenerator = listenerGenerator;
+			this.list = list;
+		}
+
+		void attachListener(final E e) {
+			if (elementsMap != null && e != null) {
+				if (elementsMap.containsKey(e)) {
+					elementsMap.get(e).increment();
+				} else {
+					InvalidationListener listener = listenerGenerator.call(e);
+					for (Observable o : extractor.call(e)) {
+						o.addListener(listener);
+					}
+					elementsMap.put(e, new ElementObserver.ElementsMapElement(listener));
+				}
+			}
+		}
+
+		void detachListener(E e) {
+			if (elementsMap != null && e != null) {
+				ElementObserver.ElementsMapElement el = elementsMap.get(e);
+				for (Observable o : extractor.call(e)) {
+					o.removeListener(el.getListener());
+				}
+				if (el.decrement() == 0) {
+					elementsMap.remove(e);
+				}
+			}
+		}
 	}
 
 	public static class SortHelper {
