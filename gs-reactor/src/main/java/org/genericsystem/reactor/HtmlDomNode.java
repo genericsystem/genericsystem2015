@@ -22,7 +22,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
 
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.defaults.tools.ObservableListWrapper;
 import org.genericsystem.defaults.tools.TransformationObservableList;
 import org.genericsystem.reactor.context.TagSwitcher;
 
@@ -245,10 +245,10 @@ public class HtmlDomNode {
 
 	private class FilteredTagChildren extends FilteredChildren<Tag> {
 
-		final ObservableList<Tag> filteredList = new FilteredList<>(new ObservableListWrapperExtended<>(context.getRootContext().getObservableChildren(tag), child -> {
+		final ObservableList<Tag> filteredList = new FilteredList<>(new ObservableListWrapper<>(context.getRootContext().getObservableChildren(tag), child -> {
 			if (child.getMetaBinding() != null)
 				return new ObservableValue[] {};
-			ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<>(child.getObservableSwitchers(), s -> {
+			ObservableList<TagSwitcher> result = new ObservableListWrapper<>(child.getObservableSwitchers(), s -> {
 				ObservableValue<Boolean> selector = s.apply(context, child);
 				selectorsByChildAndSwitcher.get(child).put(s, selector);
 				return new ObservableValue[] { selector };
@@ -264,7 +264,7 @@ public class HtmlDomNode {
 
 		FilteredChildContexts(MetaBinding<BETWEEN> metaBinding, Tag childTag) {
 			transformationListSubContexts = new TransformationObservableList<>(metaBinding.buildBetweenChildren(context), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
-				ObservableList<TagSwitcher> result = new ObservableListWrapperExtended<>(childTag.getObservableSwitchers(), s -> {
+				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(childTag.getObservableSwitchers(), s -> {
 					ObservableValue<Boolean> selector = s.apply(childContext, childTag);
 					selectorsByChildAndSwitcher.get(childContext).put(s, selector);
 					return new ObservableValue[] { selector };
