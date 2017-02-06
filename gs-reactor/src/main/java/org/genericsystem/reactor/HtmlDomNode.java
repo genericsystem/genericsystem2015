@@ -66,7 +66,7 @@ public class HtmlDomNode {
 		public void send(String message);
 	}
 
-	private final Consumer<Tag> tagAdder = tagAdder();
+	final Consumer<Tag> tagAdder = tagAdder();
 	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
 

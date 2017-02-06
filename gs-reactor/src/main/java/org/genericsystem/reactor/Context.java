@@ -130,6 +130,10 @@ public class Context {
 		tagDataMap.remove(tag);
 	}
 
+	public void addTag(Tag tag) {
+		getHtmlDomNode(tag.getParent()).tagAdder.accept(tag);
+	}
+
 	void setSubContexts(Tag tag, ObservableList<Context> subContexts) {
 		TagData tagData = tagDataMap.get(tag);
 		assert tagData == null || tagData.getSubContexts() == null;
