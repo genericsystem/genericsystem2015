@@ -50,6 +50,7 @@ public class SwitchApp extends RootTagImpl {
 	@BindText(path = HtmlLabel.class, value = Controller.CountTextBinding.class)
 	@BindText(path = HtmlButton.class, pos = { 1 }, value = Controller.NextTextBinding.class)
 	@Switch(path = HtmlButton.class, pos = { 0 }, value = Controller.PrevSwitcher.class)
+	@Switch(path = HtmlLabel.class, value = Controller.CountTextSwitcher.class)
 	@Switch(path = HtmlButton.class, pos = { 1 }, value = Controller.NextSwitcher.class)
 	public static class StepDiv extends HtmlDiv {
 

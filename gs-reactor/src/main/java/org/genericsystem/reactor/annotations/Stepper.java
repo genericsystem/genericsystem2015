@@ -54,23 +54,18 @@ public @interface Stepper {
 
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			if (tag.getMetaBinding() == null)
-				context.removeTag(tag);
-			else
-				context.getParent().removeTag(tag);
+			((Controller) context.getProperties(tag).get(Controller.CONTROLLER).getValue()).setActiveProperty(false);
 		}
 
 		@Override
 		public void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			if (tag.getMetaBinding() == null)
+			if (tag.getMetaBinding() == null) {
+				context.removeTag(tag);
 				context.addTag(tag);
-			else
+			} else {
+				context.getParent().removeTag(tag);
 				context.getParent().addTag(tag);
-		}
-
-		@Override
-		public void onRemove(Tag tag, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			tag.addPrefixBinding(context -> context.getProperties(tag).remove(Controller.CONTROLLER));
+			}
 		}
 
 		@Override
