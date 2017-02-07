@@ -48,7 +48,8 @@ public @interface InstanceValueGenerator {
 		 */
 		@Override
 		public Serializable generateInstanceValue(T meta, List<T> supers, Serializable value, List<T> components) {
-			return components.size() > 0 ? toString(components) : Integer.valueOf((int) (Math.random() * Integer.MAX_VALUE)).toString();
+			return components.size() > 0 ? toString(components)
+					: Integer.valueOf((int) (Math.random() * Integer.MAX_VALUE)).toString();
 		};
 
 		private String toString(List<T> components) {

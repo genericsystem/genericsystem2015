@@ -77,18 +77,27 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 		public void init() {
 			createConvertedValueProperty();
 			storeInvalidProperty(context -> {
-				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0).getConvertedValueProperty(context);
-				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1).getConvertedValueProperty(context);
-				return Bindings.createBooleanBinding(() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null || !Arrays.equals((byte[]) firstHashProperty.getValue(), (byte[]) secondHashProperty.getValue()), firstHashProperty,
-						secondHashProperty);
+				Property<Serializable> firstHashProperty = find(PasswordInput.class, 0)
+						.getConvertedValueProperty(context);
+				Property<Serializable> secondHashProperty = find(PasswordInput.class, 1)
+						.getConvertedValueProperty(context);
+				return Bindings
+						.createBooleanBinding(
+								() -> firstHashProperty.getValue() == null || secondHashProperty.getValue() == null
+										|| !Arrays.equals((byte[]) firstHashProperty.getValue(),
+												(byte[]) secondHashProperty.getValue()),
+								firstHashProperty, secondHashProperty);
 			});
 			addPrefixBinding(context -> {
-				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
-				getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent())
+						.getSaltProperty(context.getParent().getParent()).setValue(nv));
+				getGenericValueComponents(context).getValue().get(context.getGeneric())
+						.setGenericValue(getConvertedValueProperty(context));
 				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
-				if (Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
+				if (Arrays.equals((byte[]) nva,
+						(byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
 					find(HtmlSpan.class).addStyle(context, "display", "none");
 					getConvertedValueProperty(context).setValue(nva);
 				} else
@@ -102,7 +111,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 	public static class MultiCheckboxBuilder extends MultiCheckbox implements GSBuilderDefaults {
 		@Override
 		public void init() {
-			addPrefixBinding(context -> getMultipleRelationProperty(context).getValue().put(context.getGeneric(), new HashMap<>()));
+			addPrefixBinding(context -> getMultipleRelationProperty(context).getValue().put(context.getGeneric(),
+					new HashMap<>()));
 		}
 	}
 
@@ -111,9 +121,11 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 		public void init() {
 			addConvertedValueChangeListener((context, nva) -> {
 				if (Boolean.TRUE.equals(nva))
-					getMultipleRelationProperty(context).getValue().get(context.getGenerics()[1]).put(context.getGeneric(), getConvertedValueProperty(context));
+					getMultipleRelationProperty(context).getValue().get(context.getGenerics()[1])
+							.put(context.getGeneric(), getConvertedValueProperty(context));
 				if (Boolean.FALSE.equals(nva))
-					getMultipleRelationProperty(context).getValue().get(context.getGenerics()[1]).remove(context.getGeneric());
+					getMultipleRelationProperty(context).getValue().get(context.getGenerics()[1])
+							.remove(context.getGeneric());
 			});
 		}
 	}
@@ -123,8 +135,10 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 	@Children(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
 	@Children(path = Content.class, value = DatalistEditor.class)
 	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
-	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
-	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+	@Select(path = { Header.class,
+			HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_SELECTOR.class)
+	@Select(path = { Header.class,
+			BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
 	public static class HolderBuilder extends HolderAdder implements GSBuilderDefaults, ComponentsDefaults {
 
 		@Override
@@ -132,7 +146,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 			createComponentsListProperty();
 			addPostfixBinding(context -> {
 				if (getGenericValueComponents(context) != null)
-					getGenericValueComponents(context).getValue().get(context.getGeneric()).setComponents(getComponentsProperty(context).getValue());
+					getGenericValueComponents(context).getValue().get(context.getGeneric())
+							.setComponents(getComponentsProperty(context).getValue());
 			});
 		}
 
@@ -145,7 +160,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 			public void init() {
 				addPrefixBinding(context -> {
 					if (getGenericValueComponents(context) != null)
-						getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+						getGenericValueComponents(context).getValue().get(context.getGeneric())
+								.setGenericValue(getConvertedValueProperty(context));
 					if (getInvalidListProperty(context) != null)
 						getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 				});
@@ -158,7 +174,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 			public void init() {
 				addPrefixBinding(context -> {
 					if (getGenericValueComponents(context) != null)
-						getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+						getGenericValueComponents(context).getValue().get(context.getGeneric())
+								.setGenericValue(getConvertedValueProperty(context));
 				});
 			}
 		}
@@ -181,9 +198,12 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 
 		@Override
 		public void init() {
-			bindStyle("visibility", "visibility",
-					model -> Bindings.createStringBinding(() -> Boolean.TRUE.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue()).filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? "hidden" : "visible",
-							getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
+			bindStyle("visibility", "visibility", model -> Bindings.createStringBinding(
+					() -> Boolean.TRUE
+							.equals(getInvalidListProperty(model).getValue().stream().map(input -> input.getValue())
+									.filter(bool -> bool != null).reduce(false, (a, b) -> a || b)) ? "hidden"
+											: "visible",
+					getInvalidListProperty(model).getValue().stream().toArray(ObservableValue[]::new)));
 		}
 	}
 }
