@@ -18,21 +18,22 @@ import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
 import org.genericsystem.reactor.gscomponents.Modal.ModalEditor;
-import org.genericsystem.reactor.gscomponents.Monitor;
+import org.genericsystem.reactor.gscomponents.Monitor.MonitorLogin;
 import org.genericsystem.reactor.gscomponents.Responsive;
 import org.genericsystem.reactor.tagadmin.TagAdmin.TagScript;
+import org.genericsystem.security.model.User;
 
 /**
  * @author Nicolas Feybesse
  *
  */
-@DependsOnModel({ TagType.class, GTag.class })
+@DependsOnModel({ TagType.class, GTag.class, User.class })
 @RunScript(TagScript.class)
 @Style(name = "background-color", value = "#00afeb")
-@Children({ ModalEditor.class, AppHeader.class, Responsive.class, Monitor.class })
-@Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class })
+@Children({ ModalEditor.class, AppHeader.class, Responsive.class, MonitorLogin.class })
+@Children(path = Responsive.class, value = { TitledInstancesTable.class, TitledInstancesTable.class, TitledInstancesTable.class, SwitchDivContainer.class })
 @SetText(path = { AppHeader.class, AppTitleDiv.class, HtmlH1.class }, value = "App administration")
-@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { TagType.class, TagAnnotationAttribute.class })
+@DirectSelect(path = { Responsive.class, TitledInstancesTable.class }, value = { TagType.class, TagAnnotationAttribute.class, User.class })
 public class TagAdmin extends ExtendedRootTag {
 	public static void main(String[] mainArgs) {
 		ApplicationServer.startSimpleGenericApp(mainArgs, TagAdmin.class, "tags");
