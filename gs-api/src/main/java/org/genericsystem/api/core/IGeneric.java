@@ -1281,11 +1281,26 @@ public interface IGeneric<T extends IGeneric<T>> extends ISignature<T> {
 	 */
 	boolean isInheritanceEnabled();
 
-	T hide();
+	/**
+	 * Declares that this vertex’s instances values are hashes. Used by the reactor.
+	 *
+	 * @return <code>this</code>.
+	 */
+	T enableHashedInstanceValue();
 
-	T unhide();
+	/**
+	 * Declares that this vertex’s instances values are not hashes (default). Used by the reactor.
+	 *
+	 * @return <code>this</code>.
+	 */
+	T disableHashedInstanceValue();
 
-	boolean isHidden();
+	/**
+	 * Indicates whether this vertex’s instances values are hashes. Used by the reactor.
+	 *
+	 * @return <code>true</code> if this vertex’s instances values are hashes, <code>false</code> otherwise.
+	 */
+	boolean isInstanceValueHashed();
 
 	/**
 	 * Hide this vertex’s and its instances’ values in the reactor.

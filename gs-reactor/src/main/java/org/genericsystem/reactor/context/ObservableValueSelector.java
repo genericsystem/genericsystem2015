@@ -65,28 +65,28 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 	public static class PASSWORD_INSTANCE_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return gs[1].isHidden() ? gs[0] : null;
+			return gs[1].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
 	public static class NON_PASSWORD_INSTANCE_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return !gs[1].isHidden() ? gs[0] : null;
+			return !gs[1].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
 	public static class PASSWORD_ATTRIBUTE_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return gs[0].isHidden() ? gs[0] : null;
+			return gs[0].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
 	public static class NON_PASSWORD_ATTRIBUTE_SELECTOR implements ObservableValueSelector {
 		@Override
 		public Generic apply(Generic[] gs) {
-			return !gs[0].isHidden() ? gs[0] : null;
+			return !gs[0].isInstanceValueHashed() ? gs[0] : null;
 		}
 	}
 
@@ -108,7 +108,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[2].inheritsFrom(c)).findFirst().get();
-			return !gs[0].isHidden() && gs[0].isValueHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)) ? gs[0] : null;
+			return !gs[0].isInstanceValueHashed() && gs[0].isValueHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)) ? gs[0] : null;
 		}
 	}
 
@@ -116,7 +116,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[2].inheritsFrom(c)).findFirst().get();
-			return !gs[0].isHidden() && (!gs[0].isValueHidden() || (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)))) ? gs[0] : null;
+			return !gs[0].isInstanceValueHashed() && (!gs[0].isValueHidden() || (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)))) ? gs[0] : null;
 		}
 	}
 
@@ -124,7 +124,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[1].inheritsFrom(c)).findFirst().get();
-			return !gs[0].isHidden() && gs[0].isValueHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)) ? gs[0] : null;
+			return !gs[0].isInstanceValueHashed() && gs[0].isValueHidden() && gs[0].getComponents().size() == 2 && !gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)) ? gs[0] : null;
 		}
 	}
 
@@ -132,7 +132,7 @@ public interface ObservableValueSelector extends Function<Generic[], Generic> {
 		@Override
 		public Generic apply(Generic[] gs) {
 			Generic component = gs[0].getComponents().stream().filter(c -> gs[1].inheritsFrom(c)).findFirst().get();
-			return !gs[0].isHidden() && (!gs[0].isValueHidden() || (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)))) ? gs[0] : null;
+			return !gs[0].isInstanceValueHashed() && (!gs[0].isValueHidden() || (gs[0].getComponents().size() != 2 || gs[0].isSingularConstraintEnabled(gs[0].getComponents().indexOf(component)))) ? gs[0] : null;
 		}
 	}
 
