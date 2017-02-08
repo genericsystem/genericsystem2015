@@ -11,6 +11,7 @@ import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator
 import org.genericsystem.api.core.exceptions.NotFoundException;
 import org.genericsystem.defaults.DefaultConfig.CascadeRemoveProperty;
 import org.genericsystem.defaults.DefaultConfig.HiddenProperty;
+import org.genericsystem.defaults.DefaultConfig.HiddenValueProperty;
 import org.genericsystem.defaults.DefaultConfig.InstanceValueGeneratorProperty;
 import org.genericsystem.defaults.DefaultConfig.NoReferentialIntegrityProperty;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
@@ -215,6 +216,23 @@ public interface DefaultSystemProperties<T extends DefaultGeneric<T>> extends IG
 	@Override
 	default boolean isHidden() {
 		return isSystemPropertyEnabled(HiddenProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default T hideValue() {
+		return enableSystemProperty(HiddenValueProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default T unhideValue() {
+		return disableSystemProperty(HiddenValueProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@Override
+	default boolean isValueHidden() {
+		return isSystemPropertyEnabled(HiddenValueProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@SuppressWarnings("unchecked")

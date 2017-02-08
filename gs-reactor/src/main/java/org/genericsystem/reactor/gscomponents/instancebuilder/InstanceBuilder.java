@@ -16,8 +16,8 @@ import org.genericsystem.reactor.context.ContextAction.CREATE_INSTANCE;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_RELATION_COMPONENT;
 import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR_RELATION;
-import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR_RELATION;
+import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
 import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.context.TextBinding.ERROR_COMPONENTS;
@@ -59,8 +59,8 @@ import javafx.beans.value.ObservableValue;
 @Children(path = ButtonDiv.class, value = AddLink.class)
 @ForEach(path = Content.class, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @Select(path = { Content.class, PasswordBuilder.class }, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
-@Select(path = { Content.class, GSHolderBuilderDiv.class }, value = NON_MULTICHECKBOX_SELECTOR_RELATION.class)
-@Select(path = { Content.class, MultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR_RELATION.class)
+@Select(path = { Content.class, GSHolderBuilderDiv.class }, value = NON_MULTICHECKBOX_SELECTOR.class)
+@Select(path = { Content.class, MultiCheckbox.class }, value = MULTICHECKBOX_SELECTOR.class)
 public class InstanceBuilder extends Composite implements GSBuilderDefaults, PasswordDefaults {
 
 	@Override
@@ -134,11 +134,9 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 	@Children({ Content.class, Header.class, })
 	@Children(path = Header.class, value = { HolderBuilderInput.class, BooleanHolderBuilderInput.class })
 	@Children(path = Content.class, value = DatalistEditor.class)
-	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
-	@Select(path = { Header.class,
-			HolderBuilderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_SELECTOR.class)
-	@Select(path = { Header.class,
-			BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+	@Select(path = Header.class, value = ObservableValueSelector.GENERIC_VALUE_DISPLAYER.class)
+	@Select(path = { Header.class, HolderBuilderInput.class }, value = ObservableValueSelector.VALUE_BUILDER_DISPLAYER_SELECTOR.class)
+	@Select(path = { Header.class, BooleanHolderBuilderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	public static class HolderBuilder extends HolderAdder implements GSBuilderDefaults, ComponentsDefaults {
 
 		@Override

@@ -1288,6 +1288,27 @@ public interface IGeneric<T extends IGeneric<T>> extends ISignature<T> {
 	boolean isHidden();
 
 	/**
+	 * Hide this vertex’s and its instances’ values in the reactor.
+	 *
+	 * @return <code>this</code>.
+	 */
+	T hideValue();
+
+	/**
+	 * Show this vertex’s and its instances’ values in the reactor.
+	 *
+	 * @return <code>this</code>.
+	 */
+	T unhideValue();
+
+	/**
+	 * Indicates whether this vertex’s and its instances’ values should be shown by the reactor.
+	 *
+	 * @return <code>true</code> if this vertex’s and its instances’ values should be shown, <code>false</code> otherwise.
+	 */
+	boolean isValueHidden();
+
+	/**
 	 * Removes this vertex.
 	 *
 	 * @throws RollbackException

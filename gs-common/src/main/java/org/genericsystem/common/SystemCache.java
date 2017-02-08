@@ -11,6 +11,7 @@ import org.genericsystem.api.core.IRoot;
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
 import org.genericsystem.api.core.annotations.Hidden;
+import org.genericsystem.api.core.annotations.HideValue;
 import org.genericsystem.api.core.annotations.Meta;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator;
@@ -147,6 +148,9 @@ public abstract class SystemCache {
 
 		if (clazz.getAnnotation(Hidden.class) != null)
 			result.hide();
+
+		if (clazz.getAnnotation(HideValue.class) != null)
+			result.hideValue();
 	}
 
 	private void triggersDependencies(Class<?> clazz) {
