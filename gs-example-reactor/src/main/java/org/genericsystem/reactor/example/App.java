@@ -1,7 +1,5 @@
 package org.genericsystem.reactor.example;
 
-import org.genericsystem.reactor.example.App.ExampleReactorScript;
-
 import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.carcolor.model.Car;
 import org.genericsystem.carcolor.model.CarColor;
@@ -20,6 +18,7 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ObservableContextSelector;
+import org.genericsystem.reactor.example.App.ExampleReactorScript;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceEditor;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstanceStepEditor;
 import org.genericsystem.reactor.gscomponents.DivWithTitle.TitledHorizontalInstancesTable;
@@ -62,6 +61,7 @@ public class App extends RootTagImpl {
 			Generic carColor = engine.find(CarColor.class);
 			Generic color = engine.find(Color.class);
 			Generic carPerson = car.setRelation("CarDriverOwner", category, person);
+			carPerson.hideValue();
 			carPerson.enablePropertyConstraint();
 			Generic red = color.setInstance("Red");
 			Generic black = color.setInstance("Black");

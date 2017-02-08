@@ -3,11 +3,13 @@ package org.genericsystem.reactor;
 import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
 import org.genericsystem.reactor.annotations.BindText;
+import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DirectSelect;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.GenericProcess;
@@ -25,10 +27,15 @@ import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.AnnotationClassName;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
 import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
-import org.genericsystem.reactor.gscomponents.TagImpl;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericAnnotationWithContent;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
+
+import javafx.collections.transformation.SortedList;
 
 public class ExtendedAnnotationsManager extends AnnotationsManager {
 
@@ -45,13 +52,14 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	@Override
 	public void initManager(Class<? extends RootTag> clazz) {
 		processors = new LinkedHashMap<>();
+		registerAnnotation(Children.class);
 		registerAnnotation(DirectSelect.class);
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
-		super.registerAnnotation(Stepper.class);
-		super.registerAnnotation(Step.class);
-		// super.registerAnnotation(Stepper.class);
+		registerAnnotation(Stepper.class);
+		registerAnnotation(Step.class);
+		// super.registerAnnotation(Stepper2.class);
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
 		registerAnnotation(StyleClass.class);
@@ -70,8 +78,17 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 	}
 
 	@Override
-	public void processChildrenAnnotations(Tag tag) {
-		((TagImpl) tag).setTagNode(tag.getRootTag().buildTagNode(tag));
+	public void processAnnotations(Tag tag) {
+		GenericTagNode tagNode = (GenericTagNode) tag.getTagNode();
+		for (Entry<AnnotationClassName, SortedList<GenericAnnotationWithContent>> entry : tagNode.getSortedAnnotationsLists().entrySet()) {
+			Class<? extends Annotation> annotationClass = entry.getKey().getAnnotationClass();
+			if (processors.containsKey(annotationClass)) {
+				GenericAnnotationWithContent applyingAnnotation = entry.getValue().get(0);
+				processors.get(annotationClass).onAdd(tag, applyingAnnotation.getgTagAnnotation(), applyingAnnotation.getAnnotationContent());
+				entry.getValue().addListener(((ExtendedRootTag) tag.getRootTag()).getApplyingAnnotationsListener(tag, annotationClass));
+			}
+		}
+		super.processAnnotations(tag);
 	}
 
 	@Override

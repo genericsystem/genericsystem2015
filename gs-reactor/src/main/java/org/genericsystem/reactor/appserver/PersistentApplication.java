@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 public class PersistentApplication {
 
 	private final Class<? extends RootTag> htmlAppClass;
-	private RootTag tagTree;
 	private final Root engine;
 	private final Class<Context> modelClass;
 	private final String rootId;
@@ -39,17 +38,6 @@ public class PersistentApplication {
 			}
 			cache.safeConsum(unused -> runner.run(getEngine()));
 			log.info("Script has run");
-		}
-		try {
-			tagTree = (RootTag) getApplicationClass().newInstance().initTree();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
-			try {
-				engine.newCache().start();
-				tagTree = (RootTag) getApplicationClass().getConstructor(Root.class).newInstance(engine).initTree();
-				engine.getCurrentCache().flush();
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException | NoSuchMethodException ex) {
-				throw new IllegalStateException(ex);
-			}
 		}
 	}
 
@@ -77,7 +65,7 @@ public class PersistentApplication {
 		this.indexHtml = indexHtml;
 	}
 
-	public RootHtmlDomNode init(Sender send) {
+	public RootHtmlDomNode init(Sender send, RootTag tagTree) {
 		try {
 			return tagTree.init(modelClass.getConstructor(Root.class).newInstance(engine), rootId, send);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {

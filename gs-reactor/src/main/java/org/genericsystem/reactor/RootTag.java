@@ -1,7 +1,9 @@
 package org.genericsystem.reactor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Function;
 
+import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
@@ -18,8 +20,18 @@ import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.FlexDirectionDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.gscomponents.Controller;
+import org.genericsystem.reactor.gscomponents.Controller.MainSwitcher;
+import org.genericsystem.reactor.gscomponents.Controller.StepsStep;
 import org.genericsystem.reactor.gscomponents.FlexDirection;
 import org.genericsystem.reactor.gscomponents.TagImpl;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ListBinding;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public interface RootTag extends Tag {
 
@@ -41,21 +53,8 @@ public interface RootTag extends Tag {
 	TagNode buildTagNode(Tag child);
 
 	default void processChildren(Tag tag, Class<? extends TagImpl>[] classes) {
-		for (Class<? extends TagImpl> clazz : classes) {
-			TagImpl result = createChild(tag, clazz);
-			result.setTagNode(buildTagNode(result));
-		}
-	}
-
-	default <T extends TagImpl> TagImpl createChild(Tag tag, Class<T> clazz) {
-		T result = null;
-		try {
-			result = clazz.newInstance();
-		} catch (IllegalAccessException | InstantiationException e) {
-			throw new IllegalStateException(e);
-		}
-		result.setParent(tag);
-		return result;
+		for (Class<? extends TagImpl> clazz : classes)
+			tag.createChild(clazz);
 	}
 
 	default void processStyle(Tag tag, String name, String value) {
@@ -256,6 +255,40 @@ public interface RootTag extends Tag {
 
 	default void processBindSelection(Tag tag, Class<? extends TagImpl> value, int valuePos) {
 		tag.addPostfixBinding(context -> processBindSelection(tag, context, value, valuePos));
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	default void processStep(Tag tag, Class<? extends TagImpl> next, String prevText, String nextText) {
+		if (tag.getMetaBinding() == null) {
+			tag.addPrefixBinding(context -> {
+				Controller controller = Controller.get(tag, context);
+				controller.addStep(tag, new SimpleIntegerProperty(1), next, prevText, nextText);
+			});
+		} else {
+			Function<Context, ObservableList<Object>> contextOl = tag.getMetaBinding().getBetweenChildren();
+			tag.getMetaBinding().setBetweenChildren(context -> {
+				ObservableList ol = contextOl.apply(context);
+				Controller controller = Controller.get(tag, context);
+				StepsStep subSteps = controller.getStep(tag);
+				if (subSteps == null)
+					subSteps = controller.addStep(tag, Bindings.size(ol), next, prevText, nextText);
+				Property<Boolean> activeProperty = controller.getActiveProperty();
+				SimpleIntegerProperty indexProperty = subSteps.getIndexProperty();
+				return BindingsTools.transmitSuccessiveInvalidations(new ListBinding() {
+					{
+						bind(indexProperty, activeProperty);
+					}
+
+					@Override
+					protected ObservableList computeValue() {
+						if (!activeProperty.getValue())
+							return ol;
+						return (indexProperty.get() >= 0) && (indexProperty.get() < ol.size()) ? FXCollections.singletonObservableList(ol.get(indexProperty.get())) : FXCollections.emptyObservableList();
+					}
+				});
+			});
+		}
+		tag.getRootTag().processSwitch(tag, new Class[] { MainSwitcher.class });
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {

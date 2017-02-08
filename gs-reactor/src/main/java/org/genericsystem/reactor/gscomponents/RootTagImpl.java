@@ -24,7 +24,8 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 	protected void initRoot() {
 		annotationsManager = new AnnotationsManager(getClass());
 		setTagNode(buildTagNode(this));
-		createSubTree();
+		processAnnotations(this);
+		init();
 	}
 
 	@Override
@@ -43,9 +44,6 @@ public class RootTagImpl extends FlexDiv implements RootTag, SelectionDefaults, 
 
 	@Override
 	public TagNode buildTagNode(Tag child) {
-		Tag parent = child.getParent();
-		if (parent != null)
-			parent.getObservableChildren().add(child);
 		return new SimpleTagNode();
 	}
 

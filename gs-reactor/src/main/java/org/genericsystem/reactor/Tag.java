@@ -9,7 +9,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.context.ObservableListExtractor;
@@ -21,6 +20,7 @@ import org.genericsystem.reactor.contextproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.contextproperties.StylesDefaults;
 import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
 import org.genericsystem.reactor.contextproperties.UserRoleDefaults;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,7 +152,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	@Override
 	default <T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag) {
-		while (tag != null && model[0] != null) {
+		while (tag[0] != null && model[0] != null) {
 			if (tag[0].getMetaBinding() != null && model[0].getHtmlDomNode(tag[0].getParent()) == null)
 				model[0] = model[0].getParent();
 			tag[0] = tag[0].getParent();
@@ -192,7 +192,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 	}
 
 	default void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap) {
-		bindBiDirectionalMapElement(propertyName, name, getMap, ApiStatics.STRING_CONVERTERS.get(String.class));
+		bindBiDirectionalMapElement(propertyName, name, getMap, ReactorStatics.STRING_CONVERTERS.get(String.class));
 	}
 
 	default <T extends Serializable> void bindBiDirectionalMapElement(String propertyName, String name, Function<Context, ObservableMap<String, String>> getMap, StringConverter<T> stringConverter) {
@@ -353,18 +353,23 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		return new HtmlDomNode(parent, modelContext, this);
 	};
 
-	default void createSubTree() {
-		getRootTag().getAnnotationsManager().processChildrenAnnotations(this);
-		for (Tag child : getObservableChildren())
-			child.createSubTree();
+	default <T extends TagImpl> TagImpl createChild(Class<T> clazz) {
+		T result = null;
+		try {
+			result = clazz.newInstance();
+		} catch (IllegalAccessException | InstantiationException e) {
+			throw new IllegalStateException(e);
+		}
+		result.initTag(this);
+		return result;
 	}
 
-	default Tag initTree() {
+	default void initTag(Tag parent) {
+		setParent(parent);
+		setTagNode(getRootTag().buildTagNode(this));
 		getRootTag().processAnnotations(this);
 		init();
-		for (Tag child : getObservableChildren())
-			child.initTree();
-		return this;
+		parent.getObservableChildren().add(this);
 	}
 
 	@Override
@@ -372,10 +377,14 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	public TagNode getTagNode();
 
+	public void setTagNode(TagNode tagNode);
+
 	default void init() {
 	}
 
 	public <COMPONENT extends Tag> COMPONENT getParent();
+
+	public void setParent(Tag parent);
 
 	default RootTag getRootTag() {
 		return getParent().getRootTag();

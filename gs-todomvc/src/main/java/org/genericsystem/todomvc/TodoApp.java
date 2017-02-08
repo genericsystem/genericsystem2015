@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BidirectionalBinding;
-import org.genericsystem.defaults.tools.ObservableListWrapperExtended;
+import org.genericsystem.defaults.tools.ObservableListWrapper;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.Children;
@@ -121,7 +121,7 @@ public class TodoApp extends RootTagImpl {
 				return result;
 			};
 		});
-		createNewInitializedProperty(TODOS, model -> new ObservableListWrapperExtended<>(model.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
+		createNewInitializedProperty(TODOS, model -> new ObservableListWrapper<>(model.find(Todos.class).getObservableSubInstances(), todo -> getExtractors(model).get(todo)));
 		createNewInitializedProperty(FILTER_MODE, model -> ALL);
 		createNewInitializedProperty(FILTERED_TODOS, model -> {
 			FilteredList<Generic> filtered = new FilteredList<>(getTodos(model));

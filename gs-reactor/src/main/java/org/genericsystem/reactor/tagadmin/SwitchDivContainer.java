@@ -1,47 +1,31 @@
-package org.genericsystem.quiz.app;
+package org.genericsystem.reactor.tagadmin;
 
-import org.genericsystem.common.Root;
-import org.genericsystem.quiz.app.SwitchApp.SwitchAppScript;
-import org.genericsystem.quiz.app.SwitchApp.SwitchDiv1;
-import org.genericsystem.quiz.app.SwitchApp.SwitchDiv2;
-import org.genericsystem.quiz.app.SwitchApp.SwitchDiv3;
-import org.genericsystem.quiz.app.SwitchApp.SwitchDiv4;
-import org.genericsystem.quiz.app.SwitchApp.SwitchDiv5;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
+import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.ForEach;
-import org.genericsystem.reactor.annotations.RunScript;
+import org.genericsystem.reactor.annotations.SetText;
 import org.genericsystem.reactor.annotations.Step;
 import org.genericsystem.reactor.annotations.Stepper;
 import org.genericsystem.reactor.annotations.Switch;
-import org.genericsystem.reactor.appserver.ApplicationServer;
-import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.gscomponents.Controller;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
-import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.reactor.tagadmin.SwitchDivContainer.SwitchDiv1;
+import org.genericsystem.reactor.tagadmin.SwitchDivContainer.SwitchDiv2;
+import org.genericsystem.reactor.tagadmin.SwitchDivContainer.SwitchDiv3;
+import org.genericsystem.reactor.tagadmin.SwitchDivContainer.SwitchDiv4;
+import org.genericsystem.reactor.tagadmin.SwitchDivContainer.SwitchDiv5;
 
+@DependsOnModel({ TagType.class, GTag.class })
 @Stepper(first = SwitchDiv1.class)
-@RunScript(SwitchAppScript.class)
 @Children({ SwitchDiv1.class, SwitchDiv2.class, SwitchDiv3.class, SwitchDiv4.class, SwitchDiv5.class })
-public class SwitchApp extends RootTagImpl {
-
-	public static class SwitchAppScript implements Script {
-
-		@Override
-		public void run(Root engine) {
-			engine.setInstance("Car");
-			engine.setInstance("Color");
-			engine.getCurrentCache().flush();
-		}
-	}
-
-	public static void main(String[] mainArgs) {
-		ApplicationServer.startSimpleGenericApp(mainArgs, SwitchApp.class, "/switchapp");
-	}
+public class SwitchDivContainer extends HtmlDiv {
 
 	@Children({ HtmlButton.class, HtmlLabel.class, HtmlButton.class })
 	@BindAction(path = HtmlButton.class, pos = { 0 }, value = Controller.PrevAction.class)
@@ -57,27 +41,32 @@ public class SwitchApp extends RootTagImpl {
 	}
 
 	@Step(next = SwitchDiv2.class)
+	@SetText("SwitchDiv1")
 	public static class SwitchDiv1 extends StepDiv {
 
 	}
 
 	@Step(next = SwitchDiv3.class)
+	@SetText("SwitchDiv2")
 	public static class SwitchDiv2 extends StepDiv {
 
 	}
 
 	@Step(next = SwitchDiv4.class)
+	@SetText("SwitchDiv3")
 	public static class SwitchDiv3 extends StepDiv {
 
 	}
 
 	@Step(next = SwitchDiv5.class)
+	@SetText("SwitchDiv4")
 	@ForEach(ObservableListExtractor.INSTANCES.class)
 	public static class SwitchDiv4 extends StepDiv {
 
 	}
 
 	@Step(next = SwitchDiv5.class)
+	@SetText("SwitchDiv5")
 	@ForEach(ObservableListExtractor.INSTANCES.class)
 	public static class SwitchDiv5 extends StepDiv {
 

@@ -6,6 +6,7 @@ import org.genericsystem.api.core.ApiStatics;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
+import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.contextproperties.PasswordDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
@@ -62,7 +63,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 		Class<?> clazz = model.getGeneric().getInstanceValueClassConstraint();
 		if (clazz == null)
 			clazz = String.class;
-		return ApiStatics.STRING_CONVERTERS.get(clazz);
+		return ReactorStatics.STRING_CONVERTERS.get(clazz);
 	}
 
 	public static class InputTextEditorWithConversion<T extends Serializable> extends InputTextWithConversion<T> implements SelectionDefaults {
@@ -94,7 +95,7 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 				else
 					clazz = String.class;
 			}
-			return ApiStatics.STRING_CONVERTERS.get(clazz);
+			return ReactorStatics.STRING_CONVERTERS.get(clazz);
 		}
 	}
 

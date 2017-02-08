@@ -9,11 +9,11 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javafx.collections.ObservableList;
-
 import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.Snapshot;
-import org.genericsystem.defaults.tools.TransitiveObservableList;
+import org.genericsystem.defaults.tools.BindingsTools;
+
+import javafx.collections.ObservableList;
 
 /**
  * @author Nicolas Feybesse
@@ -30,9 +30,7 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 
 	@Override
 	default boolean isAncestorOf(T dependency) {
-		return equals(dependency) || (!dependency.isMeta() && isAncestorOf(dependency.getMeta()))
-				|| dependency.getSupers().stream().anyMatch(this::isAncestorOf)
-				|| dependency.getComponents().stream().filter(x -> x != null).anyMatch(this::isAncestorOf);
+		return equals(dependency) || (!dependency.isMeta() && isAncestorOf(dependency.getMeta())) || dependency.getSupers().stream().anyMatch(this::isAncestorOf) || dependency.getComponents().stream().filter(x -> x != null).anyMatch(this::isAncestorOf);
 	}
 
 	@Override
@@ -145,12 +143,14 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	default ObservableList<T> getObservableSubInheritings() {
-		return new TransitiveObservableList<T>(getObservableInheritings(), g -> g.getObservableSubInheritings()) {
-			@Override
-			protected List<T> computeValue() {
-				return getSubInheritings().toList();
-			}
-		};
+		return BindingsTools.createMinimalUnitaryChangesBinding(getObservableInheritings(), () -> getSubInheritings().toList(), g -> g.getObservableSubInheritings());
+
+		// return new TransitiveObservableList<T>(getObservableInheritings(), g -> g.getObservableSubInheritings()) {
+		// @Override
+		// protected List<T> computeValue() {
+		// return getSubInheritings().toList();
+		// }
+		// };
 	}
 
 	@Override
@@ -159,12 +159,14 @@ public interface DefaultDependencies<T extends DefaultGeneric<T>> extends IGener
 	}
 
 	default ObservableList<T> getObservableSubInstances() {
-		return new TransitiveObservableList<T>(getObservableSubInheritings(), g -> g.getObservableInstances()) {
-			@Override
-			protected List<T> computeValue() {
-				return getSubInstances().toList();
-			}
-		};
+		return BindingsTools.createMinimalUnitaryChangesBinding(getObservableSubInheritings(), () -> getSubInstances().toList(), g -> g.getObservableInstances());
+
+		// return new TransitiveObservableList<T>(getObservableSubInheritings(), g -> g.getObservableInstances()) {
+		// @Override
+		// protected List<T> computeValue() {
+		// return getSubInstances().toList();
+		// }
+		// };
 	}
 
 	@SuppressWarnings("unchecked")

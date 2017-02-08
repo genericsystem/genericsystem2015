@@ -98,7 +98,8 @@ function onMessageReceived(evt) {
 	case 'AA':
 		switch (message.attributeName) {
 		case "value":
-			elt.value = message.attributeValue;
+			if (elt.value !== message.attributeValue)
+				elt.value = message.attributeValue;
 			break;
 		case "checked":
 			elt.checked = true;

@@ -28,8 +28,8 @@ import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.ObservableListExtractor.NO_FOR_EACH;
 import org.genericsystem.reactor.context.ObservableListExtractor.SUBINSTANCES_OF_LINK_COMPONENT;
 import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_SELECTOR;
-import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.MULTICHECKBOX_INSTANCE_SELECTOR;
+import org.genericsystem.reactor.context.ObservableValueSelector.NON_MULTICHECKBOX_INSTANCE_SELECTOR;
 import org.genericsystem.reactor.context.ObservableValueSelector.PASSWORD_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR;
 import org.genericsystem.reactor.context.ObservableValueSelector.TYPE_SELECTOR;
@@ -56,6 +56,7 @@ import org.genericsystem.reactor.gscomponents.InstanceEditor.AttributeEdition;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.HoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.InstanceName;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.MultiCheckbox;
+import org.genericsystem.reactor.gscomponents.InstanceEditor.PasswordHoldersEditor;
 import org.genericsystem.reactor.gscomponents.InstanceEditor.ValueComponentsEditor;
 import org.genericsystem.reactor.gscomponents.InstancesTable.Holders;
 import org.genericsystem.reactor.gscomponents.InstancesTable.ValueComponents;
@@ -80,13 +81,13 @@ import javafx.beans.value.ObservableValue;
 @Children(path = InstanceName.class, value = { ValueComponents.class, ValueComponentsEditor.class })
 @Children(path = AttributeEdition.class, value = { ValueComponents.class, AttributeContent.class })
 @Children(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = GSLabelDisplayer.class)
-@Children(path = { AttributeEdition.class, Content.class }, value = { HoldersEditor.class, MultiCheckbox.class })
+@Children(path = { AttributeEdition.class, Content.class }, value = { PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
 @Children(path = { InstanceName.class, ValueComponentsEditor.class }, value = { Content.class, Header.class })
 @ForEach(path = AttributeEdition.class, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { AttributeEdition.class, AttributeContent.class }, value = ObservableListExtractor.NO_FOR_EACH.class)
 @ForEach(path = { AttributeEdition.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
 @Select(path = { InstanceName.class, ValueComponents.class }, pos = { 0, 0 }, value = TYPE_SELECTOR.class)
-@Select(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+@Select(path = { Composite.class, ValueComponents.class, Header.class }, pos = { -1, 0, -1 }, value = ObservableValueSelector.GENERIC_VALUE_DISPLAYER.class)
 public class InstanceEditor extends FlexDiv implements SelectionDefaults, StepperDefaults {
 
 	public static class InstanceName extends Composite {
@@ -98,8 +99,8 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Children({ PasswordHoldersEditor.class, HoldersEditor.class, MultiCheckbox.class })
 	@ForEach(ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 	@Select(path = PasswordHoldersEditor.class, value = PASSWORD_ATTRIBUTE_SELECTOR.class)
-	@Select(path = HoldersEditor.class, value = NON_MULTICHECKBOX_SELECTOR.class)
-	@Select(path = MultiCheckbox.class, value = MULTICHECKBOX_SELECTOR.class)
+	@Select(path = HoldersEditor.class, value = NON_MULTICHECKBOX_INSTANCE_SELECTOR.class)
+	@Select(path = MultiCheckbox.class, value = MULTICHECKBOX_INSTANCE_SELECTOR.class)
 	public static class AttributeContent extends Content {
 	}
 
@@ -226,15 +227,15 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 			});
 			find(PasswordInput.class).addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null && Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 1).getConvertedValueProperty(context).getValue())) {
-					getConvertedValueProperty(context).setValue(nva);
 					find(HtmlSpan.class).addStyle(context, "display", "none");
+					getConvertedValueProperty(context).setValue(nva);
 				} else
 					find(HtmlSpan.class).addStyle(context, "display", "inline");
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null && Arrays.equals((byte[]) nva, (byte[]) find(PasswordInput.class, 0).getConvertedValueProperty(context).getValue())) {
-					getConvertedValueProperty(context).setValue(nva);
 					find(HtmlSpan.class).addStyle(context, "display", "none");
+					getConvertedValueProperty(context).setValue(nva);
 				} else
 					find(HtmlSpan.class).addStyle(context, "display", "inline");
 			});
@@ -257,12 +258,12 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 
 	@Style(path = { Header.class, InputTextEditorWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, InputTextEditorWithConversion.class }, name = "width", value = "100%")
-	@Children({ Header.class, Content.class, ActionLink.class })
+	@Children({ Content.class, Header.class, ActionLink.class })
 	@Children(path = Header.class, value = { InputTextEditorWithConversion.class, CheckBoxEditor.class })
 	@Children(path = Content.class, value = DirectRelationComponentEditor.class)
 	@SelectContext(path = ActionLink.class, value = REMOVABLE_HOLDER_SELECTOR.class)
-	@Select(path = { Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
-	@Select(path = { Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
+	@Select(path = { Header.class, InputTextEditorWithConversion.class }, value = ObservableValueSelector.INSTANCE_LABEL_DISPLAYER.class)
+	@Select(path = { Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.INSTANCE_CHECK_BOX_DISPLAYER.class)
 	@SetText(path = ActionLink.class, value = "×")
 	@BindAction(path = ActionLink.class, value = REMOVE.class)
 	public static class ValueComponentsEditor extends ValueComponents implements ComponentsDefaults {
@@ -296,13 +297,13 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	@Style(name = "flex", value = "1 0 auto")
 	@Style(path = { Header.class, InputTextWithConversion.class }, name = "flex", value = "1")
 	@Style(path = { Header.class, InputTextWithConversion.class }, name = "width", value = "100%")
-	@Children({ Header.class, Content.class, ActionLink.class })
+	@Children({ Content.class, Header.class, ActionLink.class })
 	@Children(path = Header.class, value = { HolderAdderInput.class, BooleanHolderAdderInput.class })
 	@Children(path = Content.class, value = DatalistEditor.class)
-	@Select(path = ActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class)
-	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
-	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER_ATTRIBUTE.class)
-	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+	@Select(path = ActionLink.class, value = STRICT_ATTRIBUTE_SELECTOR.class) // TODO: Remove
+	@Select(path = Header.class, value = ObservableValueSelector.GENERIC_VALUE_DISPLAYER.class)
+	@Select(path = { Header.class, HolderAdderInput.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
+	@Select(path = { Header.class, BooleanHolderAdderInput.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	@SetText(path = ActionLink.class, value = "+")
 	@BindAction(path = ActionLink.class, value = ADD_HOLDER.class)
 	public static class HolderAdder extends ValueComponents implements ComponentsDefaults, ConvertedValueDefaults {

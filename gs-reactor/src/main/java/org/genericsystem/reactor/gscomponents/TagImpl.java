@@ -29,6 +29,7 @@ public abstract class TagImpl implements Tag {
 		return tagNode;
 	}
 
+	@Override
 	public void setTagNode(TagNode tagNode) {
 		this.tagNode = tagNode;
 	}
