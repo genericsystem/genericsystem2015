@@ -18,11 +18,10 @@ import org.genericsystem.reactor.context.ContextAction.REMOVE;
 import org.genericsystem.reactor.context.ContextAction.SET_SELECTION;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.ObservableValueSelector;
-import org.genericsystem.reactor.context.ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE;
+import org.genericsystem.reactor.context.ObservableValueSelector.GENERIC_VALUE_DISPLAYER;
 import org.genericsystem.reactor.context.TagSwitcher;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxDisplayer;
-import org.genericsystem.reactor.gscomponents.CheckBoxWithValue.CheckBoxEditor;
 import org.genericsystem.reactor.gscomponents.Composite.Content;
 import org.genericsystem.reactor.gscomponents.Composite.Header;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
@@ -44,8 +43,8 @@ import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder;
 @GenericValueBackgroundColor(path = { ContentRow.class, ValueComponents.class, Header.class }, value = "#3393ff")
 @Style(path = Composite.class, name = "flex", value = "0 1 auto")
 @Style(path = { ContentRow.class, ValueComponents.class, Header.class, GSLabelDisplayer.class }, name = "color", value = "white")
-@Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "padding-left", value = "2px")
-@Style(path = { ContentRow.class, ValueComponents.class, Header.class }, name = "align-items", value = "flex-start")
+@Style(path = { ContentRow.class, ValueComponents.class, Header.class, GSLabelDisplayer.class }, name = "padding-left", value = "2px")
+@Style(path = { ContentRow.class, ValueComponents.class, Header.class, GSLabelDisplayer.class }, name = "align-items", value = "flex-start")
 @Style(path = { HeaderRow.class, ButtonDiv.class }, name = "background-color", value = "#ea0084")
 @Style(name = "background-color", value = "lightgrey")
 @Style(name = "padding-left", value = "1px")
@@ -53,18 +52,16 @@ import org.genericsystem.reactor.gscomponents.instancebuilder.InstanceBuilder;
 @Children({ HeaderRow.class, InstanceBuilder.class, ContentRow.class })
 @Children(path = HeaderRow.class, value = { ValueComponents.class, ValueComponents.class, ButtonDiv.class })
 @Children(path = ContentRow.class, value = { ValueComponents.class, Holders.class, LinksDiv.class })
-@Children(path = { ContentRow.class, ValueComponents.class, Header.class }, value = GSLabelDisplayer.class)
 @ForEach(path = { HeaderRow.class, ValueComponents.class }, pos = { 0, 1 }, value = ObservableListExtractor.ATTRIBUTES_OF_TYPE.class)
 @ForEach(path = ContentRow.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @ForEach(path = { ContentRow.class, Holders.class }, value = ObservableListExtractor.ATTRIBUTES_OF_INSTANCES.class)
 @ForEach(path = { ContentRow.class, ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-@Select(path = { ContentRow.class, ValueComponents.class, Header.class, CheckBoxDisplayer.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 public class InstancesTable extends FlexDiv implements SelectionDefaults {
 
 	@GenericValueBackgroundColor(path = { ValueComponents.class, FlexDiv.class }, value = "#ea0084")
 	@Style(name = "color", value = "white")
 	@Children(path = { ValueComponents.class, Header.class }, value = GSLabelDisplayer.class)
-	@Select(path = { ValueComponents.class, Header.class }, value = STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER_ATTRIBUTE.class)
+	@Select(path = { ValueComponents.class, Header.class }, value = GENERIC_VALUE_DISPLAYER.class)
 	public static class HeaderRow extends Composite {
 	}
 
@@ -79,7 +76,6 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	@Children(value = ValueComponents.class)
 	@ForEach(path = ValueComponents.class, value = ObservableListExtractor.HOLDERS.class)
 	@ForEach(path = { ValueComponents.class, Content.class }, value = ObservableListExtractor.OTHER_COMPONENTS_2.class)
-	@Select(path = { ValueComponents.class, Header.class, CheckBoxEditor.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
 	public static class Holders extends Composite {
 	}
 
@@ -90,11 +86,11 @@ public class InstancesTable extends FlexDiv implements SelectionDefaults {
 	@Style(path = FlexDiv.class, name = "margin-right", value = "1px")
 	@Style(path = FlexDiv.class, name = "margin-bottom", value = "1px")
 	@ForEach(path = Content.class, value = ObservableListExtractor.OTHER_COMPONENTS_1.class)
-	@Select(path = Header.class, value = ObservableValueSelector.STRICT_ATTRIBUTE_SELECTOR_OR_CHECK_BOX_DISPLAYER.class)
+	@Select(path = Header.class, value = ObservableValueSelector.GENERIC_INSTANCE_VALUE_DISPLAYER.class)
 	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 0 }, value = ObservableValueSelector.NON_PASSWORD_INSTANCE_SELECTOR.class)
 	@Select(path = { Header.class, FlexDiv.class, HtmlLabel.class }, pos = { -1, 0, 1 }, value = ObservableValueSelector.PASSWORD_INSTANCE_SELECTOR.class)
-	@Select(path = { Header.class, CheckBoxDisplayer.class }, value = ObservableValueSelector.CHECK_BOX_DISPLAYER.class)
-	@Select(path = { Header.class, FlexDiv.class }, value = ObservableValueSelector.LABEL_DISPLAYER.class)
+	@Select(path = { Header.class, CheckBoxDisplayer.class }, value = ObservableValueSelector.INSTANCE_CHECK_BOX_DISPLAYER.class)
+	@Select(path = { Header.class, FlexDiv.class }, value = ObservableValueSelector.INSTANCE_LABEL_DISPLAYER.class)
 	@Children({ Content.class, Header.class })
 	@Children(path = Header.class, value = { CheckBoxDisplayer.class, FlexDiv.class })
 	@Children(path = { Header.class, FlexDiv.class }, value = { GSLabelDisplayer.class, HtmlLabel.class })

@@ -10,6 +10,7 @@ import org.genericsystem.reactor.context.TextBinding;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
@@ -23,9 +24,15 @@ public class Controller {
 	private final Class<? extends TagImpl> firstClass;
 	private final Property<Class<? extends Tag>> classProperty;
 	private final ObservableMap<Tag, StepsStep> steps = FXCollections.observableHashMap();
+	private Property<Boolean> activeProperty = new SimpleBooleanProperty(true);
 
 	public static void initialize(Tag tag, Class<? extends TagImpl> firstClass) {
-		tag.createNewInitializedProperty(CONTROLLER, context -> new Controller(tag, firstClass));
+		tag.addPrefixBinding(context -> {
+			if (context.containsProperty(tag, CONTROLLER))
+				tag.getProperty(CONTROLLER, context).setValue(new Controller(tag, firstClass));
+			else
+				tag.createNewInitializedProperty(CONTROLLER, context, context_ -> new Controller(tag, firstClass));
+		});
 	}
 
 	public static Controller get(Tag tag, Context context) {
@@ -40,6 +47,14 @@ public class Controller {
 
 	public Property<Class<? extends Tag>> getClassProperty() {
 		return classProperty;
+	}
+
+	public Property<Boolean> getActiveProperty() {
+		return activeProperty;
+	}
+
+	public void setActiveProperty(boolean active) {
+		activeProperty.setValue(active);
 	}
 
 	public StepsStep getStep(Tag tag) {
@@ -128,11 +143,11 @@ public class Controller {
 			this.observableSize = observableSize;
 			this.nextClass = nextClass;
 			this.hasPrev = Bindings.createBooleanBinding(() -> {
-				return getPreviousStep(tag.getClass()) != null || (getIndexProperty().get() > 0);
-			}, getIndexProperty());
+				return activeProperty.getValue() && (getPreviousStep(tag.getClass()) != null || (getIndexProperty().get() > 0));
+			}, getIndexProperty(), activeProperty);
 			this.hasNext = Bindings.createBooleanBinding(() -> {
-				return !tag.getClass().equals(nextClass) || (getIndexProperty().get() + 1 < getObservableSize().get());
-			}, getIndexProperty(), getObservableSize());
+				return activeProperty.getValue() && (!tag.getClass().equals(nextClass) || (getIndexProperty().get() + 1 < getObservableSize().get()));
+			}, getIndexProperty(), getObservableSize(), activeProperty);
 			this.prevText = Bindings.createStringBinding(() -> {
 				return prevText;
 			}, getIndexProperty(), getObservableSize());
@@ -163,17 +178,21 @@ public class Controller {
 		}
 
 		public void prev() {
-			if (indexProperty.get() > 0)
-				indexProperty.set(indexProperty.get() - 1);
-			else
-				classProperty.setValue(getPreviousStep(tag.getClass()).getTag().getClass());
+			if (activeProperty.getValue()) {
+				if (indexProperty.get() > 0)
+					indexProperty.set(indexProperty.get() - 1);
+				else
+					classProperty.setValue(getPreviousStep(tag.getClass()).getTag().getClass());
+			}
 		}
 
 		public void next() {
-			if (indexProperty.get() + 1 < observableSize.get())
-				indexProperty.set(indexProperty.get() + 1);
-			else
-				classProperty.setValue(nextClass);
+			if (activeProperty.getValue()) {
+				if (indexProperty.get() + 1 < observableSize.get())
+					indexProperty.set(indexProperty.get() + 1);
+				else
+					classProperty.setValue(nextClass);
+			}
 		}
 
 		public ObservableValue<Boolean> hasPrev() {
@@ -197,8 +216,10 @@ public class Controller {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<Class<? extends Tag>> classProperty = Controller.get(tag, context).getClassProperty();
-			return Bindings.createBooleanBinding(() -> tag.getClass().equals(classProperty.getValue()), classProperty);
+			Controller controller = Controller.get(tag, context);
+			Property<Class<? extends Tag>> classProperty = controller.getClassProperty();
+			Property<Boolean> activeProperty = controller.getActiveProperty();
+			return Bindings.createBooleanBinding(() -> !activeProperty.getValue() || tag.getClass().equals(classProperty.getValue()), classProperty, activeProperty);
 		}
 	}
 
@@ -243,6 +264,14 @@ public class Controller {
 			return Controller.get(tag, context).nextText(tag);
 		}
 
+	}
+
+	public static class CountTextSwitcher implements TagSwitcher {
+
+		@Override
+		public ObservableValue<Boolean> apply(Context context, Tag tag) {
+			return Controller.get(tag, context).activeProperty;
+		}
 	}
 
 	public static class PrevSwitcher implements TagSwitcher {

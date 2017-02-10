@@ -10,7 +10,8 @@ import org.genericsystem.api.core.IGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueGenerator.ValueGenerator;
 import org.genericsystem.api.core.exceptions.NotFoundException;
 import org.genericsystem.defaults.DefaultConfig.CascadeRemoveProperty;
-import org.genericsystem.defaults.DefaultConfig.HiddenProperty;
+import org.genericsystem.defaults.DefaultConfig.HashedInstanceValueProperty;
+import org.genericsystem.defaults.DefaultConfig.HiddenValueProperty;
 import org.genericsystem.defaults.DefaultConfig.InstanceValueGeneratorProperty;
 import org.genericsystem.defaults.DefaultConfig.NoReferentialIntegrityProperty;
 import org.genericsystem.defaults.DefaultConfig.NonHeritableProperty;
@@ -202,19 +203,36 @@ public interface DefaultSystemProperties<T extends DefaultGeneric<T>> extends IG
 
 	@SuppressWarnings("unchecked")
 	@Override
-	default T hide() {
-		return enableSystemProperty(HiddenProperty.class, ApiStatics.NO_POSITION);
+	default T enableHashedInstanceValue() {
+		return enableSystemProperty(HashedInstanceValueProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	default T unhide() {
-		return disableSystemProperty(HiddenProperty.class, ApiStatics.NO_POSITION);
+	default T disableHashedInstanceValue() {
+		return disableSystemProperty(HashedInstanceValueProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@Override
-	default boolean isHidden() {
-		return isSystemPropertyEnabled(HiddenProperty.class, ApiStatics.NO_POSITION);
+	default boolean isInstanceValueHashed() {
+		return isSystemPropertyEnabled(HashedInstanceValueProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default T hideValue() {
+		return enableSystemProperty(HiddenValueProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	default T unhideValue() {
+		return disableSystemProperty(HiddenValueProperty.class, ApiStatics.NO_POSITION);
+	}
+
+	@Override
+	default boolean isValueHidden() {
+		return isSystemPropertyEnabled(HiddenValueProperty.class, ApiStatics.NO_POSITION);
 	}
 
 	@SuppressWarnings("unchecked")

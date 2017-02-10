@@ -57,9 +57,9 @@ public class ExtendedAnnotationsManager extends AnnotationsManager {
 		registerAnnotation(Select.class);
 		registerAnnotation(SelectContext.class);
 		registerAnnotation(ForEach.class);
-		super.registerAnnotation(Stepper.class);
-		super.registerAnnotation(Step.class);
-		// super.registerAnnotation(Stepper.class);
+		registerAnnotation(Stepper.class);
+		registerAnnotation(Step.class);
+		// super.registerAnnotation(Stepper2.class);
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
 		registerAnnotation(StyleClass.class);

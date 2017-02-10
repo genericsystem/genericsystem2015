@@ -54,7 +54,8 @@ public @interface SetText {
 
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			tag.setText(context, "");
+			if (context.getHtmlDomNode(tag) != null)
+				tag.setText(context, "");
 		}
 
 		@Override

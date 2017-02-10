@@ -2,7 +2,7 @@ package org.genericsystem.security.model;
 
 import org.genericsystem.api.core.annotations.Components;
 import org.genericsystem.api.core.annotations.Dependencies;
-import org.genericsystem.api.core.annotations.Hidden;
+import org.genericsystem.api.core.annotations.HashedInstanceValue;
 import org.genericsystem.api.core.annotations.SystemGeneric;
 import org.genericsystem.api.core.annotations.constraints.InstanceValueClassConstraint;
 import org.genericsystem.api.core.annotations.constraints.SingularConstraint;
@@ -16,7 +16,7 @@ public class User {
 	@SystemGeneric
 	@Components(User.class)
 	@SingularConstraint
-	@Hidden
+	@HashedInstanceValue
 	@InstanceValueClassConstraint(byte[].class)
 	@Dependencies(Salt.class)
 	public static class Password {
@@ -26,7 +26,7 @@ public class User {
 	@SystemGeneric
 	@Components(Password.class)
 	@SingularConstraint
-	@Hidden
+	@HashedInstanceValue
 	@InstanceValueClassConstraint(byte[].class)
 	@StringValue("Salt")
 	public static class Salt {

@@ -7,27 +7,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
-import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.api.core.TagAnnotation;
 import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.Tag;
+import org.genericsystem.reactor.annotations.Step.StepGenericProcessor;
 import org.genericsystem.reactor.annotations.Step.StepProcessor;
 import org.genericsystem.reactor.annotations.Step.Steps;
-import org.genericsystem.reactor.gscomponents.Controller;
-import org.genericsystem.reactor.gscomponents.Controller.MainSwitcher;
-import org.genericsystem.reactor.gscomponents.Controller.StepsStep;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
+import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ListBinding;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import io.vertx.core.json.JsonObject;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Process(StepProcessor.class)
+@GenericProcess(StepGenericProcessor.class)
 @Repeatable(Steps.class)
 public @interface Step {
 	Class<? extends TagImpl>[] path() default {};
@@ -48,38 +48,42 @@ public @interface Step {
 
 	public static class StepProcessor implements BiConsumer<Annotation, Tag> {
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public void accept(Annotation annotation, Tag tag) {
-			if (tag.getMetaBinding() == null) {
-				tag.addPrefixBinding(context -> {
-					Controller controller = Controller.get(tag, context);
-					StepsStep subSteps = controller.getStep(tag);
-					if (subSteps == null)
-						subSteps = controller.addStep(tag, new SimpleIntegerProperty(1), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
-				});
-			} else {
-				Function<Context, ObservableList<Object>> contextOl = tag.getMetaBinding().getBetweenChildren();
-				tag.getMetaBinding().setBetweenChildren(context -> {
-					ObservableList ol = contextOl.apply(context);
-					Controller controller = Controller.get(tag, context);
-					StepsStep subSteps = controller.getStep(tag);
-					if (subSteps == null)
-						subSteps = controller.addStep(tag, Bindings.size(ol), ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
-					SimpleIntegerProperty indexProperty = subSteps.getIndexProperty();
-					return BindingsTools.transmitSuccessiveInvalidations(new ListBinding() {
-						{
-							bind(indexProperty);
-						}
+			tag.getRootTag().processStep(tag, ((Step) annotation).next(), ((Step) annotation).prevText(), ((Step) annotation).nextText());
+		}
+	}
 
-						@Override
-						protected ObservableList computeValue() {
-							return (indexProperty.get() >= 0) && (indexProperty.get() < ol.size()) ? FXCollections.singletonObservableList(ol.get(indexProperty.get())) : FXCollections.emptyObservableList();
-						}
-					});
-				});
+	public static class StepGenericProcessor implements IGenericAnnotationProcessor {
+
+		@Override
+		public void setAnnotation(GTag gTag, Annotation annotation) {
+			Step step = (Step) annotation;
+			GTagAnnotation gTagAnnotation = (GTagAnnotation) gTag.setHolder(gTag.getRoot().find(TagAnnotationAttribute.class), new TagAnnotation(Step.class, step.path(), step.pos()));
+			gTagAnnotation.setHolder(gTag.getRoot().find(TagAnnotationContentAttribute.class), new JsonObject().put("next", step.next().getName()).put("prevText", step.prevText()).put("nextText", step.nextText()).encodePrettily());
+		}
+
+		@Override
+		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			// Nothing to do.
+		}
+
+		@Override
+		public void onAdd(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			// Nothing to do.
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void onAdd(Tag tag, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
+			JsonObject content = gTagAnnotation.getContent().getJsonValue();
+			Class<? extends TagImpl> nextClass = null;
+			try {
+				nextClass = (Class<? extends TagImpl>) Class.forName(content.getString("next"));
+			} catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Class " + content.getString("next") + " not found");
 			}
-			tag.getRootTag().processSwitch(tag, new Class[] { MainSwitcher.class });
+			tag.getRootTag().processStep(tag, nextClass, content.getString("prevText"), content.getString("nextText"));
 		}
 	}
 }
