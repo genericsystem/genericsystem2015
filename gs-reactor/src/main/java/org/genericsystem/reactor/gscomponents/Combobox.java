@@ -5,13 +5,13 @@ import org.genericsystem.reactor.annotations.BindText;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.ForEach;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
+import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.StringExtractor;
 import org.genericsystem.reactor.contextproperties.ComponentsDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
 import org.genericsystem.reactor.gscomponents.Combobox.HtmlRepeatedOption;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlOption;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSelect;
 
 import javafx.beans.property.Property;
 
@@ -19,7 +19,8 @@ import javafx.beans.property.Property;
 @BindText(path = HtmlRepeatedOption.class)
 @ForEach(path = HtmlRepeatedOption.class, value = ObservableListExtractor.SUBINSTANCES.class)
 @GenericValueBackgroundColor(path = HtmlOption.class, value = "")
-public class Combobox extends HtmlSelect implements SelectionDefaults, ComponentsDefaults {
+@TagName(TagName.SELECT)
+public class Combobox extends TagImpl implements SelectionDefaults, ComponentsDefaults {
 
 	public static class HtmlRepeatedOption extends HtmlOption {
 	}

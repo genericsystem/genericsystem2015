@@ -9,11 +9,6 @@ public class HtmlTag {
 
 	}
 
-	@TagName(value = TagName.INPUT, type = TagName.CHECKBOX)
-	public static class HtmlCheckBox extends TagImpl {
-
-	}
-
 	@TagName(TagName.DATALIST)
 	public static class HtmlDatalist extends TagImpl {
 
@@ -21,11 +16,6 @@ public class HtmlTag {
 
 	@TagName(TagName.DIV)
 	public static class HtmlDiv extends TagImpl {
-
-	}
-
-	@TagName(TagName.FOOTER)
-	public static class HtmlFooter extends TagImpl {
 
 	}
 
@@ -39,28 +29,8 @@ public class HtmlTag {
 
 	}
 
-	@TagName(TagName.H3)
-	public static class HtmlH3 extends TagImpl {
-
-	}
-
 	@TagName(TagName.H4)
 	public static class HtmlH4 extends TagImpl {
-
-	}
-
-	@TagName(TagName.H5)
-	public static class HtmlH5 extends TagImpl {
-
-	}
-
-	@TagName(TagName.H6)
-	public static class HtmlH6 extends TagImpl {
-
-	}
-
-	@TagName(TagName.HEADER)
-	public static class HtmlHeader extends TagImpl {
 
 	}
 
@@ -105,28 +75,8 @@ public class HtmlTag {
 
 	}
 
-	@TagName(value = TagName.INPUT, type = TagName.RADIO)
-	public static class HtmlRadio extends TagImpl {
-
-	}
-
-	@TagName(TagName.SECTION)
-	public static class HtmlSection extends TagImpl {
-
-	}
-
-	@TagName(TagName.SELECT)
-	public static class HtmlSelect extends TagImpl {
-
-	}
-
 	@TagName(TagName.SPAN)
 	public static class HtmlSpan extends TagImpl {
-
-	}
-
-	@TagName(TagName.STRONG)
-	public static class HtmlStrong extends TagImpl {
 
 	}
 

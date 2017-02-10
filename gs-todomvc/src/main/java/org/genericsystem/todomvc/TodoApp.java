@@ -13,22 +13,20 @@ import org.genericsystem.reactor.ReactorStatics;
 import org.genericsystem.reactor.annotations.Children;
 import org.genericsystem.reactor.annotations.DependsOnModel;
 import org.genericsystem.reactor.annotations.StyleClass;
+import org.genericsystem.reactor.annotations.TagName;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.gscomponents.FlexDiv;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlButton;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlCheckBox;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlDiv;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlFooter;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlH1;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHeader;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlHyperLink;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlInputText;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLabel;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlLi;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlSpan;
-import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlStrong;
 import org.genericsystem.reactor.gscomponents.HtmlTag.HtmlUl;
 import org.genericsystem.reactor.gscomponents.RootTagImpl;
+import org.genericsystem.reactor.gscomponents.TagImpl;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv.MyDiv;
 import org.genericsystem.todomvc.TodoApp.MyHtmlDiv.MyDiv.MyDiv2;
@@ -141,7 +139,8 @@ public class TodoApp extends RootTagImpl {
 
 			@StyleClass("header")
 			@Children({ MyHtmlH1.class, MyHtmlInputText.class })
-			public static class MyHeader extends HtmlHeader {
+			@TagName(TagName.HEADER)
+			public static class MyHeader extends TagImpl {
 
 				public static class MyHtmlH1 extends HtmlH1 {
 
@@ -197,7 +196,8 @@ public class TodoApp extends RootTagImpl {
 						public static class MyHtmlDiv2 extends HtmlDiv {
 
 							@StyleClass("toggle")
-							public static class MyHtmlCheckBox extends HtmlCheckBox {
+							@TagName(value = TagName.INPUT, type = TagName.CHECKBOX)
+							public static class MyHtmlCheckBox extends TagImpl {
 								Map<Generic, Observable[]> getExtractors(Context model) {
 									return this.<Map<Generic, Observable[]>> getProperty("extractorMap", model).getValue();
 								}
@@ -245,7 +245,8 @@ public class TodoApp extends RootTagImpl {
 
 			@StyleClass("footer")
 			@Children(MyHtmlDiv3.class)
-			public static class MyHtmlFooter1 extends HtmlFooter {
+			@TagName(TagName.FOOTER)
+			public static class MyHtmlFooter1 extends TagImpl {
 
 				@Override
 				public void init() {
@@ -263,7 +264,8 @@ public class TodoApp extends RootTagImpl {
 					@Children(MyHtmlStrong.class)
 					public static class MyHtmlSpan extends HtmlSpan {
 
-						public static class MyHtmlStrong extends HtmlStrong {
+						@TagName(TagName.STRONG)
+						public static class MyHtmlStrong extends TagImpl {
 
 							@Override
 							public void init() {
@@ -358,11 +360,13 @@ public class TodoApp extends RootTagImpl {
 		}
 
 		@Children(MyHtmlDiv4.class)
-		public static class MyHtmlFooter2 extends HtmlFooter {
+		@TagName(TagName.FOOTER)
+		public static class MyHtmlFooter2 extends TagImpl {
 
 			@StyleClass("save-cancel")
 			@Children({ MyHtmlButton3.class, MyHtmlButton4.class })
-			public static class MyHtmlDiv4 extends HtmlFooter {
+			@TagName(TagName.FOOTER)
+			public static class MyHtmlDiv4 extends TagImpl {
 
 				@StyleClass("save")
 				public static class MyHtmlButton3 extends HtmlButton {
