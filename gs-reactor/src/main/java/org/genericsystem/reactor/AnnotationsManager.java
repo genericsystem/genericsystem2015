@@ -39,6 +39,7 @@ import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
+import org.genericsystem.reactor.annotations.TagName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,7 @@ public class AnnotationsManager {
 		registerAnnotation(Stepper2.class);
 		registerAnnotation(BindSelection.class);
 		registerAnnotation(SetStringExtractor.class);
+		registerAnnotation(TagName.class);
 		registerAnnotation(StyleClass.class);
 		registerAnnotation(FlexDirectionStyle.class);
 		registerAnnotation(KeepFlexDirection.class);
