@@ -77,7 +77,16 @@ public class DefaultConfig {
 	@Supers(SystemMap.class)
 	@Components(MetaAttribute.class)
 	@PropertyConstraint
-	public static class HiddenProperty implements SystemProperty {
+	public static class HashedInstanceValueProperty implements SystemProperty {
+
+	}
+
+	@SystemGeneric
+	@Meta(MetaAttribute.class)
+	@Supers(SystemMap.class)
+	@Components(MetaAttribute.class)
+	@PropertyConstraint
+	public static class HiddenValueProperty implements SystemProperty {
 
 	}
 

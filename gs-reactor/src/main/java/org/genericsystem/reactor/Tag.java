@@ -152,7 +152,7 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 
 	@Override
 	default <T> Property<T> getInheritedProperty(String propertyName, Context[] model, Tag[] tag) {
-		while (tag != null && model[0] != null) {
+		while (tag[0] != null && model[0] != null) {
 			if (tag[0].getMetaBinding() != null && model[0].getHtmlDomNode(tag[0].getParent()) == null)
 				model[0] = model[0].getParent();
 			tag[0] = tag[0].getParent();
