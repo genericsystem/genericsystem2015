@@ -1,6 +1,7 @@
 package org.genericsystem.reactor;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +14,13 @@ import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.BindingsTools;
 import org.genericsystem.reactor.context.ObservableListExtractor;
 import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.AttributesDefaults;
 import org.genericsystem.reactor.contextproperties.DisplayDefaults;
+import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
 import org.genericsystem.reactor.contextproperties.GenericStringDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+import org.genericsystem.reactor.contextproperties.StepperDefaults;
 import org.genericsystem.reactor.contextproperties.StyleClassesDefaults;
 import org.genericsystem.reactor.contextproperties.StylesDefaults;
 import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
@@ -39,11 +44,17 @@ import javafx.util.StringConverter;
  *
  * @param <N>
  */
-public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults, UserRoleDefaults {
+public interface Tag extends TagNode, ActionDefaults, SelectionDefaults, StepperDefaults, GSBuilderDefaults, TextPropertyDefaults, StylesDefaults, AttributesDefaults, StyleClassesDefaults, GenericStringDefaults, DisplayDefaults, UserRoleDefaults {
 
 	public static final Logger log = LoggerFactory.getLogger(Tag.class);
 
 	public String getTag();
+
+	public void setTag(String tagName);
+
+	public Class<? extends HtmlDomNode> getDomNodeClass();
+
+	public void setDomNodeClass(Class<? extends HtmlDomNode> domNodeClass);
 
 	public List<Consumer<Context>> getPreFixedBindings();
 
@@ -349,8 +360,12 @@ public interface Tag extends TagNode, TextPropertyDefaults, StylesDefaults, Attr
 		});
 	}
 
-	default HtmlDomNode createNode(HtmlDomNode parent, Context modelContext) {
-		return new HtmlDomNode(parent, modelContext, this);
+	default HtmlDomNode createNode(HtmlDomNode parent, Context context) {
+		try {
+			return getDomNodeClass().getConstructor(HtmlDomNode.class, Context.class, Tag.class).newInstance(parent, context, this);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new IllegalStateException(e);
+		}
 	};
 
 	default <T extends TagImpl> TagImpl createChild(Class<T> clazz) {

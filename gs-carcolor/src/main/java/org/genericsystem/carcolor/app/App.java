@@ -20,7 +20,6 @@ import org.genericsystem.reactor.annotations.Style;
 import org.genericsystem.reactor.appserver.ApplicationServer;
 import org.genericsystem.reactor.appserver.Script;
 import org.genericsystem.reactor.context.ContextAction.MODAL_DISPLAY_FLEX;
-
 import org.genericsystem.reactor.gscomponents.AppHeader;
 import org.genericsystem.reactor.gscomponents.AppHeader.AppTitleDiv;
 import org.genericsystem.reactor.gscomponents.AppHeader.Logo;
@@ -62,7 +61,6 @@ public class App extends RootTagImpl {
 	@Style(name = "flex", value = "0 1 auto")
 	@BindAction(MODAL_DISPLAY_FLEX.class)
 	@InheritStyle("background-color")
-
 	public static class GuideButton extends HtmlButton {
 
 	}
