@@ -1,7 +1,5 @@
 package org.genericsystem.reactor;
 
-import io.vertx.core.json.JsonObject;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +11,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.genericsystem.defaults.tools.TransformationObservableList;
+import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.contextproperties.ActionDefaults;
+import org.genericsystem.reactor.contextproperties.SelectionDefaults;
+
+import com.sun.javafx.collections.ObservableListWrapper;
+
+import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,10 +27,6 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
-
-import org.genericsystem.defaults.tools.ObservableListWrapper;
-import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.context.TagSwitcher;
 
 public class HtmlDomNode {
 
@@ -467,6 +469,63 @@ public class HtmlDomNode {
 
 		public void remove(String id) {
 			getMap().remove(id);
+		}
+	}
+
+	public static class HtmlDomNodeAction extends HtmlDomNode {
+
+		public HtmlDomNodeAction(HtmlDomNode parent, Context context, Tag tag) {
+			super(parent, context, tag);
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			((ActionDefaults) getTag()).getActionProperty(getModelContext()).getValue().accept(new Object());
+		}
+	}
+
+	public static class HtmlDomNodeCheckbox extends HtmlDomNode {
+
+		public HtmlDomNodeCheckbox(HtmlDomNode parent, Context context, Tag tag) {
+			super(parent, context, tag);
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			getTag().getDomNodeAttributes(getModelContext()).put(ReactorStatics.CHECKED, json.getBoolean(ReactorStatics.CHECKED) ? ReactorStatics.CHECKED : "");
+		}
+	}
+
+	public static class HtmlDomNodeInputText extends HtmlDomNode {
+
+		public HtmlDomNodeInputText(HtmlDomNode parent, Context context, Tag tag) {
+			super(parent, context, tag);
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			super.handleMessage(json);
+			if (ADD.equals(json.getString(MSG_TYPE))) {
+				Property<Consumer<Object>> action = ((ActionDefaults) getTag()).getActionProperty(getModelContext());
+				if (action != null)
+					action.getValue().accept(new Object());
+			}
+			if (UPDATE.equals(json.getString(MSG_TYPE)))
+				getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(TEXT_CONTENT));
+		}
+	}
+
+	public static class HtmlDomNodeSelect extends HtmlDomNode {
+
+		public HtmlDomNodeSelect(HtmlDomNode parent, Context context, Tag tag) {
+			super(parent, context, tag);
+		}
+
+		@Override
+		public void handleMessage(JsonObject json) {
+			if (UPDATE.equals(json.getString(MSG_TYPE))) {
+				((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+			}
 		}
 	}
 }

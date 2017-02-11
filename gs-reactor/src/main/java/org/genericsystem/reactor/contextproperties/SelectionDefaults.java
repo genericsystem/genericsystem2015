@@ -22,7 +22,7 @@ import javafx.collections.ObservableList;
  * @author Nicolas Feybesse
  *
  */
-public interface SelectionDefaults extends Tag {
+public interface SelectionDefaults extends ContextProperty {
 
 	public static final String SELECTION = "selection";
 	public static final String UPDATED_GENERIC = "updatedGeneric";
@@ -38,7 +38,7 @@ public interface SelectionDefaults extends Tag {
 				model -> Bindings.createStringBinding(() -> StringExtractor.SIMPLE_CLASS_EXTRACTOR.apply(getSelectionProperty(model).getValue() != null ? getSelectionProperty(model).getValue().getGeneric() : null), getSelectionProperty(model)));
 		storeProperty(SELECTION_INDEX, model -> {
 			Property<Integer> index = new SimpleObjectProperty<>();
-			index.addListener(new WeakChangeListener<>(model.getHtmlDomNode(this).getIndexListener()));
+			index.addListener(new WeakChangeListener<>(model.getHtmlDomNode((Tag) this).getIndexListener()));
 			return index;
 		});
 		createNewProperty(UPDATED_GENERIC);

@@ -4,6 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 import org.genericsystem.defaults.tools.BindingsTools;
+import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeAction;
+import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeCheckbox;
+import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeInputText;
+import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeSelect;
 import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
@@ -289,6 +293,33 @@ public interface RootTag extends Tag {
 			});
 		}
 		tag.getRootTag().processSwitch(tag, new Class[] { MainSwitcher.class });
+	}
+
+	default void processTagName(Tag tag, String tagName, String type) {
+		tag.setTag(tagName);
+		if ("input".equals(tagName))
+			tag.addAttribute("type", type);
+
+		switch (tagName.toLowerCase()) {
+			case "input" :
+				switch (type.toLowerCase()) {
+					case "checkbox" :
+					case "radio" :
+						tag.setDomNodeClass(HtmlDomNodeCheckbox.class);
+						break;
+					default :
+						tag.setDomNodeClass(HtmlDomNodeInputText.class);
+				}
+				break;
+			case "datalist" :
+			case "select" :
+				tag.setDomNodeClass(HtmlDomNodeSelect.class);
+				break;
+			case "button" :
+			case "a" :
+				tag.setDomNodeClass(HtmlDomNodeAction.class);
+				break;
+		}
 	}
 
 	default void initDomNode(HtmlDomNode domNode) {
