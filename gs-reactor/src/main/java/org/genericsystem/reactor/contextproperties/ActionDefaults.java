@@ -11,14 +11,14 @@ public interface ActionDefaults extends ContextProperty {
 	public static final String ACTION = "action";
 
 	default void bindAction(Consumer<Context> applyOnModel) {
-		createNewInitializedProperty("action", model -> (Consumer<Object>) o -> applyOnModel.accept(model));
+		createNewInitializedProperty("action", context -> (Consumer<Object>) o -> applyOnModel.accept(context));
 	}
 
 	default void bindAction(Context context, Consumer<Context> applyOnModel) {
-		createNewInitializedProperty("action", context, model -> (Consumer<Object>) o -> applyOnModel.accept(model));
+		createNewInitializedProperty("action", context, (Consumer<Object>) o -> applyOnModel.accept(context));
 	}
 
 	default Property<Consumer<Object>> getActionProperty(Context model) {
-		return getProperty(ACTION, model);
+		return getContextProperty(ACTION, model);
 	}
 }

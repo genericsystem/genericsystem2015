@@ -146,13 +146,11 @@ public interface RootTag extends Tag {
 		if (GENERIC_STRING.class.equals(value))
 			tag.bindText(context);
 		else
-			tag.bindText(context, context_ -> {
-				try {
-					return value.newInstance().apply(context_, tag);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
+			try {
+				tag.bindText(context, value.newInstance().apply(context, tag));
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
 	}
 
 	default void processBindAction(Tag tag, Class<? extends ContextAction>[] value) {

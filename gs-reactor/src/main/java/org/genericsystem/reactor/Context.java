@@ -19,7 +19,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.beans.value.ObservableLongValue;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 
 /**
@@ -36,7 +35,7 @@ public class Context {
 	private static class TagData {
 		private HtmlDomNode htmlDomNode;
 		private ObservableList<Context> subContexts;
-		private final Map<String, ObservableValue<?>> properties = new HashMap<>();
+		private final Map<String, Object> attributes = new HashMap<>();
 
 		public HtmlDomNode getHtmlDomNode() {
 			return htmlDomNode;
@@ -46,8 +45,8 @@ public class Context {
 			return subContexts;
 		}
 
-		public Map<String, ObservableValue<?>> getProperties() {
-			return properties;
+		public Map<String, Object> getAttributes() {
+			return attributes;
 		}
 
 		public void setHtmlDomNode(HtmlDomNode htmlDomNode) {
@@ -80,37 +79,43 @@ public class Context {
 		return tagDataMap.values().stream().map(tagData -> tagData.getSubContexts()).filter(list -> list != null).collect(Collectors.toList());
 	}
 
-	public boolean containsProperty(Tag tag, String propertyName) {
-		return tagDataMap.containsKey(tag) ? tagDataMap.get(tag).getProperties().containsKey(propertyName) : false;
+	public boolean containsAttribute(Tag tag, String propertyName) {
+		return tagDataMap.containsKey(tag) ? tagDataMap.get(tag).getAttributes().containsKey(propertyName) : false;
 	}
 
-	public void createNewProperty(Tag tag, String propertyName) {
-		if (getProperties(tag).containsKey(propertyName))
-			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
-		getProperties(tag).put(propertyName, new SimpleObjectProperty<>());
-	}
-
-	public Map<String, ObservableValue<?>> getProperties(Tag tag) {
+	public Map<String, Object> getAttributes(Tag tag) {
 		TagData tagData = tagDataMap.get(tag);
 		if (tagData == null)
 			tagDataMap.put(tag, tagData = new TagData());
-		return tagData.getProperties();
+		return tagData.getAttributes();
 	}
 
 	@SuppressWarnings("unchecked")
-	<T> ObservableValue<T> getObservableValue(Tag tag, String propertyName) {
-		return (ObservableValue<T>) getProperties(tag).get(propertyName);
+	<T> T getAttribute(Tag tag, String propertyName) {
+		return (T) getAttributes(tag).get(propertyName);
+	}
+
+	public void createNewContextProperty(Tag tag, String propertyName) {
+		if (getAttributes(tag).containsKey(propertyName))
+			throw new IllegalStateException("Unable to create an already used property : " + propertyName);
+		getAttributes(tag).put(propertyName, new SimpleObjectProperty<>());
 	}
 
 	@SuppressWarnings("unchecked")
-	<T> Property<T> getProperty(Tag tag, String propertyName) {
-		return (Property<T>) getProperties(tag).get(propertyName);
+	protected <T> void setContextPropertyValue(Tag tag, String propertyName, T value) {
+		if (!containsAttribute(tag, propertyName))
+			createNewContextProperty(tag, propertyName);
+		((Property<T>) getAttribute(tag, propertyName)).setValue(value);
 	}
 
-	protected void storeProperty(Tag tag, String propertyName, ObservableValue<?> value) {
-		if (getProperties(tag).containsKey(propertyName))
+	protected <T> void addContextAttribute(Tag tag, String propertyName, T value) {
+		if (getAttributes(tag).containsKey(propertyName))
 			throw new IllegalStateException("Unable to store an already used property : " + propertyName);
-		getProperties(tag).put(propertyName, value);
+		getAttributes(tag).put(propertyName, value);
+	}
+
+	protected <T> void setContextAttribute(Tag tag, String propertyName, T value) {
+		getAttributes(tag).put(propertyName, value);
 	}
 
 	public void removeTag(Tag tag) {
@@ -123,7 +128,7 @@ public class Context {
 		}
 		if (getSubContexts(tag) != null) {
 			((TransformationObservableList<?, ?>) getSubContexts(tag)).unbind();
-			((FilteredChildContexts<?>) tag.getProperty("filteredContexts", this).getValue()).transformationListSubContexts.unbind();
+			((FilteredChildContexts<?>) tag.getContextAttribute("filteredContexts", this)).transformationListSubContexts.unbind();
 			for (Context subContext : getSubContexts(tag))
 				subContext.destroy();
 		}

@@ -19,10 +19,10 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<Generic> selectedQuiz = tag.getProperty(SELECTED_QUIZ, context);
+			Property<Generic> selectedQuiz = tag.getContextProperty(SELECTED_QUIZ, context);
 
 			if (selectedQuiz == null) {
-				tag.getRootTag().createNewProperty(SELECTED_QUIZ);
+				tag.getRootTag().createNewContextProperty(SELECTED_QUIZ);
 				return;
 			}
 
@@ -37,10 +37,10 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<Generic> selectedUser = tag.getProperty(SELECTED_USER, context);
+			Property<Generic> selectedUser = tag.getContextProperty(SELECTED_USER, context);
 
 			if (selectedUser == null) {
-				tag.getRootTag().createNewProperty(SELECTED_USER);
+				tag.getRootTag().createNewContextProperty(SELECTED_USER);
 				return;
 			}
 
@@ -65,35 +65,26 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-
 			Generic quiz = context.getGeneric();
-			Property<Generic> selectedQuiz = tag.getProperty(SELECTED_QUIZ, context);
 
 			// Compare le type du tag avec la classe "Quiz" du modèle
 			if (!quiz.getRoot().find(Quiz.class).equals(quiz.getMeta()))
 				return;
 
-			if (selectedQuiz == null)
-				tag.getRootTag().createNewInitializedProperty(SELECTED_QUIZ, context.getRootContext(), c -> quiz);
-			else if (!quiz.equals(selectedQuiz.getValue()))
-				selectedQuiz.setValue(quiz);
+			tag.getRootTag().setContextPropertyValue(SELECTED_QUIZ, context.getRootContext(), quiz);
 		}
-
 	}
 
 	public static class SELECT_LOGGEDUSER implements ContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> selectedUser = tag.getProperty(SELECTED_USER, context);
 			Property<Generic> loggedUser = tag.getLoggedUserProperty(context);
 
 			if (loggedUser == null)
 				return;
-			if (selectedUser == null)
-				tag.getRootTag().createNewInitializedProperty(SELECTED_USER, context.getRootContext(), c -> loggedUser.getValue() + "");
-			else
-				selectedUser.setValue(loggedUser.getValue() + "");
+
+			tag.getRootTag().setContextPropertyValue(SELECTED_USER, context.getRootContext(), loggedUser.getValue() + "");
 		}
 
 	}
@@ -117,8 +108,8 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			if (tag.getProperty(QuizTagSwitcher.PAGE, context) != null)
-				tag.getProperty(QuizTagSwitcher.PAGE, context).setValue(null);
+			if (tag.getContextProperty(QuizTagSwitcher.PAGE, context) != null)
+				tag.getContextProperty(QuizTagSwitcher.PAGE, context).setValue(null);
 		}
 
 	}
@@ -128,11 +119,7 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> pageProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
-			if (pageProperty == null)
-				tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.HOME_PAGE);
-			else
-				pageProperty.setValue(QuizTagSwitcher.HOME_PAGE);
+			tag.setInheritedContextPropertyValue(QuizTagSwitcher.PAGE, context, QuizTagSwitcher.HOME_PAGE);
 		}
 	}
 
@@ -140,11 +127,7 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> pageProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
-			if (pageProperty == null)
-				tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.RESULT_PAGE);
-			else
-				pageProperty.setValue(QuizTagSwitcher.RESULT_PAGE);
+			tag.setInheritedContextPropertyValue(QuizTagSwitcher.PAGE, context, QuizTagSwitcher.RESULT_PAGE);
 		}
 	}
 
@@ -152,11 +135,7 @@ public class QuizContextAction {
 
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<String> pageProperty = tag.getProperty(QuizTagSwitcher.PAGE, context);
-			if (pageProperty == null)
-				tag.createNewInitializedProperty(QuizTagSwitcher.PAGE, context, c -> QuizTagSwitcher.QUESTION_PAGE);
-			else
-				pageProperty.setValue(QuizTagSwitcher.QUESTION_PAGE);
+			tag.setInheritedContextPropertyValue(QuizTagSwitcher.PAGE, context, QuizTagSwitcher.QUESTION_PAGE);
 		}
 
 	}

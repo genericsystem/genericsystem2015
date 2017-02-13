@@ -43,8 +43,8 @@ public interface GSBuilderDefaults extends ContextProperty {
 
 	}
 
-	default void createValueComponentsMapProperty() {
-		createNewInitializedProperty(VALUE_COMPONENTS_MAP, model -> new HashMap<Generic, GenericValueComponents>() {
+	default void createValueComponentsMap() {
+		addContextAttribute(VALUE_COMPONENTS_MAP, context -> new HashMap<Generic, GenericValueComponents>() {
 			private static final long serialVersionUID = -435743147955810836L;
 
 			@Override
@@ -58,14 +58,6 @@ public interface GSBuilderDefaults extends ContextProperty {
 		});
 	}
 
-	default void createHoldersMapProperty() {
-		createNewInitializedProperty(HOLDERS_MAP, model -> new HashMap<Generic, Property<Serializable>>());
-	}
-
-	default void createComponentsMapProperty() {
-		createNewInitializedProperty(COMPONENTS_MAP, model -> new HashMap<Generic, List<Property<Serializable>>>());
-	};
-
 	default void createInvalidListProperty() {
 		createNewInitializedProperty(INVALID_LIST, model -> new ArrayList<ObservableValue<Boolean>>());
 	};
@@ -75,22 +67,14 @@ public interface GSBuilderDefaults extends ContextProperty {
 	}
 
 	default Property<List<ObservableValue<Boolean>>> getInvalidListProperty(Context model) {
-		return getProperty(INVALID_LIST, model);
+		return getContextProperty(INVALID_LIST, model);
 	}
 
-	default Property<Map<Generic, GenericValueComponents>> getGenericValueComponents(Context context) {
-		return getProperty(VALUE_COMPONENTS_MAP, context);
-	}
-
-	default Property<Map<Generic, Property<Serializable>>> getHoldersMapProperty(Context model) {
-		return getProperty(HOLDERS_MAP, model);
-	}
-
-	default Property<Map<Generic, List<Property<Serializable>>>> getComponentsMapProperty(Context model) {
-		return getProperty(COMPONENTS_MAP, model);
+	default Map<Generic, GenericValueComponents> getGenericValueComponentsMap(Context context) {
+		return getContextAttribute(VALUE_COMPONENTS_MAP, context);
 	}
 
 	default Property<Map<Generic, Map<Generic, Property<Serializable>>>> getMultipleRelationProperty(Context context) {
-		return getProperty(MULTIPLE_RELATION, context);
+		return getContextProperty(MULTIPLE_RELATION, context);
 	}
 }

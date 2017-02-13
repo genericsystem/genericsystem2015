@@ -81,13 +81,13 @@ public class QuizExtractors {
 					return score1.getComponent(1).compareTo(score2.getComponent(1));
 			};
 
-			if (tag.getProperty(QuizContextAction.SELECTED_QUIZ, context) == null)
-				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_QUIZ, context.getRootContext());
-			if (tag.getProperty(QuizContextAction.SELECTED_USER, context) == null)
-				tag.getRootTag().createNewProperty(QuizContextAction.SELECTED_USER, context.getRootContext());
+			if (tag.getContextProperty(QuizContextAction.SELECTED_QUIZ, context) == null)
+				tag.getRootTag().createNewContextProperty(QuizContextAction.SELECTED_QUIZ, context.getRootContext());
+			if (tag.getContextProperty(QuizContextAction.SELECTED_USER, context) == null)
+				tag.getRootTag().createNewContextProperty(QuizContextAction.SELECTED_USER, context.getRootContext());
 
-			Property<Generic> selectedQuiz = tag.getProperty(QuizContextAction.SELECTED_QUIZ, context);
-			Property<String> selectedUser = tag.getProperty(QuizContextAction.SELECTED_USER, context);
+			Property<Generic> selectedQuiz = tag.getContextProperty(QuizContextAction.SELECTED_QUIZ, context);
+			Property<String> selectedUser = tag.getContextProperty(QuizContextAction.SELECTED_USER, context);
 
 			return new ListBinding<Generic>() {
 				{

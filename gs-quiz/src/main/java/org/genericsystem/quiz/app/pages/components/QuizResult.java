@@ -118,7 +118,7 @@ public class QuizResult extends FlexDiv {
 
 						if ("value".equals(change.getKey())) {
 							if (change.wasAdded())
-								getProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
+								getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
 						}
 
 					});

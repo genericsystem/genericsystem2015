@@ -11,18 +11,18 @@ public interface UserRoleDefaults extends ContextProperty {
 	public static final String ADMIN_MODE = "adminMode";
 
 	default void createLoggedUserProperty() {
-		createNewProperty(LOGGED_USER);
+		createNewContextProperty(LOGGED_USER);
 	}
 
 	default void createAdminModeProperty() {
-		createNewProperty(ADMIN_MODE);
+		createNewContextProperty(ADMIN_MODE);
 	}
 
 	default Property<Generic> getLoggedUserProperty(Context context) {
-		return getProperty(LOGGED_USER, context);
+		return getContextProperty(LOGGED_USER, context);
 	}
 
 	default Property<Boolean> getAdminModeProperty(Context context) {
-		return getProperty(ADMIN_MODE, context);
+		return getContextProperty(ADMIN_MODE, context);
 	}
 }

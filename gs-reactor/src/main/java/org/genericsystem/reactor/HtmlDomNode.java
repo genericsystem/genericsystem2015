@@ -183,7 +183,7 @@ public class HtmlDomNode {
 		if (metaBinding != null) {
 			if (context.getSubContexts(childTag) == null) {
 				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag);
-				childTag.createNewInitializedProperty("filteredContexts", context, c -> subContexts);
+				childTag.addContextAttribute("filteredContexts", context, subContexts);
 				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
 					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
 					if (subContext.isInCache())
@@ -199,11 +199,11 @@ public class HtmlDomNode {
 		// System.out.println("Attempt to destroy : " + getId());
 		assert !destroyed : "Node : " + getId();
 		destroyed = true;
-		((FilteredTagChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
+		((FilteredTagChildren) tag.getContextAttribute("filteredChildren", context)).filteredList.removeListener(tagListener);
 		for (Tag childTag : tag.getObservableChildren()) {
 			childTag.getMetaBindingProperty().removeListener(metaBindingListeners.get(childTag));
 			if (childTag.getMetaBinding() != null && context.getSubContexts(childTag) != null)
-				((FilteredChildContexts<?>) childTag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
+				((FilteredChildContexts<?>) childTag.getContextAttribute("filteredContexts", context)).transformationListSubContexts.unbind();
 		}
 		tag.getDomNodeTextProperty(context).removeListener(textListener);
 		tag.getDomNodeStyles(context).removeListener(stylesListener);
@@ -219,9 +219,9 @@ public class HtmlDomNode {
 			insertChild(index);
 		for (Consumer<Context> binding : tag.getPreFixedBindings())
 			binding.accept(context);
-		assert (!context.containsProperty(tag, "filteredChildren"));
+		assert (!context.containsAttribute(tag, "filteredChildren"));
 		FilteredTagChildren filteredChildren = new FilteredTagChildren();
-		tag.createNewInitializedProperty("filteredChildren", context, c -> filteredChildren);
+		tag.addContextAttribute("filteredChildren", context, filteredChildren);
 		for (Tag childTag : filteredChildren.filteredList)
 			tagAdder.accept(childTag);
 		filteredChildren.filteredList.addListener(tagListener);
@@ -274,8 +274,8 @@ public class HtmlDomNode {
 				selectorsByChild.put(childContext, result);
 				return new ObservableList[] { result };
 			});
-			filteredSubContexts = new FilteredList<>(transformationListSubContexts, childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream()
-					.allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
+			filteredSubContexts = new FilteredList<>(transformationListSubContexts,
+					childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
 		}
 	}
 

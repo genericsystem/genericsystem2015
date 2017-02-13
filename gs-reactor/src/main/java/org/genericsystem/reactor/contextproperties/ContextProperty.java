@@ -12,27 +12,35 @@ import javafx.beans.value.ObservableValue;
 
 public interface ContextProperty {
 
-	<T> void storeProperty(String propertyName, Context model, Function<Context, ObservableValue<T>> applyOnModel);
-
-	<T> void storeProperty(String propertyName, Function<Context, ObservableValue<T>> applyOnModel);
-
 	void addPrefixBinding(Consumer<Context> consumer);
 
 	void addPostfixBinding(Consumer<Context> consumer);
 
-	<T> Property<T> getProperty(String property, Context model);
+	<T> T getContextAttribute(String propertyName, Context context);
 
-	<T> ObservableValue<T> getObservableValue(String property, Context model);
+	<T> Property<T> getContextProperty(String property, Context context);
 
-	void createNewProperty(String propertyName);
+	<T> ObservableValue<T> getContextObservableValue(String property, Context context);
 
-	<T> void initProperty(String propertyName, Function<Context, T> getInitialValue);
+	void createNewContextProperty(String propertyName);
+
+	<T> void createNewInitializedProperty(String propertyName, Context context, T initialValue);
 
 	<T> void createNewInitializedProperty(String propertyName, Function<Context, T> getInitialValue);
 
-	<T> void createNewInitializedProperty(String propertyName, Context model, Function<Context, T> getInitialValue);
+	<T> void addContextAttribute(String propertyName, Context context, T value);
+
+	<T> void addContextAttribute(String propertyName, Function<Context, T> applyOnModel);
+
+	<T> void setContextAttribute(String valueName, Context context, T value);
+
+	<T> void setContextAttribute(String valueName, Function<Context, T> getValue);
+
+	<T> void setContextPropertyValue(String attributeName, Context context, T value);
+
+	<T> void setContextPropertyValue(String attributeName, Function<Context, T> getValue);
 
 	public void addStyle(Context context, String propertyName, String value);
 
-	<T extends Serializable> void addPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener);
+	<T extends Serializable> void addContextPropertyChangeListener(String propertyName, BiConsumer<Context, T> listener);
 }

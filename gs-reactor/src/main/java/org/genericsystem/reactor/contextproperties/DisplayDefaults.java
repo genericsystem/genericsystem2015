@@ -13,6 +13,6 @@ public interface DisplayDefaults extends ContextProperty {
 	}
 
 	default Property<String> getDisplayProperty(Context model) {
-		return getProperty(DISPLAY, model);
+		return getContextProperty(DISPLAY, model);
 	}
 }

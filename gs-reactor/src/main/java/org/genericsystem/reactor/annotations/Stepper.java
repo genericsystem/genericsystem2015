@@ -54,7 +54,7 @@ public @interface Stepper {
 
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			((Controller) context.getProperties(tag).get(Controller.CONTROLLER).getValue()).setActiveProperty(false);
+			Controller.get(tag, context).setActiveProperty(false);
 		}
 
 		@Override
