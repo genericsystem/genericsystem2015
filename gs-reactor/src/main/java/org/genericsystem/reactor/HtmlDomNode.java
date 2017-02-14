@@ -31,32 +31,6 @@ import javafx.collections.transformation.FilteredList;
 public class HtmlDomNode {
 
 	static int count = 0;
-	protected static final String MSG_TYPE = "msgType";
-	protected static final String ADD = "A";
-	protected static final String UPDATE = "U";
-	static final String REMOVE = "R";
-	static final String UPDATE_TEXT = "UT";
-	private static final String UPDATE_SELECTION = "US";
-	static final String ADD_STYLECLASS = "AC";
-	static final String REMOVE_STYLECLASS = "RC";
-	static final String ADD_STYLE = "AS";
-	static final String REMOVE_STYLE = "RS";
-	static final String ADD_ATTRIBUTE = "AA";
-	static final String REMOVE_ATTRIBUTE = "RA";
-
-	static final String PARENT_ID = "parentId";
-	public static final String ID = "nodeId";
-	static final String NEXT_ID = "nextId";
-	static final String STYLE_PROPERTY = "styleProperty";
-	static final String STYLE_VALUE = "styleValue";
-	static final String ATTRIBUTE_NAME = "attributeName";
-	static final String ATTRIBUTE_VALUE = "attributeValue";
-	static final String STYLECLASS = "styleClass";
-	protected static final String TEXT_CONTENT = "textContent";
-	static final String TAG_HTML = "tagHtml";
-	protected static final String ELT_TYPE = "eltType";
-	protected static final String SELECTED_INDEX = "selectedIndex";
-
 	private final String id;
 	private HtmlDomNode parent;
 	private Tag tag;
@@ -321,26 +295,27 @@ public class HtmlDomNode {
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
-			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_STYLE).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLE_PROPERTY, change.getKey()));
 		else if (change.wasAdded())
-			sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD_STYLE).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLE_PROPERTY, change.getKey()).put(ReactorStatics.STYLE_VALUE, change.getValueAdded()));
 	};
 
 	private final MapChangeListener<String, String> attributesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
-			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_ATTRIBUTE).put(ReactorStatics.ID, getId()).put(ReactorStatics.ATTRIBUTE_NAME, change.getKey()));
 		else if (change.wasAdded())
-			sendMessage(new JsonObject().put(MSG_TYPE, ADD_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()).put(ATTRIBUTE_VALUE, change.getValueAdded()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD_ATTRIBUTE).put(ReactorStatics.ID, getId()).put(ReactorStatics.ATTRIBUTE_NAME, change.getKey()).put(ReactorStatics.ATTRIBUTE_VALUE, change.getValueAdded()));
 	};
 
 	private final SetChangeListener<String> styleClassesListener = change -> {
 		if (change.wasAdded())
-			sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementAdded()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD_STYLECLASS).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLECLASS, change.getElementAdded()));
 		else
-			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementRemoved()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_STYLECLASS).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLECLASS, change.getElementRemoved()));
 	};
 
-	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+	private final ChangeListener<String> textListener = (o, old,
+			newValue) -> sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.UPDATE_TEXT).put(ReactorStatics.ID, getId()).put(ReactorStatics.TEXT_CONTENT, newValue != null ? newValue : ""));
 
 	private final Map<Tag, ChangeListener<MetaBinding<?>>> metaBindingListeners = new HashMap<Tag, ChangeListener<MetaBinding<?>>>() {
 
@@ -365,7 +340,7 @@ public class HtmlDomNode {
 		// UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue !=
 		// null ? newValue : 0)
 		// .encodePrettily());
-		sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
+		sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.UPDATE_SELECTION).put(ReactorStatics.ID, getId()).put(ReactorStatics.SELECTED_INDEX, newValue != null ? newValue : 0));
 	};
 
 	public ChangeListener<Number> getIndexListener() {
@@ -389,17 +364,17 @@ public class HtmlDomNode {
 	}
 
 	public void sendAdd(int index) {
-		JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
-		jsonObj.put(PARENT_ID, getParentId());
-		jsonObj.put(ID, id);
-		jsonObj.put(TAG_HTML, getTag().getTag());
-		jsonObj.put(NEXT_ID, index);
+		JsonObject jsonObj = new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD);
+		jsonObj.put(ReactorStatics.PARENT_ID, getParentId());
+		jsonObj.put(ReactorStatics.ID, id);
+		jsonObj.put(ReactorStatics.TAG_HTML, getTag().getTag());
+		jsonObj.put(ReactorStatics.NEXT_ID, index);
 		// System.out.println(jsonObj.encodePrettily());
 		sendMessage(jsonObj);
 	}
 
 	public void sendRemove() {
-		sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
+		sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE).put(ReactorStatics.ID, id));
 		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID,
 		// id).encodePrettily());
 	}
@@ -505,13 +480,13 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			super.handleMessage(json);
-			if (ADD.equals(json.getString(MSG_TYPE))) {
+			if (ReactorStatics.ADD.equals(json.getString(ReactorStatics.MSG_TYPE))) {
 				Property<Consumer<Object>> action = ((ActionDefaults) getTag()).getActionProperty(getModelContext());
 				if (action != null)
 					action.getValue().accept(new Object());
 			}
-			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(TEXT_CONTENT));
+			if (ReactorStatics.UPDATE.equals(json.getString(ReactorStatics.MSG_TYPE)))
+				getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(ReactorStatics.TEXT_CONTENT));
 		}
 	}
 
@@ -523,8 +498,8 @@ public class HtmlDomNode {
 
 		@Override
 		public void handleMessage(JsonObject json) {
-			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+			if (ReactorStatics.UPDATE.equals(json.getString(ReactorStatics.MSG_TYPE))) {
+				((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(ReactorStatics.SELECTED_INDEX));
 			}
 		}
 	}
