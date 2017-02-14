@@ -14,9 +14,9 @@ import org.genericsystem.reactor.annotations.SelectContext.SelectContextGenericP
 import org.genericsystem.reactor.annotations.SelectContext.SelectContextProcessor;
 import org.genericsystem.reactor.annotations.SelectContext.SelectContexts;
 import org.genericsystem.reactor.context.ObservableContextSelector;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)

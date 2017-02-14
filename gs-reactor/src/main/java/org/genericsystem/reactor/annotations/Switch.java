@@ -14,9 +14,9 @@ import org.genericsystem.reactor.annotations.Switch.Modes;
 import org.genericsystem.reactor.annotations.Switch.SwichProcessor;
 import org.genericsystem.reactor.annotations.Switch.SwitchGenericProcessor;
 import org.genericsystem.reactor.context.TagSwitcher;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)

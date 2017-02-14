@@ -13,9 +13,9 @@ import org.genericsystem.reactor.annotations.Children.ChildrenGenericProcessor;
 import org.genericsystem.reactor.annotations.Children.ChildrenMult;
 import org.genericsystem.reactor.annotations.Children.ChildrenProcessor;
 import org.genericsystem.reactor.annotations.DirectSelect.AnnotationProcessorNoActionWithContext;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**

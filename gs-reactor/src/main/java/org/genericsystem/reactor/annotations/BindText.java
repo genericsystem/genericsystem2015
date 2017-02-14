@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.BindText.BindTextGenericProcessor;
 import org.genericsystem.reactor.annotations.BindText.BindTextProcessor;
@@ -17,9 +16,10 @@ import org.genericsystem.reactor.annotations.BindText.BindTexts;
 import org.genericsystem.reactor.context.TextBinding;
 import org.genericsystem.reactor.context.TextBinding.GENERIC_STRING;
 import org.genericsystem.reactor.contextproperties.TextPropertyDefaults;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 @Retention(RetentionPolicy.RUNTIME)
