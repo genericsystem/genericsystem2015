@@ -10,7 +10,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
-import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.RootHtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
@@ -67,8 +67,8 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			Context rootContext = context.getRootContext();
 			Tag rootTag = rootContext.getTagDataMap().keySet().iterator().next();
-			HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
-			String body = rootNode.toHTMLString(new String());
+			RootHtmlDomNode rootNode = (RootHtmlDomNode) rootContext.getHtmlDomNode(rootTag);
+			String body = rootNode.toHTMLString();
 			rootNode.toHtmlFile(rootNode.header() + body + rootNode.footer(), "html", "/home/middleware/git/genericsystem2015/gs-reactor/src/main/resources/");
 		}
 	}

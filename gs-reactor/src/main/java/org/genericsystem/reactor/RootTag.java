@@ -8,7 +8,6 @@ import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeAction;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeCheckbox;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeInputText;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeSelect;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableContextSelector;
