@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.HtmlDomNode.FilteredChildContexts;
+import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
 import org.genericsystem.reactor.context.RootContext;
 
 import io.vertx.core.logging.Logger;

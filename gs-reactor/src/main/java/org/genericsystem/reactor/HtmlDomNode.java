@@ -9,21 +9,17 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
+import org.genericsystem.reactor.FilteredChildren.FilteredTagChildren;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-
-import com.sun.javafx.collections.ObservableListWrapper;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
-import javafx.collections.transformation.FilteredList;
 
 public class HtmlDomNode {
 
@@ -32,13 +28,7 @@ public class HtmlDomNode {
 	private HtmlDomNode parent;
 	private Tag tag;
 	private Context context;
-
 	private boolean destroyed = false;
-
-	public static interface Sender {
-		public void send(String message);
-	}
-
 	final Consumer<Tag> tagAdder = tagAdder();
 	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
@@ -60,45 +50,6 @@ public class HtmlDomNode {
 		}
 	};
 
-	public List<HtmlDomNode> getChildren() {
-		List<HtmlDomNode> result = new ArrayList<>();
-		List<Tag> subTags = tag.getObservableChildren();
-		for (Tag subTag : subTags) {
-			if (subTag.getMetaBinding() == null)
-				result.add(context.getHtmlDomNode(subTag));
-			else
-				for (Context subContext : context.getSubContexts(subTag))
-					result.add(subContext.getHtmlDomNode(subTag));
-		}
-		return result;
-	}
-
-	public String toHTMLString() {
-		String tagText = tag.getTag();
-		String classes = tag.getDomNodeStyleClasses(context).stream().collect(Collectors.joining(" "));
-		classes = ("section".equals(tagText) || "div".equals(tagText) || "header".equals(tagText) || "footer".equals(tagText)) ? classes += " adding" : classes;
-
-		String styles = tag.getDomNodeStyles(context).entrySet().stream().map(m -> m.getKey() + ": " + m.getValue()).collect(Collectors.joining("; "));
-		String tagAttributes = tag.getDomNodeAttributes(context).entrySet().stream().filter(m -> m.getValue() != null && !m.getValue().isEmpty()).map(m -> m.getKey() + "=\"" + m.getValue() + "\"").collect(Collectors.joining(""));
-
-		String body = "\n<" + tagText + " id=\"" + id + "\"";
-		if (!classes.equals(""))
-			body += " class=\"" + classes + "\"";
-		if (!styles.equals(""))
-			body += " style=\"" + styles + "\"";
-
-		body += tagAttributes + ">";
-
-		for (HtmlDomNode node : getChildren())
-			body += node.toHTMLString();
-		String tagValue = tag.getDomNodeTextProperty(context).getValue();
-		if (tagValue != null)
-			body += tagValue;
-
-		body += "</" + tagText + ">\n";
-		return body;
-	}
-
 	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
 		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
 		this.parent = parent;
@@ -107,28 +58,20 @@ public class HtmlDomNode {
 		tag.getRootTag().initDomNode(this);
 	}
 
-	private <BETWEEN> Consumer<Tag> tagAdder() {
-		return childTag -> {
-			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
-			metaBinding.addListener(metaBindingListeners.get(childTag));
-			updateMetaBinding(childTag, metaBinding.getValue());
-		};
-	}
-
-	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
-		if (metaBinding != null) {
-			if (context.getSubContexts(childTag) == null) {
-				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag);
-				childTag.addContextAttribute("filteredContexts", context, subContexts);
-				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
-					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
-					if (subContext.isInCache())
-						childTag.addStyleClass(subContext, "opaque");
-					return subContext;
-				}, subContext -> subContext.removeTag(childTag)));
-			}
-		} else if (context.getHtmlDomNode(childTag) == null)
-			childTag.createNode(this, context).init(computeIndex(0, childTag));
+	protected <BETWEEN> void init(int index) {
+		context.register(this);
+		if (parent != null)
+			insertChild(index);
+		for (Consumer<Context> binding : tag.getPreFixedBindings())
+			binding.accept(context);
+		assert (!context.containsAttribute(tag, "filteredChildren"));
+		FilteredTagChildren filteredChildren = new FilteredTagChildren(tag, context);
+		tag.addContextAttribute("filteredChildren", context, filteredChildren);
+		for (Tag childTag : filteredChildren.filteredList)
+			tagAdder.accept(childTag);
+		filteredChildren.filteredList.addListener(tagListener);
+		for (Consumer<Context> binding : tag.getPostFixedBindings())
+			binding.accept(context);
 	}
 
 	void destroy() {
@@ -149,70 +92,45 @@ public class HtmlDomNode {
 		parent.decrementSize(tag);
 	}
 
-	protected <BETWEEN> void init(int index) {
-		context.register(this);
-		if (parent != null)
-			insertChild(index);
-		for (Consumer<Context> binding : tag.getPreFixedBindings())
-			binding.accept(context);
-		assert (!context.containsAttribute(tag, "filteredChildren"));
-		FilteredTagChildren filteredChildren = new FilteredTagChildren();
-		tag.addContextAttribute("filteredChildren", context, filteredChildren);
-		for (Tag childTag : filteredChildren.filteredList)
-			tagAdder.accept(childTag);
-		filteredChildren.filteredList.addListener(tagListener);
-		for (Consumer<Context> binding : tag.getPostFixedBindings())
-			binding.accept(context);
+	public static interface Sender {
+		public void send(String message);
 	}
 
-	private class FilteredChildren<T> {
-		final Map<T, ObservableList<TagSwitcher>> selectorsByChild = new HashMap<>();// Prevents garbage collection
-		final Map<T, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsByChildAndSwitcher = new HashMap<T, Map<TagSwitcher, ObservableValue<Boolean>>>() {
+	public List<HtmlDomNode> getChildren() {
+		List<HtmlDomNode> result = new ArrayList<>();
+		List<Tag> subTags = tag.getObservableChildren();
+		for (Tag subTag : subTags) {
+			if (subTag.getMetaBinding() == null)
+				result.add(context.getHtmlDomNode(subTag));
+			else
+				for (Context subContext : context.getSubContexts(subTag))
+					result.add(subContext.getHtmlDomNode(subTag));
+		}
+		return result;
+	}
 
-			private static final long serialVersionUID = -5831485781427983238L;
-
-			@Override
-			public Map<TagSwitcher, ObservableValue<Boolean>> get(Object key) {
-				Map<TagSwitcher, ObservableValue<Boolean>> result = super.get(key);
-				if (result == null)
-					put((T) key, result = new HashMap<>());
-				return result;
-			}
+	private <BETWEEN> Consumer<Tag> tagAdder() {
+		return childTag -> {
+			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
+			metaBinding.addListener(metaBindingListeners.get(childTag));
+			updateMetaBinding(childTag, metaBinding.getValue());
 		};
 	}
 
-	private class FilteredTagChildren extends FilteredChildren<Tag> {
-
-		final ObservableList<Tag> filteredList = new FilteredList<>(new ObservableListWrapper<>(context.getRootContext().getObservableChildren(tag), child -> {
-			if (child.getMetaBinding() != null)
-				return new ObservableValue[] {};
-			ObservableList<TagSwitcher> result = new ObservableListWrapper<>(child.getObservableSwitchers(), s -> {
-				ObservableValue<Boolean> selector = s.apply(context, child);
-				selectorsByChildAndSwitcher.get(child).put(s, selector);
-				return new ObservableValue[] { selector };
-			});
-			selectorsByChild.put(child, result);
-			return new ObservableList[] { result };
-		}), child -> child.getMetaBinding() != null || selectorsByChildAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByChild.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
-	}
-
-	class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
-		final ObservableList<Context> filteredSubContexts;
-		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
-
-		FilteredChildContexts(MetaBinding<BETWEEN> metaBinding, Tag childTag) {
-			transformationListSubContexts = new TransformationObservableList<>(metaBinding.buildBetweenChildren(context), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
-				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(childTag.getObservableSwitchers(), s -> {
-					ObservableValue<Boolean> selector = s.apply(childContext, childTag);
-					selectorsByChildAndSwitcher.get(childContext).put(s, selector);
-					return new ObservableValue[] { selector };
-				});
-				selectorsByChild.put(childContext, result);
-				return new ObservableList[] { result };
-			});
-			filteredSubContexts = new FilteredList<>(transformationListSubContexts,
-					childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream().allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
-		}
+	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
+		if (metaBinding != null) {
+			if (context.getSubContexts(childTag) == null) {
+				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag, context);
+				childTag.addContextAttribute("filteredContexts", context, subContexts);
+				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
+					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
+					if (subContext.isInCache())
+						childTag.addStyleClass(subContext, "opaque");
+					return subContext;
+				}, subContext -> subContext.removeTag(childTag)));
+			}
+		} else if (context.getHtmlDomNode(childTag) == null)
+			childTag.createNode(this, context).init(computeIndex(0, childTag));
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {
@@ -362,6 +280,32 @@ public class HtmlDomNode {
 	}
 
 	public void handleMessage(JsonObject json) {
+	}
+
+	public String toHTMLString() {
+		String tagText = tag.getTag();
+		String classes = tag.getDomNodeStyleClasses(context).stream().collect(Collectors.joining(" "));
+		classes = ("section".equals(tagText) || "div".equals(tagText) || "header".equals(tagText) || "footer".equals(tagText)) ? classes += " adding" : classes;
+
+		String styles = tag.getDomNodeStyles(context).entrySet().stream().map(m -> m.getKey() + ": " + m.getValue()).collect(Collectors.joining("; "));
+		String tagAttributes = tag.getDomNodeAttributes(context).entrySet().stream().filter(m -> m.getValue() != null && !m.getValue().isEmpty()).map(m -> m.getKey() + "=\"" + m.getValue() + "\"").collect(Collectors.joining(""));
+
+		String body = "\n<" + tagText + " id=\"" + id + "\"";
+		if (!classes.equals(""))
+			body += " class=\"" + classes + "\"";
+		if (!styles.equals(""))
+			body += " style=\"" + styles + "\"";
+
+		body += tagAttributes + ">";
+
+		for (HtmlDomNode node : getChildren())
+			body += node.toHTMLString();
+		String tagValue = tag.getDomNodeTextProperty(context).getValue();
+		if (tagValue != null)
+			body += tagValue;
+
+		body += "</" + tagText + ">\n";
+		return body;
 	}
 
 	public static class HtmlDomNodeAction extends HtmlDomNode {
