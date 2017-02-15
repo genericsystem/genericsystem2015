@@ -10,7 +10,7 @@ import org.genericsystem.api.core.exceptions.RollbackException;
 import org.genericsystem.common.Generic;
 import org.genericsystem.reactor.Context;
 import org.genericsystem.reactor.EncryptionUtils;
-import org.genericsystem.reactor.HtmlDomNode;
+import org.genericsystem.reactor.RootHtmlDomNode;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.contextproperties.ConvertedValueDefaults;
 import org.genericsystem.reactor.contextproperties.GSBuilderDefaults;
@@ -38,8 +38,7 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 	public static class ADD_HOLDER implements ContextAction {
 		@Override
 		public void accept(Context context, Tag tag) {
-			Property<Serializable> convertedValue = ((ConvertedValueDefaults) tag.getParent())
-					.getConvertedValueProperty(context.getParent());
+			Property<Serializable> convertedValue = ((ConvertedValueDefaults) tag.getParent()).getConvertedValueProperty(context.getParent());
 			if (convertedValue.getValue() != null) {
 				Serializable newValue = convertedValue.getValue();
 				convertedValue.setValue(null);
@@ -68,10 +67,9 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		public void accept(Context context, Tag tag) {
 			Context rootContext = context.getRootContext();
 			Tag rootTag = rootContext.getTagDataMap().keySet().iterator().next();
-			HtmlDomNode rootNode = rootContext.getHtmlDomNode(rootTag);
-			String body = rootNode.toHTMLString(new String());
-			rootNode.toHtmlFile(rootNode.header() + body + rootNode.footer(), "html",
-					"/home/middleware/git/genericsystem2015/gs-reactor/src/main/resources/");
+			RootHtmlDomNode rootNode = (RootHtmlDomNode) rootContext.getHtmlDomNode(rootTag);
+			String body = rootNode.toHTMLString();
+			rootNode.toHtmlFile(rootNode.header() + body + rootNode.footer(), "html", "/home/middleware/git/genericsystem2015/gs-reactor/src/main/resources/");
 		}
 	}
 
@@ -198,32 +196,20 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 		@Override
 		public void accept(Context context, Tag tag) {
 			if (GSBuilderDefaults.class.isAssignableFrom(tag.getClass())) {
-				GSBuilderDefaults buildTag = (GSBuilderDefaults) tag;
+				GSBuilderDefaults buildTag = tag;
 				Generic type = context.getGeneric();
-				Map<Generic, GenericValueComponents> gvc = buildTag.getGenericValueComponents(context).getValue();
-				Generic[] components = gvc.get(type).getComponents().entrySet().stream()
-						.filter(obs -> obs.getValue() != null && obs.getValue().getValue() != null)
-						.map(entry -> getOrSetInstance(entry.getKey(), entry.getValue().getValue()))
+				Map<Generic, GenericValueComponents> gvc = buildTag.getGenericValueComponentsMap(context);
+				Generic[] components = gvc.get(type).getComponents().entrySet().stream().filter(obs -> obs.getValue() != null && obs.getValue().getValue() != null).map(entry -> getOrSetInstance(entry.getKey(), entry.getValue().getValue()))
 						.filter(gen -> gen != null).toArray(Generic[]::new);
-				if ((gvc.get(type).getGenericValue().getValue() != null || type.getInstanceValueGenerator() != null
-						|| components.length != 0) && components.length == type.getComponents().size()) {
+				if ((gvc.get(type).getGenericValue().getValue() != null || type.getInstanceValueGenerator() != null || components.length != 0) && components.length == type.getComponents().size()) {
 					Generic newInstance = type.setInstance(gvc.get(type).getGenericValue().getValue(), components);
-					for (Entry<Generic, GenericValueComponents> entry : gvc.entrySet().stream()
-							.filter(e -> !e.getKey().equals(type)).collect(Collectors.toSet())) {
-						Generic[] selectedGenerics = entry.getValue().getComponents().entrySet().stream()
-								.filter(entry_ -> entry_.getValue() != null && entry_.getValue().getValue() != null)
-								.map(entry_ -> getOrSetInstance(entry_.getKey(), entry_.getValue().getValue()))
-								.filter(gen -> gen != null).toArray(Generic[]::new);
-						if ((entry.getValue().getGenericValue().getValue() != null || selectedGenerics.length != 0)
-								&& selectedGenerics.length + 1 == entry.getKey().getComponents().size()) {
-							Generic newHolder = newInstance.setHolder(entry.getKey(),
-									entry.getValue().getGenericValue().getValue(), selectedGenerics);
-							if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass())
-									&& context.find(Password.class) != null
-									&& newHolder.isInstanceOf(context.find(Password.class)))
-								newHolder.setHolder(context.find(Salt.class),
-										((PasswordDefaults) tag.getParent().getParent()).getSaltProperty(context)
-												.getValue());
+					for (Entry<Generic, GenericValueComponents> entry : gvc.entrySet().stream().filter(e -> !e.getKey().equals(type)).collect(Collectors.toSet())) {
+						Generic[] selectedGenerics = entry.getValue().getComponents().entrySet().stream().filter(entry_ -> entry_.getValue() != null && entry_.getValue().getValue() != null)
+								.map(entry_ -> getOrSetInstance(entry_.getKey(), entry_.getValue().getValue())).filter(gen -> gen != null).toArray(Generic[]::new);
+						if ((entry.getValue().getGenericValue().getValue() != null || selectedGenerics.length != 0) && selectedGenerics.length + 1 == entry.getKey().getComponents().size()) {
+							Generic newHolder = newInstance.setHolder(entry.getKey(), entry.getValue().getGenericValue().getValue(), selectedGenerics);
+							if (PasswordDefaults.class.isAssignableFrom(tag.getParent().getParent().getClass()) && context.find(Password.class) != null && newHolder.isInstanceOf(context.find(Password.class)))
+								newHolder.setHolder(context.find(Salt.class), ((PasswordDefaults) tag.getParent().getParent()).getSaltProperty(context).getValue());
 						}
 						entry.getValue().getComponents().values().stream().forEach(sel -> sel.setValue(null));
 						entry.getValue().getGenericValue().setValue(null);
@@ -232,19 +218,15 @@ public interface ContextAction extends BiConsumer<Context, Tag> {
 					gvc.get(type).getComponents().values().stream().forEach(sel -> sel.setValue(null));
 					gvc.get(type).getGenericValue().setValue(null);
 
-					Map<Generic, Map<Generic, Property<Serializable>>> relationMap = buildTag
-							.getMultipleRelationProperty(context).getValue();
+					Map<Generic, Map<Generic, Property<Serializable>>> relationMap = buildTag.getMultipleRelationProperty(context).getValue();
 					for (Entry<Generic, Map<Generic, Property<Serializable>>> entry : relationMap.entrySet())
 						for (Generic target : entry.getValue().keySet())
 							newInstance.setHolder(entry.getKey(), null, target);
-					for (Property<Serializable> convertedProperty : relationMap.values().stream()
-							.flatMap(hm -> hm.values().stream()).collect(Collectors.toList()))
+					for (Property<Serializable> convertedProperty : relationMap.values().stream().flatMap(hm -> hm.values().stream()).collect(Collectors.toList()))
 						convertedProperty.setValue(null);
-					tag.getParent().getParent().find(Header.class).find(GSHolderBuilderDiv.class).find(HtmlSpan.class)
-							.addStyle(context, "display", "none");
+					tag.getParent().getParent().find(Header.class).find(GSHolderBuilderDiv.class).find(HtmlSpan.class).addStyle(context, "display", "none");
 				} else {
-					tag.getParent().getParent().find(Header.class).find(GSHolderBuilderDiv.class).find(HtmlSpan.class)
-							.addStyle(context, "display", "inline");
+					tag.getParent().getParent().find(Header.class).find(GSHolderBuilderDiv.class).find(HtmlSpan.class).addStyle(context, "display", "inline");
 				}
 			} else
 				log.warn("The CREATE_INSTANCE action can apply only to a tag class implementing GSBuilderDefaults.");

@@ -9,16 +9,16 @@ import java.util.function.BiConsumer;
 
 import org.genericsystem.api.core.TagAnnotation;
 import org.genericsystem.reactor.Context;
-import org.genericsystem.reactor.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
 import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Stepper.StepperGenericProcessor;
 import org.genericsystem.reactor.annotations.Stepper.StepperProcessor;
+import org.genericsystem.reactor.extended.ExtendedAnnotationsManager.IGenericAnnotationProcessor;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.TagType.TagAnnotationAttribute;
+import org.genericsystem.reactor.extended.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 import org.genericsystem.reactor.gscomponents.Controller;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationAttribute;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.TagType.TagAnnotationContentAttribute;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 import io.vertx.core.json.JsonObject;
@@ -54,7 +54,7 @@ public @interface Stepper {
 
 		@Override
 		public void onRemove(Tag tag, Context context, GTagAnnotation gTagAnnotation, GTagAnnotationContent annotationContent) {
-			((Controller) context.getProperties(tag).get(Controller.CONTROLLER).getValue()).setActiveProperty(false);
+			Controller.get(tag, context).setActiveProperty(false);
 		}
 
 		@Override

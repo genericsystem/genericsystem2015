@@ -65,7 +65,7 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 
 	@Override
 	public void init() {
-		createValueComponentsMapProperty();
+		createValueComponentsMap();
 		createInvalidListProperty();
 		createMultipleRelationProperty();
 		createSaltProperty();
@@ -84,7 +84,7 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 			});
 			addPrefixBinding(context -> {
 				getSaltProperty(context).addListener((o, v, nv) -> ((PasswordDefaults) getParent().getParent()).getSaltProperty(context.getParent().getParent()).setValue(nv));
-				getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+				getGenericValueComponentsMap(context).get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
 				getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 			});
 			find(PasswordInput.class, 1).addConvertedValueChangeListener((context, nva) -> {
@@ -129,10 +129,10 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 
 		@Override
 		public void init() {
-			createComponentsListProperty();
+			createComponentsList();
 			addPostfixBinding(context -> {
-				if (getGenericValueComponents(context) != null)
-					getGenericValueComponents(context).getValue().get(context.getGeneric()).setComponents(getComponentsProperty(context).getValue());
+				if (getGenericValueComponentsMap(context) != null)
+					getGenericValueComponentsMap(context).get(context.getGeneric()).setComponents(getComponentsMap(context));
 			});
 		}
 
@@ -144,8 +144,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 			@Override
 			public void init() {
 				addPrefixBinding(context -> {
-					if (getGenericValueComponents(context) != null)
-						getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+					if (getGenericValueComponentsMap(context) != null)
+						getGenericValueComponentsMap(context).get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
 					if (getInvalidListProperty(context) != null)
 						getInvalidListProperty(context).getValue().add(getInvalidObservable(context));
 				});
@@ -157,8 +157,8 @@ public class InstanceBuilder extends Composite implements GSBuilderDefaults, Pas
 			@Override
 			public void init() {
 				addPrefixBinding(context -> {
-					if (getGenericValueComponents(context) != null)
-						getGenericValueComponents(context).getValue().get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
+					if (getGenericValueComponentsMap(context) != null)
+						getGenericValueComponentsMap(context).get(context.getGeneric()).setGenericValue(getConvertedValueProperty(context));
 				});
 			}
 		}

@@ -87,15 +87,15 @@ public class TodoApp extends RootTagImpl {
 	}
 
 	private Property<Predicate<Generic>> getModeProperty(Context model) {
-		return getProperty(FILTER_MODE, model);
+		return getContextProperty(FILTER_MODE, model);
 	}
 
 	private ObservableList<Generic> getTodos(Context model) {
-		return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
+		return this.<ObservableList<Generic>> getContextProperty(TODOS, model).getValue();
 	}
 
 	private Map<Generic, Observable[]> getExtractors(Context model) {
-		return this.<Map<Generic, Observable[]>> getProperty("extractorMap", model).getValue();
+		return this.<Map<Generic, Observable[]>> getContextProperty("extractorMap", model).getValue();
 	}
 
 	static Predicate<Generic> ALL = null;
@@ -179,7 +179,7 @@ public class TodoApp extends RootTagImpl {
 
 						@Override
 						public void init() {
-							storeProperty(COMPLETED, model -> {
+							addContextAttribute(COMPLETED, model -> {
 								Generic completed = model.getGeneric().getHolder(model.getGeneric().getRoot().find(Completed.class));
 								return new SimpleBooleanProperty(completed != null && Boolean.TRUE.equals(completed.getValue()) ? true : false);
 							});
@@ -188,7 +188,7 @@ public class TodoApp extends RootTagImpl {
 						}
 
 						private ObservableList<Generic> getFilteredTodos(Context model) {
-							return this.<ObservableList<Generic>> getProperty(FILTERED_TODOS, model).getValue();
+							return this.<ObservableList<Generic>> getContextProperty(FILTERED_TODOS, model).getValue();
 						}
 
 						@StyleClass("view")
@@ -199,13 +199,13 @@ public class TodoApp extends RootTagImpl {
 							@TagName(value = TagName.INPUT, type = TagName.CHECKBOX)
 							public static class MyHtmlCheckBox extends TagImpl {
 								Map<Generic, Observable[]> getExtractors(Context model) {
-									return this.<Map<Generic, Observable[]>> getProperty("extractorMap", model).getValue();
+									return this.<Map<Generic, Observable[]>> getContextProperty("extractorMap", model).getValue();
 								}
 
 								@Override
 								public void init() {
 									addPrefixBinding(todo -> {
-										Property<Boolean> completedProperty = getProperty(COMPLETED, todo);
+										Property<Boolean> completedProperty = getContextProperty(COMPLETED, todo);
 										ObservableValue<Generic> completed = (ObservableValue<Generic>) getExtractors(todo.getParent()).get(todo.getGeneric())[0];
 										Property<Generic> completedGenericProperty = new SimpleObjectProperty(completed.getValue());
 										completed.addListener((ov, v, nv) -> completedGenericProperty.setValue(nv));
@@ -214,7 +214,7 @@ public class TodoApp extends RootTagImpl {
 									});
 									addStyleClass("toggle");
 									addPrefixBinding(todo -> {
-										if (Boolean.TRUE.equals(getObservableValue(COMPLETED, todo).getValue())) {
+										if (Boolean.TRUE.equals(getContextObservableValue(COMPLETED, todo).getValue())) {
 											getDomNodeAttributes(todo).put(ReactorStatics.CHECKED, ReactorStatics.CHECKED);
 										}
 									});
@@ -254,7 +254,7 @@ public class TodoApp extends RootTagImpl {
 				}
 
 				private ObservableList<Generic> getTodos(Context model) {
-					return this.<ObservableList<Generic>> getProperty(TODOS, model).getValue();
+					return this.<ObservableList<Generic>> getContextProperty(TODOS, model).getValue();
 				}
 
 				@Children({ MyHtmlSpan.class, MyHtmlUl2.class, MyHtmlButton.class })
@@ -276,7 +276,7 @@ public class TodoApp extends RootTagImpl {
 							}
 
 							private ObservableList<Generic> getActiveTodos(Context model) {
-								return this.<ObservableList<Generic>> getProperty(ACTIVE_TODOS, model).getValue();
+								return this.<ObservableList<Generic>> getContextProperty(ACTIVE_TODOS, model).getValue();
 							}
 						}
 					}
@@ -298,7 +298,7 @@ public class TodoApp extends RootTagImpl {
 								}
 
 								private Property<Predicate<Generic>> getModeProperty(Context model) {
-									return getProperty(FILTER_MODE, model);
+									return getContextProperty(FILTER_MODE, model);
 								}
 							}
 						}
@@ -316,7 +316,7 @@ public class TodoApp extends RootTagImpl {
 								}
 
 								private Property<Predicate<Generic>> getModeProperty(Context model) {
-									return getProperty(FILTER_MODE, model);
+									return getContextProperty(FILTER_MODE, model);
 								}
 							}
 						}
@@ -334,7 +334,7 @@ public class TodoApp extends RootTagImpl {
 								}
 
 								private Property<Predicate<Generic>> getModeProperty(Context model) {
-									return getProperty(FILTER_MODE, model);
+									return getContextProperty(FILTER_MODE, model);
 								}
 							}
 						}
@@ -352,7 +352,7 @@ public class TodoApp extends RootTagImpl {
 						}
 
 						private ObservableList<Generic> getCompletedTodos(Context model) {
-							return this.<ObservableList<Generic>> getProperty(COMPLETED_TODOS, model).getValue();
+							return this.<ObservableList<Generic>> getContextProperty(COMPLETED_TODOS, model).getValue();
 						}
 					}
 				}

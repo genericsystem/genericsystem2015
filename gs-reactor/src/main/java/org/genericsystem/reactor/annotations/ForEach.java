@@ -14,9 +14,9 @@ import org.genericsystem.reactor.annotations.ForEach.ForEachGenericProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachProcessor;
 import org.genericsystem.reactor.annotations.ForEach.ForEachs;
 import org.genericsystem.reactor.context.ObservableListExtractor;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
 import org.genericsystem.reactor.gscomponents.TagImpl;
 
 /**

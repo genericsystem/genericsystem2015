@@ -11,13 +11,11 @@ public interface StyleClassesDefaults extends ContextProperty {
 	public static final String STYLE_CLASSES = "styleClasses";
 
 	default ObservableSet<String> getDomNodeStyleClasses(Context model) {
-		if (!model.containsProperty((Tag) this, STYLE_CLASSES)) {
-			createNewInitializedProperty(STYLE_CLASSES, model, m -> {
-				ObservableSet<String> styleClasses = FXCollections.observableSet();
-				styleClasses.addListener(model.getHtmlDomNode((Tag) this).getStyleClassesListener());
-				return styleClasses;
-			});
+		if (!model.containsAttribute((Tag) this, STYLE_CLASSES)) {
+			ObservableSet<String> styleClasses = FXCollections.observableSet();
+			styleClasses.addListener(model.getHtmlDomNode((Tag) this).getStyleClassesListener());
+			addContextAttribute(STYLE_CLASSES, model, styleClasses);
 		}
-		return (ObservableSet<String>) getProperty(STYLE_CLASSES, model).getValue();
+		return getContextAttribute(STYLE_CLASSES, model);
 	}
 }

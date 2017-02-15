@@ -8,7 +8,6 @@ import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeAction;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeCheckbox;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeInputText;
 import org.genericsystem.reactor.HtmlDomNode.HtmlDomNodeSelect;
-import org.genericsystem.reactor.HtmlDomNode.RootHtmlDomNode;
 import org.genericsystem.reactor.HtmlDomNode.Sender;
 import org.genericsystem.reactor.context.ContextAction;
 import org.genericsystem.reactor.context.ObservableContextSelector;
@@ -146,13 +145,11 @@ public interface RootTag extends Tag {
 		if (GENERIC_STRING.class.equals(value))
 			tag.bindText(context);
 		else
-			tag.bindText(context, context_ -> {
-				try {
-					return value.newInstance().apply(context_, tag);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new IllegalStateException(e);
-				}
-			});
+			try {
+				tag.bindText(context, value.newInstance().apply(context, tag));
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalStateException(e);
+			}
 	}
 
 	default void processBindAction(Tag tag, Class<? extends ContextAction>[] value) {

@@ -1,10 +1,14 @@
-package org.genericsystem.reactor;
+package org.genericsystem.reactor.extended;
 
 import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.genericsystem.reactor.AnnotationsManager;
+import org.genericsystem.reactor.Context;
+import org.genericsystem.reactor.RootTag;
+import org.genericsystem.reactor.Tag;
 import org.genericsystem.reactor.annotations.Attribute;
 import org.genericsystem.reactor.annotations.BindAction;
 import org.genericsystem.reactor.annotations.BindSelection;
@@ -25,16 +29,15 @@ import org.genericsystem.reactor.annotations.Style.FlexDirectionStyle;
 import org.genericsystem.reactor.annotations.Style.GenericValueBackgroundColor;
 import org.genericsystem.reactor.annotations.Style.KeepFlexDirection;
 import org.genericsystem.reactor.annotations.Style.ReverseFlexDirection;
+import org.genericsystem.reactor.extended.ExtendedRootTag.AnnotationClassName;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTag;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotation;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GTagAnnotationContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GenericAnnotationWithContent;
+import org.genericsystem.reactor.extended.ExtendedRootTag.GenericTagNode;
 import org.genericsystem.reactor.annotations.StyleClass;
 import org.genericsystem.reactor.annotations.Switch;
 import org.genericsystem.reactor.annotations.TagName;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.AnnotationClassName;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTag;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotation;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GTagAnnotationContent;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericAnnotationWithContent;
-import org.genericsystem.reactor.gscomponents.ExtendedRootTag.GenericTagNode;
 
 import javafx.collections.transformation.SortedList;
 

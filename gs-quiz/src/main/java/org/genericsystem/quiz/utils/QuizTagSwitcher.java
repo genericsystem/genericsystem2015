@@ -41,7 +41,7 @@ public class QuizTagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<String> pageProperty = tag.getProperty(PAGE, context);
+			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
 			return Bindings.createBooleanBinding(() -> HOME_PAGE.equals(pageProperty.getValue()), pageProperty);
 		}
 	}
@@ -50,7 +50,7 @@ public class QuizTagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<String> pageProperty = tag.getProperty(PAGE, context);
+			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
 			return Bindings.createBooleanBinding(() -> QUESTION_PAGE.equals(pageProperty.getValue()), pageProperty);
 		}
 	}
@@ -59,7 +59,7 @@ public class QuizTagSwitcher {
 
 		@Override
 		public ObservableValue<Boolean> apply(Context context, Tag tag) {
-			Property<String> pageProperty = tag.getProperty(PAGE, context);
+			Property<String> pageProperty = tag.getContextProperty(PAGE, context);
 			return Bindings.createBooleanBinding(() -> RESULT_PAGE.equals(pageProperty.getValue()), pageProperty);
 		}
 	}

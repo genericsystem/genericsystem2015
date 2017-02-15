@@ -15,12 +15,12 @@ public interface TextPropertyDefaults extends ContextProperty {
 	public static final String TEXT_BINDING = "binding";
 
 	default Property<String> getDomNodeTextProperty(Context model) {
-		if (!model.containsProperty((Tag) this, TEXT)) {
-			storeProperty(TEXT, model, m -> new SimpleStringProperty());
-			Property<String> text = getProperty(TEXT, model);
+		if (!model.containsAttribute((Tag) this, TEXT)) {
+			Property<String> text = new SimpleStringProperty();
 			text.addListener(model.getHtmlDomNode((Tag) this).getTextListener());
+			addContextAttribute(TEXT, model, text);
 		}
-		return getProperty(TEXT, model);
+		return getContextProperty(TEXT, model);
 	}
 
 	default void setText(Context context, String value) {
@@ -31,13 +31,13 @@ public interface TextPropertyDefaults extends ContextProperty {
 		addPrefixBinding(context -> setText(context, value));
 	}
 
-	default void bindText(Context context, Function<Context, ObservableValue<String>> applyOnModel) {
-		storeProperty(TEXT_BINDING, context, applyOnModel);
-		getDomNodeTextProperty(context).bind(getObservableValue(TEXT_BINDING, context));
+	default void bindText(Context context, ObservableValue<String> observableText) {
+		addContextAttribute(TEXT_BINDING, context, observableText);
+		getDomNodeTextProperty(context).bind(getContextObservableValue(TEXT_BINDING, context));
 	}
 
 	default void bindText(Function<Context, ObservableValue<String>> applyOnModel) {
-		storeProperty(TEXT_BINDING, applyOnModel);
-		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getObservableValue(TEXT_BINDING, model)));
+		addContextAttribute(TEXT_BINDING, applyOnModel);
+		addPrefixBinding(model -> getDomNodeTextProperty(model).bind(getContextObservableValue(TEXT_BINDING, model)));
 	}
 }

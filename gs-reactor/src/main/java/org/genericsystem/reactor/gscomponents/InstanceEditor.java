@@ -132,7 +132,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 		@Override
 		public void init() {
 			initValueProperty(context -> context.getGenerics()[2].getLink(context.getGenerics()[1], context.getGeneric()) != null ? true : false);
-			storeProperty("exists", context -> {
+			addContextAttribute("exists", context -> {
 				ObservableValue<Generic> observableLink = context.getGenerics()[2].getObservableLink(context.getGenerics()[1], context.getGeneric());
 				ObservableValue<Boolean> exists = Bindings.createBooleanBinding(() -> observableLink.getValue() != null ? true : false, observableLink);
 				exists.addListener((o, v, nva) -> {
@@ -287,9 +287,9 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 		public void init() {
 			super.init();
 			addPostfixBinding(model -> {
-				Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
+				Map<Generic, Property<Serializable>> selectedComponents = getComponentsMap(model);
 				if (selectedComponents != null)
-					selectedComponents.getValue().put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
+					selectedComponents.put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
 			});
 		}
 	}
@@ -309,19 +309,19 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 	public static class HolderAdder extends ValueComponents implements ComponentsDefaults, ConvertedValueDefaults {
 		@Override
 		public void init() {
-			createComponentsListProperty();
+			createComponentsList();
 			createConvertedValueProperty();
 			addConvertedValueChangeListener((context, nva) -> {
 				if (nva != null)
 					context.getGenerics()[1].addHolder(context.getGeneric(), nva);
 			});
 			addPostfixBinding(model -> {
-				Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
+				Map<Generic, Property<Serializable>> selectedComponents = getComponentsMap(model);
 				ChangeListener<Serializable> listener = (o, v, nva) -> {
-					Generic[] selectedGenerics = selectedComponents.getValue().entrySet().stream().filter(entry -> entry.getValue() != null && entry.getValue().getValue() != null).map(entry -> entry.getKey().setInstance(entry.getValue().getValue()))
+					Generic[] selectedGenerics = selectedComponents.entrySet().stream().filter(entry -> entry.getValue() != null && entry.getValue().getValue() != null).map(entry -> entry.getKey().setInstance(entry.getValue().getValue()))
 							.filter(gen -> gen != null).toArray(Generic[]::new);
 					if (selectedGenerics.length + 1 == model.getGeneric().getComponents().size()) {
-						selectedComponents.getValue().values().stream().forEach(sel -> sel.setValue(null));
+						selectedComponents.values().stream().forEach(sel -> sel.setValue(null));
 						try {
 							model.getGenerics()[1].setHolder(model.getGeneric(), null, selectedGenerics);
 						} catch (RollbackException e) {
@@ -329,7 +329,7 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 						}
 					}
 				};
-				selectedComponents.getValue().values().forEach(component -> component.addListener(listener));
+				selectedComponents.values().forEach(component -> component.addListener(listener));
 			});
 		}
 	}
@@ -354,9 +354,9 @@ public class InstanceEditor extends FlexDiv implements SelectionDefaults, Steppe
 		public void init() {
 			super.init();
 			addPostfixBinding(model -> {
-				Property<Map<Generic, Property<Serializable>>> selectedComponents = getComponentsProperty(model);
+				Map<Generic, Property<Serializable>> selectedComponents = getComponentsMap(model);
 				if (selectedComponents != null)
-					selectedComponents.getValue().put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
+					selectedComponents.put(model.getGeneric(), find(InputTextWithConversion.class).getConvertedValueProperty(model));
 			});
 		}
 	}

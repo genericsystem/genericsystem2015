@@ -48,14 +48,14 @@ public class InputTextWithConversion<T extends Serializable> extends HtmlInputTe
 	private void bindBiDirectionalAttributeOnEnter(String propertyName, String attributeName) {
 		bindAction(model -> {
 			try {
-				getProperty(propertyName, model).setValue(getConverter(model).fromString(getDomNodeAttributes(model).get(attributeName)));
+				getContextProperty(propertyName, model).setValue(getConverter(model).fromString(getDomNodeAttributes(model).get(attributeName)));
 			} catch (Exception ignore) {
 				log.warn("Conversion exception: " + ignore.getMessage());
 			}
 		});
 		addPrefixBinding(model -> {
 			ChangeListener listener = (o, old, newValue) -> getDomNodeAttributes(model).put(attributeName, getConverter(model).toString((T) newValue));
-			getProperty(propertyName, model).addListener(listener);
+			getContextProperty(propertyName, model).addListener(listener);
 		});
 	}
 

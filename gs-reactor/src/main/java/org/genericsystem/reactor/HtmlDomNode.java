@@ -1,8 +1,5 @@
 package org.genericsystem.reactor;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -12,62 +9,26 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.genericsystem.defaults.tools.TransformationObservableList;
-import org.genericsystem.reactor.context.TagSwitcher;
+import org.genericsystem.reactor.FilteredChildren.FilteredChildContexts;
+import org.genericsystem.reactor.FilteredChildren.FilteredTagChildren;
 import org.genericsystem.reactor.contextproperties.ActionDefaults;
 import org.genericsystem.reactor.contextproperties.SelectionDefaults;
-
-import com.sun.javafx.collections.ObservableListWrapper;
 
 import io.vertx.core.json.JsonObject;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
-import javafx.collections.transformation.FilteredList;
 
 public class HtmlDomNode {
 
 	static int count = 0;
-	protected static final String MSG_TYPE = "msgType";
-	protected static final String ADD = "A";
-	protected static final String UPDATE = "U";
-	static final String REMOVE = "R";
-	static final String UPDATE_TEXT = "UT";
-	private static final String UPDATE_SELECTION = "US";
-	static final String ADD_STYLECLASS = "AC";
-	static final String REMOVE_STYLECLASS = "RC";
-	static final String ADD_STYLE = "AS";
-	static final String REMOVE_STYLE = "RS";
-	static final String ADD_ATTRIBUTE = "AA";
-	static final String REMOVE_ATTRIBUTE = "RA";
-
-	static final String PARENT_ID = "parentId";
-	public static final String ID = "nodeId";
-	static final String NEXT_ID = "nextId";
-	static final String STYLE_PROPERTY = "styleProperty";
-	static final String STYLE_VALUE = "styleValue";
-	static final String ATTRIBUTE_NAME = "attributeName";
-	static final String ATTRIBUTE_VALUE = "attributeValue";
-	static final String STYLECLASS = "styleClass";
-	protected static final String TEXT_CONTENT = "textContent";
-	static final String TAG_HTML = "tagHtml";
-	protected static final String ELT_TYPE = "eltType";
-	protected static final String SELECTED_INDEX = "selectedIndex";
-
 	private final String id;
 	private HtmlDomNode parent;
 	private Tag tag;
 	private Context context;
-
 	private boolean destroyed = false;
-
-	public static interface Sender {
-		public void send(String message);
-	}
-
 	final Consumer<Tag> tagAdder = tagAdder();
 	private Map<Tag, Integer> sizeBySubTag = new IdentityHashMap<Tag, Integer>() {
 		private static final long serialVersionUID = 6725720602283055930L;
@@ -89,6 +50,52 @@ public class HtmlDomNode {
 		}
 	};
 
+	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
+		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
+		this.parent = parent;
+		this.tag = tag;
+		this.context = context;
+		tag.getRootTag().initDomNode(this);
+	}
+
+	protected <BETWEEN> void init(int index) {
+		context.register(this);
+		if (parent != null)
+			insertChild(index);
+		for (Consumer<Context> binding : tag.getPreFixedBindings())
+			binding.accept(context);
+		assert (!context.containsAttribute(tag, "filteredChildren"));
+		FilteredTagChildren filteredChildren = new FilteredTagChildren(tag, context);
+		tag.addContextAttribute("filteredChildren", context, filteredChildren);
+		for (Tag childTag : filteredChildren.filteredList)
+			tagAdder.accept(childTag);
+		filteredChildren.filteredList.addListener(tagListener);
+		for (Consumer<Context> binding : tag.getPostFixedBindings())
+			binding.accept(context);
+	}
+
+	void destroy() {
+		// System.out.println("Attempt to destroy : " + getId());
+		assert !destroyed : "Node : " + getId();
+		destroyed = true;
+		((FilteredTagChildren) tag.getContextAttribute("filteredChildren", context)).filteredList.removeListener(tagListener);
+		for (Tag childTag : tag.getObservableChildren()) {
+			childTag.getMetaBindingProperty().removeListener(metaBindingListeners.get(childTag));
+			if (childTag.getMetaBinding() != null && context.getSubContexts(childTag) != null)
+				((FilteredChildContexts<?>) childTag.getContextAttribute("filteredContexts", context)).transformationListSubContexts.unbind();
+		}
+		tag.getDomNodeTextProperty(context).removeListener(textListener);
+		tag.getDomNodeStyles(context).removeListener(stylesListener);
+		tag.getDomNodeAttributes(context).removeListener(attributesListener);
+		tag.getDomNodeStyleClasses(context).removeListener(styleClassesListener);
+		getRootHtmlDomNode().remove(getId());
+		parent.decrementSize(tag);
+	}
+
+	public static interface Sender {
+		public void send(String message);
+	}
+
 	public List<HtmlDomNode> getChildren() {
 		List<HtmlDomNode> result = new ArrayList<>();
 		List<Tag> subTags = tag.getObservableChildren();
@@ -102,75 +109,6 @@ public class HtmlDomNode {
 		return result;
 	}
 
-	public String header() {
-		String header = "";
-		String appName = this.tag.getClass().getSimpleName().toLowerCase();
-		header = "<!DOCTYPE html>\n";
-		header += "<html>\n";
-		header += "<head>\n";
-		header += "<meta charset=\"UTF-8\" name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-		header += "<LINK rel=stylesheet type=\"text/css\" href=\"" + appName + ".css\"/>\n";
-		header += "<LINK rel=stylesheet type=\"text/css\" href=\"reactor.css\"/>\n";
-		header += "<script>\n";
-		header += "var serviceLocation = \"ws://\" + document.location.host + \"" + "\";\n";
-		header += "</script>\n";
-		header += "<script type=\"text/javascript\" src=\"" + appName + ".js\"></script>\n";
-		header += "</head>\n";
-		header += "<body onload=\"connect();\" id=\"root\">\n";
-		return header;
-	}
-
-	public String footer() {
-		String footer = "</body>\n";
-		footer += "</html>\n";
-		return footer;
-	}
-
-	public String toHTMLString(String body) {
-		String tagText = this.tag.getTag();
-		String classes = tag.getDomNodeStyleClasses(context).stream().collect(Collectors.joining(" "));
-
-		classes = ("section".equals(tagText) || "div".equals(tagText) || "header".equals(tagText) || "footer".equals(tagText)) ? classes += " adding" : classes;
-
-		String styles = tag.getDomNodeStyles(context).entrySet().stream().map(m -> m.getKey() + ": " + m.getValue()).collect(Collectors.joining("; "));
-		body = "\n<" + tagText + " id=\"" + this.id + "\"";
-		if (!classes.equals(""))
-			body += " class=\"" + classes + "\"";
-		if (!styles.equals(""))
-			body += " style=\"" + styles + "\"";
-
-		String tagAttributes = tag.getDomNodeAttributes(context).entrySet().stream().filter(m -> m.getValue() != null && !m.getValue().isEmpty()).map(m -> m.getKey() + "=\"" + m.getValue() + "\"").collect(Collectors.joining(""));
-		body += tagAttributes + ">";
-
-		for (HtmlDomNode node : getChildren())
-			body += node.toHTMLString(body);
-		String tagValue = tag.getDomNodeTextProperty(context).getValue();
-		if (tagValue != null)
-			body += tagValue;
-
-		body += "</" + tagText + ">";
-		return body;
-	}
-
-	public void toHtmlFile(String sourceCode, String extention, String path) {
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter(new FileWriter(path + "index." + extention));
-			writer.write(sourceCode);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public HtmlDomNode(HtmlDomNode parent, Context context, Tag tag) {
-		this.id = String.format("%010d", Integer.parseInt(this.hashCode() + "")).substring(0, 10);
-		this.parent = parent;
-		this.tag = tag;
-		this.context = context;
-		tag.getRootTag().initDomNode(this);
-	}
-
 	private <BETWEEN> Consumer<Tag> tagAdder() {
 		return childTag -> {
 			Property<MetaBinding<BETWEEN>> metaBinding = childTag.getMetaBindingProperty();
@@ -182,8 +120,8 @@ public class HtmlDomNode {
 	private <BETWEEN> void updateMetaBinding(Tag childTag, MetaBinding<BETWEEN> metaBinding) {
 		if (metaBinding != null) {
 			if (context.getSubContexts(childTag) == null) {
-				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag);
-				childTag.createNewInitializedProperty("filteredContexts", context, c -> subContexts);
+				FilteredChildContexts<BETWEEN> subContexts = new FilteredChildContexts<>(metaBinding, childTag, context);
+				childTag.addContextAttribute("filteredContexts", context, subContexts);
 				context.setSubContexts(childTag, new TransformationObservableList<Context, Context>(subContexts.filteredSubContexts, (i, subContext) -> {
 					childTag.createNode(this, subContext).init(computeIndex(i, childTag));
 					if (subContext.isInCache())
@@ -193,90 +131,6 @@ public class HtmlDomNode {
 			}
 		} else if (context.getHtmlDomNode(childTag) == null)
 			childTag.createNode(this, context).init(computeIndex(0, childTag));
-	}
-
-	void destroy() {
-		// System.out.println("Attempt to destroy : " + getId());
-		assert !destroyed : "Node : " + getId();
-		destroyed = true;
-		((FilteredTagChildren) tag.getProperty("filteredChildren", context).getValue()).filteredList.removeListener(tagListener);
-		for (Tag childTag : tag.getObservableChildren()) {
-			childTag.getMetaBindingProperty().removeListener(metaBindingListeners.get(childTag));
-			if (childTag.getMetaBinding() != null && context.getSubContexts(childTag) != null)
-				((FilteredChildContexts<?>) childTag.getProperty("filteredContexts", context).getValue()).transformationListSubContexts.unbind();
-		}
-		tag.getDomNodeTextProperty(context).removeListener(textListener);
-		tag.getDomNodeStyles(context).removeListener(stylesListener);
-		tag.getDomNodeAttributes(context).removeListener(attributesListener);
-		tag.getDomNodeStyleClasses(context).removeListener(styleClassesListener);
-		getRootHtmlDomNode().remove(getId());
-		parent.decrementSize(tag);
-	}
-
-	protected <BETWEEN> void init(int index) {
-		context.register(this);
-		if (parent != null)
-			insertChild(index);
-		for (Consumer<Context> binding : tag.getPreFixedBindings())
-			binding.accept(context);
-		assert (!context.containsProperty(tag, "filteredChildren"));
-		FilteredTagChildren filteredChildren = new FilteredTagChildren();
-		tag.createNewInitializedProperty("filteredChildren", context, c -> filteredChildren);
-		for (Tag childTag : filteredChildren.filteredList)
-			tagAdder.accept(childTag);
-		filteredChildren.filteredList.addListener(tagListener);
-		for (Consumer<Context> binding : tag.getPostFixedBindings())
-			binding.accept(context);
-	}
-
-	private class FilteredChildren<T> {
-		final Map<T, ObservableList<TagSwitcher>> selectorsByChild = new HashMap<>();// Prevents garbage collection
-		final Map<T, Map<TagSwitcher, ObservableValue<Boolean>>> selectorsByChildAndSwitcher = new HashMap<T, Map<TagSwitcher, ObservableValue<Boolean>>>() {
-
-			private static final long serialVersionUID = -5831485781427983238L;
-
-			@Override
-			public Map<TagSwitcher, ObservableValue<Boolean>> get(Object key) {
-				Map<TagSwitcher, ObservableValue<Boolean>> result = super.get(key);
-				if (result == null)
-					put((T) key, result = new HashMap<>());
-				return result;
-			}
-		};
-	}
-
-	private class FilteredTagChildren extends FilteredChildren<Tag> {
-
-		final ObservableList<Tag> filteredList = new FilteredList<>(new ObservableListWrapper<>(context.getRootContext().getObservableChildren(tag), child -> {
-			if (child.getMetaBinding() != null)
-				return new ObservableValue[] {};
-			ObservableList<TagSwitcher> result = new ObservableListWrapper<>(child.getObservableSwitchers(), s -> {
-				ObservableValue<Boolean> selector = s.apply(context, child);
-				selectorsByChildAndSwitcher.get(child).put(s, selector);
-				return new ObservableValue[] { selector };
-			});
-			selectorsByChild.put(child, result);
-			return new ObservableList[] { result };
-		}), child -> child.getMetaBinding() != null || selectorsByChildAndSwitcher.get(child).entrySet().stream().allMatch(entry -> !selectorsByChild.get(child).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
-	}
-
-	class FilteredChildContexts<BETWEEN> extends FilteredChildren<Context> {
-		final ObservableList<Context> filteredSubContexts;
-		final TransformationObservableList<BETWEEN, Context> transformationListSubContexts;
-
-		FilteredChildContexts(MetaBinding<BETWEEN> metaBinding, Tag childTag) {
-			transformationListSubContexts = new TransformationObservableList<>(metaBinding.buildBetweenChildren(context), (i, between) -> metaBinding.buildModel(context, between), Context::destroy, childContext -> {
-				ObservableList<TagSwitcher> result = new ObservableListWrapper<>(childTag.getObservableSwitchers(), s -> {
-					ObservableValue<Boolean> selector = s.apply(childContext, childTag);
-					selectorsByChildAndSwitcher.get(childContext).put(s, selector);
-					return new ObservableValue[] { selector };
-				});
-				selectorsByChild.put(childContext, result);
-				return new ObservableList[] { result };
-			});
-			filteredSubContexts = new FilteredList<>(transformationListSubContexts, childContext -> selectorsByChildAndSwitcher.get(childContext).entrySet().stream()
-					.allMatch(entry -> !selectorsByChild.get(childContext).contains(entry.getKey()) || Boolean.TRUE.equals(entry.getValue().getValue())));
-		}
 	}
 
 	private int computeIndex(int indexInChildren, Tag childElement) {
@@ -321,26 +175,27 @@ public class HtmlDomNode {
 
 	private final MapChangeListener<String, String> stylesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
-			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_STYLE).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLE_PROPERTY, change.getKey()));
 		else if (change.wasAdded())
-			sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLE).put(ID, getId()).put(STYLE_PROPERTY, change.getKey()).put(STYLE_VALUE, change.getValueAdded()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD_STYLE).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLE_PROPERTY, change.getKey()).put(ReactorStatics.STYLE_VALUE, change.getValueAdded()));
 	};
 
 	private final MapChangeListener<String, String> attributesListener = change -> {
 		if (!change.wasAdded() || change.getValueAdded() == null || change.getValueAdded().equals(""))
-			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_ATTRIBUTE).put(ReactorStatics.ID, getId()).put(ReactorStatics.ATTRIBUTE_NAME, change.getKey()));
 		else if (change.wasAdded())
-			sendMessage(new JsonObject().put(MSG_TYPE, ADD_ATTRIBUTE).put(ID, getId()).put(ATTRIBUTE_NAME, change.getKey()).put(ATTRIBUTE_VALUE, change.getValueAdded()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD_ATTRIBUTE).put(ReactorStatics.ID, getId()).put(ReactorStatics.ATTRIBUTE_NAME, change.getKey()).put(ReactorStatics.ATTRIBUTE_VALUE, change.getValueAdded()));
 	};
 
 	private final SetChangeListener<String> styleClassesListener = change -> {
 		if (change.wasAdded())
-			sendMessage(new JsonObject().put(MSG_TYPE, ADD_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementAdded()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD_STYLECLASS).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLECLASS, change.getElementAdded()));
 		else
-			sendMessage(new JsonObject().put(MSG_TYPE, REMOVE_STYLECLASS).put(ID, getId()).put(STYLECLASS, change.getElementRemoved()));
+			sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE_STYLECLASS).put(ReactorStatics.ID, getId()).put(ReactorStatics.STYLECLASS, change.getElementRemoved()));
 	};
 
-	private final ChangeListener<String> textListener = (o, old, newValue) -> sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_TEXT).put(ID, getId()).put(TEXT_CONTENT, newValue != null ? newValue : ""));
+	private final ChangeListener<String> textListener = (o, old,
+			newValue) -> sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.UPDATE_TEXT).put(ReactorStatics.ID, getId()).put(ReactorStatics.TEXT_CONTENT, newValue != null ? newValue : ""));
 
 	private final Map<Tag, ChangeListener<MetaBinding<?>>> metaBindingListeners = new HashMap<Tag, ChangeListener<MetaBinding<?>>>() {
 
@@ -365,7 +220,7 @@ public class HtmlDomNode {
 		// UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue !=
 		// null ? newValue : 0)
 		// .encodePrettily());
-		sendMessage(new JsonObject().put(MSG_TYPE, UPDATE_SELECTION).put(ID, getId()).put(SELECTED_INDEX, newValue != null ? newValue : 0));
+		sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.UPDATE_SELECTION).put(ReactorStatics.ID, getId()).put(ReactorStatics.SELECTED_INDEX, newValue != null ? newValue : 0));
 	};
 
 	public ChangeListener<Number> getIndexListener() {
@@ -389,17 +244,17 @@ public class HtmlDomNode {
 	}
 
 	public void sendAdd(int index) {
-		JsonObject jsonObj = new JsonObject().put(MSG_TYPE, ADD);
-		jsonObj.put(PARENT_ID, getParentId());
-		jsonObj.put(ID, id);
-		jsonObj.put(TAG_HTML, getTag().getTag());
-		jsonObj.put(NEXT_ID, index);
+		JsonObject jsonObj = new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.ADD);
+		jsonObj.put(ReactorStatics.PARENT_ID, getParentId());
+		jsonObj.put(ReactorStatics.ID, id);
+		jsonObj.put(ReactorStatics.TAG_HTML, getTag().getTag());
+		jsonObj.put(ReactorStatics.NEXT_ID, index);
 		// System.out.println(jsonObj.encodePrettily());
 		sendMessage(jsonObj);
 	}
 
 	public void sendRemove() {
-		sendMessage(new JsonObject().put(MSG_TYPE, REMOVE).put(ID, id));
+		sendMessage(new JsonObject().put(ReactorStatics.MSG_TYPE, ReactorStatics.REMOVE).put(ReactorStatics.ID, id));
 		// System.out.println(new JsonObject().put(MSG_TYPE, REMOVE).put(ID,
 		// id).encodePrettily());
 	}
@@ -427,49 +282,30 @@ public class HtmlDomNode {
 	public void handleMessage(JsonObject json) {
 	}
 
-	public static class RootHtmlDomNode extends HtmlDomNode {
-		private final Map<String, HtmlDomNode> nodeById = new HashMap<>();
-		private final Sender send;
-		private final String rootId;
+	public String toHTMLString() {
+		String tagText = tag.getTag();
+		String classes = tag.getDomNodeStyleClasses(context).stream().collect(Collectors.joining(" "));
+		classes = ("section".equals(tagText) || "div".equals(tagText) || "header".equals(tagText) || "footer".equals(tagText)) ? classes += " adding" : classes;
 
-		public RootHtmlDomNode(Context rootModelContext, RootTag rootTag, String rootId, Sender send) {
-			super(null, rootModelContext, rootTag);
-			this.rootId = rootId;
-			this.send = send;
-			sendAdd(0);
-			init(0);
-		}
+		String styles = tag.getDomNodeStyles(context).entrySet().stream().map(m -> m.getKey() + ": " + m.getValue()).collect(Collectors.joining("; "));
+		String tagAttributes = tag.getDomNodeAttributes(context).entrySet().stream().filter(m -> m.getValue() != null && !m.getValue().isEmpty()).map(m -> m.getKey() + "=\"" + m.getValue() + "\"").collect(Collectors.joining(""));
 
-		@Override
-		public Sender getSender() {
-			return send;
-		}
+		String body = "\n<" + tagText + " id=\"" + id + "\"";
+		if (!classes.equals(""))
+			body += " class=\"" + classes + "\"";
+		if (!styles.equals(""))
+			body += " style=\"" + styles + "\"";
 
-		@Override
-		protected RootHtmlDomNode getRootHtmlDomNode() {
-			return this;
-		}
+		body += tagAttributes + ">";
 
-		@Override
-		public String getParentId() {
-			return rootId;
-		}
+		for (HtmlDomNode node : getChildren())
+			body += node.toHTMLString();
+		String tagValue = tag.getDomNodeTextProperty(context).getValue();
+		if (tagValue != null)
+			body += tagValue;
 
-		private Map<String, HtmlDomNode> getMap() {
-			return nodeById;
-		}
-
-		public HtmlDomNode getNodeById(String id) {
-			return getMap().get(id);
-		}
-
-		public void add(String id, HtmlDomNode domNode) {
-			getMap().put(id, domNode);
-		}
-
-		public void remove(String id) {
-			getMap().remove(id);
-		}
+		body += "</" + tagText + ">\n";
+		return body;
 	}
 
 	public static class HtmlDomNodeAction extends HtmlDomNode {
@@ -505,13 +341,13 @@ public class HtmlDomNode {
 		@Override
 		public void handleMessage(JsonObject json) {
 			super.handleMessage(json);
-			if (ADD.equals(json.getString(MSG_TYPE))) {
+			if (ReactorStatics.ADD.equals(json.getString(ReactorStatics.MSG_TYPE))) {
 				Property<Consumer<Object>> action = ((ActionDefaults) getTag()).getActionProperty(getModelContext());
 				if (action != null)
 					action.getValue().accept(new Object());
 			}
-			if (UPDATE.equals(json.getString(MSG_TYPE)))
-				getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(TEXT_CONTENT));
+			if (ReactorStatics.UPDATE.equals(json.getString(ReactorStatics.MSG_TYPE)))
+				getTag().getDomNodeAttributes(getModelContext()).put("value", json.getString(ReactorStatics.TEXT_CONTENT));
 		}
 	}
 
@@ -523,8 +359,8 @@ public class HtmlDomNode {
 
 		@Override
 		public void handleMessage(JsonObject json) {
-			if (UPDATE.equals(json.getString(MSG_TYPE))) {
-				((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(SELECTED_INDEX));
+			if (ReactorStatics.UPDATE.equals(json.getString(ReactorStatics.MSG_TYPE))) {
+				((SelectionDefaults) getTag()).getSelectionIndex(getModelContext()).setValue(json.getInteger(ReactorStatics.SELECTED_INDEX));
 			}
 		}
 	}
