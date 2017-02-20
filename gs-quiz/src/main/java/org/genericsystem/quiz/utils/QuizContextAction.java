@@ -15,6 +15,35 @@ public class QuizContextAction {
 	public final static String SELECTED_QUIZ = "selectedQuiz";
 	public final static String SELECTED_USER = "selectedUser";
 
+	public static class ADD_LISTENED_PROPERTY implements ContextAction {
+
+		public final static String INPUTTEXT_VALUE = "Input Text Value";
+
+		@Override
+		public void accept(Context context, Tag tag) {
+
+			Property<String> inputProperty = tag.getContextProperty(INPUTTEXT_VALUE, context);
+
+			if (inputProperty == null)
+				tag.getParent().createNewInitializedProperty(INPUTTEXT_VALUE, value -> null);
+
+			tag.getContextProperty(INPUTTEXT_VALUE, context).setValue(tag.getDomNodeAttributes(context).get("value"));
+
+			// tag.getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(tag.getDomNodeAttributes(context).get("value"));
+
+			// tag.getDomNodeAttributes(context).addListener((MapChangeListener<String, String>) change -> {
+			//
+			// if ("value".equals(change.getKey())) {
+			// if (change.wasAdded())
+			// tag.getContextProperty(QuizContextAction.SELECTED_USER, context).setValue(change.getValueAdded());
+			// }
+			//
+			// });
+
+		}
+
+	}
+
 	public static class CLEAR_QUIZ implements ContextAction {
 
 		@Override
